@@ -50,6 +50,18 @@ ApplicationWindow {
                 font.pixelSize: 13
             }
 
+            Text {
+                text: previewController.fps.toFixed(1) + " fps"
+                color: "#9aa0a6"
+                font.pixelSize: 13
+            }
+
+            Text {
+                text: "Preview skipped: " + previewController.previewSkippedFrames
+                color: "#9aa0a6"
+                font.pixelSize: 13
+            }
+
             Item { Layout.fillWidth: true }
         }
     }

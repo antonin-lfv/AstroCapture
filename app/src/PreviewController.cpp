@@ -67,6 +67,9 @@ void PreviewController::rescan() {
     cameraName_ = QString::fromStdString(device_->descriptor().displayName);
     errorMessage_.clear();
     frameCount_.store(0, std::memory_order_relaxed);
+    renderedFrameCount_.store(0, std::memory_order_relaxed);
+    lastRenderedSequence_.reset();
+    startTime_ = std::chrono::steady_clock::now();
     connected_ = true;
     emit connectedChanged();
     emit errorMessageChanged();
@@ -77,10 +80,29 @@ void PreviewController::rescan() {
 #endif
 }
 
+double PreviewController::fps() const {
+    const auto acquired = frameCount_.load(std::memory_order_relaxed);
+    if (!connected_ || acquired == 0) {
+        return 0.0;
+    }
+    const double seconds = std::chrono::duration<double>(std::chrono::steady_clock::now() - startTime_).count();
+    return seconds > 0.0 ? static_cast<double>(acquired) / seconds : 0.0;
+}
+
+quint64 PreviewController::previewSkippedFrames() const {
+    const auto acquired = frameCount_.load(std::memory_order_relaxed);
+    const auto rendered = renderedFrameCount_.load(std::memory_order_relaxed);
+    return acquired > rendered ? acquired - rendered : 0;
+}
+
 QImage PreviewController::frame() const {
     const auto latest = frameSlot_.latest();
     if (!latest) {
         return QImage();
+    }
+    if (lastRenderedSequence_ != latest->metadata.sequence) {
+        lastRenderedSequence_ = latest->metadata.sequence;
+        renderedFrameCount_.fetch_add(1, std::memory_order_relaxed);
     }
     return debayerToPreviewImage(latest->descriptor, latest->storage->data(), latest->storage->size());
 }

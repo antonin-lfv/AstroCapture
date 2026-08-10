@@ -1,8 +1,10 @@
 #pragma once
 
 #include <atomic>
+#include <chrono>
 #include <cstdint>
 #include <memory>
+#include <optional>
 
 #include <QImage>
 #include <QObject>
@@ -26,6 +28,12 @@ class PreviewController : public QObject, private astro::domain::FrameSink {
     Q_PROPERTY(QString cameraName READ cameraName NOTIFY connectedChanged)
     Q_PROPERTY(QString errorMessage READ errorMessage NOTIFY errorMessageChanged)
     Q_PROPERTY(quint64 frameCount READ frameCount NOTIFY frameCountChanged)
+    // Diagnostics (ROADMAP.md Gate B: "acquisition statistics visible in
+    // dev diagnostics"). previewSkippedFrames counts frames LatestFrameSlot
+    // overwrote before the preview ever rendered them — expected/by-design
+    // for a live preview, not an error, but worth surfacing.
+    Q_PROPERTY(double fps READ fps NOTIFY frameCountChanged)
+    Q_PROPERTY(quint64 previewSkippedFrames READ previewSkippedFrames NOTIFY frameCountChanged)
 
 public:
     explicit PreviewController(QObject* parent = nullptr);
@@ -35,6 +43,8 @@ public:
     QString cameraName() const { return cameraName_; }
     QString errorMessage() const { return errorMessage_; }
     quint64 frameCount() const { return frameCount_.load(std::memory_order_relaxed); }
+    double fps() const;
+    quint64 previewSkippedFrames() const;
 
     // Debayers the latest frame on the calling thread. Intended for
     // LivePreviewItem to call from the render/GUI thread, never from the
@@ -62,6 +72,12 @@ private:
     QString cameraName_;
     QString errorMessage_;
     std::atomic<std::uint64_t> frameCount_{0};
+    std::chrono::steady_clock::time_point startTime_;  // GUI thread only (set in rescan())
+
+    // Touched only from frame(), which callers must only invoke from the
+    // render/GUI thread, so these are not atomic despite being mutable.
+    mutable std::optional<std::uint64_t> lastRenderedSequence_;
+    mutable std::atomic<std::uint64_t> renderedFrameCount_{0};
 };
 
 }  // namespace astro::app

@@ -1,10 +1,13 @@
 #include "PreviewController.hpp"
 
-#include "SimpleDebayer.hpp"
+#include "FramePreviewImage.hpp"
 #include "astro/domain/StreamMode.hpp"
 
 #ifdef ASTRO_ENABLE_MOCK_CAMERA
 #include "astro/driver/mock/MockCameraBackend.hpp"
+#endif
+#ifdef ASTRO_ENABLE_DRIVER_UVC
+#include "astro/driver/uvc/UvcCameraBackend.hpp"
 #endif
 
 namespace astro::app {
@@ -19,32 +22,22 @@ PreviewController::~PreviewController() {
     }
 }
 
-void PreviewController::rescan() {
-    if (connected_) {
-        return;
-    }
-
-#ifdef ASTRO_ENABLE_MOCK_CAMERA
-    astro::driver::mock::MockCameraBackend backend;
+std::unique_ptr<ICameraDevice> PreviewController::tryOpenFirstDevice(ICameraBackend& backend) {
     const auto descriptors = backend.enumerate();
     if (descriptors.empty()) {
-        errorMessage_ = QStringLiteral("No camera found.");
-        emit errorMessageChanged();
-        return;
+        return nullptr;
     }
 
     auto device = backend.open(descriptors.front().id);
     if (!device) {
         errorMessage_ = QStringLiteral("Failed to open camera.");
-        emit errorMessageChanged();
-        return;
+        return nullptr;
     }
 
     const auto modes = device->streamModes();
     if (modes.empty()) {
         errorMessage_ = QStringLiteral("Camera exposes no stream modes.");
-        emit errorMessageChanged();
-        return;
+        return nullptr;
     }
 
     StreamConfiguration configuration;
@@ -53,12 +46,44 @@ void PreviewController::rescan() {
 
     if (const auto result = device->configure(configuration); !result.ok()) {
         errorMessage_ = QString::fromStdString(result.error().message);
-        emit errorMessageChanged();
-        return;
+        return nullptr;
     }
 
     if (const auto result = device->start(*this); !result.ok()) {
         errorMessage_ = QString::fromStdString(result.error().message);
+        return nullptr;
+    }
+
+    return device;
+}
+
+void PreviewController::rescan() {
+    if (connected_) {
+        return;
+    }
+
+    errorMessage_.clear();
+    std::unique_ptr<ICameraDevice> device;
+
+    // Real hardware first: if a UVC/webcam is attached, prefer it over the
+    // synthetic mock so "Rescan" shows something real whenever possible.
+#ifdef ASTRO_ENABLE_DRIVER_UVC
+    if (!device) {
+        astro::driver::uvc::UvcCameraBackend uvcBackend;
+        device = tryOpenFirstDevice(uvcBackend);
+    }
+#endif
+#ifdef ASTRO_ENABLE_MOCK_CAMERA
+    if (!device) {
+        astro::driver::mock::MockCameraBackend mockBackend;
+        device = tryOpenFirstDevice(mockBackend);
+    }
+#endif
+
+    if (!device) {
+        if (errorMessage_.isEmpty()) {
+            errorMessage_ = QStringLiteral("No camera found.");
+        }
         emit errorMessageChanged();
         return;
     }
@@ -74,10 +99,6 @@ void PreviewController::rescan() {
     emit connectedChanged();
     emit errorMessageChanged();
     emit frameCountChanged();
-#else
-    errorMessage_ = QStringLiteral("No camera backends compiled in.");
-    emit errorMessageChanged();
-#endif
 }
 
 double PreviewController::fps() const {
@@ -104,7 +125,7 @@ QImage PreviewController::frame() const {
         lastRenderedSequence_ = latest->metadata.sequence;
         renderedFrameCount_.fetch_add(1, std::memory_order_relaxed);
     }
-    return debayerToPreviewImage(latest->descriptor, latest->storage->data(), latest->storage->size());
+    return frameToPreviewImage(latest->descriptor, latest->storage->data(), latest->storage->size());
 }
 
 void PreviewController::onFrame(const FrameBuffer& frameBuffer) {

@@ -23,8 +23,8 @@ qt_add_qml_module(AstroCapture
         src/PreviewController.cpp
         src/LivePreviewItem.hpp
         src/LivePreviewItem.cpp
-        src/SimpleDebayer.hpp
-        src/SimpleDebayer.cpp
+        src/FramePreviewImage.hpp
+        src/FramePreviewImage.cpp
 )
 
 target_include_directories(AstroCapture PRIVATE src)
@@ -34,4 +34,9 @@ target_link_libraries(AstroCapture PRIVATE Qt6::Quick Qt6::Gui)
 if(ASTRO_ENABLE_MOCK_CAMERA)
     target_link_libraries(AstroCapture PRIVATE astro::driver::mock)
     target_compile_definitions(AstroCapture PRIVATE ASTRO_ENABLE_MOCK_CAMERA)
+endif()
+
+if(ASTRO_ENABLE_DRIVER_UVC AND APPLE)
+    target_link_libraries(AstroCapture PRIVATE astro::driver::uvc)
+    target_compile_definitions(AstroCapture PRIVATE ASTRO_ENABLE_DRIVER_UVC)
 endif()

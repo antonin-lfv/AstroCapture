@@ -12,6 +12,7 @@
 #include <QString>
 
 #include "astro/domain/Frame.hpp"
+#include "astro/domain/ICameraBackend.hpp"
 #include "astro/domain/ICameraDevice.hpp"
 #include "astro/domain/LatestFrameSlot.hpp"
 
@@ -19,8 +20,9 @@ namespace astro::app {
 
 // Owns a single opened camera and republishes its frames as QImages for QML.
 // Stands in for the future CaptureSession/CameraManager pair (see
-// docs/development/IMPLEMENTATION_BLUEPRINT.md sections 7-8) while only one
-// backend (mock) exists; deliberately supports one device at a time.
+// docs/development/IMPLEMENTATION_BLUEPRINT.md sections 7-8); deliberately
+// supports one device at a time. rescan() tries compiled-in backends in
+// priority order (real hardware before the mock fallback).
 class PreviewController : public QObject, private astro::domain::FrameSink {
     Q_OBJECT
     QML_ELEMENT
@@ -64,6 +66,11 @@ private:
     // Must stay cheap: no decoding, no Qt GUI work (AGENT.md 2.2, the
     // acquisition path must never be blocked by preview/UI work).
     void onFrame(const astro::domain::FrameBuffer& frameBuffer) override;
+
+    // Opens, configures and starts the first device `backend` enumerates.
+    // Returns nullptr (with errorMessage_ set only on a real failure, left
+    // untouched if the backend simply found no devices) if unsuccessful.
+    std::unique_ptr<astro::domain::ICameraDevice> tryOpenFirstDevice(astro::domain::ICameraBackend& backend);
 
     std::unique_ptr<astro::domain::ICameraDevice> device_;
     astro::domain::LatestFrameSlot frameSlot_;

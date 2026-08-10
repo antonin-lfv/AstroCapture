@@ -34,6 +34,8 @@ std::string_view to_string(PixelStorage storage) {
             return "RGB24";
         case PixelStorage::BGR24:
             return "BGR24";
+        case PixelStorage::BGRA32:
+            return "BGRA32";
     }
     return "Unknown";
 }
@@ -51,6 +53,8 @@ std::size_t bytesPerPixel(PixelStorage storage) {
         case PixelStorage::RGB24:
         case PixelStorage::BGR24:
             return 3;
+        case PixelStorage::BGRA32:
+            return 4;
     }
     return 0;
 }

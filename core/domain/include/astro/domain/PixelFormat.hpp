@@ -22,6 +22,7 @@ enum class PixelStorage {
     Bayer16,
     RGB24,
     BGR24,
+    BGRA32,
 };
 
 std::string_view to_string(BayerPattern pattern);

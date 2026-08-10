@@ -120,6 +120,54 @@ ApplicationWindow {
 
             RowLayout {
                 Layout.fillWidth: true
+                visible: !previewController.recording
+                spacing: 8
+
+                Text {
+                    text: "Stop recording after"
+                    color: "#9aa0a6"
+                    font.pixelSize: 12
+                }
+
+                SpinBox {
+                    id: frameTargetSpin
+                    from: 0
+                    to: 1000000
+                    editable: true
+                    value: previewController.recordingTargetFrameCount
+                    onValueModified: previewController.recordingTargetFrameCount = value
+                }
+
+                Text {
+                    text: "frames"
+                    color: "#9aa0a6"
+                    font.pixelSize: 12
+                }
+
+                Text {
+                    text: "or"
+                    color: "#5f6368"
+                    font.pixelSize: 12
+                }
+
+                SpinBox {
+                    id: durationTargetSpin
+                    from: 0
+                    to: 36000
+                    editable: true
+                    value: previewController.recordingTargetDurationSeconds
+                    onValueModified: previewController.recordingTargetDurationSeconds = value
+                }
+
+                Text {
+                    text: "seconds (0 = unlimited)"
+                    color: "#9aa0a6"
+                    font.pixelSize: 12
+                }
+            }
+
+            RowLayout {
+                Layout.fillWidth: true
                 visible: previewController.recording
                 spacing: 16
 

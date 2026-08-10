@@ -73,6 +73,14 @@ class PreviewController : public QObject, private astro::domain::FrameSink {
     Q_PROPERTY(double recordingElapsedSeconds READ recordingElapsedSeconds NOTIFY recordingStatsChanged)
     Q_PROPERTY(QString recordingStatus READ recordingStatus NOTIFY recordingStatusChanged)
 
+    // Optional auto-stop targets, read once when startRecording() launches
+    // the writer thread. 0 means unlimited. Only meaningful before a
+    // recording starts — QML disables their inputs while recording.
+    Q_PROPERTY(int recordingTargetFrameCount READ recordingTargetFrameCount WRITE setRecordingTargetFrameCount
+                   NOTIFY recordingTargetChanged)
+    Q_PROPERTY(double recordingTargetDurationSeconds READ recordingTargetDurationSeconds WRITE
+                   setRecordingTargetDurationSeconds NOTIFY recordingTargetChanged)
+
     // Empty means "use the OS default" (Pictures/AstroCapture,
     // Movies/AstroCapture); once set, both captures and recordings go under
     // <saveDirectory>/Images and <saveDirectory>/Videos instead.
@@ -121,6 +129,11 @@ public:
     double recordingElapsedSeconds() const;
     QString recordingStatus() const { return recordingStatus_; }
 
+    int recordingTargetFrameCount() const { return recordingTargetFrameCount_; }
+    void setRecordingTargetFrameCount(int value);
+    double recordingTargetDurationSeconds() const { return recordingTargetDurationSeconds_; }
+    void setRecordingTargetDurationSeconds(double value);
+
     Q_INVOKABLE void rescan();
 
     // Stops the current device (and any active recording) and returns to
@@ -162,6 +175,12 @@ signals:
     void recordingChanged();
     void recordingStatsChanged();
     void recordingStatusChanged();
+    void recordingTargetChanged();
+    // Internal: emitted from the writer thread when a configured target is
+    // reached, connected (queued) to stopRecording() in the constructor.
+    // The writer thread can't call stopRecording() itself — it would try to
+    // join its own thread.
+    void recordingTargetReached();
     void saveDirectoryChanged();
     void presetsChanged();
 
@@ -199,6 +218,8 @@ private:
     std::atomic<std::uint64_t> recordingFrameCount_{0};
     std::atomic<std::uint64_t> recordingDroppedFrames_{0};
     std::chrono::steady_clock::time_point recordingStartTime_;  // GUI thread only
+    int recordingTargetFrameCount_ = 0;
+    double recordingTargetDurationSeconds_ = 0.0;
 
     Settings settings_;
     QString saveDirectory_;

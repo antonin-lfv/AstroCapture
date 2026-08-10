@@ -23,6 +23,11 @@ using namespace astro::domain;
 
 PreviewController::PreviewController(QObject* parent) : QObject(parent) {
     saveDirectory_ = settings_.loadRootDirectory().value_or(QString());
+    // The writer thread can't call stopRecording() itself (it would try to
+    // join its own thread), so it emits recordingTargetReached() instead;
+    // Qt queues delivery to this object's thread (GUI) automatically.
+    connect(this, &PreviewController::recordingTargetReached, this, &PreviewController::stopRecording,
+            Qt::QueuedConnection);
 }
 
 PreviewController::~PreviewController() {
@@ -287,6 +292,22 @@ double PreviewController::recordingElapsedSeconds() const {
     return std::chrono::duration<double>(std::chrono::steady_clock::now() - recordingStartTime_).count();
 }
 
+void PreviewController::setRecordingTargetFrameCount(int value) {
+    if (recording_ || recordingTargetFrameCount_ == value) {
+        return;
+    }
+    recordingTargetFrameCount_ = std::max(0, value);
+    emit recordingTargetChanged();
+}
+
+void PreviewController::setRecordingTargetDurationSeconds(double value) {
+    if (recording_ || recordingTargetDurationSeconds_ == value) {
+        return;
+    }
+    recordingTargetDurationSeconds_ = std::max(0.0, value);
+    emit recordingTargetChanged();
+}
+
 void PreviewController::startRecording() {
     if (!connected_ || !device_) {
         recordingStatus_ = QStringLiteral("No camera connected.");
@@ -342,15 +363,40 @@ void PreviewController::startRecording() {
     recordingPath_ = path;
     recording_ = true;
 
-    recordingThread_ = std::thread([this, queuePtr, recorderPtr] {
+    // Read once here (GUI thread, before the writer thread starts): thread
+    // creation happens-before the thread's first instruction, so plain
+    // values captured by the lambda are safely visible without atomics,
+    // as long as nothing mutates them while recording_ is true (the
+    // setters above already refuse to).
+    const int targetFrameCount = recordingTargetFrameCount_;
+    const double targetDurationSeconds = recordingTargetDurationSeconds_;
+    const auto recordingStart = recordingStartTime_;
+
+    recordingThread_ = std::thread([this, queuePtr, recorderPtr, targetFrameCount, targetDurationSeconds,
+                                     recordingStart] {
         while (auto queuedFrame = queuePtr->waitPop()) {
             const auto result = recorderPtr->writeFrame(*queuedFrame);
+            std::uint64_t written = 0;
             if (result.ok()) {
-                recordingFrameCount_.fetch_add(1, std::memory_order_relaxed);
+                written = recordingFrameCount_.fetch_add(1, std::memory_order_relaxed) + 1;
             } else {
                 recordingDroppedFrames_.fetch_add(1, std::memory_order_relaxed);
             }
             emit recordingStatsChanged();
+
+            const double elapsed = std::chrono::duration<double>(std::chrono::steady_clock::now() - recordingStart)
+                                        .count();
+            const bool frameTargetReached = targetFrameCount > 0 && written >= static_cast<std::uint64_t>(targetFrameCount);
+            const bool durationTargetReached = targetDurationSeconds > 0.0 && elapsed >= targetDurationSeconds;
+            if (frameTargetReached || durationTargetReached) {
+                // Frames arriving after this point (before stopRecording()
+                // actually runs on the GUI thread) queue up and, once the
+                // bounded queue fills, count as dropped — an expected,
+                // harmless artifact of hitting a target, not a real
+                // integrity failure.
+                emit recordingTargetReached();
+                break;
+            }
         }
     });
 

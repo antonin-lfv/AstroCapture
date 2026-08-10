@@ -1,3 +1,5 @@
+find_package(Threads REQUIRED)
+
 astro_add_unit_test(astro_domain_frame_descriptor_test
     SOURCES domain/FrameDescriptorTest.cpp
     LIBS astro::domain
@@ -6,6 +8,11 @@ astro_add_unit_test(astro_domain_frame_descriptor_test
 astro_add_unit_test(astro_domain_result_test
     SOURCES domain/ResultTest.cpp
     LIBS astro::domain
+)
+
+astro_add_unit_test(astro_domain_latest_frame_slot_test
+    SOURCES domain/LatestFrameSlotTest.cpp
+    LIBS astro::domain Threads::Threads
 )
 
 if(ASTRO_ENABLE_MOCK_CAMERA)

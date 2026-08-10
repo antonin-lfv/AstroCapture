@@ -1,7 +1,5 @@
 #include "PreviewController.hpp"
 
-#include <QMetaObject>
-
 #include "SimpleDebayer.hpp"
 #include "astro/domain/StreamMode.hpp"
 
@@ -68,7 +66,7 @@ void PreviewController::rescan() {
     device_ = std::move(device);
     cameraName_ = QString::fromStdString(device_->descriptor().displayName);
     errorMessage_.clear();
-    frameCount_ = 0;
+    frameCount_.store(0, std::memory_order_relaxed);
     connected_ = true;
     emit connectedChanged();
     emit errorMessageChanged();
@@ -79,22 +77,23 @@ void PreviewController::rescan() {
 #endif
 }
 
-void PreviewController::onFrame(const FrameBuffer& frameBuffer) {
-    QImage image = debayerToPreviewImage(frameBuffer.descriptor, frameBuffer.storage->data(),
-                                          frameBuffer.storage->size());
-    const quint64 sequence = frameBuffer.metadata.sequence;
+QImage PreviewController::frame() const {
+    const auto latest = frameSlot_.latest();
+    if (!latest) {
+        return QImage();
+    }
+    return debayerToPreviewImage(latest->descriptor, latest->storage->data(), latest->storage->size());
+}
 
-    // onFrame runs on the camera's acquisition thread; hop to the GUI thread
-    // (this object's thread) before touching state QML/paint code reads.
-    QMetaObject::invokeMethod(
-        this,
-        [this, image = std::move(image), sequence]() {
-            frame_ = image;
-            frameCount_ = sequence + 1;
-            emit frameChanged();
-            emit frameCountChanged();
-        },
-        Qt::QueuedConnection);
+void PreviewController::onFrame(const FrameBuffer& frameBuffer) {
+    frameSlot_.store(frameBuffer);
+    frameCount_.fetch_add(1, std::memory_order_relaxed);
+
+    // Signal emission is thread-safe in Qt: connections to GUI-thread
+    // receivers (LivePreviewItem, QML property bindings) are queued
+    // automatically, so this stays cheap on the acquisition thread.
+    emit frameChanged();
+    emit frameCountChanged();
 }
 
 }  // namespace astro::app

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <atomic>
+#include <cstdint>
 #include <memory>
 
 #include <QImage>
@@ -9,6 +11,7 @@
 
 #include "astro/domain/Frame.hpp"
 #include "astro/domain/ICameraDevice.hpp"
+#include "astro/domain/LatestFrameSlot.hpp"
 
 namespace astro::app {
 
@@ -31,10 +34,12 @@ public:
     bool connected() const { return connected_; }
     QString cameraName() const { return cameraName_; }
     QString errorMessage() const { return errorMessage_; }
-    quint64 frameCount() const { return frameCount_; }
+    quint64 frameCount() const { return frameCount_.load(std::memory_order_relaxed); }
 
-    // Latest decoded frame, read by LivePreviewItem on the GUI thread only.
-    QImage frame() const { return frame_; }
+    // Debayers the latest frame on the calling thread. Intended for
+    // LivePreviewItem to call from the render/GUI thread, never from the
+    // camera's acquisition thread.
+    QImage frame() const;
 
     Q_INVOKABLE void rescan();
 
@@ -46,15 +51,17 @@ signals:
 
 private:
     // astro::domain::FrameSink — called on the camera's acquisition thread.
+    // Must stay cheap: no decoding, no Qt GUI work (AGENT.md 2.2, the
+    // acquisition path must never be blocked by preview/UI work).
     void onFrame(const astro::domain::FrameBuffer& frameBuffer) override;
 
     std::unique_ptr<astro::domain::ICameraDevice> device_;
+    astro::domain::LatestFrameSlot frameSlot_;
 
     bool connected_ = false;
     QString cameraName_;
     QString errorMessage_;
-    quint64 frameCount_ = 0;
-    QImage frame_;
+    std::atomic<std::uint64_t> frameCount_{0};
 };
 
 }  // namespace astro::app

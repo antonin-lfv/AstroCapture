@@ -95,10 +95,61 @@ void PreviewController::rescan() {
     renderedFrameCount_.store(0, std::memory_order_relaxed);
     lastRenderedSequence_.reset();
     startTime_ = std::chrono::steady_clock::now();
+
+    exposureCapability_.reset();
+    gainCapability_.reset();
+    for (const auto& capability : device_->capabilities()) {
+        if (capability.id == ControlId::Exposure && capability.supported) {
+            exposureCapability_ = capability;
+            if (const auto value = device_->getControl(ControlId::Exposure);
+                value.ok()) {
+                if (const auto* asDouble = std::get_if<double>(&value.value())) {
+                    exposureMicroseconds_ = *asDouble;
+                }
+            }
+        } else if (capability.id == ControlId::Gain && capability.supported) {
+            gainCapability_ = capability;
+            if (const auto value = device_->getControl(ControlId::Gain); value.ok()) {
+                if (const auto* asInt = std::get_if<std::int64_t>(&value.value())) {
+                    gainValue_ = *asInt;
+                }
+            }
+        }
+    }
+
     connected_ = true;
     emit connectedChanged();
     emit errorMessageChanged();
     emit frameCountChanged();
+    emit exposureChanged();
+    emit gainChanged();
+}
+
+void PreviewController::setExposureMicroseconds(double value) {
+    if (!device_ || !exposureCapability_) {
+        return;
+    }
+    if (const auto result = device_->setControl(ControlId::Exposure, value); !result.ok()) {
+        errorMessage_ = QString::fromStdString(result.error().message);
+        emit errorMessageChanged();
+        return;
+    }
+    exposureMicroseconds_ = value;
+    emit exposureChanged();
+}
+
+void PreviewController::setGainValue(int value) {
+    if (!device_ || !gainCapability_) {
+        return;
+    }
+    const auto asInt64 = static_cast<std::int64_t>(value);
+    if (const auto result = device_->setControl(ControlId::Gain, asInt64); !result.ok()) {
+        errorMessage_ = QString::fromStdString(result.error().message);
+        emit errorMessageChanged();
+        return;
+    }
+    gainValue_ = asInt64;
+    emit gainChanged();
 }
 
 double PreviewController::fps() const {

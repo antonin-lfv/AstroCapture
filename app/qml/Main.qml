@@ -37,36 +37,102 @@ ApplicationWindow {
             Layout.fillHeight: true
         }
 
-        RowLayout {
+        ColumnLayout {
             Layout.fillWidth: true
             Layout.margins: 12
-            spacing: 16
+            spacing: 10
 
-            Text {
-                text: previewController.cameraName
-                color: "#e8eaed"
-                font.pixelSize: 13
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 16
+
+                Text {
+                    text: previewController.cameraName
+                    color: "#e8eaed"
+                    font.pixelSize: 13
+                }
+
+                Text {
+                    text: "Frames: " + previewController.frameCount
+                    color: "#9aa0a6"
+                    font.pixelSize: 13
+                }
+
+                Text {
+                    text: previewController.fps.toFixed(1) + " fps"
+                    color: "#9aa0a6"
+                    font.pixelSize: 13
+                }
+
+                Text {
+                    text: "Preview skipped: " + previewController.previewSkippedFrames
+                    color: "#9aa0a6"
+                    font.pixelSize: 13
+                }
+
+                Item { Layout.fillWidth: true }
             }
 
-            Text {
-                text: "Frames: " + previewController.frameCount
-                color: "#9aa0a6"
-                font.pixelSize: 13
+            // Capability-driven: hidden entirely for backends that don't
+            // expose the control (e.g. the UVC/webcam backend today).
+            RowLayout {
+                Layout.fillWidth: true
+                visible: previewController.exposureSupported
+                spacing: 12
+
+                Text {
+                    text: "Exposure"
+                    color: "#9aa0a6"
+                    font.pixelSize: 12
+                    Layout.preferredWidth: 64
+                }
+
+                Slider {
+                    id: exposureSlider
+                    Layout.fillWidth: true
+                    from: previewController.exposureMinMicroseconds
+                    to: previewController.exposureMaxMicroseconds
+                    value: previewController.exposureMicroseconds
+                    onMoved: previewController.exposureMicroseconds = value
+                }
+
+                Text {
+                    text: (previewController.exposureMicroseconds / 1000).toFixed(1) + " ms"
+                    color: "#e8eaed"
+                    font.pixelSize: 12
+                    Layout.preferredWidth: 64
+                }
             }
 
-            Text {
-                text: previewController.fps.toFixed(1) + " fps"
-                color: "#9aa0a6"
-                font.pixelSize: 13
-            }
+            RowLayout {
+                Layout.fillWidth: true
+                visible: previewController.gainSupported
+                spacing: 12
 
-            Text {
-                text: "Preview skipped: " + previewController.previewSkippedFrames
-                color: "#9aa0a6"
-                font.pixelSize: 13
-            }
+                Text {
+                    text: "Gain"
+                    color: "#9aa0a6"
+                    font.pixelSize: 12
+                    Layout.preferredWidth: 64
+                }
 
-            Item { Layout.fillWidth: true }
+                Slider {
+                    id: gainSlider
+                    Layout.fillWidth: true
+                    from: previewController.gainMin
+                    to: previewController.gainMax
+                    stepSize: 1
+                    value: previewController.gainValue
+                    onMoved: previewController.gainValue = Math.round(value)
+                }
+
+                Text {
+                    text: previewController.gainValue
+                    color: "#e8eaed"
+                    font.pixelSize: 12
+                    Layout.preferredWidth: 64
+                }
+            }
         }
     }
 

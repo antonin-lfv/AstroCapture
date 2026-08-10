@@ -28,6 +28,11 @@ int main() {
     slot.store(makeFrame(2));
     ASTRO_TEST_CHECK(slot.latest()->metadata.sequence == 2);
 
+    // clear() drops the stored frame so a reconnecting consumer doesn't see
+    // the previous device's stale last frame.
+    slot.clear();
+    ASTRO_TEST_CHECK(!slot.latest().has_value());
+
     // Concurrent producer/consumer must not crash or tear a read.
     LatestFrameSlot concurrentSlot;
     std::thread producer([&] {

@@ -123,6 +123,11 @@ public:
 
     Q_INVOKABLE void rescan();
 
+    // Stops the current device (and any active recording) and returns to
+    // the disconnected/empty state, so rescan() can pick a different
+    // camera. Without this, rescan() no-ops once already connected.
+    Q_INVOKABLE void disconnectCamera();
+
     // Saves the currently displayed frame (i.e. frame()'s output, already
     // debayered/converted) as PNG under Pictures/AstroCapture. Sets
     // lastCaptureStatus to the saved path or a failure reason.

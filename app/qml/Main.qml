@@ -62,6 +62,17 @@ ApplicationWindow {
                     font.pixelSize: 13
                 }
 
+                IconButton {
+                    iconName: "close"
+                    text: "Disconnect"
+                    borderColor: "#242830"
+                    onClicked: previewController.disconnectCamera()
+
+                    ToolTip.visible: hovered
+                    ToolTip.delay: 400
+                    ToolTip.text: "Disconnect this camera so Rescan can pick a different one."
+                }
+
                 Text {
                     text: "Frames: " + previewController.frameCount
                     color: "#9aa0a6"
@@ -296,4 +307,5 @@ ApplicationWindow {
         id: settingsPanel
         controller: previewController
     }
+
 }

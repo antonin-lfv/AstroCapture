@@ -25,6 +25,15 @@ public:
         return frame_;
     }
 
+    // Drops the stored frame, if any. For consumers that disconnect a
+    // device and later reconnect a different one: without this, latest()
+    // would keep returning the previous camera's last frame until the new
+    // device's first frame arrives.
+    void clear() {
+        std::lock_guard lock(mutex_);
+        frame_.reset();
+    }
+
 private:
     mutable std::mutex mutex_;
     std::optional<FrameBuffer> frame_;

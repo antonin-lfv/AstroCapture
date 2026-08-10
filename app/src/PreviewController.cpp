@@ -154,6 +154,33 @@ void PreviewController::rescan() {
     }
 }
 
+void PreviewController::disconnectCamera() {
+    if (!connected_) {
+        return;
+    }
+    if (recording_) {
+        stopRecording();
+    }
+    if (device_) {
+        device_->stop();
+        device_.reset();
+    }
+    frameSlot_.clear();
+    exposureCapability_.reset();
+    gainCapability_.reset();
+
+    connected_ = false;
+    cameraName_.clear();
+    frameCount_.store(0, std::memory_order_relaxed);
+    renderedFrameCount_.store(0, std::memory_order_relaxed);
+    lastRenderedSequence_.reset();
+
+    emit connectedChanged();
+    emit frameCountChanged();
+    emit exposureChanged();
+    emit gainChanged();
+}
+
 void PreviewController::setExposureMicroseconds(double value) {
     if (!device_ || !exposureCapability_) {
         return;

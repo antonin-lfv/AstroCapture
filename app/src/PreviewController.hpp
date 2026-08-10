@@ -7,12 +7,15 @@
 #include <mutex>
 #include <optional>
 #include <thread>
+#include <vector>
 
 #include <QImage>
 #include <QObject>
 #include <QQmlEngine>
 #include <QString>
 #include <QStringList>
+#include <QVariantList>
+#include <QVariantMap>
 
 #include "Settings.hpp"
 #include "astro/domain/BoundedFrameQueue.hpp"
@@ -29,8 +32,11 @@ namespace astro::app {
 // Owns a single opened camera and republishes its frames as QImages for QML.
 // Stands in for the future CaptureSession/CameraManager pair (see
 // docs/development/IMPLEMENTATION_BLUEPRINT.md sections 7-8); deliberately
-// supports one device at a time. rescan() tries compiled-in backends in
-// priority order (real hardware before the mock fallback).
+// supports one device at a time. rescan() auto-connects when there's exactly
+// one real (non-mock) camera, or zero (falls back to mock) — both preserve
+// the original one-click flow. With more than one real camera, it populates
+// availableCameras instead so the UI can ask which one, then
+// connectToCamera() opens the chosen one.
 class PreviewController : public QObject, private astro::domain::FrameSink {
     Q_OBJECT
     QML_ELEMENT
@@ -92,6 +98,10 @@ class PreviewController : public QObject, private astro::domain::FrameSink {
     // name belongs to one session, not a lasting preference.
     Q_PROPERTY(QString targetName READ targetName WRITE setTargetName NOTIFY targetNameChanged)
 
+    // Populated by rescan() only when more than one real camera is found
+    // (see the class comment). Each entry is {id, displayName}.
+    Q_PROPERTY(QVariantList availableCameras READ availableCameras NOTIFY availableCamerasChanged)
+
 public:
     explicit PreviewController(QObject* parent = nullptr);
     ~PreviewController() override;
@@ -140,6 +150,12 @@ public:
     void setRecordingTargetDurationSeconds(double value);
 
     Q_INVOKABLE void rescan();
+
+    QVariantList availableCameras() const;
+
+    // Opens a specific camera from availableCameras() by id. No-op if
+    // already connected or the id isn't (or is no longer) in the list.
+    Q_INVOKABLE void connectToCamera(const QString& cameraId);
 
     // Stops the current device (and any active recording) and returns to
     // the disconnected/empty state, so rescan() can pick a different
@@ -192,6 +208,7 @@ signals:
     void saveDirectoryChanged();
     void presetsChanged();
     void targetNameChanged();
+    void availableCamerasChanged();
 
 private:
     // astro::domain::FrameSink — called on the camera's acquisition thread.
@@ -199,10 +216,25 @@ private:
     // acquisition path must never be blocked by preview/UI work).
     void onFrame(const astro::domain::FrameBuffer& frameBuffer) override;
 
-    // Opens, configures and starts the first device `backend` enumerates.
-    // Returns nullptr (with errorMessage_ set only on a real failure, left
-    // untouched if the backend simply found no devices) if unsuccessful.
-    std::unique_ptr<astro::domain::ICameraDevice> tryOpenFirstDevice(astro::domain::ICameraBackend& backend);
+    struct CameraCandidate {
+        QString id;
+        QString displayName;
+        QString backendId;  // "uvc" or "mock"
+    };
+
+    // Opens, configures and starts a specific device id from `backend`.
+    // Returns nullptr (with errorMessage_ set) on failure.
+    std::unique_ptr<astro::domain::ICameraDevice> openAndStart(astro::domain::ICameraBackend& backend,
+                                                                 const astro::domain::CameraId& id);
+
+    // Dispatches to the right backend by candidate.backendId and calls
+    // openAndStart(). Returns nullptr if that backend isn't compiled in.
+    std::unique_ptr<astro::domain::ICameraDevice> openCandidate(const CameraCandidate& candidate);
+
+    // Shared tail of a successful connect: takes ownership of `device`,
+    // loads its capabilities, restores saved exposure/gain, flips
+    // connected_, and emits the associated signals.
+    void finishConnecting(std::unique_ptr<astro::domain::ICameraDevice> device);
 
     // Resolve to saveDirectory_/Images or .../Videos when set, otherwise
     // the OS-standard Pictures/AstroCapture or Movies/AstroCapture.
@@ -211,6 +243,7 @@ private:
 
     std::unique_ptr<astro::domain::ICameraDevice> device_;
     astro::domain::LatestFrameSlot frameSlot_;
+    std::vector<CameraCandidate> availableCameras_;
 
     // Guards recordingQueue_ against the race between onFrame() (checks/
     // pushes from the acquisition thread) and start/stopRecording() (create/

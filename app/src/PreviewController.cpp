@@ -39,13 +39,8 @@ PreviewController::~PreviewController() {
     }
 }
 
-std::unique_ptr<ICameraDevice> PreviewController::tryOpenFirstDevice(ICameraBackend& backend) {
-    const auto descriptors = backend.enumerate();
-    if (descriptors.empty()) {
-        return nullptr;
-    }
-
-    auto device = backend.open(descriptors.front().id);
+std::unique_ptr<ICameraDevice> PreviewController::openAndStart(ICameraBackend& backend, const CameraId& id) {
+    auto device = backend.open(id);
     if (!device) {
         errorMessage_ = QStringLiteral("Failed to open camera.");
         return nullptr;
@@ -74,37 +69,24 @@ std::unique_ptr<ICameraDevice> PreviewController::tryOpenFirstDevice(ICameraBack
     return device;
 }
 
-void PreviewController::rescan() {
-    if (connected_) {
-        return;
-    }
-
-    errorMessage_.clear();
-    std::unique_ptr<ICameraDevice> device;
-
-    // Real hardware first: if a UVC/webcam is attached, prefer it over the
-    // synthetic mock so "Rescan" shows something real whenever possible.
+std::unique_ptr<ICameraDevice> PreviewController::openCandidate(const CameraCandidate& candidate) {
 #ifdef ASTRO_ENABLE_DRIVER_UVC
-    if (!device) {
-        astro::driver::uvc::UvcCameraBackend uvcBackend;
-        device = tryOpenFirstDevice(uvcBackend);
+    if (candidate.backendId == QStringLiteral("uvc")) {
+        astro::driver::uvc::UvcCameraBackend backend;
+        return openAndStart(backend, candidate.id.toStdString());
     }
 #endif
 #ifdef ASTRO_ENABLE_MOCK_CAMERA
-    if (!device) {
-        astro::driver::mock::MockCameraBackend mockBackend;
-        device = tryOpenFirstDevice(mockBackend);
+    if (candidate.backendId == QStringLiteral("mock")) {
+        astro::driver::mock::MockCameraBackend backend;
+        return openAndStart(backend, candidate.id.toStdString());
     }
 #endif
+    errorMessage_ = QStringLiteral("Camera backend not available in this build.");
+    return nullptr;
+}
 
-    if (!device) {
-        if (errorMessage_.isEmpty()) {
-            errorMessage_ = QStringLiteral("No camera found.");
-        }
-        emit errorMessageChanged();
-        return;
-    }
-
+void PreviewController::finishConnecting(std::unique_ptr<ICameraDevice> device) {
     device_ = std::move(device);
     cameraName_ = QString::fromStdString(device_->descriptor().displayName);
     errorMessage_.clear();
@@ -156,6 +138,97 @@ void PreviewController::rescan() {
                                              static_cast<qint64>(gainCapability_->maxValue));
             setGainValue(static_cast<int>(clamped));
         }
+    }
+}
+
+void PreviewController::rescan() {
+    if (connected_) {
+        return;
+    }
+
+    errorMessage_.clear();
+
+    // Real hardware only counts here: mock is a fallback, never a peer
+    // choice, so it must not turn a single-webcam rescan into a 2-item
+    // picker (webcam + mock) — see the class comment.
+    std::vector<CameraCandidate> realCandidates;
+#ifdef ASTRO_ENABLE_DRIVER_UVC
+    {
+        astro::driver::uvc::UvcCameraBackend backend;
+        for (const auto& descriptor : backend.enumerate()) {
+            realCandidates.push_back({QString::fromStdString(descriptor.id),
+                                       QString::fromStdString(descriptor.displayName), QStringLiteral("uvc")});
+        }
+    }
+#endif
+
+    if (realCandidates.size() == 1) {
+        if (auto device = openCandidate(realCandidates.front())) {
+            finishConnecting(std::move(device));
+        } else {
+            emit errorMessageChanged();
+        }
+        return;
+    }
+
+    if (realCandidates.size() > 1) {
+        availableCameras_ = std::move(realCandidates);
+        emit availableCamerasChanged();
+        return;
+    }
+
+#ifdef ASTRO_ENABLE_MOCK_CAMERA
+    {
+        astro::driver::mock::MockCameraBackend backend;
+        const auto descriptors = backend.enumerate();
+        if (!descriptors.empty()) {
+            const CameraCandidate mockCandidate{QString::fromStdString(descriptors.front().id),
+                                                 QString::fromStdString(descriptors.front().displayName),
+                                                 QStringLiteral("mock")};
+            if (auto device = openCandidate(mockCandidate)) {
+                finishConnecting(std::move(device));
+            } else {
+                emit errorMessageChanged();
+            }
+            return;
+        }
+    }
+#endif
+
+    if (errorMessage_.isEmpty()) {
+        errorMessage_ = QStringLiteral("No camera found.");
+    }
+    emit errorMessageChanged();
+}
+
+QVariantList PreviewController::availableCameras() const {
+    QVariantList list;
+    for (const auto& candidate : availableCameras_) {
+        QVariantMap entry;
+        entry[QStringLiteral("id")] = candidate.id;
+        entry[QStringLiteral("displayName")] = candidate.displayName;
+        list.append(entry);
+    }
+    return list;
+}
+
+void PreviewController::connectToCamera(const QString& cameraId) {
+    if (connected_) {
+        return;
+    }
+    for (const auto& candidate : availableCameras_) {
+        if (candidate.id != cameraId) {
+            continue;
+        }
+        errorMessage_.clear();
+        if (auto device = openCandidate(candidate)) {
+            availableCameras_.clear();
+            emit availableCamerasChanged();
+            finishConnecting(std::move(device));
+        } else {
+            emit errorMessageChanged();
+        }
+        return;
     }
 }
 

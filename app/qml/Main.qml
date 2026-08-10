@@ -346,6 +346,34 @@ ApplicationWindow {
             ToolTip.text: "Tries a connected webcam first, falls back to the mock test camera. The reference planetary camera backend ships in Gate C."
         }
 
+        // Only populated when Rescan finds more than one real camera —
+        // with zero or one, it connects directly and this stays empty.
+        ColumnLayout {
+            Layout.alignment: Qt.AlignHCenter
+            Layout.fillWidth: true
+            visible: previewController.availableCameras.length > 0
+            spacing: 8
+
+            Text {
+                Layout.alignment: Qt.AlignHCenter
+                text: "Multiple cameras found — choose one:"
+                color: "#9aa0a6"
+                font.pixelSize: 12
+            }
+
+            Repeater {
+                model: previewController.availableCameras
+
+                delegate: IconButton {
+                    Layout.alignment: Qt.AlignHCenter
+                    Layout.fillWidth: true
+                    iconName: "camera"
+                    text: modelData.displayName
+                    onClicked: previewController.connectToCamera(modelData.id)
+                }
+            }
+        }
+
         Text {
             Layout.alignment: Qt.AlignHCenter
             Layout.topMargin: 24

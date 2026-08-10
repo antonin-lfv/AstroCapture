@@ -56,6 +56,8 @@ class PreviewController : public QObject, private astro::domain::FrameSink {
     Q_PROPERTY(int gainMin READ gainMin NOTIFY connectedChanged)
     Q_PROPERTY(int gainMax READ gainMax NOTIFY connectedChanged)
 
+    Q_PROPERTY(QString lastCaptureStatus READ lastCaptureStatus NOTIFY lastCaptureStatusChanged)
+
 public:
     explicit PreviewController(QObject* parent = nullptr);
     ~PreviewController() override;
@@ -89,7 +91,14 @@ public:
     // for HistogramItem.
     astro::processing::Histogram histogram() const;
 
+    QString lastCaptureStatus() const { return lastCaptureStatus_; }
+
     Q_INVOKABLE void rescan();
+
+    // Saves the currently displayed frame (i.e. frame()'s output, already
+    // debayered/converted) as PNG under Pictures/AstroCapture. Sets
+    // lastCaptureStatus to the saved path or a failure reason.
+    Q_INVOKABLE void captureStillImage();
 
 signals:
     void connectedChanged();
@@ -98,6 +107,7 @@ signals:
     void frameChanged();
     void exposureChanged();
     void gainChanged();
+    void lastCaptureStatusChanged();
 
 private:
     // astro::domain::FrameSink — called on the camera's acquisition thread.
@@ -122,6 +132,7 @@ private:
     bool connected_ = false;
     QString cameraName_;
     QString errorMessage_;
+    QString lastCaptureStatus_;
     std::atomic<std::uint64_t> frameCount_{0};
     std::chrono::steady_clock::time_point startTime_;  // GUI thread only (set in rescan())
 

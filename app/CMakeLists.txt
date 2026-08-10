@@ -29,6 +29,8 @@ qt_add_qml_module(AstroCapture
         src/Settings.cpp
         src/HistogramItem.hpp
         src/HistogramItem.cpp
+        src/FileNaming.hpp
+        src/FileNaming.cpp
 )
 
 target_include_directories(AstroCapture PRIVATE src)

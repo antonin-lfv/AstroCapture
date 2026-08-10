@@ -2,6 +2,10 @@
 
 #include <algorithm>
 
+#include <QDir>
+#include <QStandardPaths>
+
+#include "FileNaming.hpp"
 #include "FramePreviewImage.hpp"
 #include "astro/domain/StreamMode.hpp"
 
@@ -207,6 +211,41 @@ astro::processing::Histogram PreviewController::histogram() const {
     }
     return astro::processing::computeHistogram(latest->descriptor, latest->storage->data(),
                                                  latest->storage->size());
+}
+
+void PreviewController::captureStillImage() {
+    if (!connected_ || !device_) {
+        lastCaptureStatus_ = QStringLiteral("No camera connected.");
+        emit lastCaptureStatusChanged();
+        return;
+    }
+
+    const QImage image = frame();
+    if (image.isNull()) {
+        lastCaptureStatus_ = QStringLiteral("No frame available yet.");
+        emit lastCaptureStatusChanged();
+        return;
+    }
+
+    const QString directory =
+        QStandardPaths::writableLocation(QStandardPaths::PicturesLocation) + QStringLiteral("/AstroCapture");
+    if (!QDir().mkpath(directory)) {
+        lastCaptureStatus_ = QStringLiteral("Failed to create ") + directory;
+        emit lastCaptureStatusChanged();
+        return;
+    }
+
+    const QString cameraId = QString::fromStdString(device_->descriptor().id);
+    const QString path = directory + QLatin1Char('/') + timestampedBaseName(cameraId) + QStringLiteral(".png");
+
+    if (!image.save(path, "PNG")) {
+        lastCaptureStatus_ = QStringLiteral("Failed to save image.");
+        emit lastCaptureStatusChanged();
+        return;
+    }
+
+    lastCaptureStatus_ = QStringLiteral("Saved ") + path;
+    emit lastCaptureStatusChanged();
 }
 
 void PreviewController::onFrame(const FrameBuffer& frameBuffer) {

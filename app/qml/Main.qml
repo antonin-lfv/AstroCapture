@@ -81,6 +81,37 @@ ApplicationWindow {
                 }
 
                 Item { Layout.fillWidth: true }
+
+                Button {
+                    id: captureButton
+                    text: "Capture image"
+                    onClicked: previewController.captureStillImage()
+
+                    contentItem: Text {
+                        text: captureButton.text
+                        color: "#e8eaed"
+                        font.pixelSize: 12
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                    }
+                    background: Rectangle {
+                        implicitWidth: 108
+                        implicitHeight: 28
+                        radius: 6
+                        color: captureButton.pressed ? "#252b32" : (captureButton.hovered ? "#2a3038" : "#1c2026")
+                        border.color: "#3a4048"
+                        border.width: 1
+                    }
+                }
+            }
+
+            Text {
+                Layout.fillWidth: true
+                visible: previewController.lastCaptureStatus.length > 0
+                text: previewController.lastCaptureStatus
+                color: "#9aa0a6"
+                font.pixelSize: 11
+                elide: Text.ElideMiddle
             }
 
             // Capability-driven: hidden entirely for backends that don't

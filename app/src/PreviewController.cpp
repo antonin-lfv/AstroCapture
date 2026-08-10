@@ -273,7 +273,8 @@ void PreviewController::captureStillImage() {
     }
 
     const QString cameraId = QString::fromStdString(device_->descriptor().id);
-    const QString path = directory + QLatin1Char('/') + timestampedBaseName(cameraId) + QStringLiteral(".png");
+    const QString path =
+        directory + QLatin1Char('/') + timestampedBaseName(cameraId, targetName_) + QStringLiteral(".png");
 
     if (!image.save(path, "PNG")) {
         lastCaptureStatus_ = QStringLiteral("Failed to save image.");
@@ -333,7 +334,8 @@ void PreviewController::startRecording() {
     }
 
     const QString cameraId = QString::fromStdString(device_->descriptor().id);
-    const QString path = directory + QLatin1Char('/') + timestampedBaseName(cameraId) + QStringLiteral(".acraw");
+    const QString path =
+        directory + QLatin1Char('/') + timestampedBaseName(cameraId, targetName_) + QStringLiteral(".acraw");
 
     auto recorder = std::make_unique<astro::recording::RawSequenceRecorder>();
     const double nominalFps = fps() > 0.0 ? fps() : 30.0;  // best-effort header hint; not used for pacing
@@ -481,6 +483,14 @@ void PreviewController::setSaveDirectory(const QString& path) {
     saveDirectory_ = path;
     settings_.saveRootDirectory(path);
     emit saveDirectoryChanged();
+}
+
+void PreviewController::setTargetName(const QString& value) {
+    if (targetName_ == value) {
+        return;
+    }
+    targetName_ = value;
+    emit targetNameChanged();
 }
 
 QStringList PreviewController::presetNames() const {

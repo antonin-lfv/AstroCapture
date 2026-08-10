@@ -93,6 +93,23 @@ ApplicationWindow {
 
                 Item { Layout.fillWidth: true }
 
+                TextField {
+                    id: targetNameField
+                    Layout.preferredWidth: 140
+                    placeholderText: "Target (optional)"
+                    text: previewController.targetName
+                    color: "#e8eaed"
+                    font.pixelSize: 12
+                    onEditingFinished: previewController.targetName = text
+                    background: Rectangle {
+                        implicitHeight: 28
+                        radius: 6
+                        color: "#1c2026"
+                        border.color: "#3a4048"
+                        border.width: 1
+                    }
+                }
+
                 IconButton {
                     iconName: "camera"
                     text: "Capture"

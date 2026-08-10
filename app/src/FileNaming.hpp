@@ -9,9 +9,11 @@ namespace astro::app {
 // section 17: "Sanitize for all target filesystems").
 QString sanitizeForFilename(const QString& value);
 
-// {date}_{time}_{camera} base name (blueprint section 17's naming pattern,
-// simplified: no {target}/{sequence} tokens until sessions/multi-shot
-// naming exist). Callers append their own extension.
-QString timestampedBaseName(const QString& cameraId);
+// {date}_{time}_{target}_{camera} base name (blueprint section 17's naming
+// pattern, minus the {sequence} token, which doesn't exist yet — nothing
+// today produces multiple files in the same second). `targetName` is
+// omitted entirely when empty, so existing filenames without a target
+// still look the same. Callers append their own extension.
+QString timestampedBaseName(const QString& cameraId, const QString& targetName = QString());
 
 }  // namespace astro::app

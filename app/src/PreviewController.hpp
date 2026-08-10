@@ -87,6 +87,11 @@ class PreviewController : public QObject, private astro::domain::FrameSink {
     Q_PROPERTY(QString saveDirectory READ saveDirectory WRITE setSaveDirectory NOTIFY saveDirectoryChanged)
     Q_PROPERTY(QStringList presetNames READ presetNames NOTIFY presetsChanged)
 
+    // Free-text session metadata (IMPLEMENTATION_BLUEPRINT.md section 17's
+    // {target} filename token), e.g. "Jupiter". Not persisted: a target
+    // name belongs to one session, not a lasting preference.
+    Q_PROPERTY(QString targetName READ targetName WRITE setTargetName NOTIFY targetNameChanged)
+
 public:
     explicit PreviewController(QObject* parent = nullptr);
     ~PreviewController() override;
@@ -156,6 +161,9 @@ public:
     QString saveDirectory() const { return saveDirectory_; }
     void setSaveDirectory(const QString& path);
 
+    QString targetName() const { return targetName_; }
+    void setTargetName(const QString& value);
+
     // Named presets store the current camera's exposure/gain; scoped per
     // camera id (like the last-used values) since valid ranges are
     // hardware-specific.
@@ -183,6 +191,7 @@ signals:
     void recordingTargetReached();
     void saveDirectoryChanged();
     void presetsChanged();
+    void targetNameChanged();
 
 private:
     // astro::domain::FrameSink — called on the camera's acquisition thread.
@@ -223,6 +232,7 @@ private:
 
     Settings settings_;
     QString saveDirectory_;
+    QString targetName_;
     std::optional<astro::domain::CameraCapability> exposureCapability_;
     double exposureMicroseconds_ = 0.0;
     std::optional<astro::domain::CameraCapability> gainCapability_;

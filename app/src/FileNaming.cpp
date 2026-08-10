@@ -14,9 +14,14 @@ QString sanitizeForFilename(const QString& value) {
     return result;
 }
 
-QString timestampedBaseName(const QString& cameraId) {
+QString timestampedBaseName(const QString& cameraId, const QString& targetName) {
     const QString timestamp = QDateTime::currentDateTime().toString(QStringLiteral("yyyyMMdd_HHmmss"));
-    return timestamp + QLatin1Char('_') + sanitizeForFilename(cameraId);
+    const QString trimmedTarget = targetName.trimmed();
+    if (trimmedTarget.isEmpty()) {
+        return timestamp + QLatin1Char('_') + sanitizeForFilename(cameraId);
+    }
+    return timestamp + QLatin1Char('_') + sanitizeForFilename(trimmedTarget) + QLatin1Char('_') +
+           sanitizeForFilename(cameraId);
 }
 
 }  // namespace astro::app

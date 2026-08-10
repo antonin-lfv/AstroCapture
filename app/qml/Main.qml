@@ -37,6 +37,16 @@ ApplicationWindow {
             Layout.fillHeight: true
         }
 
+        HistogramItem {
+            id: histogramItem
+            controller: previewController
+            Layout.fillWidth: true
+            Layout.preferredHeight: 64
+            Layout.leftMargin: 12
+            Layout.rightMargin: 12
+            Layout.topMargin: 8
+        }
+
         ColumnLayout {
             Layout.fillWidth: true
             Layout.margins: 12

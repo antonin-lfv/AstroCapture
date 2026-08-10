@@ -15,6 +15,11 @@ astro_add_unit_test(astro_domain_latest_frame_slot_test
     LIBS astro::domain Threads::Threads
 )
 
+astro_add_unit_test(astro_processing_histogram_test
+    SOURCES processing/HistogramTest.cpp
+    LIBS astro::processing
+)
+
 if(ASTRO_ENABLE_MOCK_CAMERA)
     astro_add_unit_test(astro_driver_mock_bayer_test_pattern_test
         SOURCES mock/BayerTestPatternTest.cpp

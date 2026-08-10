@@ -27,11 +27,13 @@ qt_add_qml_module(AstroCapture
         src/FramePreviewImage.cpp
         src/Settings.hpp
         src/Settings.cpp
+        src/HistogramItem.hpp
+        src/HistogramItem.cpp
 )
 
 target_include_directories(AstroCapture PRIVATE src)
 
-target_link_libraries(AstroCapture PRIVATE Qt6::Quick Qt6::Gui)
+target_link_libraries(AstroCapture PRIVATE Qt6::Quick Qt6::Gui astro::processing)
 
 if(ASTRO_ENABLE_MOCK_CAMERA)
     target_link_libraries(AstroCapture PRIVATE astro::driver::mock)

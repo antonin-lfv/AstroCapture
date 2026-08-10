@@ -200,6 +200,15 @@ QImage PreviewController::frame() const {
     return frameToPreviewImage(latest->descriptor, latest->storage->data(), latest->storage->size());
 }
 
+astro::processing::Histogram PreviewController::histogram() const {
+    const auto latest = frameSlot_.latest();
+    if (!latest) {
+        return {};
+    }
+    return astro::processing::computeHistogram(latest->descriptor, latest->storage->data(),
+                                                 latest->storage->size());
+}
+
 void PreviewController::onFrame(const FrameBuffer& frameBuffer) {
     frameSlot_.store(frameBuffer);
     frameCount_.fetch_add(1, std::memory_order_relaxed);

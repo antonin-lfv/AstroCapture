@@ -29,6 +29,7 @@ if(ASTRO_BUILD_TESTS)
 endif()
 
 add_subdirectory(core/domain)
+add_subdirectory(core/processing)
 
 if(ASTRO_ENABLE_MOCK_CAMERA)
     add_subdirectory(drivers/mock)

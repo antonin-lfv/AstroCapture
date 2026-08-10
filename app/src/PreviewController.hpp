@@ -17,6 +17,7 @@
 #include "astro/domain/ICameraBackend.hpp"
 #include "astro/domain/ICameraDevice.hpp"
 #include "astro/domain/LatestFrameSlot.hpp"
+#include "astro/processing/Histogram.hpp"
 
 namespace astro::app {
 
@@ -82,6 +83,11 @@ public:
     // LivePreviewItem to call from the render/GUI thread, never from the
     // camera's acquisition thread.
     QImage frame() const;
+
+    // Computes a histogram from the latest raw frame on the calling thread.
+    // Same threading contract as frame(): render/GUI thread only, intended
+    // for HistogramItem.
+    astro::processing::Histogram histogram() const;
 
     Q_INVOKABLE void rescan();
 

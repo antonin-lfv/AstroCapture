@@ -118,7 +118,7 @@ ApplicationWindow {
 
             ToolTip.visible: hovered
             ToolTip.delay: 400
-            ToolTip.text: "Only the mock test camera is available until a real backend ships (Gate C)."
+            ToolTip.text: "Tries a connected webcam first, falls back to the mock test camera. The reference planetary camera backend ships in Gate C."
         }
 
         Text {

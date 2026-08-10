@@ -31,11 +31,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # QtQuick/QtQml (qtdeclarative) ships in the base archives, not as an
+      # addon module — do not add it to `modules:`, aqt rejects it there.
       - name: Install Qt
         uses: jurplel/install-qt-action@v4
         with:
           version: "6.7.*"
-          modules: "qtdeclarative"
           cache: true
 
       # Every job here must stay hardware-independent: only the mock camera

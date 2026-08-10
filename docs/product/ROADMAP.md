@@ -48,7 +48,8 @@ Exit criteria:
 - stable live preview;
 - common camera controls;
 - histogram;
-- recording;
+- still image capture: save the currently previewed frame to disk (PNG/TIFF/FITS);
+- video recording: record the live stream to a suitable astronomy format, SER prioritized;
 - capture duration/frame targets;
 - clear recording status;
 - no silent dropped frames;

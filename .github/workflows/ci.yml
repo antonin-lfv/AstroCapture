@@ -33,10 +33,16 @@ jobs:
 
       # QtQuick/QtQml (qtdeclarative) ships in the base archives, not as an
       # addon module — do not add it to `modules:`, aqt rejects it there.
+      #
+      # Pinned to 6.9 (not just "6.5 minimum"): 6.7's Qt6Gui links
+      # `-framework AGL` on macOS, which recent Xcode/macOS SDKs no longer
+      # ship, so linking AstroCapture failed on macos-latest ("ld: framework
+      # 'AGL' not found"). 6.9 doesn't do that. Bump deliberately, not by
+      # switching to "latest", if a future version regresses this.
       - name: Install Qt
         uses: jurplel/install-qt-action@v4
         with:
-          version: "6.7.*"
+          version: "6.9.*"
           cache: true
 
       # Every job here must stay hardware-independent: only the mock camera

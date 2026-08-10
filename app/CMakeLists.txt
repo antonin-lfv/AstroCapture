@@ -19,6 +19,9 @@ qt_add_qml_module(AstroCapture
     VERSION 1.0
     QML_FILES
         qml/Main.qml
+        qml/Icon.qml
+        qml/IconButton.qml
+        qml/SettingsPanel.qml
     SOURCES
         src/PreviewController.hpp
         src/PreviewController.cpp

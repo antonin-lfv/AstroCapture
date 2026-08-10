@@ -1,6 +1,6 @@
 import QtQuick
 // The native macOS style ignores background/contentItem customization, so
-// controls we style ourselves (e.g. rescanButton below) silently keep their
+// controls we style ourselves (e.g. IconButton) silently keep their
 // OS-appearance-dependent look, which can render near-invisible against our
 // always-dark background. Basic is a non-native style that fully honors it.
 import QtQuick.Controls.Basic
@@ -82,59 +82,19 @@ ApplicationWindow {
 
                 Item { Layout.fillWidth: true }
 
-                Button {
-                    id: captureButton
-                    text: "Capture image"
+                IconButton {
+                    iconName: "camera"
+                    text: "Capture"
                     onClicked: previewController.captureStillImage()
-
-                    contentItem: Text {
-                        text: captureButton.text
-                        color: "#e8eaed"
-                        font.pixelSize: 12
-                        horizontalAlignment: Text.AlignHCenter
-                        verticalAlignment: Text.AlignVCenter
-                    }
-                    background: Rectangle {
-                        implicitWidth: 108
-                        implicitHeight: 28
-                        radius: 6
-                        color: captureButton.pressed ? "#252b32" : (captureButton.hovered ? "#2a3038" : "#1c2026")
-                        border.color: "#3a4048"
-                        border.width: 1
-                    }
                 }
 
-                Button {
-                    id: recordButton
+                IconButton {
+                    iconName: previewController.recording ? "stop" : "camera"
                     text: previewController.recording ? "Stop" : "Record"
+                    active: previewController.recording
+                    activeBorderColor: "#e5484d"
                     onClicked: previewController.recording ? previewController.stopRecording()
                                                              : previewController.startRecording()
-
-                    contentItem: RowLayout {
-                        spacing: 6
-                        Rectangle {
-                            visible: previewController.recording
-                            width: 8
-                            height: 8
-                            radius: 4
-                            color: "#e5484d"
-                        }
-                        Text {
-                            text: recordButton.text
-                            color: "#e8eaed"
-                            font.pixelSize: 12
-                        }
-                    }
-                    background: Rectangle {
-                        implicitWidth: 90
-                        implicitHeight: 28
-                        radius: 6
-                        color: previewController.recording
-                               ? "#3a1d1f"
-                               : (recordButton.pressed ? "#252b32" : (recordButton.hovered ? "#2a3038" : "#1c2026"))
-                        border.color: previewController.recording ? "#e5484d" : "#3a4048"
-                        border.width: 1
-                    }
                 }
             }
 
@@ -151,6 +111,14 @@ ApplicationWindow {
                 Layout.fillWidth: true
                 visible: previewController.recording
                 spacing: 16
+
+                Rectangle {
+                    width: 8
+                    height: 8
+                    radius: 4
+                    color: "#e5484d"
+                    Layout.alignment: Qt.AlignVCenter
+                }
 
                 Text {
                     text: previewController.recordingElapsedSeconds.toFixed(1) + " s"
@@ -290,34 +258,16 @@ ApplicationWindow {
             horizontalAlignment: Text.AlignHCenter
         }
 
-        Button {
+        IconButton {
             id: rescanButton
             Layout.alignment: Qt.AlignHCenter
+            iconName: "refresh"
             text: "Rescan for cameras"
             onClicked: previewController.rescan()
 
             ToolTip.visible: hovered
             ToolTip.delay: 400
             ToolTip.text: "Tries a connected webcam first, falls back to the mock test camera. The reference planetary camera backend ships in Gate C."
-
-            // Explicit styling: the default Qt Quick Controls look follows
-            // the OS light/dark appearance independently of this window's
-            // always-dark background, which can render near-invisible text.
-            contentItem: Text {
-                text: rescanButton.text
-                color: "#e8eaed"
-                font.pixelSize: 14
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
-            }
-            background: Rectangle {
-                implicitWidth: 172
-                implicitHeight: 36
-                radius: 6
-                color: rescanButton.pressed ? "#252b32" : (rescanButton.hovered ? "#2a3038" : "#1c2026")
-                border.color: "#3a4048"
-                border.width: 1
-            }
         }
 
         Text {
@@ -327,5 +277,23 @@ ApplicationWindow {
             color: "#5f6368"
             font.pixelSize: 11
         }
+    }
+
+    IconButton {
+        anchors.top: parent.top
+        anchors.right: parent.right
+        anchors.margins: 12
+        iconName: "settings"
+        borderColor: "#242830"
+        onClicked: settingsPanel.open()
+
+        ToolTip.visible: hovered
+        ToolTip.delay: 400
+        ToolTip.text: "Save location and presets"
+    }
+
+    SettingsPanel {
+        id: settingsPanel
+        controller: previewController
     }
 }

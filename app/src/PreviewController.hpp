@@ -12,6 +12,7 @@
 #include <QObject>
 #include <QQmlEngine>
 #include <QString>
+#include <QStringList>
 
 #include "Settings.hpp"
 #include "astro/domain/BoundedFrameQueue.hpp"
@@ -72,6 +73,12 @@ class PreviewController : public QObject, private astro::domain::FrameSink {
     Q_PROPERTY(double recordingElapsedSeconds READ recordingElapsedSeconds NOTIFY recordingStatsChanged)
     Q_PROPERTY(QString recordingStatus READ recordingStatus NOTIFY recordingStatusChanged)
 
+    // Empty means "use the OS default" (Pictures/AstroCapture,
+    // Movies/AstroCapture); once set, both captures and recordings go under
+    // <saveDirectory>/Images and <saveDirectory>/Videos instead.
+    Q_PROPERTY(QString saveDirectory READ saveDirectory WRITE setSaveDirectory NOTIFY saveDirectoryChanged)
+    Q_PROPERTY(QStringList presetNames READ presetNames NOTIFY presetsChanged)
+
 public:
     explicit PreviewController(QObject* parent = nullptr);
     ~PreviewController() override;
@@ -128,6 +135,17 @@ public:
     Q_INVOKABLE void startRecording();
     Q_INVOKABLE void stopRecording();
 
+    QString saveDirectory() const { return saveDirectory_; }
+    void setSaveDirectory(const QString& path);
+
+    // Named presets store the current camera's exposure/gain; scoped per
+    // camera id (like the last-used values) since valid ranges are
+    // hardware-specific.
+    QStringList presetNames() const;
+    Q_INVOKABLE void savePreset(const QString& name);
+    Q_INVOKABLE void loadPreset(const QString& name);
+    Q_INVOKABLE void deletePreset(const QString& name);
+
 signals:
     void connectedChanged();
     void errorMessageChanged();
@@ -139,6 +157,8 @@ signals:
     void recordingChanged();
     void recordingStatsChanged();
     void recordingStatusChanged();
+    void saveDirectoryChanged();
+    void presetsChanged();
 
 private:
     // astro::domain::FrameSink — called on the camera's acquisition thread.
@@ -150,6 +170,11 @@ private:
     // Returns nullptr (with errorMessage_ set only on a real failure, left
     // untouched if the backend simply found no devices) if unsuccessful.
     std::unique_ptr<astro::domain::ICameraDevice> tryOpenFirstDevice(astro::domain::ICameraBackend& backend);
+
+    // Resolve to saveDirectory_/Images or .../Videos when set, otherwise
+    // the OS-standard Pictures/AstroCapture or Movies/AstroCapture.
+    QString imagesDirectoryPath() const;
+    QString videosDirectoryPath() const;
 
     std::unique_ptr<astro::domain::ICameraDevice> device_;
     astro::domain::LatestFrameSlot frameSlot_;
@@ -171,6 +196,7 @@ private:
     std::chrono::steady_clock::time_point recordingStartTime_;  // GUI thread only
 
     Settings settings_;
+    QString saveDirectory_;
     std::optional<astro::domain::CameraCapability> exposureCapability_;
     double exposureMicroseconds_ = 0.0;
     std::optional<astro::domain::CameraCapability> gainCapability_;

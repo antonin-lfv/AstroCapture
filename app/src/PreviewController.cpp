@@ -21,7 +21,9 @@ namespace astro::app {
 
 using namespace astro::domain;
 
-PreviewController::PreviewController(QObject* parent) : QObject(parent) {}
+PreviewController::PreviewController(QObject* parent) : QObject(parent) {
+    saveDirectory_ = settings_.loadRootDirectory().value_or(QString());
+}
 
 PreviewController::~PreviewController() {
     if (recording_) {
@@ -231,8 +233,7 @@ void PreviewController::captureStillImage() {
         return;
     }
 
-    const QString directory =
-        QStandardPaths::writableLocation(QStandardPaths::PicturesLocation) + QStringLiteral("/AstroCapture");
+    const QString directory = imagesDirectoryPath();
     if (!QDir().mkpath(directory)) {
         lastCaptureStatus_ = QStringLiteral("Failed to create ") + directory;
         emit lastCaptureStatusChanged();
@@ -276,8 +277,7 @@ void PreviewController::startRecording() {
         return;
     }
 
-    const QString directory =
-        QStandardPaths::writableLocation(QStandardPaths::MoviesLocation) + QStringLiteral("/AstroCapture");
+    const QString directory = videosDirectoryPath();
     if (!QDir().mkpath(directory)) {
         recordingStatus_ = QStringLiteral("Failed to create ") + directory;
         emit recordingStatusChanged();
@@ -385,6 +385,75 @@ void PreviewController::onFrame(const FrameBuffer& frameBuffer) {
     // automatically, so this stays cheap on the acquisition thread.
     emit frameChanged();
     emit frameCountChanged();
+}
+
+QString PreviewController::imagesDirectoryPath() const {
+    if (!saveDirectory_.isEmpty()) {
+        return saveDirectory_ + QStringLiteral("/Images");
+    }
+    return QStandardPaths::writableLocation(QStandardPaths::PicturesLocation) + QStringLiteral("/AstroCapture");
+}
+
+QString PreviewController::videosDirectoryPath() const {
+    if (!saveDirectory_.isEmpty()) {
+        return saveDirectory_ + QStringLiteral("/Videos");
+    }
+    return QStandardPaths::writableLocation(QStandardPaths::MoviesLocation) + QStringLiteral("/AstroCapture");
+}
+
+void PreviewController::setSaveDirectory(const QString& path) {
+    if (saveDirectory_ == path) {
+        return;
+    }
+    saveDirectory_ = path;
+    settings_.saveRootDirectory(path);
+    emit saveDirectoryChanged();
+}
+
+QStringList PreviewController::presetNames() const {
+    if (!device_) {
+        return {};
+    }
+    return settings_.presetNames(QString::fromStdString(device_->descriptor().id));
+}
+
+void PreviewController::savePreset(const QString& name) {
+    if (!device_ || name.trimmed().isEmpty()) {
+        return;
+    }
+    CameraPreset preset;
+    preset.name = name.trimmed();
+    preset.exposureMicroseconds = exposureMicroseconds_;
+    preset.gain = gainValue_;
+    settings_.savePreset(QString::fromStdString(device_->descriptor().id), preset);
+    emit presetsChanged();
+}
+
+void PreviewController::loadPreset(const QString& name) {
+    if (!device_) {
+        return;
+    }
+    const auto preset = settings_.loadPreset(QString::fromStdString(device_->descriptor().id), name);
+    if (!preset) {
+        return;
+    }
+    if (exposureCapability_) {
+        setExposureMicroseconds(
+            std::clamp(preset->exposureMicroseconds, exposureCapability_->minValue, exposureCapability_->maxValue));
+    }
+    if (gainCapability_) {
+        const auto clamped = std::clamp(preset->gain, static_cast<qint64>(gainCapability_->minValue),
+                                         static_cast<qint64>(gainCapability_->maxValue));
+        setGainValue(static_cast<int>(clamped));
+    }
+}
+
+void PreviewController::deletePreset(const QString& name) {
+    if (!device_) {
+        return;
+    }
+    settings_.deletePreset(QString::fromStdString(device_->descriptor().id), name);
+    emit presetsChanged();
 }
 
 }  // namespace astro::app

@@ -1,7 +1,13 @@
 find_package(Qt6 6.5 REQUIRED COMPONENTS Quick Gui)
 
 qt_standard_project_setup(REQUIRES 6.5)
-qt_policy(SET QTP0004 NEW)
+
+# QTP0004 doesn't exist before the Qt version that introduced it; guard so
+# the minimum supported Qt 6.5 still configures (this is Qt's documented
+# forward-compatible pattern for opting into policies).
+if(QT_KNOWN_POLICY_QTP0004)
+    qt_policy(SET QTP0004 NEW)
+endif()
 
 qt_add_executable(AstroCapture
     main.cpp

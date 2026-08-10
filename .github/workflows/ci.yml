@@ -29,7 +29,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       # QtQuick/QtQml (qtdeclarative) ships in the base archives, not as an
       # addon module — do not add it to `modules:`, aqt rejects it there.

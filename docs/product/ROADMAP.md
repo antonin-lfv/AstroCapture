@@ -49,7 +49,7 @@ Exit criteria:
 - common camera controls;
 - histogram;
 - still image capture: save the currently previewed frame to disk (PNG/TIFF/FITS);
-- video recording: record the live stream to a suitable astronomy format, SER prioritized;
+- video recording: record the live stream to a suitable astronomy format, SER prioritized (an interim non-SER recorder exists per IMPLEMENTATION_BLUEPRINT.md section 18's `IRecorder` plan — SER itself still needs the research spike that section calls for: authoritative spec, golden files, cross-validation with established planetary software);
 - capture duration/frame targets;
 - clear recording status;
 - no silent dropped frames;

@@ -325,6 +325,12 @@ Before implementation:
 
 Create `IRecorder` first so file-format details do not leak into capture orchestration.
 
+`IRecorder` and a first implementation now exist (`core/recording`,
+`astro::recording::RawSequenceRecorder`), but the implementation is a
+documented interim placeholder format (magic `ACRAWSEQ`), not SER. A real
+`SerRecorder` should implement the same `IRecorder` interface once the
+groundwork above is done.
+
 ## 19. First NexImage spike
 
 Create a small `camera_probe` tool separate from the polished UI that can:

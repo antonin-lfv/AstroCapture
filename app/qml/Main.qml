@@ -1,5 +1,9 @@
 import QtQuick
-import QtQuick.Controls
+// The native macOS style ignores background/contentItem customization, so
+// controls we style ourselves (e.g. rescanButton below) silently keep their
+// OS-appearance-dependent look, which can render near-invisible against our
+// always-dark background. Basic is a non-native style that fully honors it.
+import QtQuick.Controls.Basic
 import QtQuick.Layouts
 
 ApplicationWindow {
@@ -119,6 +123,25 @@ ApplicationWindow {
             ToolTip.visible: hovered
             ToolTip.delay: 400
             ToolTip.text: "Tries a connected webcam first, falls back to the mock test camera. The reference planetary camera backend ships in Gate C."
+
+            // Explicit styling: the default Qt Quick Controls look follows
+            // the OS light/dark appearance independently of this window's
+            // always-dark background, which can render near-invisible text.
+            contentItem: Text {
+                text: rescanButton.text
+                color: "#e8eaed"
+                font.pixelSize: 14
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+            }
+            background: Rectangle {
+                implicitWidth: 172
+                implicitHeight: 36
+                radius: 6
+                color: rescanButton.pressed ? "#252b32" : (rescanButton.hovered ? "#2a3038" : "#1c2026")
+                border.color: "#3a4048"
+                border.width: 1
+            }
         }
 
         Text {

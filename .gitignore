@@ -1,0 +1,28 @@
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Editors / IDEs
+.vscode/
+.idea/
+*.swp
+
+# CMake
+build/
+out/
+CMakeUserPresets.json
+CMakeFiles/
+CMakeCache.txt
+
+# Qt
+*.qmlc
+*.jsc
+
+# Python (research/)
+__pycache__/
+*.pyc
+.venv/
+.ipynb_checkpoints/
+
+# Local secrets / env
+.env

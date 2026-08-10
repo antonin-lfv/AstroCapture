@@ -15,9 +15,19 @@ astro_add_unit_test(astro_domain_latest_frame_slot_test
     LIBS astro::domain Threads::Threads
 )
 
+astro_add_unit_test(astro_domain_bounded_frame_queue_test
+    SOURCES domain/BoundedFrameQueueTest.cpp
+    LIBS astro::domain Threads::Threads
+)
+
 astro_add_unit_test(astro_processing_histogram_test
     SOURCES processing/HistogramTest.cpp
     LIBS astro::processing
+)
+
+astro_add_unit_test(astro_recording_raw_sequence_test
+    SOURCES recording/RawSequenceRecorderTest.cpp
+    LIBS astro::recording
 )
 
 if(ASTRO_ENABLE_MOCK_CAMERA)

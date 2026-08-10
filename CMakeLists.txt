@@ -30,6 +30,7 @@ endif()
 
 add_subdirectory(core/domain)
 add_subdirectory(core/processing)
+add_subdirectory(core/recording)
 
 if(ASTRO_ENABLE_MOCK_CAMERA)
     add_subdirectory(drivers/mock)

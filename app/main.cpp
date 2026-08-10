@@ -3,6 +3,10 @@
 
 int main(int argc, char* argv[]) {
     QGuiApplication app(argc, argv);
+    // QSettings needs these to resolve a native storage location
+    // (~/Library/Preferences/... on macOS) before any Settings use.
+    QCoreApplication::setOrganizationName("AstroCapture");
+    QCoreApplication::setApplicationName("AstroCapture");
 
     QQmlApplicationEngine engine;
     QObject::connect(

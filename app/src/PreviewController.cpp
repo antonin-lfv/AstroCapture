@@ -1,5 +1,7 @@
 #include "PreviewController.hpp"
 
+#include <algorithm>
+
 #include "FramePreviewImage.hpp"
 #include "astro/domain/StreamMode.hpp"
 
@@ -123,6 +125,23 @@ void PreviewController::rescan() {
     emit frameCountChanged();
     emit exposureChanged();
     emit gainChanged();
+
+    // Restore any previously saved values for this specific camera,
+    // overriding the device's own power-on defaults.
+    const QString cameraIdString = QString::fromStdString(device_->descriptor().id);
+    if (exposureCapability_) {
+        if (const auto saved = settings_.loadExposureMicroseconds(cameraIdString); saved) {
+            setExposureMicroseconds(
+                std::clamp(*saved, exposureCapability_->minValue, exposureCapability_->maxValue));
+        }
+    }
+    if (gainCapability_) {
+        if (const auto saved = settings_.loadGain(cameraIdString); saved) {
+            const auto clamped = std::clamp(*saved, static_cast<qint64>(gainCapability_->minValue),
+                                             static_cast<qint64>(gainCapability_->maxValue));
+            setGainValue(static_cast<int>(clamped));
+        }
+    }
 }
 
 void PreviewController::setExposureMicroseconds(double value) {
@@ -135,6 +154,7 @@ void PreviewController::setExposureMicroseconds(double value) {
         return;
     }
     exposureMicroseconds_ = value;
+    settings_.saveExposureMicroseconds(QString::fromStdString(device_->descriptor().id), value);
     emit exposureChanged();
 }
 
@@ -149,6 +169,7 @@ void PreviewController::setGainValue(int value) {
         return;
     }
     gainValue_ = asInt64;
+    settings_.saveGain(QString::fromStdString(device_->descriptor().id), asInt64);
     emit gainChanged();
 }
 

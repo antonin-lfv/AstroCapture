@@ -25,6 +25,8 @@ qt_add_qml_module(AstroCapture
         src/LivePreviewItem.cpp
         src/FramePreviewImage.hpp
         src/FramePreviewImage.cpp
+        src/Settings.hpp
+        src/Settings.cpp
 )
 
 target_include_directories(AstroCapture PRIVATE src)

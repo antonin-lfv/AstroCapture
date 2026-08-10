@@ -11,6 +11,7 @@
 #include <QQmlEngine>
 #include <QString>
 
+#include "Settings.hpp"
 #include "astro/domain/CameraControl.hpp"
 #include "astro/domain/Frame.hpp"
 #include "astro/domain/ICameraBackend.hpp"
@@ -106,6 +107,7 @@ private:
     std::unique_ptr<astro::domain::ICameraDevice> device_;
     astro::domain::LatestFrameSlot frameSlot_;
 
+    Settings settings_;
     std::optional<astro::domain::CameraCapability> exposureCapability_;
     double exposureMicroseconds_ = 0.0;
     std::optional<astro::domain::CameraCapability> gainCapability_;

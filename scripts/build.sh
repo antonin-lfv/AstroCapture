@@ -30,8 +30,11 @@ command="${1:-build}"
 preset="${2:-dev}"
 
 configure() { cmake --preset "$preset"; }
-build()     { cmake --build --preset "$preset"; }
-run_tests() { ctest --preset "$preset" --output-on-failure; }
+ensure_configured() {
+    [[ -f "build/$preset/CMakeCache.txt" ]] || configure
+}
+build()     { ensure_configured; cmake --build --preset "$preset"; }
+run_tests() { build; ctest --preset "$preset" --output-on-failure; }
 run_app()   {
     build
     ./build/"$preset"/bin/AstroCapture
@@ -42,7 +45,7 @@ case "$command" in
     build)     build ;;
     test)      run_tests ;;
     run)       run_app ;;
-    all)       configure; build; run_tests ;;
+    all)       run_tests ;;  # cascades: build -> ensure_configured -> configure
     clean)     rm -rf "build/$preset" ;;
     *)
         echo "Unknown command: $command" >&2

@@ -1,5 +1,7 @@
 # AstroCapture
 
+[![CI](https://github.com/antonin-lfv/AstroCapture/actions/workflows/ci.yml/badge.svg)](https://github.com/antonin-lfv/AstroCapture/actions/workflows/ci.yml)
+
 AstroCapture is a planned modern cross-platform desktop application for astronomical camera acquisition, initially focused on planetary imaging.
 
 The project is desktop-first and local-first, with a production core in C++, a Qt/QML interface, Python for research/AI development and native model inference for shipping AI features.

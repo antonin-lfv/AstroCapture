@@ -25,11 +25,50 @@
         "ASTRO_ENABLE_DEVTOOLS": "OFF",
         "ASTRO_ENABLE_MOCK_CAMERA": "ON"
       }
+    },
+    {
+      "name": "ci-macos",
+      "displayName": "CI (macOS)",
+      "description": "Hardware-independent build/test job for the macOS CI runner.",
+      "binaryDir": "${sourceDir}/build/ci-macos",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "ASTRO_BUILD_TESTS": "ON",
+        "ASTRO_ENABLE_DEVTOOLS": "ON",
+        "ASTRO_ENABLE_MOCK_CAMERA": "ON"
+      }
+    },
+    {
+      "name": "ci-windows",
+      "displayName": "CI (Windows)",
+      "description": "Hardware-independent build/test job for the Windows CI runner.",
+      "binaryDir": "${sourceDir}/build/ci-windows",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "ASTRO_BUILD_TESTS": "ON",
+        "ASTRO_ENABLE_DEVTOOLS": "ON",
+        "ASTRO_ENABLE_MOCK_CAMERA": "ON"
+      }
+    },
+    {
+      "name": "ci-linux",
+      "displayName": "CI (Linux)",
+      "description": "Hardware-independent build/test job for the Linux CI runner.",
+      "binaryDir": "${sourceDir}/build/ci-linux",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "ASTRO_BUILD_TESTS": "ON",
+        "ASTRO_ENABLE_DEVTOOLS": "ON",
+        "ASTRO_ENABLE_MOCK_CAMERA": "ON"
+      }
     }
   ],
   "buildPresets": [
     { "name": "dev", "configurePreset": "dev", "configuration": "Debug" },
-    { "name": "release", "configurePreset": "release", "configuration": "Release" }
+    { "name": "release", "configurePreset": "release", "configuration": "Release" },
+    { "name": "ci-macos", "configurePreset": "ci-macos", "configuration": "Debug" },
+    { "name": "ci-windows", "configurePreset": "ci-windows", "configuration": "Debug" },
+    { "name": "ci-linux", "configurePreset": "ci-linux", "configuration": "Debug" }
   ],
   "testPresets": [
     {
@@ -42,6 +81,24 @@
       "name": "release",
       "configurePreset": "release",
       "configuration": "Release",
+      "output": { "outputOnFailure": true }
+    },
+    {
+      "name": "ci-macos",
+      "configurePreset": "ci-macos",
+      "configuration": "Debug",
+      "output": { "outputOnFailure": true }
+    },
+    {
+      "name": "ci-windows",
+      "configurePreset": "ci-windows",
+      "configuration": "Debug",
+      "output": { "outputOnFailure": true }
+    },
+    {
+      "name": "ci-linux",
+      "configurePreset": "ci-linux",
+      "configuration": "Debug",
       "output": { "outputOnFailure": true }
     }
   ]

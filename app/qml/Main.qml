@@ -103,12 +103,81 @@ ApplicationWindow {
                         border.width: 1
                     }
                 }
+
+                Button {
+                    id: recordButton
+                    text: previewController.recording ? "Stop" : "Record"
+                    onClicked: previewController.recording ? previewController.stopRecording()
+                                                             : previewController.startRecording()
+
+                    contentItem: RowLayout {
+                        spacing: 6
+                        Rectangle {
+                            visible: previewController.recording
+                            width: 8
+                            height: 8
+                            radius: 4
+                            color: "#e5484d"
+                        }
+                        Text {
+                            text: recordButton.text
+                            color: "#e8eaed"
+                            font.pixelSize: 12
+                        }
+                    }
+                    background: Rectangle {
+                        implicitWidth: 90
+                        implicitHeight: 28
+                        radius: 6
+                        color: previewController.recording
+                               ? "#3a1d1f"
+                               : (recordButton.pressed ? "#252b32" : (recordButton.hovered ? "#2a3038" : "#1c2026"))
+                        border.color: previewController.recording ? "#e5484d" : "#3a4048"
+                        border.width: 1
+                    }
+                }
             }
 
             Text {
                 Layout.fillWidth: true
                 visible: previewController.lastCaptureStatus.length > 0
                 text: previewController.lastCaptureStatus
+                color: "#9aa0a6"
+                font.pixelSize: 11
+                elide: Text.ElideMiddle
+            }
+
+            RowLayout {
+                Layout.fillWidth: true
+                visible: previewController.recording
+                spacing: 16
+
+                Text {
+                    text: previewController.recordingElapsedSeconds.toFixed(1) + " s"
+                    color: "#e8eaed"
+                    font.pixelSize: 12
+                }
+
+                Text {
+                    text: "Recorded: " + previewController.recordingFrameCount
+                    color: "#9aa0a6"
+                    font.pixelSize: 12
+                }
+
+                // Never silent (ROADMAP.md Gate D: "no silent dropped
+                // frames") — shown even at zero so a sudden increase is
+                // noticeable, and in red once it happens.
+                Text {
+                    text: "Dropped: " + previewController.recordingDroppedFrames
+                    color: previewController.recordingDroppedFrames > 0 ? "#e5484d" : "#9aa0a6"
+                    font.pixelSize: 12
+                }
+            }
+
+            Text {
+                Layout.fillWidth: true
+                visible: !previewController.recording && previewController.recordingStatus.length > 0
+                text: previewController.recordingStatus
                 color: "#9aa0a6"
                 font.pixelSize: 11
                 elide: Text.ElideMiddle

@@ -8,6 +8,7 @@
 #include "FileNaming.hpp"
 #include "FramePreviewImage.hpp"
 #include "astro/domain/StreamMode.hpp"
+#include "astro/recording/RawSequenceRecorder.hpp"
 
 #ifdef ASTRO_ENABLE_MOCK_CAMERA
 #include "astro/driver/mock/MockCameraBackend.hpp"
@@ -23,6 +24,9 @@ using namespace astro::domain;
 PreviewController::PreviewController(QObject* parent) : QObject(parent) {}
 
 PreviewController::~PreviewController() {
+    if (recording_) {
+        stopRecording();
+    }
     if (device_) {
         device_->stop();
     }
@@ -248,9 +252,133 @@ void PreviewController::captureStillImage() {
     emit lastCaptureStatusChanged();
 }
 
+double PreviewController::recordingElapsedSeconds() const {
+    if (!recording_) {
+        return 0.0;
+    }
+    return std::chrono::duration<double>(std::chrono::steady_clock::now() - recordingStartTime_).count();
+}
+
+void PreviewController::startRecording() {
+    if (!connected_ || !device_) {
+        recordingStatus_ = QStringLiteral("No camera connected.");
+        emit recordingStatusChanged();
+        return;
+    }
+    if (recording_) {
+        return;
+    }
+
+    const auto latest = frameSlot_.latest();
+    if (!latest) {
+        recordingStatus_ = QStringLiteral("No frame available yet.");
+        emit recordingStatusChanged();
+        return;
+    }
+
+    const QString directory =
+        QStandardPaths::writableLocation(QStandardPaths::MoviesLocation) + QStringLiteral("/AstroCapture");
+    if (!QDir().mkpath(directory)) {
+        recordingStatus_ = QStringLiteral("Failed to create ") + directory;
+        emit recordingStatusChanged();
+        return;
+    }
+
+    const QString cameraId = QString::fromStdString(device_->descriptor().id);
+    const QString path = directory + QLatin1Char('/') + timestampedBaseName(cameraId) + QStringLiteral(".acraw");
+
+    auto recorder = std::make_unique<astro::recording::RawSequenceRecorder>();
+    const double nominalFps = fps() > 0.0 ? fps() : 30.0;  // best-effort header hint; not used for pacing
+    if (const auto result = recorder->open(path.toStdString(), latest->descriptor, nominalFps); !result.ok()) {
+        recordingStatus_ = QString::fromStdString(result.error().message);
+        emit recordingStatusChanged();
+        return;
+    }
+
+    // Publish the queue under the lock so onFrame() (acquisition thread)
+    // never observes a partially-constructed queue; capture a stable raw
+    // pointer for the writer thread rather than letting it re-read
+    // recordingQueue_ each iteration, since stopRecording() nulls that
+    // member out while the thread may still be draining (see there).
+    auto queue = std::make_unique<astro::domain::BoundedFrameQueue>(64);
+    astro::domain::BoundedFrameQueue* queuePtr = queue.get();
+    astro::recording::IRecorder* recorderPtr = recorder.get();
+    {
+        std::lock_guard lock(recordingMutex_);
+        recordingQueue_ = std::move(queue);
+    }
+    recorder_ = std::move(recorder);
+
+    recordingFrameCount_.store(0, std::memory_order_relaxed);
+    recordingDroppedFrames_.store(0, std::memory_order_relaxed);
+    recordingStartTime_ = std::chrono::steady_clock::now();
+    recordingPath_ = path;
+    recording_ = true;
+
+    recordingThread_ = std::thread([this, queuePtr, recorderPtr] {
+        while (auto queuedFrame = queuePtr->waitPop()) {
+            const auto result = recorderPtr->writeFrame(*queuedFrame);
+            if (result.ok()) {
+                recordingFrameCount_.fetch_add(1, std::memory_order_relaxed);
+            } else {
+                recordingDroppedFrames_.fetch_add(1, std::memory_order_relaxed);
+            }
+            emit recordingStatsChanged();
+        }
+    });
+
+    recordingStatus_.clear();
+    emit recordingChanged();
+    emit recordingStatusChanged();
+    emit recordingStatsChanged();
+}
+
+void PreviewController::stopRecording() {
+    if (!recording_) {
+        return;
+    }
+
+    // Order matters: stop() wakes the writer thread's waitPop() so it can
+    // drain whatever's left and exit; join() guarantees it has actually
+    // exited (and so is done touching queuePtr/recorderPtr) before we
+    // destroy the objects those pointers reference below.
+    recordingQueue_->stop();
+    if (recordingThread_.joinable()) {
+        recordingThread_.join();
+    }
+
+    {
+        std::lock_guard lock(recordingMutex_);
+        recordingQueue_.reset();
+    }
+
+    const auto summary = recorder_->close();
+    if (summary.ok()) {
+        recordingStatus_ = QStringLiteral("Saved ") + recordingPath_ + QStringLiteral(" (") +
+                            QString::number(summary.value().framesWritten) + QStringLiteral(" frames, ") +
+                            QString::number(recordingDroppedFrames_.load(std::memory_order_relaxed)) +
+                            QStringLiteral(" dropped)");
+    } else {
+        recordingStatus_ = QString::fromStdString(summary.error().message);
+    }
+    recorder_.reset();
+
+    recording_ = false;
+    emit recordingChanged();
+    emit recordingStatusChanged();
+}
+
 void PreviewController::onFrame(const FrameBuffer& frameBuffer) {
     frameSlot_.store(frameBuffer);
     frameCount_.fetch_add(1, std::memory_order_relaxed);
+
+    {
+        std::lock_guard lock(recordingMutex_);
+        if (recordingQueue_ && !recordingQueue_->tryPush(frameBuffer)) {
+            recordingDroppedFrames_.fetch_add(1, std::memory_order_relaxed);
+            emit recordingStatsChanged();
+        }
+    }
 
     // Signal emission is thread-safe in Qt: connections to GUI-thread
     // receivers (LivePreviewItem, QML property bindings) are queued

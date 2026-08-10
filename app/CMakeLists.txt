@@ -1,4 +1,5 @@
 find_package(Qt6 6.5 REQUIRED COMPONENTS Quick Gui)
+find_package(Threads REQUIRED)
 
 qt_standard_project_setup(REQUIRES 6.5)
 
@@ -35,7 +36,7 @@ qt_add_qml_module(AstroCapture
 
 target_include_directories(AstroCapture PRIVATE src)
 
-target_link_libraries(AstroCapture PRIVATE Qt6::Quick Qt6::Gui astro::processing)
+target_link_libraries(AstroCapture PRIVATE Qt6::Quick Qt6::Gui astro::processing astro::recording Threads::Threads)
 
 if(ASTRO_ENABLE_MOCK_CAMERA)
     target_link_libraries(AstroCapture PRIVATE astro::driver::mock)

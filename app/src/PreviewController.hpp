@@ -4,7 +4,9 @@
 #include <chrono>
 #include <cstdint>
 #include <memory>
+#include <mutex>
 #include <optional>
+#include <thread>
 
 #include <QImage>
 #include <QObject>
@@ -12,12 +14,14 @@
 #include <QString>
 
 #include "Settings.hpp"
+#include "astro/domain/BoundedFrameQueue.hpp"
 #include "astro/domain/CameraControl.hpp"
 #include "astro/domain/Frame.hpp"
 #include "astro/domain/ICameraBackend.hpp"
 #include "astro/domain/ICameraDevice.hpp"
 #include "astro/domain/LatestFrameSlot.hpp"
 #include "astro/processing/Histogram.hpp"
+#include "astro/recording/IRecorder.hpp"
 
 namespace astro::app {
 
@@ -58,6 +62,16 @@ class PreviewController : public QObject, private astro::domain::FrameSink {
 
     Q_PROPERTY(QString lastCaptureStatus READ lastCaptureStatus NOTIFY lastCaptureStatusChanged)
 
+    // Recording (ROADMAP.md Gate D: video recording + "no silent dropped
+    // frames"). recordingDroppedFrames counts BoundedFrameQueue overflows —
+    // must stay visible, never silently absorbed.
+    Q_PROPERTY(bool recording READ recording NOTIFY recordingChanged)
+    Q_PROPERTY(QString recordingPath READ recordingPath NOTIFY recordingChanged)
+    Q_PROPERTY(quint64 recordingFrameCount READ recordingFrameCount NOTIFY recordingStatsChanged)
+    Q_PROPERTY(quint64 recordingDroppedFrames READ recordingDroppedFrames NOTIFY recordingStatsChanged)
+    Q_PROPERTY(double recordingElapsedSeconds READ recordingElapsedSeconds NOTIFY recordingStatsChanged)
+    Q_PROPERTY(QString recordingStatus READ recordingStatus NOTIFY recordingStatusChanged)
+
 public:
     explicit PreviewController(QObject* parent = nullptr);
     ~PreviewController() override;
@@ -93,12 +107,26 @@ public:
 
     QString lastCaptureStatus() const { return lastCaptureStatus_; }
 
+    bool recording() const { return recording_; }
+    QString recordingPath() const { return recordingPath_; }
+    quint64 recordingFrameCount() const { return recordingFrameCount_.load(std::memory_order_relaxed); }
+    quint64 recordingDroppedFrames() const { return recordingDroppedFrames_.load(std::memory_order_relaxed); }
+    double recordingElapsedSeconds() const;
+    QString recordingStatus() const { return recordingStatus_; }
+
     Q_INVOKABLE void rescan();
 
     // Saves the currently displayed frame (i.e. frame()'s output, already
     // debayered/converted) as PNG under Pictures/AstroCapture. Sets
     // lastCaptureStatus to the saved path or a failure reason.
     Q_INVOKABLE void captureStillImage();
+
+    // Starts writing raw frames to Movies/AstroCapture/{date}_{time}_
+    // {camera}.acraw (see RawSequenceRecorder) until stopRecording() is
+    // called. Recording runs on its own writer thread, fed through a
+    // bounded queue, so it never blocks acquisition or preview.
+    Q_INVOKABLE void startRecording();
+    Q_INVOKABLE void stopRecording();
 
 signals:
     void connectedChanged();
@@ -108,6 +136,9 @@ signals:
     void exposureChanged();
     void gainChanged();
     void lastCaptureStatusChanged();
+    void recordingChanged();
+    void recordingStatsChanged();
+    void recordingStatusChanged();
 
 private:
     // astro::domain::FrameSink — called on the camera's acquisition thread.
@@ -122,6 +153,22 @@ private:
 
     std::unique_ptr<astro::domain::ICameraDevice> device_;
     astro::domain::LatestFrameSlot frameSlot_;
+
+    // Guards recordingQueue_ against the race between onFrame() (checks/
+    // pushes from the acquisition thread) and start/stopRecording() (create/
+    // destroy from the GUI thread). The writer thread itself never touches
+    // this member directly — it operates on a raw pointer captured at
+    // thread-start, see startRecording()'s comment for why that matters.
+    std::mutex recordingMutex_;
+    std::unique_ptr<astro::domain::BoundedFrameQueue> recordingQueue_;
+    std::unique_ptr<astro::recording::IRecorder> recorder_;
+    std::thread recordingThread_;
+    bool recording_ = false;
+    QString recordingPath_;
+    QString recordingStatus_;
+    std::atomic<std::uint64_t> recordingFrameCount_{0};
+    std::atomic<std::uint64_t> recordingDroppedFrames_{0};
+    std::chrono::steady_clock::time_point recordingStartTime_;  // GUI thread only
 
     Settings settings_;
     std::optional<astro::domain::CameraCapability> exposureCapability_;

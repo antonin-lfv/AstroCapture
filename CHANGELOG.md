@@ -19,5 +19,13 @@ The changelog should describe user-visible changes, not every commit.
   format, not yet the planned SER format.
 - Exposure/gain are remembered per camera and restored automatically next
   time that camera connects.
+- Settings panel (gear icon): choose a custom save location for images/
+  videos, and save/load/delete named exposure+gain presets per camera.
+- "Disconnect" button so a different camera can be selected without
+  restarting the app.
+- Recordings can auto-stop after a target frame count and/or duration.
+- Optional target name (e.g. "Jupiter") is included in saved file names.
+- When more than one real camera is connected, a picker lets you choose
+  which one instead of always guessing the first one found.
 - Continuous integration builds and tests the app on macOS, Windows and
   Linux on every change.

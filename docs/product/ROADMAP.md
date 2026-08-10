@@ -44,16 +44,16 @@ Important: this gate may involve a research spike. Do not contaminate the genera
 
 Exit criteria:
 
-- polished camera selector/empty state;
+- polished camera selector/empty state (a picker now appears when more than one real camera is found, plus a Disconnect action; still not "polished" in the visual-design sense the phrase implies);
 - stable live preview;
 - common camera controls;
 - histogram;
 - still image capture: save the currently previewed frame to disk (PNG/TIFF/FITS);
 - video recording: record the live stream to a suitable astronomy format, SER prioritized (an interim non-SER recorder exists per IMPLEMENTATION_BLUEPRINT.md section 18's `IRecorder` plan — SER itself still needs the research spike that section calls for: authoritative spec, golden files, cross-validation with established planetary software);
-- capture duration/frame targets;
+- capture duration/frame targets (frame-count and/or duration auto-stop);
 - clear recording status;
 - no silent dropped frames;
-- file/session metadata;
+- file/session metadata (an optional target name is threaded into saved filenames; no observer/notes fields or a session concept beyond that yet);
 - basic settings persistence;
 - smoke-tested production package on macOS.
 

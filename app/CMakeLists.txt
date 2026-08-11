@@ -35,6 +35,8 @@ qt_add_qml_module(AstroCapture
         src/Settings.cpp
         src/HistogramItem.hpp
         src/HistogramItem.cpp
+        src/ZoomLoupeItem.hpp
+        src/ZoomLoupeItem.cpp
         src/FileNaming.hpp
         src/FileNaming.cpp
 )

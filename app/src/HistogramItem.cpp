@@ -1,6 +1,7 @@
 #include "HistogramItem.hpp"
 
 #include <algorithm>
+#include <numeric>
 
 #include <QPainter>
 #include <QPolygonF>
@@ -30,6 +31,27 @@ void paintCurve(QPainter* painter, const std::array<std::uint32_t, astro::proces
     painter->setPen(Qt::NoPen);
     painter->setBrush(QBrush(color));
     painter->drawPolygon(polygon);
+}
+
+// Fraction of all pixels sitting at the extreme bucket (0 or 255) above
+// which the edge reads as "clipped" (crushed blacks / blown highlights)
+// rather than just a normal dark/bright frame having a few pixels there.
+constexpr double kClippingThreshold = 0.005;
+
+void paintClippingIndicator(QPainter* painter, std::uint32_t extremeCount, std::uint32_t totalCount,
+                             const QRectF& area, bool atRightEdge) {
+    if (totalCount == 0) {
+        return;
+    }
+    const double fraction = static_cast<double>(extremeCount) / static_cast<double>(totalCount);
+    if (fraction < kClippingThreshold) {
+        return;
+    }
+
+    constexpr double kBarWidth = 4.0;
+    const double opacity = std::min(1.0, fraction / 0.05);  // fully opaque by 5% clipped
+    const QRectF bar(atRightEdge ? area.right() - kBarWidth : area.left(), area.top(), kBarWidth, area.height());
+    painter->fillRect(bar, QColor(229, 72, 77, static_cast<int>(120 + 135 * opacity)));
 }
 
 }  // namespace
@@ -70,6 +92,11 @@ void HistogramItem::paint(QPainter* painter) {
     } else {
         paintCurve(painter, histogram.luminance, area, QColor(220, 220, 220, 200));
     }
+
+    const std::uint32_t totalPixels =
+        std::accumulate(histogram.luminance.begin(), histogram.luminance.end(), std::uint32_t{0});
+    paintClippingIndicator(painter, histogram.luminance.front(), totalPixels, area, /*atRightEdge=*/false);
+    paintClippingIndicator(painter, histogram.luminance.back(), totalPixels, area, /*atRightEdge=*/true);
 }
 
 }  // namespace astro::app

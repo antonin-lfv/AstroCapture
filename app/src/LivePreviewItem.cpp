@@ -35,6 +35,11 @@ void LivePreviewItem::paint(QPainter* painter) {
     const QRectF centered(QPointF((target.width() - scaled.width()) / 2.0, (target.height() - scaled.height()) / 2.0),
                            scaled);
     painter->drawImage(centered, image);
+
+    if (imageRect_ != centered) {
+        imageRect_ = centered;
+        emit imageRectChanged();
+    }
 }
 
 }  // namespace astro::app

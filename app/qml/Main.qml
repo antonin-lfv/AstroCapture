@@ -41,11 +41,92 @@ ApplicationWindow {
             Layout.fillHeight: true
             spacing: 8
 
-            LivePreviewItem {
-                id: livePreview
-                controller: previewController
+            Item {
+                id: previewArea
                 Layout.fillWidth: true
                 Layout.fillHeight: true
+
+                LivePreviewItem {
+                    id: livePreview
+                    anchors.fill: parent
+                    controller: previewController
+                }
+
+                // Center crosshair, aligned to the actual displayed image
+                // rect (not previewArea's full, possibly letterboxed
+                // bounds) so it stays centered on the frame regardless of
+                // aspect ratio.
+                Item {
+                    x: livePreview.imageRect.x
+                    y: livePreview.imageRect.y
+                    width: livePreview.imageRect.width
+                    height: livePreview.imageRect.height
+                    visible: previewController.connected
+
+                    Rectangle {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: 1
+                        height: 18
+                        color: "#ffffff90"
+                    }
+                    Rectangle {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: 18
+                        height: 1
+                        color: "#ffffff90"
+                    }
+                }
+
+                // Zoom loupe: hover the preview to pixel-peep a magnified,
+                // unsmoothed crop around the cursor.
+                MouseArea {
+                    id: previewHover
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    acceptedButtons: Qt.NoButton
+                    enabled: previewController.connected
+
+                    onPositionChanged: (mouse) => {
+                        const rect = livePreview.imageRect;
+                        if (rect.width <= 0 || rect.height <= 0) {
+                            zoomLoupeFrame.visible = false;
+                            return;
+                        }
+                        const localX = mouse.x - rect.x;
+                        const localY = mouse.y - rect.y;
+                        if (localX < 0 || localY < 0 || localX > rect.width || localY > rect.height) {
+                            zoomLoupeFrame.visible = false;
+                            return;
+                        }
+                        zoomLoupe.sourceX = localX / rect.width;
+                        zoomLoupe.sourceY = localY / rect.height;
+                        zoomLoupeFrame.visible = true;
+                        zoomLoupeFrame.x = Math.min(mouse.x + 24, previewArea.width - zoomLoupeFrame.width - 4);
+                        zoomLoupeFrame.y = Math.min(mouse.y + 24, previewArea.height - zoomLoupeFrame.height - 4);
+                    }
+                    onExited: zoomLoupeFrame.visible = false
+                }
+
+                Rectangle {
+                    id: zoomLoupeFrame
+                    width: 168
+                    height: 168
+                    radius: 4
+                    color: "#0b0d10"
+                    border.color: "#3a4048"
+                    border.width: 1
+                    visible: false
+
+                    ZoomLoupeItem {
+                        id: zoomLoupe
+                        anchors.fill: parent
+                        anchors.margins: 1
+                        controller: previewController
+                        active: zoomLoupeFrame.visible
+                    }
+                }
             }
 
             HistogramItem {

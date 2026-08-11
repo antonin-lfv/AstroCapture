@@ -85,6 +85,26 @@ environment.
 9. SER recording format — the actual target format, now the default
    recording format (ACRAWSEQ remains selectable).
 
+### Next up
+
+The feature-parity backlog above is done; the mock-camera experience is
+now close to feature-complete against FireCapture/SharpCap/ASICap. Two
+things remain before Gate D can be called closed and Gate E started:
+
+1. **Smoke-tested production package on macOS** — the one still-open
+   Gate D exit criterion. No packaging pipeline exists yet (no cpack,
+   no `macdeployqt`, no signing/notarization) — see
+   IMPLEMENTATION_BLUEPRINT.md section 21 and
+   `docs/development/RELEASE_AND_PACKAGING.md` for the intended shape.
+2. **Gate C — first real camera (Celestron NexImage 5, macOS)** — the
+   project has only ever driven the mock/simulated camera so far.
+   IMPLEMENTATION_BLUEPRINT.md section 19 ("First NexImage spike")
+   describes the `camera_probe` tool to build first, before wiring a
+   real backend into the polished UI.
+
+Gate C is the higher-value next step: it's the point where AstroCapture
+stops being validated only against itself.
+
 ## Gate E — Cross-platform productization
 
 Exit criteria:

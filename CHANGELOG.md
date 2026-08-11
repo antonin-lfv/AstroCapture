@@ -40,3 +40,17 @@ The changelog should describe user-visible changes, not every commit.
   which one instead of always guessing the first one found.
 - Continuous integration builds and tests the app on macOS, Windows and
   Linux on every change.
+- ROI/crop is now selected by clicking and dragging directly on the
+  preview instead of typing X/Y/Width/Height — drag again inside an
+  existing selection to narrow it further, or double-click (or use the
+  sidebar's "Full frame" button) to reset.
+- Clickable "?" help icons next to less-obvious controls (frame counter,
+  Recording, Sensor ROI, Image/Video format), explaining what they do.
+- "Open" button next to the save location in Settings, to open it
+  directly in the file manager.
+- Various fit-and-finish fixes: the sidebar's scrollbar no longer
+  overlaps its content; placeholder text (target name, preset name) is
+  now readable; the Settings panel is wider and its format buttons
+  (PNG/TIFF16/FITS, SER/ACRAW) split width evenly; saving a preset over
+  an existing name now says so; the "Disconnect" button is plain
+  centered text instead of an unnecessary icon.

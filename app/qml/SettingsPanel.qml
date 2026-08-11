@@ -12,7 +12,7 @@ Popup {
     anchors.centerIn: parent
     modal: true
     focus: true
-    width: 360
+    width: 420
     padding: 16
 
     background: Rectangle {
@@ -86,6 +86,7 @@ Popup {
 
                 IconButton {
                     iconName: "folder"
+                    text: "Choose"
                     onClicked: folderDialog.open()
 
                     ToolTip.visible: hovered
@@ -145,6 +146,13 @@ Popup {
 
                     delegate: IconButton {
                         Layout.fillWidth: true
+                        // preferredWidth: 0, not just fillWidth: without
+                        // it, RowLayout gives each item its own natural
+                        // (text-driven) width as a minimum before
+                        // distributing extra space, so "TIFF16" ends up
+                        // wider than "PNG" instead of all three being an
+                        // even third.
+                        Layout.preferredWidth: 0
                         text: modelData
                         active: controller && controller.saveFormat === modelData
                         activeBorderColor: "#6e93ff"
@@ -190,6 +198,10 @@ Popup {
 
                     delegate: IconButton {
                         Layout.fillWidth: true
+                        // See the Image format Repeater's identical
+                        // comment: without this, "ACRAW" ends up wider
+                        // than "SER" instead of an even 50/50 split.
+                        Layout.preferredWidth: 0
                         text: modelData
                         active: controller && controller.videoFormat === modelData
                         activeBorderColor: "#6e93ff"
@@ -233,6 +245,7 @@ Popup {
                     Layout.fillWidth: true
                     placeholderText: "Preset name"
                     color: "#e8eaed"
+                    placeholderTextColor: "#9aa0a6"
                     selectedTextColor: "#e8eaed"
                     selectionColor: "#2a3d6b"
                     font.pixelSize: 12
@@ -249,10 +262,24 @@ Popup {
                     iconName: "plus"
                     enabled: presetNameField.text.trim().length > 0
                     onClicked: {
-                        controller.savePreset(presetNameField.text.trim());
+                        const name = presetNameField.text.trim();
+                        presetStatus.text = controller.presetNames.indexOf(name) !== -1
+                                             ? "\"" + name + "\" already existed — overwritten."
+                                             : "\"" + name + "\" saved.";
+                        controller.savePreset(name);
                         presetNameField.text = "";
                     }
                 }
+            }
+
+            Text {
+                id: presetStatus
+                Layout.fillWidth: true
+                text: ""
+                visible: text.length > 0
+                color: "#9aa0a6"
+                font.pixelSize: 11
+                wrapMode: Text.Wrap
             }
 
             ListView {

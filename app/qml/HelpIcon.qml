@@ -35,14 +35,32 @@ Item {
         anchors.fill: parent
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
-        onClicked: popup.open()
+        onClicked: {
+            // Positioned imperatively, on click, rather than via a
+            // declarative "x: root.mapToItem(...)" binding: mapToItem()
+            // is a method call, and QML's binding dependency tracker
+            // doesn't pick up everything it reads internally (root's and
+            // the overlay's transforms), so a declarative binding built
+            // on it can silently freeze at a stale (and, empirically,
+            // wildly wrong — off by hundreds of pixels) position instead
+            // of recomputing when the window's actual geometry settles.
+            // Recomputing fresh right before every open() sidesteps that
+            // entirely.
+            const overlay = root.Overlay.overlay;
+            const pos = root.mapToItem(overlay, 0, root.height + 6);
+            popup.parent = overlay;
+            // Clamped so the popup can't run past the window's right
+            // edge — most HelpIcon placements in this app sit close to
+            // the sidebar's right edge, where an unclamped position
+            // would clip the text.
+            popup.x = Math.min(pos.x, overlay.width - popup.width - 8);
+            popup.y = pos.y;
+            popup.open();
+        }
     }
 
     Popup {
         id: popup
-        parent: Overlay.overlay
-        x: root.mapToItem(Overlay.overlay, 0, root.height + 6).x
-        y: root.mapToItem(Overlay.overlay, 0, root.height + 6).y
         width: root.maxWidth
         padding: 10
         modal: false

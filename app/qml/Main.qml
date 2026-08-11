@@ -127,6 +127,113 @@ ApplicationWindow {
                         active: zoomLoupeFrame.visible
                     }
                 }
+
+                // ROI drag-select: click and drag on the preview to crop
+                // to that sub-region — replaces typing X/Y/Width/Height by
+                // hand. Coordinates are mapped through whatever's
+                // currently displayed (full sensor or an existing ROI),
+                // so a drag inside an already-cropped view narrows it
+                // further instead of resetting relative to the full
+                // sensor. previewHover (above) only tracks hover
+                // (acceptedButtons: NoButton), so it never competes with
+                // this for button presses.
+                MouseArea {
+                    id: roiSelect
+                    anchors.fill: parent
+                    enabled: previewController.roiSupported && !previewController.recording
+
+                    property real startFracX: 0
+                    property real startFracY: 0
+
+                    function fractionAt(mouse) {
+                        const rect = livePreview.imageRect;
+                        if (rect.width <= 0 || rect.height <= 0) {
+                            return null;
+                        }
+                        const fx = (mouse.x - rect.x) / rect.width;
+                        const fy = (mouse.y - rect.y) / rect.height;
+                        return Qt.point(Math.max(0, Math.min(1, fx)), Math.max(0, Math.min(1, fy)));
+                    }
+
+                    onPressed: (mouse) => {
+                        const frac = fractionAt(mouse);
+                        if (!frac) {
+                            mouse.accepted = false;
+                            return;
+                        }
+                        startFracX = frac.x;
+                        startFracY = frac.y;
+                        zoomLoupeFrame.visible = false;
+                        roiSelectionBox.updateFromFractions(startFracX, startFracY, startFracX, startFracY);
+                        roiSelectionBox.visible = true;
+                    }
+
+                    onPositionChanged: (mouse) => {
+                        if (!roiSelectionBox.visible) return;
+                        const frac = fractionAt(mouse);
+                        if (!frac) return;
+                        roiSelectionBox.updateFromFractions(startFracX, startFracY, frac.x, frac.y);
+                    }
+
+                    onReleased: (mouse) => {
+                        if (!roiSelectionBox.visible) return;
+                        roiSelectionBox.visible = false;
+                        const frac = fractionAt(mouse);
+                        if (!frac) return;
+
+                        // The currently displayed frame is roiWidth x
+                        // roiHeight sensor pixels, offset at roiX/roiY —
+                        // map the drag's fractional positions through
+                        // that to get absolute sensor pixels.
+                        const baseX = previewController.roiX;
+                        const baseY = previewController.roiY;
+                        const baseW = previewController.roiWidth;
+                        const baseH = previewController.roiHeight;
+
+                        const x1 = baseX + startFracX * baseW;
+                        const y1 = baseY + startFracY * baseH;
+                        const x2 = baseX + frac.x * baseW;
+                        const y2 = baseY + frac.y * baseH;
+
+                        let x = Math.min(x1, x2);
+                        let y = Math.min(y1, y2);
+                        let w = Math.abs(x2 - x1);
+                        let h = Math.abs(y2 - y1);
+
+                        // Round to even (Bayer phase) and require a
+                        // minimum drag size — an accidental click without
+                        // a real drag shouldn't crop to a near-zero ROI.
+                        x = Math.floor(x / 2) * 2;
+                        y = Math.floor(y / 2) * 2;
+                        w = Math.round(w / 2) * 2;
+                        h = Math.round(h / 2) * 2;
+                        if (w < 16 || h < 16) {
+                            return;
+                        }
+
+                        previewController.setRoi(x, y, w, h);
+                    }
+                }
+
+                Rectangle {
+                    id: roiSelectionBox
+                    visible: false
+                    color: "#4d6e93ff"
+                    border.color: "#6e93ff"
+                    border.width: 1
+
+                    function updateFromFractions(fx1, fy1, fx2, fy2) {
+                        const rect = livePreview.imageRect;
+                        const px1 = rect.x + Math.min(fx1, fx2) * rect.width;
+                        const py1 = rect.y + Math.min(fy1, fy2) * rect.height;
+                        const px2 = rect.x + Math.max(fx1, fx2) * rect.width;
+                        const py2 = rect.y + Math.max(fy1, fy2) * rect.height;
+                        roiSelectionBox.x = px1;
+                        roiSelectionBox.y = py1;
+                        roiSelectionBox.width = px2 - px1;
+                        roiSelectionBox.height = py2 - py1;
+                    }
+                }
             }
 
             Item {
@@ -177,7 +284,12 @@ ApplicationWindow {
                 clip: true
 
                 ColumnLayout {
-                    width: sidebarScroll.availableWidth
+                    // A few pixels narrower than availableWidth, not the
+                    // full width: the scrollbar is a transient overlay
+                    // (appears over content on hover/scroll rather than
+                    // reserving its own space), so without this gutter it
+                    // covers the last few pixels of right-aligned text.
+                    width: sidebarScroll.availableWidth - 8
                     spacing: 16
 
                     RowLayout {
@@ -259,6 +371,7 @@ ApplicationWindow {
                             placeholderText: "Target (optional)"
                             text: previewController.targetName
                             color: "#e8eaed"
+                            placeholderTextColor: "#9aa0a6"
                             selectedTextColor: "#e8eaed"
                             selectionColor: "#2a3d6b"
                             font.pixelSize: 12
@@ -556,14 +669,17 @@ ApplicationWindow {
 
                     // ROI/crop (ROADMAP.md Gate D backlog 22.1): read out a
                     // sub-rectangle of the sensor instead of the full
-                    // frame. Applied as a unit (all four fields via one
-                    // setRoi() call) rather than live per-field, since a
-                    // partially-edited rectangle is usually invalid.
+                    // frame. Selected by click-and-drag directly on the
+                    // preview (previewArea's roiSelect MouseArea below)
+                    // rather than numeric fields — much more direct than
+                    // typing coordinates for what's fundamentally a
+                    // "draw a box around what I want" action.
                     SidebarSection {
                         title: "Sensor ROI"
                         helpText: "Reads out only a sub-rectangle of the sensor instead of the full frame, which " +
-                                  "can raise achievable fps. Set X/Y (top-left corner) and Width/Height, then " +
-                                  "Apply — the preview itself becomes that cropped region. \"Full frame\" resets it."
+                                  "can raise achievable fps. Click and drag on the preview to select the region " +
+                                  "— dragging again inside an existing selection narrows it further. " +
+                                  "\"Full frame\" resets it."
                         visible: previewController.roiSupported
                         enabled: !previewController.recording
 
@@ -575,89 +691,13 @@ ApplicationWindow {
                             font.pixelSize: 11
                         }
 
-                        RowLayout {
+                        IconButton {
                             Layout.fillWidth: true
-                            spacing: 6
-
-                            ColumnLayout {
-                                Layout.fillWidth: true
-                                spacing: 2
-                                Text { text: "X"; color: "#5f6368"; font.pixelSize: 10 }
-                                DarkSpinBox {
-                                    id: roiXSpin
-                                    Layout.fillWidth: true
-                                    from: 0
-                                    to: Math.max(0, previewController.sensorWidth - 2)
-                                    stepSize: 2
-                                    value: previewController.roiX
-                                }
-                            }
-                            ColumnLayout {
-                                Layout.fillWidth: true
-                                spacing: 2
-                                Text { text: "Y"; color: "#5f6368"; font.pixelSize: 10 }
-                                DarkSpinBox {
-                                    id: roiYSpin
-                                    Layout.fillWidth: true
-                                    from: 0
-                                    to: Math.max(0, previewController.sensorHeight - 2)
-                                    stepSize: 2
-                                    value: previewController.roiY
-                                }
-                            }
-                        }
-
-                        RowLayout {
-                            Layout.fillWidth: true
-                            spacing: 6
-
-                            ColumnLayout {
-                                Layout.fillWidth: true
-                                spacing: 2
-                                Text { text: "Width"; color: "#5f6368"; font.pixelSize: 10 }
-                                DarkSpinBox {
-                                    id: roiWSpin
-                                    Layout.fillWidth: true
-                                    from: 2
-                                    to: Math.max(2, previewController.sensorWidth)
-                                    stepSize: 2
-                                    value: previewController.roiWidth
-                                }
-                            }
-                            ColumnLayout {
-                                Layout.fillWidth: true
-                                spacing: 2
-                                Text { text: "Height"; color: "#5f6368"; font.pixelSize: 10 }
-                                DarkSpinBox {
-                                    id: roiHSpin
-                                    Layout.fillWidth: true
-                                    from: 2
-                                    to: Math.max(2, previewController.sensorHeight)
-                                    stepSize: 2
-                                    value: previewController.roiHeight
-                                }
-                            }
-                        }
-
-                        RowLayout {
-                            Layout.fillWidth: true
-                            spacing: 8
-
-                            IconButton {
-                                Layout.fillWidth: true
-                                text: "Apply"
-                                onClicked: previewController.setRoi(roiXSpin.value, roiYSpin.value, roiWSpin.value,
-                                                                     roiHSpin.value)
-                            }
-
-                            IconButton {
-                                Layout.fillWidth: true
-                                iconName: "close"
-                                text: "Full frame"
-                                visible: previewController.roiWidth < previewController.sensorWidth ||
-                                         previewController.roiHeight < previewController.sensorHeight
-                                onClicked: previewController.resetRoi()
-                            }
+                            iconName: "close"
+                            text: "Full frame"
+                            visible: previewController.roiWidth < previewController.sensorWidth ||
+                                     previewController.roiHeight < previewController.sensorHeight
+                            onClicked: previewController.resetRoi()
                         }
                     }
 

@@ -81,6 +81,18 @@ class PreviewController : public QObject, private astro::domain::FrameSink {
     Q_PROPERTY(int roiWidth READ roiWidth NOTIFY roiChanged)
     Q_PROPERTY(int roiHeight READ roiHeight NOTIFY roiChanged)
 
+    // Gate D backlog 22.3: Gamma/WhiteBalanceRed/WhiteBalanceBlue/
+    // Brightness/FrameRateLimit — unlike Exposure/Gain (typed properties,
+    // the two controls every early UI iteration needed), these five go
+    // through one generic list so QML can render whichever the connected
+    // backend actually supports without five more near-identical
+    // Q_PROPERTY blocks (see IMPLEMENTATION_BLUEPRINT.md section 11: the
+    // point to generalize is "once a third control needs exposing" — this
+    // adds five at once, past where a dedicated property per control still
+    // pays for itself). Each entry: {key, label, unit, isFloat, value,
+    // min, max, step}.
+    Q_PROPERTY(QVariantList extraControls READ extraControls NOTIFY extraControlsChanged)
+
     Q_PROPERTY(QString lastCaptureStatus READ lastCaptureStatus NOTIFY lastCaptureStatusChanged)
 
     // Recording (ROADMAP.md Gate D: video recording + "no silent dropped
@@ -160,6 +172,9 @@ public:
     Q_INVOKABLE void setRoi(int x, int y, int width, int height);
     Q_INVOKABLE void resetRoi();
 
+    QVariantList extraControls() const;
+    Q_INVOKABLE void setExtraControlValue(const QString& key, double value);
+
     // Debayers the latest frame on the calling thread. Intended for
     // LivePreviewItem to call from the render/GUI thread, never from the
     // camera's acquisition thread.
@@ -231,6 +246,7 @@ signals:
     void exposureChanged();
     void gainChanged();
     void roiChanged();
+    void extraControlsChanged();
     void lastCaptureStatusChanged();
     void recordingChanged();
     void recordingStatsChanged();
@@ -257,6 +273,23 @@ private:
         QString displayName;
         QString backendId;  // "mock", or a real backend's id once one exists (Gate C)
     };
+
+    struct ExtraControl {
+        astro::domain::ControlId id;
+        QString key;    // stable id for QML/Settings, e.g. "gamma"
+        QString label;  // display label, e.g. "Gamma"
+        QString unit;
+        bool isFloat = false;
+        double value = 0.0;
+        double minValue = 0.0;
+        double maxValue = 0.0;
+        double step = 1.0;
+    };
+
+    // Populates extraControls_ from device_->capabilities(), restoring any
+    // per-camera saved value the same way finishConnecting() does for
+    // exposure/gain. Called from finishConnecting().
+    void loadExtraControls(const QString& cameraIdString);
 
     // Opens, configures and starts a specific device id from `backend`.
     // Returns nullptr (with errorMessage_ set) on failure.
@@ -285,6 +318,8 @@ private:
     bool roiSupported_ = false;
     std::uint32_t sensorWidth_ = 0;
     std::uint32_t sensorHeight_ = 0;
+
+    std::vector<ExtraControl> extraControls_;
 
     // Guards recordingQueue_ against the race between onFrame() (checks/
     // pushes from the acquisition thread) and start/stopRecording() (create/

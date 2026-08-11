@@ -1,6 +1,7 @@
 #include "PreviewController.hpp"
 
 #include <algorithm>
+#include <cmath>
 
 #include <QDir>
 #include <QStandardPaths>
@@ -17,6 +18,53 @@
 namespace astro::app {
 
 using namespace astro::domain;
+
+namespace {
+
+// Display metadata for the "extra controls" (Gate D backlog 22.3) that go
+// through PreviewController::extraControls() instead of dedicated
+// properties. Returns false for ids that don't belong in that list
+// (Exposure/Gain have their own properties; everything else isn't a
+// scalar control at all, e.g. Temperature/Cooler/Trigger aren't wired up
+// yet).
+bool extraControlMeta(ControlId id, QString& key, QString& label, QString& unit, bool& isFloat) {
+    switch (id) {
+        case ControlId::Gamma:
+            key = QStringLiteral("gamma");
+            label = QStringLiteral("Gamma");
+            unit.clear();
+            isFloat = true;
+            return true;
+        case ControlId::WhiteBalanceRed:
+            key = QStringLiteral("whiteBalanceRed");
+            label = QStringLiteral("White Balance (R)");
+            unit.clear();
+            isFloat = false;
+            return true;
+        case ControlId::WhiteBalanceBlue:
+            key = QStringLiteral("whiteBalanceBlue");
+            label = QStringLiteral("White Balance (B)");
+            unit.clear();
+            isFloat = false;
+            return true;
+        case ControlId::Brightness:
+            key = QStringLiteral("brightness");
+            label = QStringLiteral("Brightness");
+            unit.clear();
+            isFloat = false;
+            return true;
+        case ControlId::FrameRateLimit:
+            key = QStringLiteral("frameRateLimit");
+            label = QStringLiteral("Frame Rate Limit");
+            unit = QStringLiteral("fps");
+            isFloat = true;
+            return true;
+        default:
+            return false;
+    }
+}
+
+}  // namespace
 
 PreviewController::PreviewController(QObject* parent) : QObject(parent) {
     saveDirectory_ = settings_.loadRootDirectory().value_or(QString());
@@ -136,6 +184,54 @@ void PreviewController::finishConnecting(std::unique_ptr<ICameraDevice> device) 
             setGainValue(static_cast<int>(clamped));
         }
     }
+
+    loadExtraControls(cameraIdString);
+}
+
+void PreviewController::loadExtraControls(const QString& cameraIdString) {
+    extraControls_.clear();
+    for (const auto& capability : device_->capabilities()) {
+        if (!capability.supported) {
+            continue;
+        }
+        QString key;
+        QString label;
+        QString unit;
+        bool isFloat = false;
+        if (!extraControlMeta(capability.id, key, label, unit, isFloat)) {
+            continue;
+        }
+
+        ExtraControl control;
+        control.id = capability.id;
+        control.key = key;
+        control.label = label;
+        control.unit = unit;
+        control.isFloat = isFloat;
+        control.minValue = capability.minValue;
+        control.maxValue = capability.maxValue;
+        control.step = capability.step > 0.0 ? capability.step : 1.0;
+        control.value = capability.defaultValue;
+        if (const auto current = device_->getControl(capability.id); current.ok()) {
+            if (const auto* asDouble = std::get_if<double>(&current.value())) {
+                control.value = *asDouble;
+            } else if (const auto* asInt = std::get_if<std::int64_t>(&current.value())) {
+                control.value = static_cast<double>(*asInt);
+            }
+        }
+
+        if (const auto saved = settings_.loadExtraControl(cameraIdString, key); saved) {
+            const double clamped = std::clamp(*saved, control.minValue, control.maxValue);
+            const ControlValue controlValue =
+                isFloat ? ControlValue{clamped} : ControlValue{static_cast<std::int64_t>(std::llround(clamped))};
+            if (device_->setControl(capability.id, controlValue).ok()) {
+                control.value = clamped;
+            }
+        }
+
+        extraControls_.push_back(control);
+    }
+    emit extraControlsChanged();
 }
 
 void PreviewController::rescan() {
@@ -241,6 +337,7 @@ void PreviewController::disconnectCamera() {
     sensorWidth_ = 0;
     sensorHeight_ = 0;
     currentConfiguration_ = astro::domain::StreamConfiguration{};
+    extraControls_.clear();
 
     connected_ = false;
     cameraName_.clear();
@@ -253,6 +350,7 @@ void PreviewController::disconnectCamera() {
     emit exposureChanged();
     emit gainChanged();
     emit roiChanged();
+    emit extraControlsChanged();
 }
 
 void PreviewController::setExposureMicroseconds(double value) {
@@ -282,6 +380,46 @@ void PreviewController::setGainValue(int value) {
     gainValue_ = asInt64;
     settings_.saveGain(QString::fromStdString(device_->descriptor().id), asInt64);
     emit gainChanged();
+}
+
+QVariantList PreviewController::extraControls() const {
+    QVariantList list;
+    for (const auto& control : extraControls_) {
+        QVariantMap entry;
+        entry[QStringLiteral("key")] = control.key;
+        entry[QStringLiteral("label")] = control.label;
+        entry[QStringLiteral("unit")] = control.unit;
+        entry[QStringLiteral("isFloat")] = control.isFloat;
+        entry[QStringLiteral("value")] = control.value;
+        entry[QStringLiteral("min")] = control.minValue;
+        entry[QStringLiteral("max")] = control.maxValue;
+        entry[QStringLiteral("step")] = control.step;
+        list.append(entry);
+    }
+    return list;
+}
+
+void PreviewController::setExtraControlValue(const QString& key, double value) {
+    if (!device_) {
+        return;
+    }
+    for (auto& control : extraControls_) {
+        if (control.key != key) {
+            continue;
+        }
+        const double clamped = std::clamp(value, control.minValue, control.maxValue);
+        const ControlValue controlValue =
+            control.isFloat ? ControlValue{clamped} : ControlValue{static_cast<std::int64_t>(std::llround(clamped))};
+        if (const auto result = device_->setControl(control.id, controlValue); !result.ok()) {
+            errorMessage_ = QString::fromStdString(result.error().message);
+            emit errorMessageChanged();
+            return;
+        }
+        control.value = clamped;
+        settings_.saveExtraControl(QString::fromStdString(device_->descriptor().id), key, clamped);
+        emit extraControlsChanged();
+        return;
+    }
 }
 
 void PreviewController::setRoi(int x, int y, int width, int height) {

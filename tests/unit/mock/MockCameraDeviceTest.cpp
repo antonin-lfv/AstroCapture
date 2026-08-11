@@ -128,6 +128,26 @@ int main() {
     ASTRO_TEST_CHECK(!device->getControl(ControlId::Temperature).ok());
     ASTRO_TEST_CHECK(!device->setControl(ControlId::Temperature, ControlValue{std::int64_t{0}}).ok());
 
+    // Gate D backlog 22.3: gamma/white balance/brightness/frame rate limit
+    // round-trip the same way exposure/gain do above.
+    ASTRO_TEST_CHECK(device->setControl(ControlId::Gamma, ControlValue{1.8}).ok());
+    ASTRO_TEST_CHECK(std::get<double>(device->getControl(ControlId::Gamma).value()) == 1.8);
+    ASTRO_TEST_CHECK(!device->setControl(ControlId::Gamma, ControlValue{10.0}).ok());
+
+    ASTRO_TEST_CHECK(device->setControl(ControlId::WhiteBalanceRed, ControlValue{std::int64_t{70}}).ok());
+    ASTRO_TEST_CHECK(std::get<std::int64_t>(device->getControl(ControlId::WhiteBalanceRed).value()) == 70);
+    ASTRO_TEST_CHECK(device->setControl(ControlId::WhiteBalanceBlue, ControlValue{std::int64_t{30}}).ok());
+    ASTRO_TEST_CHECK(std::get<std::int64_t>(device->getControl(ControlId::WhiteBalanceBlue).value()) == 30);
+    ASTRO_TEST_CHECK(!device->setControl(ControlId::WhiteBalanceRed, ControlValue{std::int64_t{200}}).ok());
+
+    ASTRO_TEST_CHECK(device->setControl(ControlId::Brightness, ControlValue{std::int64_t{40}}).ok());
+    ASTRO_TEST_CHECK(std::get<std::int64_t>(device->getControl(ControlId::Brightness).value()) == 40);
+    ASTRO_TEST_CHECK(!device->setControl(ControlId::Brightness, ControlValue{std::int64_t{-1}}).ok());
+
+    ASTRO_TEST_CHECK(device->setControl(ControlId::FrameRateLimit, ControlValue{45.0}).ok());
+    ASTRO_TEST_CHECK(std::get<double>(device->getControl(ControlId::FrameRateLimit).value()) == 45.0);
+    ASTRO_TEST_CHECK(!device->setControl(ControlId::FrameRateLimit, ControlValue{500.0}).ok());
+
     std::cout << "OK\n";
     return 0;
 }

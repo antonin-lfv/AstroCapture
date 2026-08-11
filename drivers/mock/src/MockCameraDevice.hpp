@@ -52,6 +52,16 @@ private:
     mutable std::mutex controlsMutex_;
     double exposureMicroseconds_ = 10'000.0;
     std::int64_t gain_ = 0;
+    double gamma_ = 1.0;
+    std::int64_t whiteBalanceRed_ = 50;
+    std::int64_t whiteBalanceBlue_ = 50;
+    std::int64_t brightness_ = 8;
+    // Live-adjustable while streaming, unlike StreamConfiguration::targetFps
+    // (the capability-time request configure() validates against the
+    // mode's fps range) — runLoop() paces itself off this value instead, so
+    // setControl(FrameRateLimit, ...) actually changes the streamed rate in
+    // real time.
+    double frameRateLimit_;
 };
 
 }  // namespace astro::driver::mock

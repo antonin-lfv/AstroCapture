@@ -22,6 +22,21 @@ constexpr std::int64_t kGainMax = 100;
 constexpr std::int64_t kGainStep = 1;
 constexpr std::int64_t kGainDefault = 0;
 
+constexpr double kGammaMin = 0.1;
+constexpr double kGammaMax = 3.0;
+constexpr double kGammaStep = 0.05;
+constexpr double kGammaDefault = 1.0;
+
+constexpr std::int64_t kWhiteBalanceMin = 0;
+constexpr std::int64_t kWhiteBalanceMax = 100;
+constexpr std::int64_t kWhiteBalanceStep = 1;
+constexpr std::int64_t kWhiteBalanceDefault = 50;
+
+constexpr std::int64_t kBrightnessMin = 0;
+constexpr std::int64_t kBrightnessMax = 255;
+constexpr std::int64_t kBrightnessStep = 1;
+constexpr std::int64_t kBrightnessDefault = 8;
+
 StreamMode defaultSupportedMode() {
     StreamMode mode;
     mode.width = 640;
@@ -53,7 +68,9 @@ bool sameMode(const StreamMode& a, const StreamMode& b) {
 }  // namespace
 
 MockCameraDevice::MockCameraDevice(CameraDescriptor descriptor)
-    : descriptor_(std::move(descriptor)), supportedMode_(defaultSupportedMode()) {}
+    : descriptor_(std::move(descriptor)),
+      supportedMode_(defaultSupportedMode()),
+      frameRateLimit_(supportedMode_.maxFps) {}
 
 MockCameraDevice::~MockCameraDevice() {
     running_ = false;
@@ -88,7 +105,58 @@ std::vector<CameraCapability> MockCameraDevice::capabilities() const {
     gain.defaultValue = static_cast<double>(kGainDefault);
     gain.mutableWhileStreaming = true;
 
-    return {exposure, gain};
+    CameraCapability gamma;
+    gamma.id = ControlId::Gamma;
+    gamma.valueType = ControlValueType::Float;
+    gamma.supported = true;
+    gamma.minValue = kGammaMin;
+    gamma.maxValue = kGammaMax;
+    gamma.step = kGammaStep;
+    gamma.defaultValue = kGammaDefault;
+    gamma.mutableWhileStreaming = true;
+
+    CameraCapability whiteBalanceRed;
+    whiteBalanceRed.id = ControlId::WhiteBalanceRed;
+    whiteBalanceRed.valueType = ControlValueType::Integer;
+    whiteBalanceRed.supported = true;
+    whiteBalanceRed.minValue = static_cast<double>(kWhiteBalanceMin);
+    whiteBalanceRed.maxValue = static_cast<double>(kWhiteBalanceMax);
+    whiteBalanceRed.step = static_cast<double>(kWhiteBalanceStep);
+    whiteBalanceRed.defaultValue = static_cast<double>(kWhiteBalanceDefault);
+    whiteBalanceRed.mutableWhileStreaming = true;
+
+    CameraCapability whiteBalanceBlue;
+    whiteBalanceBlue.id = ControlId::WhiteBalanceBlue;
+    whiteBalanceBlue.valueType = ControlValueType::Integer;
+    whiteBalanceBlue.supported = true;
+    whiteBalanceBlue.minValue = static_cast<double>(kWhiteBalanceMin);
+    whiteBalanceBlue.maxValue = static_cast<double>(kWhiteBalanceMax);
+    whiteBalanceBlue.step = static_cast<double>(kWhiteBalanceStep);
+    whiteBalanceBlue.defaultValue = static_cast<double>(kWhiteBalanceDefault);
+    whiteBalanceBlue.mutableWhileStreaming = true;
+
+    CameraCapability brightness;
+    brightness.id = ControlId::Brightness;
+    brightness.valueType = ControlValueType::Integer;
+    brightness.supported = true;
+    brightness.minValue = static_cast<double>(kBrightnessMin);
+    brightness.maxValue = static_cast<double>(kBrightnessMax);
+    brightness.step = static_cast<double>(kBrightnessStep);
+    brightness.defaultValue = static_cast<double>(kBrightnessDefault);
+    brightness.mutableWhileStreaming = true;
+
+    CameraCapability frameRateLimit;
+    frameRateLimit.id = ControlId::FrameRateLimit;
+    frameRateLimit.valueType = ControlValueType::Float;
+    frameRateLimit.supported = true;
+    frameRateLimit.minValue = supportedMode_.minFps;
+    frameRateLimit.maxValue = supportedMode_.maxFps;
+    frameRateLimit.step = 1.0;
+    frameRateLimit.defaultValue = supportedMode_.maxFps;
+    frameRateLimit.mutableWhileStreaming = true;
+    frameRateLimit.unit = "fps";
+
+    return {exposure, gain, gamma, whiteBalanceRed, whiteBalanceBlue, brightness, frameRateLimit};
 }
 
 Result<void> MockCameraDevice::configure(const StreamConfiguration& configuration) {
@@ -163,9 +231,18 @@ Result<ControlValue> MockCameraDevice::getControl(ControlId id) const {
             return Result<ControlValue>::success(exposureMicroseconds_);
         case ControlId::Gain:
             return Result<ControlValue>::success(gain_);
+        case ControlId::Gamma:
+            return Result<ControlValue>::success(gamma_);
+        case ControlId::WhiteBalanceRed:
+            return Result<ControlValue>::success(whiteBalanceRed_);
+        case ControlId::WhiteBalanceBlue:
+            return Result<ControlValue>::success(whiteBalanceBlue_);
+        case ControlId::Brightness:
+            return Result<ControlValue>::success(brightness_);
+        case ControlId::FrameRateLimit:
+            return Result<ControlValue>::success(frameRateLimit_);
         default:
-            return Result<ControlValue>::failure(
-                {ErrorCode::UnsupportedControl, "MockCameraDevice only exposes Exposure and Gain", ""});
+            return Result<ControlValue>::failure({ErrorCode::UnsupportedControl, "Control not supported", ""});
     }
 }
 
@@ -189,8 +266,43 @@ Result<void> MockCameraDevice::setControl(ControlId id, const ControlValue& valu
         gain_ = *asInt;
         return Result<void>::success();
     }
-    return Result<void>::failure(
-        {ErrorCode::UnsupportedControl, "MockCameraDevice only exposes Exposure and Gain", ""});
+    if (id == ControlId::Gamma) {
+        const double* asDouble = std::get_if<double>(&value);
+        if (asDouble == nullptr || *asDouble < kGammaMin || *asDouble > kGammaMax) {
+            return Result<void>::failure(
+                {ErrorCode::UnsupportedControl, "Gamma expects a double within [min, max]", ""});
+        }
+        gamma_ = *asDouble;
+        return Result<void>::success();
+    }
+    if (id == ControlId::WhiteBalanceRed || id == ControlId::WhiteBalanceBlue) {
+        const std::int64_t* asInt = std::get_if<std::int64_t>(&value);
+        if (asInt == nullptr || *asInt < kWhiteBalanceMin || *asInt > kWhiteBalanceMax) {
+            return Result<void>::failure(
+                {ErrorCode::UnsupportedControl, "White balance expects an integer within [min, max]", ""});
+        }
+        (id == ControlId::WhiteBalanceRed ? whiteBalanceRed_ : whiteBalanceBlue_) = *asInt;
+        return Result<void>::success();
+    }
+    if (id == ControlId::Brightness) {
+        const std::int64_t* asInt = std::get_if<std::int64_t>(&value);
+        if (asInt == nullptr || *asInt < kBrightnessMin || *asInt > kBrightnessMax) {
+            return Result<void>::failure(
+                {ErrorCode::UnsupportedControl, "Brightness expects an integer within [min, max]", ""});
+        }
+        brightness_ = *asInt;
+        return Result<void>::success();
+    }
+    if (id == ControlId::FrameRateLimit) {
+        const double* asDouble = std::get_if<double>(&value);
+        if (asDouble == nullptr || *asDouble < supportedMode_.minFps || *asDouble > supportedMode_.maxFps) {
+            return Result<void>::failure(
+                {ErrorCode::UnsupportedControl, "FrameRateLimit expects a double within the mode's fps range", ""});
+        }
+        frameRateLimit_ = *asDouble;
+        return Result<void>::success();
+    }
+    return Result<void>::failure({ErrorCode::UnsupportedControl, "Control not supported", ""});
 }
 
 std::shared_ptr<const BufferStorage> MockCameraDevice::cropToRoi(const Roi& roi) const {
@@ -221,7 +333,11 @@ void MockCameraDevice::runLoop() {
 
         sink_->onFrame(frame);
 
-        const double fps = configuration_.targetFps > 0.0 ? configuration_.targetFps : supportedMode_.maxFps;
+        double fps;
+        {
+            std::lock_guard lock(controlsMutex_);
+            fps = frameRateLimit_ > 0.0 ? frameRateLimit_ : supportedMode_.maxFps;
+        }
         std::this_thread::sleep_for(std::chrono::duration_cast<std::chrono::microseconds>(
             std::chrono::duration<double>(1.0 / fps)));
     }

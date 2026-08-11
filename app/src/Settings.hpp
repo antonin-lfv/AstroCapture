@@ -27,6 +27,13 @@ public:
     std::optional<double> loadExposureMicroseconds(const QString& cameraId) const;
     std::optional<qint64> loadGain(const QString& cameraId) const;
 
+    // Generic per-camera scalar control storage (Gate D backlog 22.3:
+    // gamma/white balance/brightness/frame rate limit), keyed by
+    // PreviewController::ExtraControl::key. Not part of named presets —
+    // exposure/gain remain the only preset-scoped fields for now.
+    void saveExtraControl(const QString& cameraId, const QString& key, double value);
+    std::optional<double> loadExtraControl(const QString& cameraId, const QString& key) const;
+
     void saveRootDirectory(const QString& path);
     std::optional<QString> loadRootDirectory() const;
 

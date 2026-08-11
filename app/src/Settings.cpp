@@ -14,6 +14,10 @@ QString gainKey(const QString& cameraId) { return "cameraProfiles/" + cameraId +
 
 QString presetsGroup(const QString& cameraId) { return "cameraProfiles/" + cameraId + "/presets"; }
 
+QString extraControlKey(const QString& cameraId, const QString& key) {
+    return "cameraProfiles/" + cameraId + "/controls/" + key;
+}
+
 QString presetGroup(const QString& cameraId, const QString& name) {
     return presetsGroup(cameraId) + QLatin1Char('/') + sanitizeForFilename(name);
 }
@@ -46,6 +50,20 @@ std::optional<qint64> Settings::loadGain(const QString& cameraId) const {
         return std::nullopt;
     }
     return settings.value(key).toLongLong();
+}
+
+void Settings::saveExtraControl(const QString& cameraId, const QString& key, double value) {
+    QSettings settings;
+    settings.setValue(extraControlKey(cameraId, key), value);
+}
+
+std::optional<double> Settings::loadExtraControl(const QString& cameraId, const QString& key) const {
+    QSettings settings;
+    const QString settingsKey = extraControlKey(cameraId, key);
+    if (!settings.contains(settingsKey)) {
+        return std::nullopt;
+    }
+    return settings.value(settingsKey).toDouble();
 }
 
 void Settings::saveRootDirectory(const QString& path) {

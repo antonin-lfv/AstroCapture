@@ -10,12 +10,19 @@ namespace astro::domain {
 // small set the charter names explicitly (AGENT.md section 8); vendor-specific
 // controls that don't map to one of these stay behind an escape hatch that
 // does not exist yet rather than growing this enum speculatively.
+//
+// ROI is deliberately not here: it is a StreamConfiguration parameter (see
+// StreamMode.hpp's Roi/roiSupported), not a scalar control value, since
+// changing it changes the frame's own dimensions rather than a per-pixel
+// value.
 enum class ControlId {
     Exposure,
     Gain,
-    WhiteBalance,
     Gamma,
-    HardwareROI,
+    WhiteBalanceRed,
+    WhiteBalanceBlue,
+    Brightness,
+    FrameRateLimit,
     Temperature,
     Cooler,
     Trigger,

@@ -377,7 +377,8 @@ ApplicationWindow {
                         Layout.fillWidth: true
                         height: 1
                         color: "#242830"
-                        visible: previewController.exposureSupported || previewController.gainSupported
+                        visible: previewController.exposureSupported || previewController.gainSupported ||
+                                 previewController.extraControls.length > 0
                     }
 
                     // Capability-driven: the whole section (and each
@@ -385,7 +386,8 @@ ApplicationWindow {
                     // expose it.
                     SidebarSection {
                         title: "Camera Controls"
-                        visible: previewController.exposureSupported || previewController.gainSupported
+                        visible: previewController.exposureSupported || previewController.gainSupported ||
+                                 previewController.extraControls.length > 0
 
                         ColumnLayout {
                             Layout.fillWidth: true
@@ -435,6 +437,44 @@ ApplicationWindow {
                                 stepSize: 1
                                 value: previewController.gainValue
                                 onMoved: previewController.gainValue = Math.round(value)
+                            }
+                        }
+
+                        // Gate D backlog 22.3: gamma/white balance/
+                        // brightness/frame rate limit, whichever the
+                        // connected backend actually reports as supported.
+                        Repeater {
+                            model: previewController.extraControls
+
+                            delegate: ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: 4
+
+                                RowLayout {
+                                    Layout.fillWidth: true
+                                    Text {
+                                        text: modelData.label
+                                        color: "#9aa0a6"
+                                        font.pixelSize: 12
+                                        Layout.fillWidth: true
+                                    }
+                                    Text {
+                                        text: (modelData.isFloat ? modelData.value.toFixed(2)
+                                                                  : Math.round(modelData.value)) +
+                                              (modelData.unit.length > 0 ? " " + modelData.unit : "")
+                                        color: "#e8eaed"
+                                        font.pixelSize: 12
+                                    }
+                                }
+
+                                Slider {
+                                    Layout.fillWidth: true
+                                    from: modelData.min
+                                    to: modelData.max
+                                    stepSize: modelData.step
+                                    value: modelData.value
+                                    onMoved: previewController.setExtraControlValue(modelData.key, value)
+                                }
                             }
                         }
                     }

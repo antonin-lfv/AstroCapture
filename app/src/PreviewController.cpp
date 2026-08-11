@@ -13,6 +13,7 @@
 #include "astro/domain/StreamMode.hpp"
 #include "astro/recording/FitsWriter.hpp"
 #include "astro/recording/RawSequenceRecorder.hpp"
+#include "astro/recording/SerRecorder.hpp"
 #include "astro/recording/TiffWriter.hpp"
 
 #ifdef ASTRO_ENABLE_MOCK_CAMERA
@@ -76,6 +77,8 @@ PreviewController::PreviewController(QObject* parent) : QObject(parent) {
     saveFormat_ = (loadedFormat == QStringLiteral("TIFF16") || loadedFormat == QStringLiteral("FITS"))
                       ? loadedFormat
                       : QStringLiteral("PNG");
+    const QString loadedVideoFormat = settings_.loadVideoFormat().value_or(QStringLiteral("SER"));
+    videoFormat_ = loadedVideoFormat == QStringLiteral("ACRAW") ? loadedVideoFormat : QStringLiteral("SER");
     // The writer thread can't call stopRecording() itself (it would try to
     // join its own thread), so it emits recordingTargetReached() instead;
     // Qt queues delivery to this object's thread (GUI) automatically.
@@ -617,10 +620,14 @@ void PreviewController::startRecording() {
     }
 
     const QString cameraId = QString::fromStdString(device_->descriptor().id);
-    const QString path =
-        directory + QLatin1Char('/') + timestampedBaseName(cameraId, targetName_) + QStringLiteral(".acraw");
+    const bool useSer = videoFormat_ == QStringLiteral("SER");
+    const QString path = directory + QLatin1Char('/') + timestampedBaseName(cameraId, targetName_) +
+                          (useSer ? QStringLiteral(".ser") : QStringLiteral(".acraw"));
 
-    auto recorder = std::make_unique<astro::recording::RawSequenceRecorder>();
+    std::unique_ptr<astro::recording::IRecorder> recorder =
+        useSer ? std::unique_ptr<astro::recording::IRecorder>(std::make_unique<astro::recording::SerRecorder>())
+               : std::unique_ptr<astro::recording::IRecorder>(
+                     std::make_unique<astro::recording::RawSequenceRecorder>());
     const double nominalFps = fps() > 0.0 ? fps() : 30.0;  // best-effort header hint; not used for pacing
     if (const auto result = recorder->open(path.toStdString(), latest->descriptor, nominalFps); !result.ok()) {
         recordingStatus_ = QString::fromStdString(result.error().message);
@@ -776,6 +783,16 @@ void PreviewController::setSaveFormat(const QString& format) {
     saveFormat_ = format;
     settings_.saveImageFormat(format);
     emit saveFormatChanged();
+}
+
+void PreviewController::setVideoFormat(const QString& format) {
+    if (recording_ || videoFormat_ == format ||
+        (format != QStringLiteral("SER") && format != QStringLiteral("ACRAW"))) {
+        return;
+    }
+    videoFormat_ = format;
+    settings_.saveVideoFormat(format);
+    emit videoFormatChanged();
 }
 
 void PreviewController::setTargetName(const QString& value) {

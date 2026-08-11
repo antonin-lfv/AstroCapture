@@ -40,6 +40,11 @@ astro_add_unit_test(astro_recording_fits_writer_test
     LIBS astro::recording
 )
 
+astro_add_unit_test(astro_recording_ser_test
+    SOURCES recording/SerRecorderTest.cpp
+    LIBS astro::recording
+)
+
 if(ASTRO_ENABLE_MOCK_CAMERA)
     astro_add_unit_test(astro_driver_mock_bayer_test_pattern_test
         SOURCES mock/BayerTestPatternTest.cpp

@@ -325,11 +325,17 @@ Before implementation:
 
 Create `IRecorder` first so file-format details do not leak into capture orchestration.
 
-`IRecorder` and a first implementation now exist (`core/recording`,
-`astro::recording::RawSequenceRecorder`), but the implementation is a
-documented interim placeholder format (magic `ACRAWSEQ`), not SER. A real
-`SerRecorder` should implement the same `IRecorder` interface once the
-groundwork above is done.
+`IRecorder` and its first implementation (`core/recording`,
+`astro::recording::RawSequenceRecorder`, the documented interim `ACRAWSEQ`
+placeholder format) both exist, and now so does `astro::recording::SerRecorder`
+implementing the same interface for real SER — see section 22.9 for what
+"before implementation" above ended up meaning in practice: this project has
+no Windows/AutoStakkert/PIPP/Registax available to cross-validate against, so
+implementation went ahead against the SER specification directly rather than
+staying blocked on that. SER is now the default (Settings' "Video format" toggle); `RawSequenceRecorder`
+remains selectable there too, both as a fallback for formats SER has no
+color ID for and so `.acraw` files from earlier in this project's history
+stay explicable.
 
 ## 19. First NexImage spike
 
@@ -463,10 +469,34 @@ against the mock camera alone.
   (single HDU, no WCS) is a small, self-contained addition — no
   third-party dependency needed for this scope.
 
-### 22.9 SER recording format
+### 22.9 SER recording format — done
 
-- Tracked in full in section 18; not re-planned here. Its priority
-  relative to 22.1-22.8 is the ROADMAP.md ordering, not a statement that
-  it's next by default — the research spike (spec, golden files,
-  cross-validation) is a prerequisite before implementation work can even
-  start, unlike the other items here.
+Implemented: `astro::recording::SerRecorder` (`core/recording`), against the
+SER specification (178-byte header, ColorID/PixelDepthPerPlane/dimensions,
+raw un-demosaiced frame data, optional per-frame UTC timestamp trailer using
+the same steady-clock/wall-clock anchor technique section 22.6 built for
+`RawSequenceReader`). Selectable as the recording format in Settings
+("Video format": SER or ACRAW), SER is now the default.
+
+What section 18's "before implementation" list actually became, since this
+environment has no Windows/AutoStakkert/PIPP/Registax to get golden files
+from or cross-validate against:
+
+- specification: the public SER spec, unchanged and identically implemented
+  by every tool named above for over a decade;
+- color IDs/bit depths/endian: implemented for MONO/BAYER(all 4
+  patterns)/RGB24/BGR24 at 8 or 16 bits; BGRA32 has no SER equivalent (no
+  alpha channel), rejected at `open()` rather than silently dropping the
+  channel;
+- validation performed instead of golden-file cross-validation: real files
+  recorded through the actual app (mock camera → acquisition → recording
+  pipeline, not just the unit test) were independently re-parsed byte-by-
+  byte against the spec in Python (not reusing any of this project's own
+  parsing code), and separately recognized correctly by `file`(1)'s own SER
+  magic support (`SER video sequence, bayer: RGGB, little-endian, width:
+  640, height: 480, 8 bit, frames: N`) — a second, fully independent
+  implementation agreeing on every header field;
+- still open: an actual planetary-stacking tool (AutoStakkert/PIPP/
+  Registax) has not opened one of these files. That needs Windows (or a
+  compatible build of one of those tools) this environment doesn't have —
+  flagged here rather than silently dropped.

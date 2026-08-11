@@ -120,6 +120,8 @@ class PreviewController : public QObject, private astro::domain::FrameSink {
     // Gate D backlog 22.8: "PNG", "TIFF16" or "FITS". App-wide, like
     // saveDirectory, not per-camera.
     Q_PROPERTY(QString saveFormat READ saveFormat WRITE setSaveFormat NOTIFY saveFormatChanged)
+    // Gate D backlog 22.9: "SER" or "ACRAW". App-wide, like saveFormat.
+    Q_PROPERTY(QString videoFormat READ videoFormat WRITE setVideoFormat NOTIFY videoFormatChanged)
     Q_PROPERTY(QStringList presetNames READ presetNames NOTIFY presetsChanged)
 
     // Free-text session metadata (IMPLEMENTATION_BLUEPRINT.md section 17's
@@ -233,6 +235,9 @@ public:
     QString saveFormat() const { return saveFormat_; }
     void setSaveFormat(const QString& format);
 
+    QString videoFormat() const { return videoFormat_; }
+    void setVideoFormat(const QString& format);
+
     QString targetName() const { return targetName_; }
     void setTargetName(const QString& value);
 
@@ -265,6 +270,7 @@ signals:
     void recordingTargetReached();
     void saveDirectoryChanged();
     void saveFormatChanged();
+    void videoFormatChanged();
     void presetsChanged();
     void targetNameChanged();
     void availableCamerasChanged();
@@ -349,6 +355,7 @@ private:
     Settings settings_;
     QString saveDirectory_;
     QString saveFormat_ = QStringLiteral("PNG");
+    QString videoFormat_ = QStringLiteral("SER");
     QString targetName_;
     std::optional<astro::domain::CameraCapability> exposureCapability_;
     double exposureMicroseconds_ = 0.0;

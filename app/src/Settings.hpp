@@ -42,6 +42,12 @@ public:
     void saveImageFormat(const QString& format);
     std::optional<QString> loadImageFormat() const;
 
+    // Video recording format (Gate D backlog 22.9): "SER" or "ACRAW" (the
+    // interim placeholder format, kept as an option rather than removed
+    // now that SER exists). App-wide, like saveRootDirectory.
+    void saveVideoFormat(const QString& format);
+    std::optional<QString> loadVideoFormat() const;
+
     void savePreset(const QString& cameraId, const CameraPreset& preset);
     void deletePreset(const QString& cameraId, const QString& name);
     QStringList presetNames(const QString& cameraId) const;

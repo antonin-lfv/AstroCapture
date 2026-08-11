@@ -95,6 +95,20 @@ std::optional<QString> Settings::loadImageFormat() const {
     return settings.value(key).toString();
 }
 
+void Settings::saveVideoFormat(const QString& format) {
+    QSettings settings;
+    settings.setValue(QStringLiteral("application/saveVideoFormat"), format);
+}
+
+std::optional<QString> Settings::loadVideoFormat() const {
+    QSettings settings;
+    const QString key = QStringLiteral("application/saveVideoFormat");
+    if (!settings.contains(key)) {
+        return std::nullopt;
+    }
+    return settings.value(key).toString();
+}
+
 void Settings::savePreset(const QString& cameraId, const CameraPreset& preset) {
     QSettings settings;
     const QString group = presetGroup(cameraId, preset.name);

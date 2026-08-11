@@ -136,6 +136,47 @@ Popup {
 
         ColumnLayout {
             Layout.fillWidth: true
+            spacing: 6
+
+            Text {
+                text: "Video format"
+                color: "#9aa0a6"
+                font.pixelSize: 11
+            }
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 8
+                enabled: controller && !controller.recording
+
+                Repeater {
+                    model: ["SER", "ACRAW"]
+
+                    delegate: IconButton {
+                        Layout.fillWidth: true
+                        text: modelData
+                        active: controller && controller.videoFormat === modelData
+                        activeBorderColor: "#6e93ff"
+                        onClicked: controller.videoFormat = modelData
+
+                        ToolTip.visible: hovered
+                        ToolTip.delay: 400
+                        ToolTip.text: modelData === "SER"
+                                      ? "Standard planetary video format (AutoStakkert, PIPP, Registax, FireCapture)"
+                                      : "AstroCapture's own interim format"
+                    }
+                }
+            }
+        }
+
+        Rectangle {
+            Layout.fillWidth: true
+            height: 1
+            color: "#242830"
+        }
+
+        ColumnLayout {
+            Layout.fillWidth: true
             spacing: 8
             visible: controller && controller.connected
 

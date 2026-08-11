@@ -48,8 +48,8 @@ Exit criteria:
 - stable live preview;
 - common camera controls;
 - histogram;
-- still image capture: save the currently previewed frame to disk (PNG/TIFF/FITS);
-- video recording: record the live stream to a suitable astronomy format, SER prioritized (an interim non-SER recorder exists per IMPLEMENTATION_BLUEPRINT.md section 18's `IRecorder` plan — SER itself still needs the research spike that section calls for: authoritative spec, golden files, cross-validation with established planetary software);
+- still image capture: save the currently previewed frame to disk (PNG, or TIFF/FITS — see the feature-parity backlog below);
+- video recording: record the live stream to a suitable astronomy format — SER is implemented and the default (`astro::recording::SerRecorder`), with the interim `ACRAWSEQ` recorder kept as a selectable fallback; see IMPLEMENTATION_BLUEPRINT.md section 22.9 for what validation was and wasn't possible without a Windows/AutoStakkert/PIPP/Registax environment to cross-validate against;
 - capture duration/frame targets (frame-count and/or duration auto-stop);
 - clear recording status;
 - no silent dropped frames;
@@ -57,36 +57,33 @@ Exit criteria:
 - basic settings persistence;
 - smoke-tested production package on macOS.
 
-### Feature-parity backlog
+### Feature-parity backlog — completed
 
 Gaps against reference planetary-capture software (FireCapture, SharpCap,
 ASICap), found by comparing against their common feature sets rather than
-derived from any specific hardware test. All of these are implementable and
-testable against the mock camera alone — none need Gate C. Priority order
-(highest first); see IMPLEMENTATION_BLUEPRINT.md section 22 for the plan
-behind each:
+derived from any specific hardware test. All nine below are implemented,
+each testable and tested against the mock camera alone (none needed Gate
+C). See IMPLEMENTATION_BLUEPRINT.md section 22 for the plan/detail behind
+each and, for SER specifically, section 22.9's note on what could and
+couldn't be validated without a Windows/AutoStakkert/PIPP/Registax
+environment.
 
-1. ROI/crop capture — read out a sub-region of the sensor to raise
-   framerate; the single highest-impact planetary feature missing today.
+1. ROI/crop capture — a sub-region of the sensor can be streamed instead
+   of the full frame.
 2. Preview overlays — zoom/loupe (pixel peeping), center crosshair,
    histogram over/under-exposure (clipping) indicators.
 3. Additional camera controls — gamma, white balance (R/B gain),
-   brightness/offset, frame rate limit; today only exposure/gain exist.
+   brightness/offset, frame rate limit, alongside exposure/gain.
 4. Advanced capture statistics — live min/max/mean pixel value; disk-write
-   fps vs. capture fps (divergence signals the writer thread falling
-   behind, which recordingDroppedFrames_ already counts but doesn't
-   explain).
-5. Real (bilinear) debayer for the live preview, replacing the
+   fps shown next to capture fps in the Recording section.
+5. Real (bilinear) debayer for the live preview, replacing the former
    nearest-neighbor placeholder.
-6. Per-frame timestamps in recordings, needed by derotation tools such as
-   WinJUPOS.
-7. Keyboard shortcuts for capture/record start-stop — capture sessions are
-   often run with the mouse busy on framing/focus.
-8. Additional still-image save formats — 16-bit TIFF and/or FITS, PNG is
-   currently the only option.
-9. SER recording format — already tracked as its own research spike, see
-   IMPLEMENTATION_BLUEPRINT.md section 18; listed here only for relative
-   priority against the rest of this backlog.
+6. Per-frame timestamps in recordings, recoverable as absolute UTC time
+   for derotation tools such as WinJUPOS.
+7. Keyboard shortcuts (C/R) for capture/record start-stop.
+8. Additional still-image save formats — TIFF16 and FITS, alongside PNG.
+9. SER recording format — the actual target format, now the default
+   recording format (ACRAWSEQ remains selectable).
 
 ## Gate E — Cross-platform productization
 

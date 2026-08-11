@@ -25,6 +25,16 @@ struct Histogram {
     std::array<std::uint32_t, kBucketCount> green{};
     std::array<std::uint32_t, kBucketCount> blue{};
     bool hasColorChannels = false;
+
+    // Derived from `luminance` (so meaningful for Bayer/mono raw ADU
+    // values and BGRA32's computed luminance alike, matching what the
+    // plotted curve shows) — not per-channel, to keep this one summary
+    // rather than four. Only valid when hasStats is true (at least one
+    // pixel was counted; false for unrecognized formats or empty data).
+    std::uint8_t minValue = 0;
+    std::uint8_t maxValue = 0;
+    double meanValue = 0.0;
+    bool hasStats = false;
 };
 
 // Returns an all-zero Histogram for formats it doesn't understand or for

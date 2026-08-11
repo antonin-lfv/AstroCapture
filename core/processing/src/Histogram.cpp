@@ -14,6 +14,34 @@ void accumulateSingleChannel(const std::uint8_t* bytes, std::uint32_t count,
     }
 }
 
+// A second O(256) pass over the already-built buckets, not a second pass
+// over pixel data.
+void computeStats(Histogram& histogram) {
+    std::uint64_t weightedSum = 0;
+    std::uint64_t total = 0;
+    int minIndex = -1;
+    int maxIndex = -1;
+    for (int i = 0; i < static_cast<int>(Histogram::kBucketCount); ++i) {
+        const auto count = histogram.luminance[static_cast<std::size_t>(i)];
+        if (count == 0) {
+            continue;
+        }
+        if (minIndex == -1) {
+            minIndex = i;
+        }
+        maxIndex = i;
+        weightedSum += static_cast<std::uint64_t>(count) * static_cast<std::uint64_t>(i);
+        total += count;
+    }
+    if (total == 0) {
+        return;
+    }
+    histogram.minValue = static_cast<std::uint8_t>(minIndex);
+    histogram.maxValue = static_cast<std::uint8_t>(maxIndex);
+    histogram.meanValue = static_cast<double>(weightedSum) / static_cast<double>(total);
+    histogram.hasStats = true;
+}
+
 }  // namespace
 
 Histogram computeHistogram(const FrameDescriptor& descriptor, const std::byte* data, std::size_t size) {
@@ -63,6 +91,7 @@ Histogram computeHistogram(const FrameDescriptor& descriptor, const std::byte* d
             break;
     }
 
+    computeStats(histogram);
     return histogram;
 }
 

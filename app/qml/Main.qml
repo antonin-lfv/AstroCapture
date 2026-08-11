@@ -129,14 +129,32 @@ ApplicationWindow {
                 }
             }
 
-            HistogramItem {
-                id: histogramItem
-                controller: previewController
+            Item {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 90
                 Layout.leftMargin: 12
                 Layout.rightMargin: 12
                 Layout.bottomMargin: 12
+
+                HistogramItem {
+                    id: histogramItem
+                    anchors.fill: parent
+                    controller: previewController
+                }
+
+                // Gate D backlog 22.4: min/max/mean of the current frame,
+                // overlaid on the histogram rather than adding a separate
+                // sidebar row.
+                Text {
+                    visible: histogramItem.hasStats
+                    anchors.top: parent.top
+                    anchors.right: parent.right
+                    anchors.margins: 4
+                    text: "min " + histogramItem.minValue + "  max " + histogramItem.maxValue + "  mean " +
+                          histogramItem.meanValue.toFixed(1)
+                    color: "#9aa0a6"
+                    font.pixelSize: 10
+                }
             }
         }
 
@@ -359,6 +377,21 @@ ApplicationWindow {
                             Text {
                                 text: "Dropped: " + previewController.recordingDroppedFrames
                                 color: previewController.recordingDroppedFrames > 0 ? "#e5484d" : "#9aa0a6"
+                                font.pixelSize: 12
+                            }
+
+                            // Gate D backlog 22.4: write fps falling behind
+                            // capture fps is what recordingDroppedFrames
+                            // rising actually means — shown side by side so
+                            // the cause is visible, not just the count.
+                            Text {
+                                property real writeFps: previewController.recordingElapsedSeconds > 0
+                                                         ? previewController.recordingFrameCount /
+                                                           previewController.recordingElapsedSeconds
+                                                         : 0
+                                text: "Write: " + writeFps.toFixed(1) + " fps  (capture: " +
+                                      previewController.fps.toFixed(1) + " fps)"
+                                color: writeFps < previewController.fps * 0.9 ? "#e5484d" : "#9aa0a6"
                                 font.pixelSize: 12
                             }
                         }

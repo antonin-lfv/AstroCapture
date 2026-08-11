@@ -48,6 +48,11 @@ int main() {
         ASTRO_TEST_CHECK(histogram.luminance[40] == 1);
         ASTRO_TEST_CHECK(sum(histogram.luminance) == 4);
         ASTRO_TEST_CHECK(sum(histogram.red) == 0);
+
+        ASTRO_TEST_CHECK(histogram.hasStats);
+        ASTRO_TEST_CHECK(histogram.minValue == 10);
+        ASTRO_TEST_CHECK(histogram.maxValue == 40);
+        ASTRO_TEST_CHECK(histogram.meanValue == 25.0);  // (10+20+30+40)/4
     }
 
     // BGRA32: a single pixel with known B, G, R, A bytes.
@@ -90,6 +95,7 @@ int main() {
         const std::vector<std::byte> bytes(16);
         const Histogram histogram = computeHistogram(descriptor, bytes.data(), bytes.size());
         ASTRO_TEST_CHECK(sum(histogram.luminance) == 0);
+        ASTRO_TEST_CHECK(!histogram.hasStats);
     }
 
     std::cout << "OK\n";

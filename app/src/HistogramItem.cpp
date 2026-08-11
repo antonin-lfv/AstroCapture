@@ -97,6 +97,15 @@ void HistogramItem::paint(QPainter* painter) {
         std::accumulate(histogram.luminance.begin(), histogram.luminance.end(), std::uint32_t{0});
     paintClippingIndicator(painter, histogram.luminance.front(), totalPixels, area, /*atRightEdge=*/false);
     paintClippingIndicator(painter, histogram.luminance.back(), totalPixels, area, /*atRightEdge=*/true);
+
+    if (hasStats_ != histogram.hasStats || minValue_ != histogram.minValue || maxValue_ != histogram.maxValue ||
+        !qFuzzyCompare(meanValue_ + 1.0, histogram.meanValue + 1.0)) {
+        hasStats_ = histogram.hasStats;
+        minValue_ = histogram.minValue;
+        maxValue_ = histogram.maxValue;
+        meanValue_ = histogram.meanValue;
+        emit statsChanged();
+    }
 }
 
 }  // namespace astro::app

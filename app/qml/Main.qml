@@ -134,13 +134,16 @@ ApplicationWindow {
                 // currently displayed (full sensor or an existing ROI),
                 // so a drag inside an already-cropped view narrows it
                 // further instead of resetting relative to the full
-                // sensor. previewHover (above) only tracks hover
-                // (acceptedButtons: NoButton), so it never competes with
-                // this for button presses.
+                // sensor. Double-click resets to the full sensor.
+                // previewHover (above) only tracks hover (acceptedButtons:
+                // NoButton), so it never competes with this for button
+                // presses.
                 MouseArea {
                     id: roiSelect
                     anchors.fill: parent
                     enabled: previewController.roiSupported && !previewController.recording
+
+                    onDoubleClicked: previewController.resetRoi()
 
                     property real startFracX: 0
                     property real startFracY: 0
@@ -350,7 +353,6 @@ ApplicationWindow {
 
                     IconButton {
                         Layout.fillWidth: true
-                        iconName: "close"
                         text: "Disconnect"
                         borderColor: "#242830"
                         onClicked: previewController.disconnectCamera()
@@ -679,7 +681,7 @@ ApplicationWindow {
                         helpText: "Reads out only a sub-rectangle of the sensor instead of the full frame, which " +
                                   "can raise achievable fps. Click and drag on the preview to select the region " +
                                   "— dragging again inside an existing selection narrows it further. " +
-                                  "\"Full frame\" resets it."
+                                  "Double-click, or \"Full frame\", resets it."
                         visible: previewController.roiSupported
                         enabled: !previewController.recording
 

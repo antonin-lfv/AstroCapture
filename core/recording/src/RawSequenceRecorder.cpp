@@ -11,7 +11,7 @@ namespace {
 
 // On-disk layout (little-endian on every platform this project targets):
 //   char     magic[8]        = "ACRAWSEQ"
-//   uint32   formatVersion   = 1
+//   uint32   formatVersion   = 2
 //   uint32   width
 //   uint32   height
 //   uint32   strideBytes
@@ -20,15 +20,24 @@ namespace {
 //   uint32   validBits
 //   uint64   frameCount      (0 until close() patches it)
 //   double   nominalFps
+//   int64    anchorSteadyNanos      (steady_clock::now().time_since_epoch()
+//                                     at open(), same clock/epoch as each
+//                                     frame's hostArrivalNanos below)
+//   int64    anchorSystemUnixNanos  (system_clock::now().time_since_epoch()
+//                                     at open(), i.e. Unix epoch time)
 // followed by `frameCount` records of:
 //   uint64   sequence
 //   int64    hostArrivalNanos  (astro::domain::FrameMetadata::hostArrival's
 //                                steady_clock duration since its own epoch;
-//                                only meaningful as a relative offset
-//                                within this recording, never as wall time)
+//                                meaningless as an absolute time on its
+//                                own — RawSequenceReader's
+//                                frameWallClockUnixNanos() combines it with
+//                                the two anchors above to recover the
+//                                frame's actual Unix time, which per-frame
+//                                derotation tools such as WinJUPOS need)
 //   byte     payload[descriptor.expectedPayloadBytes()]
 constexpr std::array<char, 8> kMagic = {'A', 'C', 'R', 'A', 'W', 'S', 'E', 'Q'};
-constexpr std::uint32_t kFormatVersion = 1;
+constexpr std::uint32_t kFormatVersion = 2;
 
 template <typename T>
 void writeField(std::ofstream& file, const T& value) {
@@ -65,6 +74,18 @@ Result<void> RawSequenceRecorder::open(const std::string& path, const FrameDescr
     frameCountFieldOffset_ = file_.tellp();
     writeField(file_, std::uint64_t{0});
     writeField(file_, nominalFps);
+
+    // Captured back-to-back so the two clocks stay in sync to within a
+    // few microseconds — good enough for reconstructing per-frame wall
+    // time from the steady_clock deltas frames are stamped with.
+    const auto anchorSteadyNanos =
+        std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now().time_since_epoch())
+            .count();
+    const auto anchorSystemUnixNanos =
+        std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch())
+            .count();
+    writeField(file_, anchorSteadyNanos);
+    writeField(file_, anchorSystemUnixNanos);
 
     if (!file_.good()) {
         return Result<void>::failure({ErrorCode::RecordingOpenFailed, "Failed writing header", path});

@@ -52,6 +52,8 @@ Result<RawSequenceReader::Header> RawSequenceReader::open(const std::string& pat
 
     readField(file_, header.frameCount);
     readField(file_, header.nominalFps);
+    readField(file_, header.anchorSteadyNanos);
+    readField(file_, header.anchorSystemUnixNanos);
 
     if (!file_.good()) {
         return Result<Header>::failure({ErrorCode::InvalidFrame, "Truncated header", path});
@@ -86,6 +88,13 @@ Result<FrameBuffer> RawSequenceReader::readNextFrame() {
 
     ++framesRead_;
     return Result<FrameBuffer>::success(std::move(frame));
+}
+
+std::int64_t frameWallClockUnixNanos(const RawSequenceReader::Header& header,
+                                      std::chrono::steady_clock::time_point frameHostArrival) {
+    const auto frameSteadyNanos =
+        std::chrono::duration_cast<std::chrono::nanoseconds>(frameHostArrival.time_since_epoch()).count();
+    return header.anchorSystemUnixNanos + (frameSteadyNanos - header.anchorSteadyNanos);
 }
 
 }  // namespace astro::recording

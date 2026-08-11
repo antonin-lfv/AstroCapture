@@ -1,5 +1,6 @@
 #pragma once
 
+#include <chrono>
 #include <cstdint>
 #include <fstream>
 #include <string>
@@ -20,6 +21,8 @@ public:
         astro::domain::FrameDescriptor descriptor;
         std::uint64_t frameCount = 0;
         double nominalFps = 0.0;
+        std::int64_t anchorSteadyNanos = 0;
+        std::int64_t anchorSystemUnixNanos = 0;
     };
 
     astro::domain::Result<Header> open(const std::string& path);
@@ -31,5 +34,14 @@ private:
     std::uint64_t frameCount_ = 0;
     std::uint64_t framesRead_ = 0;
 };
+
+// Recovers a frame's actual Unix epoch time in nanoseconds from its
+// steady_clock hostArrival timestamp and the recording's two open()-time
+// anchors, since steady_clock has no fixed epoch of its own and so isn't
+// comparable across processes/machines on its own. Needed by per-frame
+// derotation tools (e.g. WinJUPOS) that require real wall-clock timestamps,
+// not just relative frame-to-frame offsets.
+std::int64_t frameWallClockUnixNanos(const RawSequenceReader::Header& header,
+                                      std::chrono::steady_clock::time_point frameHostArrival);
 
 }  // namespace astro::recording

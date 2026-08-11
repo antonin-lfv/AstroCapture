@@ -3,6 +3,7 @@
 #include <array>
 #include <cstdint>
 #include <cstdio>
+#include <optional>
 #include <vector>
 
 #include "astro/recording/RawSequenceReader.hpp"
@@ -14,6 +15,7 @@ using astro::domain::BufferStorage;
 using astro::domain::FrameBuffer;
 using astro::domain::FrameDescriptor;
 using astro::domain::PixelStorage;
+using astro::recording::frameWallClockUnixNanos;
 using astro::recording::RawSequenceReader;
 using astro::recording::RawSequenceRecorder;
 
@@ -79,8 +81,13 @@ int main() {
         ASTRO_TEST_CHECK(header.value().descriptor.height == descriptor.height);
         ASTRO_TEST_CHECK(header.value().descriptor.storage == descriptor.storage);
         ASTRO_TEST_CHECK(header.value().descriptor.bayer == descriptor.bayer);
+        // Two independent clocks read microseconds apart in open() — allow
+        // slack, but they must be unmistakably "now", not zero/garbage.
+        ASTRO_TEST_CHECK(header.value().anchorSteadyNanos != 0);
+        ASTRO_TEST_CHECK(header.value().anchorSystemUnixNanos > 0);
 
         const std::array<std::uint8_t, 3> expectedFill = {10, 20, 30};
+        std::optional<std::int64_t> previousWallClockNanos;
         for (std::uint64_t i = 0; i < 3; ++i) {
             const auto frame = reader.readNextFrame();
             ASTRO_TEST_CHECK(frame.ok());
@@ -90,6 +97,20 @@ int main() {
             for (std::size_t b = 0; b < frame.value().storage->size(); ++b) {
                 ASTRO_TEST_CHECK(static_cast<std::uint8_t>(bytes[b]) == expectedFill[i]);
             }
+
+            // frameWallClockUnixNanos() must recover each frame's actual
+            // Unix time from its steady_clock hostArrival plus the
+            // header's anchors. makeFrame() stamped frame i exactly
+            // `i * 1000` steady-clock nanoseconds apart, and that spacing
+            // is clock-independent (unlike the absolute value, which this
+            // synthetic test's fabricated timestamps don't make
+            // meaningful) — so consecutive frames' recovered wall-clock
+            // times must be exactly 1000ns apart too.
+            const auto wallClockNanos = frameWallClockUnixNanos(header.value(), frame.value().metadata.hostArrival);
+            if (previousWallClockNanos) {
+                ASTRO_TEST_CHECK(wallClockNanos - *previousWallClockNanos == 1000);
+            }
+            previousWallClockNanos = wallClockNanos;
         }
 
         // Past the last frame: a clear failure, not garbage data.

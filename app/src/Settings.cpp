@@ -81,6 +81,20 @@ std::optional<QString> Settings::loadRootDirectory() const {
     return value.isEmpty() ? std::nullopt : std::make_optional(value);
 }
 
+void Settings::saveImageFormat(const QString& format) {
+    QSettings settings;
+    settings.setValue(QStringLiteral("application/saveImageFormat"), format);
+}
+
+std::optional<QString> Settings::loadImageFormat() const {
+    QSettings settings;
+    const QString key = QStringLiteral("application/saveImageFormat");
+    if (!settings.contains(key)) {
+        return std::nullopt;
+    }
+    return settings.value(key).toString();
+}
+
 void Settings::savePreset(const QString& cameraId, const CameraPreset& preset) {
     QSettings settings;
     const QString group = presetGroup(cameraId, preset.name);

@@ -1,6 +1,8 @@
 add_library(astro_recording STATIC
     src/RawSequenceRecorder.cpp
     src/RawSequenceReader.cpp
+    src/TiffWriter.cpp
+    src/FitsWriter.cpp
 )
 add_library(astro::recording ALIAS astro_recording)
 

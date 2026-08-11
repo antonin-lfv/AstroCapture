@@ -2,6 +2,8 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstring>
+#include <vector>
 
 #include <QDir>
 #include <QStandardPaths>
@@ -9,7 +11,9 @@
 #include "FileNaming.hpp"
 #include "FramePreviewImage.hpp"
 #include "astro/domain/StreamMode.hpp"
+#include "astro/recording/FitsWriter.hpp"
 #include "astro/recording/RawSequenceRecorder.hpp"
+#include "astro/recording/TiffWriter.hpp"
 
 #ifdef ASTRO_ENABLE_MOCK_CAMERA
 #include "astro/driver/mock/MockCameraBackend.hpp"
@@ -68,6 +72,10 @@ bool extraControlMeta(ControlId id, QString& key, QString& label, QString& unit,
 
 PreviewController::PreviewController(QObject* parent) : QObject(parent) {
     saveDirectory_ = settings_.loadRootDirectory().value_or(QString());
+    const QString loadedFormat = settings_.loadImageFormat().value_or(QStringLiteral("PNG"));
+    saveFormat_ = (loadedFormat == QStringLiteral("TIFF16") || loadedFormat == QStringLiteral("FITS"))
+                      ? loadedFormat
+                      : QStringLiteral("PNG");
     // The writer thread can't call stopRecording() itself (it would try to
     // join its own thread), so it emits recordingTargetReached() instead;
     // Qt queues delivery to this object's thread (GUI) automatically.
@@ -518,10 +526,40 @@ void PreviewController::captureStillImage() {
     }
 
     const QString cameraId = QString::fromStdString(device_->descriptor().id);
-    const QString path =
-        directory + QLatin1Char('/') + timestampedBaseName(cameraId, targetName_) + QStringLiteral(".png");
+    const QString extension = saveFormat_ == QStringLiteral("TIFF16")   ? QStringLiteral("tiff")
+                               : saveFormat_ == QStringLiteral("FITS")  ? QStringLiteral("fits")
+                                                                        : QStringLiteral("png");
+    const QString path = directory + QLatin1Char('/') + timestampedBaseName(cameraId, targetName_) +
+                          QLatin1Char('.') + extension;
 
-    if (!image.save(path, "PNG")) {
+    bool saved = false;
+    if (saveFormat_ == QStringLiteral("PNG")) {
+        saved = image.save(path, "PNG");
+    } else {
+        // Both writers need tightly packed (no row padding) interleaved
+        // RGB8 bytes; QImage's own bytesPerLine() can pad each scanline,
+        // so copy row by row rather than assuming constBits() is already
+        // contiguous.
+        const QImage rgb = image.convertToFormat(QImage::Format_RGB888);
+        std::vector<std::uint8_t> tightRgb(static_cast<std::size_t>(rgb.width()) * rgb.height() * 3);
+        for (int y = 0; y < rgb.height(); ++y) {
+            std::memcpy(tightRgb.data() + static_cast<std::size_t>(y) * rgb.width() * 3, rgb.constScanLine(y),
+                        static_cast<std::size_t>(rgb.width()) * 3);
+        }
+
+        const auto result = saveFormat_ == QStringLiteral("TIFF16")
+                                 ? astro::recording::writeTiff16Rgb(path.toStdString(),
+                                                                     static_cast<std::uint32_t>(rgb.width()),
+                                                                     static_cast<std::uint32_t>(rgb.height()),
+                                                                     tightRgb.data())
+                                 : astro::recording::writeFits8Rgb(path.toStdString(),
+                                                                    static_cast<std::uint32_t>(rgb.width()),
+                                                                    static_cast<std::uint32_t>(rgb.height()),
+                                                                    tightRgb.data());
+        saved = result.ok();
+    }
+
+    if (!saved) {
         lastCaptureStatus_ = QStringLiteral("Failed to save image.");
         emit lastCaptureStatusChanged();
         return;
@@ -728,6 +766,16 @@ void PreviewController::setSaveDirectory(const QString& path) {
     saveDirectory_ = path;
     settings_.saveRootDirectory(path);
     emit saveDirectoryChanged();
+}
+
+void PreviewController::setSaveFormat(const QString& format) {
+    if (saveFormat_ == format ||
+        (format != QStringLiteral("PNG") && format != QStringLiteral("TIFF16") && format != QStringLiteral("FITS"))) {
+        return;
+    }
+    saveFormat_ = format;
+    settings_.saveImageFormat(format);
+    emit saveFormatChanged();
 }
 
 void PreviewController::setTargetName(const QString& value) {

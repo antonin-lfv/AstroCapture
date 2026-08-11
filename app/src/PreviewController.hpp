@@ -117,6 +117,9 @@ class PreviewController : public QObject, private astro::domain::FrameSink {
     // Movies/AstroCapture); once set, both captures and recordings go under
     // <saveDirectory>/Images and <saveDirectory>/Videos instead.
     Q_PROPERTY(QString saveDirectory READ saveDirectory WRITE setSaveDirectory NOTIFY saveDirectoryChanged)
+    // Gate D backlog 22.8: "PNG", "TIFF16" or "FITS". App-wide, like
+    // saveDirectory, not per-camera.
+    Q_PROPERTY(QString saveFormat READ saveFormat WRITE setSaveFormat NOTIFY saveFormatChanged)
     Q_PROPERTY(QStringList presetNames READ presetNames NOTIFY presetsChanged)
 
     // Free-text session metadata (IMPLEMENTATION_BLUEPRINT.md section 17's
@@ -227,6 +230,9 @@ public:
     QString saveDirectory() const { return saveDirectory_; }
     void setSaveDirectory(const QString& path);
 
+    QString saveFormat() const { return saveFormat_; }
+    void setSaveFormat(const QString& format);
+
     QString targetName() const { return targetName_; }
     void setTargetName(const QString& value);
 
@@ -258,6 +264,7 @@ signals:
     // join its own thread.
     void recordingTargetReached();
     void saveDirectoryChanged();
+    void saveFormatChanged();
     void presetsChanged();
     void targetNameChanged();
     void availableCamerasChanged();
@@ -341,6 +348,7 @@ private:
 
     Settings settings_;
     QString saveDirectory_;
+    QString saveFormat_ = QStringLiteral("PNG");
     QString targetName_;
     std::optional<astro::domain::CameraCapability> exposureCapability_;
     double exposureMicroseconds_ = 0.0;

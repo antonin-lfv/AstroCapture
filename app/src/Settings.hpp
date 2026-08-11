@@ -37,6 +37,11 @@ public:
     void saveRootDirectory(const QString& path);
     std::optional<QString> loadRootDirectory() const;
 
+    // Still-image save format (Gate D backlog 22.8): "PNG", "TIFF16" or
+    // "FITS". App-wide, like saveRootDirectory — not per-camera.
+    void saveImageFormat(const QString& format);
+    std::optional<QString> loadImageFormat() const;
+
     void savePreset(const QString& cameraId, const CameraPreset& preset);
     void deletePreset(const QString& cameraId, const QString& name);
     QStringList presetNames(const QString& cameraId) const;

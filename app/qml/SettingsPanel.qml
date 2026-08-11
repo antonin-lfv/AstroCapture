@@ -102,6 +102,40 @@ Popup {
 
         ColumnLayout {
             Layout.fillWidth: true
+            spacing: 6
+
+            Text {
+                text: "Image format"
+                color: "#9aa0a6"
+                font.pixelSize: 11
+            }
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 8
+
+                Repeater {
+                    model: ["PNG", "TIFF16", "FITS"]
+
+                    delegate: IconButton {
+                        Layout.fillWidth: true
+                        text: modelData
+                        active: controller && controller.saveFormat === modelData
+                        activeBorderColor: "#6e93ff"
+                        onClicked: controller.saveFormat = modelData
+                    }
+                }
+            }
+        }
+
+        Rectangle {
+            Layout.fillWidth: true
+            height: 1
+            color: "#242830"
+        }
+
+        ColumnLayout {
+            Layout.fillWidth: true
             spacing: 8
             visible: controller && controller.connected
 

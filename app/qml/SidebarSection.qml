@@ -8,19 +8,31 @@ ColumnLayout {
     id: root
 
     property string title: ""
+    // Non-empty shows a clickable "?" next to the title (see HelpIcon.qml).
+    property string helpText: ""
     default property alias content: inner.children
 
     Layout.fillWidth: true
     spacing: 8
 
-    Text {
-        text: root.title
-        color: "#6e7681"
-        font.pixelSize: 10
-        font.weight: Font.DemiBold
-        font.capitalization: Font.AllUppercase
-        font.letterSpacing: 0.8
+    RowLayout {
         Layout.fillWidth: true
+        spacing: 4
+
+        Text {
+            text: root.title
+            color: "#6e7681"
+            font.pixelSize: 10
+            font.weight: Font.DemiBold
+            font.capitalization: Font.AllUppercase
+            font.letterSpacing: 0.8
+            Layout.fillWidth: true
+        }
+
+        HelpIcon {
+            visible: root.helpText.length > 0
+            text: root.helpText
+        }
     }
 
     ColumnLayout {

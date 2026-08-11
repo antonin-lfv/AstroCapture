@@ -220,6 +220,13 @@ ApplicationWindow {
                             font.pixelSize: 11
                         }
 
+                        HelpIcon {
+                            text: "This is acquisition, not recording: frames received from the camera since " +
+                                  "connecting. Nothing is written to disk unless you press Record — this can run " +
+                                  "for hours with no files created and constant memory use (only the latest " +
+                                  "frame is ever kept)."
+                        }
+
                         Item { Layout.fillWidth: true }
 
                         Text {
@@ -309,6 +316,8 @@ ApplicationWindow {
 
                     SidebarSection {
                         title: "Recording"
+                        helpText: "Auto-stops recording once either target is reached (whichever comes first). " +
+                                  "0 means unlimited/disabled for that field — set both to 0 to only stop manually."
 
                         ColumnLayout {
                             Layout.fillWidth: true
@@ -507,8 +516,18 @@ ApplicationWindow {
                                         Layout.fillWidth: true
                                     }
                                     Text {
-                                        text: (modelData.isFloat ? modelData.value.toFixed(2)
-                                                                  : Math.round(modelData.value)) +
+                                        // extraSlider.value, not
+                                        // modelData.value: the controller
+                                        // deliberately doesn't re-notify
+                                        // extraControls per drag update
+                                        // (see setExtraControlValue's
+                                        // comment) since that would rebuild
+                                        // this whole Repeater mid-drag, so
+                                        // this must track the slider's own
+                                        // live value instead to stay
+                                        // current while dragging.
+                                        text: (modelData.isFloat ? extraSlider.value.toFixed(2)
+                                                                  : Math.round(extraSlider.value)) +
                                               (modelData.unit.length > 0 ? " " + modelData.unit : "")
                                         color: "#e8eaed"
                                         font.pixelSize: 12
@@ -516,6 +535,7 @@ ApplicationWindow {
                                 }
 
                                 Slider {
+                                    id: extraSlider
                                     Layout.fillWidth: true
                                     from: modelData.min
                                     to: modelData.max
@@ -541,6 +561,9 @@ ApplicationWindow {
                     // partially-edited rectangle is usually invalid.
                     SidebarSection {
                         title: "Sensor ROI"
+                        helpText: "Reads out only a sub-rectangle of the sensor instead of the full frame, which " +
+                                  "can raise achievable fps. Set X/Y (top-left corner) and Width/Height, then " +
+                                  "Apply — the preview itself becomes that cropped region. \"Full frame\" resets it."
                         visible: previewController.roiSupported
                         enabled: !previewController.recording
 

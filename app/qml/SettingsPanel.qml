@@ -76,7 +76,21 @@ Popup {
 
                 IconButton {
                     iconName: "folder"
+                    text: "Open"
+                    onClicked: controller.openSaveDirectory()
+
+                    ToolTip.visible: hovered
+                    ToolTip.delay: 400
+                    ToolTip.text: "Open this folder in the file manager"
+                }
+
+                IconButton {
+                    iconName: "folder"
                     onClicked: folderDialog.open()
+
+                    ToolTip.visible: hovered
+                    ToolTip.delay: 400
+                    ToolTip.text: "Choose a different folder"
                 }
             }
 
@@ -104,10 +118,22 @@ Popup {
             Layout.fillWidth: true
             spacing: 6
 
-            Text {
-                text: "Image format"
-                color: "#9aa0a6"
-                font.pixelSize: 11
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 4
+
+                Text {
+                    text: "Image format"
+                    color: "#9aa0a6"
+                    font.pixelSize: 11
+                }
+
+                HelpIcon {
+                    text: "PNG: lossless, opens everywhere — good default.\n\n" +
+                          "TIFF16: 16-bit per channel, for processing pipelines that expect more precision than 8-bit " +
+                          "(the source is still 8-bit today; this stores it losslessly at 16-bit).\n\n" +
+                          "FITS: the astronomy-standard format, for tools that expect it (PixInsight, DSS, etc)."
+                }
             }
 
             RowLayout {
@@ -138,10 +164,20 @@ Popup {
             Layout.fillWidth: true
             spacing: 6
 
-            Text {
-                text: "Video format"
-                color: "#9aa0a6"
-                font.pixelSize: 11
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 4
+
+                Text {
+                    text: "Video format"
+                    color: "#9aa0a6"
+                    font.pixelSize: 11
+                }
+
+                HelpIcon {
+                    text: "SER: standard, uncompressed planetary video (AutoStakkert, PIPP, Registax, FireCapture) — use this for real capture sessions you'll stack.\n\n" +
+                          "ACRAW: AstroCapture's own interim format from before SER support existed. Kept only as a fallback."
+                }
             }
 
             RowLayout {

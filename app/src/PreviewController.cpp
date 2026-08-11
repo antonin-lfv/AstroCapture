@@ -5,8 +5,10 @@
 #include <cstring>
 #include <vector>
 
+#include <QDesktopServices>
 #include <QDir>
 #include <QStandardPaths>
+#include <QUrl>
 
 #include "FileNaming.hpp"
 #include "FramePreviewImage.hpp"
@@ -444,7 +446,15 @@ void PreviewController::setExtraControlValue(const QString& key, double value) {
         }
         control.value = clamped;
         settings_.saveExtraControl(QString::fromStdString(device_->descriptor().id), key, clamped);
-        emit extraControlsChanged();
+        // Deliberately no extraControlsChanged() here: that property backs
+        // a QML Repeater over a QVariantList, and re-emitting it on every
+        // slider-drag update replaces the whole list — which destroys and
+        // recreates every delegate (including the one being dragged),
+        // aborting the drag gesture entirely (only a click-to-position
+        // would "stick"). The slider driving this call already reflects
+        // its own live value locally; nothing else needs to be notified
+        // (extraControls values aren't part of presets, and no other UI
+        // reads them).
         return;
     }
 }
@@ -795,6 +805,12 @@ void PreviewController::setSaveDirectory(const QString& path) {
     saveDirectory_ = path;
     settings_.saveRootDirectory(path);
     emit saveDirectoryChanged();
+}
+
+void PreviewController::openSaveDirectory() {
+    const QString path = saveDirectory_.isEmpty() ? imagesDirectoryPath() : saveDirectory_;
+    QDir().mkpath(path);
+    QDesktopServices::openUrl(QUrl::fromLocalFile(path));
 }
 
 void PreviewController::setSaveFormat(const QString& format) {

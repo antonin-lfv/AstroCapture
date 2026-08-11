@@ -233,6 +233,12 @@ public:
     QString saveDirectory() const { return saveDirectory_; }
     void setSaveDirectory(const QString& path);
 
+    // Opens saveDirectory (or, if unset, the OS-default location images
+    // are saved to — see imagesDirectoryPath()) in the system file
+    // manager, creating it first if it doesn't exist yet so this works
+    // even before any capture has actually happened.
+    Q_INVOKABLE void openSaveDirectory();
+
     QString saveFormat() const { return saveFormat_; }
     void setSaveFormat(const QString& format);
 
@@ -355,6 +361,7 @@ private:
     std::unique_ptr<astro::domain::BoundedFrameQueue> recordingQueue_;
     std::unique_ptr<astro::recording::IRecorder> recorder_;
     std::thread recordingThread_;
+
     bool recording_ = false;
     QString recordingPath_;
     QString recordingStatus_;

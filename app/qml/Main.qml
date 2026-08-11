@@ -358,6 +358,117 @@ ApplicationWindow {
                         }
                     }
 
+                    Rectangle {
+                        Layout.fillWidth: true
+                        height: 1
+                        color: "#242830"
+                        visible: previewController.roiSupported
+                    }
+
+                    // ROI/crop (ROADMAP.md Gate D backlog 22.1): read out a
+                    // sub-rectangle of the sensor instead of the full
+                    // frame. Applied as a unit (all four fields via one
+                    // setRoi() call) rather than live per-field, since a
+                    // partially-edited rectangle is usually invalid.
+                    SidebarSection {
+                        title: "Sensor ROI"
+                        visible: previewController.roiSupported
+                        enabled: !previewController.recording
+
+                        Text {
+                            Layout.fillWidth: true
+                            text: previewController.roiWidth + " × " + previewController.roiHeight + " of " +
+                                  previewController.sensorWidth + " × " + previewController.sensorHeight
+                            color: "#9aa0a6"
+                            font.pixelSize: 11
+                        }
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 6
+
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: 2
+                                Text { text: "X"; color: "#5f6368"; font.pixelSize: 10 }
+                                DarkSpinBox {
+                                    id: roiXSpin
+                                    Layout.fillWidth: true
+                                    from: 0
+                                    to: Math.max(0, previewController.sensorWidth - 2)
+                                    stepSize: 2
+                                    value: previewController.roiX
+                                }
+                            }
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: 2
+                                Text { text: "Y"; color: "#5f6368"; font.pixelSize: 10 }
+                                DarkSpinBox {
+                                    id: roiYSpin
+                                    Layout.fillWidth: true
+                                    from: 0
+                                    to: Math.max(0, previewController.sensorHeight - 2)
+                                    stepSize: 2
+                                    value: previewController.roiY
+                                }
+                            }
+                        }
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 6
+
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: 2
+                                Text { text: "Width"; color: "#5f6368"; font.pixelSize: 10 }
+                                DarkSpinBox {
+                                    id: roiWSpin
+                                    Layout.fillWidth: true
+                                    from: 2
+                                    to: Math.max(2, previewController.sensorWidth)
+                                    stepSize: 2
+                                    value: previewController.roiWidth
+                                }
+                            }
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: 2
+                                Text { text: "Height"; color: "#5f6368"; font.pixelSize: 10 }
+                                DarkSpinBox {
+                                    id: roiHSpin
+                                    Layout.fillWidth: true
+                                    from: 2
+                                    to: Math.max(2, previewController.sensorHeight)
+                                    stepSize: 2
+                                    value: previewController.roiHeight
+                                }
+                            }
+                        }
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 8
+
+                            IconButton {
+                                Layout.fillWidth: true
+                                text: "Apply"
+                                onClicked: previewController.setRoi(roiXSpin.value, roiYSpin.value, roiWSpin.value,
+                                                                     roiHSpin.value)
+                            }
+
+                            IconButton {
+                                Layout.fillWidth: true
+                                iconName: "close"
+                                text: "Full frame"
+                                visible: previewController.roiWidth < previewController.sensorWidth ||
+                                         previewController.roiHeight < previewController.sensorHeight
+                                onClicked: previewController.resetRoi()
+                            }
+                        }
+                    }
+
                     Item { Layout.fillHeight: true }
                 }
             }

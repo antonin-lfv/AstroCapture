@@ -16,11 +16,13 @@ public:
         ++frameCount;
         lastDescriptor = frame.descriptor;
         lastSequence = frame.metadata.sequence;
+        lastStorage = frame.storage;
     }
 
     int frameCount = 0;
     FrameDescriptor lastDescriptor{};
     std::uint64_t lastSequence = 0;
+    std::shared_ptr<const BufferStorage> lastStorage;
 };
 
 }  // namespace
@@ -68,6 +70,48 @@ int main() {
 
     // stop() must be idempotent.
     ASTRO_TEST_CHECK(device->stop().ok());
+
+    // ROI: a valid crop must only change the streamed frame's shape and
+    // report exactly the sensor's sub-region content — verified against
+    // the full-frame capture above at the corresponding offset, not just
+    // by dimensions.
+    ASTRO_TEST_CHECK(sink.lastStorage != nullptr);
+    StreamConfiguration roiConfiguration = configuration;
+    roiConfiguration.roi = Roi{2, 4, 8, 6};
+    ASTRO_TEST_CHECK(device->configure(roiConfiguration).ok());
+
+    CountingSink roiSink;
+    ASTRO_TEST_CHECK(device->start(roiSink).ok());
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    ASTRO_TEST_CHECK(device->stop().ok());
+
+    ASTRO_TEST_CHECK(roiSink.frameCount > 0);
+    ASTRO_TEST_CHECK(roiSink.lastDescriptor.width == 8 && roiSink.lastDescriptor.height == 6);
+    ASTRO_TEST_CHECK(roiSink.lastDescriptor.bayer == BayerPattern::RGGB);
+    ASTRO_TEST_CHECK(roiSink.lastStorage != nullptr);
+    ASTRO_TEST_CHECK(roiSink.lastStorage->size() == 8 * 6);
+
+    {
+        const auto* fullBytes = reinterpret_cast<const std::uint8_t*>(sink.lastStorage->data());
+        const auto* roiBytes = reinterpret_cast<const std::uint8_t*>(roiSink.lastStorage->data());
+        for (std::uint32_t row = 0; row < 6; ++row) {
+            for (std::uint32_t col = 0; col < 8; ++col) {
+                const std::uint8_t expected = fullBytes[(4 + row) * 640 + (2 + col)];
+                const std::uint8_t actual = roiBytes[row * 8 + col];
+                ASTRO_TEST_CHECK(expected == actual);
+            }
+        }
+    }
+
+    // Invalid ROI (odd origin, or out of bounds) must be rejected while
+    // stopped, never silently rounded or clamped.
+    StreamConfiguration oddOrigin = configuration;
+    oddOrigin.roi = Roi{1, 0, 8, 6};
+    ASTRO_TEST_CHECK(!device->configure(oddOrigin).ok());
+
+    StreamConfiguration outOfBounds = configuration;
+    outOfBounds.roi = Roi{636, 0, 8, 6};
+    ASTRO_TEST_CHECK(!device->configure(outOfBounds).ok());
 
     // Control round-trip.
     auto exposure = device->getControl(ControlId::Exposure);

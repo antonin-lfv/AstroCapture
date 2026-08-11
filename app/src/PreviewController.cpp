@@ -63,6 +63,7 @@ std::unique_ptr<ICameraDevice> PreviewController::openAndStart(ICameraBackend& b
         return nullptr;
     }
 
+    currentConfiguration_ = configuration;
     return device;
 }
 
@@ -85,6 +86,10 @@ void PreviewController::finishConnecting(std::unique_ptr<ICameraDevice> device) 
     renderedFrameCount_.store(0, std::memory_order_relaxed);
     lastRenderedSequence_.reset();
     startTime_ = std::chrono::steady_clock::now();
+
+    roiSupported_ = currentConfiguration_.mode.roiSupported;
+    sensorWidth_ = currentConfiguration_.mode.width;
+    sensorHeight_ = currentConfiguration_.mode.height;
 
     exposureCapability_.reset();
     gainCapability_.reset();
@@ -113,6 +118,7 @@ void PreviewController::finishConnecting(std::unique_ptr<ICameraDevice> device) 
     emit frameCountChanged();
     emit exposureChanged();
     emit gainChanged();
+    emit roiChanged();
 
     // Restore any previously saved values for this specific camera,
     // overriding the device's own power-on defaults.
@@ -231,6 +237,10 @@ void PreviewController::disconnectCamera() {
     frameSlot_.clear();
     exposureCapability_.reset();
     gainCapability_.reset();
+    roiSupported_ = false;
+    sensorWidth_ = 0;
+    sensorHeight_ = 0;
+    currentConfiguration_ = astro::domain::StreamConfiguration{};
 
     connected_ = false;
     cameraName_.clear();
@@ -242,6 +252,7 @@ void PreviewController::disconnectCamera() {
     emit frameCountChanged();
     emit exposureChanged();
     emit gainChanged();
+    emit roiChanged();
 }
 
 void PreviewController::setExposureMicroseconds(double value) {
@@ -272,6 +283,44 @@ void PreviewController::setGainValue(int value) {
     settings_.saveGain(QString::fromStdString(device_->descriptor().id), asInt64);
     emit gainChanged();
 }
+
+void PreviewController::setRoi(int x, int y, int width, int height) {
+    if (!connected_ || !device_ || !roiSupported_ || recording_) {
+        return;
+    }
+
+    StreamConfiguration newConfiguration = currentConfiguration_;
+    newConfiguration.roi = Roi{static_cast<std::uint32_t>(std::max(0, x)), static_cast<std::uint32_t>(std::max(0, y)),
+                                static_cast<std::uint32_t>(std::max(0, width)),
+                                static_cast<std::uint32_t>(std::max(0, height))};
+
+    // Real backends generally require the stream stopped to reconfigure;
+    // the mock enforces this too (configure() rejects while running), so
+    // this stop/configure/start sequence is what a real ROI-capable
+    // backend will need as well, not a mock-only shortcut.
+    device_->stop();
+    if (const auto result = device_->configure(newConfiguration); !result.ok()) {
+        errorMessage_ = QString::fromStdString(result.error().message);
+        // Best-effort: restart with the last-known-good configuration so a
+        // rejected ROI doesn't leave the camera stopped.
+        device_->configure(currentConfiguration_);
+        device_->start(*this);
+        emit errorMessageChanged();
+        return;
+    }
+    if (const auto result = device_->start(*this); !result.ok()) {
+        errorMessage_ = QString::fromStdString(result.error().message);
+        emit errorMessageChanged();
+        return;
+    }
+
+    currentConfiguration_ = newConfiguration;
+    frameSlot_.clear();
+    lastRenderedSequence_.reset();
+    emit roiChanged();
+}
+
+void PreviewController::resetRoi() { setRoi(0, 0, 0, 0); }
 
 double PreviewController::fps() const {
     const auto acquired = frameCount_.load(std::memory_order_relaxed);

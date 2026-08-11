@@ -67,6 +67,20 @@ class PreviewController : public QObject, private astro::domain::FrameSink {
     Q_PROPERTY(int gainMin READ gainMin NOTIFY connectedChanged)
     Q_PROPERTY(int gainMax READ gainMax NOTIFY connectedChanged)
 
+    // ROI/crop (ROADMAP.md Gate D backlog 22.1): a sub-rectangle of the
+    // sensor to stream instead of the full frame. sensorWidth/sensorHeight
+    // are the full-frame bounds a caller must clamp x/y/width/height
+    // within; roiX/roiY/roiWidth/roiHeight report the currently active
+    // crop (roiWidth == sensorWidth && roiHeight == sensorHeight means "no
+    // crop").
+    Q_PROPERTY(bool roiSupported READ roiSupported NOTIFY connectedChanged)
+    Q_PROPERTY(int sensorWidth READ sensorWidth NOTIFY connectedChanged)
+    Q_PROPERTY(int sensorHeight READ sensorHeight NOTIFY connectedChanged)
+    Q_PROPERTY(int roiX READ roiX NOTIFY roiChanged)
+    Q_PROPERTY(int roiY READ roiY NOTIFY roiChanged)
+    Q_PROPERTY(int roiWidth READ roiWidth NOTIFY roiChanged)
+    Q_PROPERTY(int roiHeight READ roiHeight NOTIFY roiChanged)
+
     Q_PROPERTY(QString lastCaptureStatus READ lastCaptureStatus NOTIFY lastCaptureStatusChanged)
 
     // Recording (ROADMAP.md Gate D: video recording + "no silent dropped
@@ -124,6 +138,27 @@ public:
     int gainMin() const { return gainCapability_ ? static_cast<int>(gainCapability_->minValue) : 0; }
     int gainMax() const { return gainCapability_ ? static_cast<int>(gainCapability_->maxValue) : 0; }
     void setGainValue(int value);
+
+    bool roiSupported() const { return roiSupported_; }
+    int sensorWidth() const { return static_cast<int>(sensorWidth_); }
+    int sensorHeight() const { return static_cast<int>(sensorHeight_); }
+    int roiX() const { return static_cast<int>(currentConfiguration_.roi.x); }
+    int roiY() const { return static_cast<int>(currentConfiguration_.roi.y); }
+    int roiWidth() const {
+        return static_cast<int>(currentConfiguration_.roi.width > 0 ? currentConfiguration_.roi.width : sensorWidth_);
+    }
+    int roiHeight() const {
+        return static_cast<int>(currentConfiguration_.roi.height > 0 ? currentConfiguration_.roi.height
+                                                                       : sensorHeight_);
+    }
+
+    // Stops, reconfigures with the given crop and restarts the current
+    // device. Rejected (errorMessage set) while recording, disconnected, or
+    // when the backend doesn't support an ROI — mirrors the validation
+    // configure() itself does, so callers get a message without needing to
+    // stream a doomed reconfigure attempt.
+    Q_INVOKABLE void setRoi(int x, int y, int width, int height);
+    Q_INVOKABLE void resetRoi();
 
     // Debayers the latest frame on the calling thread. Intended for
     // LivePreviewItem to call from the render/GUI thread, never from the
@@ -195,6 +230,7 @@ signals:
     void frameChanged();
     void exposureChanged();
     void gainChanged();
+    void roiChanged();
     void lastCaptureStatusChanged();
     void recordingChanged();
     void recordingStatsChanged();
@@ -244,6 +280,11 @@ private:
     std::unique_ptr<astro::domain::ICameraDevice> device_;
     astro::domain::LatestFrameSlot frameSlot_;
     std::vector<CameraCandidate> availableCameras_;
+
+    astro::domain::StreamConfiguration currentConfiguration_;
+    bool roiSupported_ = false;
+    std::uint32_t sensorWidth_ = 0;
+    std::uint32_t sensorHeight_ = 0;
 
     // Guards recordingQueue_ against the race between onFrame() (checks/
     // pushes from the acquisition thread) and start/stopRecording() (create/

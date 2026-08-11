@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <cstring>
 
 #include "astro/driver/mock/BayerTestPattern.hpp"
 
@@ -30,7 +31,19 @@ StreamMode defaultSupportedMode() {
     mode.validBits = 8;
     mode.minFps = 1.0;
     mode.maxFps = 120.0;
+    mode.roiSupported = true;
     return mode;
+}
+
+// Bayer's 2x2 channel tiling repeats every 2 pixels, so an ROI whose origin
+// isn't on an even pixel would shift which channel lands where — reject
+// rather than silently mis-color the crop.
+bool isValidRoi(const Roi& roi, const StreamMode& mode) {
+    if (roi.width == 0 && roi.height == 0) {
+        return true;
+    }
+    return roi.width >= 2 && roi.height >= 2 && roi.width % 2 == 0 && roi.height % 2 == 0 && roi.x % 2 == 0 &&
+           roi.y % 2 == 0 && roi.x + roi.width <= mode.width && roi.y + roi.height <= mode.height;
 }
 
 bool sameMode(const StreamMode& a, const StreamMode& b) {
@@ -90,6 +103,14 @@ Result<void> MockCameraDevice::configure(const StreamConfiguration& configuratio
     if (configuration.targetFps < supportedMode_.minFps || configuration.targetFps > supportedMode_.maxFps) {
         return Result<void>::failure(
             {ErrorCode::UnsupportedFormat, "targetFps is outside the supported mode's fps range", ""});
+    }
+    if (configuration.roi.width > 0 && !supportedMode_.roiSupported) {
+        return Result<void>::failure({ErrorCode::UnsupportedFormat, "This mode does not support an ROI", ""});
+    }
+    if (!isValidRoi(configuration.roi, supportedMode_)) {
+        return Result<void>::failure(
+            {ErrorCode::UnsupportedFormat,
+             "ROI must have an even, in-bounds origin and even, non-zero dimensions", ""});
     }
 
     configuration_ = configuration;
@@ -172,17 +193,31 @@ Result<void> MockCameraDevice::setControl(ControlId id, const ControlValue& valu
         {ErrorCode::UnsupportedControl, "MockCameraDevice only exposes Exposure and Gain", ""});
 }
 
+std::shared_ptr<const BufferStorage> MockCameraDevice::cropToRoi(const Roi& roi) const {
+    const auto* fullBytes = reinterpret_cast<const std::uint8_t*>(testPattern_->data());
+    std::vector<std::byte> cropped(static_cast<std::size_t>(roi.width) * roi.height);
+    for (std::uint32_t row = 0; row < roi.height; ++row) {
+        const std::size_t srcOffset = (static_cast<std::size_t>(roi.y + row) * supportedMode_.width) + roi.x;
+        const std::size_t dstOffset = static_cast<std::size_t>(row) * roi.width;
+        std::memcpy(cropped.data() + dstOffset, fullBytes + srcOffset, roi.width);
+    }
+    return std::make_shared<const BufferStorage>(std::move(cropped));
+}
+
 void MockCameraDevice::runLoop() {
     while (running_.load(std::memory_order_relaxed)) {
+        const Roi& roi = configuration_.roi;
+        const bool cropped = roi.width > 0;
+
         FrameBuffer frame;
-        frame.descriptor.width = supportedMode_.width;
-        frame.descriptor.height = supportedMode_.height;
+        frame.descriptor.width = cropped ? roi.width : supportedMode_.width;
+        frame.descriptor.height = cropped ? roi.height : supportedMode_.height;
         frame.descriptor.storage = supportedMode_.storage;
         frame.descriptor.bayer = supportedMode_.bayer;
         frame.descriptor.validBits = supportedMode_.validBits;
         frame.metadata.sequence = sequence_.fetch_add(1, std::memory_order_relaxed);
         frame.metadata.hostArrival = std::chrono::steady_clock::now();
-        frame.storage = testPattern_;
+        frame.storage = cropped ? cropToRoi(roi) : testPattern_;
 
         sink_->onFrame(frame);
 

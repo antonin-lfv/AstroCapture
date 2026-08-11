@@ -32,6 +32,11 @@ public:
 private:
     void runLoop();
 
+    // Extracts the roi sub-rectangle from testPattern_ (a full-sensor
+    // Bayer8 buffer at supportedMode_'s dimensions) row by row. roi's
+    // origin/dimensions are assumed already validated (isValidRoi).
+    std::shared_ptr<const astro::domain::BufferStorage> cropToRoi(const astro::domain::Roi& roi) const;
+
     astro::domain::CameraDescriptor descriptor_;
     astro::domain::StreamMode supportedMode_;
 

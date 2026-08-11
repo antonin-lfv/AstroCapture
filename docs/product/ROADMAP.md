@@ -57,6 +57,37 @@ Exit criteria:
 - basic settings persistence;
 - smoke-tested production package on macOS.
 
+### Feature-parity backlog
+
+Gaps against reference planetary-capture software (FireCapture, SharpCap,
+ASICap), found by comparing against their common feature sets rather than
+derived from any specific hardware test. All of these are implementable and
+testable against the mock camera alone — none need Gate C. Priority order
+(highest first); see IMPLEMENTATION_BLUEPRINT.md section 22 for the plan
+behind each:
+
+1. ROI/crop capture — read out a sub-region of the sensor to raise
+   framerate; the single highest-impact planetary feature missing today.
+2. Preview overlays — zoom/loupe (pixel peeping), center crosshair,
+   histogram over/under-exposure (clipping) indicators.
+3. Additional camera controls — gamma, white balance (R/B gain),
+   brightness/offset, frame rate limit; today only exposure/gain exist.
+4. Advanced capture statistics — live min/max/mean pixel value; disk-write
+   fps vs. capture fps (divergence signals the writer thread falling
+   behind, which recordingDroppedFrames_ already counts but doesn't
+   explain).
+5. Real (bilinear) debayer for the live preview, replacing the
+   nearest-neighbor placeholder.
+6. Per-frame timestamps in recordings, needed by derotation tools such as
+   WinJUPOS.
+7. Keyboard shortcuts for capture/record start-stop — capture sessions are
+   often run with the mouse busy on framing/focus.
+8. Additional still-image save formats — 16-bit TIFF and/or FITS, PNG is
+   currently the only option.
+9. SER recording format — already tracked as its own research spike, see
+   IMPLEMENTATION_BLUEPRINT.md section 18; listed here only for relative
+   priority against the rest of this backlog.
+
 ## Gate E — Cross-platform productization
 
 Exit criteria:

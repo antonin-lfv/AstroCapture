@@ -367,3 +367,106 @@ compile/link -> local runnable executable
 ```
 
 Never make package creation a prerequisite for normal local debugging.
+
+## 22. Gate D feature-parity backlog
+
+Plan behind ROADMAP.md's Gate D "Feature-parity backlog", in the same
+priority order. Each item is scoped to be implementable and verifiable
+against the mock camera alone.
+
+### 22.1 ROI/crop capture
+
+- Add `Roi` (x, y, width, height) to `StreamConfiguration` alongside the
+  existing mode/fps fields (section 6); a backend that ignores it (mock,
+  initially) just returns the full frame.
+- Mock backend: honor it by cropping its generated Bayer pattern, so the
+  behavior is actually exercised in tests, not just plumbed through.
+- UI: a draggable/resizable rectangle over the live preview (own QML item,
+  reuses LivePreviewItem's frame-to-widget coordinate mapping), plus a
+  reset-to-full-frame action.
+- Changing ROI while connected re-runs `configure()`; treat it like any
+  other stream reconfiguration, not a special case.
+
+### 22.2 Preview overlays
+
+- Zoom/loupe: a small magnified inset following the cursor, sampling
+  `frame()`'s QImage directly (render/GUI-thread only, same contract
+  `frame()` already documents) — no new frame path needed.
+- Center crosshair: static QML overlay, no controller changes.
+- Clipping indicators: extend `Histogram` (astro_processing) with clipped
+  low/high pixel counts (already has the per-bin data, this is a
+  reduction over the existing bins) and expose via `HistogramItem`, then
+  render as colored highlights at the histogram's edges.
+
+### 22.3 Additional camera controls
+
+- Extend `ControlId` (CameraControl.hpp) with `Gamma`, `WhiteBalanceRed`,
+  `WhiteBalanceBlue`, `Brightness`/`Offset`, `FrameRateLimit`.
+- Follow the existing Exposure/Gain pattern exactly: capability-driven
+  (`*Supported` property, hidden control when absent), typed
+  `Q_PROPERTY` pairs on `PreviewController`, persisted the same way as
+  exposure/gain in `Settings`. Do not build a generic control-list model
+  for this (blueprint section 11 already flags that as the point to
+  generalize once a *third* control needs exposing — this adds five, so
+  it's worth reconsidering then, not preemptively now).
+
+### 22.4 Advanced capture statistics
+
+- Min/max/mean: compute alongside the existing histogram pass in
+  `astro::processing` (single extra reduction over pixels already being
+  visited, avoid a second full-frame scan) and expose next to the current
+  `fps`/`previewSkippedFrames` diagnostics.
+- Disk-write fps vs. capture fps: the writer thread already timestamps
+  each write for `recordingElapsedSeconds()`; derive a rolling write-fps
+  from that and compare against the acquisition-side `fps()`. Surfacing
+  the two side by side in the Recording sidebar section explains
+  `recordingDroppedFrames_` increases instead of just counting them.
+
+### 22.5 Real debayer for preview
+
+- Replace `FramePreviewImage`'s 2x2 nearest-neighbor Bayer8 path with
+  bilinear interpolation. Keep it in `astro_processing`, not inline in
+  the Qt-facing wrapper, so section 20's synthetic-patch Bayer test can
+  cover it directly instead of only through the UI.
+- Nearest-neighbor was always documented as a placeholder (see
+  FramePreviewImage.hpp); this closes that out rather than introducing
+  new scope.
+
+### 22.6 Per-frame timestamps in recordings
+
+- `FrameDescriptor`/`FrameBuffer` already carry a capture timestamp
+  (used for fps calculation) — thread it into `IRecorder::writeFrame()`
+  and `RawSequenceRecorder`'s per-frame record, bumping the `ACRAWSEQ`
+  format version.
+- `RawSequenceReader` needs the matching read-side change; update its
+  round-trip test (core/recording) to assert the timestamp survives.
+- Design the on-disk field so a future `SerRecorder` (section 18) can
+  populate SER's own trailer timestamp block from the same source data.
+
+### 22.7 Keyboard shortcuts
+
+- QML `Shortcut` items in Main.qml bound to the same invokables the
+  sidebar buttons already call (`captureStillImage`, `startRecording`/
+  `stopRecording`) — no controller changes, this is UI-only wiring.
+- Disable/no-op consistently with the buttons' own enabled state (e.g.
+  don't let a shortcut start a second recording).
+
+### 22.8 Additional still-image save formats
+
+- `captureStillImage()` currently hardcodes PNG. Introduce a save-format
+  setting (Settings.hpp, same per-app scope as saveDirectory) with PNG/
+  TIFF16/FITS options.
+- TIFF16 needs the pre-debayer or 16-bit-if-available pixel data, not the
+  already-8-bit-converted preview QImage — check what precision the
+  backend actually delivers before promising 16-bit output.
+- FITS is a plain flat binary format with a text header; a minimal writer
+  (single HDU, no WCS) is a small, self-contained addition — no
+  third-party dependency needed for this scope.
+
+### 22.9 SER recording format
+
+- Tracked in full in section 18; not re-planned here. Its priority
+  relative to 22.1-22.8 is the ROADMAP.md ordering, not a statement that
+  it's next by default — the research spike (spec, golden files,
+  cross-validation) is a prerequisite before implementation work can even
+  start, unlike the other items here.

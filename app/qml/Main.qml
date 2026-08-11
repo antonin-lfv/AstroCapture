@@ -272,6 +272,10 @@ ApplicationWindow {
                                 iconName: "camera"
                                 text: "Capture"
                                 onClicked: previewController.captureStillImage()
+
+                                ToolTip.visible: hovered
+                                ToolTip.delay: 400
+                                ToolTip.text: "Shortcut: C"
                             }
 
                             IconButton {
@@ -282,6 +286,10 @@ ApplicationWindow {
                                 activeBorderColor: "#e5484d"
                                 onClicked: previewController.recording ? previewController.stopRecording()
                                                                          : previewController.startRecording()
+
+                                ToolTip.visible: hovered
+                                ToolTip.delay: 400
+                                ToolTip.text: "Shortcut: R"
                             }
                         }
 
@@ -739,6 +747,23 @@ ApplicationWindow {
     SettingsPanel {
         id: settingsPanel
         controller: previewController
+    }
+
+    // Gate D backlog 22.7: capture sessions are often run with the mouse
+    // busy on framing/focus. Disabled while a text field has focus or the
+    // settings popup is open, so typing "c"/"r" (e.g. into a target name)
+    // doesn't accidentally trigger them.
+    Shortcut {
+        sequence: "C"
+        enabled: previewController.connected && !targetNameField.activeFocus && !settingsPanel.opened
+        onActivated: previewController.captureStillImage()
+    }
+
+    Shortcut {
+        sequence: "R"
+        enabled: previewController.connected && !targetNameField.activeFocus && !settingsPanel.opened
+        onActivated: previewController.recording ? previewController.stopRecording()
+                                                   : previewController.startRecording()
     }
 
 }

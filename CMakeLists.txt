@@ -18,10 +18,6 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 option(ASTRO_BUILD_TESTS "Build tests" ON)
 option(ASTRO_ENABLE_DEVTOOLS "Enable developer tools" OFF)
 option(ASTRO_ENABLE_MOCK_CAMERA "Build mock camera backend" ON)
-# Generic AVFoundation/UVC webcam backend. macOS only; silently unavailable
-# elsewhere even when this stays ON, so it can share one value across
-# presets/platforms like ASTRO_ENABLE_MOCK_CAMERA does.
-option(ASTRO_ENABLE_DRIVER_UVC "Build the generic UVC/webcam camera backend (macOS only)" ON)
 
 if(ASTRO_BUILD_TESTS)
     enable_testing()
@@ -34,11 +30,6 @@ add_subdirectory(core/recording)
 
 if(ASTRO_ENABLE_MOCK_CAMERA)
     add_subdirectory(drivers/mock)
-endif()
-
-if(ASTRO_ENABLE_DRIVER_UVC AND APPLE)
-    enable_language(OBJCXX)
-    add_subdirectory(drivers/uvc)
 endif()
 
 add_subdirectory(app)

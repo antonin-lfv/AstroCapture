@@ -6,9 +6,11 @@ The changelog should describe user-visible changes, not every commit.
 
 ## Unreleased
 
-- Live preview: "Rescan for cameras" now tries a connected USB webcam or the
-  Mac's built-in camera first, falling back to a synthetic test camera when
-  none is found.
+- Live preview: "Rescan for cameras" connects to a synthetic test camera
+  until a real astronomy camera backend exists (Gate C). An earlier build
+  briefly used the Mac's built-in webcam as a stand-in; it was removed
+  since generic webcams don't expose exposure/gain, making them unsuitable
+  for developing or testing those controls.
 - Exposure and gain controls, shown only for cameras that actually support
   them.
 - Live histogram of the current frame.

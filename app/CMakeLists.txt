@@ -48,7 +48,3 @@ if(ASTRO_ENABLE_MOCK_CAMERA)
     target_compile_definitions(AstroCapture PRIVATE ASTRO_ENABLE_MOCK_CAMERA)
 endif()
 
-if(ASTRO_ENABLE_DRIVER_UVC AND APPLE)
-    target_link_libraries(AstroCapture PRIVATE astro::driver::uvc)
-    target_compile_definitions(AstroCapture PRIVATE ASTRO_ENABLE_DRIVER_UVC)
-endif()

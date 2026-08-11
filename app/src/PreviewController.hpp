@@ -219,7 +219,7 @@ private:
     struct CameraCandidate {
         QString id;
         QString displayName;
-        QString backendId;  // "uvc" or "mock"
+        QString backendId;  // "mock", or a real backend's id once one exists (Gate C)
     };
 
     // Opens, configures and starts a specific device id from `backend`.

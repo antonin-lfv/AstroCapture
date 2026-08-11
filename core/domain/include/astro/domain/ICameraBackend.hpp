@@ -9,8 +9,9 @@
 
 namespace astro::domain {
 
-// A technology/provider capable of enumerating devices (e.g. mock, UVC,
-// a vendor SDK). Drivers depend on this contract; the reverse never happens.
+// A technology/provider capable of enumerating devices (e.g. mock, or a
+// real camera's vendor SDK). Drivers depend on this contract; the reverse
+// never happens.
 class ICameraBackend {
 public:
     virtual ~ICameraBackend() = default;

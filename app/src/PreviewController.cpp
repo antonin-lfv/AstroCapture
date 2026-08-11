@@ -13,9 +13,6 @@
 #ifdef ASTRO_ENABLE_MOCK_CAMERA
 #include "astro/driver/mock/MockCameraBackend.hpp"
 #endif
-#ifdef ASTRO_ENABLE_DRIVER_UVC
-#include "astro/driver/uvc/UvcCameraBackend.hpp"
-#endif
 
 namespace astro::app {
 
@@ -70,12 +67,6 @@ std::unique_ptr<ICameraDevice> PreviewController::openAndStart(ICameraBackend& b
 }
 
 std::unique_ptr<ICameraDevice> PreviewController::openCandidate(const CameraCandidate& candidate) {
-#ifdef ASTRO_ENABLE_DRIVER_UVC
-    if (candidate.backendId == QStringLiteral("uvc")) {
-        astro::driver::uvc::UvcCameraBackend backend;
-        return openAndStart(backend, candidate.id.toStdString());
-    }
-#endif
 #ifdef ASTRO_ENABLE_MOCK_CAMERA
     if (candidate.backendId == QStringLiteral("mock")) {
         astro::driver::mock::MockCameraBackend backend;
@@ -149,18 +140,12 @@ void PreviewController::rescan() {
     errorMessage_.clear();
 
     // Real hardware only counts here: mock is a fallback, never a peer
-    // choice, so it must not turn a single-webcam rescan into a 2-item
-    // picker (webcam + mock) — see the class comment.
+    // choice, so it must not turn a single-camera rescan into a 2-item
+    // picker (real + mock) — see the class comment. No real backend is
+    // compiled in yet (Gate C), so this stays empty until one exists; a
+    // future backend enumerates into realCandidates here the same way the
+    // removed UVC backend did.
     std::vector<CameraCandidate> realCandidates;
-#ifdef ASTRO_ENABLE_DRIVER_UVC
-    {
-        astro::driver::uvc::UvcCameraBackend backend;
-        for (const auto& descriptor : backend.enumerate()) {
-            realCandidates.push_back({QString::fromStdString(descriptor.id),
-                                       QString::fromStdString(descriptor.displayName), QStringLiteral("uvc")});
-        }
-    }
-#endif
 
     if (realCandidates.size() == 1) {
         if (auto device = openCandidate(realCandidates.front())) {

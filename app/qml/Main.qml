@@ -301,7 +301,7 @@ ApplicationWindow {
 
                     // Capability-driven: the whole section (and each
                     // control within it) is hidden for backends that don't
-                    // expose it — e.g. the UVC/webcam backend today.
+                    // expose it.
                     SidebarSection {
                         title: "Camera Controls"
                         visible: previewController.exposureSupported || previewController.gainSupported
@@ -417,7 +417,7 @@ ApplicationWindow {
 
             ToolTip.visible: hovered
             ToolTip.delay: 400
-            ToolTip.text: "Tries a connected webcam first, falls back to the mock test camera. The reference planetary camera backend ships in Gate C."
+            ToolTip.text: "Connects to the mock test camera until a real planetary camera backend ships in Gate C."
         }
 
         // Only populated when Rescan finds more than one real camera —

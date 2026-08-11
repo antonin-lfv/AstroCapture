@@ -25,266 +25,340 @@ ApplicationWindow {
     // "Rescan" both discovers and connects it in one step (AGENT.md 10.6,
     // USER_FLOWS Flow 1). Real discovery/selection lands with the first
     // hardware backend (Gate C).
-    ColumnLayout {
+    //
+    // Layout: preview (+ histogram) fills the left side; a fixed-width
+    // sidebar on the right holds every control, grouped into labeled
+    // sections — the FireCapture/SharpCap-style split used by most
+    // planetary capture software, instead of stacking everything in a
+    // strip below the preview.
+    RowLayout {
         anchors.fill: parent
         visible: previewController.connected
         spacing: 0
 
-        LivePreviewItem {
-            id: livePreview
-            controller: previewController
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-        }
-
-        HistogramItem {
-            id: histogramItem
-            controller: previewController
-            Layout.fillWidth: true
-            Layout.preferredHeight: 64
-            Layout.leftMargin: 12
-            Layout.rightMargin: 12
-            Layout.topMargin: 8
-        }
-
         ColumnLayout {
             Layout.fillWidth: true
-            Layout.margins: 12
-            spacing: 10
+            Layout.fillHeight: true
+            spacing: 8
 
-            RowLayout {
+            LivePreviewItem {
+                id: livePreview
+                controller: previewController
                 Layout.fillWidth: true
-                spacing: 16
+                Layout.fillHeight: true
+            }
 
-                Text {
-                    text: previewController.cameraName
-                    color: "#e8eaed"
-                    font.pixelSize: 13
-                }
+            HistogramItem {
+                id: histogramItem
+                controller: previewController
+                Layout.fillWidth: true
+                Layout.preferredHeight: 90
+                Layout.leftMargin: 12
+                Layout.rightMargin: 12
+                Layout.bottomMargin: 12
+            }
+        }
 
-                IconButton {
-                    iconName: "close"
-                    text: "Disconnect"
-                    borderColor: "#242830"
-                    onClicked: previewController.disconnectCamera()
+        Rectangle {
+            Layout.fillWidth: false
+            Layout.fillHeight: true
+            Layout.preferredWidth: 1
+            color: "#242830"
+        }
 
-                    ToolTip.visible: hovered
-                    ToolTip.delay: 400
-                    ToolTip.text: "Disconnect this camera so Rescan can pick a different one."
-                }
+        Rectangle {
+            Layout.preferredWidth: 300
+            Layout.fillHeight: true
+            color: "#101318"
 
-                Text {
-                    text: "Frames: " + previewController.frameCount
-                    color: "#9aa0a6"
-                    font.pixelSize: 13
-                }
+            ScrollView {
+                id: sidebarScroll
+                anchors.fill: parent
+                anchors.margins: 16
+                clip: true
 
-                Text {
-                    text: previewController.fps.toFixed(1) + " fps"
-                    color: "#9aa0a6"
-                    font.pixelSize: 13
-                }
+                ColumnLayout {
+                    width: sidebarScroll.availableWidth
+                    spacing: 16
 
-                Text {
-                    text: "Preview skipped: " + previewController.previewSkippedFrames
-                    color: "#9aa0a6"
-                    font.pixelSize: 13
-                }
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: 8
 
-                Item { Layout.fillWidth: true }
+                        Text {
+                            text: previewController.cameraName
+                            color: "#e8eaed"
+                            font.pixelSize: 14
+                            font.weight: Font.DemiBold
+                            elide: Text.ElideRight
+                            Layout.fillWidth: true
+                        }
 
-                TextField {
-                    id: targetNameField
-                    Layout.preferredWidth: 140
-                    placeholderText: "Target (optional)"
-                    text: previewController.targetName
-                    color: "#e8eaed"
-                    font.pixelSize: 12
-                    onEditingFinished: previewController.targetName = text
-                    background: Rectangle {
-                        implicitHeight: 28
-                        radius: 6
-                        color: "#1c2026"
-                        border.color: "#3a4048"
-                        border.width: 1
+                        IconButton {
+                            iconName: "settings"
+                            borderColor: "#242830"
+                            onClicked: settingsPanel.open()
+
+                            ToolTip.visible: hovered
+                            ToolTip.delay: 400
+                            ToolTip.text: "Save location and presets"
+                        }
                     }
-                }
 
-                IconButton {
-                    iconName: "camera"
-                    text: "Capture"
-                    onClicked: previewController.captureStillImage()
-                }
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: 10
 
-                IconButton {
-                    iconName: previewController.recording ? "stop" : "camera"
-                    text: previewController.recording ? "Stop" : "Record"
-                    active: previewController.recording
-                    activeBorderColor: "#e5484d"
-                    onClicked: previewController.recording ? previewController.stopRecording()
-                                                             : previewController.startRecording()
-                }
-            }
+                        Text {
+                            text: previewController.frameCount + " frames"
+                            color: "#9aa0a6"
+                            font.pixelSize: 11
+                        }
 
-            Text {
-                Layout.fillWidth: true
-                visible: previewController.lastCaptureStatus.length > 0
-                text: previewController.lastCaptureStatus
-                color: "#9aa0a6"
-                font.pixelSize: 11
-                elide: Text.ElideMiddle
-            }
+                        Text {
+                            text: previewController.fps.toFixed(1) + " fps"
+                            color: "#9aa0a6"
+                            font.pixelSize: 11
+                        }
 
-            RowLayout {
-                Layout.fillWidth: true
-                visible: !previewController.recording
-                spacing: 8
+                        Item { Layout.fillWidth: true }
 
-                Text {
-                    text: "Stop recording after"
-                    color: "#9aa0a6"
-                    font.pixelSize: 12
-                }
+                        Text {
+                            text: "skipped " + previewController.previewSkippedFrames
+                            color: "#5f6368"
+                            font.pixelSize: 11
+                        }
+                    }
 
-                SpinBox {
-                    id: frameTargetSpin
-                    from: 0
-                    to: 1000000
-                    editable: true
-                    value: previewController.recordingTargetFrameCount
-                    onValueModified: previewController.recordingTargetFrameCount = value
-                }
+                    IconButton {
+                        Layout.fillWidth: true
+                        iconName: "close"
+                        text: "Disconnect"
+                        borderColor: "#242830"
+                        onClicked: previewController.disconnectCamera()
 
-                Text {
-                    text: "frames"
-                    color: "#9aa0a6"
-                    font.pixelSize: 12
-                }
+                        ToolTip.visible: hovered
+                        ToolTip.delay: 400
+                        ToolTip.text: "Disconnect this camera so Rescan can pick a different one."
+                    }
 
-                Text {
-                    text: "or"
-                    color: "#5f6368"
-                    font.pixelSize: 12
-                }
+                    Rectangle { Layout.fillWidth: true; height: 1; color: "#242830" }
 
-                SpinBox {
-                    id: durationTargetSpin
-                    from: 0
-                    to: 36000
-                    editable: true
-                    value: previewController.recordingTargetDurationSeconds
-                    onValueModified: previewController.recordingTargetDurationSeconds = value
-                }
+                    SidebarSection {
+                        title: "Capture"
 
-                Text {
-                    text: "seconds (0 = unlimited)"
-                    color: "#9aa0a6"
-                    font.pixelSize: 12
-                }
-            }
+                        TextField {
+                            id: targetNameField
+                            Layout.fillWidth: true
+                            placeholderText: "Target (optional)"
+                            text: previewController.targetName
+                            color: "#e8eaed"
+                            font.pixelSize: 12
+                            onEditingFinished: previewController.targetName = text
+                            background: Rectangle {
+                                implicitHeight: 28
+                                radius: 6
+                                color: "#1c2026"
+                                border.color: "#3a4048"
+                                border.width: 1
+                            }
+                        }
 
-            RowLayout {
-                Layout.fillWidth: true
-                visible: previewController.recording
-                spacing: 16
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 8
 
-                Rectangle {
-                    width: 8
-                    height: 8
-                    radius: 4
-                    color: "#e5484d"
-                    Layout.alignment: Qt.AlignVCenter
-                }
+                            IconButton {
+                                Layout.fillWidth: true
+                                iconName: "camera"
+                                text: "Capture"
+                                onClicked: previewController.captureStillImage()
+                            }
 
-                Text {
-                    text: previewController.recordingElapsedSeconds.toFixed(1) + " s"
-                    color: "#e8eaed"
-                    font.pixelSize: 12
-                }
+                            IconButton {
+                                Layout.fillWidth: true
+                                iconName: previewController.recording ? "stop" : "camera"
+                                text: previewController.recording ? "Stop" : "Record"
+                                active: previewController.recording
+                                activeBorderColor: "#e5484d"
+                                onClicked: previewController.recording ? previewController.stopRecording()
+                                                                         : previewController.startRecording()
+                            }
+                        }
 
-                Text {
-                    text: "Recorded: " + previewController.recordingFrameCount
-                    color: "#9aa0a6"
-                    font.pixelSize: 12
-                }
+                        Text {
+                            Layout.fillWidth: true
+                            visible: previewController.lastCaptureStatus.length > 0
+                            text: previewController.lastCaptureStatus
+                            color: "#9aa0a6"
+                            font.pixelSize: 11
+                            wrapMode: Text.Wrap
+                        }
+                    }
 
-                // Never silent (ROADMAP.md Gate D: "no silent dropped
-                // frames") — shown even at zero so a sudden increase is
-                // noticeable, and in red once it happens.
-                Text {
-                    text: "Dropped: " + previewController.recordingDroppedFrames
-                    color: previewController.recordingDroppedFrames > 0 ? "#e5484d" : "#9aa0a6"
-                    font.pixelSize: 12
-                }
-            }
+                    Rectangle { Layout.fillWidth: true; height: 1; color: "#242830" }
 
-            Text {
-                Layout.fillWidth: true
-                visible: !previewController.recording && previewController.recordingStatus.length > 0
-                text: previewController.recordingStatus
-                color: "#9aa0a6"
-                font.pixelSize: 11
-                elide: Text.ElideMiddle
-            }
+                    SidebarSection {
+                        title: "Recording"
 
-            // Capability-driven: hidden entirely for backends that don't
-            // expose the control (e.g. the UVC/webcam backend today).
-            RowLayout {
-                Layout.fillWidth: true
-                visible: previewController.exposureSupported
-                spacing: 12
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            visible: !previewController.recording
+                            spacing: 6
 
-                Text {
-                    text: "Exposure"
-                    color: "#9aa0a6"
-                    font.pixelSize: 12
-                    Layout.preferredWidth: 64
-                }
+                            Text {
+                                text: "Stop recording after"
+                                color: "#9aa0a6"
+                                font.pixelSize: 12
+                            }
 
-                Slider {
-                    id: exposureSlider
-                    Layout.fillWidth: true
-                    from: previewController.exposureMinMicroseconds
-                    to: previewController.exposureMaxMicroseconds
-                    value: previewController.exposureMicroseconds
-                    onMoved: previewController.exposureMicroseconds = value
-                }
+                            RowLayout {
+                                Layout.fillWidth: true
+                                spacing: 6
+                                DarkSpinBox {
+                                    id: frameTargetSpin
+                                    Layout.fillWidth: true
+                                    from: 0
+                                    to: 1000000
+                                    value: previewController.recordingTargetFrameCount
+                                    onValueModified: previewController.recordingTargetFrameCount = value
+                                }
+                                Text { text: "frames"; color: "#9aa0a6"; font.pixelSize: 11 }
+                            }
 
-                Text {
-                    text: (previewController.exposureMicroseconds / 1000).toFixed(1) + " ms"
-                    color: "#e8eaed"
-                    font.pixelSize: 12
-                    Layout.preferredWidth: 64
-                }
-            }
+                            Text { text: "or"; color: "#5f6368"; font.pixelSize: 11 }
 
-            RowLayout {
-                Layout.fillWidth: true
-                visible: previewController.gainSupported
-                spacing: 12
+                            RowLayout {
+                                Layout.fillWidth: true
+                                spacing: 6
+                                DarkSpinBox {
+                                    id: durationTargetSpin
+                                    Layout.fillWidth: true
+                                    from: 0
+                                    to: 36000
+                                    value: previewController.recordingTargetDurationSeconds
+                                    onValueModified: previewController.recordingTargetDurationSeconds = value
+                                }
+                                Text { text: "sec"; color: "#9aa0a6"; font.pixelSize: 11 }
+                            }
 
-                Text {
-                    text: "Gain"
-                    color: "#9aa0a6"
-                    font.pixelSize: 12
-                    Layout.preferredWidth: 64
-                }
+                            Text {
+                                text: "0 = unlimited"
+                                color: "#5f6368"
+                                font.pixelSize: 10
+                            }
+                        }
 
-                Slider {
-                    id: gainSlider
-                    Layout.fillWidth: true
-                    from: previewController.gainMin
-                    to: previewController.gainMax
-                    stepSize: 1
-                    value: previewController.gainValue
-                    onMoved: previewController.gainValue = Math.round(value)
-                }
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            visible: previewController.recording
+                            spacing: 6
 
-                Text {
-                    text: previewController.gainValue
-                    color: "#e8eaed"
-                    font.pixelSize: 12
-                    Layout.preferredWidth: 64
+                            RowLayout {
+                                spacing: 8
+                                Rectangle { width: 8; height: 8; radius: 4; color: "#e5484d" }
+                                Text {
+                                    text: previewController.recordingElapsedSeconds.toFixed(1) + " s"
+                                    color: "#e8eaed"
+                                    font.pixelSize: 13
+                                    font.weight: Font.DemiBold
+                                }
+                            }
+
+                            Text {
+                                text: "Recorded: " + previewController.recordingFrameCount
+                                color: "#9aa0a6"
+                                font.pixelSize: 12
+                            }
+
+                            // Never silent (ROADMAP.md Gate D: "no silent
+                            // dropped frames") — shown even at zero so a
+                            // sudden increase is noticeable, red once it
+                            // happens.
+                            Text {
+                                text: "Dropped: " + previewController.recordingDroppedFrames
+                                color: previewController.recordingDroppedFrames > 0 ? "#e5484d" : "#9aa0a6"
+                                font.pixelSize: 12
+                            }
+                        }
+
+                        Text {
+                            Layout.fillWidth: true
+                            visible: !previewController.recording && previewController.recordingStatus.length > 0
+                            text: previewController.recordingStatus
+                            color: "#9aa0a6"
+                            font.pixelSize: 11
+                            wrapMode: Text.Wrap
+                        }
+                    }
+
+                    Rectangle {
+                        Layout.fillWidth: true
+                        height: 1
+                        color: "#242830"
+                        visible: previewController.exposureSupported || previewController.gainSupported
+                    }
+
+                    // Capability-driven: the whole section (and each
+                    // control within it) is hidden for backends that don't
+                    // expose it — e.g. the UVC/webcam backend today.
+                    SidebarSection {
+                        title: "Camera Controls"
+                        visible: previewController.exposureSupported || previewController.gainSupported
+
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            visible: previewController.exposureSupported
+                            spacing: 4
+
+                            RowLayout {
+                                Layout.fillWidth: true
+                                Text { text: "Exposure"; color: "#9aa0a6"; font.pixelSize: 12; Layout.fillWidth: true }
+                                Text {
+                                    text: (previewController.exposureMicroseconds / 1000).toFixed(1) + " ms"
+                                    color: "#e8eaed"
+                                    font.pixelSize: 12
+                                }
+                            }
+
+                            Slider {
+                                id: exposureSlider
+                                Layout.fillWidth: true
+                                from: previewController.exposureMinMicroseconds
+                                to: previewController.exposureMaxMicroseconds
+                                value: previewController.exposureMicroseconds
+                                onMoved: previewController.exposureMicroseconds = value
+                            }
+                        }
+
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            visible: previewController.gainSupported
+                            spacing: 4
+
+                            RowLayout {
+                                Layout.fillWidth: true
+                                Text { text: "Gain"; color: "#9aa0a6"; font.pixelSize: 12; Layout.fillWidth: true }
+                                Text {
+                                    text: previewController.gainValue
+                                    color: "#e8eaed"
+                                    font.pixelSize: 12
+                                }
+                            }
+
+                            Slider {
+                                id: gainSlider
+                                Layout.fillWidth: true
+                                from: previewController.gainMin
+                                to: previewController.gainMax
+                                stepSize: 1
+                                value: previewController.gainValue
+                                onMoved: previewController.gainValue = Math.round(value)
+                            }
+                        }
+                    }
+
+                    Item { Layout.fillHeight: true }
                 }
             }
         }
@@ -387,6 +461,7 @@ ApplicationWindow {
         anchors.top: parent.top
         anchors.right: parent.right
         anchors.margins: 12
+        visible: !previewController.connected
         iconName: "settings"
         borderColor: "#242830"
         onClicked: settingsPanel.open()

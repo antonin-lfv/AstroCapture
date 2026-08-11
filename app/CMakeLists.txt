@@ -22,6 +22,8 @@ qt_add_qml_module(AstroCapture
         qml/Icon.qml
         qml/IconButton.qml
         qml/SettingsPanel.qml
+        qml/DarkSpinBox.qml
+        qml/SidebarSection.qml
     SOURCES
         src/PreviewController.hpp
         src/PreviewController.cpp

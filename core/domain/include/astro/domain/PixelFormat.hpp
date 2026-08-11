@@ -32,4 +32,11 @@ std::string_view to_string(PixelStorage storage);
 // Returns 0 for Unknown, since callers must treat that as "cannot size a buffer".
 std::size_t bytesPerPixel(PixelStorage storage);
 
+// Which channel (0 = red, 1 = green, 2 = blue) a Bayer mosaic sample
+// belongs to at pixel (x, y), given the pattern's 2x2 tile layout. The
+// single place this mapping is defined — drivers/mock's synthetic mosaic
+// and astro_processing's debayer both key off it, rather than each
+// re-deriving the same four-way switch. Returns -1 for BayerPattern::None.
+int bayerChannelAt(BayerPattern pattern, std::uint32_t x, std::uint32_t y);
+
 }  // namespace astro::domain

@@ -9,34 +9,16 @@ using astro::domain::BayerPattern;
 
 namespace {
 
-constexpr int kChannelR = 0;
-constexpr int kChannelG = 1;
-constexpr int kChannelB = 2;
-
-// Which RGB channel sits at (x, y) for a given Bayer pattern, using the
-// pattern's own 2x2 tile definition (top-left, top-right, bottom-left,
-// bottom-right).
+// astro::domain::bayerChannelAt returns -1 for BayerPattern::None (a
+// caller-error sentinel other callers might want to handle differently);
+// this mosaic always has a concrete pattern, so translate that case into a
+// thrown precondition failure instead of propagating -1 as a channel index.
 int channelAt(BayerPattern pattern, std::uint32_t x, std::uint32_t y) {
-    const bool evenRow = (y % 2) == 0;
-    const bool evenCol = (x % 2) == 0;
-
-    switch (pattern) {
-        case BayerPattern::RGGB:
-            if (evenRow) return evenCol ? kChannelR : kChannelG;
-            return evenCol ? kChannelG : kChannelB;
-        case BayerPattern::BGGR:
-            if (evenRow) return evenCol ? kChannelB : kChannelG;
-            return evenCol ? kChannelG : kChannelR;
-        case BayerPattern::GRBG:
-            if (evenRow) return evenCol ? kChannelG : kChannelR;
-            return evenCol ? kChannelB : kChannelG;
-        case BayerPattern::GBRG:
-            if (evenRow) return evenCol ? kChannelG : kChannelB;
-            return evenCol ? kChannelR : kChannelG;
-        case BayerPattern::None:
-            break;
+    const int channel = astro::domain::bayerChannelAt(pattern, x, y);
+    if (channel < 0) {
+        throw std::invalid_argument("mosaicToBayer8: pattern must not be BayerPattern::None");
     }
-    throw std::invalid_argument("mosaicToBayer8: pattern must not be BayerPattern::None");
+    return channel;
 }
 
 }  // namespace

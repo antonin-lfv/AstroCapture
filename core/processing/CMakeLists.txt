@@ -1,5 +1,6 @@
 add_library(astro_processing STATIC
     src/Histogram.cpp
+    src/Debayer.cpp
 )
 add_library(astro::processing ALIAS astro_processing)
 

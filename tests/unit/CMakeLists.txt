@@ -40,4 +40,12 @@ if(ASTRO_ENABLE_MOCK_CAMERA)
         SOURCES mock/MockCameraDeviceTest.cpp
         LIBS astro::driver::mock
     )
+
+    # Uses drivers/mock's synthetic Bayer generator to produce the known
+    # color-bar mosaic astro_processing's debayer is checked against;
+    # gated the same way since it needs that generator.
+    astro_add_unit_test(astro_processing_debayer_test
+        SOURCES processing/DebayerTest.cpp
+        LIBS astro::processing astro::driver::mock
+    )
 endif()

@@ -15,7 +15,12 @@ void LivePreviewItem::setController(PreviewController* controller) {
     }
     controller_ = controller;
     if (controller_) {
-        connect(controller_, &PreviewController::frameChanged, this, [this] { update(); });
+        // previewTick(), not frameChanged(): repainting on every acquired
+        // frame (100+/sec) made window/slider dragging visibly janky by
+        // re-running debayer on the GUI thread that often. previewTick is
+        // deliberately rate-capped; frame() always returns whatever is
+        // newest regardless, so this only throttles how often we ask.
+        connect(controller_, &PreviewController::previewTick, this, [this] { update(); });
     }
     emit controllerChanged();
     update();

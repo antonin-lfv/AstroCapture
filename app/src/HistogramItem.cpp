@@ -67,7 +67,10 @@ void HistogramItem::setController(PreviewController* controller) {
     }
     controller_ = controller;
     if (controller_) {
-        connect(controller_, &PreviewController::frameChanged, this, [this] { update(); });
+        // previewTick(), not frameChanged() — see LivePreviewItem's
+        // identical comment; histogram computation is just as expensive
+        // as debayer and was being re-run just as often.
+        connect(controller_, &PreviewController::previewTick, this, [this] { update(); });
     }
     emit controllerChanged();
     update();

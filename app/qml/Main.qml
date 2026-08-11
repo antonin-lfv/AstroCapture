@@ -252,6 +252,8 @@ ApplicationWindow {
                             placeholderText: "Target (optional)"
                             text: previewController.targetName
                             color: "#e8eaed"
+                            selectedTextColor: "#e8eaed"
+                            selectionColor: "#2a3d6b"
                             font.pixelSize: 12
                             onEditingFinished: previewController.targetName = text
                             background: Rectangle {
@@ -324,7 +326,12 @@ ApplicationWindow {
                                 spacing: 6
                                 DarkSpinBox {
                                     id: frameTargetSpin
-                                    Layout.fillWidth: true
+                                    // Fixed rather than fillWidth: the
+                                    // "frames"/"sec" labels differ in
+                                    // length, which made the two spin
+                                    // boxes different widths when each
+                                    // filled "row minus its own label".
+                                    Layout.preferredWidth: sidebarScroll.availableWidth * 0.66
                                     from: 0
                                     to: 1000000
                                     value: previewController.recordingTargetFrameCount
@@ -340,7 +347,7 @@ ApplicationWindow {
                                 spacing: 6
                                 DarkSpinBox {
                                     id: durationTargetSpin
-                                    Layout.fillWidth: true
+                                    Layout.preferredWidth: sidebarScroll.availableWidth * 0.66
                                     from: 0
                                     to: 36000
                                     value: previewController.recordingTargetDurationSeconds

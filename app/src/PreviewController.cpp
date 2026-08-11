@@ -84,6 +84,18 @@ PreviewController::PreviewController(QObject* parent) : QObject(parent) {
     // Qt queues delivery to this object's thread (GUI) automatically.
     connect(this, &PreviewController::recordingTargetReached, this, &PreviewController::stopRecording,
             Qt::QueuedConnection);
+
+    // 20Hz: smooth enough for a live camera preview, far cheaper than
+    // repainting (and re-running debayer/histogram) at the camera's own
+    // fps — see previewTick()'s comment. Deliberately chosen rather than
+    // relying on Qt's own render-loop pacing to cap the rate: measured
+    // behavior of that varies (16fps on this dev machine, for reasons
+    // unrelated to how expensive paint() actually is), and isn't something
+    // this project controls or can guarantee across platforms. Only
+    // running while connected (finishConnecting()/disconnectCamera()
+    // start/stop it) so it costs nothing at idle.
+    previewTimer_.setInterval(50);
+    connect(&previewTimer_, &QTimer::timeout, this, &PreviewController::previewTick);
 }
 
 PreviewController::~PreviewController() {
@@ -144,7 +156,9 @@ void PreviewController::finishConnecting(std::unique_ptr<ICameraDevice> device) 
     frameCount_.store(0, std::memory_order_relaxed);
     renderedFrameCount_.store(0, std::memory_order_relaxed);
     lastRenderedSequence_.reset();
+    cachedFrameImage_ = QImage();
     startTime_ = std::chrono::steady_clock::now();
+    previewTimer_.start();
 
     roiSupported_ = currentConfiguration_.mode.roiSupported;
     sensorWidth_ = currentConfiguration_.mode.width;
@@ -355,6 +369,8 @@ void PreviewController::disconnectCamera() {
     frameCount_.store(0, std::memory_order_relaxed);
     renderedFrameCount_.store(0, std::memory_order_relaxed);
     lastRenderedSequence_.reset();
+    cachedFrameImage_ = QImage();
+    previewTimer_.stop();
 
     emit connectedChanged();
     emit frameCountChanged();
@@ -466,6 +482,7 @@ void PreviewController::setRoi(int x, int y, int width, int height) {
     currentConfiguration_ = newConfiguration;
     frameSlot_.clear();
     lastRenderedSequence_.reset();
+    cachedFrameImage_ = QImage();
     emit roiChanged();
 }
 
@@ -494,8 +511,13 @@ QImage PreviewController::frame() const {
     if (lastRenderedSequence_ != latest->metadata.sequence) {
         lastRenderedSequence_ = latest->metadata.sequence;
         renderedFrameCount_.fetch_add(1, std::memory_order_relaxed);
+        // Debayering is the expensive part of this call; LivePreviewItem
+        // and ZoomLoupeItem both call frame() independently on the same
+        // previewTick, so without this cache an unchanged frame was being
+        // fully re-debayered twice per tick for no reason.
+        cachedFrameImage_ = frameToPreviewImage(latest->descriptor, latest->storage->data(), latest->storage->size());
     }
-    return frameToPreviewImage(latest->descriptor, latest->storage->data(), latest->storage->size());
+    return cachedFrameImage_;
 }
 
 astro::processing::Histogram PreviewController::histogram() const {

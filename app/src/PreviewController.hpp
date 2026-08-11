@@ -14,6 +14,7 @@
 #include <QQmlEngine>
 #include <QString>
 #include <QStringList>
+#include <QTimer>
 #include <QVariantList>
 #include <QVariantMap>
 
@@ -253,7 +254,18 @@ signals:
     void connectedChanged();
     void errorMessageChanged();
     void frameCountChanged();
+    // Fired on every single acquired frame (up to the camera's full fps —
+    // 100+/sec even for the mock camera); do NOT connect UI repaints to
+    // this directly, that was making window/slider dragging visibly janky
+    // by re-running debayer/histogram on the GUI thread up to 100x/sec.
+    // Connect to previewTick() instead, which is deliberately capped.
     void frameChanged();
+    // Emitted at a fixed, capped rate (see previewTimer_) while connected —
+    // LivePreviewItem/HistogramItem/ZoomLoupeItem repaint from this, not
+    // frameChanged(). frame()/histogram() always read whatever is newest
+    // at call time regardless, so this only throttles how *often* the UI
+    // asks, not what it shows.
+    void previewTick();
     void exposureChanged();
     void gainChanged();
     void roiChanged();
@@ -373,6 +385,16 @@ private:
     // render/GUI thread, so these are not atomic despite being mutable.
     mutable std::optional<std::uint64_t> lastRenderedSequence_;
     mutable std::atomic<std::uint64_t> renderedFrameCount_{0};
+    // frame() previously re-ran the full debayer on every call, even when
+    // called more than once for the same underlying frame (LivePreviewItem
+    // and ZoomLoupeItem both call it independently) — cached so repeat
+    // calls for an unchanged sequence are a cheap QImage copy instead.
+    mutable QImage cachedFrameImage_;
+
+    // Drives previewTick() at a fixed rate decoupled from the camera's own
+    // fps (see that signal's comment) — started in finishConnecting(),
+    // stopped in disconnectCamera().
+    QTimer previewTimer_;
 };
 
 }  // namespace astro::app

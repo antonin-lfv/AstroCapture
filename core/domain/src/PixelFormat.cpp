@@ -40,33 +40,6 @@ std::string_view to_string(PixelStorage storage) {
     return "Unknown";
 }
 
-int bayerChannelAt(BayerPattern pattern, std::uint32_t x, std::uint32_t y) {
-    constexpr int kRed = 0;
-    constexpr int kGreen = 1;
-    constexpr int kBlue = 2;
-
-    const bool evenRow = (y % 2) == 0;
-    const bool evenCol = (x % 2) == 0;
-
-    switch (pattern) {
-        case BayerPattern::RGGB:
-            if (evenRow) return evenCol ? kRed : kGreen;
-            return evenCol ? kGreen : kBlue;
-        case BayerPattern::BGGR:
-            if (evenRow) return evenCol ? kBlue : kGreen;
-            return evenCol ? kGreen : kRed;
-        case BayerPattern::GRBG:
-            if (evenRow) return evenCol ? kGreen : kRed;
-            return evenCol ? kBlue : kGreen;
-        case BayerPattern::GBRG:
-            if (evenRow) return evenCol ? kGreen : kBlue;
-            return evenCol ? kRed : kGreen;
-        case BayerPattern::None:
-            break;
-    }
-    return -1;
-}
-
 std::size_t bytesPerPixel(PixelStorage storage) {
     switch (storage) {
         case PixelStorage::Unknown:

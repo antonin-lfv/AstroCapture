@@ -18,7 +18,9 @@ void ZoomLoupeItem::setController(PreviewController* controller) {
     }
     controller_ = controller;
     if (controller_) {
-        connect(controller_, &PreviewController::frameChanged, this, [this] {
+        // previewTick(), not frameChanged() — see LivePreviewItem's
+        // identical comment.
+        connect(controller_, &PreviewController::previewTick, this, [this] {
             if (active_) {
                 update();
             }

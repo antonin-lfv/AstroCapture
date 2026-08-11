@@ -197,6 +197,8 @@ Popup {
                     Layout.fillWidth: true
                     placeholderText: "Preset name"
                     color: "#e8eaed"
+                    selectedTextColor: "#e8eaed"
+                    selectionColor: "#2a3d6b"
                     font.pixelSize: 12
                     background: Rectangle {
                         implicitHeight: 28

@@ -30,7 +30,7 @@ void LivePreviewItem::paint(QPainter* painter) {
     if (!controller_) {
         return;
     }
-    const QImage image = controller_->frame();
+    const QImage image = controller_->previewImage();
     if (image.isNull()) {
         return;
     }

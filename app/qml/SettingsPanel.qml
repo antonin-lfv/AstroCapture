@@ -35,6 +35,12 @@ Popup {
         modal: true
         focus: true
         padding: 16
+        // See Main.qml's mockConfirm Popup comment: a fixed width: on this
+        // plain child ColumnLayout doesn't feed the Popup's own
+        // auto-sizing (which reads contentItem.implicitWidth), so the
+        // Popup stayed smaller than its actual content. Explicit width
+        // here + ColumnLayout using parent.width makes it deterministic.
+        width: 312
 
         property string pendingName: ""
 
@@ -46,7 +52,7 @@ Popup {
         }
 
         ColumnLayout {
-            width: 280
+            width: parent.width
             spacing: 14
 
             Text {

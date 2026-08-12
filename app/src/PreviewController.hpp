@@ -181,10 +181,25 @@ public:
     QVariantList extraControls() const;
     Q_INVOKABLE void setExtraControlValue(const QString& key, double value);
 
-    // Debayers the latest frame on the calling thread. Intended for
-    // LivePreviewItem to call from the render/GUI thread, never from the
-    // camera's acquisition thread.
+    // Debayers the latest frame at full resolution on the calling thread.
+    // Intended for captureStillImage() (full-quality saves) and
+    // ZoomLoupeItem (pixel-peeking needs real detail) — never call this
+    // from the camera's acquisition thread. LivePreviewItem uses
+    // previewImage() instead; see that method's comment for why.
     QImage frame() const;
+
+    // Same contract as frame() (calling/render thread only, never the
+    // acquisition thread), but decimates large Bayer8 sensor frames before
+    // debayering so it's cheap enough to run every previewTick(). A
+    // real-camera 5MP frame's full bilinear debayer measured ~130ms even
+    // parallelized across cores — comfortably blowing the 50ms preview
+    // tick budget and freezing the whole GUI thread (window drags, clicks)
+    // during real-camera bring-up; see
+    // docs/development/NEXIMAGE5_HARDWARE_NOTES.md. Only ever used for the
+    // on-screen live view, never for saved captures (frame() stays full
+    // resolution for those) — this is a display shortcut, not a quality
+    // setting.
+    QImage previewImage() const;
 
     // Computes a histogram from the latest raw frame on the calling thread.
     // Same threading contract as frame(): render/GUI thread only, intended
@@ -212,6 +227,16 @@ public:
     // Opens a specific camera from availableCameras() by id. No-op if
     // already connected or the id isn't (or is no longer) in the list.
     Q_INVOKABLE void connectToCamera(const QString& cameraId);
+
+    // Connects the mock camera. Only meaningful after mockCameraOffered()
+    // fired (rescan() found no real camera but mock is compiled in) — the
+    // QML layer confirms with the user before calling this, rather than
+    // rescan() silently falling back to mock on its own, which made a real
+    // camera failure look identical to "no camera plugged in" (see
+    // docs/development/NEXIMAGE5_HARDWARE_NOTES.md's bring-up notes for
+    // how confusing that was in practice). No-op if mock isn't compiled in
+    // or a camera is already connected.
+    Q_INVOKABLE void connectMock();
 
     // Stops the current device (and any active recording) and returns to
     // the disconnected/empty state, so rescan() can pick a different
@@ -286,6 +311,11 @@ signals:
     // The writer thread can't call stopRecording() itself — it would try to
     // join its own thread.
     void recordingTargetReached();
+    // rescan() found no real camera but mock is compiled in — QML should
+    // ask the user whether to fall back to it (connectMock() if yes,
+    // otherwise stay on the empty/disconnected state) rather than
+    // connecting automatically. See connectMock()'s comment.
+    void mockCameraOffered();
     void saveDirectoryChanged();
     void saveFormatChanged();
     void videoFormatChanged();
@@ -397,6 +427,14 @@ private:
     // and ZoomLoupeItem both call it independently) — cached so repeat
     // calls for an unchanged sequence are a cheap QImage copy instead.
     mutable QImage cachedFrameImage_;
+
+    // Same caching idea as cachedFrameImage_ above, for previewImage()'s
+    // decimated-then-debayered output. Separate cache/sequence tracking
+    // because frame() and previewImage() are independently called (not
+    // necessarily in the same tick — ZoomLoupeItem only calls frame() while
+    // active) and produce different-resolution images.
+    mutable std::optional<std::uint64_t> lastPreviewSequence_;
+    mutable QImage cachedPreviewImage_;
 
     // Drives previewTick() at a fixed rate decoupled from the camera's own
     // fps (see that signal's comment) — started in finishConnecting(),

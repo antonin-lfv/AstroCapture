@@ -541,10 +541,20 @@ ApplicationWindow {
                             Slider {
                                 id: exposureSlider
                                 Layout.fillWidth: true
-                                from: previewController.exposureMinMicroseconds
-                                to: previewController.exposureMaxMicroseconds
-                                value: previewController.exposureMicroseconds
-                                onMoved: previewController.exposureMicroseconds = value
+                                // Logarithmic: the min/max range spans 100us
+                                // to tens of seconds on real cameras (five
+                                // orders of magnitude), so a linear slider
+                                // put nearly the whole useful sub-100ms
+                                // planetary-imaging range into a couple of
+                                // pixels of travel — log space gives every
+                                // decade equal room instead.
+                                from: Math.log10(previewController.exposureMinMicroseconds)
+                                to: Math.log10(previewController.exposureMaxMicroseconds)
+                                value: Math.log10(Math.max(previewController.exposureMicroseconds,
+                                                            previewController.exposureMinMicroseconds))
+                                onMoved: previewController.exposureMicroseconds = Math.min(
+                                             previewController.exposureMaxMicroseconds,
+                                             Math.max(previewController.exposureMinMicroseconds, Math.pow(10, value)))
                             }
                         }
 
@@ -715,7 +725,7 @@ ApplicationWindow {
 
             ToolTip.visible: hovered
             ToolTip.delay: 400
-            ToolTip.text: "Connects to the mock test camera until a real planetary camera backend ships in Gate C."
+            ToolTip.text: "Looks for a connected camera. Offers the mock test camera if none is found."
         }
 
         // Only populated when Rescan finds more than one real camera —
@@ -772,6 +782,85 @@ ApplicationWindow {
     SettingsPanel {
         id: settingsPanel
         controller: previewController
+    }
+
+    // rescan() no longer connects the mock camera silently when no real
+    // camera is found — that made a genuine real-camera failure look
+    // identical to "nothing plugged in" (see
+    // docs/development/NEXIMAGE5_HARDWARE_NOTES.md's bring-up notes).
+    // It emits mockCameraOffered() instead and waits for this to confirm.
+    Popup {
+        id: mockConfirm
+        parent: Overlay.overlay
+        anchors.centerIn: parent
+        modal: true
+        focus: true
+        padding: 16
+        // Popup auto-sizes from contentItem.implicitWidth, which a fixed
+        // width: on a plain (non-contentItem) child ColumnLayout doesn't
+        // feed — the Popup was staying at its default size while the
+        // ColumnLayout rendered wider than it, so the buttons visually
+        // spilled outside the dark modal background. Setting width here
+        // (and having the ColumnLayout below fill it via parent.width,
+        // same as SettingsPanel.qml's root Popup) makes the Popup's size
+        // authoritative instead.
+        width: 332
+
+        background: Rectangle {
+            color: "#15181d"
+            radius: 10
+            border.color: "#3a4048"
+            border.width: 1
+        }
+
+        Connections {
+            target: previewController
+            function onMockCameraOffered() {
+                mockConfirm.open();
+            }
+        }
+
+        ColumnLayout {
+            width: parent.width
+            spacing: 14
+
+            Text {
+                text: "No real camera found."
+                color: "#e8eaed"
+                font.pixelSize: 14
+                font.weight: Font.DemiBold
+                wrapMode: Text.Wrap
+                Layout.fillWidth: true
+            }
+
+            Text {
+                text: "Use the mock test camera instead?"
+                color: "#9aa0a6"
+                font.pixelSize: 12
+                wrapMode: Text.Wrap
+                Layout.fillWidth: true
+            }
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 8
+
+                Item { Layout.fillWidth: true }
+
+                IconButton {
+                    text: "Cancel"
+                    onClicked: mockConfirm.close()
+                }
+
+                IconButton {
+                    text: "Use mock camera"
+                    onClicked: {
+                        previewController.connectMock();
+                        mockConfirm.close();
+                    }
+                }
+            }
+        }
     }
 
     // Gate D backlog 22.7: capture sessions are often run with the mouse

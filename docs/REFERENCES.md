@@ -15,3 +15,8 @@ These references were current when the initial architecture charter was authored
 - SignTool: https://learn.microsoft.com/en-us/windows/win32/seccrypto/signtool
 - GitHub Actions matrix jobs: https://docs.github.com/actions/writing-workflows/choosing-what-your-workflow-does/running-variations-of-jobs-in-a-workflow
 - GitHub hosted runners: https://docs.github.com/actions/using-github-hosted-runners/about-github-hosted-runners
+- oaCapture / liboacam source (EUVC driver reference for TIS/NexImage cameras): https://github.com/openastroproject/openastro/tree/master/liboacam/euvc
+- The Imaging Source USB2 firmware mode-switch protocol source: https://github.com/TheImagingSource/tcam-firmware-update
+- libuvc (USB Video Class library): https://github.com/libuvc/libuvc
+- See also `docs/development/NEXIMAGE5_HARDWARE_NOTES.md` for what was learned applying these to the Celestron NexImage 5.
+- ZWO ASICamera2 SDK, vendored for `drivers/zwo` (MIT-licensed): https://github.com/indilib/indi-3rdparty/tree/master/libasi — see `third_party/zwo-sdk/README.md` and `docs/decisions/ADR-007-zwo-asi-backend.md`.

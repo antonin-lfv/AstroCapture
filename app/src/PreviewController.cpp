@@ -13,6 +13,7 @@
 #include "FileNaming.hpp"
 #include "FramePreviewImage.hpp"
 #include "astro/domain/StreamMode.hpp"
+#include "astro/processing/Debayer.hpp"
 #include "astro/recording/FitsWriter.hpp"
 #include "astro/recording/RawSequenceRecorder.hpp"
 #include "astro/recording/SerRecorder.hpp"
@@ -20,6 +21,19 @@
 
 #ifdef ASTRO_ENABLE_MOCK_CAMERA
 #include "astro/driver/mock/MockCameraBackend.hpp"
+#endif
+
+#ifdef ASTRO_ENABLE_DRIVER_UVC
+#include "CameraPermission.hpp"
+#include "astro/driver/uvc/UvcCameraBackend.hpp"
+#endif
+
+#ifdef ASTRO_ENABLE_DRIVER_EUVC
+#include "astro/driver/euvc/EuvcCameraBackend.hpp"
+#endif
+
+#ifdef ASTRO_ENABLE_DRIVER_ZWO
+#include "astro/driver/zwo/ZwoCameraBackend.hpp"
 #endif
 
 namespace astro::app {
@@ -141,6 +155,24 @@ std::unique_ptr<ICameraDevice> PreviewController::openAndStart(ICameraBackend& b
 }
 
 std::unique_ptr<ICameraDevice> PreviewController::openCandidate(const CameraCandidate& candidate) {
+#ifdef ASTRO_ENABLE_DRIVER_ZWO
+    if (candidate.backendId == QStringLiteral("zwo")) {
+        astro::driver::zwo::ZwoCameraBackend backend;
+        return openAndStart(backend, candidate.id.toStdString());
+    }
+#endif
+#ifdef ASTRO_ENABLE_DRIVER_EUVC
+    if (candidate.backendId == QStringLiteral("euvc")) {
+        astro::driver::euvc::EuvcCameraBackend backend;
+        return openAndStart(backend, candidate.id.toStdString());
+    }
+#endif
+#ifdef ASTRO_ENABLE_DRIVER_UVC
+    if (candidate.backendId == QStringLiteral("uvc")) {
+        astro::driver::uvc::UvcCameraBackend backend;
+        return openAndStart(backend, candidate.id.toStdString());
+    }
+#endif
 #ifdef ASTRO_ENABLE_MOCK_CAMERA
     if (candidate.backendId == QStringLiteral("mock")) {
         astro::driver::mock::MockCameraBackend backend;
@@ -270,11 +302,54 @@ void PreviewController::rescan() {
 
     // Real hardware only counts here: mock is a fallback, never a peer
     // choice, so it must not turn a single-camera rescan into a 2-item
-    // picker (real + mock) — see the class comment. No real backend is
-    // compiled in yet (Gate C), so this stays empty until one exists; a
-    // future backend enumerates into realCandidates here the same way the
-    // removed UVC backend did.
+    // picker (real + mock) — see the class comment.
     std::vector<CameraCandidate> realCandidates;
+
+#ifdef ASTRO_ENABLE_DRIVER_UVC
+    // macOS gates raw USB Video-class access behind the same TCC privacy
+    // permission as AVFoundation (ADR-005) — skip enumerate() rather than
+    // let it silently find nothing when permission was never granted.
+    // NotDetermined fires the system prompt but doesn't wait for it (see
+    // CameraPermission.hpp): this rescan() still falls through to mock,
+    // and a later rescan() (after the user responds) picks up the answer.
+    if (astro::app::cameraAuthorizationStatus() == astro::app::CameraAuthStatus::NotDetermined) {
+        astro::app::requestCameraAuthorization();
+    }
+    if (astro::app::cameraAuthorizationStatus() == astro::app::CameraAuthStatus::Authorized) {
+        astro::driver::uvc::UvcCameraBackend backend;
+        for (const auto& descriptor : backend.enumerate()) {
+            realCandidates.push_back({QString::fromStdString(descriptor.id),
+                                       QString::fromStdString(descriptor.displayName), QStringLiteral("uvc")});
+        }
+    }
+#endif
+
+#ifdef ASTRO_ENABLE_DRIVER_EUVC
+    // No macOS permission gate here (ADR-006): this camera family's
+    // control/streaming interfaces declare a vendor-specific class, not
+    // UVC, so nothing in the OS claims or gates access to them the way
+    // UVCAssistant does for drivers/uvc above.
+    {
+        astro::driver::euvc::EuvcCameraBackend backend;
+        for (const auto& descriptor : backend.enumerate()) {
+            realCandidates.push_back({QString::fromStdString(descriptor.id),
+                                       QString::fromStdString(descriptor.displayName), QStringLiteral("euvc")});
+        }
+    }
+#endif
+
+#ifdef ASTRO_ENABLE_DRIVER_ZWO
+    // No macOS permission gate here either (same reasoning as euvc above):
+    // ZWO's ASICamera2 SDK talks to the device directly, not through any
+    // OS-recognized camera class.
+    {
+        astro::driver::zwo::ZwoCameraBackend backend;
+        for (const auto& descriptor : backend.enumerate()) {
+            realCandidates.push_back({QString::fromStdString(descriptor.id),
+                                       QString::fromStdString(descriptor.displayName), QStringLiteral("zwo")});
+        }
+    }
+#endif
 
     if (realCandidates.size() == 1) {
         if (auto device = openCandidate(realCandidates.front())) {
@@ -294,16 +369,8 @@ void PreviewController::rescan() {
 #ifdef ASTRO_ENABLE_MOCK_CAMERA
     {
         astro::driver::mock::MockCameraBackend backend;
-        const auto descriptors = backend.enumerate();
-        if (!descriptors.empty()) {
-            const CameraCandidate mockCandidate{QString::fromStdString(descriptors.front().id),
-                                                 QString::fromStdString(descriptors.front().displayName),
-                                                 QStringLiteral("mock")};
-            if (auto device = openCandidate(mockCandidate)) {
-                finishConnecting(std::move(device));
-            } else {
-                emit errorMessageChanged();
-            }
+        if (!backend.enumerate().empty()) {
+            emit mockCameraOffered();
             return;
         }
     }
@@ -313,6 +380,27 @@ void PreviewController::rescan() {
         errorMessage_ = QStringLiteral("No camera found.");
     }
     emit errorMessageChanged();
+}
+
+void PreviewController::connectMock() {
+#ifdef ASTRO_ENABLE_MOCK_CAMERA
+    if (connected_) {
+        return;
+    }
+    astro::driver::mock::MockCameraBackend backend;
+    const auto descriptors = backend.enumerate();
+    if (descriptors.empty()) {
+        return;
+    }
+    const CameraCandidate mockCandidate{QString::fromStdString(descriptors.front().id),
+                                         QString::fromStdString(descriptors.front().displayName),
+                                         QStringLiteral("mock")};
+    if (auto device = openCandidate(mockCandidate)) {
+        finishConnecting(std::move(device));
+    } else {
+        emit errorMessageChanged();
+    }
+#endif
 }
 
 QVariantList PreviewController::availableCameras() const {
@@ -372,9 +460,17 @@ void PreviewController::disconnectCamera() {
     renderedFrameCount_.store(0, std::memory_order_relaxed);
     lastRenderedSequence_.reset();
     cachedFrameImage_ = QImage();
+    lastPreviewSequence_.reset();
+    cachedPreviewImage_ = QImage();
     previewTimer_.stop();
 
+    // A leftover error (e.g. a failed control write) must not linger on
+    // the empty/disconnected state once the user has moved past it —
+    // rescan() already clears this at its own start for the same reason.
+    errorMessage_.clear();
+
     emit connectedChanged();
+    emit errorMessageChanged();
     emit frameCountChanged();
     emit exposureChanged();
     emit gainChanged();
@@ -386,6 +482,11 @@ void PreviewController::setExposureMicroseconds(double value) {
     if (!device_ || !exposureCapability_) {
         return;
     }
+    // Clamp rather than trust the caller: the QML slider computes this via
+    // a log10/pow10 round-trip for its logarithmic scale, which can
+    // overshoot min/max by a floating-point epsilon and fail the
+    // backend's strict range check otherwise.
+    value = std::clamp(value, exposureCapability_->minValue, exposureCapability_->maxValue);
     if (const auto result = device_->setControl(ControlId::Exposure, value); !result.ok()) {
         errorMessage_ = QString::fromStdString(result.error().message);
         emit errorMessageChanged();
@@ -520,14 +621,46 @@ QImage PreviewController::frame() const {
     }
     if (lastRenderedSequence_ != latest->metadata.sequence) {
         lastRenderedSequence_ = latest->metadata.sequence;
-        renderedFrameCount_.fetch_add(1, std::memory_order_relaxed);
-        // Debayering is the expensive part of this call; LivePreviewItem
-        // and ZoomLoupeItem both call frame() independently on the same
-        // previewTick, so without this cache an unchanged frame was being
-        // fully re-debayered twice per tick for no reason.
+        // Debayering is the expensive part of this call; ZoomLoupeItem can
+        // call this more than once per tick while active, so without this
+        // cache an unchanged frame was being fully re-debayered for no
+        // reason.
         cachedFrameImage_ = frameToPreviewImage(latest->descriptor, latest->storage->data(), latest->storage->size());
     }
     return cachedFrameImage_;
+}
+
+QImage PreviewController::previewImage() const {
+    const auto latest = frameSlot_.latest();
+    if (!latest) {
+        return QImage();
+    }
+    if (lastPreviewSequence_ != latest->metadata.sequence) {
+        lastPreviewSequence_ = latest->metadata.sequence;
+        renderedFrameCount_.fetch_add(1, std::memory_order_relaxed);
+
+        // Only real sensor frames need decimating — the mock's 640x480
+        // test pattern is already cheap to debayer in full. Picks the
+        // smallest even factor that gets the long edge under ~1000px,
+        // which is comfortably more detail than a sidebar-width preview
+        // pane can show anyway.
+        constexpr std::uint32_t kPreviewTargetMaxDimension = 1000;
+        std::uint32_t factor = 1;
+        while (std::max(latest->descriptor.width, latest->descriptor.height) / factor > kPreviewTargetMaxDimension &&
+               factor < 8) {
+            factor *= 2;
+        }
+
+        if (latest->descriptor.storage == PixelStorage::Bayer8 && factor > 1) {
+            const auto decimated = astro::processing::decimateBayer(latest->descriptor, latest->storage->data(),
+                                                                      latest->storage->size(), factor);
+            cachedPreviewImage_ = frameToPreviewImage(decimated.descriptor, decimated.data.data(), decimated.data.size());
+        } else {
+            cachedPreviewImage_ =
+                frameToPreviewImage(latest->descriptor, latest->storage->data(), latest->storage->size());
+        }
+    }
+    return cachedPreviewImage_;
 }
 
 astro::processing::Histogram PreviewController::histogram() const {

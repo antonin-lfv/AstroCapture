@@ -28,6 +28,125 @@ Popup {
         onAccepted: controller.saveDirectory = String(selectedFolder).replace("file://", "")
     }
 
+    Popup {
+        id: overwriteConfirm
+        parent: Overlay.overlay
+        anchors.centerIn: parent
+        modal: true
+        focus: true
+        padding: 16
+
+        property string pendingName: ""
+
+        background: Rectangle {
+            color: "#15181d"
+            radius: 10
+            border.color: "#3a4048"
+            border.width: 1
+        }
+
+        ColumnLayout {
+            width: 280
+            spacing: 14
+
+            Text {
+                text: "Replace preset \"" + overwriteConfirm.pendingName + "\"?"
+                color: "#e8eaed"
+                font.pixelSize: 13
+                wrapMode: Text.Wrap
+                Layout.fillWidth: true
+            }
+
+            Text {
+                text: "A preset with this name already exists. Saving will overwrite it."
+                color: "#9aa0a6"
+                font.pixelSize: 11
+                wrapMode: Text.Wrap
+                Layout.fillWidth: true
+            }
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 8
+
+                Item { Layout.fillWidth: true }
+
+                IconButton {
+                    text: "Cancel"
+                    onClicked: overwriteConfirm.close()
+                }
+
+                IconButton {
+                    text: "Replace"
+                    borderColor: "#e5484d"
+                    onClicked: {
+                        controller.savePreset(overwriteConfirm.pendingName);
+                        presetStatus.text = "\"" + overwriteConfirm.pendingName + "\" overwritten.";
+                        overwriteConfirm.pendingName = "";
+                        presetNameField.text = "";
+                        overwriteConfirm.close();
+                    }
+                }
+            }
+        }
+    }
+
+    Popup {
+        id: toast
+        parent: Overlay.overlay
+        x: Overlay.overlay ? (Overlay.overlay.width - width) / 2 : 0
+        y: Overlay.overlay ? Overlay.overlay.height - height - 32 : 0
+        modal: false
+        focus: false
+        closePolicy: Popup.NoAutoClose
+        padding: 10
+
+        property string message: ""
+
+        function show(msg) {
+            message = msg;
+            toastTimer.restart();
+            open();
+        }
+
+        background: Rectangle {
+            color: "#1c2026"
+            radius: 8
+            border.color: "#3a4048"
+            border.width: 1
+        }
+
+        contentItem: RowLayout {
+            spacing: 8
+
+            Icon {
+                name: "check"
+                color: "#3ddc84"
+                Layout.preferredWidth: 14
+                Layout.preferredHeight: 14
+            }
+
+            Text {
+                text: toast.message
+                color: "#e8eaed"
+                font.pixelSize: 12
+            }
+        }
+
+        enter: Transition {
+            NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 120 }
+        }
+        exit: Transition {
+            NumberAnimation { property: "opacity"; from: 1; to: 0; duration: 150 }
+        }
+
+        Timer {
+            id: toastTimer
+            interval: 1800
+            onTriggered: toast.close()
+        }
+    }
+
     ColumnLayout {
         width: parent.width
         spacing: 14
@@ -65,6 +184,7 @@ Popup {
                 spacing: 8
 
                 Text {
+                    id: saveLocationText
                     Layout.fillWidth: true
                     text: controller && controller.saveDirectory.length > 0
                           ? controller.saveDirectory
@@ -72,6 +192,14 @@ Popup {
                     color: "#e8eaed"
                     font.pixelSize: 12
                     elide: Text.ElideMiddle
+
+                    HoverHandler {
+                        id: saveLocationHover
+                    }
+
+                    ToolTip.visible: saveLocationHover.hovered && saveLocationText.truncated
+                    ToolTip.delay: 400
+                    ToolTip.text: saveLocationText.text
                 }
 
                 IconButton {
@@ -263,10 +391,13 @@ Popup {
                     enabled: presetNameField.text.trim().length > 0
                     onClicked: {
                         const name = presetNameField.text.trim();
-                        presetStatus.text = controller.presetNames.indexOf(name) !== -1
-                                             ? "\"" + name + "\" already existed — overwritten."
-                                             : "\"" + name + "\" saved.";
+                        if (controller.presetNames.indexOf(name) !== -1) {
+                            overwriteConfirm.pendingName = name;
+                            overwriteConfirm.open();
+                            return;
+                        }
                         controller.savePreset(name);
+                        presetStatus.text = "\"" + name + "\" saved.";
                         presetNameField.text = "";
                     }
                 }
@@ -303,7 +434,10 @@ Popup {
 
                     IconButton {
                         iconName: "check"
-                        onClicked: controller.loadPreset(modelData)
+                        onClicked: {
+                            controller.loadPreset(modelData);
+                            toast.show("\"" + modelData + "\" applied.");
+                        }
                     }
 
                     IconButton {

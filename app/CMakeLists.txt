@@ -25,6 +25,8 @@ qt_add_qml_module(AstroCapture
         qml/DarkSpinBox.qml
         qml/SidebarSection.qml
         qml/HelpIcon.qml
+    RESOURCES
+        qml/assets/logo.png
     SOURCES
         src/PreviewController.hpp
         src/PreviewController.cpp

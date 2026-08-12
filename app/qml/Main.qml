@@ -17,6 +17,21 @@ ApplicationWindow {
     title: "AstroCapture"
     color: "#0b0d10"
 
+    // Frame counters can run into the tens of thousands during long
+    // sequences; abbreviate past 1000 (1k, 10.1k, 1.2M) so the sidebar
+    // stays readable instead of growing a wide raw integer.
+    function formatCount(n) {
+        if (n >= 1000000) {
+            const v = n / 1000000;
+            return (Number.isInteger(v) ? v.toFixed(0) : v.toFixed(1)) + "M";
+        }
+        if (n >= 1000) {
+            const v = n / 1000;
+            return (Number.isInteger(v) ? v.toFixed(0) : v.toFixed(1)) + "k";
+        }
+        return n.toString();
+    }
+
     PreviewController {
         id: previewController
     }
@@ -79,55 +94,6 @@ ApplicationWindow {
                     }
                 }
 
-                // Zoom loupe: hover the preview to pixel-peep a magnified,
-                // unsmoothed crop around the cursor.
-                MouseArea {
-                    id: previewHover
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    acceptedButtons: Qt.NoButton
-                    enabled: previewController.connected
-
-                    onPositionChanged: (mouse) => {
-                        const rect = livePreview.imageRect;
-                        if (rect.width <= 0 || rect.height <= 0) {
-                            zoomLoupeFrame.visible = false;
-                            return;
-                        }
-                        const localX = mouse.x - rect.x;
-                        const localY = mouse.y - rect.y;
-                        if (localX < 0 || localY < 0 || localX > rect.width || localY > rect.height) {
-                            zoomLoupeFrame.visible = false;
-                            return;
-                        }
-                        zoomLoupe.sourceX = localX / rect.width;
-                        zoomLoupe.sourceY = localY / rect.height;
-                        zoomLoupeFrame.visible = true;
-                        zoomLoupeFrame.x = Math.min(mouse.x + 24, previewArea.width - zoomLoupeFrame.width - 4);
-                        zoomLoupeFrame.y = Math.min(mouse.y + 24, previewArea.height - zoomLoupeFrame.height - 4);
-                    }
-                    onExited: zoomLoupeFrame.visible = false
-                }
-
-                Rectangle {
-                    id: zoomLoupeFrame
-                    width: 168
-                    height: 168
-                    radius: 4
-                    color: "#0b0d10"
-                    border.color: "#3a4048"
-                    border.width: 1
-                    visible: false
-
-                    ZoomLoupeItem {
-                        id: zoomLoupe
-                        anchors.fill: parent
-                        anchors.margins: 1
-                        controller: previewController
-                        active: zoomLoupeFrame.visible
-                    }
-                }
-
                 // ROI drag-select: click and drag on the preview to crop
                 // to that sub-region — replaces typing X/Y/Width/Height by
                 // hand. Coordinates are mapped through whatever's
@@ -135,9 +101,6 @@ ApplicationWindow {
                 // so a drag inside an already-cropped view narrows it
                 // further instead of resetting relative to the full
                 // sensor. Double-click resets to the full sensor.
-                // previewHover (above) only tracks hover (acceptedButtons:
-                // NoButton), so it never competes with this for button
-                // presses.
                 MouseArea {
                     id: roiSelect
                     anchors.fill: parent
@@ -166,7 +129,6 @@ ApplicationWindow {
                         }
                         startFracX = frac.x;
                         startFracY = frac.y;
-                        zoomLoupeFrame.visible = false;
                         roiSelectionBox.updateFromFractions(startFracX, startFracY, startFracX, startFracY);
                         roiSelectionBox.visible = true;
                     }
@@ -324,7 +286,7 @@ ApplicationWindow {
                         spacing: 10
 
                         Text {
-                            text: previewController.frameCount + " frames"
+                            text: formatCount(previewController.frameCount) + " frames"
                             color: "#9aa0a6"
                             font.pixelSize: 11
                         }
@@ -504,7 +466,7 @@ ApplicationWindow {
                             }
 
                             Text {
-                                text: "Recorded: " + previewController.recordingFrameCount
+                                text: "Recorded: " + formatCount(previewController.recordingFrameCount)
                                 color: "#9aa0a6"
                                 font.pixelSize: 12
                             }
@@ -715,22 +677,13 @@ ApplicationWindow {
         spacing: 20
         width: Math.min(420, window.width - 80)
 
-        Rectangle {
+        Image {
             Layout.alignment: Qt.AlignHCenter
-            width: 96
-            height: 96
-            radius: 48
-            color: "transparent"
-            border.color: "#3a4048"
-            border.width: 2
-
-            Rectangle {
-                anchors.centerIn: parent
-                width: 40
-                height: 40
-                radius: 20
-                color: "#3a4048"
-            }
+            source: "assets/logo.png"
+            sourceSize.width: 112
+            sourceSize.height: 112
+            fillMode: Image.PreserveAspectFit
+            smooth: true
         }
 
         Text {

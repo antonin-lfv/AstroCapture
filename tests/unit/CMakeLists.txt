@@ -46,6 +46,18 @@ astro_add_unit_test(astro_recording_ser_test
 )
 
 if(ASTRO_ENABLE_MOCK_CAMERA)
+    find_package(Qt6 6.5 REQUIRED COMPONENTS Quick Gui)
+    astro_add_unit_test(astro_app_recording_lifecycle_test
+        SOURCES app/RecordingLifecycleTest.cpp
+            ../../app/src/PreviewController.cpp ../../app/src/PreviewController.hpp
+            ../../app/src/Settings.cpp ../../app/src/FileNaming.cpp ../../app/src/FramePreviewImage.cpp
+        LIBS Qt6::Quick Qt6::Gui astro::processing astro::recording astro::driver::mock
+    )
+    set_target_properties(astro_app_recording_lifecycle_test PROPERTIES AUTOMOC ON)
+    target_include_directories(astro_app_recording_lifecycle_test PRIVATE ../../app/src)
+    target_compile_definitions(astro_app_recording_lifecycle_test PRIVATE ASTRO_ENABLE_MOCK_CAMERA)
+    set_tests_properties(astro_app_recording_lifecycle_test PROPERTIES TIMEOUT 20)
+
     astro_add_unit_test(astro_driver_mock_bayer_test_pattern_test
         SOURCES mock/BayerTestPatternTest.cpp
         LIBS astro::driver::mock

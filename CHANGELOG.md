@@ -6,6 +6,23 @@ The changelog should describe user-visible changes, not every commit.
 
 ## Unreleased
 
+- Captures made within the same second get distinct filenames instead of
+  overwriting the preceding image or recording.
+- Faster Bayer8 bilinear conversion with unchanged pixel results; avoid
+  launching many worker threads for small previews and reject malformed
+  frame dimensions/strides before reading pixels.
+- Recording shutdown now seals the frame queue before draining it. Disk
+  write errors stop recording with a visible failure; duration limits also
+  stop capture when no new frame arrives, and statistics update at the
+  preview cadence instead of queuing GUI updates for every camera frame.
+- SER recordings now use the little-endian flag expected by Siril and
+  SER Player, strip row padding, and reject format changes mid-recording.
+- NexImage USB shutdown and partial startup failures wait for transfer
+  cancellation callbacks before releasing buffers; failed resubmissions
+  no longer leave a transfer permanently pending.
+- Fixed the macOS development launch helper to run the executable inside
+  the application bundle.
+
 - Live preview: "Rescan for cameras" connects to a synthetic test camera
   until a real astronomy camera backend exists (Gate C). An earlier build
   briefly used the Mac's built-in webcam as a stand-in; it was removed

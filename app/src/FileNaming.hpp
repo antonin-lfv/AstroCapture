@@ -10,10 +10,14 @@ namespace astro::app {
 QString sanitizeForFilename(const QString& value);
 
 // {date}_{time}_{target}_{camera} base name (blueprint section 17's naming
-// pattern, minus the {sequence} token, which doesn't exist yet — nothing
-// today produces multiple files in the same second). `targetName` is
+// pattern). `targetName` is
 // omitted entirely when empty, so existing filenames without a target
 // still look the same. Callers append their own extension.
 QString timestampedBaseName(const QString& cameraId, const QString& targetName = QString());
+
+// Reserve a new empty file exclusively, adding a numeric suffix on
+// collision. Returns empty on failure. Writers may overwrite this file,
+// which belongs to this capture, without truncating a previous capture.
+QString reserveCapturePath(const QString& directory, const QString& baseName, const QString& extension);
 
 }  // namespace astro::app

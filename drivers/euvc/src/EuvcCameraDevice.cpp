@@ -421,16 +421,27 @@ Result<void> EuvcCameraDevice::start(FrameSink& sink) {
 
     for (int i = 0; i < kNumTransfers; ++i) {
         libusb_transfer* transfer = libusb_alloc_transfer(0);
+        if (!transfer) {
+            streaming_ = false;
+            cancelTransfers();
+            drainTransfers();
+            transferBuffers_.clear();
+            sink_ = nullptr;
+            return Result<void>::failure({ErrorCode::StreamStartFailed, "Failed to allocate USB transfer", ""});
+        }
         transfers_[i] = transfer;
         libusb_fill_bulk_transfer(transfer, handle_, descriptors_.streamEndpoint, transferBuffers_[i].data(),
                                    static_cast<int>(transferBuffers_[i].size()), &EuvcCameraDevice::transferCallback,
                                    this, proto::kUsbBulkTimeoutMs);
         if (libusb_submit_transfer(transfer) != 0) {
             streaming_ = false;
-            for (auto* t : transfers_) {
-                if (t) libusb_free_transfer(t);
-            }
-            transfers_.clear();
+            // This submission failed, but earlier slots are still owned
+            // by libusb until their cancellation callbacks have run.
+            transfers_[i] = nullptr;
+            libusb_free_transfer(transfer);
+            cancelTransfers();
+            drainTransfers();
+            transferBuffers_.clear();
             sink_ = nullptr;
             return Result<void>::failure({ErrorCode::StreamStartFailed, "Failed to submit USB transfer", ""});
         }
@@ -445,11 +456,7 @@ Result<void> EuvcCameraDevice::stop() {
         return Result<void>::success();
     }
     streaming_ = false;
-    for (auto* transfer : transfers_) {
-        if (transfer) {
-            libusb_cancel_transfer(transfer);
-        }
-    }
+    cancelTransfers();
     if (eventThread_.joinable()) {
         eventThread_.join();
     }
@@ -459,15 +466,36 @@ Result<void> EuvcCameraDevice::stop() {
     return Result<void>::success();
 }
 
+void EuvcCameraDevice::cancelTransfers() {
+    // Callbacks may retire slots concurrently. Keep cancellation and
+    // resubmission/freeing mutually exclusive.
+    std::lock_guard lock(transfersMutex_);
+    for (auto* transfer : transfers_) {
+        if (transfer) {
+            libusb_cancel_transfer(transfer);
+        }
+    }
+}
+
 void EuvcCameraDevice::eventLoop() {
     timeval timeout{0, 100000};  // 100ms — bounds how promptly stop() is noticed
     while (streaming_.load(std::memory_order_relaxed)) {
         libusb_handle_events_timeout(ctx_, &timeout);
     }
-    // Drain cancellation completions so libusb_free_transfer below (called
-    // from onTransferComplete for LIBUSB_TRANSFER_CANCELLED) always runs
-    // before this thread exits.
-    for (int i = 0; i < 10 && !transfers_.empty(); ++i) {
+    drainTransfers();
+}
+
+void EuvcCameraDevice::drainTransfers() {
+    timeval timeout{0, 100000};
+    // A time budget cannot authorize freeing buffers still owned by USB.
+    // libusb cancellation is asynchronous: wait for every callback.
+    for (;;) {
+        {
+            std::lock_guard lock(transfersMutex_);
+            if (std::all_of(transfers_.begin(), transfers_.end(), [](auto* t) { return t == nullptr; })) {
+                break;
+            }
+        }
         libusb_handle_events_timeout(ctx_, &timeout);
     }
 }
@@ -510,9 +538,12 @@ void EuvcCameraDevice::onTransferComplete(libusb_transfer* transfer) {
         }
     }
 
-    if (streaming_.load(std::memory_order_relaxed) && transfer->status != LIBUSB_TRANSFER_CANCELLED) {
-        libusb_submit_transfer(transfer);
-        return;
+    std::lock_guard lock(transfersMutex_);
+    if (streaming_.load(std::memory_order_relaxed) && transfer->status != LIBUSB_TRANSFER_CANCELLED &&
+        transfer->status != LIBUSB_TRANSFER_NO_DEVICE) {
+        if (libusb_submit_transfer(transfer) == 0) {
+            return;
+        }
     }
 
     // Streaming stopped (or the device is gone) — free this slot so
@@ -521,9 +552,6 @@ void EuvcCameraDevice::onTransferComplete(libusb_transfer* transfer) {
         if (slot == transfer) {
             slot = nullptr;
         }
-    }
-    if (std::all_of(transfers_.begin(), transfers_.end(), [](auto* t) { return t == nullptr; })) {
-        transfers_.clear();
     }
     libusb_free_transfer(transfer);
 }

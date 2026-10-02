@@ -100,7 +100,7 @@ int main() {
     ASTRO_TEST_CHECK(fileId == "LUCAM-RECORDER");
     ASTRO_TEST_CHECK(readI32(bytes, 14) == 0);  // LuID
     ASTRO_TEST_CHECK(readI32(bytes, 18) == 8);  // ColorID: BAYER_RGGB
-    ASTRO_TEST_CHECK(readI32(bytes, 22) == 1);  // LittleEndian
+    ASTRO_TEST_CHECK(readI32(bytes, 22) == 0);  // Siril/SER Player little-endian convention
     ASTRO_TEST_CHECK(readI32(bytes, 26) == 4);  // ImageWidth
     ASTRO_TEST_CHECK(readI32(bytes, 30) == 4);  // ImageHeight
     ASTRO_TEST_CHECK(readI32(bytes, 34) == 8);  // PixelDepthPerPlane
@@ -132,6 +132,53 @@ int main() {
     ASTRO_TEST_CHECK(t2 - t1 == 10000);
 
     std::remove(path.c_str());
+
+    // Non-symmetric 16-bit values and padded rows expose byte-order and
+    // frame-offset bugs that a uniform Bayer8 fixture cannot detect.
+    {
+        FrameDescriptor wide;
+        wide.width = 2;
+        wide.height = 2;
+        wide.strideBytes = 6;
+        wide.storage = PixelStorage::Mono16;
+        const std::string widePath = "astro_ser_padded16_test.ser";
+        SerRecorder recorder;
+        ASTRO_TEST_CHECK(recorder.open(widePath, wide, 30).ok());
+        auto frame = makeFrame(wide, 0, 0);
+        frame.storage = std::make_shared<const BufferStorage>(std::vector<std::byte>{
+            std::byte{0x34}, std::byte{0x12}, std::byte{0xcd}, std::byte{0xab}, std::byte{0xee}, std::byte{0xee},
+            std::byte{0x02}, std::byte{0x01}, std::byte{0xff}, std::byte{0xfe}, std::byte{0xee}, std::byte{0xee}});
+        ASTRO_TEST_CHECK(recorder.writeFrame(frame).ok());
+        auto changed = frame;
+        changed.descriptor.width = 1;  // Same buffer length, different geometry.
+        ASTRO_TEST_CHECK(!recorder.writeFrame(changed).ok());
+        changed = frame;
+        changed.descriptor.storage = PixelStorage::Bayer16;
+        changed.descriptor.bayer = BayerPattern::RGGB;
+        ASTRO_TEST_CHECK(!recorder.writeFrame(changed).ok());
+        ASTRO_TEST_CHECK(recorder.close().ok());
+        std::ifstream input(widePath, std::ios::binary);
+        const std::vector<std::uint8_t> data((std::istreambuf_iterator<char>(input)), {});
+        ASTRO_TEST_CHECK(data.size() == 178 + 8 + 8);
+        ASTRO_TEST_CHECK(readI32(data, 22) == 0);
+        ASTRO_TEST_CHECK(readI32(data, 34) == 16);
+        ASTRO_TEST_CHECK(readI32(data, 38) == 1);
+        const std::array<std::uint16_t, 4> expected{0x1234, 0xabcd, 0x0102, 0xfeff};
+        for (std::size_t i = 0; i < expected.size(); ++i) {
+            const auto sample = data[178 + i * 2] | (data[179 + i * 2] << 8);
+            ASTRO_TEST_CHECK(sample == expected[i]);
+        }
+        input.close();
+        std::remove(widePath.c_str());
+        wide.validBits = 8;  // Would make readers expect 1 byte/sample.
+        ASTRO_TEST_CHECK(!recorder.open(widePath, wide, 30).ok());
+        wide.validBits = 16;
+        wide.strideBytes = 1;
+        ASTRO_TEST_CHECK(!recorder.open(widePath, wide, 30).ok());
+        wide.strideBytes = 0;
+        wide.height = 0;
+        ASTRO_TEST_CHECK(!recorder.open(widePath, wide, 30).ok());
+    }
     std::cout << "OK\n";
     return 0;
 }

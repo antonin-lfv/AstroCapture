@@ -20,6 +20,19 @@ FrameBuffer makeFrame(std::uint64_t sequence) {
 }  // namespace
 
 int main() {
+    // Stopping seals the queue even while a producer is still running.
+    // Only frames accepted before stop may be drained by the recorder.
+    {
+        BoundedFrameQueue queue(4);
+        ASTRO_TEST_CHECK(queue.tryPush(makeFrame(1)));
+        queue.stop();
+        ASTRO_TEST_CHECK(!queue.tryPush(makeFrame(2)));
+        ASTRO_TEST_CHECK(queue.waitPop()->metadata.sequence == 1);
+        ASTRO_TEST_CHECK(!queue.waitPop());
+        ASTRO_TEST_CHECK(!queue.tryPush(makeFrame(3)));
+        ASTRO_TEST_CHECK(!queue.waitPop());
+    }
+
     // Capacity is enforced: the (capacity+1)th push is dropped, not queued.
     {
         BoundedFrameQueue queue(2);

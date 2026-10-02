@@ -310,7 +310,7 @@ signals:
     // reached, connected (queued) to stopRecording() in the constructor.
     // The writer thread can't call stopRecording() itself — it would try to
     // join its own thread.
-    void recordingTargetReached();
+    void recordingTargetReached(quint64 generation);
     // rescan() found no real camera but mock is compiled in — QML should
     // ask the user whether to fall back to it (connectMock() if yes,
     // otherwise stay on the empty/disconnected state) rather than
@@ -389,6 +389,9 @@ private:
     // thread-start, see startRecording()'s comment for why that matters.
     std::mutex recordingMutex_;
     std::unique_ptr<astro::domain::BoundedFrameQueue> recordingQueue_;
+    bool recordingAcceptingFrames_ = false;  // guarded by recordingMutex_
+    std::string recordingFailure_;  // writer only; GUI reads after join
+    quint64 recordingGeneration_ = 0;
     std::unique_ptr<astro::recording::IRecorder> recorder_;
     std::thread recordingThread_;
 
@@ -440,6 +443,7 @@ private:
     // fps (see that signal's comment) — started in finishConnecting(),
     // stopped in disconnectCamera().
     QTimer previewTimer_;
+    QTimer recordingDeadlineTimer_;
 };
 
 }  // namespace astro::app

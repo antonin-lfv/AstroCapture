@@ -3,6 +3,7 @@
 #include <atomic>
 #include <cstdint>
 #include <optional>
+#include <mutex>
 #include <thread>
 #include <vector>
 
@@ -90,6 +91,8 @@ private:
     static void transferCallback(libusb_transfer* transfer);
     void onTransferComplete(libusb_transfer* transfer);
     void eventLoop();
+    void cancelTransfers();
+    void drainTransfers();
 
     // Converts one assembled raw frame into a FrameBuffer and hands it to
     // sink_ — Bayer8 for color units, Mono8 for mono, per
@@ -113,6 +116,7 @@ private:
     std::thread eventThread_;
 
     static constexpr int kNumTransfers = 8;
+    std::mutex transfersMutex_;
     std::vector<libusb_transfer*> transfers_;
     std::vector<std::vector<std::uint8_t>> transferBuffers_;
 

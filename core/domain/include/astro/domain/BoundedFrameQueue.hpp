@@ -20,10 +20,10 @@ class BoundedFrameQueue {
 public:
     explicit BoundedFrameQueue(std::size_t capacity) : capacity_(capacity) {}
 
-    // Returns false (frame dropped) if the queue is already at capacity.
+    // Returns false if the queue is full or has been stopped.
     bool tryPush(FrameBuffer frame) {
         std::lock_guard lock(mutex_);
-        if (queue_.size() >= capacity_) {
+        if (stopped_ || queue_.size() >= capacity_) {
             return false;
         }
         queue_.push_back(std::move(frame));

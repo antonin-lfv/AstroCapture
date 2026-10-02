@@ -4,6 +4,7 @@
 #include <chrono>
 #include <cstring>
 #include <optional>
+#include <limits>
 
 namespace astro::recording {
 
@@ -16,9 +17,8 @@ namespace {
 //   char[14] FileID              = "LUCAM-RECORDER"
 //   int32    LuID                = 0 (no real camera series id to report)
 //   int32    ColorID             (see serColorIdFor)
-//   int32    LittleEndian        = 1 (pixel samples are written native
-//                                      little-endian, true on every
-//                                      platform this project targets)
+//   int32    LittleEndian        = 0 (de facto little-endian convention,
+//                                      used by Siril and SER Player)
 //   int32    ImageWidth
 //   int32    ImageHeight
 //   int32    PixelDepthPerPlane  (8 or 16)
@@ -103,10 +103,25 @@ SerRecorder::~SerRecorder() {
 }
 
 Result<void> SerRecorder::open(const std::string& path, const FrameDescriptor& descriptor, double /*nominalFps*/) {
+    if (file_.is_open()) {
+        return Result<void>::failure({ErrorCode::RecordingOpenFailed, "Recorder is already open", path});
+    }
     const auto format = serColorIdFor(descriptor);
     if (!format) {
         return Result<void>::failure(
             {ErrorCode::UnsupportedFormat, "SER has no color ID for this frame format", path});
+    }
+
+    const auto rowBytes = static_cast<std::size_t>(descriptor.width) * bytesPerPixel(descriptor.storage);
+    const bool wide = descriptor.storage == PixelStorage::Mono16 || descriptor.storage == PixelStorage::Bayer16;
+    const auto bits = descriptor.validBits != 0 ? descriptor.validBits : (wide ? 16 : 8);
+    if (descriptor.width == 0 || descriptor.height == 0 ||
+        descriptor.width > std::numeric_limits<std::int32_t>::max() ||
+        descriptor.height > std::numeric_limits<std::int32_t>::max() ||
+        rowBytes > std::numeric_limits<std::uint32_t>::max() ||
+        (descriptor.strideBytes != 0 && descriptor.strideBytes < rowBytes) ||
+        (wide ? (bits <= 8 || bits > 16) : bits > 8)) {
+        return Result<void>::failure({ErrorCode::InvalidFrame, "Invalid SER dimensions, stride or bit depth", path});
     }
 
     file_.open(path, std::ios::binary | std::ios::trunc);
@@ -128,10 +143,12 @@ Result<void> SerRecorder::open(const std::string& path, const FrameDescriptor& d
     file_.write(kFileId.data(), static_cast<std::streamsize>(kFileId.size()));
     writeField(file_, std::int32_t{0});                       // LuID
     writeField(file_, format->colorId);                       // ColorID
-    writeField(file_, std::int32_t{1});                       // LittleEndian
+    // The original specification has this flag reversed. Follow existing
+    // readers: https://siril.readthedocs.io/en/latest/file-formats/SER.html
+    writeField(file_, std::int32_t{0});                       // LittleEndian
     writeField(file_, static_cast<std::int32_t>(descriptor.width));
     writeField(file_, static_cast<std::int32_t>(descriptor.height));
-    writeField(file_, static_cast<std::int32_t>(descriptor.validBits > 0 ? descriptor.validBits : 8));
+    writeField(file_, static_cast<std::int32_t>(bits));
 
     frameCountFieldOffset_ = file_.tellp();
     writeField(file_, std::int32_t{0});  // FrameCount, patched in close()
@@ -157,13 +174,32 @@ Result<void> SerRecorder::writeFrame(const FrameBuffer& frame) {
     if (!frame.storage) {
         return Result<void>::failure({ErrorCode::InvalidFrame, "Frame has no backing storage", ""});
     }
+    const auto& d = frame.descriptor;
+    if (d.width != descriptor_.width || d.height != descriptor_.height || d.storage != descriptor_.storage ||
+        d.bayer != descriptor_.bayer || d.validBits != descriptor_.validBits ||
+        d.expectedPayloadBytes() != descriptor_.expectedPayloadBytes()) {
+        return Result<void>::failure({ErrorCode::InvalidFrame, "Frame format changed during recording", ""});
+    }
+    if (framesWritten_ >= static_cast<std::uint64_t>(std::numeric_limits<std::int32_t>::max())) {
+        return Result<void>::failure({ErrorCode::DiskWriteFailed, "SER frame count limit reached", ""});
+    }
     if (frame.storage->size() != descriptor_.expectedPayloadBytes()) {
         return Result<void>::failure(
             {ErrorCode::InvalidFrame, "Frame payload size does not match the recording's descriptor", ""});
     }
 
-    file_.write(reinterpret_cast<const char*>(frame.storage->data()),
-                static_cast<std::streamsize>(frame.storage->size()));
+    // SER stores tightly packed rows. Camera buffers may have alignment
+    // padding, which must not shift every subsequent row and timestamp.
+    const auto rowBytes = static_cast<std::size_t>(descriptor_.width) * bytesPerPixel(descriptor_.storage);
+    const auto stride = descriptor_.strideBytes != 0 ? descriptor_.strideBytes : rowBytes;
+    const auto* data = reinterpret_cast<const char*>(frame.storage->data());
+    if (stride == rowBytes) {
+        file_.write(data, static_cast<std::streamsize>(rowBytes * descriptor_.height));
+    } else {
+        for (std::uint32_t y = 0; y < descriptor_.height; ++y) {
+            file_.write(data + y * stride, static_cast<std::streamsize>(rowBytes));
+        }
+    }
     if (!file_.good()) {
         return Result<void>::failure({ErrorCode::DiskWriteFailed, "Failed writing frame", ""});
     }

@@ -67,7 +67,23 @@ void debayerRows(const FrameDescriptor& descriptor, const std::uint8_t* bytes, s
             std::array<std::uint8_t, 3> pixel{};
             pixel[static_cast<std::size_t>(ownChannel)] = ownValue;
 
-            if (ownChannel == kGreen) {
+            if (x > 0 && x + 1 < width && y > 0 && y + 1 < descriptor.height) {
+                // Interior pixels always have all neighbors. Their CFA
+                // channels follow directly from the 2x2 tile, avoiding
+                // eight bounds checks and repeated pattern lookups.
+                const auto* p = bytes + static_cast<std::size_t>(y) * stride + x;
+                const auto* above = p - stride;
+                const auto* below = p + stride;
+                if (ownChannel == kGreen) {
+                    const int horizontal = bayerChannelAt(descriptor.bayer, x - 1, y);
+                    pixel[static_cast<std::size_t>(horizontal)] = (p[-1] + p[1]) / 2;
+                    pixel[static_cast<std::size_t>(kBlue - horizontal)] = (*above + *below) / 2;
+                } else {
+                    pixel[kGreen] = (p[-1] + p[1] + *above + *below) / 4;
+                    pixel[static_cast<std::size_t>(kBlue - ownChannel)] =
+                        (above[-1] + above[1] + below[-1] + below[1]) / 4;
+                }
+            } else if (ownChannel == kGreen) {
                 pixel[kRed] = averageNeighbors(bytes, stride, width, descriptor.height, x, y, descriptor.bayer,
                                                 kOrthogonal, kRed, ownValue);
                 pixel[kBlue] = averageNeighbors(bytes, stride, width, descriptor.height, x, y, descriptor.bayer,
@@ -93,14 +109,14 @@ void debayerRows(const FrameDescriptor& descriptor, const std::uint8_t* bytes, s
 
 std::vector<std::uint8_t> debayerBilinear(const FrameDescriptor& descriptor, const std::byte* data,
                                            std::size_t size) {
-    if (descriptor.storage != PixelStorage::Bayer8 || descriptor.bayer == BayerPattern::None || data == nullptr) {
+    if (descriptor.storage != PixelStorage::Bayer8 || bayerChannelAt(descriptor.bayer, 0, 0) < 0 || data == nullptr) {
         return {};
     }
 
     const std::uint32_t width = descriptor.width;
     const std::uint32_t height = descriptor.height;
     const std::uint32_t stride = descriptor.strideBytes != 0 ? descriptor.strideBytes : width;
-    if (static_cast<std::size_t>(stride) * height > size) {
+    if (width == 0 || height == 0 || stride < width || static_cast<std::size_t>(stride) * height > size) {
         return {};
     }
 
@@ -115,14 +131,17 @@ std::vector<std::uint8_t> debayerBilinear(const FrameDescriptor& descriptor, con
     // the available cores instead of reducing resolution/quality, so
     // captureStillImage() (which reuses this same output) isn't affected.
     const unsigned int hwThreads = std::thread::hardware_concurrency();
-    const std::uint32_t threadCount = std::clamp<std::uint32_t>(hwThreads == 0 ? 4 : hwThreads, 1, height);
+    const auto usefulThreads = static_cast<std::uint32_t>(
+        std::clamp<std::size_t>(static_cast<std::size_t>(width) * height / 262144, 1, 8));
+    const std::uint32_t threadCount = std::min({hwThreads == 0 ? 4 : hwThreads, usefulThreads, height});
 
     if (threadCount <= 1) {
         debayerRows(descriptor, bytes, stride, width, 0, height, rgb.data());
         return rgb;
     }
 
-    std::vector<std::thread> workers;
+    // jthread also joins already-created workers if thread creation throws.
+    std::vector<std::jthread> workers;
     workers.reserve(threadCount);
     const std::uint32_t rowsPerThread = (height + threadCount - 1) / threadCount;
     for (std::uint32_t t = 0; t < threadCount; ++t) {
@@ -143,14 +162,14 @@ std::vector<std::uint8_t> debayerBilinear(const FrameDescriptor& descriptor, con
 DecimatedBayer decimateBayer(const FrameDescriptor& descriptor, const std::byte* data, std::size_t size,
                               std::uint32_t factor) {
     DecimatedBayer result;
-    if (descriptor.storage != PixelStorage::Bayer8 || data == nullptr) {
+    if (descriptor.storage != PixelStorage::Bayer8 || bayerChannelAt(descriptor.bayer, 0, 0) < 0 || data == nullptr) {
         return result;
     }
 
     const std::uint32_t width = descriptor.width;
     const std::uint32_t height = descriptor.height;
     const std::uint32_t stride = descriptor.strideBytes != 0 ? descriptor.strideBytes : width;
-    if (static_cast<std::size_t>(stride) * height > size) {
+    if (width == 0 || height == 0 || stride < width || static_cast<std::size_t>(stride) * height > size) {
         return result;
     }
 

@@ -37,7 +37,12 @@ build()     { ensure_configured; cmake --build --preset "$preset"; }
 run_tests() { build; ctest --preset "$preset" --output-on-failure; }
 run_app()   {
     build
-    ./build/"$preset"/bin/AstroCapture
+    local bundle="build/$preset/bin/AstroCapture.app"
+    if [[ -d "$bundle" ]]; then
+        "$bundle/Contents/MacOS/AstroCapture"
+    else
+        ./build/"$preset"/bin/AstroCapture
+    fi
 }
 
 case "$command" in

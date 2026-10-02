@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <array>
 #include <vector>
+#include <random>
 
 #include "astro/driver/mock/BayerTestPattern.hpp"
 
@@ -66,6 +67,73 @@ int main() {
             checkColorAt(rgb, kWidth, 22, y, 0, 255, 0);      // green bar
             checkColorAt(rgb, kWidth, 38, y, 0, 0, 255);      // blue bar
             checkColorAt(rgb, kWidth, 54, y, 255, 255, 255);  // white bar
+        }
+    }
+
+    // Unsupported storage: empty result, not a garbage reinterpretation.
+    // Compare every pixel to an independent scalar 3x3 neighborhood
+    // reference, including borders, odd dimensions, padding and tiny ROIs.
+    std::mt19937 random(42);
+    for (const auto pattern : kPatterns) {
+        for (const auto width : {1u, 2u, 7u, 65u, 1024u}) {
+            const std::uint32_t height = width == 1024 ? 768 : 9;
+            FrameDescriptor d{width, height, width + 3, PixelStorage::Bayer8, pattern, 8};
+            std::vector<std::byte> raw(d.expectedPayloadBytes());
+            for (auto& value : raw) value = std::byte(random() % 256);
+            const auto actual = debayerBilinear(d, raw.data(), raw.size());
+            ASTRO_TEST_CHECK(actual.size() == static_cast<std::size_t>(width) * height * 3);
+            for (std::uint32_t y = 0; y < height; ++y) {
+                for (std::uint32_t x = 0; x < width; ++x) {
+                    const auto own = std::to_integer<int>(raw[y * d.strideBytes + x]);
+                    for (int channel = 0; channel < 3; ++channel) {
+                        int sum = 0, count = 0;
+                        for (int dy = -1; dy <= 1; ++dy) {
+                            for (int dx = -1; dx <= 1; ++dx) {
+                                const int nx = static_cast<int>(x) + dx, ny = static_cast<int>(y) + dy;
+                                if (nx >= 0 && ny >= 0 && nx < static_cast<int>(width) && ny < static_cast<int>(height) &&
+                                    bayerChannelAt(pattern, nx, ny) == channel) {
+                                    sum += std::to_integer<int>(raw[ny * d.strideBytes + nx]);
+                                    ++count;
+                                }
+                            }
+                        }
+                        const int expected = channel == bayerChannelAt(pattern, x, y) ? own : (count ? sum / count : own);
+                        ASTRO_TEST_CHECK(actual[(static_cast<std::size_t>(y) * width + x) * 3 + channel] == expected);
+                    }
+                }
+            }
+        }
+    }
+
+    // Reject invalid geometry/patterns before starting any worker or
+    // reading pixels, including a stride shorter than a row.
+    {
+        FrameDescriptor d{4, 4, 2, PixelStorage::Bayer8, BayerPattern::GBRG, 8};
+        const std::vector<std::byte> raw(16);
+        ASTRO_TEST_CHECK(debayerBilinear(d, raw.data(), raw.size()).empty());
+        ASTRO_TEST_CHECK(astro::processing::decimateBayer(d, raw.data(), raw.size(), 2).data.empty());
+        d.strideBytes = 4;
+        d.height = 0;
+        ASTRO_TEST_CHECK(debayerBilinear(d, raw.data(), raw.size()).empty());
+        d.height = 4;
+        d.bayer = static_cast<BayerPattern>(99);
+        ASTRO_TEST_CHECK(debayerBilinear(d, raw.data(), raw.size()).empty());
+    }
+
+    // Decimation must preserve every channel's parity, including odd edges.
+    for (const auto pattern : kPatterns) {
+        FrameDescriptor d{67, 19, 70, PixelStorage::Bayer8, pattern, 8};
+        std::vector<std::byte> raw(d.expectedPayloadBytes());
+        for (std::uint32_t y = 0; y < d.height; ++y)
+            for (std::uint32_t x = 0; x < d.width; ++x)
+                raw[y * d.strideBytes + x] = std::byte(40 + 60 * bayerChannelAt(pattern, x, y));
+        for (auto factor : {2u, 4u, 8u}) {
+            const auto result = astro::processing::decimateBayer(d, raw.data(), raw.size(), factor);
+            ASTRO_TEST_CHECK(result.descriptor.bayer == pattern);
+            for (std::uint32_t y = 0; y < result.descriptor.height; ++y)
+                for (std::uint32_t x = 0; x < result.descriptor.width; ++x)
+                    ASTRO_TEST_CHECK(std::to_integer<int>(result.data[y * result.descriptor.strideBytes + x]) ==
+                                     40 + 60 * bayerChannelAt(pattern, x, y));
         }
     }
 

@@ -98,8 +98,9 @@ PreviewController::PreviewController(QObject* parent) : QObject(parent) {
     // The writer thread can't call stopRecording() itself (it would try to
     // join its own thread), so it emits recordingTargetReached() instead;
     // Qt queues delivery to this object's thread (GUI) automatically.
-    connect(this, &PreviewController::recordingTargetReached, this, &PreviewController::stopRecording,
-            Qt::QueuedConnection);
+    connect(this, &PreviewController::recordingTargetReached, this, [this](quint64 generation) {
+        if (generation == recordingGeneration_) stopRecording();
+    }, Qt::QueuedConnection);
 
     // 20Hz: smooth enough for a live camera preview, far cheaper than
     // repainting (and re-running debayer/histogram) at the camera's own
@@ -112,6 +113,12 @@ PreviewController::PreviewController(QObject* parent) : QObject(parent) {
     // start/stop it) so it costs nothing at idle.
     previewTimer_.setInterval(50);
     connect(&previewTimer_, &QTimer::timeout, this, &PreviewController::previewTick);
+    connect(&previewTimer_, &QTimer::timeout, this, [this] {
+        emit frameCountChanged();
+        if (recording_) emit recordingStatsChanged();
+    });
+    recordingDeadlineTimer_.setSingleShot(true);
+    connect(&recordingDeadlineTimer_, &QTimer::timeout, this, &PreviewController::stopRecording);
 }
 
 PreviewController::~PreviewController() {
@@ -594,6 +601,8 @@ void PreviewController::setRoi(int x, int y, int width, int height) {
     frameSlot_.clear();
     lastRenderedSequence_.reset();
     cachedFrameImage_ = QImage();
+    lastPreviewSequence_.reset();
+    cachedPreviewImage_ = QImage();
     emit roiChanged();
 }
 
@@ -697,8 +706,12 @@ void PreviewController::captureStillImage() {
     const QString extension = saveFormat_ == QStringLiteral("TIFF16")   ? QStringLiteral("tiff")
                                : saveFormat_ == QStringLiteral("FITS")  ? QStringLiteral("fits")
                                                                         : QStringLiteral("png");
-    const QString path = directory + QLatin1Char('/') + timestampedBaseName(cameraId, targetName_) +
-                          QLatin1Char('.') + extension;
+    const QString path = reserveCapturePath(directory, timestampedBaseName(cameraId, targetName_), extension);
+    if (path.isEmpty()) {
+        lastCaptureStatus_ = QStringLiteral("Failed to create image file.");
+        emit lastCaptureStatusChanged();
+        return;
+    }
 
     bool saved = false;
     if (saveFormat_ == QStringLiteral("PNG")) {
@@ -786,8 +799,13 @@ void PreviewController::startRecording() {
 
     const QString cameraId = QString::fromStdString(device_->descriptor().id);
     const bool useSer = videoFormat_ == QStringLiteral("SER");
-    const QString path = directory + QLatin1Char('/') + timestampedBaseName(cameraId, targetName_) +
-                          (useSer ? QStringLiteral(".ser") : QStringLiteral(".acraw"));
+    const QString path = reserveCapturePath(directory, timestampedBaseName(cameraId, targetName_),
+                                            useSer ? QStringLiteral("ser") : QStringLiteral("acraw"));
+    if (path.isEmpty()) {
+        recordingStatus_ = QStringLiteral("Failed to create recording file.");
+        emit recordingStatusChanged();
+        return;
+    }
 
     std::unique_ptr<astro::recording::IRecorder> recorder =
         useSer ? std::unique_ptr<astro::recording::IRecorder>(std::make_unique<astro::recording::SerRecorder>())
@@ -808,14 +826,16 @@ void PreviewController::startRecording() {
     auto queue = std::make_unique<astro::domain::BoundedFrameQueue>(64);
     astro::domain::BoundedFrameQueue* queuePtr = queue.get();
     astro::recording::IRecorder* recorderPtr = recorder.get();
+    recordingFrameCount_.store(0, std::memory_order_relaxed);
+    recordingDroppedFrames_.store(0, std::memory_order_relaxed);
+    recordingFailure_.clear();
     {
         std::lock_guard lock(recordingMutex_);
         recordingQueue_ = std::move(queue);
+        recordingAcceptingFrames_ = true;
     }
     recorder_ = std::move(recorder);
 
-    recordingFrameCount_.store(0, std::memory_order_relaxed);
-    recordingDroppedFrames_.store(0, std::memory_order_relaxed);
     recordingStartTime_ = std::chrono::steady_clock::now();
     recordingPath_ = path;
     recording_ = true;
@@ -828,9 +848,16 @@ void PreviewController::startRecording() {
     const int targetFrameCount = recordingTargetFrameCount_;
     const double targetDurationSeconds = recordingTargetDurationSeconds_;
     const auto recordingStart = recordingStartTime_;
+    const auto generation = ++recordingGeneration_;
+    if (targetDurationSeconds > 0.0) {
+        // A stalled/disconnected camera cannot provide the next frame to
+        // check the deadline. Keep a GUI timer as an independent stop.
+        recordingDeadlineTimer_.start(std::chrono::milliseconds(
+            static_cast<std::int64_t>(std::min(targetDurationSeconds * 1000.0, 2147483647.0))));
+    }
 
     recordingThread_ = std::thread([this, queuePtr, recorderPtr, targetFrameCount, targetDurationSeconds,
-                                     recordingStart] {
+                                     recordingStart, generation] {
         while (auto queuedFrame = queuePtr->waitPop()) {
             const auto result = recorderPtr->writeFrame(*queuedFrame);
             std::uint64_t written = 0;
@@ -838,20 +865,21 @@ void PreviewController::startRecording() {
                 written = recordingFrameCount_.fetch_add(1, std::memory_order_relaxed) + 1;
             } else {
                 recordingDroppedFrames_.fetch_add(1, std::memory_order_relaxed);
+                recordingFailure_ = result.error().message;
             }
-            emit recordingStatsChanged();
 
             const double elapsed = std::chrono::duration<double>(std::chrono::steady_clock::now() - recordingStart)
                                         .count();
             const bool frameTargetReached = targetFrameCount > 0 && written >= static_cast<std::uint64_t>(targetFrameCount);
             const bool durationTargetReached = targetDurationSeconds > 0.0 && elapsed >= targetDurationSeconds;
-            if (frameTargetReached || durationTargetReached) {
-                // Frames arriving after this point (before stopRecording()
-                // actually runs on the GUI thread) queue up and, once the
-                // bounded queue fills, count as dropped — an expected,
-                // harmless artifact of hitting a target, not a real
-                // integrity failure.
-                emit recordingTargetReached();
+            if (!result.ok() || frameTargetReached || durationTargetReached) {
+                // Seal admission immediately. Waiting for the GUI's stop
+                // would report spurious drops after a completed target.
+                {
+                    std::lock_guard lock(recordingMutex_);
+                    recordingAcceptingFrames_ = false;
+                }
+                emit recordingTargetReached(generation);
                 break;
             }
         }
@@ -867,23 +895,29 @@ void PreviewController::stopRecording() {
     if (!recording_) {
         return;
     }
+    recordingDeadlineTimer_.stop();
 
     // Order matters: stop() wakes the writer thread's waitPop() so it can
     // drain whatever's left and exit; join() guarantees it has actually
     // exited (and so is done touching queuePtr/recorderPtr) before we
     // destroy the objects those pointers reference below.
-    recordingQueue_->stop();
+    // Detach under the producer's lock before draining: new camera frames
+    // belong to the preview, not to the recording that is being finalized.
+    std::unique_ptr<astro::domain::BoundedFrameQueue> finishingQueue;
+    {
+        std::lock_guard lock(recordingMutex_);
+        recordingAcceptingFrames_ = false;
+        finishingQueue = std::move(recordingQueue_);
+    }
+    finishingQueue->stop();
     if (recordingThread_.joinable()) {
         recordingThread_.join();
     }
 
-    {
-        std::lock_guard lock(recordingMutex_);
-        recordingQueue_.reset();
-    }
-
     const auto summary = recorder_->close();
-    if (summary.ok()) {
+    if (!recordingFailure_.empty()) {
+        recordingStatus_ = QStringLiteral("Recording failed: ") + QString::fromStdString(recordingFailure_);
+    } else if (summary.ok()) {
         recordingStatus_ = QStringLiteral("Saved ") + recordingPath_ + QStringLiteral(" (") +
                             QString::number(summary.value().framesWritten) + QStringLiteral(" frames, ") +
                             QString::number(recordingDroppedFrames_.load(std::memory_order_relaxed)) +
@@ -896,6 +930,7 @@ void PreviewController::stopRecording() {
     recording_ = false;
     emit recordingChanged();
     emit recordingStatusChanged();
+    emit recordingStatsChanged();
 }
 
 void PreviewController::onFrame(const FrameBuffer& frameBuffer) {
@@ -904,9 +939,8 @@ void PreviewController::onFrame(const FrameBuffer& frameBuffer) {
 
     {
         std::lock_guard lock(recordingMutex_);
-        if (recordingQueue_ && !recordingQueue_->tryPush(frameBuffer)) {
+        if (recordingAcceptingFrames_ && recordingQueue_ && !recordingQueue_->tryPush(frameBuffer)) {
             recordingDroppedFrames_.fetch_add(1, std::memory_order_relaxed);
-            emit recordingStatsChanged();
         }
     }
 
@@ -914,7 +948,6 @@ void PreviewController::onFrame(const FrameBuffer& frameBuffer) {
     // receivers (LivePreviewItem, QML property bindings) are queued
     // automatically, so this stays cheap on the acquisition thread.
     emit frameChanged();
-    emit frameCountChanged();
 }
 
 QString PreviewController::imagesDirectoryPath() const {

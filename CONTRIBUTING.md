@@ -1,6 +1,6 @@
 # Contributing
 
-1. Read `AGENT.md` and relevant subsystem documentation.
+1. Read `README.md` for the project scope and build instructions.
 2. Build and test using CMake presets.
 3. Prefer mock/replay camera tests for reproducibility.
 4. Keep platform/vendor dependencies behind interfaces.

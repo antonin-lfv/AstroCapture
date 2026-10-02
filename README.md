@@ -6,24 +6,18 @@ AstroCapture is a planned modern cross-platform desktop application for astronom
 
 The project is desktop-first and local-first, with a production core in C++, a Qt/QML interface, Python for research/AI development and native model inference for shipping AI features.
 
-## Start here
+## Build and test
 
-Read [`AGENT.md`](AGENT.md). It is the engineering and product charter.
+With CMake, a C++20 compiler and Qt 6.5 or newer installed:
 
-Key documents:
+```sh
+cmake --preset dev
+cmake --build --preset dev
+ctest --preset dev --output-on-failure
+```
 
-- [`docs/product/VISION.md`](docs/product/VISION.md)
-- [`docs/product/ROADMAP.md`](docs/product/ROADMAP.md)
-- [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
-- [`docs/architecture/CAMERA_AND_PIPELINE.md`](docs/architecture/CAMERA_AND_PIPELINE.md)
-- [`docs/design/UX_UI.md`](docs/design/UX_UI.md)
-- [`docs/development/DEVELOPMENT.md`](docs/development/DEVELOPMENT.md)
-- [`docs/development/RELEASE_AND_PACKAGING.md`](docs/development/RELEASE_AND_PACKAGING.md)
-- [`docs/development/QUALITY.md`](docs/development/QUALITY.md)
-- [`docs/development/IMPLEMENTATION_BLUEPRINT.md`](docs/development/IMPLEMENTATION_BLUEPRINT.md)
-- [`docs/design/USER_FLOWS.md`](docs/design/USER_FLOWS.md)
-- [`docs/development/GOVERNANCE.md`](docs/development/GOVERNANCE.md)
-- [`docs/ai/AI_STRATEGY.md`](docs/ai/AI_STRATEGY.md)
+On macOS, `scripts/build.sh run` builds and launches the application.
+The simulated camera allows development without physical hardware.
 
 ## First engineering target
 

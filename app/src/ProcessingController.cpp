@@ -1,4 +1,5 @@
 #include "ProcessingController.hpp"
+#include "ImagePreview.hpp"
 
 #include <QDir>
 #include "SequenceReader.hpp"
@@ -30,20 +31,7 @@ std::filesystem::path nativePath(const QString &path) {
 #endif
 }
 FloatImage readImage(SequenceReader& reader,int index) {return reader.image(index);}
-QImage preview(const FloatImage &image) {
-  QImage out(image.width, image.height, QImage::Format_RGB888);
-  if (out.isNull())
-    throw std::runtime_error("Not enough memory for image preview.");
-  for (int y = 0; y < image.height; ++y) {
-    auto *row = out.scanLine(y);
-    for (int x = 0; x < image.width * 3; ++x)
-      row[x] = static_cast<unsigned char>(std::lround(
-          std::clamp(image.rgb[std::size_t(y) * image.width * 3 + x], 0.f,
-                     1.f) *
-          255));
-  }
-  return out;
-}
+QImage preview(const FloatImage &image,const processing::CheckCancel& check={}) {return makeImagePreview(image,check);}
 } // namespace
 ProcessingController::ProcessingController(QObject *parent) : QObject(parent) {}
 ProcessingController::~ProcessingController() {
@@ -434,9 +422,11 @@ void ProcessingController::startAdjustments(const Adjustments &settings) {
   run(
       tr("Applying wavelets…"),
       [this, original, edgeMask, settings, revision](std::stop_token stop) {
+        auto image=allocateImagePreview(*original);const auto target=previewTarget(image);
         auto result = std::make_shared<FloatImage>(
             wavelets(*original, settings.gains, settings.denoise,
-                     settings.color, settings.gamma, [&] { check(stop); }));
+                     settings.color, settings.gamma, [&] { check(stop); },
+                     processing::ComputePreference::Auto,nullptr,edgeMask?nullptr:&target));
         if(edgeMask) {
           // Do not sharpen the artificial coverage boundary of a mosaic.
           for(int y=0;y<result->height;++y) {check(stop);for(int x=0;x<result->width;++x) {
@@ -444,7 +434,7 @@ void ProcessingController::startAdjustments(const Adjustments &settings) {
             for(int c=0;c<3;++c) result->rgb[at*3+c]=original->rgb[at*3+c]+w*(result->rgb[at*3+c]-original->rgb[at*3+c]);
           }}
         }
-        auto image = preview(*result);
+        if(edgeMask)image=preview(*result,[&]{check(stop);});
         check(stop);
         post([this, result, image, revision] {
           if (revision != adjustmentRevision_)

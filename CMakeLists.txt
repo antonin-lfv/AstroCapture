@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.25)
 
-project(AstroCapture VERSION 1.0.0 LANGUAGES C CXX)
+project(AstroCapture VERSION 1.0.1 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -14,6 +14,11 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+
+if(APPLE)
+    enable_language(OBJCXX)
+endif()
+option(ASTRO_ENABLE_METAL "Accelerate supported processing with Metal on Apple Silicon" ON)
 
 option(ASTRO_BUILD_TESTS "Build tests" ON)
 option(ASTRO_ENABLE_DEVTOOLS "Enable developer tools" OFF)
@@ -84,12 +89,6 @@ if(ASTRO_ENABLE_DRIVER_ZWO)
             set(ASTRO_ENABLE_DRIVER_ZWO OFF)
         endif()
     endif()
-endif()
-
-# CameraPermission.mm (app/CMakeLists.txt) needs Objective-C++ — see
-# docs/decisions/ADR-005-macos-camera-permission.md.
-if(APPLE)
-    enable_language(OBJCXX)
 endif()
 
 add_subdirectory(app)

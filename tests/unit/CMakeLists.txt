@@ -173,3 +173,12 @@ set_target_properties(astro_app_deep_sky_workspace_test PROPERTIES AUTOMOC ON)
 target_include_directories(astro_app_deep_sky_workspace_test PRIVATE ../../app/src)
 target_compile_definitions(astro_app_deep_sky_workspace_test PRIVATE ASTRO_SOURCE_DIR="${PROJECT_SOURCE_DIR}")
 set_tests_properties(astro_app_deep_sky_workspace_test PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_BACKEND=software" TIMEOUT 90)
+
+# Manual performance measurements; timings must not become CI pass thresholds.
+add_executable(astro_processing_benchmark ../benchmarks/ProcessingBenchmark.cpp)
+target_link_libraries(astro_processing_benchmark PRIVATE astro::processing astro::recording)
+astro_add_unit_test(astro_processing_metal_test
+    SOURCES processing/MetalProcessingTest.cpp
+    LIBS astro::processing Threads::Threads
+)
+set_tests_properties(astro_processing_metal_test PROPERTIES TIMEOUT 60)

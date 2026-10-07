@@ -1,4 +1,5 @@
 #include "DeepSkyController.hpp"
+#include "ImagePreview.hpp"
 #include <astro/recording/AstroImage.hpp>
 #include <astro/recording/TiffWriter.hpp>
 #include <QFileInfo>
@@ -62,13 +63,9 @@ QVariantMap suggested(const processing::FloatImage& image) {
     const float midtones=std::clamp(median*.82f/(median+.18f-2*median*.18f),.001f,.999f);
     return {{"black",black},{"white",white},{"midtones",midtones},{"red",gains[0]},{"green",gains[1]},{"blue",gains[2]}};
 }
-QImage previewImage(const processing::FloatImage& image,bool stretch) {
-    auto display=image;
-    if(stretch){const auto settings=suggested(image);processing::Finish f;f.black=settings["black"].toFloat();f.white=settings["white"].toFloat();f.midtones=settings["midtones"].toFloat();f.color={settings["red"].toFloat(),settings["green"].toFloat(),settings["blue"].toFloat()};display=processing::finishDeepSky(image,f);}
-    QImage preview(image.width,image.height,QImage::Format_RGB888);
-    if(preview.isNull())throw std::runtime_error("Not enough memory for preview.");
-    for(int y=0;y<image.height;++y)for(int x=0;x<image.width*3;++x){const float v=display.rgb[std::size_t(y)*image.width*3+x];preview.scanLine(y)[x]=std::isfinite(v)?uchar(std::lround(std::clamp(v,0.f,1.f)*255)):0;}
-    return preview;
+QImage previewImage(const processing::FloatImage& image,bool stretch,const processing::CheckCancel& check={}) {
+    if(stretch){const auto settings=suggested(image);processing::Finish f;f.black=settings["black"].toFloat();f.white=settings["white"].toFloat();f.midtones=settings["midtones"].toFloat();f.color={settings["red"].toFloat(),settings["green"].toFloat(),settings["blue"].toFloat()};return makeImagePreview(processing::finishDeepSky(image,f,check),check);}
+    return makeImagePreview(image,check);
 }
 QVariantMap makeLinearHistogram(const processing::FloatImage& image,const std::array<float,3>& gains,float black,float white) {
     std::array<std::vector<float>,3> samples;std::vector<float> combined;
@@ -89,9 +86,10 @@ struct Display {
 Display prepare(const processing::FloatImage& image) {
     const auto settings=suggested(image);processing::Finish f;
     f.black=settings["black"].toFloat();f.white=settings["white"].toFloat();f.midtones=settings["midtones"].toFloat();f.color={settings["red"].toFloat(),settings["green"].toFloat(),settings["blue"].toFloat()};
-    auto pixels=std::make_shared<processing::FloatImage>(processing::finishDeepSky(image,f));
+    auto preview=allocateImagePreview(image);const auto target=previewTarget(preview);
+    auto pixels=std::make_shared<processing::FloatImage>(processing::finishDeepSky(image,f,{},nullptr,&target));
     auto complete=settings;complete["histogram"]=makeLinearHistogram(image,f.color,f.black,f.white);
-    return {pixels,previewImage(*pixels,false),complete};
+    return {pixels,preview,complete};
 }
 void atomicCopy(const QString& from,const QString& to,std::stop_token stop) {
     QFile input(from);QSaveFile output(to);
@@ -251,7 +249,7 @@ void DeepSkyController::apply(const QVariantMap& options) {
     f.color={options.value("red",1).toFloat(),options.value("green",1).toFloat(),options.value("blue",1).toFloat()};f.denoise=options.value("denoise",0).toFloat();f.asinh=options.value("asinh",false).toBool();f.asinhStrength=options.value("asinhStrength",20).toFloat();f.saturation=options.value("saturation",1).toFloat();
     for(float value:{f.black,f.white,f.midtones,f.color[0],f.color[1],f.color[2],f.denoise,f.asinhStrength,f.saturation})if(!std::isfinite(value)){status_=tr("Adjustment values must be finite.");emit changed();return;}
     adjusting_=true;
-    run(tr("Adjusting background, colors and stretch…"),[this,image,f](std::stop_token stop){auto result=std::make_shared<processing::FloatImage>(processing::finishDeepSky(*image,f,[stop]{check(stop);}));const auto preview=previewImage(*result,false);const auto histogram=makeLinearHistogram(*image,f.color,f.black,f.white);check(stop);post([this,result,preview,histogram,stop]{if(stop.stop_requested())return;histogram_=histogram;finished_=result;resultPreview_=preview;preview_=preview;comparingRaw_=false;displayingResult_=true;status_=tr("Adjustments applied. Linear FITS retains the original integration.");progress_=100;emit imageChanged();emit changed();});});
+    run(tr("Adjusting background, colors and stretch…"),[this,image,f](std::stop_token stop){auto preview=allocateImagePreview(*image);const auto target=previewTarget(preview);auto result=std::make_shared<processing::FloatImage>(processing::finishDeepSky(*image,f,[stop]{check(stop);},nullptr,&target));const auto histogram=makeLinearHistogram(*image,f.color,f.black,f.white);check(stop);post([this,result,preview,histogram,stop]{if(stop.stop_requested())return;histogram_=histogram;finished_=result;resultPreview_=preview;preview_=preview;comparingRaw_=false;displayingResult_=true;status_=tr("Adjustments applied. Linear FITS retains the original integration.");progress_=100;emit imageChanged();emit changed();});});
 }
 void DeepSkyController::exportImage(const QUrl& url,bool linear) {
     if(!linear_||!url.isLocalFile())return;

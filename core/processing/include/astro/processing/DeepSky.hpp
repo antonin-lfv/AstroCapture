@@ -1,5 +1,6 @@
 #pragma once
 #include <astro/processing/Planetary.hpp>
+#include <astro/processing/Preview.hpp>
 #include <astro/recording/AstroImage.hpp>
 #include <functional>
 #include <optional>
@@ -40,8 +41,9 @@ struct Finish {
     float denoise{};
     bool asinh{};
     float asinhStrength{20},saturation{1};
+    ComputePreference compute{ComputePreference::Auto};
 };
-FloatImage finishDeepSky(const FloatImage&,const Finish&,const CheckCancel& = {});
+FloatImage finishDeepSky(const FloatImage&,const Finish&,const CheckCancel& = {},ComputeReport* = nullptr,const PreviewTarget* preview = nullptr);
 FloatImage combineChannels(const FloatImage& red,const FloatImage& green,const FloatImage& blue,
                           const FloatImage* luminance=nullptr,const CheckCancel& = {});
 }

@@ -1,5 +1,6 @@
 #pragma once
 #include <array>
+#include <astro/processing/Acceleration.hpp>
 #include <astro/domain/PixelFormat.hpp>
 #include <functional>
 #include <span>
@@ -7,6 +8,7 @@
 
 namespace astro::processing {
 // Linear RGB, normalized to the source bit depth, never quantized for processing.
+struct PreviewTarget;
 struct FloatImage {
     int width{}, height{};
     std::vector<float> rgb;
@@ -51,5 +53,6 @@ private:
 // Six undecimated B3-spline scales. Zero gains give the original exactly.
 // Denoise soft-thresholds detail additions; RGB gains and gamma apply at the end.
 FloatImage wavelets(const FloatImage& image, const std::array<float, 6>& gains, float denoise,
-                    const std::array<float, 3>& color, float gamma, const CheckCancel& check = {});
+                    const std::array<float, 3>& color, float gamma, const CheckCancel& check = {},
+                    ComputePreference preference = ComputePreference::Auto, ComputeReport* report = nullptr, const PreviewTarget* preview = nullptr);
 }  // namespace astro::processing

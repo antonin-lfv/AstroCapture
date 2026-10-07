@@ -28,6 +28,32 @@ L’histogramme permet de surveiller l’exposition. La cadence, les compteurs d
 
 La **Celestron NexImage 5** est le matériel de référence : capteur MT9P031, 2 592 × 1 944 pixels de 2,2 µm. La réception des images a été vérifiée sur Mac. Le profil Bayer GBRG actuellement utilisé reste à confirmer avec une cible de couleur connue. Les possibilités de réglage dépendent du pilote et de la caméra ; la compatibilité de chaque autre modèle doit être vérifiée individuellement.
 
+## Accélération Apple Silicon
+
+La version 1.0.1 utilise automatiquement **Metal** pour les réglages de ciel
+profond à partir de 1 MP et pour les ondelettes actives à partir de 0,26 MP.
+L’étirement classique ou asinh, les gains couleur, la saturation, le lissage et
+les six échelles d’ondelettes conservent des pixels **RGB flottants 32 bits**.
+L’aperçu 8 bits est calculé dans la même commande GPU, puis affiché à sa
+résolution complète. Une conversion d’aperçu seule reste sur CPU : les mesures
+montrent que sa copie vers le GPU coûterait plus que son calcul.
+
+Sur un **M1 Pro**, avec le résultat Siril M8/M20 de **6244 × 4172** pixels,
+les mesures incluent les allocations et copies des traitements ; elles ne sont
+pas une promesse sur le temps total d’importation ou d’empilement. Les résultats
+et la méthode de mesure sont consignés dans les notes locales `docs/`.
+
+Les calculs GPU travaillent par bandes avec recouvrement pour préserver les
+bords et raccords tout en limitant la mémoire temporaire. L’annulation attend
+la fin du bloc GPU en cours avant de libérer ses données. Le CPU prend le relais
+si Metal est absent, désactivé, manque de mémoire ou rencontre une erreur.
+Les petites images gardent le CPU. La calibration, la détection et l’alignement
+d’étoiles, l’empilement et les exports conservent leurs méthodes actuelles.
+
+Pour compiler sans cette accélération : `-DASTRO_ENABLE_METAL=OFF`. Pour un
+contrôle ponctuel sur Mac : lancez l’application avec `ASTRO_DISABLE_METAL=1`.
+Les autres systèmes utilisent le moteur CPU, sans dépendance Metal.
+
 ## Ciel profond
 
 L’onglet **Ciel profond** propose un parcours inspiré de l’organisation

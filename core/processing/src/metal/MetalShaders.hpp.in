@@ -1,0 +1,4 @@
+#pragma once
+namespace astro::processing::detail {
+inline constexpr char metalShaderSource[]=R"ASTROMETAL(@ASTRO_METAL_SHADER_SOURCE@)ASTROMETAL";
+}

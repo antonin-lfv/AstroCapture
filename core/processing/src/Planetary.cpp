@@ -1,3 +1,4 @@
+#include "MetalProcessing.hpp"
 #include <algorithm>
 #include <astro/processing/Planetary.hpp>
 #include <cmath>
@@ -356,7 +357,7 @@ FloatImage MeanStack::finish() const {
 }
 FloatImage wavelets(const FloatImage &image, const std::array<float, 6> &gains,
                     float denoise, const std::array<float, 3> &color,
-                    float gamma, const CheckCancel &check) {
+                    float gamma, const CheckCancel &check, ComputePreference preference, ComputeReport* report,const PreviewTarget* preview) {
   validate(image, 32000000);
   if (!std::isfinite(gamma) || gamma < .1f || gamma > 5 ||
       !std::isfinite(denoise) || denoise < 0 || denoise > 1)
@@ -367,6 +368,15 @@ FloatImage wavelets(const FloatImage &image, const std::array<float, 6> &gains,
   for (float v : color)
     if (!std::isfinite(v) || v < 0 || v > 4)
       throw std::runtime_error("Invalid color gain.");
+  if(preview)validatePreviewTarget(image,*preview);
+  checkpoint(check);
+  if(detail::requestMetal(image.rgb.size()/3,preference,report,std::any_of(gains.begin(),gains.end(),[](float v){return v!=0;})?512*512:1024*1024)) {
+    FloatImage accelerated;std::string reason;
+    if(detail::metalWavelets(image,gains,denoise,color,gamma,accelerated,check,reason,preview,report)) {
+      if(report)report->backend=ComputeBackend::Metal;return accelerated;
+    }
+    if(report)report->fallbackReason=std::move(reason);
+  }
   FloatImage out = image;
   constexpr float weights[5] = {1.f / 16, 4.f / 16, 6.f / 16, 4.f / 16,
                                 1.f / 16};
@@ -418,6 +428,7 @@ FloatImage wavelets(const FloatImage &image, const std::array<float, 6> &gains,
     out.rgb[i] =
         std::pow(std::max(0.f, out.rgb[i] * color[i % 3]), 1.f / gamma);
   }
+  if(preview)renderRgb8(out,preview->pixels,preview->bytesPerLine,check,ComputePreference::Cpu);
   return out;
 }
 } // namespace astro::processing

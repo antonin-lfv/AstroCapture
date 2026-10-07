@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.0.1 — 2026-10-08
+
+- Accelerate large-image deep-sky stretching, color, saturation and Gaussian
+  smoothing, plus B3-spline wavelets, with precise float32 Metal compute.
+- Fuse full-resolution RGB8 previews with GPU processing. Preserve standalone
+  CPU conversion and remove an unnecessary full-image float preview copy.
+- Bound shared GPU scratch memory with overlapping strips; cache pipelines,
+  propagate cancellation safely and fall back to CPU on unavailable/failed Metal.
+- Preserve CPU calibration, registration, stacking and scientific exports.
+- Add CPU/Metal precision, seam, rounding, concurrency, cancellation and fallback
+  regressions plus a reproducible Siril benchmark. Metal can be disabled at build
+  time or with ASTRO_DISABLE_METAL for runtime checks.
+
 ## 1.0.0 — 2026-10-07
 
 - Refine deep-sky sections, parameter helpers, expandable advanced settings and

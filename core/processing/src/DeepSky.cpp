@@ -1,4 +1,5 @@
 #include <astro/processing/DeepSky.hpp>
+#include "MetalProcessing.hpp"
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/calib3d.hpp>
@@ -348,11 +349,25 @@ Integration integrate(int count,const ImageLoader& load,const Calibration& maste
     }
     return result;
 }
-FloatImage finishDeepSky(const FloatImage& input,const Finish& options,const CheckCancel& check) {
-    if(!(options.white>options.black)||options.midtones<=0||options.midtones>=1)
+FloatImage finishDeepSky(const FloatImage& input,const Finish& options,const CheckCancel& check,ComputeReport* report,const PreviewTarget* preview) {
+    if(input.width<=0 || input.height<=0 || std::uint64_t(input.width)*input.height>32000000 || input.rgb.size()!=std::size_t(input.width)*input.height*3)
+        throw std::runtime_error("Invalid processing image dimensions.");
+    if(!std::isfinite(options.white)||!std::isfinite(options.black)||!std::isfinite(options.midtones)||!(options.white>options.black)||options.midtones<=0||options.midtones>=1)
         throw std::runtime_error("White must exceed black; midtones must be between 0 and 1.");
     if(!std::isfinite(options.asinhStrength)||options.asinhStrength<1||options.asinhStrength>1000||!std::isfinite(options.saturation)||options.saturation<0||options.saturation>3)
         throw std::runtime_error("Invalid asinh or saturation settings.");
+    if(!std::isfinite(options.denoise)||std::any_of(options.color.begin(),options.color.end(),[](float v){return !std::isfinite(v);}))
+        throw std::runtime_error("Invalid color or smoothing settings.");
+    if(preview)validatePreviewTarget(input,*preview);
+    checked(check);
+    const bool metal=detail::requestMetal(input.rgb.size()/3,options.compute,report);
+    auto accelerate=[&](const FloatImage& source)->std::optional<FloatImage> {
+        if(!metal)return {};
+        FloatImage out;std::string reason;
+        if(detail::metalFinish(source,options,out,check,reason,preview,report)){if(report)report->backend=ComputeBackend::Metal;return out;}
+        if(report)report->fallbackReason=std::move(reason);return {};
+    };
+    if(!options.background)if(auto out=accelerate(input))return std::move(*out);
     FloatImage image=input;
     if(options.background) {
         // Robust planar fit to tile medians. Exclude the brightest tiles;
@@ -374,6 +389,7 @@ FloatImage finishDeepSky(const FloatImage& input,const Finish& options,const Che
             for(int y=0;y<image.height;++y){checked(check);for(int x=0;x<image.width;++x)image.rgb[(std::size_t(y)*image.width+x)*3+c]-=float(coeff.at<double>(0)*x/image.width+coeff.at<double>(1)*y/image.height+coeff.at<double>(2)-base);}
         }
     }
+    if(options.background)if(auto out=accelerate(image))return std::move(*out);
     for(int y=0;y<image.height;++y) {
         checked(check);
         for(int x=0;x<image.width;++x) {
@@ -407,6 +423,7 @@ FloatImage finishDeepSky(const FloatImage& input,const Finish& options,const Che
         const float amount=std::clamp(options.denoise,0.f,1.f);
         for(std::size_t i=0;i<image.rgb.size();++i)image.rgb[i]=image.rgb[i]*(1-amount)+smooth.ptr<float>()[i]*amount;
     }
+    if(preview)renderRgb8(image,preview->pixels,preview->bytesPerLine,check,ComputePreference::Cpu);
     return image;
 }
 FloatImage combineChannels(const FloatImage& red,const FloatImage& green,const FloatImage& blue,const FloatImage* luminance,const CheckCancel& check) {

@@ -25,6 +25,7 @@ int main(int argc,char** argv){
     QCoreApplication::setOrganizationName("AstroCaptureTest");QCoreApplication::setApplicationName("DeepSkyWorkspaceTest");
     QSettings::setDefaultFormat(QSettings::IniFormat);QSettings::setPath(QSettings::IniFormat,QSettings::UserScope,directory.path());
     qmlRegisterType<app::DeepSkyController>("AstroCapture",1,0,"DeepSkyController");qmlRegisterType<app::DeepSkyHistogramItem>("AstroCapture",1,0,"DeepSkyHistogramItem");qmlRegisterType<app::DeepSkyImageItem>("AstroCapture",1,0,"DeepSkyImageItem");qmlRegisterType<app::AppLibrary>("AstroCapture",1,0,"AppLibrary");
+    std::unique_ptr<app::DeepSkyController> screenshotController;
     app::DeepSkyController controller;app::AppLibrary library;QQmlEngine engine;QQmlComponent component(&engine);
     QFile source(QStringLiteral(ASTRO_SOURCE_DIR "/app/qml/DeepSkyWorkspace.qml"));ASTRO_TEST_CHECK(source.open(QIODevice::ReadOnly));
     component.setData("import AstroCapture 1.0\n"+source.readAll(),QUrl::fromLocalFile(source.fileName()));
@@ -74,5 +75,14 @@ int main(int argc,char** argv){
     app::DeepSkyController imported;imported.addFolder(QUrl::fromLocalFile(folder));wait(imported);ASTRO_TEST_CHECK(imported.frames().size()==4);
     QStringList importedRoles;for(const auto& value:imported.frames())importedRoles<<value.toMap()["role"].toString();for(const auto& role:QStringList{"Light","Dark","Flat","DarkFlat"})ASTRO_TEST_CHECK(importedRoles.contains(role));
     imported.setRole(0,"Bias");imported.setGroup(0,"L");ASTRO_TEST_CHECK(imported.frames()[0].toMap()["role"]=="Bias"&&imported.frames()[0].toMap()["group"]=="L");
+    if(qEnvironmentVariableIsSet("ASTRO_UI_FITS_PATH")) {
+        screenshotController=std::make_unique<app::DeepSkyController>();root->setProperty("controller",QVariant::fromValue(screenshotController.get()));
+        screenshotController->addFiles({QUrl::fromLocalFile(qEnvironmentVariable("ASTRO_UI_FITS_PATH"))});wait(*screenshotController);ASTRO_TEST_CHECK(screenshotController->frames().size()==1);
+        screenshotController->integrate(true);wait(*screenshotController);ASTRO_TEST_CHECK(screenshotController->hasResult());
+        auto settings=screenshotController->suggestedStretch();
+        screenshotController->apply(settings);wait(*screenshotController);ASTRO_TEST_CHECK(screenshotController->processingDocument().value<app::ImageDocument>().pixels);
+        root->setProperty("workflowStep",6);QCoreApplication::processEvents();QThread::msleep(50);QCoreApplication::processEvents();
+        if(qEnvironmentVariableIsSet("ASTRO_UI_SNAPSHOT_PATH"))ASTRO_TEST_CHECK(window.grabWindow().save(qEnvironmentVariable("ASTRO_UI_SNAPSHOT_PATH")));
+    }
     std::cout<<"OK\n";
 }

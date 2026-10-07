@@ -1,4 +1,5 @@
 #include "MosaicController.hpp"
+#include "ImagePreview.hpp"
 #include <QDir>
 #include <QCoreApplication>
 #include <QFileInfo>
@@ -63,20 +64,8 @@ processing::MosaicTile loadTile(const QString& path) {
     }
     return tile;
 }
-QImage preview(const processing::FloatImage& image) {
-    // Keep full-resolution pixels for meaningful 100% inspection.
-    const double scale=1.;
-    QImage out(std::max(1,int(image.width*scale)),std::max(1,int(image.height*scale)),QImage::Format_RGB888);
-    if(out.isNull()) throw std::runtime_error("Not enough memory for the mosaic preview.");
-    for(int y=0;y<out.height();++y) {
-        auto* row=out.scanLine(y); const int sy=std::min(image.height-1,int(y/scale));
-        for(int x=0;x<out.width();++x) {
-            const int sx=std::min(image.width-1,int(x/scale));
-            for(int c=0;c<3;++c) row[x*3+c]=std::uint8_t(std::lround(std::clamp(image.rgb[(std::size_t(sy)*image.width+sx)*3+c],0.f,1.f)*255));
-        }
-    }
-    return out;
-}
+QImage preview(const processing::FloatImage& image) {return makeImagePreview(image);}
+
 }
 MosaicController::~MosaicController() { worker_.request_stop(); if(worker_.joinable()) worker_.join(); }
 void MosaicController::post(std::function<void()> action) { QMetaObject::invokeMethod(this,std::move(action),Qt::QueuedConnection); }

@@ -1101,12 +1101,12 @@ L’aperçu est automatiquement éclairci ; les données restent linéaires.</tr
     <context>
         <name>GuideWorkspace</name>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="67" />
+            <location filename="../qml/GuideWorkspace.qml" line="68" />
             <source>Guide</source>
             <translation>Guide</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="68" />
+            <location filename="../qml/GuideWorkspace.qml" line="69" />
             <source>From the first recording to the finished image, at your own pace.</source>
             <translation>Du premier enregistrement à l’image finale, à votre rythme.</translation>
         </message>
@@ -1403,7 +1403,7 @@ L’aperçu est automatiquement éclairci ; les données restent linéaires.</tr
             <translation type="vanished">Combinez plusieurs filtres en RGB, LRGB, SHO ou HOO. Réglez manuellement les gains couleur, la saturation et le lissage. Les gains initiaux estiment un fond neutre ; ce n’est pas une calibration photométrique. La correction planaire du gradient est optionnelle et peut affecter les nébulosités étendues. La calibration photométrique, GHS et la déconvolution ne sont pas encore disponibles. Exportez un FITS linéaire 32 bits pour poursuivre le travail, ou un TIFF 16 bits ou JPEG finalisé. Détails et légende transfère le résultat finalisé vers Traitement.</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="45" />
+            <location filename="../qml/GuideWorkspace.qml" line="46" />
             <source>Capture and projects</source>
             <translation>Capture et projets</translation>
         </message>
@@ -1428,131 +1428,141 @@ L’aperçu est automatiquement éclairci ; les données restent linéaires.</tr
         </message>
         <message>
             <location filename="../qml/GuideWorkspace.qml" line="45" />
+            <source>Apple Silicon acceleration</source>
+            <translation>Accélération Apple Silicon</translation>
+        </message>
+        <message>
+            <location filename="../qml/GuideWorkspace.qml" line="45" />
+            <source>Large images use automatic GPU acceleration for stretch, color, smoothing and wavelets. Smaller images and unsupported operations keep the CPU. Original data and export precision stay unchanged. No extra setting is required.</source>
+            <translation>Les grandes images utilisent automatiquement le processeur graphique pour l’étirement, les couleurs, le lissage et les ondelettes. Les petites images et les opérations non prises en charge restent sur le processeur central. Les originaux et la précision des exports sont préservés. Aucun réglage supplémentaire n’est nécessaire.</translation>
+        </message>
+        <message>
+            <location filename="../qml/GuideWorkspace.qml" line="46" />
             <source>In Capture, choose Deep sky · FITS sequence, set the camera exposure and frame count, and start. Raw sensor samples and acquisition metadata are saved in individual FITS. Mount tracking and guiding remain external. Use the gear menu to open, save or clear a project. Saving preserves file references and frame selection; keep the source files in place.</source>
             <translation>Dans Capture, choisissez « Ciel profond · séquence FITS », réglez la durée de pose et le nombre d’images, puis démarrez. Les données brutes du capteur et les métadonnées sont enregistrées dans chaque FITS. Le suivi et l’autoguidage restent externes. Le menu à rouage permet d’ouvrir, enregistrer ou vider un projet. L’enregistrement conserve les références aux fichiers et la sélection ; laissez les sources à leur emplacement.</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="46" />
+            <location filename="../qml/GuideWorkspace.qml" line="47" />
             <source>Go to Deep sky</source>
             <translation>Aller à Ciel profond</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="47" />
+            <location filename="../qml/GuideWorkspace.qml" line="48" />
             <source>Mosaics</source>
             <translation>Mosaïques</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="47" />
+            <location filename="../qml/GuideWorkspace.qml" line="48" />
             <source>Build a wider view of the Moon or Sun</source>
             <translation>Reconstituer une vue plus large de la Lune ou du Soleil</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="48" />
+            <location filename="../qml/GuideWorkspace.qml" line="49" />
             <source>Photograph overlapping portions using the same setup and a consistent exposure. Aim for 25–40% overlap, with recognizable details shared between neighboring views.</source>
             <translation>Photographiez des portions qui se chevauchent, avec le même matériel et une exposition cohérente. Visez 25 à 40 % de recouvrement, avec des détails reconnaissables communs aux vues voisines.</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="50" />
+            <location filename="../qml/GuideWorkspace.qml" line="51" />
             <source>Prepare each portion</source>
             <translation>Préparer chaque portion</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="50" />
+            <location filename="../qml/GuideWorkspace.qml" line="51" />
             <source>For best results, record one SER per portion and stack each one. Export the portions as TIFF without captions and with similar, moderate sharpening. Add these TIFFs to Mosaic; PNG and JPEG also work.</source>
             <translation>Pour de meilleurs résultats, enregistrez un SER par portion et empilez chaque vidéo. Exportez les portions en TIFF sans légende, avec une accentuation similaire et modérée. Ajoutez ces TIFF dans Mosaïque ; les PNG et JPEG conviennent aussi.</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="51" />
+            <location filename="../qml/GuideWorkspace.qml" line="52" />
             <source>Select and assemble</source>
             <translation>Sélectionner et assembler</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="51" />
+            <location filename="../qml/GuideWorkspace.qml" line="52" />
             <source>Use the checkboxes to include or leave out images. Automatic exclusion retains the largest connected group and leaves other views visible, unchecked. At least two compatible views are needed. A smooth solar edge alone may not provide enough distinctive detail.</source>
             <translation>Cochez les images à utiliser et décochez celles à écarter. L’exclusion automatique conserve le plus grand groupe raccordable et laisse les autres vues visibles, décochées. Il faut au moins deux vues compatibles. Le contour lisse du Soleil peut ne pas fournir assez de détails distinctifs.</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="52" />
+            <location filename="../qml/GuideWorkspace.qml" line="53" />
             <source>Brightness and edges</source>
             <translation>Luminosité et contours</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="52" />
+            <location filename="../qml/GuideWorkspace.qml" line="53" />
             <source>Assembly options can balance exposure and soften the outer coverage boundary. Edge softening darkens a narrow strip and protects it from sharpening when sent to Processing. It does not fill missing areas or remove every internal seam.</source>
             <translation>Les options d’assemblage peuvent harmoniser l’exposition et adoucir la limite extérieure de la mosaïque. L’adoucissement assombrit une fine bande et la protège de l’accentuation lors du transfert dans Traitement. Il ne comble pas les zones manquantes et ne supprime pas tous les raccords internes.</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="53" />
+            <location filename="../qml/GuideWorkspace.qml" line="54" />
             <source>Finish once the mosaic is assembled</source>
             <translation>Retoucher après l’assemblage</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="53" />
+            <location filename="../qml/GuideWorkspace.qml" line="54" />
             <source>Send the result to Processing for the final wavelets and color adjustments. Add a caption and title at the end. The number of assembled images follows the mosaic into Processing. Exporting and reopening a TIFF does not restore the assembly settings or edge-protection mask.</source>
             <translation>Envoyez le résultat dans Traitement pour les derniers réglages d’ondelettes et de couleur. Ajoutez la légende et le titre à la fin. Le nombre d’images assemblées suit la mosaïque dans Traitement. Exporter puis rouvrir un TIFF ne restaure ni les réglages d’assemblage ni le masque de protection des bords.</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="54" />
+            <location filename="../qml/GuideWorkspace.qml" line="55" />
             <source>Go to Mosaic</source>
             <translation>Aller à Mosaïque</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="55" />
+            <location filename="../qml/GuideWorkspace.qml" line="56" />
             <source>Export and History</source>
             <translation>Export et historique</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="55" />
+            <location filename="../qml/GuideWorkspace.qml" line="56" />
             <source>Keep your originals and find your results</source>
             <translation>Conserver ses originaux et retrouver ses résultats</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="56" />
+            <location filename="../qml/GuideWorkspace.qml" line="57" />
             <source>Capture files and processed exports have separate destination folders in Settings. These choices are saved locally across application updates.</source>
             <translation>Les captures et les exports traités disposent de dossiers de destination distincts dans Paramètres. Ces choix sont conservés localement entre les mises à jour.</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="58" />
+            <location filename="../qml/GuideWorkspace.qml" line="59" />
             <source>Save a result</source>
             <translation>Enregistrer un résultat</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="58" />
+            <location filename="../qml/GuideWorkspace.qml" line="59" />
             <source>Export from Processing or Mosaic creates a TIFF. An imported source image is protected from overwriting; choose a different file name. Captions are optional, and their title appears above the caption text. Once exported, the caption is part of the image.</source>
             <translation>L’export depuis Traitement ou Mosaïque crée un TIFF. Une image source importée est protégée contre l’écrasement : choisissez un autre nom de fichier. La légende est facultative et son titre apparaît au-dessus du texte. Après l’export, la légende fait partie de l’image.</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="59" />
+            <location filename="../qml/GuideWorkspace.qml" line="60" />
             <source>What appears in History?</source>
             <translation>Qu’est-ce qui apparaît dans Historique ?</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="59" />
+            <location filename="../qml/GuideWorkspace.qml" line="60" />
             <source>With automatic history enabled, successful exports from Mosaic and Processing are added, including a mosaic finished in Processing. Capture snapshots are also remembered. Moving between tabs alone does not save an image.</source>
             <translation>Lorsque l’historique automatique est activé, les exports réussis de Mosaïque et Traitement y sont ajoutés, y compris une mosaïque retouchée dans Traitement. Les photos uniques de Capture sont aussi mémorisées. Changer d’onglet ne sauvegarde pas d’image.</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="60" />
+            <location filename="../qml/GuideWorkspace.qml" line="61" />
             <source>Paths, not duplicate files</source>
             <translation>Des chemins, sans copie des fichiers</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="60" />
+            <location filename="../qml/GuideWorkspace.qml" line="61" />
             <source>History remembers file locations. Saving again to the same path updates one entry; a new path creates another. You can import existing images, open them or reveal them in Finder. Removing an entry does not delete the image; missing paths are cleaned automatically.</source>
             <translation>L’historique mémorise l’emplacement des fichiers. Réenregistrer au même endroit actualise une entrée ; un nouveau chemin en crée une autre. Vous pouvez importer des images existantes, les ouvrir ou les afficher dans le Finder. Retirer une entrée ne supprime pas l’image ; les chemins introuvables sont nettoyés automatiquement.</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="61" />
+            <location filename="../qml/GuideWorkspace.qml" line="62" />
             <source>Keep enough to start again</source>
             <translation>Garder de quoi recommencer</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="61" />
+            <location filename="../qml/GuideWorkspace.qml" line="62" />
             <source>Keep the SER recordings and the uncaptioned image portions separately from your final exports. A TIFF preserves the image, not an editable project with its frame selection, wavelet settings or assembly history.</source>
             <translation>Conservez les SER et les portions sans légende séparément de vos exports finaux. Un TIFF conserve l’image, pas un projet modifiable contenant la sélection des prises, les réglages d’ondelettes ou l’historique d’assemblage.</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="62" />
+            <location filename="../qml/GuideWorkspace.qml" line="63" />
             <source>Go to History</source>
             <translation>Aller à Historique</translation>
         </message>
@@ -2042,7 +2052,7 @@ Ajoutez-le depuis son nouvel emplacement.</translation>
         </message>
         <message>
             <source>%1 images</source>
-            <translation>%1 images</translation>
+            <translation type="vanished">%1 images</translation>
         </message>
         <message>
             <location filename="../qml/MosaicWorkspace.qml" line="96" />
@@ -2788,7 +2798,7 @@ Télescope · caméra · accessoires</translation>
     <context>
         <name>QObject</name>
         <message>
-            <location filename="../src/MosaicController.cpp" line="50" />
+            <location filename="../src/MosaicController.cpp" line="51" />
             <source>Cannot read image: </source>
             <translation>Impossible de lire l’image : </translation>
         </message>
@@ -2970,164 +2980,164 @@ Télescope · caméra · accessoires</translation>
     <context>
         <name>astro::app::DeepSkyController</name>
         <message>
-            <location filename="../src/DeepSkyController.cpp" line="109" />
+            <location filename="../src/DeepSkyController.cpp" line="107" />
             <source>Cancelled. Previous results are preserved.</source>
             <translation>Annulé. Les résultats précédents sont conservés.</translation>
         </message>
         <message>
-            <location filename="../src/DeepSkyController.cpp" line="130" />
+            <location filename="../src/DeepSkyController.cpp" line="128" />
             <source>Invalid import settings.</source>
             <translation>Réglages d’import invalides.</translation>
         </message>
         <message>
-            <location filename="../src/DeepSkyController.cpp" line="125" />
-            <location filename="../src/DeepSkyController.cpp" line="131" />
+            <location filename="../src/DeepSkyController.cpp" line="123" />
+            <location filename="../src/DeepSkyController.cpp" line="129" />
             <source>Projects are limited to 2000 files.</source>
             <translation>Un projet accepte au maximum 2000 fichiers.</translation>
         </message>
         <message>
-            <location filename="../src/DeepSkyController.cpp" line="133" />
+            <location filename="../src/DeepSkyController.cpp" line="131" />
             <source>Reading images and detecting stars…</source>
             <translation>Lecture des images et détection des étoiles…</translation>
         </message>
         <message>
-            <location filename="../src/DeepSkyController.cpp" line="141" />
+            <location filename="../src/DeepSkyController.cpp" line="139" />
             <source>File not found: %1</source>
             <translation>Fichier introuvable : %1</translation>
         </message>
         <message>
-            <location filename="../src/DeepSkyController.cpp" line="173" />
+            <location filename="../src/DeepSkyController.cpp" line="171" />
             <source>%1 images imported.</source>
             <translation>%1 images importées.</translation>
         </message>
         <message>
-            <location filename="../src/DeepSkyController.cpp" line="189" />
+            <location filename="../src/DeepSkyController.cpp" line="187" />
             <source>Preparing raw comparison…</source>
             <translation>Préparation de la comparaison avec une brute…</translation>
         </message>
         <message>
-            <location filename="../src/DeepSkyController.cpp" line="195" />
+            <location filename="../src/DeepSkyController.cpp" line="193" />
             <source>Showing the stacked result.</source>
             <translation>Affichage du résultat empilé.</translation>
         </message>
         <message>
-            <location filename="../src/DeepSkyController.cpp" line="196" />
+            <location filename="../src/DeepSkyController.cpp" line="194" />
             <source>Opening frame…</source>
             <translation>Ouverture de la pose…</translation>
         </message>
         <message>
-            <location filename="../src/DeepSkyController.cpp" line="196" />
+            <location filename="../src/DeepSkyController.cpp" line="194" />
             <source>Source preview: %1. Export still uses the integrated result.</source>
             <translation>Aperçu de la source : %1. L’export utilise le résultat empilé.</translation>
         </message>
         <message>
-            <location filename="../src/DeepSkyController.cpp" line="199" />
+            <location filename="../src/DeepSkyController.cpp" line="197" />
             <source>Calibrating and integrating…</source>
             <translation>Calibration et empilement…</translation>
         </message>
         <message>
-            <location filename="../src/DeepSkyController.cpp" line="227" />
+            <location filename="../src/DeepSkyController.cpp" line="225" />
             <source>%1: %2/%3 frames, %4 s, %5 rejected samples</source>
             <translation>%1 : %2/%3 poses, %4 s, %5 valeurs rejetées</translation>
         </message>
         <message>
-            <location filename="../src/DeepSkyController.cpp" line="228" />
+            <location filename="../src/DeepSkyController.cpp" line="226" />
             <source>Only one usable light in %1: no multi-frame noise reduction was possible.</source>
             <translation>Une seule pose utilisable dans %1 : aucune réduction du bruit par empilement n’a été possible.</translation>
         </message>
         <message>
-            <location filename="../src/DeepSkyController.cpp" line="236" />
+            <location filename="../src/DeepSkyController.cpp" line="234" />
             <source>Complete</source>
             <translation>Terminé</translation>
         </message>
         <message>
-            <location filename="../src/DeepSkyController.cpp" line="239" />
+            <location filename="../src/DeepSkyController.cpp" line="237" />
             <source>Displaying integration…</source>
             <translation>Affichage de l’empilement…</translation>
         </message>
         <message>
-            <location filename="../src/DeepSkyController.cpp" line="242" />
+            <location filename="../src/DeepSkyController.cpp" line="240" />
             <source>Select integrated groups for each color channel.</source>
             <translation>Choisissez les groupes empilés pour chaque couche couleur.</translation>
         </message>
         <message>
-            <location filename="../src/DeepSkyController.cpp" line="245" />
+            <location filename="../src/DeepSkyController.cpp" line="243" />
             <source>Aligning and combining channels…</source>
             <translation>Alignement et combinaison des couches…</translation>
         </message>
         <message>
-            <location filename="../src/DeepSkyController.cpp" line="245" />
+            <location filename="../src/DeepSkyController.cpp" line="243" />
             <source>Channels combined. Adjust the stretch, then export.</source>
             <translation>Couches combinées. Réglez l’étirement puis exportez.</translation>
         </message>
         <message>
-            <location filename="../src/DeepSkyController.cpp" line="252" />
+            <location filename="../src/DeepSkyController.cpp" line="250" />
             <source>Adjustment values must be finite.</source>
             <translation>Les valeurs des réglages doivent être des nombres finis.</translation>
         </message>
         <message>
-            <location filename="../src/DeepSkyController.cpp" line="254" />
+            <location filename="../src/DeepSkyController.cpp" line="252" />
             <source>Adjusting background, colors and stretch…</source>
             <translation>Réglage du fond de ciel, des couleurs et de l’étirement…</translation>
         </message>
         <message>
-            <location filename="../src/DeepSkyController.cpp" line="254" />
+            <location filename="../src/DeepSkyController.cpp" line="252" />
             <source>Adjustments applied. Linear FITS retains the original integration.</source>
             <translation>Réglages appliqués. Le FITS linéaire conserve l’empilement original.</translation>
         </message>
         <message>
-            <location filename="../src/DeepSkyController.cpp" line="259" />
-            <location filename="../src/DeepSkyController.cpp" line="284" />
+            <location filename="../src/DeepSkyController.cpp" line="257" />
+            <location filename="../src/DeepSkyController.cpp" line="282" />
             <source>An original image cannot be overwritten.</source>
             <translation>Une image originale ne peut pas être écrasée.</translation>
         </message>
         <message>
-            <location filename="../src/DeepSkyController.cpp" line="261" />
+            <location filename="../src/DeepSkyController.cpp" line="259" />
             <source>Exporting image…</source>
             <translation>Export de l’image…</translation>
         </message>
         <message>
-            <location filename="../src/DeepSkyController.cpp" line="279" />
+            <location filename="../src/DeepSkyController.cpp" line="277" />
             <source>Saved %1</source>
             <translation>Enregistré : %1</translation>
         </message>
         <message>
-            <location filename="../src/DeepSkyController.cpp" line="287" />
+            <location filename="../src/DeepSkyController.cpp" line="285" />
             <source>Cannot save project.</source>
             <translation>Impossible d’enregistrer le projet.</translation>
         </message>
         <message>
-            <location filename="../src/DeepSkyController.cpp" line="287" />
+            <location filename="../src/DeepSkyController.cpp" line="285" />
             <source>Project saved. Original files are referenced, not copied.</source>
             <translation>Projet enregistré. Il référence les originaux sans les copier.</translation>
         </message>
         <message>
-            <location filename="../src/DeepSkyController.cpp" line="292" />
+            <location filename="../src/DeepSkyController.cpp" line="290" />
             <source>Cannot read project.</source>
             <translation>Impossible de lire le projet.</translation>
         </message>
         <message>
-            <location filename="../src/DeepSkyController.cpp" line="294" />
+            <location filename="../src/DeepSkyController.cpp" line="292" />
             <source>Invalid AstroCapture project.</source>
             <translation>Projet AstroCapture invalide.</translation>
         </message>
         <message>
-            <location filename="../src/DeepSkyController.cpp" line="296" />
+            <location filename="../src/DeepSkyController.cpp" line="294" />
             <source>Project contains missing files or invalid roles.</source>
             <translation>Le projet contient des fichiers manquants ou des rôles invalides.</translation>
         </message>
         <message>
-            <location filename="../src/DeepSkyController.cpp" line="297" />
+            <location filename="../src/DeepSkyController.cpp" line="295" />
             <source>Project loaded. Integrate to recreate the result.</source>
             <translation>Projet chargé. Relancez l’empilement pour recréer le résultat.</translation>
         </message>
         <message>
-            <location filename="../src/DeepSkyController.cpp" line="302" />
+            <location filename="../src/DeepSkyController.cpp" line="300" />
             <source>Deep-sky result</source>
             <translation>Résultat ciel profond</translation>
         </message>
         <message>
-            <location filename="../src/DeepSkyController.cpp" line="304" />
+            <location filename="../src/DeepSkyController.cpp" line="302" />
             <source>Deep sky · %1 exposures · %2 s total · filters: %3</source>
             <translation>Ciel profond · %1 poses · %2 s au total · filtres : %3</translation>
         </message>
@@ -3135,62 +3145,62 @@ Télescope · caméra · accessoires</translation>
     <context>
         <name>astro::app::MosaicController</name>
         <message>
-            <location filename="../src/MosaicController.cpp" line="88" />
+            <location filename="../src/MosaicController.cpp" line="77" />
             <source>Cancelled. Previous results are preserved.</source>
             <translation>Annulé. Les résultats précédents sont conservés.</translation>
         </message>
         <message>
-            <location filename="../src/MosaicController.cpp" line="91" />
+            <location filename="../src/MosaicController.cpp" line="80" />
             <source>Mosaic could not be completed: %1</source>
             <translation>Impossible de terminer la mosaïque : %1</translation>
         </message>
         <message>
-            <location filename="../src/MosaicController.cpp" line="136" />
+            <location filename="../src/MosaicController.cpp" line="125" />
             <source>%1 images ready. Add overlapping views, then assemble.</source>
             <translation>%1 images prêtes. Ajoutez des vues qui se chevauchent, puis lancez l’assemblage.</translation>
         </message>
         <message>
-            <location filename="../src/MosaicController.cpp" line="137" />
+            <location filename="../src/MosaicController.cpp" line="126" />
             <source> · %1 skipped (unsupported, too large or over the 100-image limit)</source>
             <translation> · %1 ignorées (format non pris en charge, taille excessive ou limite de 100 images)</translation>
         </message>
         <message>
-            <location filename="../src/MosaicController.cpp" line="143" />
+            <location filename="../src/MosaicController.cpp" line="132" />
             <source>Image removed from this mosaic. The original file is unchanged.</source>
             <translation>Image retirée de la mosaïque. Le fichier original est préservé.</translation>
         </message>
         <message>
-            <location filename="../src/MosaicController.cpp" line="158" />
+            <location filename="../src/MosaicController.cpp" line="147" />
             <source>Cancelling…</source>
             <translation>Annulation…</translation>
         </message>
         <message>
-            <location filename="../src/MosaicController.cpp" line="161" />
+            <location filename="../src/MosaicController.cpp" line="150" />
             <source>Finding shared surface details…</source>
             <translation>Recherche des détails communs…</translation>
         </message>
         <message>
-            <location filename="../src/MosaicController.cpp" line="166" />
+            <location filename="../src/MosaicController.cpp" line="155" />
             <source>Finding surface details…</source>
             <translation>Recherche des détails de surface…</translation>
         </message>
         <message>
-            <location filename="../src/MosaicController.cpp" line="166" />
+            <location filename="../src/MosaicController.cpp" line="155" />
             <source>Matching overlapping views…</source>
             <translation>Recherche des recouvrements…</translation>
         </message>
         <message>
-            <location filename="../src/MosaicController.cpp" line="166" />
+            <location filename="../src/MosaicController.cpp" line="155" />
             <source>Aligning the mosaic…</source>
             <translation>Alignement de la mosaïque…</translation>
         </message>
         <message>
-            <location filename="../src/MosaicController.cpp" line="166" />
+            <location filename="../src/MosaicController.cpp" line="155" />
             <source>Blending overlaps…</source>
             <translation>Fusion des raccords…</translation>
         </message>
         <message>
-            <location filename="../src/MosaicController.cpp" line="166" />
+            <location filename="../src/MosaicController.cpp" line="155" />
             <source>Preparing the result…</source>
             <translation>Préparation du résultat…</translation>
         </message>
@@ -3199,118 +3209,118 @@ Télescope · caméra · accessoires</translation>
             <translation type="vanished">%1 images assemblées · %2 × %3 px · %4 recouvrements · écart résiduel %5 px</translation>
         </message>
         <message>
-            <location filename="../src/MosaicController.cpp" line="190" />
-            <location filename="../src/MosaicController.cpp" line="191" />
+            <location filename="../src/MosaicController.cpp" line="179" />
+            <location filename="../src/MosaicController.cpp" line="180" />
             <source>An original image cannot be overwritten.</source>
             <translation>Une image originale ne peut pas être écrasée.</translation>
         </message>
         <message>
-            <location filename="../src/MosaicController.cpp" line="192" />
+            <location filename="../src/MosaicController.cpp" line="181" />
             <source>Exporting 16-bit TIFF…</source>
             <translation>Export en TIFF 16 bits…</translation>
         </message>
         <message>
-            <location filename="../src/MosaicController.cpp" line="208" />
+            <location filename="../src/MosaicController.cpp" line="197" />
             <source>Saved 16-bit TIFF: %1</source>
             <translation>TIFF 16 bits enregistré : %1</translation>
         </message>
         <message>
-            <location filename="../src/MosaicController.cpp" line="17" />
+            <location filename="../src/MosaicController.cpp" line="18" />
             <source>Not enough surface detail in: </source>
             <translation>Pas assez de détails reconnaissables dans : </translation>
         </message>
         <message>
-            <location filename="../src/MosaicController.cpp" line="18" />
+            <location filename="../src/MosaicController.cpp" line="19" />
             <source>No reliable overlap for: </source>
             <translation>Aucun recouvrement fiable pour : </translation>
         </message>
         <message>
-            <location filename="../src/MosaicController.cpp" line="19" />
+            <location filename="../src/MosaicController.cpp" line="20" />
             <source>. Add an intermediate view or remove this image.</source>
             <translation>. Ajoutez une vue intermédiaire ou retirez cette image.</translation>
         </message>
         <message>
-            <location filename="../src/MosaicController.cpp" line="20" />
+            <location filename="../src/MosaicController.cpp" line="21" />
             <source>Overlaps disagree. Remove a changed, blurred or mismatched view and try again.</source>
             <translation>Les raccords ne concordent pas. Retirez une vue floue, différente ou mal raccordée, puis réessayez.</translation>
         </message>
         <message>
-            <location filename="../src/MosaicController.cpp" line="21" />
+            <location filename="../src/MosaicController.cpp" line="22" />
             <source>Inconsistent image scales. Use images from the same setup.</source>
             <translation>Les échelles des images sont incompatibles. Utilisez des prises réalisées avec le même matériel.</translation>
         </message>
         <message>
-            <location filename="../src/MosaicController.cpp" line="22" />
+            <location filename="../src/MosaicController.cpp" line="23" />
             <source>The mosaic exceeds the 32-megapixel limit. Use smaller images or fewer tiles.</source>
             <translation>La mosaïque dépasse la limite de 32 mégapixels. Réduisez les images ou le nombre de vues.</translation>
         </message>
         <message>
-            <location filename="../src/MosaicController.cpp" line="23" />
+            <location filename="../src/MosaicController.cpp" line="24" />
             <source>Each image must be at least 64 pixels per side and no larger than 24 megapixels: </source>
             <translation>Chaque image doit mesurer au moins 64 pixels par côté et au plus 24 mégapixels : </translation>
         </message>
         <message>
-            <location filename="../src/MosaicController.cpp" line="24" />
+            <location filename="../src/MosaicController.cpp" line="25" />
             <source>An input image changed or could not be read: </source>
             <translation>Une image a changé ou ne peut pas être lue : </translation>
         </message>
         <message>
-            <location filename="../src/MosaicController.cpp" line="25" />
+            <location filename="../src/MosaicController.cpp" line="26" />
             <source>The image positions could not be resolved.</source>
             <translation>Les positions des images n’ont pas pu être déterminées.</translation>
         </message>
         <message>
-            <location filename="../src/MosaicController.cpp" line="26" />
+            <location filename="../src/MosaicController.cpp" line="27" />
             <source>Choose between 2 and 100 overlapping images.</source>
             <translation>Choisissez entre 2 et 100 images qui se chevauchent.</translation>
         </message>
         <message>
-            <location filename="../src/MosaicController.cpp" line="27" />
+            <location filename="../src/MosaicController.cpp" line="28" />
             <source>Image dimensions changed or exceed the 24-megapixel input limit.</source>
             <translation>Les dimensions d’une image ont changé ou dépassent la limite de 24 mégapixels.</translation>
         </message>
         <message>
-            <location filename="../src/MosaicController.cpp" line="28" />
+            <location filename="../src/MosaicController.cpp" line="29" />
             <source>Cannot read image: </source>
             <translation>Impossible de lire l’image : </translation>
         </message>
         <message>
-            <location filename="../src/MosaicController.cpp" line="29" />
+            <location filename="../src/MosaicController.cpp" line="30" />
             <source>Not enough memory for the mosaic preview.</source>
             <translation>Mémoire insuffisante pour afficher la mosaïque.</translation>
         </message>
         <message>
-            <location filename="../src/MosaicController.cpp" line="30" />
+            <location filename="../src/MosaicController.cpp" line="31" />
             <source>Cannot create an export in this folder.</source>
             <translation>Impossible de créer un export dans ce dossier.</translation>
         </message>
         <message>
-            <location filename="../src/MosaicController.cpp" line="31" />
+            <location filename="../src/MosaicController.cpp" line="32" />
             <source>Cannot open export destination.</source>
             <translation>Impossible d’ouvrir le fichier de destination.</translation>
         </message>
         <message>
-            <location filename="../src/MosaicController.cpp" line="32" />
+            <location filename="../src/MosaicController.cpp" line="33" />
             <source>Writing the image failed. Check available disk space.</source>
             <translation>L’écriture de l’image a échoué. Vérifiez l’espace disque disponible.</translation>
         </message>
         <message>
-            <location filename="../src/MosaicController.cpp" line="33" />
+            <location filename="../src/MosaicController.cpp" line="34" />
             <source>Could not finish saving the image.</source>
             <translation>L’enregistrement de l’image n’a pas pu être terminé.</translation>
         </message>
         <message>
-            <location filename="../src/MosaicController.cpp" line="170" />
+            <location filename="../src/MosaicController.cpp" line="159" />
             <source>%1 images assembled · %2 × %3 px</source>
             <translation>%1 images assemblées · %2 × %3 px</translation>
         </message>
         <message>
-            <location filename="../src/MosaicController.cpp" line="111" />
+            <location filename="../src/MosaicController.cpp" line="100" />
             <source>Mosaic · %1 images · %2 × %3 px</source>
             <translation>Mosaïque · %1 images · %2 × %3 px</translation>
         </message>
         <message>
-            <location filename="../src/MosaicController.cpp" line="119" />
+            <location filename="../src/MosaicController.cpp" line="108" />
             <source>Mosaic</source>
             <translation>Mosaïque</translation>
         </message>
@@ -3367,17 +3377,17 @@ Télescope · caméra · accessoires</translation>
             <translation type="vanished">Terminé</translation>
         </message>
         <message>
-            <location filename="../src/MosaicController.cpp" line="16" />
+            <location filename="../src/MosaicController.cpp" line="17" />
             <source>No pair of images has a reliable overlap. No mosaic was created; original files are unchanged.</source>
             <translation>Aucune paire d’images ne présente de recouvrement fiable. Aucune mosaïque n’a été créée ; les fichiers d’origine sont inchangés.</translation>
         </message>
         <message>
-            <location filename="../src/MosaicController.cpp" line="155" />
+            <location filename="../src/MosaicController.cpp" line="144" />
             <source>Excluded images restored. Add an intermediate view or adjust the selection.</source>
             <translation>Images écartées réintégrées. Ajoutez une vue intermédiaire ou ajustez la sélection.</translation>
         </message>
         <message>
-            <location filename="../src/MosaicController.cpp" line="171" />
+            <location filename="../src/MosaicController.cpp" line="160" />
             <source> · %1 excluded: no reliable connection to the main group</source>
             <translation> · %1 écartées : aucun raccord fiable au groupe principal</translation>
         </message>
@@ -3398,7 +3408,7 @@ Télescope · caméra · accessoires</translation>
             <translation type="vanished">Ces vues n’ont pas pu être raccordées de façon fiable au groupe conservé. Elles restent visibles dans la grille, décochées. Les fichiers d’origine sont inchangés.</translation>
         </message>
         <message>
-            <location filename="../src/MosaicController.cpp" line="150" />
+            <location filename="../src/MosaicController.cpp" line="139" />
             <source>%1 of %2 images selected.</source>
             <translation>%1 images sélectionnées sur %2.</translation>
         </message>
@@ -3483,22 +3493,22 @@ Télescope · caméra · accessoires</translation>
     <context>
         <name>astro::app::ProcessingController</name>
         <message>
-            <location filename="../src/ProcessingController.cpp" line="59" />
+            <location filename="../src/ProcessingController.cpp" line="47" />
             <source>%1 · %2 × %3 · %4-bit · %5 frames</source>
             <translation>%1 · %2 × %3 · %4 bits · %5 images</translation>
         </message>
         <message>
-            <location filename="../src/ProcessingController.cpp" line="124" />
+            <location filename="../src/ProcessingController.cpp" line="112" />
             <source>Cancelled. Previous results are preserved.</source>
             <translation>Annulé. Les résultats précédents sont conservés.</translation>
         </message>
         <message>
-            <location filename="../src/ProcessingController.cpp" line="154" />
+            <location filename="../src/ProcessingController.cpp" line="142" />
             <source>%1 · %2 / %3</source>
             <translation>%1 · %2 / %3</translation>
         </message>
         <message>
-            <location filename="../src/ProcessingController.cpp" line="164" />
+            <location filename="../src/ProcessingController.cpp" line="152" />
             <source>Cancelling…</source>
             <translation>Annulation…</translation>
         </message>
@@ -3507,175 +3517,175 @@ Télescope · caméra · accessoires</translation>
             <translation type="vanished">Choisissez un fichier SER local.</translation>
         </message>
         <message>
-            <location filename="../src/ProcessingController.cpp" line="224" />
+            <location filename="../src/ProcessingController.cpp" line="212" />
             <source>Opening video…</source>
             <translation>Ouverture de la vidéo…</translation>
         </message>
         <message>
-            <location filename="../src/ProcessingController.cpp" line="246" />
+            <location filename="../src/ProcessingController.cpp" line="234" />
             <source>Video ready. Analyze to rank the sharpest frames.</source>
             <translation>Vidéo prête. Lancez l’analyse pour classer les images par netteté.</translation>
         </message>
         <message>
-            <location filename="../src/ProcessingController.cpp" line="247" />
+            <location filename="../src/ProcessingController.cpp" line="235" />
             <source>Source · frame 1</source>
             <translation>Source · image 1</translation>
         </message>
         <message>
-            <location filename="../src/ProcessingController.cpp" line="274" />
+            <location filename="../src/ProcessingController.cpp" line="262" />
             <source>Deep-sky stack ready for detail, color and caption adjustments.</source>
             <translation>Empilement de ciel profond prêt pour les détails, les couleurs et la légende.</translation>
         </message>
         <message>
-            <location filename="../src/ProcessingController.cpp" line="297" />
+            <location filename="../src/ProcessingController.cpp" line="285" />
             <source>Source · frame %1</source>
             <translation>Source · image %1</translation>
         </message>
         <message>
-            <location filename="../src/ProcessingController.cpp" line="306" />
+            <location filename="../src/ProcessingController.cpp" line="294" />
             <source>Analyzing sharpness…</source>
             <translation>Analyse de la netteté…</translation>
         </message>
         <message>
-            <location filename="../src/ProcessingController.cpp" line="313" />
+            <location filename="../src/ProcessingController.cpp" line="301" />
             <source>Analyzing sharpness</source>
             <translation>Analyse de la netteté</translation>
         </message>
         <message>
-            <location filename="../src/ProcessingController.cpp" line="336" />
+            <location filename="../src/ProcessingController.cpp" line="324" />
             <source>Ranked by sharpness. Choose how many frames to keep.</source>
             <translation>Images classées par netteté. Choisissez combien en conserver.</translation>
         </message>
         <message>
-            <location filename="../src/ProcessingController.cpp" line="337" />
+            <location filename="../src/ProcessingController.cpp" line="325" />
             <source>Sharpest source frame · %1</source>
             <translation>Image source la plus nette · %1</translation>
         </message>
         <message>
-            <location filename="../src/ProcessingController.cpp" line="348" />
+            <location filename="../src/ProcessingController.cpp" line="336" />
             <source>Aligning and stacking…</source>
             <translation>Alignement et empilement…</translation>
         </message>
         <message>
-            <location filename="../src/ProcessingController.cpp" line="381" />
+            <location filename="../src/ProcessingController.cpp" line="369" />
             <source>Aligning and stacking</source>
             <translation>Alignement et empilement</translation>
         </message>
         <message>
-            <location filename="../src/ProcessingController.cpp" line="392" />
+            <location filename="../src/ProcessingController.cpp" line="380" />
             <source>%1 frames stacked · %2 rejected · %3 × %4 (common area)</source>
             <translation>%1 images empilées · %2 écartées · %3 × %4 (zone commune)</translation>
         </message>
         <message>
-            <location filename="../src/ProcessingController.cpp" line="396" />
+            <location filename="../src/ProcessingController.cpp" line="384" />
             <source>Last stack: %1% selected · %2 stacked · %3 rejected</source>
             <translation>Dernier empilement : %1 % sélectionnées · %2 empilées · %3 écartées</translation>
         </message>
         <message>
-            <location filename="../src/ProcessingController.cpp" line="406" />
-            <location filename="../src/ProcessingController.cpp" line="465" />
+            <location filename="../src/ProcessingController.cpp" line="394" />
+            <location filename="../src/ProcessingController.cpp" line="455" />
             <source>Stack · before wavelets</source>
             <translation>Empilement · avant ondelettes</translation>
         </message>
         <message>
-            <location filename="../src/ProcessingController.cpp" line="435" />
+            <location filename="../src/ProcessingController.cpp" line="423" />
             <source>Applying wavelets…</source>
             <translation>Application des ondelettes…</translation>
         </message>
         <message>
-            <location filename="../src/ProcessingController.cpp" line="455" />
+            <location filename="../src/ProcessingController.cpp" line="445" />
             <source>Adjustments applied. Compare before / after, then export.</source>
             <translation>Réglages appliqués. Comparez avant / après, puis exportez.</translation>
         </message>
         <message>
-            <location filename="../src/ProcessingController.cpp" line="456" />
+            <location filename="../src/ProcessingController.cpp" line="446" />
             <source>Result · wavelets and color</source>
             <translation>Résultat · ondelettes et couleur</translation>
         </message>
         <message>
-            <location filename="../src/ProcessingController.cpp" line="465" />
+            <location filename="../src/ProcessingController.cpp" line="455" />
             <source>Result · ready to export</source>
             <translation>Résultat · prêt à exporter</translation>
         </message>
         <message>
-            <location filename="../src/ProcessingController.cpp" line="471" />
+            <location filename="../src/ProcessingController.cpp" line="461" />
             <source>Choose a local export location.</source>
             <translation>Choisissez un emplacement d’export local.</translation>
         </message>
         <message>
-            <location filename="../src/ProcessingController.cpp" line="481" />
+            <location filename="../src/ProcessingController.cpp" line="471" />
             <source>The source video cannot be overwritten.</source>
             <translation>La vidéo source ne peut pas être écrasée.</translation>
         </message>
         <message>
-            <location filename="../src/ProcessingController.cpp" line="490" />
+            <location filename="../src/ProcessingController.cpp" line="480" />
             <source>Exporting 16-bit TIFF…</source>
             <translation>Export du TIFF 16 bits…</translation>
         </message>
         <message>
-            <location filename="../src/ProcessingController.cpp" line="528" />
+            <location filename="../src/ProcessingController.cpp" line="518" />
             <source>Saved 16-bit TIFF: </source>
             <translation>TIFF 16 bits enregistré : </translation>
         </message>
         <message>
-            <location filename="../src/ProcessingController.cpp" line="82" />
+            <location filename="../src/ProcessingController.cpp" line="70" />
             <source>%1 × %2 px</source>
             <translation>%1 × %2 px</translation>
         </message>
         <message>
-            <location filename="../src/ProcessingController.cpp" line="393" />
+            <location filename="../src/ProcessingController.cpp" line="381" />
             <source> · local correction: %1 frames</source>
             <translation> · correction locale : %1 images</translation>
         </message>
         <message>
-            <location filename="../src/ProcessingController.cpp" line="58" />
+            <location filename="../src/ProcessingController.cpp" line="46" />
             <source>%1 · %2 × %3 px</source>
             <translation>%1 · %2 × %3 px</translation>
         </message>
         <message>
-            <location filename="../src/ProcessingController.cpp" line="271" />
+            <location filename="../src/ProcessingController.cpp" line="259" />
             <source>Still image · no stacking needed</source>
             <translation>Image fixe · aucun empilement nécessaire</translation>
         </message>
         <message>
-            <location filename="../src/ProcessingController.cpp" line="270" />
+            <location filename="../src/ProcessingController.cpp" line="258" />
             <source>Mosaic · %1 images assembled</source>
             <translation>Mosaïque · %1 images assemblées</translation>
         </message>
         <message>
-            <location filename="../src/ProcessingController.cpp" line="172" />
-            <location filename="../src/ProcessingController.cpp" line="222" />
+            <location filename="../src/ProcessingController.cpp" line="160" />
+            <location filename="../src/ProcessingController.cpp" line="210" />
             <source>Choose a local SER, ACRAW, PNG or TIFF file.</source>
             <translation>Choisissez un fichier local SER, ACRAW, PNG ou TIFF.</translation>
         </message>
         <message>
-            <location filename="../src/ProcessingController.cpp" line="179" />
+            <location filename="../src/ProcessingController.cpp" line="167" />
             <source>Open FITS images in the Deep sky tab.</source>
             <translation>Ouvrez les images FITS dans l’onglet Ciel profond.</translation>
         </message>
         <message>
-            <location filename="../src/ProcessingController.cpp" line="274" />
+            <location filename="../src/ProcessingController.cpp" line="262" />
             <source>Mosaic ready for detail, color and caption adjustments.</source>
             <translation>Mosaïque prête pour les réglages de détails, de couleur et de légende.</translation>
         </message>
         <message>
-            <location filename="../src/ProcessingController.cpp" line="275" />
-            <location filename="../src/ProcessingController.cpp" line="465" />
+            <location filename="../src/ProcessingController.cpp" line="263" />
+            <location filename="../src/ProcessingController.cpp" line="455" />
             <source>Mosaic · before adjustments</source>
             <translation>Mosaïque · avant retouches</translation>
         </message>
         <message>
-            <location filename="../src/ProcessingController.cpp" line="355" />
+            <location filename="../src/ProcessingController.cpp" line="343" />
             <source>Selecting and stacking by area</source>
             <translation>Sélection et empilement par zone</translation>
         </message>
         <message>
-            <location filename="../src/ProcessingController.cpp" line="395" />
+            <location filename="../src/ProcessingController.cpp" line="383" />
             <source>Local selection: up to %1 frames/area (%2%) · %3 distinct frames used</source>
             <translation>Sélection locale : jusqu’à %1 images/zone (%2 %) · %3 images distinctes utilisées</translation>
         </message>
         <message>
-            <location filename="../src/ProcessingController.cpp" line="486" />
+            <location filename="../src/ProcessingController.cpp" line="476" />
             <source>An original image cannot be overwritten.</source>
             <translation>Une image originale ne peut pas être écrasée.</translation>
         </message>
@@ -3704,7 +3714,7 @@ Télescope · caméra · accessoires</translation>
             <translation type="vanished">Choisissez un fichier SER, PNG ou TIFF sur votre ordinateur.</translation>
         </message>
         <message>
-            <location filename="../src/ProcessingController.cpp" line="185" />
+            <location filename="../src/ProcessingController.cpp" line="173" />
             <source>Opening image…</source>
             <translation>Ouverture de l’image…</translation>
         </message>
@@ -3721,13 +3731,13 @@ Télescope · caméra · accessoires</translation>
             <translation type="vanished">Choisissez un PNG ou TIFF contenant une seule image, et non un fichier multipage.</translation>
         </message>
         <message>
-            <location filename="../src/ProcessingController.cpp" line="274" />
+            <location filename="../src/ProcessingController.cpp" line="262" />
             <source>Image ready. Adjust details, color and caption, then export.</source>
             <translation>Image prête. Ajustez les détails, la couleur et la légende, puis exportez.</translation>
         </message>
         <message>
-            <location filename="../src/ProcessingController.cpp" line="275" />
-            <location filename="../src/ProcessingController.cpp" line="465" />
+            <location filename="../src/ProcessingController.cpp" line="263" />
+            <location filename="../src/ProcessingController.cpp" line="455" />
             <source>Image · before adjustments</source>
             <translation>Image · avant retouches</translation>
         </message>

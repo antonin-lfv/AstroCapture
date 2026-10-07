@@ -17,6 +17,161 @@ ApplicationWindow {
     title: "AstroCapture"
     color: "#0b0d10"
 
+    property string currentTab: "capture"
+    readonly property bool textEditing: activeFocusItem instanceof TextInput || activeFocusItem instanceof TextEdit
+    readonly property bool processingMode: currentTab === "processing"
+    AppLibrary { id: appLibrary; objectName: "appLibrary" }
+    ProcessingController { id: processingController }
+    MosaicController { id: mosaicController }
+    DeepSkyController { id: deepSkyController }
+    header: Rectangle {
+        height: 48
+        color: "#12161c"
+        RowLayout {
+            anchors.fill: parent
+            anchors.margins: 8
+            spacing: 8
+            IconButton { text: qsTr("Capture"); borderColor: window.currentTab === "capture" ? "#6ca5f8" : "#3a4048"; onClicked: window.currentTab = "capture" }
+            IconButton { text: qsTr("Processing"); borderColor: window.processingMode ? "#6ca5f8" : "#3a4048"; enabled: !previewController.recording; onClicked: window.currentTab = "processing" }
+            IconButton { text: qsTr("Deep sky"); borderColor: window.currentTab === "deepSky" ? "#6ca5f8" : "#3a4048"; enabled: !previewController.recording; onClicked: window.currentTab = "deepSky" }
+            IconButton { text: qsTr("Mosaic"); borderColor: window.currentTab === "mosaic" ? "#6ca5f8" : "#3a4048"; enabled: !previewController.recording; onClicked: window.currentTab = "mosaic" }
+            IconButton { text: qsTr("History"); borderColor: window.currentTab === "history" ? "#6ca5f8" : "#3a4048"; enabled: !previewController.recording; onClicked: window.currentTab = "history" }
+            IconButton { text: qsTr("Guide"); borderColor: window.currentTab === "guide" ? "#6ca5f8" : "#3a4048"; onClicked: window.currentTab = "guide" }
+            IconButton { text: qsTr("Settings"); borderColor: window.currentTab === "settings" ? "#6ca5f8" : "#3a4048"; enabled: !previewController.recording; onClicked: window.currentTab = "settings" }
+            Item { Layout.fillWidth: true }
+            Text {
+                text: previewController.recording ? qsTr("Recording…") : (processingController.busy && !processingController.seeking ? qsTr("Processing…") : "")
+                color: "#a8b5c6"
+                font.pixelSize: 12
+                Layout.preferredWidth: 110
+                Layout.minimumWidth: 110
+                Layout.maximumWidth: 110
+                horizontalAlignment: Text.AlignRight
+            }
+        }
+    }
+    ProcessingWorkspace {
+        id: processingWorkspace
+        anchors.fill: parent
+        visible: window.processingMode
+        controller: processingController
+        library: appLibrary
+        lastRecording: previewController.recordingPath
+        shortcutsAllowed: !window.textEditing && !settingsPanel.opened
+    }
+
+    DeepSkyWorkspace {
+        id: deepSkyWorkspace
+        anchors.fill: parent
+        visible: window.currentTab === "deepSky"
+        controller: deepSkyController
+        library: appLibrary
+        canEditResult: !processingController.busy && !processingWorkspace.adjustmentsDirty && !processingWorkspace.playing
+        onEditResult: { if (processingController.openDocument(deepSkyController.processingDocument())) window.currentTab = "processing"; }
+    }
+    Connections { target: deepSkyController; function onImageExported(url) { if (/\.(tiff?|jpe?g)$/i.test(url.toString())) appLibrary.recordExport(url); } }
+
+    MosaicWorkspace {
+        id: mosaicWorkspace
+        anchors.fill: parent
+        visible: window.currentTab === "mosaic"
+        controller: mosaicController
+        library: appLibrary
+        canEditResult: !processingController.busy && !processingWorkspace.adjustmentsDirty && !processingWorkspace.playing
+        onEditResult: {
+            if (processingController.openDocument(mosaicController.processingDocument())) window.currentTab = "processing";
+        }
+    }
+    Connections { target: mosaicController; function onImageExported(url) { appLibrary.recordExport(url); } }
+    GuideWorkspace {
+        anchors.fill: parent
+        visible: window.currentTab === "guide"
+        captureActive: previewController.recording
+        onNavigate: tab => { window.currentTab = tab; }
+    }
+    GlobalSettingsWorkspace {
+        anchors.fill: parent
+        visible: window.currentTab === "settings"
+        library: appLibrary
+        captureController: previewController
+    }
+    HistoryWorkspace {
+        anchors.fill: parent
+        visible: window.currentTab === "history"
+        library: appLibrary
+    }
+    Connections {
+        target: processingController
+        function onImageExported(url) { appLibrary.recordExport(url); }
+    }
+    Connections {
+        target: previewController
+        function onStillImageSaved(url) { appLibrary.rememberImage(url); }
+    }
+
+    DropArea {
+        id: deepSkyDrop
+        anchors.fill:parent;z:99
+        enabled:window.currentTab !== "deepSky" && !previewController.recording && !deepSkyController.busy && !deepSkyWorkspace.dialogOpen && !processingWorkspace.dialogOpen && !mosaicWorkspace.dialogOpen
+        function accepts(event) {return event.hasUrls && event.urls.length>0 && event.urls.every(url => /^file:/i.test(url.toString()) && /\.(fits?|fts|fz|cr2|cr3|nef|nrw|arw|dng|orf|raf|rw2|pef)$/i.test(url.toString()));}
+        onEntered:drag=>{drag.accepted=accepts(drag);}
+        onDropped:drop=>{if(!accepts(drop))return;window.currentTab="deepSky";deepSkyController.addFiles(drop.urls);drop.acceptProposedAction();}
+        Rectangle {anchors.fill:parent;anchors.margins:8;visible:parent.containsDrag;color:"#e6111c2c";border.color:"#6ca5f8";radius:8
+            Label {anchors.centerIn:parent;text:qsTr("Drop to open in Deep sky");color:"#e8edf5";font.pixelSize:24}
+        }
+    }
+
+    DropArea {
+        id: serDrop
+        anchors.fill: parent
+        z: 100
+        enabled: !previewController.recording && !processingController.busy && !processingWorkspace.dialogOpen && !mosaicWorkspace.dialogOpen && !deepSkyWorkspace.dialogOpen
+        function accepts(event) {
+            return event.hasUrls && event.urls.length === 1
+                && event.urls[0].toString().startsWith("file:")
+                && /\.(ser|acraw)$/i.test(event.urls[0].toString());
+        }
+        onEntered: (drag) => { drag.accepted = accepts(drag); }
+        onDropped: (drop) => {
+            if (!enabled || !accepts(drop)) { drop.accepted = false; return; }
+            window.currentTab = "processing";
+            processingWorkspace.openFile(drop.urls[0]);
+            drop.acceptProposedAction();
+        }
+        Rectangle {
+            anchors.fill: parent
+            anchors.margins: 8
+            visible: serDrop.containsDrag
+            color: "#e6111c2c"
+            border.color: "#6ca5f8"
+            border.width: 2
+            radius: 8
+            Label {
+                anchors.centerIn: parent
+                text: qsTr("Drop to open in Processing")
+                color: "#e8edf5"
+                font.pixelSize: 24
+            }
+        }
+    }
+
+    Shortcut {
+        sequence: StandardKey.Open
+        enabled: !previewController.recording && !processingController.busy && !window.textEditing && !settingsPanel.opened && !processingWorkspace.dialogOpen && !mosaicWorkspace.dialogOpen && !deepSkyWorkspace.dialogOpen
+        onActivated: { window.currentTab = "processing"; processingWorkspace.chooseSource(); }
+    }
+    Repeater {
+        model: ["capture", "processing", "history", "settings", "mosaic", "guide"]
+        delegate: Item {
+            required property string modelData
+            required property int index
+            Shortcut {
+                sequence: "Ctrl+" + (index + 1)
+                enabled: !previewController.recording && !window.textEditing && !settingsPanel.opened && !processingWorkspace.dialogOpen && !mosaicWorkspace.dialogOpen && !deepSkyWorkspace.dialogOpen
+                onActivated: window.currentTab = modelData
+            }
+        }
+    }
     // Frame counters can run into the tens of thousands during long
     // sequences; abbreviate past 1000 (1k, 10.1k, 1.2M) so the sidebar
     // stays readable instead of growing a wide raw integer.
@@ -48,7 +203,7 @@ ApplicationWindow {
     // strip below the preview.
     RowLayout {
         anchors.fill: parent
-        visible: previewController.connected
+        visible: previewController.connected && window.currentTab === "capture"
         spacing: 0
 
         ColumnLayout {
@@ -222,7 +377,7 @@ ApplicationWindow {
                     anchors.top: parent.top
                     anchors.right: parent.right
                     anchors.margins: 4
-                    text: "min " + histogramItem.minValue + "  max " + histogramItem.maxValue + "  mean " +
+                    text: qsTr("min ") + histogramItem.minValue + qsTr("  max ") + histogramItem.maxValue + qsTr("  mean ") +
                           histogramItem.meanValue.toFixed(1)
                     color: "#9aa0a6"
                     font.pixelSize: 10
@@ -243,6 +398,8 @@ ApplicationWindow {
             color: "#101318"
 
             ScrollView {
+                ScrollBar.vertical.policy: ScrollBar.AlwaysOff
+                ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
                 id: sidebarScroll
                 anchors.fill: parent
                 anchors.margins: 16
@@ -277,7 +434,7 @@ ApplicationWindow {
 
                             ToolTip.visible: hovered
                             ToolTip.delay: 400
-                            ToolTip.text: "Save location and presets"
+                            ToolTip.text: qsTr("Capture settings and presets")
                         }
                     }
 
@@ -286,28 +443,28 @@ ApplicationWindow {
                         spacing: 10
 
                         Text {
-                            text: formatCount(previewController.frameCount) + " frames"
+                            text: formatCount(previewController.frameCount) + qsTr(" frames")
                             color: "#9aa0a6"
                             font.pixelSize: 11
                         }
 
                         Text {
-                            text: previewController.fps.toFixed(1) + " fps"
+                            text: previewController.fps.toFixed(1) + qsTr(" fps")
                             color: "#9aa0a6"
                             font.pixelSize: 11
                         }
 
                         HelpIcon {
-                            text: "This is acquisition, not recording: frames received from the camera since " +
-                                  "connecting. Nothing is written to disk unless you press Record — this can run " +
-                                  "for hours with no files created and constant memory use (only the latest " +
-                                  "frame is ever kept)."
+                            text: qsTr("This is acquisition, not recording: frames received from the camera since ") +
+                                  qsTr("connecting. Nothing is written to disk unless you press Record — this can run ") +
+                                  qsTr("for hours with no files created and constant memory use (only the latest ") +
+                                  qsTr("frame is ever kept).")
                         }
 
                         Item { Layout.fillWidth: true }
 
                         Text {
-                            text: "skipped " + previewController.previewSkippedFrames
+                            text: qsTr("skipped ") + previewController.previewSkippedFrames
                             color: "#5f6368"
                             font.pixelSize: 11
                         }
@@ -315,24 +472,24 @@ ApplicationWindow {
 
                     IconButton {
                         Layout.fillWidth: true
-                        text: "Disconnect"
+                        text: qsTr("Disconnect")
                         borderColor: "#242830"
                         onClicked: previewController.disconnectCamera()
 
                         ToolTip.visible: hovered
                         ToolTip.delay: 400
-                        ToolTip.text: "Disconnect this camera so Rescan can pick a different one."
+                        ToolTip.text: qsTr("Disconnect this camera so Rescan can pick a different one.")
                     }
 
                     Rectangle { Layout.fillWidth: true; height: 1; color: "#242830" }
 
                     SidebarSection {
-                        title: "Capture"
+                        title: qsTr("Capture")
 
                         TextField {
                             id: targetNameField
                             Layout.fillWidth: true
-                            placeholderText: "Target (optional)"
+                            placeholderText: qsTr("Target (optional)")
                             text: previewController.targetName
                             color: "#e8eaed"
                             placeholderTextColor: "#9aa0a6"
@@ -349,6 +506,24 @@ ApplicationWindow {
                             }
                         }
 
+                        ComboBox {
+                            Layout.fillWidth: true
+                            model: [qsTr("Planetary · SER"), qsTr("Deep sky · FITS sequence"), qsTr("Raw sequence · ACRAW")]
+                            currentIndex: previewController.videoFormat === "FITS" ? 1 : previewController.videoFormat === "ACRAW" ? 2 : 0
+                            enabled: !previewController.recording
+                            onActivated: previewController.videoFormat = currentIndex === 1 ? "FITS" : currentIndex === 2 ? "ACRAW" : "SER"
+                        }
+                        RowLayout {
+                            visible: previewController.videoFormat === "FITS"
+                            Layout.fillWidth: true
+                            ComboBox {Layout.fillWidth: true; model:["Light","Dark","Flat","Bias","DarkFlat"]; enabled:!previewController.recording; onActivated:previewController.captureType=currentText}
+                            ComboBox {Layout.fillWidth: true;model:["", "R", "G", "B", "L", "HA", "OIII", "SII"];enabled:!previewController.recording;onActivated:previewController.captureFilter=currentText}
+                        }
+                        Text {
+                            visible: previewController.videoFormat === "FITS"
+                            text: qsTr("Set exposure and frame count, then start. Raw pixels are saved before demosaicing. Camera limits still apply; mount guiding is external.")
+                            color: "#9aa0a6"; font.pixelSize:11; wrapMode:Text.Wrap; Layout.fillWidth:true
+                        }
                         RowLayout {
                             Layout.fillWidth: true
                             spacing: 8
@@ -356,18 +531,19 @@ ApplicationWindow {
                             IconButton {
                                 Layout.fillWidth: true
                                 iconName: "camera"
-                                text: "Capture"
+                                text: qsTr("Capture")
                                 onClicked: previewController.captureStillImage()
 
                                 ToolTip.visible: hovered
                                 ToolTip.delay: 400
-                                ToolTip.text: "Shortcut: C"
+                                ToolTip.text: qsTr("Shortcut: C")
                             }
 
                             IconButton {
                                 Layout.fillWidth: true
                                 iconName: previewController.recording ? "stop" : "camera"
-                                text: previewController.recording ? "Stop" : "Record"
+                                text: previewController.recording ? qsTr("Stop") : qsTr("Record")
+                                enabled: previewController.recording || !processingController.busy
                                 active: previewController.recording
                                 activeBorderColor: "#e5484d"
                                 onClicked: previewController.recording ? previewController.stopRecording()
@@ -375,7 +551,7 @@ ApplicationWindow {
 
                                 ToolTip.visible: hovered
                                 ToolTip.delay: 400
-                                ToolTip.text: "Shortcut: R"
+                                ToolTip.text: qsTr("Shortcut: R")
                             }
                         }
 
@@ -392,7 +568,7 @@ ApplicationWindow {
                     Rectangle { Layout.fillWidth: true; height: 1; color: "#242830" }
 
                     SidebarSection {
-                        title: "Recording"
+                        title: qsTr("Recording")
                         helpText: "Auto-stops recording once either target is reached (whichever comes first). " +
                                   "0 means unlimited/disabled for that field — set both to 0 to only stop manually."
 
@@ -402,7 +578,7 @@ ApplicationWindow {
                             spacing: 6
 
                             Text {
-                                text: "Stop recording after"
+                                text: qsTr("Stop recording after")
                                 color: "#9aa0a6"
                                 font.pixelSize: 12
                             }
@@ -423,10 +599,10 @@ ApplicationWindow {
                                     value: previewController.recordingTargetFrameCount
                                     onValueModified: previewController.recordingTargetFrameCount = value
                                 }
-                                Text { text: "frames"; color: "#9aa0a6"; font.pixelSize: 11 }
+                                Text { text: qsTr("frames"); color: "#9aa0a6"; font.pixelSize: 11 }
                             }
 
-                            Text { text: "or"; color: "#5f6368"; font.pixelSize: 11 }
+                            Text { text: qsTr("or"); color: "#5f6368"; font.pixelSize: 11 }
 
                             RowLayout {
                                 Layout.fillWidth: true
@@ -439,11 +615,11 @@ ApplicationWindow {
                                     value: previewController.recordingTargetDurationSeconds
                                     onValueModified: previewController.recordingTargetDurationSeconds = value
                                 }
-                                Text { text: "sec"; color: "#9aa0a6"; font.pixelSize: 11 }
+                                Text { text: qsTr("sec"); color: "#9aa0a6"; font.pixelSize: 11 }
                             }
 
                             Text {
-                                text: "0 = unlimited"
+                                text: qsTr("0 = unlimited")
                                 color: "#5f6368"
                                 font.pixelSize: 10
                             }
@@ -458,7 +634,7 @@ ApplicationWindow {
                                 spacing: 8
                                 Rectangle { width: 8; height: 8; radius: 4; color: "#e5484d" }
                                 Text {
-                                    text: previewController.recordingElapsedSeconds.toFixed(1) + " s"
+                                    text: previewController.recordingElapsedSeconds.toFixed(1) + qsTr(" s")
                                     color: "#e8eaed"
                                     font.pixelSize: 13
                                     font.weight: Font.DemiBold
@@ -466,7 +642,7 @@ ApplicationWindow {
                             }
 
                             Text {
-                                text: "Recorded: " + formatCount(previewController.recordingFrameCount)
+                                text: qsTr("Recorded: ") + formatCount(previewController.recordingFrameCount)
                                 color: "#9aa0a6"
                                 font.pixelSize: 12
                             }
@@ -476,7 +652,7 @@ ApplicationWindow {
                             // sudden increase is noticeable, red once it
                             // happens.
                             Text {
-                                text: "Dropped: " + previewController.recordingDroppedFrames
+                                text: qsTr("Dropped: ") + previewController.recordingDroppedFrames
                                 color: previewController.recordingDroppedFrames > 0 ? "#e5484d" : "#9aa0a6"
                                 font.pixelSize: 12
                             }
@@ -490,7 +666,7 @@ ApplicationWindow {
                                                          ? previewController.recordingFrameCount /
                                                            previewController.recordingElapsedSeconds
                                                          : 0
-                                text: "Write: " + writeFps.toFixed(1) + " fps  (capture: " +
+                                text: qsTr("Write: ") + writeFps.toFixed(1) + qsTr(" fps  (capture: ") +
                                       previewController.fps.toFixed(1) + " fps)"
                                 color: writeFps < previewController.fps * 0.9 ? "#e5484d" : "#9aa0a6"
                                 font.pixelSize: 12
@@ -519,7 +695,7 @@ ApplicationWindow {
                     // control within it) is hidden for backends that don't
                     // expose it.
                     SidebarSection {
-                        title: "Camera Controls"
+                        title: qsTr("Camera Controls")
                         visible: previewController.exposureSupported || previewController.gainSupported ||
                                  previewController.extraControls.length > 0
 
@@ -530,9 +706,9 @@ ApplicationWindow {
 
                             RowLayout {
                                 Layout.fillWidth: true
-                                Text { text: "Exposure"; color: "#9aa0a6"; font.pixelSize: 12; Layout.fillWidth: true }
+                                Text { text: qsTr("Exposure"); color: "#9aa0a6"; font.pixelSize: 12; Layout.fillWidth: true }
                                 Text {
-                                    text: (previewController.exposureMicroseconds / 1000).toFixed(1) + " ms"
+                                    text: (previewController.exposureMicroseconds / 1000).toFixed(1) + qsTr(" ms")
                                     color: "#e8eaed"
                                     font.pixelSize: 12
                                 }
@@ -565,7 +741,7 @@ ApplicationWindow {
 
                             RowLayout {
                                 Layout.fillWidth: true
-                                Text { text: "Gain"; color: "#9aa0a6"; font.pixelSize: 12; Layout.fillWidth: true }
+                                Text { text: qsTr("Gain"); color: "#9aa0a6"; font.pixelSize: 12; Layout.fillWidth: true }
                                 Text {
                                     text: previewController.gainValue
                                     color: "#e8eaed"
@@ -597,7 +773,7 @@ ApplicationWindow {
                                 RowLayout {
                                     Layout.fillWidth: true
                                     Text {
-                                        text: modelData.label
+                                        text: qsTranslate("CameraControls", modelData.label)
                                         color: "#9aa0a6"
                                         font.pixelSize: 12
                                         Layout.fillWidth: true
@@ -649,7 +825,7 @@ ApplicationWindow {
                     // typing coordinates for what's fundamentally a
                     // "draw a box around what I want" action.
                     SidebarSection {
-                        title: "Sensor ROI"
+                        title: qsTr("Sensor ROI")
                         helpText: "Reads out only a sub-rectangle of the sensor instead of the full frame, which " +
                                   "can raise achievable fps. Click and drag on the preview to select the region " +
                                   "— dragging again inside an existing selection narrows it further. " +
@@ -659,7 +835,7 @@ ApplicationWindow {
 
                         Text {
                             Layout.fillWidth: true
-                            text: previewController.roiWidth + " × " + previewController.roiHeight + " of " +
+                            text: previewController.roiWidth + " × " + previewController.roiHeight + qsTr(" of ") +
                                   previewController.sensorWidth + " × " + previewController.sensorHeight
                             color: "#9aa0a6"
                             font.pixelSize: 11
@@ -668,7 +844,7 @@ ApplicationWindow {
                         IconButton {
                             Layout.fillWidth: true
                             iconName: "close"
-                            text: "Full frame"
+                            text: qsTr("Full frame")
                             visible: previewController.roiWidth < previewController.sensorWidth ||
                                      previewController.roiHeight < previewController.sensorHeight
                             onClicked: previewController.resetRoi()
@@ -683,7 +859,7 @@ ApplicationWindow {
 
     ColumnLayout {
         anchors.centerIn: parent
-        visible: !previewController.connected
+        visible: !previewController.connected && window.currentTab === "capture"
         spacing: 20
         width: Math.min(420, window.width - 80)
 
@@ -698,7 +874,7 @@ ApplicationWindow {
 
         Text {
             Layout.alignment: Qt.AlignHCenter
-            text: "No camera connected"
+            text: qsTr("No camera connected")
             color: "#e8eaed"
             font.pixelSize: 22
             font.weight: Font.DemiBold
@@ -709,7 +885,7 @@ ApplicationWindow {
             Layout.fillWidth: true
             text: previewController.errorMessage.length > 0
                   ? previewController.errorMessage
-                  : "Connect a supported planetary camera to start a live preview."
+                  : qsTr("Connect a supported planetary camera to start a live preview.")
             color: previewController.errorMessage.length > 0 ? "#e8776a" : "#9aa0a6"
             font.pixelSize: 14
             wrapMode: Text.WordWrap
@@ -720,12 +896,12 @@ ApplicationWindow {
             id: rescanButton
             Layout.alignment: Qt.AlignHCenter
             iconName: "refresh"
-            text: "Rescan for cameras"
+            text: qsTr("Rescan for cameras")
             onClicked: previewController.rescan()
 
             ToolTip.visible: hovered
             ToolTip.delay: 400
-            ToolTip.text: "Looks for a connected camera. Offers the mock test camera if none is found."
+            ToolTip.text: qsTr("Looks for a connected camera. Offers the mock test camera if none is found.")
         }
 
         // Only populated when Rescan finds more than one real camera —
@@ -738,7 +914,7 @@ ApplicationWindow {
 
             Text {
                 Layout.alignment: Qt.AlignHCenter
-                text: "Multiple cameras found — choose one:"
+                text: qsTr("Multiple cameras found — choose one:")
                 color: "#9aa0a6"
                 font.pixelSize: 12
             }
@@ -759,7 +935,7 @@ ApplicationWindow {
         Text {
             Layout.alignment: Qt.AlignHCenter
             Layout.topMargin: 24
-            text: "Development build"
+            text: qsTr("Development build")
             color: "#5f6368"
             font.pixelSize: 11
         }
@@ -769,14 +945,14 @@ ApplicationWindow {
         anchors.top: parent.top
         anchors.right: parent.right
         anchors.margins: 12
-        visible: !previewController.connected
+        visible: !previewController.connected && window.currentTab === "capture"
         iconName: "settings"
         borderColor: "#242830"
         onClicked: settingsPanel.open()
 
         ToolTip.visible: hovered
         ToolTip.delay: 400
-        ToolTip.text: "Save location and presets"
+        ToolTip.text: qsTr("Capture settings and presets")
     }
 
     SettingsPanel {
@@ -825,7 +1001,7 @@ ApplicationWindow {
             spacing: 14
 
             Text {
-                text: "No real camera found."
+                text: qsTr("No real camera found.")
                 color: "#e8eaed"
                 font.pixelSize: 14
                 font.weight: Font.DemiBold
@@ -834,7 +1010,7 @@ ApplicationWindow {
             }
 
             Text {
-                text: "Use the mock test camera instead?"
+                text: qsTr("Use the mock test camera instead?")
                 color: "#9aa0a6"
                 font.pixelSize: 12
                 wrapMode: Text.Wrap
@@ -848,12 +1024,12 @@ ApplicationWindow {
                 Item { Layout.fillWidth: true }
 
                 IconButton {
-                    text: "Cancel"
+                    text: qsTr("Cancel")
                     onClicked: mockConfirm.close()
                 }
 
                 IconButton {
-                    text: "Use mock camera"
+                    text: qsTr("Use mock camera")
                     onClicked: {
                         previewController.connectMock();
                         mockConfirm.close();
@@ -869,13 +1045,13 @@ ApplicationWindow {
     // doesn't accidentally trigger them.
     Shortcut {
         sequence: "C"
-        enabled: previewController.connected && !targetNameField.activeFocus && !settingsPanel.opened
+        enabled: window.currentTab === "capture" && !processingController.busy && previewController.connected && !targetNameField.activeFocus && !settingsPanel.opened
         onActivated: previewController.captureStillImage()
     }
 
     Shortcut {
         sequence: "R"
-        enabled: previewController.connected && !targetNameField.activeFocus && !settingsPanel.opened
+        enabled: window.currentTab === "capture" && !processingController.busy && previewController.connected && !targetNameField.activeFocus && !settingsPanel.opened
         onActivated: previewController.recording ? previewController.stopRecording()
                                                    : previewController.startRecording()
     }

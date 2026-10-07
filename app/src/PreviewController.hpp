@@ -15,6 +15,7 @@
 #include <QString>
 #include <QStringList>
 #include <QTimer>
+#include <QUrl>
 #include <QVariantList>
 #include <QVariantMap>
 
@@ -122,6 +123,8 @@ class PreviewController : public QObject, private astro::domain::FrameSink {
     // saveDirectory, not per-camera.
     Q_PROPERTY(QString saveFormat READ saveFormat WRITE setSaveFormat NOTIFY saveFormatChanged)
     // Gate D backlog 22.9: "SER" or "ACRAW". App-wide, like saveFormat.
+    Q_PROPERTY(QString captureType READ captureType WRITE setCaptureType NOTIFY captureMetadataChanged)
+    Q_PROPERTY(QString captureFilter READ captureFilter WRITE setCaptureFilter NOTIFY captureMetadataChanged)
     Q_PROPERTY(QString videoFormat READ videoFormat WRITE setVideoFormat NOTIFY videoFormatChanged)
     Q_PROPERTY(QStringList presetNames READ presetNames NOTIFY presetsChanged)
 
@@ -135,6 +138,10 @@ class PreviewController : public QObject, private astro::domain::FrameSink {
     Q_PROPERTY(QVariantList availableCameras READ availableCameras NOTIFY availableCamerasChanged)
 
 public:
+    QString captureType() const {return captureType_;}
+    QString captureFilter() const {return captureFilter_;}
+    void setCaptureType(const QString& value) {if(!recording_ && QStringList{"Light","Dark","Flat","Bias","DarkFlat"}.contains(value)){captureType_=value;emit captureMetadataChanged();}}
+    void setCaptureFilter(const QString& value) {if(!recording_){captureFilter_=value;emit captureMetadataChanged();}}
     explicit PreviewController(QObject* parent = nullptr);
     ~PreviewController() override;
 
@@ -257,6 +264,9 @@ public:
 
     QString saveDirectory() const { return saveDirectory_; }
     void setSaveDirectory(const QString& path);
+    Q_INVOKABLE void chooseSaveDirectory(const QUrl& url);
+    Q_PROPERTY(QUrl saveDirectoryUrl READ saveDirectoryUrl NOTIFY saveDirectoryChanged)
+    QUrl saveDirectoryUrl() const;
 
     // Opens saveDirectory (or, if unset, the OS-default location images
     // are saved to — see imagesDirectoryPath()) in the system file
@@ -282,6 +292,7 @@ public:
     Q_INVOKABLE void deletePreset(const QString& name);
 
 signals:
+    void captureMetadataChanged();
     void connectedChanged();
     void errorMessageChanged();
     void frameCountChanged();
@@ -302,6 +313,7 @@ signals:
     void roiChanged();
     void extraControlsChanged();
     void lastCaptureStatusChanged();
+    void stillImageSaved(const QUrl& url);
     void recordingChanged();
     void recordingStatsChanged();
     void recordingStatusChanged();
@@ -409,6 +421,7 @@ private:
     QString saveFormat_ = QStringLiteral("PNG");
     QString videoFormat_ = QStringLiteral("SER");
     QString targetName_;
+    QString captureType_{"Light"}, captureFilter_;
     std::optional<astro::domain::CameraCapability> exposureCapability_;
     double exposureMicroseconds_ = 0.0;
     std::optional<astro::domain::CameraCapability> gainCapability_;

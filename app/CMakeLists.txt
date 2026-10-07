@@ -1,4 +1,4 @@
-find_package(Qt6 6.5 REQUIRED COMPONENTS Quick Gui)
+find_package(Qt6 6.5 REQUIRED COMPONENTS Quick Gui LinguistTools)
 find_package(Threads REQUIRED)
 
 qt_standard_project_setup(REQUIRES 6.5)
@@ -15,6 +15,8 @@ qt_add_executable(AstroCapture
     main.cpp
 )
 
+target_compile_definitions(AstroCapture PRIVATE ASTRO_APP_VERSION="${PROJECT_VERSION}")
+
 # A bare Mach-O binary has no identity macOS's TCC privacy subsystem can
 # register a Camera decision against, so raw USB Video-class access (the
 # UVC driver) is silently refused and the app never even appears under
@@ -23,7 +25,24 @@ qt_add_executable(AstroCapture
 # with NSCameraUsageDescription plus one AVFoundation authorization request
 # (CameraPermission.mm) is what gets it a proper entry and prompt.
 if(APPLE)
+    set(app_icon "${CMAKE_CURRENT_BINARY_DIR}/AstroCapture.icns")
+    add_custom_command(
+        OUTPUT "${app_icon}"
+        COMMAND "${CMAKE_COMMAND}"
+            "-DINPUT=${CMAKE_CURRENT_SOURCE_DIR}/qml/assets/logo.png"
+            "-DOUTPUT=${app_icon}"
+            -P "${PROJECT_SOURCE_DIR}/cmake/GenerateMacIcon.cmake"
+        DEPENDS qml/assets/logo.png "${PROJECT_SOURCE_DIR}/cmake/GenerateMacIcon.cmake"
+        COMMENT "Generating the macOS application icon from the logo"
+        VERBATIM
+    )
+    set_source_files_properties("${app_icon}" PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+    set_source_files_properties("${ASTRO_VISION_NOTICES}" PROPERTIES MACOSX_PACKAGE_LOCATION Resources/Licenses)
+    file(GLOB astro_image_notices "${PROJECT_SOURCE_DIR}/third_party/notices/*")
+    set_source_files_properties(${astro_image_notices} PROPERTIES MACOSX_PACKAGE_LOCATION Resources/Licenses)
+    target_sources(AstroCapture PRIVATE "${app_icon}" "${ASTRO_VISION_NOTICES}" ${astro_image_notices})
     set_target_properties(AstroCapture PROPERTIES
+        MACOSX_BUNDLE_ICON_FILE "AstroCapture.icns"
         MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/Info.plist.in"
         MACOSX_BUNDLE_GUI_IDENTIFIER "com.astrocapture.AstroCapture"
         MACOSX_BUNDLE_BUNDLE_NAME "AstroCapture"
@@ -37,6 +56,14 @@ qt_add_qml_module(AstroCapture
     VERSION 1.0
     QML_FILES
         qml/Main.qml
+        qml/ProcessingWorkspace.qml
+        qml/DeepSkyWorkspace.qml
+        qml/MosaicWorkspace.qml
+        qml/CaptionEditor.qml
+        qml/ImageViewport.qml
+        qml/GlobalSettingsWorkspace.qml
+        qml/HistoryWorkspace.qml
+        qml/GuideWorkspace.qml
         qml/Icon.qml
         qml/IconButton.qml
         qml/SettingsPanel.qml
@@ -46,6 +73,22 @@ qt_add_qml_module(AstroCapture
     RESOURCES
         qml/assets/logo.png
     SOURCES
+        src/DeepSkyController.hpp
+        src/DeepSkyController.cpp
+        src/DeepSkyImageItem.hpp
+        src/MosaicController.hpp
+        src/MosaicController.cpp
+        src/MosaicImageItem.hpp
+        src/ProcessingEdits.hpp
+        src/ProcessingEdits.cpp
+        src/ProcessingSettings.hpp
+        src/ExportAnnotation.hpp
+        src/ProcessingController.hpp
+        src/AppLibrary.hpp
+        src/AppLibrary.cpp
+        src/ProcessingController.cpp
+        src/ProcessingImageItem.hpp
+        src/ProcessingImageItem.cpp
         src/PreviewController.hpp
         src/PreviewController.cpp
         src/LivePreviewItem.hpp
@@ -63,6 +106,9 @@ qt_add_qml_module(AstroCapture
 )
 
 target_include_directories(AstroCapture PRIVATE src)
+if(ASTRO_ENABLE_DEVTOOLS)
+    target_compile_definitions(AstroCapture PRIVATE ASTRO_ENABLE_DEVTOOLS)
+endif()
 
 target_link_libraries(AstroCapture PRIVATE Qt6::Quick Qt6::Gui astro::processing astro::recording Threads::Threads)
 
@@ -92,10 +138,17 @@ endif()
 if(ASTRO_ENABLE_DRIVER_ZWO)
     target_link_libraries(AstroCapture PRIVATE astro::driver::zwo)
     target_compile_definitions(AstroCapture PRIVATE ASTRO_ENABLE_DRIVER_ZWO)
-    # ASICamera2 is a shared (not static) imported library — the built app
-    # needs an explicit rpath to find it at load time in the build tree
-    # (no install step exists in this project's workflow).
-    set_target_properties(AstroCapture PROPERTIES BUILD_RPATH "${CMAKE_BINARY_DIR}/drivers/zwo")
+    # ASICamera2 is a shared (not static) imported library — CMake's
+    # default automatic rpath computation already adds its directory for
+    # us (it does this for any linked target with a known
+    # IMPORTED_LOCATION), so nothing extra is needed here. Setting an
+    # explicit BUILD_RPATH used to live here but replaces CMake's
+    # automatic rpath list rather than adding to it, which silently
+    # dropped Qt's own required rpath entries — invisible for a plain dev
+    # run (Homebrew's Qt build uses absolute install names, not @rpath,
+    # so it resolved anyway) but broke macdeployqt's packaging pass,
+    # which specifically rewrites Qt's paths to @rpath ones and then
+    # needs a correct rpath list to resolve them.
 endif()
 
 if(APPLE)
@@ -110,3 +163,7 @@ if(APPLE)
     )
 endif()
 
+qt_add_translations(AstroCapture
+    TS_FILES translations/astrocapture_fr.ts
+    RESOURCE_PREFIX "/i18n"
+)

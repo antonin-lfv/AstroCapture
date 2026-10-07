@@ -27,12 +27,14 @@ public:
 
     astro::domain::Result<Header> open(const std::string& path);
     astro::domain::Result<astro::domain::FrameBuffer> readNextFrame();
+    astro::domain::Result<astro::domain::FrameBuffer> readFrame(std::uint64_t index);
 
 private:
     std::ifstream file_;
     astro::domain::FrameDescriptor descriptor_;
     std::uint64_t frameCount_ = 0;
     std::uint64_t framesRead_ = 0;
+    std::streamoff dataOffset_{};
 };
 
 // Recovers a frame's actual Unix epoch time in nanoseconds from its

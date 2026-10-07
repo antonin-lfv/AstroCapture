@@ -6,6 +6,10 @@
 #include <vector>
 
 #include <QDesktopServices>
+#include <QSaveFile>
+#include <QTemporaryDir>
+#include <astro/processing/DeepSky.hpp>
+#include <astro/recording/FitsSequenceRecorder.hpp>
 #include <QDir>
 #include <QStandardPaths>
 #include <QUrl>
@@ -52,31 +56,31 @@ bool extraControlMeta(ControlId id, QString& key, QString& label, QString& unit,
     switch (id) {
         case ControlId::Gamma:
             key = QStringLiteral("gamma");
-            label = QStringLiteral("Gamma");
+            label = QString::fromUtf8(QT_TRANSLATE_NOOP("CameraControls", "Gamma"));
             unit.clear();
             isFloat = true;
             return true;
         case ControlId::WhiteBalanceRed:
             key = QStringLiteral("whiteBalanceRed");
-            label = QStringLiteral("White Balance (R)");
+            label = QString::fromUtf8(QT_TRANSLATE_NOOP("CameraControls", "White Balance (R)"));
             unit.clear();
             isFloat = false;
             return true;
         case ControlId::WhiteBalanceBlue:
             key = QStringLiteral("whiteBalanceBlue");
-            label = QStringLiteral("White Balance (B)");
+            label = QString::fromUtf8(QT_TRANSLATE_NOOP("CameraControls", "White Balance (B)"));
             unit.clear();
             isFloat = false;
             return true;
         case ControlId::Brightness:
             key = QStringLiteral("brightness");
-            label = QStringLiteral("Brightness");
+            label = QString::fromUtf8(QT_TRANSLATE_NOOP("CameraControls", "Brightness"));
             unit.clear();
             isFloat = false;
             return true;
         case ControlId::FrameRateLimit:
             key = QStringLiteral("frameRateLimit");
-            label = QStringLiteral("Frame Rate Limit");
+            label = QString::fromUtf8(QT_TRANSLATE_NOOP("CameraControls", "Frame Rate Limit"));
             unit = QStringLiteral("fps");
             isFloat = true;
             return true;
@@ -94,7 +98,7 @@ PreviewController::PreviewController(QObject* parent) : QObject(parent) {
                       ? loadedFormat
                       : QStringLiteral("PNG");
     const QString loadedVideoFormat = settings_.loadVideoFormat().value_or(QStringLiteral("SER"));
-    videoFormat_ = loadedVideoFormat == QStringLiteral("ACRAW") ? loadedVideoFormat : QStringLiteral("SER");
+    videoFormat_ = (loadedVideoFormat == QStringLiteral("ACRAW") || loadedVideoFormat == QStringLiteral("FITS")) ? loadedVideoFormat : QStringLiteral("SER");
     // The writer thread can't call stopRecording() itself (it would try to
     // join its own thread), so it emits recordingTargetReached() instead;
     // Qt queues delivery to this object's thread (GUI) automatically.
@@ -133,13 +137,13 @@ PreviewController::~PreviewController() {
 std::unique_ptr<ICameraDevice> PreviewController::openAndStart(ICameraBackend& backend, const CameraId& id) {
     auto device = backend.open(id);
     if (!device) {
-        errorMessage_ = QStringLiteral("Failed to open camera.");
+        errorMessage_ = tr("Failed to open camera.");
         return nullptr;
     }
 
     const auto modes = device->streamModes();
     if (modes.empty()) {
-        errorMessage_ = QStringLiteral("Camera exposes no stream modes.");
+        errorMessage_ = tr("Camera exposes no stream modes.");
         return nullptr;
     }
 
@@ -186,7 +190,7 @@ std::unique_ptr<ICameraDevice> PreviewController::openCandidate(const CameraCand
         return openAndStart(backend, candidate.id.toStdString());
     }
 #endif
-    errorMessage_ = QStringLiteral("Camera backend not available in this build.");
+    errorMessage_ = tr("Camera backend not available in this build.");
     return nullptr;
 }
 
@@ -384,7 +388,7 @@ void PreviewController::rescan() {
 #endif
 
     if (errorMessage_.isEmpty()) {
-        errorMessage_ = QStringLiteral("No camera found.");
+        errorMessage_ = tr("No camera found.");
     }
     emit errorMessageChanged();
 }
@@ -486,7 +490,7 @@ void PreviewController::disconnectCamera() {
 }
 
 void PreviewController::setExposureMicroseconds(double value) {
-    if (!device_ || !exposureCapability_) {
+    if (recording_ || !device_ || !exposureCapability_) {
         return;
     }
     // Clamp rather than trust the caller: the QML slider computes this via
@@ -505,7 +509,7 @@ void PreviewController::setExposureMicroseconds(double value) {
 }
 
 void PreviewController::setGainValue(int value) {
-    if (!device_ || !gainCapability_) {
+    if (recording_ || !device_ || !gainCapability_) {
         return;
     }
     const auto asInt64 = static_cast<std::int64_t>(value);
@@ -537,7 +541,7 @@ QVariantList PreviewController::extraControls() const {
 }
 
 void PreviewController::setExtraControlValue(const QString& key, double value) {
-    if (!device_) {
+    if (recording_ || !device_) {
         return;
     }
     for (auto& control : extraControls_) {
@@ -683,21 +687,21 @@ astro::processing::Histogram PreviewController::histogram() const {
 
 void PreviewController::captureStillImage() {
     if (!connected_ || !device_) {
-        lastCaptureStatus_ = QStringLiteral("No camera connected.");
+        lastCaptureStatus_ = tr("No camera connected.");
         emit lastCaptureStatusChanged();
         return;
     }
 
     const QImage image = frame();
     if (image.isNull()) {
-        lastCaptureStatus_ = QStringLiteral("No frame available yet.");
+        lastCaptureStatus_ = tr("No frame available yet.");
         emit lastCaptureStatusChanged();
         return;
     }
 
     const QString directory = imagesDirectoryPath();
     if (!QDir().mkpath(directory)) {
-        lastCaptureStatus_ = QStringLiteral("Failed to create ") + directory;
+        lastCaptureStatus_ = tr("Failed to create ") + directory;
         emit lastCaptureStatusChanged();
         return;
     }
@@ -708,7 +712,7 @@ void PreviewController::captureStillImage() {
                                                                         : QStringLiteral("png");
     const QString path = reserveCapturePath(directory, timestampedBaseName(cameraId, targetName_), extension);
     if (path.isEmpty()) {
-        lastCaptureStatus_ = QStringLiteral("Failed to create image file.");
+        lastCaptureStatus_ = tr("Failed to create image file.");
         emit lastCaptureStatusChanged();
         return;
     }
@@ -717,37 +721,44 @@ void PreviewController::captureStillImage() {
     if (saveFormat_ == QStringLiteral("PNG")) {
         saved = image.save(path, "PNG");
     } else {
-        // Both writers need tightly packed (no row padding) interleaved
-        // RGB8 bytes; QImage's own bytesPerLine() can pad each scanline,
-        // so copy row by row rather than assuming constBits() is already
-        // contiguous.
-        const QImage rgb = image.convertToFormat(QImage::Format_RGB888);
-        std::vector<std::uint8_t> tightRgb(static_cast<std::size_t>(rgb.width()) * rgb.height() * 3);
-        for (int y = 0; y < rgb.height(); ++y) {
-            std::memcpy(tightRgb.data() + static_cast<std::size_t>(y) * rgb.width() * 3, rgb.constScanLine(y),
-                        static_cast<std::size_t>(rgb.width()) * 3);
+        try {
+            const auto raw = frameSlot_.latest();
+            if (!raw) throw std::runtime_error("No camera frame available.");
+            auto data = astro::recording::imageFromFrame(*raw);
+            data.exposure = exposureMicroseconds_ / 1000000.0;
+            data.gain = double(gainValue_); data.hasGain = gainSupported();
+            data.object = targetName_.toStdString();
+            if (saveFormat_ == QStringLiteral("FITS")) {
+                QTemporaryDir temporary(QFileInfo(path).dir().filePath(".capture-XXXXXX"));
+                if (!temporary.isValid()) throw std::runtime_error("Cannot create capture temporary directory.");
+                const auto tempPath = temporary.filePath("image.fits");
+                astro::recording::writeAstroFits(tempPath.toStdString(), data);
+                QFile input(tempPath); QSaveFile output(path);
+                if (!input.open(QIODevice::ReadOnly) || !output.open(QIODevice::WriteOnly)) throw std::runtime_error("Cannot save FITS capture.");
+                while (!input.atEnd()) {const auto block=input.read(1024*1024);if(block.isEmpty()||output.write(block)!=block.size())throw std::runtime_error("Cannot write FITS capture.");}
+                saved = output.commit();
+            } else {
+                const auto rgb = astro::processing::linearRgb(data);
+                std::vector<std::uint16_t> samples(rgb.rgb.size());
+                for(std::size_t i=0;i<samples.size();++i) samples[i]=std::uint16_t(std::lround(std::clamp(rgb.rgb[i],0.f,1.f)*65535));
+                saved = astro::recording::writeTiff16Samples(path.toStdString(),rgb.width,rgb.height,samples.data()).ok();
+            }
+        } catch(const std::exception& error) {
+            lastCaptureStatus_ = QString::fromUtf8(error.what());
+            emit lastCaptureStatusChanged();
+            return;
         }
-
-        const auto result = saveFormat_ == QStringLiteral("TIFF16")
-                                 ? astro::recording::writeTiff16Rgb(path.toStdString(),
-                                                                     static_cast<std::uint32_t>(rgb.width()),
-                                                                     static_cast<std::uint32_t>(rgb.height()),
-                                                                     tightRgb.data())
-                                 : astro::recording::writeFits8Rgb(path.toStdString(),
-                                                                    static_cast<std::uint32_t>(rgb.width()),
-                                                                    static_cast<std::uint32_t>(rgb.height()),
-                                                                    tightRgb.data());
-        saved = result.ok();
     }
 
     if (!saved) {
-        lastCaptureStatus_ = QStringLiteral("Failed to save image.");
+        lastCaptureStatus_ = tr("Failed to save image.");
         emit lastCaptureStatusChanged();
         return;
     }
 
-    lastCaptureStatus_ = QStringLiteral("Saved ") + path;
+    lastCaptureStatus_ = tr("Saved ") + path;
     emit lastCaptureStatusChanged();
+    emit stillImageSaved(QUrl::fromLocalFile(path));
 }
 
 double PreviewController::recordingElapsedSeconds() const {
@@ -775,7 +786,7 @@ void PreviewController::setRecordingTargetDurationSeconds(double value) {
 
 void PreviewController::startRecording() {
     if (!connected_ || !device_) {
-        recordingStatus_ = QStringLiteral("No camera connected.");
+        recordingStatus_ = tr("No camera connected.");
         emit recordingStatusChanged();
         return;
     }
@@ -785,32 +796,41 @@ void PreviewController::startRecording() {
 
     const auto latest = frameSlot_.latest();
     if (!latest) {
-        recordingStatus_ = QStringLiteral("No frame available yet.");
+        recordingStatus_ = tr("No frame available yet.");
         emit recordingStatusChanged();
         return;
     }
 
     const QString directory = videosDirectoryPath();
     if (!QDir().mkpath(directory)) {
-        recordingStatus_ = QStringLiteral("Failed to create ") + directory;
+        recordingStatus_ = tr("Failed to create ") + directory;
         emit recordingStatusChanged();
         return;
     }
 
     const QString cameraId = QString::fromStdString(device_->descriptor().id);
     const bool useSer = videoFormat_ == QStringLiteral("SER");
+    const bool useFits = videoFormat_ == QStringLiteral("FITS");
     const QString path = reserveCapturePath(directory, timestampedBaseName(cameraId, targetName_),
-                                            useSer ? QStringLiteral("ser") : QStringLiteral("acraw"));
+                                            useSer ? QStringLiteral("ser") : useFits ? QStringLiteral("fits-sequence") : QStringLiteral("acraw"));
     if (path.isEmpty()) {
-        recordingStatus_ = QStringLiteral("Failed to create recording file.");
+        recordingStatus_ = tr("Failed to create recording file.");
         emit recordingStatusChanged();
         return;
     }
 
-    std::unique_ptr<astro::recording::IRecorder> recorder =
-        useSer ? std::unique_ptr<astro::recording::IRecorder>(std::make_unique<astro::recording::SerRecorder>())
-               : std::unique_ptr<astro::recording::IRecorder>(
-                     std::make_unique<astro::recording::RawSequenceRecorder>());
+    std::unique_ptr<astro::recording::IRecorder> recorder;
+    if (useFits) {
+        QFile::remove(path); // replace the reserved placeholder with a new directory
+        auto fits = std::make_unique<astro::recording::FitsSequenceRecorder>();
+        fits->metadata.exposure = exposureMicroseconds_ / 1000000.0;
+        fits->metadata.gain = double(gainValue_); fits->metadata.hasGain = gainSupported();
+        fits->metadata.object = targetName_.toStdString();
+        fits->metadata.filter = captureFilter_.toStdString();
+        fits->metadata.imageType = captureType_.toStdString();
+        recorder = std::move(fits);
+    } else if(useSer) recorder = std::make_unique<astro::recording::SerRecorder>();
+    else recorder = std::make_unique<astro::recording::RawSequenceRecorder>();
     const double nominalFps = fps() > 0.0 ? fps() : 30.0;  // best-effort header hint; not used for pacing
     if (const auto result = recorder->open(path.toStdString(), latest->descriptor, nominalFps); !result.ok()) {
         recordingStatus_ = QString::fromStdString(result.error().message);
@@ -857,8 +877,9 @@ void PreviewController::startRecording() {
     }
 
     recordingThread_ = std::thread([this, queuePtr, recorderPtr, targetFrameCount, targetDurationSeconds,
-                                     recordingStart, generation] {
+                                     recordingStart, generation, useFits, exposureSeconds = exposureMicroseconds_ / 1000000.0] {
         while (auto queuedFrame = queuePtr->waitPop()) {
+            if (useFits && std::chrono::duration<double>(queuedFrame->metadata.hostArrival - recordingStart).count() < exposureSeconds) continue;
             const auto result = recorderPtr->writeFrame(*queuedFrame);
             std::uint64_t written = 0;
             if (result.ok()) {
@@ -916,12 +937,12 @@ void PreviewController::stopRecording() {
 
     const auto summary = recorder_->close();
     if (!recordingFailure_.empty()) {
-        recordingStatus_ = QStringLiteral("Recording failed: ") + QString::fromStdString(recordingFailure_);
+        recordingStatus_ = tr("Recording failed: ") + QString::fromStdString(recordingFailure_);
     } else if (summary.ok()) {
-        recordingStatus_ = QStringLiteral("Saved ") + recordingPath_ + QStringLiteral(" (") +
-                            QString::number(summary.value().framesWritten) + QStringLiteral(" frames, ") +
+        recordingStatus_ = tr("Saved ") + recordingPath_ + QStringLiteral(" (") +
+                            QString::number(summary.value().framesWritten) + tr(" frames, ") +
                             QString::number(recordingDroppedFrames_.load(std::memory_order_relaxed)) +
-                            QStringLiteral(" dropped)");
+                            tr(" dropped)");
     } else {
         recordingStatus_ = QString::fromStdString(summary.error().message);
     }
@@ -964,6 +985,15 @@ QString PreviewController::videosDirectoryPath() const {
     return QStandardPaths::writableLocation(QStandardPaths::MoviesLocation) + QStringLiteral("/AstroCapture");
 }
 
+QUrl PreviewController::saveDirectoryUrl() const {
+    return QUrl::fromLocalFile(saveDirectory_.isEmpty() ? imagesDirectoryPath() : saveDirectory_);
+}
+
+void PreviewController::chooseSaveDirectory(const QUrl& url) {
+    if (url.isLocalFile() && QFileInfo(url.toLocalFile()).isDir())
+        setSaveDirectory(QFileInfo(url.toLocalFile()).absoluteFilePath());
+}
+
 void PreviewController::setSaveDirectory(const QString& path) {
     if (saveDirectory_ == path) {
         return;
@@ -991,7 +1021,7 @@ void PreviewController::setSaveFormat(const QString& format) {
 
 void PreviewController::setVideoFormat(const QString& format) {
     if (recording_ || videoFormat_ == format ||
-        (format != QStringLiteral("SER") && format != QStringLiteral("ACRAW"))) {
+        (format != QStringLiteral("SER") && format != QStringLiteral("ACRAW") && format != QStringLiteral("FITS"))) {
         return;
     }
     videoFormat_ = format;

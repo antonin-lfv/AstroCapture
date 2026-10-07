@@ -1,10 +1,70 @@
 # Changelog
 
-All notable product changes will be documented here once implementation begins.
+## 1.0.0 — 2026-10-07
 
-The changelog should describe user-visible changes, not every commit.
+- Refine deep-sky sections, parameter helpers, expandable advanced settings and
+  project gear menu. Import folders with editable image roles and filter groups.
+- Rename final export to Image finale and preserve exposure count, total exposure
+  and filters when transferring a deep-sky stack to Processing and its caption.
 
-## Unreleased
+- Compare a selected original light exposure against the finished deep-sky stack
+  using a hold-to-view action. Load the first group reference automatically, label
+  the source framing and independent automatic stretch, and preserve exports.
+
+- Interactive linear histogram with stretch curve, black/midtone/white dragging,
+  graph zoom and sampled clipping estimates; optional live finishing preview
+  coalesces requests and keeps the latest settings. Provide automatic/linear reset
+  actions and show Apply only when live preview is disabled.
+
+- Simplify deep-sky workflow to Images, Stack settings, Finish and export; use raw
+  calibration by default and reject conflicting calibration selections. Distinguish
+  source previews from the stacked result, with a restore-result action.
+- Add adaptive initial stretch, estimated background color gains, color-ratio
+  preserving asinh and saturation with dark-background protection.
+
+- Fix macOS worker-stack overflow when opening astronomical images in optimized
+  builds by allocating the LibRaw decoder on the heap. Processing explicitly
+  directs FITS files to Deep sky while preserving the current result.
+- Deep-sky workspace with an APP-inspired configurable workflow, FITS/compressed
+  FITS and Bayer RAW import, frame inspection and per-filter reference selection.
+- Bias/dark/flat/dark-flat calibration before demosaicing, bad-pixel map support,
+  star-based similarity registration, optional stellar-flux/background
+  normalization, disk-backed integration and robust sample rejection.
+- RGB/LRGB and narrowband channel composition, planar gradient correction,
+  midtones stretch, color gains, smoothing and displayed RGB/luminance histogram.
+- Linear float FITS exports, finished 16-bit TIFF with sRGB ICC profile, JPEG,
+  protected originals, cancellation and source-referencing project files.
+- Individual raw FITS acquisition sequences with metadata; fixed FITS/TIFF
+  captures no longer lose sensor precision through an 8-bit preview.
+- Validated ACRAW random access and Processing import; mono/Bayer 16-bit camera
+  preview and histogram support. Camera parameters lock during recordings.
+- CFITSIO and LibRaw build dependencies, Mac bundle notices and CI setup.
+
+- Offline Guide tab in English and French, with capture, formats, processing,
+  mosaic and export lessons.
+- Direct PNG and TIFF processing, preserving 16-bit samples, with original-file
+  overwrite protection and image drops scoped to the Processing tab.
+- Native macOS mosaic image picker with image type filters.
+- Per-image selection checkboxes; automatic exclusion keeps the largest
+  connected group and leaves unmatched images visible and unchecked.
+- Optional coverage-edge smoothing, preserved through mosaic finishing;
+  noise-reduced feature detection for low-contrast surface images.
+- Wavelet level 1 now reaches 50; other level limits are unchanged.
+
+- Independent best-frame selection for each Moon/Sun alignment area, with
+  visible area-size guidance and per-area selection counts.
+- Mosaic thumbnail grid with asynchronous loading of visible previews.
+- Optional caption titles above the caption text in Processing and Mosaic.
+- Transfer a mosaic to Processing for finishing while preserving image
+  precision, the number of assembled images and an editable caption.
+- Removed hover explanations from the before/after comparison buttons.
+
+- Automatic Moon and Sun mosaics from overlapping TIFF, PNG or JPEG images,
+  with brightness matching, preview, cancellation and 16-bit TIFF export.
+- Moon/Sun stacking mode with local surface alignment and a choice of
+  64, 96 or 160-pixel alignment areas.
+- Drag the blue sharpness-chart boundary to change the number of frames kept.
+- Wavelet levels 1–3 now reach 20; levels 4–6 remain limited to 10.
 
 - Captures made within the same second get distinct filenames instead of
   overwriting the preceding image or recording.
@@ -23,11 +83,46 @@ The changelog should describe user-visible changes, not every commit.
 - Fixed the macOS development launch helper to run the executable inside
   the application bundle.
 
-- Live preview: "Rescan for cameras" connects to a synthetic test camera
-  until a real astronomy camera backend exists (Gate C). An earlier build
-  briefly used the Mac's built-in webcam as a stand-in; it was removed
-  since generic webcams don't expose exposure/gain, making them unsuitable
-  for developing or testing those controls.
+- Real camera support (Gate C, macOS): AstroCapture now drives actual
+  astronomy cameras instead of only the mock. A Celestron NexImage 5 has
+  been live-tested end-to-end, including color capture. Two USB backends
+  cover this and similar hardware — standard UVC (`libuvc`) and a
+  reverse-engineered proprietary protocol (`drivers/euvc`) for the older
+  TIS/Celestron camera family that macOS's `UVCAssistant` system
+  extension otherwise blocks from using standard UVC at all. See
+  `docs/development/NEXIMAGE5_HARDWARE_NOTES.md` for what was learned.
+- ZWO ASI camera backend (`drivers/zwo`), wrapping ZWO's official SDK —
+  broadens support to the most common camera brand among the target
+  audience. Implemented against ZWO's documented API and compiles/links
+  correctly, but **not yet verified against real ZWO hardware** (none
+  was available to test with).
+- macOS Camera permission handling: the app now requests/shows up for
+  the standard Camera privacy prompt (`System Settings > Privacy &
+  Security > Camera`), required for raw USB video access to be
+  authorized at all.
+- Major live-preview performance fix when connected to a real
+  high-resolution camera: debayering is now parallelized and the
+  on-screen preview uses a decimated (lower-resolution) copy, while
+  saved images still use the full-resolution frame — fixes severe UI
+  lag/freezing that occurred with real (non-mock) high-megapixel
+  cameras.
+- Exposure control changed from a linear to a logarithmic slider, so
+  the useful low-exposure range isn't compressed into a few pixels of
+  travel; also fixes a rare out-of-range value that could freeze the UI
+  for a second or two at high exposure settings.
+- Connecting to the mock camera now requires an explicit confirmation
+  dialog instead of happening automatically, so the home screen doesn't
+  silently connect to fake hardware.
+- First macOS packaging pipeline (`scripts/package_macos.sh`): produces
+  a self-contained `.app` + DMG that runs without Homebrew/Qt/libusb
+  installed on the target Mac. Ad-hoc signed only for now (no Apple
+  Developer ID yet), so Gatekeeper will still warn on first launch —
+  see `docs/development/RELEASE_AND_PACKAGING.md`.
+- Live preview: "Rescan for cameras" now discovers real connected
+  cameras (UVC/EUVC/ZWO, see above) alongside the mock. An earlier build
+  briefly used the Mac's built-in webcam as a stand-in for a real camera;
+  it was removed since generic webcams don't expose exposure/gain, making
+  them unsuitable for developing or testing those controls.
 - Exposure, gain, gamma, white balance, brightness and frame rate limit
   controls, each shown only for cameras that actually support it.
 - Live histogram of the current frame, with min/max/mean and highlighted
@@ -65,9 +160,14 @@ The changelog should describe user-visible changes, not every commit.
   Recording, Sensor ROI, Image/Video format), explaining what they do.
 - "Open" button next to the save location in Settings, to open it
   directly in the file manager.
+- Selecting a saved preset shows a brief "applied" toast confirmation.
+- Large frame counts are abbreviated (e.g. "10.1k" instead of "10123")
+  so the counter stays compact.
 - Various fit-and-finish fixes: the sidebar's scrollbar no longer
   overlaps its content; placeholder text (target name, preset name) is
   now readable; the Settings panel is wider and its format buttons
   (PNG/TIFF16/FITS, SER/ACRAW) split width evenly; saving a preset over
   an existing name now says so; the "Disconnect" button is plain
-  centered text instead of an unnecessary icon.
+  centered text instead of an unnecessary icon; confirmation dialogs no
+  longer render a button outside the modal's edge; the error message
+  shown on the home screen no longer persists stale after disconnecting.

@@ -3,6 +3,8 @@
 #include <array>
 #include <fstream>
 #include <vector>
+#include <limits>
+#include <filesystem>
 
 namespace astro::recording {
 
@@ -42,21 +44,24 @@ std::uint32_t inlineShort(std::uint16_t value) { return static_cast<std::uint32_
 
 }  // namespace
 
-Result<void> writeTiff16Rgb(const std::string& path, std::uint32_t width, std::uint32_t height,
-                             const std::uint8_t* rgb8) {
-    if (width == 0 || height == 0 || rgb8 == nullptr) {
+template <typename Sample>
+static Result<void> writeTiffImpl(const std::string& path, std::uint32_t width, std::uint32_t height,
+                             const Sample* rgb8, std::span<const std::uint8_t> icc = {}) {
+    if (width == 0 || height == 0 || rgb8 == nullptr ||
+        std::uint64_t(width)*height > (std::numeric_limits<std::uint32_t>::max()-1024)/6) {
         return Result<void>::failure({ErrorCode::InvalidFrame, "writeTiff16Rgb: empty image", path});
     }
 
-    constexpr std::uint16_t kTagCount = 13;
+    const std::uint16_t kTagCount = icc.empty()?13:14;
     constexpr std::uint32_t kHeaderSize = 8;
-    constexpr std::uint32_t kIfdSize = 2 + kTagCount * 12 + 4;
+    const std::uint32_t kIfdSize = 2 + kTagCount * 12 + 4;
     const std::uint32_t ifdOffset = kHeaderSize;
     const std::uint32_t externalBlobOffset = ifdOffset + kIfdSize;
     const std::uint32_t bitsPerSampleOffset = externalBlobOffset;      // 3x uint16 = 6 bytes
     const std::uint32_t xResolutionOffset = bitsPerSampleOffset + 6;   // 2x uint32 = 8 bytes
     const std::uint32_t yResolutionOffset = xResolutionOffset + 8;     // 2x uint32 = 8 bytes
-    const std::uint32_t pixelDataOffset = yResolutionOffset + 8;
+    const std::uint32_t iccOffset = yResolutionOffset + 8;
+    const std::uint32_t pixelDataOffset = iccOffset + std::uint32_t(icc.size()) + (icc.size()%2);
 
     const std::uint64_t pixelCount = static_cast<std::uint64_t>(width) * height;
     const std::uint32_t pixelDataSize = static_cast<std::uint32_t>(pixelCount * 3 * 2);  // 3 channels, 16-bit each
@@ -85,6 +90,7 @@ Result<void> writeTiff16Rgb(const std::string& path, std::uint32_t width, std::u
     appendIfdEntry(out, 283, kTypeRational, 1, yResolutionOffset);        // YResolution
     appendIfdEntry(out, 284, kTypeShort, 1, inlineShort(1));              // PlanarConfiguration: chunky
     appendIfdEntry(out, 296, kTypeShort, 1, inlineShort(2));              // ResolutionUnit: inches
+    if(!icc.empty())appendIfdEntry(out,34675,7,std::uint32_t(icc.size()),iccOffset);
     appendU32(out, 0);                                                    // next IFD offset: none
 
     // --- External values the inline 4-byte slots couldn't hold ---
@@ -96,15 +102,15 @@ Result<void> writeTiff16Rgb(const std::string& path, std::uint32_t width, std::u
     appendU32(out, 72);
     appendU32(out, 1);               // YResolution 72/1
 
-    // --- Pixel data: chunky RGB, 16-bit/sample, bit-replicated from the
-    // 8-bit source (v | v << 8) so black/white endpoints stay exact. ---
+    out.insert(out.end(),icc.begin(),icc.end());if(icc.size()%2)out.push_back(0);
+
+    // Preserve 16-bit samples, or replicate 8-bit samples to retain endpoints.
     for (std::uint64_t i = 0; i < pixelCount * 3; ++i) {
-        const std::uint8_t v = rgb8[i];
-        const std::uint16_t upsampled = static_cast<std::uint16_t>(v | (static_cast<std::uint16_t>(v) << 8));
+        const std::uint16_t upsampled = sizeof(Sample)==1 ? static_cast<std::uint16_t>(rgb8[i]*257u) : rgb8[i];
         appendU16(out, upsampled);
     }
 
-    std::ofstream file(path, std::ios::binary | std::ios::trunc);
+    std::ofstream file(std::filesystem::path(std::u8string(path.begin(), path.end())), std::ios::binary | std::ios::trunc);
     if (!file.is_open()) {
         return Result<void>::failure({ErrorCode::RecordingOpenFailed, "Failed to open file for writing", path});
     }
@@ -115,4 +121,10 @@ Result<void> writeTiff16Rgb(const std::string& path, std::uint32_t width, std::u
     return Result<void>::success();
 }
 
+Result<void> writeTiff16Rgb(const std::string& path, std::uint32_t width, std::uint32_t height, const std::uint8_t* rgb) {
+    return writeTiffImpl(path, width, height, rgb);
+}
+Result<void> writeTiff16Samples(const std::string& path, std::uint32_t width, std::uint32_t height, const std::uint16_t* rgb, std::span<const std::uint8_t> icc) {
+    return writeTiffImpl(path, width, height, rgb,icc);
+}
 }  // namespace astro::recording

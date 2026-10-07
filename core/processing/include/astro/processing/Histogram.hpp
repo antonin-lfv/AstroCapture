@@ -8,7 +8,8 @@
 
 namespace astro::processing {
 
-// A basic 256-bucket per-channel histogram of 8-bit-per-sample frame data.
+// A basic 256-bucket histogram of 8/16-bit mono, Bayer or RGB camera samples.
+// 16-bit samples are mapped to the display range using validBits.
 // `luminance` is always populated when the format is understood. `red`/
 // `green`/`blue` are only meaningful (hasColorChannels true) for formats
 // with separable color channels (currently BGRA32). Bayer sources report a

@@ -59,6 +59,19 @@ Result<RawSequenceReader::Header> RawSequenceReader::open(const std::string& pat
         return Result<Header>::failure({ErrorCode::InvalidFrame, "Truncated header", path});
     }
 
+    if (header.formatVersion != 2 || !header.descriptor.width || !header.descriptor.height ||
+        std::uint64_t(header.descriptor.width)*header.descriptor.height > 32000000 ||
+        bytesPerPixel(header.descriptor.storage)==0 || header.descriptor.validBits<1 || header.descriptor.validBits>16 ||
+        (header.descriptor.strideBytes && header.descriptor.strideBytes < header.descriptor.width*bytesPerPixel(header.descriptor.storage)) ||
+        header.frameCount>10000000 || bayerValue>std::uint32_t(BayerPattern::GBRG))
+        return Result<Header>::failure({ErrorCode::InvalidFrame,"Invalid ACRAW header",path});
+    dataOffset_=file_.tellg();
+    file_.seekg(0,std::ios::end);
+    const auto length=file_.tellg();
+    const auto requiredBytes=std::uint64_t(dataOffset_)+(header.descriptor.expectedPayloadBytes()+16)*header.frameCount;
+    if(length<0 || std::uint64_t(length)<requiredBytes)
+        return Result<Header>::failure({ErrorCode::InvalidFrame,"Truncated ACRAW sequence",path});
+    file_.seekg(dataOffset_);
     descriptor_ = header.descriptor;
     frameCount_ = header.frameCount;
     framesRead_ = 0;
@@ -88,6 +101,12 @@ Result<FrameBuffer> RawSequenceReader::readNextFrame() {
 
     ++framesRead_;
     return Result<FrameBuffer>::success(std::move(frame));
+}
+
+Result<FrameBuffer> RawSequenceReader::readFrame(std::uint64_t index) {
+    if(index>=frameCount_)return Result<FrameBuffer>::failure({ErrorCode::InvalidFrame,"ACRAW index out of range",""});
+    file_.clear(); file_.seekg(dataOffset_+std::streamoff((descriptor_.expectedPayloadBytes()+16)*index));
+    framesRead_=index;return readNextFrame();
 }
 
 std::int64_t frameWallClockUnixNanos(const RawSequenceReader::Header& header,

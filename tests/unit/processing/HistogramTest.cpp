@@ -98,6 +98,12 @@ int main() {
         ASTRO_TEST_CHECK(!histogram.hasStats);
     }
 
+    {
+        FrameDescriptor descriptor{3,1,8,PixelStorage::Mono16,BayerPattern::None,16};
+        const auto bytes=toBytes({0,0,0,128,255,255,0,0});
+        const auto histogram=computeHistogram(descriptor,bytes.data(),bytes.size());
+        ASTRO_TEST_CHECK(histogram.hasStats&&histogram.luminance[0]==1&&histogram.luminance[128]==1&&histogram.luminance[255]==1);
+    }
     std::cout << "OK\n";
     return 0;
 }

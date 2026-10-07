@@ -76,3 +76,100 @@ if(ASTRO_ENABLE_MOCK_CAMERA)
         LIBS astro::processing astro::driver::mock
     )
 endif()
+
+astro_add_unit_test(astro_recording_ser_reader_test
+    SOURCES recording/SerReaderTest.cpp
+    LIBS astro::recording
+)
+astro_add_unit_test(astro_processing_planetary_test
+    SOURCES processing/PlanetaryTest.cpp
+    LIBS astro::processing
+)
+find_package(Qt6 6.5 REQUIRED COMPONENTS Quick Gui)
+astro_add_unit_test(astro_app_processing_lifecycle_test
+    SOURCES app/ProcessingLifecycleTest.cpp
+        ../../app/src/ProcessingController.cpp ../../app/src/ProcessingController.hpp
+    LIBS Qt6::Quick Qt6::Gui astro::processing astro::recording
+)
+set_target_properties(astro_app_processing_lifecycle_test PROPERTIES AUTOMOC ON)
+target_include_directories(astro_app_processing_lifecycle_test PRIVATE ../../app/src)
+set_tests_properties(astro_app_processing_lifecycle_test PROPERTIES TIMEOUT 30)
+
+astro_add_unit_test(astro_app_library_test
+    SOURCES app/AppLibraryTest.cpp ../../app/src/AppLibrary.cpp ../../app/src/AppLibrary.hpp
+    LIBS Qt6::Quick Qt6::Gui
+)
+set_target_properties(astro_app_library_test PROPERTIES AUTOMOC ON)
+target_include_directories(astro_app_library_test PRIVATE ../../app/src)
+
+astro_add_unit_test(astro_app_history_drop_test
+    SOURCES app/HistoryDropTest.cpp ../../app/src/AppLibrary.cpp ../../app/src/AppLibrary.hpp
+    LIBS Qt6::Quick Qt6::Gui
+)
+set_target_properties(astro_app_history_drop_test PROPERTIES AUTOMOC ON)
+target_include_directories(astro_app_history_drop_test PRIVATE ../../app/src)
+target_compile_definitions(astro_app_history_drop_test PRIVATE ASTRO_SOURCE_DIR="${PROJECT_SOURCE_DIR}")
+set_tests_properties(astro_app_history_drop_test PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_BACKEND=software")
+
+astro_add_unit_test(astro_app_processing_edits_test
+    SOURCES app/ProcessingEditsTest.cpp ../../app/src/ProcessingEdits.cpp ../../app/src/ProcessingEdits.hpp
+    LIBS Qt6::Quick Qt6::Gui
+)
+set_target_properties(astro_app_processing_edits_test PROPERTIES AUTOMOC ON)
+target_include_directories(astro_app_processing_edits_test PRIVATE ../../app/src)
+
+astro_add_unit_test(astro_app_processing_workspace_test
+    SOURCES app/ProcessingWorkspaceTest.cpp
+        ../../app/src/ProcessingController.cpp ../../app/src/ProcessingController.hpp
+        ../../app/src/ProcessingEdits.cpp ../../app/src/ProcessingEdits.hpp
+        ../../app/src/ProcessingImageItem.cpp ../../app/src/ProcessingImageItem.hpp
+        ../../app/src/AppLibrary.cpp ../../app/src/AppLibrary.hpp
+    LIBS Qt6::Quick Qt6::Gui astro::processing astro::recording
+)
+set_target_properties(astro_app_processing_workspace_test PROPERTIES AUTOMOC ON)
+target_include_directories(astro_app_processing_workspace_test PRIVATE ../../app/src)
+target_compile_definitions(astro_app_processing_workspace_test PRIVATE ASTRO_SOURCE_DIR="${PROJECT_SOURCE_DIR}")
+set_tests_properties(astro_app_processing_workspace_test PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_BACKEND=software" TIMEOUT 30)
+
+astro_add_unit_test(astro_processing_vision_test
+    SOURCES processing/VisionTest.cpp
+    LIBS astro::processing
+)
+set_tests_properties(astro_processing_vision_test PROPERTIES TIMEOUT 120)
+astro_add_unit_test(astro_app_mosaic_lifecycle_test
+    SOURCES app/MosaicLifecycleTest.cpp ../../app/src/MosaicController.cpp ../../app/src/MosaicController.hpp
+    LIBS Qt6::Quick Qt6::Gui astro::processing astro::recording
+)
+set_target_properties(astro_app_mosaic_lifecycle_test PROPERTIES AUTOMOC ON)
+target_include_directories(astro_app_mosaic_lifecycle_test PRIVATE ../../app/src)
+set_tests_properties(astro_app_mosaic_lifecycle_test PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen" TIMEOUT 120)
+
+astro_add_unit_test(astro_app_mosaic_drop_test
+    SOURCES app/MosaicDropTest.cpp ../../app/src/MosaicController.cpp ../../app/src/MosaicController.hpp
+        ../../app/src/MosaicImageItem.hpp ../../app/src/AppLibrary.cpp ../../app/src/AppLibrary.hpp
+    LIBS Qt6::Quick Qt6::Gui astro::processing astro::recording
+)
+set_target_properties(astro_app_mosaic_drop_test PROPERTIES AUTOMOC ON)
+target_include_directories(astro_app_mosaic_drop_test PRIVATE ../../app/src)
+target_compile_definitions(astro_app_mosaic_drop_test PRIVATE ASTRO_SOURCE_DIR="${PROJECT_SOURCE_DIR}")
+set_tests_properties(astro_app_mosaic_drop_test PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_BACKEND=software" TIMEOUT 30)
+
+astro_add_unit_test(astro_recording_astro_image_test
+    SOURCES recording/AstroImageTest.cpp
+    LIBS astro::recording astro_cfitsio
+)
+astro_add_unit_test(astro_processing_deep_sky_test
+    SOURCES processing/DeepSkyTest.cpp
+    LIBS astro::processing
+)
+set_tests_properties(astro_processing_deep_sky_test PROPERTIES TIMEOUT 120)
+astro_add_unit_test(astro_app_deep_sky_workspace_test
+    SOURCES app/DeepSkyWorkspaceTest.cpp
+        ../../app/src/DeepSkyController.cpp ../../app/src/DeepSkyController.hpp
+        ../../app/src/DeepSkyImageItem.hpp ../../app/src/AppLibrary.cpp ../../app/src/AppLibrary.hpp
+    LIBS Qt6::Quick Qt6::Gui astro::processing astro::recording
+)
+set_target_properties(astro_app_deep_sky_workspace_test PROPERTIES AUTOMOC ON)
+target_include_directories(astro_app_deep_sky_workspace_test PRIVATE ../../app/src)
+target_compile_definitions(astro_app_deep_sky_workspace_test PRIVATE ASTRO_SOURCE_DIR="${PROJECT_SOURCE_DIR}")
+set_tests_properties(astro_app_deep_sky_workspace_test PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_BACKEND=software" TIMEOUT 90)

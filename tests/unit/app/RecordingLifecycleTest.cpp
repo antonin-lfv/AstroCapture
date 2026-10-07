@@ -1,6 +1,8 @@
 #include "PreviewController.hpp"
 #include "Check.hpp"
 #include "FileNaming.hpp"
+#include <astro/recording/AstroImage.hpp>
+#include <QDir>
 
 #include <QCoreApplication>
 #include <QElapsedTimer>
@@ -87,6 +89,17 @@ int main(int argc, char** argv) {
 
     controller.setRoi(0, 0, 320, 240);
     ASTRO_TEST_CHECK(waitFor([&] { return controller.previewImage().size() == QSize(320, 240); }));
+    controller.setVideoFormat("FITS");
+    controller.setCaptureFilter("HA");controller.setCaptureType("Light");
+    controller.setRecordingTargetFrameCount(3);controller.setRecordingTargetDurationSeconds(0);
+    const auto exposure=controller.exposureMicroseconds();
+    controller.startRecording();ASTRO_TEST_CHECK(controller.recording());
+    controller.setExposureMicroseconds(exposure*2);ASTRO_TEST_CHECK(controller.exposureMicroseconds()==exposure);
+    ASTRO_TEST_CHECK(waitFor([&]{return !controller.recording();}));
+    const auto files=QDir(controller.recordingPath()).entryList({"*.fits"},QDir::Files);
+    ASTRO_TEST_CHECK(files.size()==3&&controller.recordingFrameCount()==3);
+    const auto fits=astro::recording::readAstroImage(QDir(controller.recordingPath()).filePath(files.front()).toStdString());
+    ASTRO_TEST_CHECK(fits.filter=="HA"&&fits.imageType=="Light"&&fits.exposure==exposure/1000000.0&&fits.bayer!=astro::domain::BayerPattern::None);
     controller.disconnectCamera();
     ASTRO_TEST_CHECK(!controller.connected());
     ASTRO_TEST_CHECK(controller.previewImage().isNull());

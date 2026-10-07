@@ -22,12 +22,6 @@ Popup {
         border.width: 1
     }
 
-    FolderDialog {
-        id: folderDialog
-        title: "Choose a save location"
-        onAccepted: controller.saveDirectory = String(selectedFolder).replace("file://", "")
-    }
-
     Popup {
         id: overwriteConfirm
         parent: Overlay.overlay
@@ -56,7 +50,7 @@ Popup {
             spacing: 14
 
             Text {
-                text: "Replace preset \"" + overwriteConfirm.pendingName + "\"?"
+                text: qsTr("Replace preset “%1”?").arg(overwriteConfirm.pendingName)
                 color: "#e8eaed"
                 font.pixelSize: 13
                 wrapMode: Text.Wrap
@@ -64,7 +58,7 @@ Popup {
             }
 
             Text {
-                text: "A preset with this name already exists. Saving will overwrite it."
+                text: qsTr("A preset with this name already exists. Saving will overwrite it.")
                 color: "#9aa0a6"
                 font.pixelSize: 11
                 wrapMode: Text.Wrap
@@ -78,12 +72,12 @@ Popup {
                 Item { Layout.fillWidth: true }
 
                 IconButton {
-                    text: "Cancel"
+                    text: qsTr("Cancel")
                     onClicked: overwriteConfirm.close()
                 }
 
                 IconButton {
-                    text: "Replace"
+                    text: qsTr("Replace")
                     borderColor: "#e5484d"
                     onClicked: {
                         controller.savePreset(overwriteConfirm.pendingName);
@@ -161,7 +155,7 @@ Popup {
             Layout.fillWidth: true
 
             Text {
-                text: "Settings"
+                text: qsTr("Capture settings")
                 color: "#e8eaed"
                 font.pixelSize: 14
                 font.weight: Font.DemiBold
@@ -179,95 +173,21 @@ Popup {
             Layout.fillWidth: true
             spacing: 6
 
-            Text {
-                text: "Save location"
-                color: "#9aa0a6"
-                font.pixelSize: 11
-            }
-
-            RowLayout {
-                Layout.fillWidth: true
-                spacing: 8
-
-                Text {
-                    id: saveLocationText
-                    Layout.fillWidth: true
-                    text: controller && controller.saveDirectory.length > 0
-                          ? controller.saveDirectory
-                          : "Default (Pictures/Movies → AstroCapture)"
-                    color: "#e8eaed"
-                    font.pixelSize: 12
-                    elide: Text.ElideMiddle
-
-                    HoverHandler {
-                        id: saveLocationHover
-                    }
-
-                    ToolTip.visible: saveLocationHover.hovered && saveLocationText.truncated
-                    ToolTip.delay: 400
-                    ToolTip.text: saveLocationText.text
-                }
-
-                IconButton {
-                    iconName: "folder"
-                    text: "Open"
-                    onClicked: controller.openSaveDirectory()
-
-                    ToolTip.visible: hovered
-                    ToolTip.delay: 400
-                    ToolTip.text: "Open this folder in the file manager"
-                }
-
-                IconButton {
-                    iconName: "folder"
-                    text: "Choose"
-                    onClicked: folderDialog.open()
-
-                    ToolTip.visible: hovered
-                    ToolTip.delay: 400
-                    ToolTip.text: "Choose a different folder"
-                }
-            }
-
-            Text {
-                visible: controller && controller.saveDirectory.length > 0
-                text: "Reset to default"
-                color: "#6e93ff"
-                font.pixelSize: 11
-
-                MouseArea {
-                    anchors.fill: parent
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: controller.saveDirectory = ""
-                }
-            }
-        }
-
-        Rectangle {
-            Layout.fillWidth: true
-            height: 1
-            color: "#242830"
-        }
-
-        ColumnLayout {
-            Layout.fillWidth: true
-            spacing: 6
-
             RowLayout {
                 Layout.fillWidth: true
                 spacing: 4
 
                 Text {
-                    text: "Image format"
+                    text: qsTr("Image format")
                     color: "#9aa0a6"
                     font.pixelSize: 11
                 }
 
                 HelpIcon {
-                    text: "PNG: lossless, opens everywhere — good default.\n\n" +
-                          "TIFF16: 16-bit per channel, for processing pipelines that expect more precision than 8-bit " +
-                          "(the source is still 8-bit today; this stores it losslessly at 16-bit).\n\n" +
-                          "FITS: the astronomy-standard format, for tools that expect it (PixInsight, DSS, etc)."
+                    text: qsTr("PNG: lossless, opens everywhere — good default.\n\n") +
+                          qsTr("TIFF16: 16-bit per channel, for processing pipelines that expect more precision than 8-bit ") +
+                          qsTr("(the source is still 8-bit today; this stores it losslessly at 16-bit).\n\n") +
+                          qsTr("FITS: the astronomy-standard format, for tools that expect it (PixInsight, DSS, etc).")
                 }
             }
 
@@ -311,14 +231,14 @@ Popup {
                 spacing: 4
 
                 Text {
-                    text: "Video format"
+                    text: qsTr("Video format")
                     color: "#9aa0a6"
                     font.pixelSize: 11
                 }
 
                 HelpIcon {
-                    text: "SER: standard, uncompressed planetary video (AutoStakkert, PIPP, Registax, FireCapture) — use this for real capture sessions you'll stack.\n\n" +
-                          "ACRAW: AstroCapture's own interim format from before SER support existed. Kept only as a fallback."
+                    text: qsTr("SER: standard, uncompressed planetary video (AutoStakkert, PIPP, Registax, FireCapture) — use this for real capture sessions you'll stack.\n\n") +
+                          qsTr("ACRAW: AstroCapture's own interim format from before SER support existed. Kept only as a fallback.")
                 }
             }
 
@@ -328,7 +248,7 @@ Popup {
                 enabled: controller && !controller.recording
 
                 Repeater {
-                    model: ["SER", "ACRAW"]
+                    model: ["SER", "ACRAW", "FITS"]
 
                     delegate: IconButton {
                         Layout.fillWidth: true
@@ -344,8 +264,8 @@ Popup {
                         ToolTip.visible: hovered
                         ToolTip.delay: 400
                         ToolTip.text: modelData === "SER"
-                                      ? "Standard planetary video format (AutoStakkert, PIPP, Registax, FireCapture)"
-                                      : "AstroCapture's own interim format"
+                                      ? qsTr("Standard planetary video format (AutoStakkert, PIPP, Registax, FireCapture)")
+                                      : modelData === "FITS" ? qsTr("Individual linear FITS frames for deep-sky imaging") : qsTr("AstroCapture's own interim format")
                     }
                 }
             }
@@ -363,7 +283,7 @@ Popup {
             visible: controller && controller.connected
 
             Text {
-                text: "Presets — " + (controller ? controller.cameraName : "")
+                text: qsTr("Presets — ") + (controller ? controller.cameraName : "")
                 color: "#9aa0a6"
                 font.pixelSize: 11
                 elide: Text.ElideRight
@@ -377,7 +297,7 @@ Popup {
                 TextField {
                     id: presetNameField
                     Layout.fillWidth: true
-                    placeholderText: "Preset name"
+                    placeholderText: qsTr("Preset name")
                     color: "#e8eaed"
                     placeholderTextColor: "#9aa0a6"
                     selectedTextColor: "#e8eaed"
@@ -403,7 +323,7 @@ Popup {
                             return;
                         }
                         controller.savePreset(name);
-                        presetStatus.text = "\"" + name + "\" saved.";
+                        presetStatus.text = qsTr("“%1” saved.").arg(name);
                         presetNameField.text = "";
                     }
                 }
@@ -442,7 +362,7 @@ Popup {
                         iconName: "check"
                         onClicked: {
                             controller.loadPreset(modelData);
-                            toast.show("\"" + modelData + "\" applied.");
+                            toast.show(qsTr("“%1” applied.").arg(modelData));
                         }
                     }
 
@@ -455,7 +375,7 @@ Popup {
 
             Text {
                 visible: controller && controller.presetNames.length === 0
-                text: "No presets yet."
+                text: qsTr("No presets yet.")
                 color: "#5f6368"
                 font.pixelSize: 11
             }

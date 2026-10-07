@@ -47,6 +47,21 @@ jobs:
 
       # Every job here must stay hardware-independent: only the mock camera
       # backend is exercised (RELEASE_AND_PACKAGING.md section 3).
+      - name: Install astronomical image libraries (macOS)
+        if: runner.os == 'macOS'
+        run: brew install cfitsio libraw
+
+      - name: Install astronomical image libraries (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libcfitsio-dev libraw-dev
+
+      - name: Install astronomical image libraries (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          vcpkg install cfitsio:x64-windows libraw:x64-windows
+          "CMAKE_TOOLCHAIN_FILE=$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" >> $env:GITHUB_ENV
+
       - name: Configure
         run: cmake --preset ${{ matrix.preset }}
 

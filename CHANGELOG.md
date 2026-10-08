@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.1.2 — 2026-10-08
+
+- Show a rotating activity indicator during deep-sky operations without changing
+  preview geometry.
+- Display a brief completion toast, with separate cancellation and error messages;
+  queued adjustments notify only after the final calculation.
+
 ## 1.1.1 — 2026-10-08
 
 - Replace boxed project gear with a larger vector icon; show contextual help on

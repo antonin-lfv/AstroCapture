@@ -75,6 +75,7 @@ public:
     Q_INVOKABLE QVariant processingDocument() const;
     Q_INVOKABLE void cancel(){pendingAdjustments_.reset();worker_.request_stop();}
 signals:
+    void operationFinished(bool success, const QString& message);
     void changed();
     void imageChanged();
     void resultChanged();

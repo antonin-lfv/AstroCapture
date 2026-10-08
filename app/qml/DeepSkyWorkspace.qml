@@ -87,7 +87,14 @@ Control {
     function options() {return {background: background.checked, stretch: stretch.checked, black:Number(black.text),white:Number(white.text),midtones:midtones.value,red:redGain.value,green:greenGain.value,blue:blueGain.value,denoise:denoise.value,asinh:asinh.checked,asinhStrength:asinhStrength.value,saturation:saturation.value};}
     Connections {
         target: root.controller
+        function onOperationFinished(success, message) {
+            if(controller.busy)return;
+            completionToast.success=success;
+            completionToast.message=success?qsTr("Operation complete"):message;
+            completionToast.open();toastTimer.restart();
+        }
         function onChanged() {
+            if(controller.busy)completionToast.close();
             if(!controller.hasResult && root.workflowStep===6)root.workflowStep=0;
             if (!controller.busy && controller.hasResult && root.pendingProjectFinish) {
                 const finish = root.pendingProjectFinish;
@@ -458,10 +465,31 @@ Control {
             ProgressBar {Layout.fillWidth:true;Layout.preferredHeight:6;Layout.minimumHeight:6;Layout.maximumHeight:6;opacity:controller.busy?1:0;from:0;to:100;value:controller.progress}
             RowLayout {
                 Layout.fillWidth:true
+                Item {
+                    id: activitySpinner; objectName:"deepSkyActivitySpinner"
+                    Layout.preferredWidth:20;Layout.preferredHeight:20
+                    opacity:controller.busy?1:0
+                    Canvas {anchors.fill:parent;onPaint:{const ctx=getContext("2d");ctx.reset();ctx.strokeStyle="#8dbaff";ctx.lineWidth=2;ctx.lineCap="round";ctx.beginPath();ctx.arc(10,10,7,0,Math.PI*1.5);ctx.stroke();}}
+                    RotationAnimator {target:activitySpinner;from:0;to:360;duration:900;loops:Animation.Infinite;running:controller.busy && root.visible}
+                }
                 ScrollView {Layout.fillWidth:true;Layout.preferredHeight:52;Layout.minimumHeight:52;Layout.maximumHeight:52;clip:true;Label {width:parent.width;text:controller.status;color:"#a8b5c6";wrapMode:Text.Wrap}}
                 IconButton {text:qsTr("Cancel");opacity:controller.busy?1:0;enabled:controller.busy;onClicked:controller.cancel()}
             }
         }
+    }
+    Timer {id:toastTimer;interval:3500;onTriggered:completionToast.close()}
+    Popup {
+        id:completionToast;objectName:"deepSkyCompletionToast"
+        property bool success:true
+        property string message:""
+        parent:root
+        x:Math.max(12,(root.width-width)/2);y:Math.max(12,root.height-height-80)
+        width:Math.min(440,root.width-24);padding:14
+        closePolicy:Popup.NoAutoClose
+        background:Rectangle {color:"#151b24";radius:8;border.color:completionToast.success?"#4b8065":"#b97b56"}
+        contentItem:Label {text:(completionToast.success?"✓  ":"")+completionToast.message;color:"#eef3fa";wrapMode:Text.Wrap;Accessible.name:text}
+        enter:Transition {NumberAnimation {property:"opacity";from:0;to:1;duration:150}}
+        exit:Transition {NumberAnimation {property:"opacity";from:1;to:0;duration:150}}
     }
     DarkDialog {
         id:presetDialog;objectName:"deepSkyPresetDialog";parent:Overlay.overlay;anchors.centerIn:parent;modal:true

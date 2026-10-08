@@ -105,9 +105,10 @@ void DeepSkyController::run(const QString& status,std::function<void(std::stop_t
     if(busy_)return;
     busy_=true;progress_=0;status_=status;emit changed();
     worker_=std::jthread([this,task=std::move(task)](std::stop_token stop){
-        try{task(stop);}catch(const Cancelled&){post([this]{status_=tr("Cancelled. Previous results are preserved.");});}
-        catch(const std::exception& e){const auto message=QString::fromUtf8(e.what());post([this,message]{status_=message;});}
-        post([this]{busy_=false;adjusting_=false;if(pendingAdjustments_){auto next=std::move(*pendingAdjustments_);pendingAdjustments_.reset();apply(next);return;}emit changed();});
+        bool success=true;
+        try{task(stop);success=!stop.stop_requested();}catch(const Cancelled&){success=false;post([this]{status_=tr("Cancelled. Previous results are preserved.");});}
+        catch(const std::exception& e){success=false;const auto message=QString::fromUtf8(e.what());post([this,message]{status_=message;});}
+        post([this,success]{busy_=false;adjusting_=false;if(pendingAdjustments_){auto next=std::move(*pendingAdjustments_);pendingAdjustments_.reset();apply(next);return;}emit changed();emit operationFinished(success,status_);});
     });
 }
 void DeepSkyController::show(std::shared_ptr<const processing::FloatImage> image,bool result,QImage preview,std::shared_ptr<const processing::FloatImage> displayed,QVariantMap stretch) {

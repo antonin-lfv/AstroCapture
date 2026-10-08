@@ -54,7 +54,12 @@ int main(int argc,char** argv){
     const std::array<std::array<int,2>,10> stars{{{20,20},{60,16},{105,25},{140,40},{35,60},{80,55},{120,75},{25,105},{75,110},{135,105}}};
     QList<QUrl> urls;
     for(int n=0;n<3;++n){for(int y=0;y<128;++y)for(int x=0;x<160;++x){double value=.02;for(const auto& star:stars)value+=.2*std::exp(-((x-star[0]-n)*(x-star[0]-n)+(y-star[1])*(y-star[1]))/5.);data.samples[y*160+x]=float(value);}const auto path=directory.filePath(QString("light-%1.fits").arg(n));recording::writeAstroFits(path.toStdString(),data);urls<<QUrl::fromLocalFile(path);}
-    controller.addFiles(urls);wait(controller);ASTRO_TEST_CHECK(controller.frames().size()==3&&controller.frames()[0].toMap()["group"]=="R");
+    auto* toast=object->findChild<QObject*>("deepSkyCompletionToast");ASTRO_TEST_CHECK(toast);
+    auto* spinner=object->findChild<QObject*>("deepSkyActivitySpinner");ASTRO_TEST_CHECK(spinner);
+    controller.addFiles(urls);QCoreApplication::processEvents();ASTRO_TEST_CHECK(spinner->property("opacity").toDouble()==1);
+    wait(controller);QCoreApplication::processEvents();ASTRO_TEST_CHECK(spinner->property("opacity").toDouble()==0);
+    ASTRO_TEST_CHECK(toast->property("success").toBool()&&toast->property("visible").toBool());
+    ASTRO_TEST_CHECK(controller.frames().size()==3&&controller.frames()[0].toMap()["group"]=="R");
     ASTRO_TEST_CHECK(controller.frames()[0].toMap()["stars"].toInt()>=8&&controller.imageWidth()==160);
     controller.addFiles(urls);wait(controller);ASTRO_TEST_CHECK(controller.frames().size()==3);
     root->setProperty("workflowStep",1);QCoreApplication::processEvents();
@@ -181,7 +186,7 @@ int main(int argc,char** argv){
     const auto scientific=recording::readAstroImage(linearAfter.toLocalFile().toStdString());
     ASTRO_TEST_CHECK(scientific.samples.size()==result.samples.size());
     for(std::size_t i=0;i<scientific.samples.size();++i)ASTRO_TEST_CHECK(std::abs(scientific.samples[i]-result.samples[i])<1e-6);
-    controller.integrate(true);controller.cancel();wait(controller);ASTRO_TEST_CHECK(controller.processingDocument().value<app::ImageDocument>().pixels==previous);
+    controller.integrate(true);controller.cancel();wait(controller);QCoreApplication::processEvents();ASTRO_TEST_CHECK(!toast->property("success").toBool());ASTRO_TEST_CHECK(controller.processingDocument().value<app::ImageDocument>().pixels==previous);
     QFile original(urls[0].toLocalFile());ASTRO_TEST_CHECK(original.open(QIODevice::ReadOnly));const auto before=original.readAll();original.close();controller.exportImage(urls[0],true);ASTRO_TEST_CHECK(!controller.busy());ASTRO_TEST_CHECK(original.open(QIODevice::ReadOnly));ASTRO_TEST_CHECK(original.readAll()==before);
     app::DeepSkyController guarded;guarded.addFiles({urls[0]});wait(guarded);guarded.addFiles({urls[1]},"Dark");wait(guarded);guarded.integrate(true);wait(guarded);ASTRO_TEST_CHECK(!guarded.hasResult()&&guarded.status().contains("Calibration files are selected"));
     const auto folder=directory.filePath("structured");

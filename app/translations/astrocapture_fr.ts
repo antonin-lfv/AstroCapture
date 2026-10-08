@@ -124,6 +124,7 @@ Télescope · caméra · accessoires</translation>
     </context>
     <context>
         <name>DeepSkyWorkspace</name>
+    <message><source>Operation complete</source><translation>Opération terminée</translation></message>
         <message>
             <location filename="../qml/DeepSkyWorkspace.qml" line="131" />
             <source>Drop deep-sky light frames</source>

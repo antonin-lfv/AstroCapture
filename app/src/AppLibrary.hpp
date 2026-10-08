@@ -16,6 +16,7 @@ class AppLibrary : public QObject {
     Q_PROPERTY(bool historyEnabled READ historyEnabled WRITE setHistoryEnabled NOTIFY changed)
     Q_PROPERTY(QVariantList images READ images NOTIFY changed)
     Q_PROPERTY(QString status READ status NOTIFY changed)
+    Q_PROPERTY(QVariantList recentProjects READ recentProjects NOTIFY changed)
     Q_PROPERTY(QVariantList recentVideos READ recentVideos NOTIFY changed)
     Q_PROPERTY(QUrl lastVideoDirectory READ lastVideoDirectory NOTIFY changed)
     Q_PROPERTY(QStringList deepSkyPresetNames READ deepSkyPresetNames NOTIFY changed)
@@ -31,6 +32,8 @@ public:
     QVariantList images() const;
     QString status() const { return status_; }
     QVariantList recentVideos() const;
+    QVariantList recentProjects() const;
+    Q_INVOKABLE void recordProject(const QUrl& url);
     QUrl lastVideoDirectory() const;
     QStringList deepSkyPresetNames() const { return deepSkyPresets_.keys(); }
     Q_INVOKABLE bool saveDeepSkyPreset(const QString&, const QVariantMap&, bool overwrite=false);
@@ -70,7 +73,7 @@ private:
     QString language_{"en"};
     bool historyEnabled_{true};
     QVariantList images_;
-    QStringList recentVideos_;
+    QStringList recentVideos_, recentProjects_;
     QVariantMap processingPresets_,deepSkyPresets_;
     bool compactProcessing_{false};
     int processingPanelWidth_{330};

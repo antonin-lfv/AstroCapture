@@ -9,10 +9,10 @@ import QtQuick.Layouts
 ApplicationWindow {
     id: window
 
-    width: 1100
-    height: 720
-    minimumWidth: 720
-    minimumHeight: 480
+    width: 1280
+    height: 820
+    minimumWidth: 900
+    minimumHeight: 640
     visible: true
     title: "AstroCapture" + (Qt.application.version ? " · " + Qt.application.version : "")
     color: "#0b0d10"
@@ -26,38 +26,49 @@ ApplicationWindow {
     palette.highlight: "#6ca5f8"
     palette.highlightedText: "#0b0d10"
 
-    property string currentTab: "capture"
+    property string currentTab: "home"
     readonly property bool textEditing: activeFocusItem instanceof TextInput || activeFocusItem instanceof TextEdit
     readonly property bool processingMode: currentTab === "processing"
     AppLibrary { id: appLibrary; objectName: "appLibrary" }
     ProcessingController { id: processingController }
     MosaicController { id: mosaicController }
     DeepSkyController { id: deepSkyController }
-    header: Rectangle {
-        height: 48
-        color: "#12161c"
+    readonly property string activityTab: previewController.recording?"capture":deepSkyController.busy?"deepSky":mosaicController.busy?"mosaic":processingController.busy && !processingController.seeking?"processing":""
+    readonly property string activityText: previewController.recording?qsTr("Recording…"):deepSkyController.busy?qsTr("Deep sky · %1%").arg(deepSkyController.progress):mosaicController.busy?qsTr("Mosaic · processing…"):processingController.busy && !processingController.seeking?qsTr("Processing · %1%").arg(processingController.progress):""
+    function navigate(tab) {
+        if(previewController.recording && ["home","capture","guide"].indexOf(tab)<0)return;
+        currentTab=tab;
+    }
+    header: StudioNavigation {
+        currentTab:window.currentTab;recording:previewController.recording
+        activityText:window.activityText;activityTab:window.activityTab
+        onNavigate:tab=>window.navigate(tab)
+    }
+    footer:Rectangle {
+        height:30;color:"#10141b"
+        Rectangle {anchors.top:parent.top;width:parent.width;height:1;color:"#29313d"}
         RowLayout {
-            anchors.fill: parent
-            anchors.margins: 8
-            spacing: 8
-            IconButton { text: qsTr("Capture"); borderColor: window.currentTab === "capture" ? "#6ca5f8" : "#3a4048"; onClicked: window.currentTab = "capture" }
-            IconButton { text: qsTr("Processing"); borderColor: window.processingMode ? "#6ca5f8" : "#3a4048"; enabled: !previewController.recording; onClicked: window.currentTab = "processing" }
-            IconButton { text: qsTr("Deep sky"); borderColor: window.currentTab === "deepSky" ? "#6ca5f8" : "#3a4048"; enabled: !previewController.recording; onClicked: window.currentTab = "deepSky" }
-            IconButton { text: qsTr("Mosaic"); borderColor: window.currentTab === "mosaic" ? "#6ca5f8" : "#3a4048"; enabled: !previewController.recording; onClicked: window.currentTab = "mosaic" }
-            IconButton { text: qsTr("History"); borderColor: window.currentTab === "history" ? "#6ca5f8" : "#3a4048"; enabled: !previewController.recording; onClicked: window.currentTab = "history" }
-            IconButton { text: qsTr("Guide"); borderColor: window.currentTab === "guide" ? "#6ca5f8" : "#3a4048"; onClicked: window.currentTab = "guide" }
-            IconButton { text: qsTr("Settings"); borderColor: window.currentTab === "settings" ? "#6ca5f8" : "#3a4048"; enabled: !previewController.recording; onClicked: window.currentTab = "settings" }
-            Item { Layout.fillWidth: true }
-            Text {
-                text: previewController.recording ? qsTr("Recording…") : (processingController.busy && !processingController.seeking ? qsTr("Processing…") : "")
-                color: "#a8b5c6"
-                font.pixelSize: 12
-                Layout.preferredWidth: 110
-                Layout.minimumWidth: 110
-                Layout.maximumWidth: 110
-                horizontalAlignment: Text.AlignRight
-            }
+            anchors.fill:parent;anchors.leftMargin:20;anchors.rightMargin:16;spacing:8
+            Rectangle {Layout.preferredWidth:6;Layout.preferredHeight:6;radius:3;color:window.activityTab.length>0?"#91b8ff":"#8cbfa1"}
+            Label {text:window.activityText||qsTr("Ready");color:"#a2aec0";font.pixelSize:12;Layout.fillWidth:true;elide:Text.ElideRight}
+            Label {text:previewController.connected?previewController.cameraName:qsTr("Camera not connected");color:"#a2aec0";font.pixelSize:12;elide:Text.ElideRight;Layout.maximumWidth:window.width*.3}
         }
+    }
+    HomeWorkspace {
+        id:homeWorkspace;anchors.fill:parent;visible:window.currentTab==="home"
+        library:appLibrary;recording:previewController.recording
+        deepSkyOpen:deepSkyController.frames.length>0;deepSkyCount:deepSkyController.frames.length
+        processingOpen:processingController.loaded;processingName:processingController.sourceName
+        projectBusy:deepSkyController.busy;processingBusy:processingWorkspace.controlsBusy
+        onNavigate:tab=>window.navigate(tab)
+        onChooseProject:{window.navigate("deepSky");deepSkyWorkspace.chooseProject();}
+        onOpenProject:source=>{window.navigate("deepSky");deepSkyController.loadProject(source);}
+        onOpenVideo:source=>{window.navigate("processing");processingWorkspace.openFile(source);}
+    }
+    Connections {
+        target:deepSkyController
+        function onProjectOpened(url){appLibrary.recordProject(url);}
+        function onProjectSaved(url){appLibrary.recordProject(url);}
     }
     ProcessingWorkspace {
         id: processingWorkspace
@@ -171,14 +182,14 @@ ApplicationWindow {
         onActivated: { window.currentTab = "processing"; processingWorkspace.chooseSource(); }
     }
     Repeater {
-        model: ["capture", "processing", "history", "settings", "mosaic", "guide"]
+        model: ["home", "capture", "processing", "deepSky", "mosaic", "history", "guide", "settings"]
         delegate: Item {
             required property string modelData
             required property int index
             Shortcut {
                 sequence: "Ctrl+" + (index + 1)
                 enabled: !previewController.recording && !window.textEditing && !settingsPanel.opened && !processingWorkspace.dialogOpen && !mosaicWorkspace.dialogOpen && !deepSkyWorkspace.dialogOpen
-                onActivated: window.currentTab = modelData
+                onActivated: window.navigate(modelData)
             }
         }
     }

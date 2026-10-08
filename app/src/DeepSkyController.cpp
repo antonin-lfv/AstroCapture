@@ -288,7 +288,7 @@ void DeepSkyController::saveProject(const QUrl& url) {
     for(const auto& value:frames_)if(QFileInfo(url.toLocalFile()).canonicalFilePath()==QFileInfo(value.toMap()["path"].toString()).canonicalFilePath()){status_=tr("An original image cannot be overwritten.");emit changed();return;}
     const QJsonObject project{{"version",1},{"frames",QJsonArray::fromVariantList(frames_)},{"options",QJsonObject::fromVariantMap(projectOptions_)}};
     QSaveFile file(url.toLocalFile());const auto bytes=QJsonDocument(project).toJson();
-    if(!file.open(QIODevice::WriteOnly)||file.write(bytes)!=bytes.size()||!file.commit())status_=tr("Cannot save project.");else status_=tr("Project saved. Original files are referenced, not copied.");emit changed();
+    if(!file.open(QIODevice::WriteOnly)||file.write(bytes)!=bytes.size()||!file.commit())status_=tr("Cannot save project.");else {status_=tr("Project saved. Original files are referenced, not copied.");emit projectSaved(url);}emit changed();
 }
 void DeepSkyController::loadProject(const QUrl& url) {
     if(busy_||!url.isLocalFile())return;
@@ -312,7 +312,7 @@ void DeepSkyController::loadProject(const QUrl& url) {
         options["versions"]=*checked;
         options["finish"]=(*checked)[(*checked)["active"].toString()];
     }
-    clear();projectOptions_=std::move(options);emit projectOptionsChanged();frames_=std::move(frames);for(const auto& value:frames_){const auto row=value.toMap();if(row["reference"].toBool())references_[row["group"].toString()]=row["path"].toString();}status_=tr("Project loaded. Integrate to recreate the result.");emit changed();
+    clear();projectOptions_=std::move(options);emit projectOptionsChanged();frames_=std::move(frames);for(const auto& value:frames_){const auto row=value.toMap();if(row["reference"].toBool())references_[row["group"].toString()]=row["path"].toString();}status_=tr("Project loaded. Integrate to recreate the result.");emit projectOpened(url);emit changed();
 }
 QVariant DeepSkyController::processingDocument() const {
     if(!finished_)return {};

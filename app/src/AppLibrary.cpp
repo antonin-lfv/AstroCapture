@@ -44,6 +44,9 @@ AppLibrary::AppLibrary(QObject* parent) : QObject(parent) {
     historyEnabled_ = settings.value("application/historyEnabled", true).toBool();
     compactProcessing_ = settings.value("application/compactProcessing", false).toBool();
     processingPanelWidth_ = std::clamp(settings.value("application/processingPanelWidth", 330).toInt(), 260, 600);
+    recentProjects_ = settings.value("application/recentProjects").toStringList();
+    recentProjects_.removeDuplicates();
+    while(recentProjects_.size()>10)recentProjects_.removeLast();
     recentVideos_ = settings.value("application/recentVideos").toStringList();
     recentVideos_.removeDuplicates();
     while (recentVideos_.size() > 10) recentVideos_.removeLast();
@@ -86,6 +89,7 @@ void AppLibrary::save() {
     settings.setValue("application/compactProcessing", compactProcessing_);
     settings.setValue("application/processingPanelWidth", processingPanelWidth_);
     settings.setValue("application/recentVideos", recentVideos_);
+    settings.setValue("application/recentProjects", recentProjects_);
     settings.setValue("application/processingPresets", QJsonDocument(QJsonObject::fromVariantMap(processingPresets_)).toJson(QJsonDocument::Compact));
     settings.setValue("application/deepSkyPresets",QJsonDocument(QJsonObject::fromVariantMap(deepSkyPresets_)).toJson(QJsonDocument::Compact));
     settings.remove("application/showScrollbars");
@@ -95,6 +99,24 @@ void AppLibrary::save() {
     settings.sync();
     if (settings.status() != QSettings::NoError) status_ = tr("Could not save application preferences.");
     emit changed();
+}
+QVariantList AppLibrary::recentProjects() const {
+    QVariantList result;
+    for(const auto& path:recentProjects_) {
+        const QFileInfo file(path);
+        if(!QDir::isAbsolutePath(path)||file.suffix().compare("astroproject",Qt::CaseInsensitive)!=0)continue;
+        result.append(QVariantMap{{"name",file.completeBaseName()},{"path",path},{"url",QUrl::fromLocalFile(path)},{"exists",file.isFile()}});
+    }
+    return result;
+}
+void AppLibrary::recordProject(const QUrl& url) {
+    if(!url.isLocalFile())return;
+    const QFileInfo file(url.toLocalFile());
+    if(!file.isFile()||file.suffix().compare("astroproject",Qt::CaseInsensitive)!=0)return;
+    const auto path=file.absoluteFilePath();
+    recentProjects_.removeAll(path);recentProjects_.prepend(path);
+    while(recentProjects_.size()>10)recentProjects_.removeLast();
+    save();emit changed();
 }
 QVariantList AppLibrary::recentVideos() const {
     QVariantList result;

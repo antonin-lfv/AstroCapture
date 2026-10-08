@@ -12,6 +12,7 @@ Control {
     property bool shortcutsAllowed: true
     property string editError: ""
     property bool imageFocus: false
+    property bool frameListOpen:true
     property var rawViewState: null
     function compareRaw(enabled) {
         if(enabled) {
@@ -38,6 +39,7 @@ Control {
     function selectedRole() {return roles[rolePicker.currentIndex];}
     property bool linearExport: true
     property int workflowStep: 0
+    onWorkflowStepChanged:{frameListOpen=workflowStep!==6;if(settingsScroll.contentItem)settingsScroll.contentItem.contentY=0}
     property bool updatingControls: false
     property var pendingProjectFinish: null
     readonly property bool finishDirty: controller.hasResult && (editError.length>0 || Object.keys(edits.values).some(key=>edits.values[key]!==controller.finishSettings[key]))
@@ -78,6 +80,7 @@ Control {
     palette.mid: "#3a4048"
     palette.light: "#3a4048"
     palette.dark: "#12161c"
+    function chooseProject() {if(!controller.busy)projectOpen.open();}
     function importFiles(role) { importRole=role; inputDialog.open(); }
     function saveOptions() {
         if(!edits.applyValues(options())){editError=qsTr("Check the levels: white must exceed black and all values must be valid.");return false;}
@@ -168,12 +171,6 @@ Control {
                 DarkToolTip {text:qsTr("Project options");visible:projectGear.hovered}
             }
         }
-        RowLayout {
-            Layout.fillWidth:true;spacing:6
-            Repeater {model:[qsTr("Images"),qsTr("Stack settings"),qsTr("Finish and export")]
-                delegate:IconButton {required property int index;required property string modelData;objectName:index===2?"deepSkyFinishTab":index===1?"deepSkyStackTab":"deepSkyImagesTab";enabled:index!==2 || controller.hasResult;text:modelData;Layout.fillWidth:true;borderColor:root.workflowStep===[0,1,6][index]?"#6ca5f8":"#344150";onClicked:root.workflowStep=[0,1,6][index]}
-            }
-        }
         Rectangle {Layout.fillWidth:true;Layout.preferredHeight:1;color:"#344150"}
     }
     Menu {
@@ -194,13 +191,20 @@ Control {
         }
     }
     RowLayout {
-        anchors.fill:parent; anchors.margins:12;anchors.topMargin:workspaceHeader.height+24; spacing:12
+        anchors.fill:parent; anchors.margins:12;anchors.topMargin:workspaceHeader.height+24; spacing:12;layoutDirection:Qt.RightToLeft
         ScrollView {
-            id:settingsScroll
-            Layout.preferredWidth:330; Layout.minimumWidth:260; Layout.fillHeight:true
-            clip:true
+            id:settingsScroll;objectName:"deepSkyInspector"
+            Layout.preferredWidth:350; Layout.minimumWidth:280; Layout.maximumWidth:Math.max(280,root.width*.46); Layout.fillHeight:true
+            padding:12;clip:true
+            background:Rectangle {color:"#151a22";radius:8;border.color:"#29313d"}
             ColumnLayout {
                 width:settingsScroll.availableWidth; spacing:10
+        RowLayout {
+            Layout.fillWidth:true;spacing:6
+            Repeater {model:[qsTr("Images"),qsTr("Stack"),qsTr("Finish")]
+                delegate:IconButton {required property int index;required property string modelData;objectName:index===2?"deepSkyFinishTab":index===1?"deepSkyStackTab":"deepSkyImagesTab";enabled:index!==2 || controller.hasResult;text:modelData;Layout.fillWidth:true;borderColor:root.workflowStep===[0,1,6][index]?"#6ca5f8":"#344150";onClicked:root.workflowStep=[0,1,6][index]}
+            }
+        }
                 ColumnLayout {
                 visible:root.workflowStep===0;Layout.fillWidth:true;Layout.minimumWidth:0
                 SectionTitle {label:qsTr("Import");explanation:qsTr("Add individual files or import a folder and its subfolders. Automatic detection uses FITS metadata and file/folder names. Long offsets are classified as dark flats. Check and edit the roles in the image list.")}
@@ -264,6 +268,64 @@ Control {
                 IconButton {visible:root.workflowStep===1;objectName:"deepSkyIntegrate";text:qsTr("Create the stacked image");Layout.fillWidth:true;Layout.minimumWidth:0;enabled:!controller.busy && controller.frames.some(row=>row.selected && row.role==="Light");onClicked:controller.integrate(calibrated.checked,integrationMethod.currentIndex===0?sigma.value:0,normalize.checked,badPixels.checked)}
                 ColumnLayout {
                 visible:root.workflowStep===6;Layout.fillWidth:true;Layout.minimumWidth:0
+            ColumnLayout {
+                visible:root.workflowStep===6 && controller.hasResult;Layout.fillWidth:true;spacing:3
+                ColumnLayout {
+                    Layout.fillWidth:true
+                    Label {text:qsTr("Linear histogram and stretch curve");color:"#e8edf5";Layout.fillWidth:true;wrapMode:Text.Wrap}
+                    RowLayout {Layout.fillWidth:true
+                    ComboBox {id:histogramControl;objectName:"deepSkyHistogramControl";onCurrentIndexChanged:linearHistogram.requestPaint();model:[qsTr("Black"),qsTr("Midtones"),qsTr("White")];Layout.preferredWidth:120;enabled:root.finishEditable}
+                    Label {text:qsTr("Zoom");color:"#a8b5c6"}
+                    SpinBox {id:histogramZoom;from:1;to:50;value:1;Layout.preferredWidth:100}
+                    }
+                }
+                Canvas {
+                    id:linearHistogram;objectName:"deepSkyLinearHistogram";Layout.fillWidth:true;Layout.preferredHeight:115
+                    property var stats:controller.linearHistogram
+                    property real blackPoint:Number(black.text)
+                    property real whitePoint:Number(white.text)
+                    property real midpoint:midtones.value
+                    property real zoom:histogramZoom.value
+                    property bool useAsinh:asinh.checked
+                    property real strength:asinhStrength.value
+                    property real low:stats.minimum===undefined?0:stats.minimum
+                    property real high:low+(Math.max(stats.maximum||1,whitePoint)-low)/zoom
+                    onStatsChanged:requestPaint();onBlackPointChanged:requestPaint();onWhitePointChanged:requestPaint();onMidpointChanged:requestPaint();onZoomChanged:requestPaint();onUseAsinhChanged:requestPaint();onStrengthChanged:requestPaint()
+                    onWidthChanged:requestPaint();onHeightChanged:requestPaint()
+                    function pointX(value) {return Math.max(0,Math.min(width,(value-low)/(high-low)*width));}
+                    onPaint: {
+                        const ctx=getContext("2d");ctx.clearRect(0,0,width,height);ctx.fillStyle="#12161c";ctx.fillRect(0,0,width,height);
+                        const channels=stats.channels||[],colors=["#cf6060","#60ba80","#729dde"];
+                        for(let c=0;c<channels.length;c++) {
+                            const bins=channels[c];let peak=1;for(let i=0;i<bins.length;i++)peak=Math.max(peak,bins[i]);
+                            ctx.strokeStyle=colors[c];ctx.beginPath();
+                            for(let i=0;i<bins.length;i++){const value=low+(stats.maximum-low)*i/(bins.length-1);if(value>high)break;const x=(value-low)/(high-low)*width,y=height-15-(height-20)*Math.log(1+bins[i])/Math.log(1+peak);if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);}ctx.stroke();
+                        }
+                        if(whitePoint>blackPoint) {
+                            ctx.strokeStyle="#e8edf5";ctx.beginPath();
+                            for(let x=0;x<=width;x++){const value=low+x/width*(high-low),v=Math.max(0,Math.min(1,(value-blackPoint)/(whitePoint-blackPoint)));const out=useAsinh?Math.asinh(strength*v)/Math.asinh(strength):((midpoint-1)*v)/((2*midpoint-1)*v-midpoint);const y=height-15-(height-20)*out;if(x===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);}ctx.stroke();
+                        }
+                        const points=[blackPoint,blackPoint+midpoint*(whitePoint-blackPoint),whitePoint],labels=["B","M","W"];
+                        for(let i=0;i<3;i++){if(i===1&&useAsinh)continue;const x=pointX(points[i]);ctx.fillStyle=i===histogramControl.currentIndex?"#6ca5f8":"#e8edf5";ctx.fillRect(Math.max(0,Math.min(width-2,x)),0,2,height-15);ctx.fillText(labels[i],Math.max(2,Math.min(width-10,x)),height-2);}
+                    }
+                    MouseArea {
+                        anchors.fill:parent;enabled:root.finishEditable
+                        function changePoint(x) {
+                            const value=linearHistogram.low+Math.max(0,Math.min(1,x/width))*(linearHistogram.high-linearHistogram.low);
+                            if(histogramControl.currentIndex===0)black.text=Math.min(value,Number(white.text)-1e-6).toPrecision(7);
+                            else if(histogramControl.currentIndex===2)white.text=Math.max(value,Number(black.text)+1e-6).toPrecision(7);
+                            else if(!asinh.checked)midtones.value=Math.max(.001,Math.min(.999,(value-Number(black.text))/(Number(white.text)-Number(black.text))));
+                            root.previewAdjustments();linearHistogram.requestPaint();
+                        }
+                        onPressed:mouse=>{edits.beginEdit();changePoint(mouse.x);}
+                        onReleased:edits.endEdit()
+                        onCanceled:edits.endEdit()
+                        onPositionChanged:mouse=>{if(pressed)changePoint(mouse.x);}
+                    }
+                }
+                Label {text:qsTr("Select Black, Midtones or White, then drag in the graph. Zoom only changes the graph view.");color:"#a8b5c6";font.pixelSize:11;wrapMode:Text.Wrap;Layout.fillWidth:true}
+                Label {text:qsTr("Estimated clipping · shadows %1% · highlights %2%").arg(Number(controller.linearHistogram.blackLoss||0).toFixed(2)).arg(Number(controller.linearHistogram.whiteLoss||0).toFixed(2));color:"#a8b5c6";font.pixelSize:11;wrapMode:Text.Wrap;Layout.fillWidth:true}
+            }
                 ColumnLayout {Layout.fillWidth:true;Layout.minimumWidth:0;visible:controller.groups.length>1
                 SectionTitle {label:qsTr("Channel composition");explanation:qsTr("Assign R/G/B or a narrowband palette. RGB uses R/G/B, SHO uses SII/HA/OIII and HOO uses HA/OIII/OIII. Optional luminance adds detail. Each chosen filter must have an integrated result.")}
                 ComboBox {id:resultGroup;Layout.fillWidth:true;Layout.minimumWidth:0;model:controller.groups;enabled:!controller.busy && count>0;onActivated:controller.selectResult(currentText)}
@@ -358,8 +420,9 @@ Control {
         ColumnLayout {
             Layout.fillWidth:true;Layout.fillHeight:true;spacing:8
             RowLayout {
-                Layout.fillWidth:true
-                Label {text:controller.comparingRaw?qsTr("Raw exposure · %1 · automatic stretch").arg(controller.rawComparisonName):controller.displayingResult?(root.finishDirty?qsTr("Stacked result · pending adjustments"):qsTr("Stacked result · version %1").arg(edits.version)):qsTr("Source image preview · automatic stretch");color:"#e8edf5";Layout.fillWidth:true;wrapMode:Text.Wrap}
+                Layout.fillWidth:true;Layout.preferredHeight:40;Layout.minimumHeight:40;Layout.maximumHeight:40
+                Label {text:controller.comparingRaw?qsTr("Raw exposure · %1 · automatic stretch").arg(controller.rawComparisonName):controller.displayingResult?(root.finishDirty?qsTr("Stacked result · pending adjustments"):qsTr("Stacked result · version %1").arg(edits.version)):qsTr("Source image preview · automatic stretch");color:"#e8edf5";Layout.fillWidth:true;elide:Text.ElideRight;DarkToolTip {visible:labelHover.hovered;text:parent.text} HoverHandler {id:labelHover}}
+                IconButton {objectName:"deepSkySources";iconName:"folder";text:qsTr("Source files");enabled:controller.frames.length>0;borderColor:root.frameListOpen?"#6ca5f8":"#344150";onClicked:{root.imageFocus=false;root.frameListOpen=!root.frameListOpen;}}
                 IconButton {objectName:"deepSkyImageFocus";text:root.imageFocus?qsTr("Show histograms"):qsTr("Enlarge preview");onClicked:root.imageFocus=!root.imageFocus;ToolTip.visible:hovered;ToolTip.text:qsTr("Temporarily hide histograms and the image list to inspect A/B. Zoom and framing stay shared.")}
                 IconButton {text:qsTr("Show stacked result");visible:controller.hasResult && !controller.displayingResult;enabled:!controller.busy;onClicked:controller.restoreResult()}
             }
@@ -376,72 +439,16 @@ Control {
                 ComboBox {id:histogramMode;model:["RGB",qsTr("Luminance")];Layout.preferredWidth:140}
             }
             DeepSkyHistogramItem {visible:!root.imageFocus;Layout.fillWidth:true;Layout.preferredHeight:64;controller:root.controller;luminanceOnly:histogramMode.currentIndex===1}
-            ColumnLayout {
-                visible:!root.imageFocus && root.workflowStep===6 && controller.hasResult;Layout.fillWidth:true;spacing:3
-                RowLayout {
-                    Layout.fillWidth:true
-                    Label {text:qsTr("Linear histogram and stretch curve");color:"#e8edf5";Layout.fillWidth:true}
-                    ComboBox {id:histogramControl;objectName:"deepSkyHistogramControl";onCurrentIndexChanged:linearHistogram.requestPaint();model:[qsTr("Black"),qsTr("Midtones"),qsTr("White")];Layout.preferredWidth:120;enabled:root.finishEditable}
-                    Label {text:qsTr("Zoom");color:"#a8b5c6"}
-                    SpinBox {id:histogramZoom;from:1;to:50;value:1;Layout.preferredWidth:100}
-                }
-                Canvas {
-                    id:linearHistogram;objectName:"deepSkyLinearHistogram";Layout.fillWidth:true;Layout.preferredHeight:115
-                    property var stats:controller.linearHistogram
-                    property real blackPoint:Number(black.text)
-                    property real whitePoint:Number(white.text)
-                    property real midpoint:midtones.value
-                    property real zoom:histogramZoom.value
-                    property bool useAsinh:asinh.checked
-                    property real strength:asinhStrength.value
-                    property real low:stats.minimum===undefined?0:stats.minimum
-                    property real high:low+(Math.max(stats.maximum||1,whitePoint)-low)/zoom
-                    onStatsChanged:requestPaint();onBlackPointChanged:requestPaint();onWhitePointChanged:requestPaint();onMidpointChanged:requestPaint();onZoomChanged:requestPaint();onUseAsinhChanged:requestPaint();onStrengthChanged:requestPaint()
-                    onWidthChanged:requestPaint();onHeightChanged:requestPaint()
-                    function pointX(value) {return Math.max(0,Math.min(width,(value-low)/(high-low)*width));}
-                    onPaint: {
-                        const ctx=getContext("2d");ctx.clearRect(0,0,width,height);ctx.fillStyle="#12161c";ctx.fillRect(0,0,width,height);
-                        const channels=stats.channels||[],colors=["#cf6060","#60ba80","#729dde"];
-                        for(let c=0;c<channels.length;c++) {
-                            const bins=channels[c];let peak=1;for(let i=0;i<bins.length;i++)peak=Math.max(peak,bins[i]);
-                            ctx.strokeStyle=colors[c];ctx.beginPath();
-                            for(let i=0;i<bins.length;i++){const value=low+(stats.maximum-low)*i/(bins.length-1);if(value>high)break;const x=(value-low)/(high-low)*width,y=height-15-(height-20)*Math.log(1+bins[i])/Math.log(1+peak);if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);}ctx.stroke();
-                        }
-                        if(whitePoint>blackPoint) {
-                            ctx.strokeStyle="#e8edf5";ctx.beginPath();
-                            for(let x=0;x<=width;x++){const value=low+x/width*(high-low),v=Math.max(0,Math.min(1,(value-blackPoint)/(whitePoint-blackPoint)));const out=useAsinh?Math.asinh(strength*v)/Math.asinh(strength):((midpoint-1)*v)/((2*midpoint-1)*v-midpoint);const y=height-15-(height-20)*out;if(x===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);}ctx.stroke();
-                        }
-                        const points=[blackPoint,blackPoint+midpoint*(whitePoint-blackPoint),whitePoint],labels=["B","M","W"];
-                        for(let i=0;i<3;i++){if(i===1&&useAsinh)continue;const x=pointX(points[i]);ctx.fillStyle=i===histogramControl.currentIndex?"#6ca5f8":"#e8edf5";ctx.fillRect(Math.max(0,Math.min(width-2,x)),0,2,height-15);ctx.fillText(labels[i],Math.max(2,Math.min(width-10,x)),height-2);}
-                    }
-                    MouseArea {
-                        anchors.fill:parent;enabled:root.finishEditable
-                        function changePoint(x) {
-                            const value=linearHistogram.low+Math.max(0,Math.min(1,x/width))*(linearHistogram.high-linearHistogram.low);
-                            if(histogramControl.currentIndex===0)black.text=Math.min(value,Number(white.text)-1e-6).toPrecision(7);
-                            else if(histogramControl.currentIndex===2)white.text=Math.max(value,Number(black.text)+1e-6).toPrecision(7);
-                            else if(!asinh.checked)midtones.value=Math.max(.001,Math.min(.999,(value-Number(black.text))/(Number(white.text)-Number(black.text))));
-                            root.previewAdjustments();linearHistogram.requestPaint();
-                        }
-                        onPressed:mouse=>{edits.beginEdit();changePoint(mouse.x);}
-                        onReleased:edits.endEdit()
-                        onCanceled:edits.endEdit()
-                        onPositionChanged:mouse=>{if(pressed)changePoint(mouse.x);}
-                    }
-                }
-                Label {text:qsTr("Select Black, Midtones or White, then drag in the graph. Zoom only changes the graph view.");color:"#a8b5c6";font.pixelSize:11;wrapMode:Text.Wrap;Layout.fillWidth:true}
-                Label {text:qsTr("Estimated clipping · shadows %1% · highlights %2%").arg(Number(controller.linearHistogram.blackLoss||0).toFixed(2)).arg(Number(controller.linearHistogram.whiteLoss||0).toFixed(2));color:"#a8b5c6";font.pixelSize:11;Layout.fillWidth:true}
-            }
             RowLayout {
                 Layout.fillWidth:true
-                visible:!root.imageFocus
+                visible:!root.imageFocus && root.frameListOpen
                 ComboBox {id:frameFilterChoice;objectName:"deepSkyFrameFilter";model:[qsTr("All images")].concat(root.roleNames.slice(1));Layout.preferredWidth:155;onActivated:root.frameFilter=currentIndex===0?"All":root.roles[currentIndex]}
                 Label {text:qsTr("%1 / %2 images").arg(root.visibleFrames.length).arg(controller.frames.length);color:"#9daec3";Layout.fillWidth:true}
                 IconButton {text:qsTr("Select all");enabled:!controller.busy;onClicked:root.visibleFrames.forEach(row=>controller.setSelected(row.sourceIndex,true))}
                 IconButton {text:qsTr("Select none");enabled:!controller.busy;onClicked:root.visibleFrames.forEach(row=>controller.setSelected(row.sourceIndex,false))}
             }
             ListView {
-                id:frameList;objectName:"deepSkyFrameList";visible:!root.imageFocus;Layout.fillWidth:true;Layout.preferredHeight:root.workflowStep===6?80:200;clip:true;model:root.visibleFrames
+                id:frameList;objectName:"deepSkyFrameList";visible:!root.imageFocus && root.frameListOpen;Layout.fillWidth:true;Layout.preferredHeight:Math.min(160,Math.max(64,controller.frames.length*64));clip:true;model:root.visibleFrames
                 ScrollBar.vertical:ScrollBar {}
                 delegate:Rectangle {
                     required property var modelData

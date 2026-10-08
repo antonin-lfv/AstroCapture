@@ -55,6 +55,8 @@ qt_add_qml_module(AstroCapture
     URI AstroCapture
     VERSION 1.0
     QML_FILES
+        qml/StudioNavigation.qml
+        qml/HomeWorkspace.qml
         qml/Main.qml
         qml/ProcessingWorkspace.qml
         qml/DeepSkyWorkspace.qml

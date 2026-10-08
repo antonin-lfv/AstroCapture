@@ -81,6 +81,8 @@ signals:
     void resultChanged();
     void projectOptionsChanged();
     void imageExported(const QUrl&);
+    void projectOpened(const QUrl&);
+    void projectSaved(const QUrl&);
 private:
     void run(const QString&,std::function<void(std::stop_token)>);
     void post(std::function<void()>);

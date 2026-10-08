@@ -308,3 +308,22 @@ l’inverse) duplique la finition. Le nouvel empilement ou la nouvelle compositi
 réinitialise A/B. Les projets sauvegardent les deux versions et la version active,
 mais pas les historiques d’annulation. Sans aperçu automatique, appliquer les
 réglages en attente est nécessaire avant l’export final ou le transfert.
+
+### Interface Studio (1.2.0)
+
+L’application démarre sur **Accueil**, avec les accès Capture, Traitement et Ciel
+profond, les projets de ciel profond récemment ouverts ou enregistrés et les
+vidéos SER récentes. **Reprendre** revient au travail en mémoire. **Ouvrir** recharge
+un projet enregistré ; recréez son empilement pour retrouver sa finition.
+Les fichiers manquants sont signalés et les originaux restent dans leurs dossiers.
+
+Les onglets restent visibles et conservent images, cadrage et réglages. Les
+calculs continuent lors d’un changement d’onglet ; leur activité est indiquée en
+haut et en bas. En Ciel profond, l’inspecteur de droite regroupe Images, Empilement
+et Finition, avec l’histogramme linéaire interactif. La liste des fichiers se replie en
+finition ; **Fichiers sources** permet de la retrouver. Le rouage supérieur ouvre les
+réglages de l’application, celui du projet gère ses fichiers.
+
+Raccourcis : Ctrl+1 Accueil, Ctrl+2 Capture, Ctrl+3 Traitement, Ctrl+4 Ciel profond,
+Ctrl+5 Mosaïque, Ctrl+6 Historique, Ctrl+7 Guide, Ctrl+8 Réglages. Pendant une
+capture, les onglets Accueil, Capture et Guide restent disponibles.

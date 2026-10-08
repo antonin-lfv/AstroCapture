@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.2.0 — 2026-10-08
+
+- Introduce Studio navigation with persistent workspace tabs, version, settings
+  and activity indicators; launch on a new Home workspace.
+- Resume work in memory or open recent saved deep-sky projects and SER videos.
+- Move deep-sky tools and the editable linear histogram into the right inspector.
+- Preserve controller state and background calculations when switching tabs.
+- Document the new navigation and test recording locks and recent project storage.
+
 ## 1.1.2 — 2026-10-08
 
 - Show a rotating activity indicator during deep-sky operations without changing

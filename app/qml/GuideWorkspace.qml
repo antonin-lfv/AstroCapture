@@ -9,6 +9,7 @@ Rectangle {
     property int topic: 0
     signal navigate(string tab)
     readonly property var lessons: [
+
         { title: qsTr("Start here"), lead: qsTr("One observation, three steps"),
           intro: qsTr("Capture a video, combine its sharpest frames, then finish the image. For the Moon, Sun and planets, this gives you more useful material than a single snapshot."),
           cards: [
@@ -71,6 +72,13 @@ Rectangle {
             {title: qsTr("Paths, not duplicate files"), body: qsTr("History remembers file locations. Saving again to the same path updates one entry; a new path creates another. You can import existing images, open them or reveal them in Finder. Removing an entry does not delete the image; missing paths are cleaned automatically.")},
             {title: qsTr("Keep enough to start again"), body: qsTr("Keep the SER recordings and the uncaptioned image portions separately from your final exports. A TIFF preserves the image, not an editable project with its frame selection, wavelet settings or assembly history.")}
           ], action: qsTr("Go to History"), tab: "history" }
+        ,{ title:qsTr("Studio navigation"),lead:qsTr("One workspace for each task"),
+          intro:qsTr("Home offers Capture, Processing and Deep sky, recent saved projects and SER videos, and work still open in this session."),
+          cards:[
+            {title:qsTr("Move between workspaces"),body:qsTr("The top tabs stay visible. Switching tabs preserves loaded images, framing and controls, and calculations continue in the background. Click the activity label to return to a running task. During recording, Home, Capture and Guide remain available; other workspaces are locked.")},
+            {title:qsTr("Return to a project"),body:qsTr("Resume returns to the current session without loading files again. Open reloads a saved deep-sky project; recreate its stack to restore the saved finish. Keep its source files in place. The gear at the top right opens application settings; the deep-sky gear manages the current project.")},
+            {title:qsTr("Deep-sky tools on the right"),body:qsTr("Images, Stack and Finish are in the right inspector. Stack contains calibration and integration settings. Finish unlocks after stacking and contains the editable linear histogram, finishing controls, presets and export. The image and displayed histogram stay on the left. Source files toggles the source list, which starts collapsed in Finish.")}
+          ],action:qsTr("Go to Home"),tab:"home"}
     ]
     readonly property var lesson: lessons[topic]
     ColumnLayout {

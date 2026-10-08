@@ -14,6 +14,26 @@ Item {
     implicitHeight: 16
 
     Canvas {
+        id:studioIcon;anchors.fill:parent
+        visible:["home","processing","stars","mosaic","history","book"].indexOf(root.name)>=0
+        onWidthChanged:requestPaint();onHeightChanged:requestPaint()
+        Connections {target:root;function onColorChanged(){studioIcon.requestPaint();}function onNameChanged(){studioIcon.requestPaint();}}
+        onPaint: {
+            const c=getContext("2d");c.reset();c.scale(width/24,height/24);
+            c.strokeStyle=root.color;c.fillStyle=root.color;c.lineWidth=1.6;c.lineCap="round";c.lineJoin="round";
+            c.beginPath();
+            if(root.name==="home") {c.moveTo(3,11);c.lineTo(12,3);c.lineTo(21,11);c.moveTo(6,10);c.lineTo(6,21);c.lineTo(10,21);c.lineTo(10,15);c.lineTo(14,15);c.lineTo(14,21);c.lineTo(18,21);c.lineTo(18,10);}
+            else if(root.name==="processing") {c.arc(12,12,9,0,Math.PI*2);c.moveTo(17,12);c.arc(12,12,5,0,Math.PI*2);c.moveTo(3,12);c.lineTo(7,12);c.moveTo(17,12);c.lineTo(21,12);c.moveTo(12,3);c.lineTo(12,7);c.moveTo(12,17);c.lineTo(12,21);}
+            else if(root.name==="stars") {c.moveTo(10,2);c.lineTo(12,8);c.lineTo(18,10);c.lineTo(12,12);c.lineTo(10,18);c.lineTo(8,12);c.lineTo(2,10);c.lineTo(8,8);c.closePath();c.moveTo(19,15);c.lineTo(19,22);c.moveTo(15.5,18.5);c.lineTo(22.5,18.5);}
+            else if(root.name==="mosaic") {for(let y=4;y<20;y+=9)for(let x=4;x<20;x+=9)c.rect(x,y,6,6);}
+            else if(root.name==="history") {c.arc(12,12,9,-Math.PI*.8,Math.PI*1.2);c.moveTo(12,6);c.lineTo(12,12);c.lineTo(16,14);c.moveTo(3,3);c.lineTo(3,8);c.lineTo(8,8);}
+            else if(root.name==="book") {c.moveTo(12,6);c.quadraticCurveTo(7,2,3,4);c.lineTo(3,19);c.quadraticCurveTo(7,17,12,21);c.quadraticCurveTo(17,17,21,19);c.lineTo(21,4);c.quadraticCurveTo(17,2,12,6);c.lineTo(12,21);}
+            c.stroke();
+        }
+        Component.onCompleted:requestPaint()
+    }
+
+    Canvas {
         anchors.fill: parent
         visible: root.name === "refresh"
         onPaint: {

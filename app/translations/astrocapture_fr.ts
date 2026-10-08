@@ -124,6 +124,10 @@ Télescope · caméra · accessoires</translation>
     </context>
     <context>
         <name>DeepSkyWorkspace</name>
+<message><source>Source files</source><translation>Fichiers sources</translation></message>
+<message><source>Stack</source><translation>Empilement</translation></message>
+<message><source>Finish</source><translation>Finition</translation></message>
+
     <message><source>Operation complete</source><translation>Opération terminée</translation></message>
         <message>
             <location filename="../qml/DeepSkyWorkspace.qml" line="131" />
@@ -1133,6 +1137,17 @@ L’aperçu est automatiquement éclairci ; les données restent linéaires.</tr
 </context>
     <context>
         <name>GuideWorkspace</name>
+<message><source>Studio navigation</source><translation>Navigation Studio</translation></message>
+<message><source>One workspace for each task</source><translation>Un espace pour chaque tâche</translation></message>
+<message><source>Home offers Capture, Processing and Deep sky, recent saved projects and SER videos, and work still open in this session.</source><translation>L’accueil donne accès à Capture, Traitement et Ciel profond, aux projets enregistrés et vidéos SER récents, ainsi qu’au travail encore ouvert dans cette session.</translation></message>
+<message><source>Move between workspaces</source><translation>Passer d’un espace à l’autre</translation></message>
+<message><source>The top tabs stay visible. Switching tabs preserves loaded images, framing and controls, and calculations continue in the background. Click the activity label to return to a running task. During recording, Home, Capture and Guide remain available; other workspaces are locked.</source><translation>Les onglets supérieurs restent visibles. Changer d’onglet conserve les images chargées, le cadrage et les réglages ; les calculs continuent en arrière-plan. Cliquez sur l’activité pour revenir à la tâche en cours. Pendant une capture, Accueil, Capture et Guide restent disponibles ; les autres espaces sont verrouillés.</translation></message>
+<message><source>Return to a project</source><translation>Reprendre un projet</translation></message>
+<message><source>Resume returns to the current session without loading files again. Open reloads a saved deep-sky project; recreate its stack to restore the saved finish. Keep its source files in place. The gear at the top right opens application settings; the deep-sky gear manages the current project.</source><translation>Reprendre revient à la session actuelle sans recharger les fichiers. Ouvrir recharge un projet de ciel profond enregistré ; recréez son empilement pour retrouver la finition sauvegardée. Gardez ses fichiers sources en place. Le rouage supérieur droit ouvre les réglages de l’application ; celui du ciel profond gère le projet actuel.</translation></message>
+<message><source>Deep-sky tools on the right</source><translation>Outils de ciel profond à droite</translation></message>
+<message><source>Images, Stack and Finish are in the right inspector. Stack contains calibration and integration settings. Finish unlocks after stacking and contains the editable linear histogram, finishing controls, presets and export. The image and displayed histogram stay on the left. Source files toggles the source list, which starts collapsed in Finish.</source><translation>Images, Empilement et Finition se trouvent dans l’inspecteur de droite. Empilement regroupe les réglages de calibration et d’intégration. Finition devient accessible après l’empilement et contient l’histogramme linéaire interactif, les réglages de finition, les préréglages et l’export. L’image et son histogramme d’affichage restent à gauche. Fichiers sources affiche ou replie la liste, repliée par défaut en Finition.</translation></message>
+<message><source>Go to Home</source><translation>Aller à l’accueil</translation></message>
+
         <message>
             <location filename="../qml/GuideWorkspace.qml" line="68" />
             <source>Guide</source>
@@ -1736,6 +1751,12 @@ Ajoutez-le depuis son nouvel emplacement.</translation>
     </context>
     <context>
         <name>Main</name>
+<message><source>Deep sky · %1%</source><translation>Ciel profond · %1 %</translation></message>
+<message><source>Mosaic · processing…</source><translation>Mosaïque · traitement…</translation></message>
+<message><source>Processing · %1%</source><translation>Traitement · %1 %</translation></message>
+<message><source>Ready</source><translation>Prêt</translation></message>
+<message><source>Camera not connected</source><translation>Caméra non connectée</translation></message>
+
         <message>
             <location filename="../qml/Main.qml" line="34" />
             <location filename="../qml/Main.qml" line="487" />
@@ -2275,6 +2296,8 @@ Les détails communs relient les vues. Les zones manquantes restent noires ; auc
     </context>
     <context>
         <name>ProcessingWorkspace</name>
+<message><source>Processing</source><translation>Traitement</translation></message>
+
         <message>
             <source>Open a planetary video</source>
             <translation type="vanished">Ouvrir une vidéo planétaire</translation>
@@ -2487,7 +2510,7 @@ Les détails communs relient les vues. Les zones manquantes restent noires ; auc
         </message>
         <message>
             <location filename="../qml/ProcessingWorkspace.qml" line="618" />
-            <source>Adjustments update automatically after a short pause. Levels 1–2: fine details · 3–4: medium structures · 5–6: broad contrast. Each scale doubles in size. Click ? for help.</source>
+            <source>Adjustments update automatically after a short pause. Levels 1–2: fine details · 3–4: medium structures · 5–6: broad contrast. Each scale doubles in size. Hover the help icon for an explanation.</source>
             <translation>L’aperçu s’actualise après une courte pause. Niveaux 1–2 : détails fins · 3–4 : structures moyennes · 5–6 : contraste large. Chaque échelle double de taille. Cliquez sur ? pour l’aide.</translation>
         </message>
         <message>
@@ -3805,4 +3828,39 @@ Résultat obtenu :
             <translation>Image · avant retouches</translation>
         </message>
     </context>
+<context><name>HomeWorkspace</name>
+<message><source>Your next image starts here.</source><translation>Votre prochaine image commence ici.</translation></message>
+<message><source>Capture, process or return to a project.</source><translation>Capturer, traiter ou reprendre un projet.</translation></message>
+<message><source>Open a project…</source><translation>Ouvrir un projet…</translation></message>
+<message><source>Capture the sky</source><translation>Capturer le ciel</translation></message>
+<message><source>Camera · SER video · FITS exposures</source><translation>Caméra · Vidéo SER · Poses FITS</translation></message>
+<message><source>Process an image</source><translation>Traiter une image</translation></message>
+<message><source>Planets, Moon and Sun · Still images</source><translation>Planètes, Lune et Soleil · Images fixes</translation></message>
+<message><source>Explore deep sky</source><translation>Explorer le ciel profond</translation></message>
+<message><source>Calibration · Stacking · Finishing</source><translation>Calibration · Empilement · Finition</translation></message>
+<message><source>Continue your work</source><translation>Reprendre votre travail</translation></message>
+<message><source>Current deep-sky project</source><translation>Projet de ciel profond en cours</translation></message>
+<message><source>%1 images · current session</source><translation>%1 images · session actuelle</translation></message>
+<message><source>Resume</source><translation>Reprendre</translation></message>
+<message><source>Processing · current session</source><translation>Traitement · session actuelle</translation></message>
+<message><source>Saved deep-sky project</source><translation>Projet de ciel profond enregistré</translation></message>
+<message><source>File unavailable</source><translation>Fichier indisponible</translation></message>
+<message><source>Open</source><translation>Ouvrir</translation></message>
+<message><source>Recent SER video</source><translation>Vidéo SER récente</translation></message>
+<message><source>Your recent projects and videos will appear here.</source><translation>Vos projets et vidéos récents apparaîtront ici.</translation></message>
+<message><source>First session?</source><translation>Première session ?</translation></message>
+<message><source>Learn acquisition, calibration and finishing at your own pace.</source><translation>Découvrez l’acquisition, la calibration et la finition à votre rythme.</translation></message>
+<message><source>Open the guide</source><translation>Ouvrir le guide</translation></message>
+</context>
+<context><name>StudioNavigation</name>
+<message><source>Home</source><translation>Accueil</translation></message>
+<message><source>Capture</source><translation>Capture</translation></message>
+<message><source>Processing</source><translation>Traitement</translation></message>
+<message><source>Deep sky</source><translation>Ciel profond</translation></message>
+<message><source>Mosaic</source><translation>Mosaïque</translation></message>
+<message><source>History</source><translation>Historique</translation></message>
+<message><source>Guide</source><translation>Guide</translation></message>
+<message><source>Settings</source><translation>Réglages</translation></message>
+<message><source>Current workspace</source><translation>Espace actif</translation></message>
+</context>
 </TS>

@@ -190,3 +190,12 @@ astro_add_unit_test(astro_app_deep_sky_edits_test
 )
 set_target_properties(astro_app_deep_sky_edits_test PROPERTIES AUTOMOC ON)
 target_include_directories(astro_app_deep_sky_edits_test PRIVATE ../../app/src)
+
+astro_add_unit_test(astro_app_studio_workspace_test
+    SOURCES app/StudioWorkspaceTest.cpp ../../app/src/AppLibrary.cpp ../../app/src/AppLibrary.hpp
+    LIBS Qt6::Quick Qt6::Gui
+)
+set_target_properties(astro_app_studio_workspace_test PROPERTIES AUTOMOC ON)
+target_include_directories(astro_app_studio_workspace_test PRIVATE ../../app/src)
+target_compile_definitions(astro_app_studio_workspace_test PRIVATE ASTRO_SOURCE_DIR="${PROJECT_SOURCE_DIR}")
+set_tests_properties(astro_app_studio_workspace_test PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_BACKEND=software" TIMEOUT 30)

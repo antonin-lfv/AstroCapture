@@ -67,6 +67,9 @@ int main(int argc,char** argv){
     ASTRO_TEST_CHECK(object->findChild<QObject*>("deepSkyStackDivider")->property("visible").toBool());
     object->findChild<QObject*>("deepSkyAdvanced")->setProperty("expanded",true);QCoreApplication::processEvents();
     controller.setSelected(2,false);controller.integrate(true);wait(controller);
+    ASTRO_TEST_CHECK(!root->property("frameListOpen").toBool());
+    ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root->findChild<QObject*>("deepSkySources"),"clicked"));
+    ASTRO_TEST_CHECK(root->property("frameListOpen").toBool());
     if(!controller.hasResult())qWarning()<<controller.status();ASTRO_TEST_CHECK(controller.hasResult()&&controller.displayingResult()&&controller.groups()==QStringList{"R"});
     ASTRO_TEST_CHECK(controller.hasRawComparison());
     ASTRO_TEST_CHECK(finishTab->property("enabled").toBool());
@@ -152,6 +155,8 @@ int main(int argc,char** argv){
     ASTRO_TEST_CHECK(controller.finishSettings()["midtones"]==.37);
     QVariant savedOptions;
     ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root,"saveOptions",Q_RETURN_ARG(QVariant,savedOptions))&&savedOptions.toBool());
+    QObject::connect(&controller,&app::DeepSkyController::projectSaved,&library,&app::AppLibrary::recordProject);
+    QObject::connect(&controller,&app::DeepSkyController::projectOpened,&library,&app::AppLibrary::recordProject);
     const auto project=QUrl::fromLocalFile(directory.filePath("session.astroproject"));controller.saveProject(project);controller.clear();root->setProperty("workflowStep",0);controller.loadProject(project);ASTRO_TEST_CHECK(controller.frames().size()==3&&!controller.frames()[2].toMap()["selected"].toBool()&&!controller.hasResult());
     controller.integrate(true);wait(controller);ASTRO_TEST_CHECK(controller.hasResult());
     ASTRO_TEST_CHECK(root->property("workflowStep").toInt()==6);
@@ -174,6 +179,7 @@ int main(int argc,char** argv){
     for(std::size_t i=0;i<restoredB->rgb.size();++i)ASTRO_TEST_CHECK(std::abs(restoredB->rgb[i]-bPixels->rgb[i])<1e-6);
     ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root,"switchVersion",Q_ARG(QVariant,QVariant("A"))));wait(controller);
     const auto previous=controller.processingDocument().value<app::ImageDocument>().pixels;
+    ASTRO_TEST_CHECK(library.recentProjects().size()==1 && library.recentProjects()[0].toMap()["url"].toUrl()==project);
     QFile savedProject(project.toLocalFile());ASTRO_TEST_CHECK(savedProject.open(QIODevice::ReadOnly));
     auto corruptProject=QJsonDocument::fromJson(savedProject.readAll()).object();savedProject.close();
     auto corruptOptions=corruptProject["options"].toObject();auto corruptVersions=corruptOptions["versions"].toObject();
@@ -181,6 +187,7 @@ int main(int argc,char** argv){
     corruptVersions["B"]=corruptB;corruptOptions["versions"]=corruptVersions;corruptProject["options"]=corruptOptions;
     const auto badProject=directory.filePath("invalid.astroproject");QFile badFile(badProject);ASTRO_TEST_CHECK(badFile.open(QIODevice::WriteOnly));
     badFile.write(QJsonDocument(corruptProject).toJson());badFile.close();controller.loadProject(QUrl::fromLocalFile(badProject));
+    ASTRO_TEST_CHECK(library.recentProjects().size()==1);
     ASTRO_TEST_CHECK(controller.hasResult()&&!controller.status().isEmpty()&&controller.processingDocument().value<app::ImageDocument>().pixels==previous);
     const auto linearAfter=QUrl::fromLocalFile(directory.filePath("linear-after-edits.fits"));controller.exportImage(linearAfter,true);wait(controller);
     const auto scientific=recording::readAstroImage(linearAfter.toLocalFile().toStdString());
@@ -213,11 +220,12 @@ int main(int argc,char** argv){
             QMetaObject::invokeMethod(presetDialog,"open");QCoreApplication::processEvents();QThread::msleep(200);QCoreApplication::processEvents();
             ASTRO_TEST_CHECK(window.grabWindow().save(path+".dialog.png"));
             QMetaObject::invokeMethod(presetDialog,"close");QCoreApplication::processEvents();
+            root->setProperty("workflowStep",1);QCoreApplication::processEvents();
             QQuickItem* helpTarget=nullptr;
-            for(auto* item:root->findChildren<QQuickItem*>())if(item->isVisible()&&item->property("explanation").toString().startsWith("Presets save")){helpTarget=item;break;}
-            // The French explanation is translated; use the visible section title
-            // as a fallback, with a non-empty accessible explanation.
-            if(!helpTarget)for(auto* item:root->findChildren<QQuickItem*>())if(item->isVisible()&&item->property("explanation").toString().contains("préréglages")){helpTarget=item;break;}
+            for(auto* item:root->findChildren<QQuickItem*>()) {
+                const auto position=item->mapToScene(QPointF(20,item->height()/2));
+                if(item->isVisible() && !item->property("explanation").toString().isEmpty() && position.y()>0 && position.y()<window.height()-100) {helpTarget=item;break;}
+            }
             ASTRO_TEST_CHECK(helpTarget);
             const auto point=helpTarget->mapToScene(QPointF(20,helpTarget->height()/2));
             QMouseEvent hover(QEvent::MouseMove,point,point,Qt::NoButton,Qt::NoButton,Qt::NoModifier);QGuiApplication::sendEvent(&window,&hover);

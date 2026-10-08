@@ -274,6 +274,7 @@ Rectangle {
         anchors.fill: parent
         anchors.margins: 16
         spacing: 12
+        Label {text:qsTr("Processing");color:"#eef3fa";font.pixelSize:22;font.weight:Font.Medium}
         RowLayout {
             Layout.fillWidth: true
             IconButton {
@@ -615,7 +616,7 @@ Rectangle {
                     }
                     }
                     SectionTitle { text: root.controller.stillImage ? qsTr("Reveal detail") : qsTr("3   Reveal detail") }
-                    Caption { visible: !root.library.compactProcessing; text: qsTr("Adjustments update automatically after a short pause. Levels 1–2: fine details · 3–4: medium structures · 5–6: broad contrast. Each scale doubles in size. Click ? for help.") }
+                    Caption { visible: !root.library.compactProcessing; text: qsTr("Adjustments update automatically after a short pause. Levels 1–2: fine details · 3–4: medium structures · 5–6: broad contrast. Each scale doubles in size. Hover the help icon for an explanation.") }
                     ColumnLayout {
                         enabled: root.controller.hasResult && (!root.controlsBusy || root.controller.adjusting)
                         Layout.fillWidth: true

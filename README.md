@@ -30,7 +30,7 @@ La **Celestron NexImage 5** est le matériel de référence : capteur MT9P031, 2
 
 ## Accélération Apple Silicon
 
-La version 1.0.1 utilise automatiquement **Metal** pour les réglages de ciel
+Depuis la version 1.0.1, AstroCapture utilise automatiquement **Metal** pour les réglages de ciel
 profond à partir de 1 MP et pour les ondelettes actives à partir de 0,26 MP.
 L’étirement classique ou asinh, les gains couleur, la saturation, le lissage et
 les six échelles d’ondelettes conservent des pixels **RGB flottants 32 bits**.
@@ -294,3 +294,7 @@ dépendances astronomiques avec `brew install cfitsio libraw`, puis utilisez les
 préréglages CMake indiqués dans CONTRIBUTING.md. Les bibliothèques requises et
 leurs notices sont intégrées au paquet macOS ; elles ne doivent pas être
 installées séparément pour utiliser le DMG.
+
+Le numéro de version est visible dans le titre de la fenêtre et les paramètres.
+Le bouton **Signaler un bug** prépare un e-mail vers antoninlefevre45@gmail.com
+avec la version et les étapes de reproduction, à relire avant envoi.

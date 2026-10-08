@@ -48,6 +48,8 @@ public:
     Q_INVOKABLE void recordExport(const QUrl& url);
     Q_INVOKABLE void rememberImage(const QUrl& url);
     Q_INVOKABLE void importImages(const QList<QUrl>& urls);
+    Q_INVOKABLE QUrl bugReportUrl() const;
+    Q_INVOKABLE void reportBug();
     Q_INVOKABLE void refresh();
     Q_INVOKABLE void removeImage(const QUrl& url);
     Q_INVOKABLE void openImage(const QUrl& url);

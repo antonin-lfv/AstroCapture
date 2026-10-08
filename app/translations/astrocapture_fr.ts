@@ -1097,7 +1097,9 @@ L’aperçu est automatiquement éclairci ; les données restent linéaires.</tr
             <source>Keeps up to 500 image paths locally. Images stay in their original folders. Turning this off keeps existing entries and still allows manual imports.</source>
             <translation>Conserve jusqu’à 500 chemins d’images localement. Les fichiers restent dans leur dossier d’origine. Désactiver cette option conserve les entrées existantes et permet toujours l’ajout manuel.</translation>
         </message>
-    </context>
+    <message><source>Report a problem by email. You can review the message before sending it.</source><translation>Signalez un problème par e-mail. Vous pouvez relire le message avant de l’envoyer.</translation></message>
+<message><source>Report a bug</source><translation>Signaler un bug</translation></message>
+</context>
     <context>
         <name>GuideWorkspace</name>
         <message>
@@ -2976,7 +2978,23 @@ Télescope · caméra · accessoires</translation>
             <source>Could not open the image folder.</source>
             <translation>Impossible d’ouvrir le dossier de l’image.</translation>
         </message>
-    </context>
+    <message><source>Version: %1
+
+Steps to reproduce:
+
+Expected result:
+
+Actual result:
+</source><translation>Version : %1
+
+Étapes pour reproduire :
+
+Résultat attendu :
+
+Résultat obtenu :
+</translation></message>
+<message><source>Could not open your email application. Contact antoninlefevre45@gmail.com.</source><translation>Impossible d’ouvrir votre application de messagerie. Contactez antoninlefevre45@gmail.com.</translation></message>
+</context>
     <context>
         <name>astro::app::DeepSkyController</name>
         <message>

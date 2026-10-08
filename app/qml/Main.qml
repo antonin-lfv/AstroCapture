@@ -14,7 +14,7 @@ ApplicationWindow {
     minimumWidth: 720
     minimumHeight: 480
     visible: true
-    title: "AstroCapture"
+    title: "AstroCapture" + (Qt.application.version ? " · " + Qt.application.version : "")
     color: "#0b0d10"
 
     property string currentTab: "capture"

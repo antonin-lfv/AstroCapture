@@ -1,4 +1,5 @@
 #include <QCoreApplication>
+#include <QUrlQuery>
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
@@ -25,6 +26,12 @@ int main(int argc, char** argv) {
     const QUrl suggestion = QUrl::fromLocalFile(temp.filePath("video-processed.tif"));
     astro::app::AppLibrary library;
     ASTRO_TEST_CHECK(library.language() == "en" && library.historyEnabled() && library.images().isEmpty());
+    QCoreApplication::setApplicationVersion("1.0.2");
+    const QUrl report = library.bugReportUrl();
+    ASTRO_TEST_CHECK(report.scheme() == "mailto" && report.path() == "antoninlefevre45@gmail.com");
+    const QUrlQuery reportQuery(QUrl::fromEncoded(report.toEncoded()));
+    ASTRO_TEST_CHECK(reportQuery.queryItemValue("subject", QUrl::FullyDecoded).contains("1.0.2"));
+    ASTRO_TEST_CHECK(reportQuery.queryItemValue("body", QUrl::FullyDecoded).contains("\n\nSteps to reproduce:"));
     library.chooseExportDirectory(QUrl::fromLocalFile(folder));
     ASTRO_TEST_CHECK(library.suggestedExport(suggestion).toLocalFile() == folder + "/video-processed.tif");
     ASTRO_TEST_CHECK(library.exportFolderFor(suggestion).toLocalFile() == folder);

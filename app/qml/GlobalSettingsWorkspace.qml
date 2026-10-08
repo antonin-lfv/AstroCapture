@@ -50,6 +50,11 @@ Rectangle {
             Label { text: qsTr("Application settings"); color: "#eef3fa"; font.pixelSize: 24 }
             Description { text: qsTr("Saved locally and kept when you update the application.") }
             Card {
+                Heading { text: "AstroCapture · " + Qt.application.version }
+                Description { text: qsTr("Report a problem by email. You can review the message before sending it.") }
+                IconButton { text: qsTr("Report a bug"); onClicked: root.library.reportBug() }
+            }
+            Card {
                 RowLayout {
                     Layout.fillWidth: true
                     Heading { text: qsTr("Language") }

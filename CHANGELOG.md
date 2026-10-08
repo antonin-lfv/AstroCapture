@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.2 — 2026-10-08
+
+- Show the application version in the window title and settings.
+- Add an email bug report button with the version and reproduction template.
+
+
 ## 1.0.1 — 2026-10-08
 
 - Accelerate large-image deep-sky stretching, color, saturation and Gaussian

@@ -1,6 +1,8 @@
 #include "AppLibrary.hpp"
 #include "ProcessingSettings.hpp"
 
+#include <QCoreApplication>
+#include <QUrlQuery>
 #include <QDateTime>
 #include <QDesktopServices>
 #include <QDir>
@@ -19,6 +21,20 @@ bool isSupportedImage(const QString& path) {
     return suffix == "tif" || suffix == "tiff" || suffix == "png" || suffix == "jpg" || suffix == "jpeg";
 }
 constexpr int historyLimit = 500;
+}
+QUrl AppLibrary::bugReportUrl() const {
+    QUrl url(QStringLiteral("mailto:antoninlefevre45@gmail.com"));
+    QUrlQuery query;
+    query.addQueryItem(QStringLiteral("subject"), QStringLiteral("AstroCapture %1 — Bug report").arg(QCoreApplication::applicationVersion()));
+    query.addQueryItem(QStringLiteral("body"), tr("Version: %1\n\nSteps to reproduce:\n\nExpected result:\n\nActual result:\n").arg(QCoreApplication::applicationVersion()));
+    url.setQuery(query);
+    return url;
+}
+void AppLibrary::reportBug() {
+    if (!QDesktopServices::openUrl(bugReportUrl())) {
+        status_ = tr("Could not open your email application. Contact antoninlefevre45@gmail.com.");
+        emit changed();
+    }
 }
 AppLibrary::AppLibrary(QObject* parent) : QObject(parent) {
     QSettings settings;

@@ -2,6 +2,9 @@
 
 ## 1.0.3 — 2026-10-08
 
+- Add a bilingual guide topic for evaluating processing quality and update the
+  explanation of project finishing restoration.
+
 - Restore saved deep-sky finishing controls and automatically reapply them after
   recreating the stack, including when live preview is disabled.
 - Clear pending restoration when clearing a project; suppress automatic preview

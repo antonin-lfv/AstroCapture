@@ -3,6 +3,7 @@ using namespace metal;
 struct FinishParams {
     uint width,height,stretch,useAsinh;
     float black,white,midtones,strength,saturation,denoise,red,green,blue;
+    uint luminanceMode;
 };
 struct WaveletParams {
     uint width,height,step,vertical;
@@ -17,7 +18,7 @@ kernel void finishPixels(device const float* source [[buffer(0)]],device float* 
     if(p.stretch) {
         rgb=clamp((rgb-p.black)/(p.white-p.black),0.f,1.f);
         if(p.useAsinh) {
-            const float maximum=max(max(rgb.r,rgb.g),rgb.b);
+            const float maximum=p.luminanceMode==1?dot(rgb,float3(.2126f,.7152f,.0722f)):p.luminanceMode==2?(rgb.r+rgb.g+rgb.b)/3.f:max(max(rgb.r,rgb.g),rgb.b);
             const float factor=maximum>1e-8f?asinh(p.strength*maximum)/(asinh(p.strength)*maximum):1.f;
             rgb*=factor;
         }else rgb=((p.midtones-1.f)*rgb)/((2.f*p.midtones-1.f)*rgb-p.midtones);

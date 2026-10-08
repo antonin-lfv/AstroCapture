@@ -281,13 +281,14 @@ found:
     if(!ratios.empty())best.fluxScale=std::clamp(double(median(std::move(ratios))),.1,10.);
     return best;
 }
-Integration integrate(int count,const ImageLoader& load,const Calibration& masters,bool calibrated,double sigma,const CheckCancel& check,const Progress& progress,bool normalize) {
+Integration integrate(int count,const ImageLoader& load,const Calibration& masters,bool calibrated,double sigma,const CheckCancel& check,const Progress& progress,bool normalize,const BackgroundOptions* backgroundOptions) {
     if(count<1||count>500)throw std::runtime_error("Select between 1 and 500 light frames per group.");
     if(!std::isfinite(sigma)||sigma<0||sigma>10)throw std::runtime_error("Sigma rejection must be between 0 and 10.");
     Integration result;
     auto raw=load(0);const auto pattern=raw.bayer;const int channels=raw.channels;
     if(!calibrated)raw=calibrate(std::move(raw),masters,check);
     auto reference=linearRgb(raw,check);
+    if(backgroundOptions)reference=extractBackground(reference,*backgroundOptions,check).image;
     std::vector<unsigned char> coverage(std::size_t(reference.width)*reference.height,1);
     std::vector<DiskImage> disk;
     std::array<float,3> background{level(reference,0),level(reference,1),level(reference,2)};
@@ -299,6 +300,7 @@ Integration integrate(int count,const ImageLoader& load,const Calibration& maste
                 throw std::runtime_error("Dimensions or sensor layout differ from the reference.");
             if(!calibrated&&n)data=calibrate(std::move(data),masters,check);
             auto image=n?linearRgb(data,check):reference;
+            if(n&&backgroundOptions){if(progress)progress(n,count,"Background extraction");image=extractBackground(image,*backgroundOptions,check).image;}
             if(n){
                 if(progress)progress(n,count,"Star analysis and registration");
                 const auto alignment=alignStars(reference,image,check);
@@ -349,11 +351,62 @@ Integration integrate(int count,const ImageLoader& load,const Calibration& maste
     }
     return result;
 }
+BackgroundResult extractBackground(const FloatImage& input,const BackgroundOptions& options,const CheckCancel& check) {
+    if(input.width<2||input.height<2||std::uint64_t(input.width)*input.height>32000000||input.rgb.size()!=std::size_t(input.width)*input.height*3)
+        throw std::runtime_error("Invalid background image dimensions.");
+    if(options.degree<1||options.degree>4||options.samplesPerLine<2||options.samplesPerLine>50||!std::isfinite(options.tolerance)||options.tolerance<0||options.tolerance>10||options.samples.size()>2500)
+        throw std::runtime_error("Invalid background sampling settings.");
+    const int terms=(options.degree+1)*(options.degree+2)/2;
+    auto basis=[&](double x,double y){std::vector<double> out; x=2*x-1;y=2*y-1;for(int d=0;d<=options.degree;++d)for(int k=0;k<=d;++k)out.push_back(std::pow(x,k)*std::pow(y,d-k));return out;};
+    std::vector<std::array<double,2>> points=options.samples;
+    if(points.empty())for(int y=0;y<options.samplesPerLine;++y)for(int x=0;x<options.samplesPerLine;++x)points.push_back({(x+.5)/options.samplesPerLine,(y+.5)/options.samplesPerLine});
+    std::array<std::vector<float>,3> values;
+    for(const auto& point:points){
+        checked(check);if(!std::isfinite(point[0])||!std::isfinite(point[1])||point[0]<0||point[0]>1||point[1]<0||point[1]>1)throw std::runtime_error("Background samples must lie inside the image.");
+        const int cx=std::min(input.width-1,int(point[0]*input.width)),cy=std::min(input.height-1,int(point[1]*input.height));
+        const int radius=std::max(1,std::min({12,input.width/(options.samplesPerLine*4),input.height/(options.samplesPerLine*4)}));
+        std::array<std::vector<float>,3> patch;
+        for(int y=std::max(0,cy-radius);y<=std::min(input.height-1,cy+radius);++y)for(int x=std::max(0,cx-radius);x<=std::min(input.width-1,cx+radius);++x)for(int c=0;c<3;++c){float v=input.rgb[(std::size_t(y)*input.width+x)*3+c];if(std::isfinite(v))patch[c].push_back(v);}
+        for(int c=0;c<3;++c){if(patch[c].empty())throw std::runtime_error("A background sample contains no finite pixels.");values[c].push_back(median(std::move(patch[c])));}
+    }
+    std::array<float,3> base{},limit{};
+    for(int c=0;c<3;++c){base[c]=median(values[c]);std::vector<float> deviations;for(float v:values[c])deviations.push_back(std::abs(v-base[c]));limit[c]=base[c]+float(options.tolerance)*std::max(median(std::move(deviations)),1e-8f);}
+    std::vector<int> accepted;
+    for(std::size_t i=0;i<points.size();++i){bool keep=!options.samples.empty();if(!keep){keep=true;for(int c=0;c<3;++c)keep&=values[c][i]<=limit[c];}if(keep)accepted.push_back(int(i));}
+    if(int(accepted.size())<terms)throw std::runtime_error("Not enough background samples for this polynomial degree. Reduce degree or increase tolerance.");
+    cv::Mat a(int(accepted.size()),terms,CV_64F),b(int(accepted.size()),3,CV_64F);
+    for(int n=0;n<int(accepted.size());++n){int i=accepted[n];auto row=basis(points[i][0],points[i][1]);for(int k=0;k<terms;++k)a.at<double>(n,k)=row[k];for(int c=0;c<3;++c)b.at<double>(n,c)=values[c][i];}
+    cv::Mat singular;cv::SVD::compute(a,singular);if(singular.rows<terms||singular.at<double>(terms-1)<singular.at<double>(0)*1e-10)throw std::runtime_error("Background samples do not constrain the model. Spread samples across the image.");
+    cv::Mat coefficients;if(!cv::solve(a,b,coefficients,cv::DECOMP_SVD))throw std::runtime_error("Cannot fit background model.");
+    BackgroundResult result;result.image=input;result.model={input.width,input.height,std::vector<float>(input.rgb.size())};for(int i:accepted)result.samples.push_back(points[i]);
+    std::vector<std::array<double,5>> xp(input.width),yp(input.height);
+    for(int x=0;x<input.width;++x){xp[x][0]=1;for(int d=1;d<=options.degree;++d)xp[x][d]=xp[x][d-1]*(2*(x+.5)/input.width-1);}
+    for(int y=0;y<input.height;++y){yp[y][0]=1;for(int d=1;d<=options.degree;++d)yp[y][d]=yp[y][d-1]*(2*(y+.5)/input.height-1);}
+    for(int y=0;y<input.height;++y){checked(check);for(int x=0;x<input.width;++x){std::array<double,3> v{};int term=0;for(int d=0;d<=options.degree;++d)for(int k=0;k<=d;++k,++term){const double weight=xp[x][k]*yp[y][d-k];for(int c=0;c<3;++c)v[c]+=weight*coefficients.at<double>(term,c);}for(int c=0;c<3;++c){const auto at=(std::size_t(y)*input.width+x)*3+c;result.model.rgb[at]=float(v[c]);result.image.rgb[at]-=float(v[c]-base[c]);}}}
+    return result;
+}
+FloatImage removeGreen(const FloatImage& input,int method,float amount,bool preserve,const CheckCancel& check) {
+    if(input.width<=0||input.height<=0||std::uint64_t(input.width)*input.height>32000000||input.rgb.size()!=std::size_t(input.width)*input.height*3||method<0||method>3||!std::isfinite(amount)||amount<0||amount>1)throw std::runtime_error("Invalid green noise reduction settings.");
+    FloatImage out=input;
+    // CIE L* preservation, in bounded RGB display space, one row at a time.
+    for(int y=0;y<input.height;++y){checked(check);const auto at=std::size_t(y)*input.width*3;cv::Mat original(1,input.width,CV_32FC3,const_cast<float*>(input.rgb.data()+at)),corrected(1,input.width,CV_32FC3,out.rgb.data()+at);
+        for(int x=0;x<input.width;++x){auto* p=out.rgb.data()+at+x*3;for(int c=0;c<3;++c)if(!std::isfinite(p[c])||p[c]<0||p[c]>1)throw std::runtime_error("Green reduction requires stretched RGB pixels between 0 and 1.");const float m=method==0?(p[0]+p[2])*.5f:method==3?std::min(1.f,p[0]+p[2]):std::max(p[0],p[2]);p[1]=method<2?std::min(p[1],m):p[1]*((1-amount)*(1-m)+m);}
+        if(preserve){cv::Mat before,after;cv::cvtColor(original,before,cv::COLOR_RGB2Lab);cv::cvtColor(corrected,after,cv::COLOR_RGB2Lab);for(int x=0;x<input.width;++x)after.at<cv::Vec3f>(0,x)[0]=before.at<cv::Vec3f>(0,x)[0];cv::cvtColor(after,corrected,cv::COLOR_Lab2RGB);}
+    }
+    return out;
+}
+FloatImage orientImage(const FloatImage& input,int turns,bool horizontal,bool vertical,const CheckCancel& check) {
+    if(input.width<=0||input.height<=0||std::uint64_t(input.width)*input.height>32000000||input.rgb.size()!=std::size_t(input.width)*input.height*3||turns<0||turns>3)throw std::runtime_error("Invalid image orientation.");
+    FloatImage output;output.width=turns%2?input.height:input.width;output.height=turns%2?input.width:input.height;output.rgb.resize(input.rgb.size());
+    for(int y=0;y<input.height;++y){checked(check);for(int x=0;x<input.width;++x){int tx=x,ty=y;if(turns==1){tx=input.height-1-y;ty=x;}else if(turns==2){tx=input.width-1-x;ty=input.height-1-y;}else if(turns==3){tx=y;ty=input.width-1-x;}if(horizontal)tx=output.width-1-tx;if(vertical)ty=output.height-1-ty;for(int c=0;c<3;++c)output.rgb[(std::size_t(ty)*output.width+tx)*3+c]=input.rgb[(std::size_t(y)*input.width+x)*3+c];}}
+    return output;
+}
 FloatImage finishDeepSky(const FloatImage& input,const Finish& options,const CheckCancel& check,ComputeReport* report,const PreviewTarget* preview) {
     if(input.width<=0 || input.height<=0 || std::uint64_t(input.width)*input.height>32000000 || input.rgb.size()!=std::size_t(input.width)*input.height*3)
         throw std::runtime_error("Invalid processing image dimensions.");
     if(!std::isfinite(options.white)||!std::isfinite(options.black)||!std::isfinite(options.midtones)||!(options.white>options.black)||options.midtones<=0||options.midtones>=1)
         throw std::runtime_error("White must exceed black; midtones must be between 0 and 1.");
+    if(options.asinhLuminance<0||options.asinhLuminance>2)throw std::runtime_error("Invalid asinh luminance mode.");
     if(!std::isfinite(options.asinhStrength)||options.asinhStrength<1||options.asinhStrength>1000||!std::isfinite(options.saturation)||options.saturation<0||options.saturation>3)
         throw std::runtime_error("Invalid asinh or saturation settings.");
     if(!std::isfinite(options.denoise)||std::any_of(options.color.begin(),options.color.end(),[](float v){return !std::isfinite(v);}))
@@ -370,24 +423,7 @@ FloatImage finishDeepSky(const FloatImage& input,const Finish& options,const Che
     if(!options.background)if(auto out=accelerate(input))return std::move(*out);
     FloatImage image=input;
     if(options.background) {
-        // Robust planar fit to tile medians. Exclude the brightest tiles;
-        // subtraction preserves the median background instead of clipping it.
-        std::vector<cv::Vec3d> coords;std::array<std::vector<float>,3> medians;
-        for(int ty=0;ty<8;++ty)for(int tx=0;tx<8;++tx) {
-            checked(check);std::array<std::vector<float>,3> samples;
-            const int left=tx*input.width/8,right=(tx+1)*input.width/8,top=ty*input.height/8,bottom=(ty+1)*input.height/8;
-            for(int y=top;y<bottom;y+=std::max(1,(bottom-top)/24))for(int x=left;x<right;x+=std::max(1,(right-left)/24))for(int c=0;c<3;++c)samples[c].push_back(input.rgb[(std::size_t(y)*input.width+x)*3+c]);
-            if(samples[0].empty())continue;
-            coords.emplace_back((left+right)*.5/input.width,(top+bottom)*.5/input.height,1);
-            for(int c=0;c<3;++c)medians[c].push_back(median(std::move(samples[c])));
-        }
-        for(int c=0;c<3;++c) {
-            const auto base=median(medians[c]);std::vector<float> sorted=medians[c];std::sort(sorted.begin(),sorted.end());const auto cutoff=sorted[sorted.size()*3/4];
-            cv::Mat a(int(coords.size()),3,CV_64F),b(int(coords.size()),1,CV_64F);int n=0;
-            for(std::size_t i=0;i<coords.size();++i)if(medians[c][i]<=cutoff){for(int k=0;k<3;++k)a.at<double>(n,k)=coords[i][k];b.at<double>(n++,0)=medians[c][i];}
-            cv::Mat coeff;if(n<3||!cv::solve(a.rowRange(0,n),b.rowRange(0,n),coeff,cv::DECOMP_SVD))continue;
-            for(int y=0;y<image.height;++y){checked(check);for(int x=0;x<image.width;++x)image.rgb[(std::size_t(y)*image.width+x)*3+c]-=float(coeff.at<double>(0)*x/image.width+coeff.at<double>(1)*y/image.height+coeff.at<double>(2)-base);}
-        }
+        image=extractBackground(input,options.backgroundOptions,check).image;
     }
     if(options.background)if(auto out=accelerate(image))return std::move(*out);
     for(int y=0;y<image.height;++y) {
@@ -400,7 +436,7 @@ FloatImage finishDeepSky(const FloatImage& input,const Finish& options,const Che
             }
             if(options.stretch) {
                 if(options.asinh) {
-                    const float maximum=std::max({pixel[0],pixel[1],pixel[2]});
+                    const float maximum=options.asinhLuminance==1?.2126f*pixel[0]+.7152f*pixel[1]+.0722f*pixel[2]:options.asinhLuminance==2?(pixel[0]+pixel[1]+pixel[2])/3:std::max({pixel[0],pixel[1],pixel[2]});
                     const float factor=maximum>1e-8f?std::asinh(options.asinhStrength*maximum)/(std::asinh(options.asinhStrength)*maximum):1;
                     for(int c=0;c<3;++c)pixel[c]*=factor;
                 }else for(int c=0;c<3;++c) {

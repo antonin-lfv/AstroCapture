@@ -24,6 +24,16 @@ struct StarAlignment {
     double fluxScale{1};
 };
 StarAlignment alignStars(const FloatImage& reference,const FloatImage& source,const CheckCancel& = {});
+struct BackgroundOptions {
+    int degree{1}, samplesPerLine{20};
+    double tolerance{1};
+    // Normalized image coordinates; empty means automatic generation.
+    std::vector<std::array<double,2>> samples;
+};
+struct BackgroundResult { FloatImage image, model; std::vector<std::array<double,2>> samples; };
+BackgroundResult extractBackground(const FloatImage&,const BackgroundOptions&,const CheckCancel& = {});
+FloatImage removeGreen(const FloatImage&,int method=0,float amount=1,bool preserveLightness=true,const CheckCancel& = {});
+FloatImage orientImage(const FloatImage&,int quarterTurns,bool mirrorHorizontal,bool mirrorVertical,const CheckCancel& = {});
 struct Integration {
     FloatImage image;
     std::vector<int> accepted, rejected;
@@ -32,15 +42,17 @@ struct Integration {
     double totalExposure{};
 };
 Integration integrate(int count,const ImageLoader&,const Calibration&,bool calibrated,double sigma,
-                      const CheckCancel& = {},const Progress& = {},bool normalize=true);
+                      const CheckCancel& = {},const Progress& = {},bool normalize=true,const BackgroundOptions* background=nullptr);
 struct Finish {
     bool background{};
+    BackgroundOptions backgroundOptions;
     bool stretch{true};
     float black{0},white{1},midtones{0.15f};
     std::array<float,3> color{1,1,1};
     float denoise{};
     bool asinh{};
     float asinhStrength{20},saturation{1};
+    int asinhLuminance{}; // 0: maximum (legacy), 1: human weighted, 2: mean
     ComputePreference compute{ComputePreference::Auto};
 };
 FloatImage finishDeepSky(const FloatImage&,const Finish&,const CheckCancel& = {},ComputeReport* = nullptr,const PreviewTarget* preview = nullptr);

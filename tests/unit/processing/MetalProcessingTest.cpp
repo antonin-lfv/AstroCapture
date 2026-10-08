@@ -41,6 +41,7 @@ int main(){
         options.compute=ComputePreference::Metal;const auto metal=finishDeepSky(image,options,{},&report);
         ASTRO_TEST_CHECK(report.backend==(gpu?ComputeBackend::Metal:ComputeBackend::Cpu));equal(cpu,metal);
     }
+    for(int luminance=0;luminance<3;++luminance){options.asinhLuminance=luminance;options.asinh=true;options.asinhStrength=1000;options.compute=ComputePreference::Cpu;const auto cpu=finishDeepSky(image,options);options.compute=ComputePreference::Metal;equal(cpu,finishDeepSky(image,options));}options.asinhLuminance=0;options.asinhStrength=20;
     options.background=true;options.compute=ComputePreference::Cpu;const auto gradient=finishDeepSky(image,options);options.compute=ComputePreference::Metal;equal(gradient,finishDeepSky(image,options,{},&report));
     for(const auto size:std::array<std::array<int,2>,4>{{{1,1},{1,9},{9,1},{3,5}}}) {
         auto tiny=fixture(size[0],size[1]);options.background=false;options.compute=ComputePreference::Cpu;const auto cpu=finishDeepSky(tiny,options);options.compute=ComputePreference::Metal;equal(cpu,finishDeepSky(tiny,options));

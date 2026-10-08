@@ -29,5 +29,13 @@ int main(int argc,char** argv){
     for(int n=0;n<120;++n){next=initial;next["saturation"]=n/100.;edits.applyValues(next);}
     int count=0;while(edits.canUndo()){edits.undo();++count;}ASTRO_TEST_CHECK(count==100);
     edits.redo();next=initial;next["saturation"]=2.8;edits.applyValues(next);ASTRO_TEST_CHECK(!edits.canRedo());
+    auto legacy=initial;for(const auto& key:QStringList{"asinhLuminance","operations","scnr","scnrMethod","scnrAmount","scnrPreserve","backgroundPoints","backgroundDegree","backgroundSamples","backgroundTolerance","rotation","mirrorHorizontal","mirrorVertical"})legacy.remove(key);
+    ASTRO_TEST_CHECK(checkedDeepSkySettings(legacy));
+    auto node=initial;node.remove("operations");node["stretch"]=false;node["background"]=true;
+    auto recipe=initial;recipe["operations"]=QVariantList{QVariantMap{{"name",QString("Gradient")},{"enabled",true},{"settings",node}}};
+    ASTRO_TEST_CHECK(edits.applyValues(recipe));edits.undo();edits.redo();ASTRO_TEST_CHECK(edits.values()["operations"].toList().size()==1);
+    invalid=initial;invalid["backgroundDegree"]=2.5;ASTRO_TEST_CHECK(!checkedDeepSkySettings(invalid));
+    invalid=initial;invalid["backgroundPoints"]=QVariantList{QVariantList{1.1,.2}};ASTRO_TEST_CHECK(!checkedDeepSkySettings(invalid));
+    node["operations"]=QVariantList{};recipe["operations"]=QVariantList{QVariantMap{{"name",QString("Nested")},{"enabled",true},{"settings",node}}};ASTRO_TEST_CHECK(!checkedDeepSkySettings(recipe));
     std::cout<<"OK\n";
 }

@@ -1012,6 +1012,226 @@ L’aperçu est automatiquement éclairci ; les données restent linéaires.</tr
 <message><source>Temporarily hide histograms and the image list to inspect A/B. Zoom and framing stay shared.</source><translation>Masquez temporairement les histogrammes et la liste des images pour examiner A/B. Le zoom et le cadrage restent communs.</translation></message>
 <message><source>Normalization, stacking method and rejection threshold.</source><translation>Normalisation, méthode d’empilement et seuil de rejet.</translation></message>
 <message><source>Check the stars, FWHM and reference in the image list before stacking.</source><translation>Vérifiez les étoiles, la FWHM et la référence dans la liste des images avant l’empilement.</translation></message>
+    <message>
+        <source>Asinh luminance</source>
+        <translation>Luminance asinh</translation>
+    </message>
+    <message>
+        <source>Human weighted uses eye sensitivity; mean gives equal weight to RGB; maximum preserves the historical behavior. A shared factor links the channels, but black/white clipping can still alter colors.</source>
+        <translation>Pondération visuelle : sensibilité de l’œil. Moyenne : même poids pour chaque couche. Maximum : comportement historique. Un facteur commun relie les couches, mais l’écrêtage noir/blanc peut modifier les couleurs.</translation>
+    </message>
+    <message>
+        <source>Maximum channel</source>
+        <translation>Couche maximale</translation>
+    </message>
+    <message>
+        <source>Human weighted</source>
+        <translation>Pondération visuelle</translation>
+    </message>
+    <message>
+        <source>RGB mean</source>
+        <translation>Moyenne RGB</translation>
+    </message>
+    <message>
+        <source>Controls the asinh stretch strength. The draft uses either asinh or midtones. Commit a transformation to apply another stretch afterwards.</source>
+        <translation>Intensité de l’asinh. Le brouillon utilise soit asinh, soit les tons moyens. Validez une transformation pour effectuer ensuite un autre étirement.</translation>
+    </message>
+    <message>
+        <source>Stretch</source>
+        <translation>Étirement</translation>
+    </message>
+    <message>
+        <source>Orientation</source>
+        <translation>Orientation</translation>
+    </message>
+    <message>
+        <source>Apply or cancel the transformation edit before saving the project.</source>
+        <translation>Appliquez ou annulez la modification de la transformation avant d’enregistrer le projet.</translation>
+    </message>
+    <message>
+        <source>Gradient before stacking</source>
+        <translation>Gradient avant empilement</translation>
+    </message>
+    <message>
+        <source>Optional degree-1 subtraction after calibration and debayering, before alignment. Each exposure gets its own automatic grid (20 samples per line, tolerance 1). Leave disabled for fields filled with nebulosity.</source>
+        <translation>Soustraction facultative d’ordre 1 après calibration et dématriçage, avant alignement. Chaque pose reçoit sa propre grille automatique : 20 échantillons par ligne, tolérance 1. À désactiver pour les champs remplis de nébulosités.</translation>
+    </message>
+    <message>
+        <source>Correct each calibrated exposure</source>
+        <translation>Corriger chaque pose calibrée</translation>
+    </message>
+    <message>
+        <source>Input histogram and stretch curve</source>
+        <translation>Histogramme d’entrée et courbe d’étirement</translation>
+    </message>
+    <message>
+        <source>Shadow / highlight estimates at the level thresholds, after background correction and gains. These are channel samples, not the fraction of whole pixels lost. Later color operations may also clip.</source>
+        <translation>Estimation aux seuils noir et blanc, après correction du fond et gains couleur. Les pourcentages portent sur les échantillons des couches, pas sur les pixels entiers. Les traitements couleur suivants peuvent aussi écrêter.</translation>
+    </message>
+    <message>
+        <source>Versions A/B and presets</source>
+        <translation>Versions A/B et préréglages</translation>
+    </message>
+    <message>
+        <source>Draft adjustments start from the output of applied transformations, or from the linear stack when history is empty. Live preview can be disabled. Automatic starting point is optional; Reset to linear restores un-stretched pixels and neutral gains.</source>
+        <translation>Le brouillon part du résultat des transformations appliquées, ou de l’empilement linéaire si l’historique est vide. L’aperçu direct peut être désactivé. Le point de départ automatique reste facultatif ; revenir au linéaire réinitialise la recette et les gains.</translation>
+    </message>
+    <message>
+        <source>The optional correction fits a polynomial independently in each color channel. Bright grid samples are rejected using the tolerance. Compare with correction disabled to protect extended nebulosity. Enable sample editing to add or remove points directly on the image.</source>
+        <translation>La correction ajuste un polynôme séparément dans chaque couche. La tolérance écarte les zones trop lumineuses. Comparez sans correction pour protéger les nébulosités étendues. Activez l’édition des échantillons pour ajouter ou retirer des points sur l’image.</translation>
+    </message>
+    <message>
+        <source>Show extracted background model</source>
+        <translation>Afficher le modèle du fond extrait</translation>
+    </message>
+    <message>
+        <source>Displays the fitted background with an automatic display stretch. Export always uses the processed image. Inspect the model for traces of real astronomical objects.</source>
+        <translation>Affiche le fond modélisé avec un étirement d’affichage automatique. L’export utilise le résultat traité. Vérifiez que le modèle ne contient pas de structures de l’objet.</translation>
+    </message>
+    <message>
+        <source>Edit background samples on image</source>
+        <translation>Modifier les échantillons sur l’image</translation>
+    </message>
+    <message>
+        <source>Left click adds a sky sample. Right click removes one. Avoid stars and nebulosity. Rotate and mirror are temporarily unavailable while editing samples.</source>
+        <translation>Clic gauche : ajouter un échantillon de ciel. Clic droit : retirer un point. Évitez étoiles et nébulosités. Rotation et miroirs sont désactivés pendant cette édition.</translation>
+    </message>
+    <message>
+        <source>Regenerate automatic samples</source>
+        <translation>Régénérer les échantillons automatiques</translation>
+    </message>
+    <message>
+        <source>Polynomial degree</source>
+        <translation>Ordre du polynôme</translation>
+    </message>
+    <message>
+        <source>Start with degree 1. Higher degrees fit curved gradients but can remove real nebulosity.</source>
+        <translation>Commencez à l’ordre 1. Les ordres supérieurs corrigent les fonds courbes, mais peuvent retirer de vraies nébulosités.</translation>
+    </message>
+    <message>
+        <source>Samples per line</source>
+        <translation>Échantillons par ligne</translation>
+    </message>
+    <message>
+        <source>Density of the automatic background grid. More samples do not guarantee a better model.</source>
+        <translation>Densité de la grille automatique. Davantage d’échantillons ne garantit pas un meilleur modèle.</translation>
+    </message>
+    <message>
+        <source>Grid tolerance</source>
+        <translation>Tolérance de la grille</translation>
+    </message>
+    <message>
+        <source>Reject samples above the median plus this multiple of the median absolute deviation. Increase if too few samples remain.</source>
+        <translation>Rejette les échantillons au-dessus de la médiane augmentée de ce multiple de l’écart absolu médian (MAD). Augmentez si trop peu de points restent.</translation>
+    </message>
+    <message>
+        <source>Rotate clockwise, then mirror the finished image. The original linear integration remains unchanged. Orientation is saved with the project and can be undone.</source>
+        <translation>Rotation horaire, puis miroir de l’image finale. Le FITS linéaire conserve l’intégration source. Ces réglages sont enregistrés dans le projet et peuvent être annulés.</translation>
+    </message>
+    <message>
+        <source>Original orientation</source>
+        <translation>Orientation d’origine</translation>
+    </message>
+    <message>
+        <source>Mirror horizontally</source>
+        <translation>Miroir horizontal</translation>
+    </message>
+    <message>
+        <source>Mirror vertically</source>
+        <translation>Miroir vertical</translation>
+    </message>
+    <message>
+        <source>Green noise reduction</source>
+        <translation>Suppression du bruit vert</translation>
+    </message>
+    <message>
+        <source>Optional SCNR on the stretched image, after background and color balance. Avoid for intentional green colors in comets, planetary nebulae or SHO palettes. This is not photometric calibration.</source>
+        <translation>SCNR facultatif sur l’image étirée, après correction du fond et équilibrage couleur. Préservez les verts intentionnels des comètes, nébuleuses planétaires et palettes SHO. Ce n’est pas un étalonnage photométrique.</translation>
+    </message>
+    <message>
+        <source>Remove green noise</source>
+        <translation>Réduire le vert</translation>
+    </message>
+    <message>
+        <source>Average neutral protection</source>
+        <translation>Protection neutre moyenne</translation>
+    </message>
+    <message>
+        <source>Maximum neutral protection</source>
+        <translation>Protection neutre maximale</translation>
+    </message>
+    <message>
+        <source>Maximum mask protection</source>
+        <translation>Protection par masque maximal</translation>
+    </message>
+    <message>
+        <source>Additive mask protection</source>
+        <translation>Protection par masque additif</translation>
+    </message>
+    <message>
+        <source>Amount · %1</source>
+        <translation>Dosage · %1</translation>
+    </message>
+    <message>
+        <source>Mask methods have an adjustable amount. Neutral methods cap green using red and blue without this parameter.</source>
+        <translation>Le dosage agit sur les méthodes par masque. Les méthodes neutres plafonnent le vert à partir du rouge et du bleu sans utiliser ce réglage.</translation>
+    </message>
+    <message>
+        <source>Preserve CIE lightness</source>
+        <translation>Préserver la luminosité CIE</translation>
+    </message>
+    <message>
+        <source>Apply draft as a transformation</source>
+        <translation>Appliquer le brouillon comme transformation</translation>
+    </message>
+    <message>
+        <source>Commits all current draft adjustments into the ordered history. New adjustments then operate on that result, so stretches can be repeated. Undo restores the previous draft.</source>
+        <translation>Valide tous les réglages du brouillon dans l’historique ordonné. Les réglages suivants agissent sur ce résultat : les étirements peuvent se cumuler. Annuler restaure le brouillon précédent.</translation>
+    </message>
+    <message>
+        <source>Cancel transformation edit</source>
+        <translation>Annuler la modification</translation>
+    </message>
+    <message>
+        <source>Applied transformations · %1</source>
+        <translation>Transformations appliquées · %1</translation>
+    </message>
+    <message>
+        <source>Edit</source>
+        <translation>Modifier</translation>
+    </message>
+    <message>
+        <source>Remove transformation</source>
+        <translation>Supprimer la transformation</translation>
+    </message>
+    <message>
+        <source>The draft is applied after this history. Disable a transformation to compare its effect; downstream transformations are recalculated. Linear FITS still exports the original integration.</source>
+        <translation>Le brouillon s’applique après cette recette. Désactivez une transformation pour comparer ; les suivantes sont recalculées. Le FITS linéaire exporte toujours l’intégration source.</translation>
+    </message>
+    <message>
+        <source>Source image preview · linear display</source>
+        <translation>Aperçu de la source · affichage linéaire</translation>
+    </message>
+    <message>
+        <source>Background model · automatic display stretch</source>
+        <translation>Modèle du fond · étirement d’affichage automatique</translation>
+    </message>
+    <message>
+        <source>Color preview</source>
+        <translation>Aperçu couleur</translation>
+    </message>
+    <message>
+        <source>Debayer the preview when Bayer metadata is available. Calibration always uses the original sensor samples.</source>
+        <translation>Dématrice l’aperçu si le fichier indique une matrice Bayer. La calibration utilise toujours les données originales du capteur.</translation>
+    </message>
+    <message>
+        <source>Auto display stretch</source>
+        <translation>Étirement d’affichage auto</translation>
+    </message>
+    <message>
+        <source>Only changes the source preview. Disable to view linear pixel brightness.</source>
+        <translation>Modifie uniquement l’aperçu de la source. Désactivez pour voir la luminosité linéaire des pixels.</translation>
+    </message>
 </context>
     <context>
         <name>GlobalSettingsWorkspace</name>
@@ -1625,6 +1845,22 @@ L’aperçu est automatiquement éclairci ; les données restent linéaires.</tr
 <message><source>Stacking can improve signal-to-noise ratio. Stretching makes existing signal visible, and sharpening can amplify both detail and noise. No single sharpness score proves that a finished image is good. Keep the originals and the linear FITS so you can revisit your choices.</source><translation>L’empilement peut améliorer le rapport signal/bruit. L’étirement rend visible le signal existant, et l’accentuation peut amplifier les détails comme le bruit. Aucun score de netteté ne prouve à lui seul la qualité d’une image finale. Conservez les originaux et le FITS linéaire pour pouvoir reprendre vos choix.</translation></message>
 <message><source>Presets, undo and versions A/B</source><translation>Préréglages, annulation et versions A/B</translation></message>
 <message><source>In Finish and export, load or manage your named finishing presets. Save with a new name to duplicate a preset; Replace updates an existing name. Presets contain stretch, levels, color, background and smoothing, but no calibration files or channel composition. Check the histogram because absolute levels depend on the data. Undo and Redo operate separately in A and B; a slider drag is one change. Switch versions to compare two finishes on the same linear stack and framing. Enlarge preview temporarily hides histograms and the image list; Show histograms restores them. Copy duplicates settings into the other version. The final export uses the selected, applied version. With live preview off, apply pending settings before export. Projects save both versions and the selected version, but not undo histories. A new stack or channel composition resets both versions and their histories.</source><translation>Dans Finition et export, chargez ou gérez vos préréglages de finition nommés. Un nouveau nom duplique un préréglage ; Remplacer met à jour un nom existant. Les préréglages conservent l’étirement, les niveaux, les couleurs, le fond et le lissage, sans fichiers de calibration ni composition des canaux. Vérifiez l’histogramme : les niveaux absolus dépendent des données. Annuler et Rétablir fonctionnent séparément dans A et B ; un déplacement de curseur compte comme une modification. Basculez entre les versions pour comparer deux finitions du même empilement linéaire et du même cadrage. Agrandir l’aperçu masque temporairement les histogrammes et la liste ; Afficher les histogrammes les rétablit. Copier duplique les réglages dans l’autre version. L’export final utilise la version sélectionnée et appliquée. Sans aperçu automatique, appliquez les réglages en attente avant l’export. Les projets conservent les deux versions et la version sélectionnée, mais pas les historiques d’annulation. Un nouvel empilement ou une nouvelle composition des canaux réinitialise les deux versions et leurs historiques.</translation></message>
+    <message>
+        <source>Use the Deep sky workspace for FITS or Bayer RAW sequences. The source samples remain linear. Color preview debayers Bayer sensor data; Auto display stretch only changes their visibility. Disable these options to inspect the raw mosaic or linear brightness. Calibration always reads the original file.</source>
+        <translation>Utilisez Ciel profond pour les séquences FITS ou RAW Bayer. Les données sources restent linéaires. Aperçu couleur dématrice le capteur ; l’étirement d’affichage ne change que leur visibilité. Désactivez ces options pour inspecter la mosaïque brute ou la luminosité linéaire. La calibration lit toujours le fichier original.</translation>
+    </message>
+    <message>
+        <source>Transformation workshop</source>
+        <translation>Atelier de transformations</translation>
+    </message>
+    <message>
+        <source>Select Stretch, Background, Color and noise, or Orientation. Controls preview a draft. Apply draft as a transformation commits the complete draft, then resets controls so further adjustments operate on its output. Repeat stretches if needed. The ordered list lets you edit, disable, move up or remove transformations. During editing, Apply replaces the selected transformation and recalculates later ones; Cancel restores the complete previous recipe. Undo and redo also restore operations. Projects and presets retain recipes, not full image copies for each history step. Linear FITS always exports the original integration.</source>
+        <translation>Choisissez Étirement, Fond de ciel, Couleur et bruit, ou Orientation. Les réglages prévisualisent un brouillon. Appliquer le brouillon comme transformation le valide et réinitialise les commandes ; les réglages suivants agissent sur son résultat. Vous pouvez cumuler les étirements. La liste permet de modifier, désactiver, remonter ou supprimer une transformation. Pendant l’édition, Appliquer remplace la transformation puis recalcule les suivantes ; Annuler restaure la recette précédente. Les projets et préréglages conservent les recettes ; l’historique n’accumule pas les copies d’images. Le FITS linéaire exporte l’intégration source.</translation>
+    </message>
+    <message>
+        <source>Combine multiple filters as RGB, LRGB, SHO or HOO. Adjust color gains, saturation and smoothing manually. The initial gains estimate a neutral background; they are not photometric calibration. Gradient extraction uses independent color-channel polynomials (degrees 1 to 4), a configurable grid and manually editable sky samples. Optional degree-1 extraction can run on each calibrated, debayered exposure before stacking. Avoid fitting real nebulosity. Green noise reduction offers four SCNR protection methods and optional CIE lightness preservation. Use it after stretching and color balance; intentional green colors should be preserved. Photometric calibration, GHS and deconvolution are not available yet. Export linear 32-bit FITS for further work, or the finished 16-bit TIFF or JPEG. Image finale offers TIFF or JPEG. Details and caption transfers the finished result to Processing with the accepted exposure count, total exposure time and filters for the technical caption.</source>
+        <translation>Composez les filtres en RGB, LRGB, SHO ou HOO. Réglez les gains, la saturation et le lissage. Les gains initiaux estiment un fond neutre : ce n’est pas un étalonnage photométrique. Le gradient utilise des polynômes par couche, d’ordre 1 à 4, une grille réglable et des échantillons modifiables. Une correction facultative d’ordre 1 peut traiter chaque pose calibrée et dématricée avant empilement. Protégez les vraies nébulosités. Le SCNR offre quatre protections et la préservation CIE de luminosité ; utilisez-le après étirement et équilibrage, en préservant les verts intentionnels. Photométrie, GHS et déconvolution restent à ajouter. Exportez le FITS linéaire 32 bits, ou l’image finale en TIFF 16 bits ou JPEG. Détails et légende transmet les poses retenues, leur durée totale et les filtres au traitement.</translation>
+    </message>
 </context>
     <context>
         <name>HistoryWorkspace</name>
@@ -3227,6 +3463,22 @@ Résultat obtenu :
             <translation>Ciel profond · %1 poses · %2 s au total · filtres : %3</translation>
         </message>
     <message><source>Invalid finishing settings. Check levels and parameter ranges.</source><translation>Réglages de finition invalides. Vérifiez les niveaux et les plages des paramètres.</translation></message>
+    <message>
+        <source>RGB source · three channels</source>
+        <translation>Source RGB · trois couches</translation>
+    </message>
+    <message>
+        <source>Bayer %1 source · color preview is debayered</source>
+        <translation>Source Bayer %1 · aperçu couleur dématricé</translation>
+    </message>
+    <message>
+        <source>Monochrome source · one channel</source>
+        <translation>Source monochrome · une couche</translation>
+    </message>
+    <message>
+        <source>Bayer %1 source · raw mosaic preview</source>
+        <translation>Source Bayer %1 · aperçu de la mosaïque brute</translation>
+    </message>
 </context>
     <context>
         <name>astro::app::MosaicController</name>

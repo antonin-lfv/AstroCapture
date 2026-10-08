@@ -57,6 +57,27 @@ int main(){
     const auto saturated=processing::finishDeepSky(colors,asinh);
     ASTRO_TEST_CHECK(saturated.rgb[0]>colors.rgb[0]&&saturated.rgb[3]==colors.rgb[3]);
     finish.stretch=false;finish.background=true;const auto corrected=processing::finishDeepSky(ar,finish);ASTRO_TEST_CHECK(corrected.width==ar.width);for(auto v:corrected.rgb)ASTRO_TEST_CHECK(std::isfinite(v));
+    // Recover independently curved backgrounds without clipping linear values.
+    processing::FloatImage gradient{96,80,std::vector<float>(96*80*3)};
+    for(int y=0;y<80;++y)for(int x=0;x<96;++x)for(int c=0;c<3;++c){double nx=(x+.5)/96.,ny=(y+.5)/80.;gradient.rgb[(y*96+x)*3+c]=float(.1+.02*(c+1)*nx+.03*ny*ny);}
+    processing::BackgroundOptions bg;bg.degree=2;bg.samplesPerLine=8;bg.tolerance=10;
+    for(int y=0;y<8;++y)for(int x=0;x<8;++x)bg.samples.push_back({(x+.5)/8.,(y+.5)/8.});
+    const auto extraction=processing::extractBackground(gradient,bg);
+    for(int c=0;c<3;++c){float low=1,high=-1;for(std::size_t i=c;i<extraction.image.rgb.size();i+=3){low=std::min(low,extraction.image.rgb[i]);high=std::max(high,extraction.image.rgb[i]);}ASTRO_TEST_CHECK(high-low<.001);}
+    bg.samples={{.1,.1},{.2,.2},{.3,.3},{.4,.4},{.5,.5},{.6,.6}};refused=false;try{processing::extractBackground(gradient,bg);}catch(const std::exception&){refused=true;}ASTRO_TEST_CHECK(refused);
+    processing::FloatImage grid{3,2,{1,1,1,2,2,2,3,3,3,4,4,4,5,5,5,6,6,6}};
+    const auto quarter=processing::orientImage(grid,1,false,false);ASTRO_TEST_CHECK(quarter.width==2&&quarter.height==3&&quarter.rgb[0]==4&&quarter.rgb[3]==1);
+    ASTRO_TEST_CHECK(processing::orientImage(quarter,3,false,false).rgb==grid.rgb);
+    ASTRO_TEST_CHECK(processing::orientImage(processing::orientImage(grid,0,true,true),0,true,true).rgb==grid.rgb);
+    processing::FloatImage green{1,1,{.2f,.8f,.4f}};
+    const auto neutral=processing::removeGreen(green,0,1,false);ASTRO_TEST_CHECK(std::abs(neutral.rgb[1]-.3)<1e-6&&neutral.rgb[0]==.2f&&neutral.rgb[2]==.4f);
+    auto lightness=[](const std::vector<float>& rgb){auto linear=[](double v){return v<=.04045?v/12.92:std::pow((v+.055)/1.055,2.4);};const double y=.2126*linear(rgb[0])+.7152*linear(rgb[1])+.0722*linear(rgb[2]);return 116*(y>.008856?std::cbrt(y):7.787*y+16./116)-16;};
+    processing::FloatImage gentle{1,1,{.3f,.4f,.35f}};const auto preserved=processing::removeGreen(gentle,0,1,true);ASTRO_TEST_CHECK(std::abs(lightness(gentle.rgb)-lightness(preserved.rgb))<.2);
+    const auto noMask=processing::removeGreen(green,2,0,false);ASTRO_TEST_CHECK(noMask.rgb==green.rgb);
+    const auto maxNeutral=processing::removeGreen(green,1,1,false);ASTRO_TEST_CHECK(maxNeutral.rgb[1]==.4f);
+    refused=false;auto hdr=green;hdr.rgb[0]=2;try{processing::removeGreen(hdr);}catch(const std::exception&){refused=true;}ASTRO_TEST_CHECK(refused);
+    processing::BackgroundOptions sequenceBg;
+    const auto bgStack=processing::integrate(2,[&](int n){return frames[n];},{},true,3,{}, {},true,&sequenceBg);ASTRO_TEST_CHECK(bgStack.accepted.size()==2);
     const auto combined=processing::combineChannels(ar,br,ar);ASTRO_TEST_CHECK(combined.width>200&&combined.height>180);for(auto v:combined.rgb)ASTRO_TEST_CHECK(std::isfinite(v));
     int checks=0;refused=false;try{processing::integrate(5,[&](int n){return frames[n];},{},true,3,[&]{if(++checks>3)throw std::logic_error("cancel");});}catch(const std::logic_error&){refused=true;}ASTRO_TEST_CHECK(refused);
     std::cout<<"OK\n";

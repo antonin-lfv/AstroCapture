@@ -12,6 +12,12 @@ namespace astro::app {
 class DeepSkyController : public QObject {
     Q_OBJECT
     QML_ELEMENT
+    Q_PROPERTY(bool showingBackgroundModel READ showingBackgroundModel WRITE setShowingBackgroundModel NOTIFY changed)
+    Q_PROPERTY(bool hasBackgroundModel READ hasBackgroundModel NOTIFY changed)
+    Q_PROPERTY(QString sourceInterpretation READ sourceInterpretation NOTIFY changed)
+    Q_PROPERTY(bool sourceDebayer READ sourceDebayer WRITE setSourceDebayer NOTIFY changed)
+    Q_PROPERTY(bool sourceAutoStretch READ sourceAutoStretch WRITE setSourceAutoStretch NOTIFY changed)
+    Q_PROPERTY(QVariantList backgroundSamples READ backgroundSamples NOTIFY changed)
     Q_PROPERTY(bool busy READ busy NOTIFY changed)
     Q_PROPERTY(bool adjusting READ adjusting NOTIFY changed)
     Q_PROPERTY(bool hasRawComparison READ hasRawComparison NOTIFY changed)
@@ -33,6 +39,15 @@ class DeepSkyController : public QObject {
 public:
     explicit DeepSkyController(QObject* parent=nullptr):QObject(parent){}
     ~DeepSkyController() override;
+    bool showingBackgroundModel() const{return showingBackgroundModel_;}
+    bool hasBackgroundModel() const{return !backgroundPreview_.isNull();}
+    void setShowingBackgroundModel(bool);
+    QString sourceInterpretation() const{return sourceInterpretation_;}
+    bool sourceDebayer() const{return sourceDebayer_;}
+    bool sourceAutoStretch() const{return sourceAutoStretch_;}
+    void setSourceDebayer(bool);
+    void setSourceAutoStretch(bool);
+    QVariantList backgroundSamples() const{return backgroundSamples_;}
     bool busy() const{return busy_;}
     bool adjusting() const{return adjusting_;}
     bool hasRawComparison() const{return !rawPreview_.isNull();}
@@ -64,7 +79,7 @@ public:
     Q_INVOKABLE void restoreResult();
     Q_INVOKABLE void chooseRawComparison(int index);
     Q_INVOKABLE void showRawComparison(bool enabled);
-    Q_INVOKABLE void integrate(bool calibrated,double sigma=3,bool normalize=true,bool correctBadPixels=true);
+    Q_INVOKABLE void integrate(bool calibrated,double sigma=3,bool normalize=true,bool correctBadPixels=true,bool sequenceBackground=false);
     Q_INVOKABLE void setReference(int index);
     Q_INVOKABLE void selectResult(const QString& group);
     Q_INVOKABLE void compose(const QString& red,const QString& green,const QString& blue,const QString& luminance="");
@@ -87,9 +102,11 @@ private:
     void run(const QString&,std::function<void(std::stop_token)>);
     void post(std::function<void()>);
     void show(std::shared_ptr<const processing::FloatImage>,bool result, QImage preview, std::shared_ptr<const processing::FloatImage> displayed, QVariantMap stretch);
-    QVariantList frames_;
+    QVariantList frames_,backgroundSamples_;
     QStringList groups_;
-    QString status_,stage_;
+    QString status_,stage_,sourceInterpretation_;
+    QVariantMap sourceRow_;
+    bool sourceDebayer_{true},sourceAutoStretch_{true};
     std::map<QString,QString> references_;
     int progress_{};
     bool busy_{},adjusting_{};
@@ -97,10 +114,12 @@ private:
     QVariantMap histogram_;
     bool displayingResult_{},comparingRaw_{};
     QString rawName_;
-    QImage preview_,resultPreview_,rawPreview_;
+    QImage preview_,resultPreview_,rawPreview_,backgroundPreview_;
+    bool showingBackgroundModel_{};
     QVariantMap stretch_,projectOptions_,finishSettings_;
     std::map<QString,std::shared_ptr<const processing::FloatImage>> stacks_;
-    std::shared_ptr<const processing::FloatImage> linear_,finished_;
+    std::shared_ptr<const processing::FloatImage> linear_,finished_,pipelineCache_,pipelineSource_;
+    QByteArray pipelineCacheKey_;
     double totalExposure_{};
     int exposureCount_{};
     QStringList resultFilters_;

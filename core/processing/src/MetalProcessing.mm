@@ -47,9 +47,9 @@ struct Context {
     }}
 };
 Context& context(){static Context instance;return instance;}
-struct FinishParams {std::uint32_t width,height,stretch,useAsinh;float black,white,midtones,strength,saturation,denoise,red,green,blue;};
+struct FinishParams {std::uint32_t width,height,stretch,useAsinh;float black,white,midtones,strength,saturation,denoise,red,green,blue;std::uint32_t luminanceMode;};
 struct WaveletParams {std::uint32_t width,height,step,vertical;float gain,denoise,red,green,blue,gamma;};
-static_assert(sizeof(FinishParams)==52&&sizeof(WaveletParams)==40);
+static_assert(sizeof(FinishParams)==56&&sizeof(WaveletParams)==40);
 bool ready(const FloatImage& image,int buffers,int maximumRows,const CheckCancel& check,std::string& reason) {
     checkpoint(check);
     if(disabled()){reason="Metal is disabled by ASTRO_DISABLE_METAL.";return false;}
@@ -114,7 +114,7 @@ bool metalFinish(const FloatImage& image,const Finish& settings,FloatImage& resu
     id<MTLBuffer> previewOutput=preview?allocate(capacity/sizeof(float)):nil;
     if(!input||!output||(smooth&&!scratch)||(preview&&!previewOutput)){reason="Cannot allocate shared Metal buffers.";return false;}
     FloatImage out{image.width,image.height,std::vector<float>(image.rgb.size())};
-    FinishParams p{std::uint32_t(image.width),0,std::uint32_t(settings.stretch),std::uint32_t(settings.asinh),settings.black,settings.white,settings.midtones,settings.asinhStrength,settings.saturation,std::clamp(settings.denoise,0.f,1.f),settings.color[0],settings.color[1],settings.color[2]};
+    FinishParams p{std::uint32_t(image.width),0,std::uint32_t(settings.stretch),std::uint32_t(settings.asinh),settings.black,settings.white,settings.midtones,settings.asinhStrength,settings.saturation,std::clamp(settings.denoise,0.f,1.f),settings.color[0],settings.color[1],settings.color[2],std::uint32_t(settings.asinhLuminance)};
     // Identical 7-tap sigma=.7 Gaussian and REFLECT_101 borders as the CPU.
     float weights[7];double sum=0;for(int k=-3;k<=3;++k)sum+=std::exp(-double(k*k)/(2*.7*.7));
     for(int k=-3;k<=3;++k)weights[k+3]=float(std::exp(-double(k*k)/(2*.7*.7))/sum);

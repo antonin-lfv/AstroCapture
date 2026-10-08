@@ -4,9 +4,9 @@
 
 # AstroCapture
 
-**De la caméra au TIFF final, dans une seule application sur Mac.**
+**De la caméra à l’image finale, dans une seule application sur Mac.**
 
-AstroCapture réunit l’acquisition vidéo, la sélection des meilleures images, l’empilement et la finition par ondelettes. Il est conçu pour l’imagerie planétaire, lunaire et solaire, avec une interface disponible en français et en anglais. Les fichiers et les traitements restent sur votre ordinateur.
+AstroCapture réunit la capture vidéo et FITS, le traitement planétaire, la calibration et l’empilement du ciel profond, les transformations de finition, les ondelettes et les mosaïques. Son studio conserve les espaces de travail entre les onglets, avec une interface en français et en anglais. Les fichiers et les traitements restent sur votre ordinateur.
 
 ![Traitement d’une vidéo SER dans AstroCapture](assets/screenshots/processing.png)
 
@@ -94,12 +94,29 @@ cochez **Poses déjà calibrées** uniquement pour des données déjà prétrait
   rejetées ; les images alignées utilisent de l’espace disque temporaire.
 - Composez les couches en **RGB, LRGB, SHO ou HOO**, puis réglez le fond de
   ciel, les gains couleur, les niveaux noir/blanc, les tons moyens ou l’étirement
-  asinh, la saturation avec protection du fond sombre et le lissage
+  asinh (maximum, luminance visuelle ou moyenne RGB), la saturation avec protection du fond sombre et le lissage
   du bruit. L’histogramme RGB/luminance représente l’image affichée. Un second
-  histogramme montre les données linéaires avec les gains couleur courants et
+  histogramme montre l’entrée du brouillon, après la recette et la correction
+  de gradient, avec les gains couleur courants et
   la courbe d’étirement : choisissez Noir, Tons moyens ou Blanc et glissez
   dans le graphique. Le zoom du graphique ne modifie pas les données. Les
   taux de coupure sont estimés par échantillonnage.
+- Les aperçus de sources distinguent matrice **Bayer**, image **RGB** et image
+  **monochrome**. **Aperçu couleur** et **Étirement d’affichage automatique**
+  sont indépendants des données utilisées pour la calibration.
+- L’extraction du gradient ajuste chaque couche séparément : polynôme d’ordre
+  1 à 4, grille de 2 à 50 échantillons par ligne (20 par défaut), tolérance de
+  rejet en unités MAD (1 par défaut). Les échantillons se modifient sur l’image :
+  clic gauche pour ajouter, clic droit pour retirer. Le modèle du fond peut
+  être affiché séparément pour contrôler la correction. Les modèles insuffisamment
+  contraints sont refusés. Une correction d’ordre 1 peut aussi s’appliquer à
+  chaque pose calibrée et dématricée avant alignement ; elle reste facultative.
+- La finition propose rotations de 90°, 180°, 270° et miroirs horizontal/vertical.
+  Les exports finaux les utilisent ; le FITS linéaire garde l’intégration source.
+- La suppression du vert (SCNR) offre quatre protections et la préservation CIE
+  de luminosité. Elle agit sur des valeurs RGB étirées dans [0, 1]. Les méthodes
+  par masque proposent un dosage ; les méthodes neutres n’utilisent pas ce dosage.
+  Préservez les couleurs vertes intentionnelles des comètes, nébuleuses ou palettes SHO.
 - L’aperçu des réglages en direct peut être désactivé. Les demandes successives
   de finition sont regroupées : la dernière position des curseurs est conservée.
   Choisissez une pose dans la liste de comparaison et maintenez **Pose brute**
@@ -107,7 +124,13 @@ cochez **Poses déjà calibrées** uniquement pour des données déjà prétrait
   et son cadrage sont indépendants ; cette vue n’est pas un recalage pixel à pixel.
   La comparaison ne change pas l’export. Revenez au linéaire ou utilisez la proposition
   automatique. Les valeurs numériques restent éditables ; les calculs repartent
-  toujours des données linéaires, sans cumuler les étirements.
+  de l’intégration linéaire et rejouent les transformations appliquées dans leur ordre.
+  **Appliquer le brouillon comme transformation** valide les réglages courants,
+  puis remet les commandes à zéro. Cela permet notamment plusieurs étirements
+  successifs. Chaque transformation peut être modifiée, désactivée, remontée ou
+  supprimée ; les suivantes sont recalculées. Le projet et les préréglages
+  conservent cette recette, les deux versions A/B et leurs réglages. Un cache
+  borné évite de rejouer une recette inchangée pendant les ajustements suivants.
 - Exportez le **FITS linéaire 32 bits** pour préserver l’intégration, ou le
   **TIFF 16 bits final** avec profil sRGB. Un JPEG sRGB peut aussi être exporté.
   **Image finale…** propose ces deux formats. **Détails et légende…** transmet

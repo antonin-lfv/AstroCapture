@@ -3,6 +3,7 @@
 #include <QQmlComponent>
 #include <QQuickItem>
 #include <QQuickWindow>
+#include <QMouseEvent>
 #include <QTemporaryDir>
 #include <QElapsedTimer>
 #include <QThread>
@@ -21,6 +22,11 @@
 #include "AppLibrary.hpp"
 #include "Check.hpp"
 using namespace astro;
+QQuickItem* visualItem(QQuickItem* parent,const QString& name) {
+    if(parent->objectName()==name)return parent;
+    for(auto* child:parent->childItems())if(auto* found=visualItem(child,name))return found;
+    return nullptr;
+}
 void wait(app::DeepSkyController& controller){QElapsedTimer timer;timer.start();while(controller.busy()&&timer.elapsed()<20000){QCoreApplication::processEvents();QThread::msleep(1);}ASTRO_TEST_CHECK(!controller.busy());}
 int main(int argc,char** argv){
     QGuiApplication application(argc,argv);QTemporaryDir directory;
@@ -37,6 +43,13 @@ int main(int argc,char** argv){
     std::unique_ptr<QObject> object(component.createWithInitialProperties({{"library",QVariant::fromValue(&library)},{"controller",QVariant::fromValue(&controller)}}));ASTRO_TEST_CHECK(object);
     ASTRO_TEST_CHECK(!object->findChild<QObject*>("deepSkyCalibrated")->property("checked").toBool());
     QQuickWindow window;window.resize(1100,720);auto* root=qobject_cast<QQuickItem*>(object.get());root->setParentItem(window.contentItem());root->setSize({1100,720});window.show();
+    QCoreApplication::processEvents();
+    auto* finishTab=visualItem(root,"deepSkyFinishTab");ASTRO_TEST_CHECK(finishTab);
+    ASTRO_TEST_CHECK(!finishTab->property("enabled").toBool());
+    ASTRO_TEST_CHECK(!object->findChild<QObject*>("deepSkyIntegrate")->property("visible").toBool());
+    auto* presetDialog=object->findChild<QObject*>("deepSkyPresetDialog");ASTRO_TEST_CHECK(presetDialog);
+    auto* dialogBackground=presetDialog->property("background").value<QObject*>();ASTRO_TEST_CHECK(dialogBackground);
+    ASTRO_TEST_CHECK(dialogBackground->property("color").value<QColor>()==QColor("#0b0d10"));
     recording::AstroImage data;data.width=160;data.height=128;data.exposure=60;data.filter="Red";data.samples.resize(160*128);
     const std::array<std::array<int,2>,10> stars{{{20,20},{60,16},{105,25},{140,40},{35,60},{80,55},{120,75},{25,105},{75,110},{135,105}}};
     QList<QUrl> urls;
@@ -44,9 +57,14 @@ int main(int argc,char** argv){
     controller.addFiles(urls);wait(controller);ASTRO_TEST_CHECK(controller.frames().size()==3&&controller.frames()[0].toMap()["group"]=="R");
     ASTRO_TEST_CHECK(controller.frames()[0].toMap()["stars"].toInt()>=8&&controller.imageWidth()==160);
     controller.addFiles(urls);wait(controller);ASTRO_TEST_CHECK(controller.frames().size()==3);
+    root->setProperty("workflowStep",1);QCoreApplication::processEvents();
+    ASTRO_TEST_CHECK(object->findChild<QObject*>("deepSkyIntegrate")->property("visible").toBool());
+    ASTRO_TEST_CHECK(object->findChild<QObject*>("deepSkyStackDivider")->property("visible").toBool());
+    object->findChild<QObject*>("deepSkyAdvanced")->setProperty("expanded",true);QCoreApplication::processEvents();
     controller.setSelected(2,false);controller.integrate(true);wait(controller);
     if(!controller.hasResult())qWarning()<<controller.status();ASTRO_TEST_CHECK(controller.hasResult()&&controller.displayingResult()&&controller.groups()==QStringList{"R"});
     ASTRO_TEST_CHECK(controller.hasRawComparison());
+    ASTRO_TEST_CHECK(finishTab->property("enabled").toBool());
     const auto handed=controller.processingDocument().value<app::ImageDocument>();ASTRO_TEST_CHECK(handed.exposureCount==2&&handed.totalExposure==120&&handed.filters==QStringList{"R"}&&!handed.processingSummary.isEmpty());
     const auto integratedPixels=handed.pixels;
     const auto integratedPreview=controller.image();
@@ -54,9 +72,33 @@ int main(int argc,char** argv){
     controller.showRawComparison(false);ASTRO_TEST_CHECK(!controller.comparingRaw()&&controller.image()==integratedPreview);
     controller.chooseRawComparison(1);wait(controller);ASTRO_TEST_CHECK(controller.rawComparisonName()=="light-1.fits");
     controller.showRawComparison(true);controller.restoreResult();ASTRO_TEST_CHECK(!controller.comparingRaw()&&controller.image()==integratedPreview);
+    auto* imageViewport=root->findChild<QObject*>("deepSkyViewport");ASTRO_TEST_CHECK(imageViewport);
+    imageViewport->setProperty("fitMode",false);imageViewport->setProperty("zoom",8.0);
+    imageViewport->setProperty("panX",12.0);imageViewport->setProperty("panY",6.0);
+    ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root,"compareRaw",Q_ARG(QVariant,QVariant(true))));
+    ASTRO_TEST_CHECK(controller.comparingRaw() && !imageViewport->property("fitMode").toBool());
+    ASTRO_TEST_CHECK(imageViewport->property("zoom").toDouble()==8.0);
+    ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root,"compareRaw",Q_ARG(QVariant,QVariant(false))));
+    ASTRO_TEST_CHECK(!controller.comparingRaw() && !imageViewport->property("fitMode").toBool());
+    ASTRO_TEST_CHECK(imageViewport->property("zoom").toDouble()==8.0);
+    ASTRO_TEST_CHECK(imageViewport->property("panX").toDouble()==12.0 && imageViewport->property("panY").toDouble()==6.0);
+    QMetaObject::invokeMethod(imageViewport,"fit");
     const auto output=QUrl::fromLocalFile(directory.filePath("linear.fits"));controller.exportImage(output,true);wait(controller);
     auto result=recording::readAstroImage(output.toLocalFile().toStdString());ASTRO_TEST_CHECK(result.exposure==120&&result.channels==3&&result.width<160);
-    auto stretch=controller.suggestedStretch();stretch["midtones"]=.1;stretch["background"]=false;controller.apply(stretch);wait(controller);
+    QCoreApplication::processEvents();
+    const auto viewportHeight=imageViewport->property("height").toDouble();
+    const auto viewportY=imageViewport->property("y").toDouble();
+    const auto layoutConnection=QObject::connect(&controller,&app::DeepSkyController::changed,root,[imageViewport,viewportHeight,viewportY]{
+        QMetaObject::invokeMethod(imageViewport,[imageViewport,viewportHeight,viewportY]{
+            ASTRO_TEST_CHECK(imageViewport->property("height").toDouble()==viewportHeight && imageViewport->property("y").toDouble()==viewportY);
+        },Qt::QueuedConnection);
+    });
+    auto stretch=controller.suggestedStretch();stretch["midtones"]=.1;stretch["background"]=false;controller.apply(stretch);
+    QCoreApplication::processEvents();
+    ASTRO_TEST_CHECK(imageViewport->property("height").toDouble()==viewportHeight && imageViewport->property("y").toDouble()==viewportY);
+    wait(controller);QCoreApplication::processEvents();
+    ASTRO_TEST_CHECK(imageViewport->property("height").toDouble()==viewportHeight && imageViewport->property("y").toDouble()==viewportY);
+    QObject::disconnect(layoutConnection);
     ASTRO_TEST_CHECK(controller.linearHistogram()["channels"].toList().size()==3);
     auto pending=stretch;pending["midtones"]=.3;controller.apply(pending);ASTRO_TEST_CHECK(controller.adjusting());pending["midtones"]=.7;controller.apply(pending);wait(controller);
     processing::Finish expectedSettings;expectedSettings.black=stretch["black"].toFloat();expectedSettings.white=stretch["white"].toFloat();expectedSettings.midtones=.7;
@@ -158,6 +200,27 @@ int main(int argc,char** argv){
         root->setProperty("workflowStep",6);root->setProperty("imageFocus",true);QCoreApplication::processEvents();QThread::msleep(50);QCoreApplication::processEvents();
         if(qEnvironmentVariableIsSet("ASTRO_UI_SNAPSHOT_PATH"))ASTRO_TEST_CHECK(window.grabWindow().save(qEnvironmentVariable("ASTRO_UI_SNAPSHOT_PATH")));
         ASTRO_TEST_CHECK(root->findChild<QObject*>("deepSkyViewport")->property("height").toDouble()>280);
+        if(qEnvironmentVariableIsSet("ASTRO_UI_SNAPSHOT_PATH")) {
+            const auto path=qEnvironmentVariable("ASTRO_UI_SNAPSHOT_PATH");
+            root->setProperty("workflowStep",1);root->setProperty("imageFocus",false);QCoreApplication::processEvents();
+            ASTRO_TEST_CHECK(window.grabWindow().save(path+".stack.png"));
+            root->setProperty("workflowStep",6);root->setProperty("imageFocus",true);
+            QMetaObject::invokeMethod(presetDialog,"open");QCoreApplication::processEvents();QThread::msleep(200);QCoreApplication::processEvents();
+            ASTRO_TEST_CHECK(window.grabWindow().save(path+".dialog.png"));
+            QMetaObject::invokeMethod(presetDialog,"close");QCoreApplication::processEvents();
+            QQuickItem* helpTarget=nullptr;
+            for(auto* item:root->findChildren<QQuickItem*>())if(item->isVisible()&&item->property("explanation").toString().startsWith("Presets save")){helpTarget=item;break;}
+            // The French explanation is translated; use the visible section title
+            // as a fallback, with a non-empty accessible explanation.
+            if(!helpTarget)for(auto* item:root->findChildren<QQuickItem*>())if(item->isVisible()&&item->property("explanation").toString().contains("préréglages")){helpTarget=item;break;}
+            ASTRO_TEST_CHECK(helpTarget);
+            const auto point=helpTarget->mapToScene(QPointF(20,helpTarget->height()/2));
+            QMouseEvent hover(QEvent::MouseMove,point,point,Qt::NoButton,Qt::NoButton,Qt::NoModifier);QGuiApplication::sendEvent(&window,&hover);
+            QElapsedTimer tooltipWait;tooltipWait.start();while(tooltipWait.elapsed()<500){QCoreApplication::processEvents();QThread::msleep(1);}
+            bool helpVisible=false;for(auto* tip:root->findChildren<QObject*>("darkHelpTip"))helpVisible|=tip->property("visible").toBool();
+            ASTRO_TEST_CHECK(helpVisible);ASTRO_TEST_CHECK(window.grabWindow().save(path+".help.png"));
+            QMouseEvent leave(QEvent::MouseMove,QPointF(2,2),QPointF(2,2),Qt::NoButton,Qt::NoButton,Qt::NoModifier);QGuiApplication::sendEvent(&window,&leave);QCoreApplication::processEvents();
+        }
         const auto beforeAB=screenshotController->processingDocument().value<app::ImageDocument>().pixels;
         auto realB=root->findChild<app::DeepSkyEdits*>("deepSkyEdits")->values();realB["midtones"]=.35;realB["asinh"]=false;
         ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root,"switchVersion",Q_ARG(QVariant,QVariant("B"))));wait(*screenshotController);

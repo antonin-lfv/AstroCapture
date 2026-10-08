@@ -219,8 +219,16 @@ DMG_STAGING="$(mktemp -d)"
 trap 'rm -rf "${DMG_STAGING}"' EXIT
 cp -R "${APP_BUNDLE}" "${DMG_STAGING}/"
 ln -s /Applications "${DMG_STAGING}/Applications"
-DMG_PATH="${BUILD_DIR}/${APP_NAME}.dmg"
+APP_VERSION="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "${APP_BUNDLE}/Contents/Info.plist")"
+[[ "${APP_VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "Invalid app version for packaging" >&2; exit 1; }
+DMG_PATH="${BUILD_DIR}/${APP_NAME}-${APP_VERSION}.dmg"
 rm -f "${DMG_PATH}"
 hdiutil create -volname "${APP_NAME}" -srcfolder "${DMG_STAGING}" -ov -format UDZO "${DMG_PATH}"
+
+# Keep the previous installer until creation succeeds, then retain only this one.
+for previous_dmg in "${BUILD_DIR}/${APP_NAME}.dmg" "${BUILD_DIR}/${APP_NAME}-"*.dmg; do
+    [[ -f "${previous_dmg}" && "${previous_dmg}" != "${DMG_PATH}" ]] || continue
+    rm -f "${previous_dmg}"
+done
 
 echo "==> Done: ${DMG_PATH}"

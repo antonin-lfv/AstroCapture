@@ -12,7 +12,7 @@ AstroCapture réunit l’acquisition vidéo, la sélection des meilleures images
 
 ## Installer sur macOS
 
-Ouvrez `AstroCapture.dmg`, glissez **AstroCapture** dans **Applications**, puis lancez l’application. Pour une mise à jour, quittez d’abord AstroCapture et remplacez l’application existante. Les préférences, les préréglages et l’historique sont conservés séparément de l’application.
+Ouvrez `AstroCapture-<version>.dmg`, glissez **AstroCapture** dans **Applications**, puis lancez l’application. Pour une mise à jour, quittez d’abord AstroCapture et remplacez l’application existante. Les préférences, les préréglages et l’historique sont conservés séparément de l’application.
 
 Le paquet actuel est destiné aux Mac Apple Silicon. Il n’est pas encore signé avec un certificat Apple Developer ID ni notarisé : macOS peut demander une autorisation d’ouverture.
 

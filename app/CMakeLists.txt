@@ -70,6 +70,8 @@ qt_add_qml_module(AstroCapture
         qml/DarkSpinBox.qml
         qml/SidebarSection.qml
         qml/HelpIcon.qml
+        qml/DarkToolTip.qml
+        qml/DarkDialog.qml
     RESOURCES
         qml/assets/logo.png
     SOURCES

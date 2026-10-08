@@ -8,6 +8,7 @@ Rectangle {
     property real sourceWidth: 0
     property real sourceHeight: 0
     property alias imageContainer: imageLayer
+    property bool preserveViewOnSourceResize: false
     property bool fitMode: true
     property real zoom: 1
     property real panX: 0
@@ -41,8 +42,8 @@ Rectangle {
         constrainPan();
     }
     function actualSize() { zoomAt(1, surface.width / 2, surface.height / 2); }
-    onSourceWidthChanged: fit()
-    onSourceHeightChanged: fit()
+    onSourceWidthChanged: if(!preserveViewOnSourceResize)fit()
+    onSourceHeightChanged: if(!preserveViewOnSourceResize)fit()
     onWidthChanged: constrainPan()
     onHeightChanged: constrainPan()
 

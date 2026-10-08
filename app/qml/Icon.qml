@@ -86,6 +86,24 @@ Item {
         color: root.color
     }
 
+    Canvas {
+        id:gearCanvas;anchors.fill:parent;visible:root.name==="gear"
+        onWidthChanged:requestPaint();onHeightChanged:requestPaint()
+        Connections {target:root;function onColorChanged(){gearCanvas.requestPaint();}}
+        onPaint: {
+            const ctx=getContext("2d");ctx.reset();ctx.fillStyle=root.color;
+            const cx=width/2,cy=height/2,r=Math.min(width,height);
+            ctx.beginPath();
+            for(let i=0;i<32;i++) {
+                const angle=(i-.5)*Math.PI/16, radius=r*(i%4<2?.45:.34);
+                const x=cx+Math.cos(angle)*radius,y=cy+Math.sin(angle)*radius;
+                if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+            }
+            ctx.closePath();ctx.moveTo(cx+r*.15,cy);ctx.arc(cx,cy,r*.15,0,-Math.PI*2,true);ctx.fill();
+        }
+        Component.onCompleted:requestPaint()
+    }
+
     Item {
         anchors.fill: parent
         visible: root.name === "settings"

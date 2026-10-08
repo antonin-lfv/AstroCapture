@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.1.1 — 2026-10-08
+
+- Replace boxed project gear with a larger vector icon; show contextual help on
+  hover in dark tooltips and use dark, legible application dialogs.
+- Start stacking only from Stack settings, group advanced options in a labelled
+  panel and separate the launch action. Disable Finish until a result exists.
+- Preserve zoom and pan across raw comparison, including different frame sizes.
+- Reserve progress and status space to prevent preview height jumps while editing.
+- Package a single versioned DMG and remove older installers only after success.
+
+
 ## 1.1.0 — 2026-10-08
 
 - Save, load, duplicate, replace and delete named deep-sky finishing presets locally.

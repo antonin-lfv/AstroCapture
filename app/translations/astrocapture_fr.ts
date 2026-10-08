@@ -1005,6 +1005,8 @@ L’aperçu est automatiquement éclairci ; les données restent linéaires.</tr
 <message><source>Show histograms</source><translation>Afficher les histogrammes</translation></message>
 <message><source>Enlarge preview</source><translation>Agrandir l’aperçu</translation></message>
 <message><source>Temporarily hide histograms and the image list to inspect A/B. Zoom and framing stay shared.</source><translation>Masquez temporairement les histogrammes et la liste des images pour examiner A/B. Le zoom et le cadrage restent communs.</translation></message>
+<message><source>Normalization, stacking method and rejection threshold.</source><translation>Normalisation, méthode d’empilement et seuil de rejet.</translation></message>
+<message><source>Check the stars, FWHM and reference in the image list before stacking.</source><translation>Vérifiez les étoiles, la FWHM et la référence dans la liste des images avant l’empilement.</translation></message>
 </context>
     <context>
         <name>GlobalSettingsWorkspace</name>
@@ -1387,8 +1389,8 @@ L’aperçu est automatiquement éclairci ; les données restent linéaires.</tr
         </message>
         <message>
             <location filename="../qml/GuideWorkspace.qml" line="40" />
-            <source>Inspect star counts, FWHM and source previews; uncheck poor frames and choose a reference per filter. Normalization and rejection are configurable in Advanced stack settings. Create the stacked image runs calibration, alignment, normalization and integration together: there are no numbered steps to launch separately.</source>
-            <translation>Inspectez le nombre d’étoiles, la FWHM et les aperçus ; décochez les mauvaises poses et choisissez une référence par filtre. La normalisation et le rejet se règlent dans Réglages avancés. Créer l’image empilée lance la calibration, l’alignement, la normalisation et l’intégration ensemble : aucune étape numérotée à lancer séparément.</translation>
+            <source>Inspect star counts, FWHM and source previews; uncheck poor frames and choose a reference per filter. Normalization and rejection are configurable in Advanced stack settings. Start Create the stacked image from Stack settings after checking calibration, reference and advanced options. It runs calibration, alignment, normalization and integration together. Finish and export becomes available when a result exists. Hover parameter labels for help.</source>
+            <translation>Inspectez le nombre d’étoiles, la FWHM et les aperçus ; décochez les mauvaises poses et choisissez une référence par filtre. La normalisation et le rejet se règlent dans Réglages avancés. Lancez Créer l’image empilée depuis Réglages d’empilement après vérification de la calibration, de la référence et des réglages avancés. La calibration, l’alignement, la normalisation et l’intégration sont exécutés ensemble. Finition et export devient accessible lorsqu’un résultat existe. Survolez les libellés des paramètres pour afficher l’aide.</translation>
         </message>
         <message>
             <location filename="../qml/GuideWorkspace.qml" line="41" />

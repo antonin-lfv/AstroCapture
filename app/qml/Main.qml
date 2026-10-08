@@ -16,6 +16,15 @@ ApplicationWindow {
     visible: true
     title: "AstroCapture" + (Qt.application.version ? " · " + Qt.application.version : "")
     color: "#0b0d10"
+    palette.window: "#0b0d10"
+    palette.windowText: "#eef3fa"
+    palette.base: "#1c2026"
+    palette.text: "#eef3fa"
+    palette.placeholderText: "#9aa7b8"
+    palette.button: "#1c2026"
+    palette.buttonText: "#eef3fa"
+    palette.highlight: "#6ca5f8"
+    palette.highlightedText: "#0b0d10"
 
     property string currentTab: "capture"
     readonly property bool textEditing: activeFocusItem instanceof TextInput || activeFocusItem instanceof TextEdit

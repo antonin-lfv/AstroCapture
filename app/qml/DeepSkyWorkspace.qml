@@ -12,6 +12,21 @@ Control {
     property bool shortcutsAllowed: true
     property string editError: ""
     property bool imageFocus: false
+    property var rawViewState: null
+    function compareRaw(enabled) {
+        if(enabled) {
+            if(controller.busy || !controller.hasRawComparison || !controller.hasResult)return;
+            rawViewState={fitMode:viewport.fitMode,zoom:viewport.zoom,panX:viewport.panX,panY:viewport.panY};
+            controller.showRawComparison(true);
+        } else {
+            controller.showRawComparison(false);
+            if(rawViewState) {
+                viewport.fitMode=rawViewState.fitMode;viewport.zoom=rawViewState.zoom;
+                viewport.panX=rawViewState.panX;viewport.panY=rawViewState.panY;
+                viewport.constrainPan();rawViewState=null;
+            }
+        }
+    }
     property alias finishEdits: edits
     DeepSkyEdits {id:edits;objectName:"deepSkyEdits";onValuesChanged:root.restoreFinish(values)}
     property string importRole: "Auto"
@@ -21,7 +36,6 @@ Control {
     readonly property var visibleFrames:controller.frames.map((row,index)=>Object.assign({sourceIndex:index},row)).filter(row=>frameFilter==="All" || row.role===frameFilter)
     function roleLabel(role) {const index=roles.indexOf(role);return index>=0?roleNames[index]:role;}
     function selectedRole() {return roles[rolePicker.currentIndex];}
-    function showHelp(message) {helpDialog.message=message;helpDialog.open();}
     property bool linearExport: true
     property int workflowStep: 0
     property bool updatingControls: false
@@ -51,7 +65,7 @@ Control {
     Shortcut {sequences:[StandardKey.Undo];enabled:root.visible && root.shortcutsAllowed && !root.dialogOpen && root.finishEditable && edits.canUndo;onActivated:root.undoFinish()}
     Shortcut {sequences:[StandardKey.Redo];enabled:root.visible && root.shortcutsAllowed && !root.dialogOpen && root.finishEditable && edits.canRedo;onActivated:root.redoFinish()}
     Timer {id:adjustmentTimer;interval:200;onTriggered:controller.apply(root.options())}
-    readonly property bool dialogOpen: inputDialog.visible || folderDialog.visible || helpDialog.visible || exportDialog.visible || projectOpen.visible || projectSave.visible || presetDialog.visible || projectMenu.visible
+    readonly property bool dialogOpen: inputDialog.visible || folderDialog.visible || exportDialog.visible || projectOpen.visible || projectSave.visible || presetDialog.visible || projectMenu.visible
     background: Rectangle {color:"#0b0d10"}
     palette.window: "#0b0d10"
     palette.windowText: "#e8edf5"
@@ -74,6 +88,7 @@ Control {
     Connections {
         target: root.controller
         function onChanged() {
+            if(!controller.hasResult && root.workflowStep===6)root.workflowStep=0;
             if (!controller.busy && controller.hasResult && root.pendingProjectFinish) {
                 const finish = root.pendingProjectFinish;
                 root.pendingProjectFinish = null;
@@ -110,13 +125,6 @@ Control {
             }
         }
     }
-    component HelpButton: ToolButton {
-        property string explanation
-        text:"?";implicitWidth:26;implicitHeight:26;Accessible.name:qsTr("Parameter help")
-        onClicked:root.showHelp(explanation)
-        ToolTip.visible:hovered;ToolTip.text:qsTr("Show explanation")
-        background:Rectangle {radius:13;color:parent.hovered?"#2b3b51":"#202831";border.color:"#3b4c61"}
-    }
     component SectionTitle: RowLayout {
         property string label
         property string explanation:""
@@ -124,7 +132,9 @@ Control {
         Layout.fillWidth:true;Layout.minimumWidth:0;spacing:8
         Label {text:heading.label;color:"#e8edf5";font.pixelSize:14;font.bold:true;wrapMode:Text.Wrap}
         Rectangle {Layout.fillWidth:true;Layout.preferredHeight:1;color:"#344150"}
-        HelpButton {visible:heading.explanation.length>0;explanation:heading.explanation}
+        HoverHandler {id:headingHover}
+        Accessible.description: explanation
+        DarkToolTip {parent:heading;text:heading.explanation;visible:headingHover.hovered && text.length>0}
     }
     component ParameterLabel: RowLayout {
         property string label
@@ -132,7 +142,9 @@ Control {
         id:parameter
         Layout.fillWidth:true;Layout.minimumWidth:0;spacing:4
         Label {text:parameter.label;color:"#b5c2d2";Layout.fillWidth:true;wrapMode:Text.Wrap}
-        HelpButton {explanation:parameter.explanation}
+        HoverHandler {id:parameterHover}
+        Accessible.description: explanation
+        DarkToolTip {parent:parameter;text:parameter.explanation;visible:parameterHover.hovered && text.length>0}
     }
     ColumnLayout {
         id:workspaceHeader;anchors.top:parent.top;anchors.left:parent.left;anchors.right:parent.right;anchors.margins:12;spacing:8
@@ -140,12 +152,19 @@ Control {
             Layout.fillWidth:true
             Label {text:qsTr("Deep sky");color:"#eef3fa";font.pixelSize:22;font.bold:true;Layout.fillWidth:true}
             Label {text:qsTr("%1 images").arg(controller.frames.length);color:"#9daec3"}
-            IconButton {objectName:"deepSkyProjectMenu";text:"⚙";Accessible.name:qsTr("Project options");onClicked:projectMenu.popup()}
+            ToolButton {
+                id:projectGear;objectName:"deepSkyProjectMenu";implicitWidth:40;implicitHeight:40;padding:6
+                Accessible.name:qsTr("Project options")
+                contentItem:Icon {name:"gear";color:projectGear.hovered?"#6ca5f8":"#eef3fa"}
+                background:Item {}
+                onClicked:projectMenu.popup()
+                DarkToolTip {text:qsTr("Project options");visible:projectGear.hovered}
+            }
         }
         RowLayout {
             Layout.fillWidth:true;spacing:6
             Repeater {model:[qsTr("Images"),qsTr("Stack settings"),qsTr("Finish and export")]
-                delegate:IconButton {required property int index;required property string modelData;text:modelData;Layout.fillWidth:true;borderColor:root.workflowStep===[0,1,6][index]?"#6ca5f8":"#344150";onClicked:root.workflowStep=[0,1,6][index]}
+                delegate:IconButton {required property int index;required property string modelData;objectName:index===2?"deepSkyFinishTab":index===1?"deepSkyStackTab":"deepSkyImagesTab";enabled:index!==2 || controller.hasResult;text:modelData;Layout.fillWidth:true;borderColor:root.workflowStep===[0,1,6][index]?"#6ca5f8":"#344150";onClicked:root.workflowStep=[0,1,6][index]}
             }
         }
         Rectangle {Layout.fillWidth:true;Layout.preferredHeight:1;color:"#344150"}
@@ -200,31 +219,42 @@ Control {
                 ParameterLabel {label:qsTr("Bad pixels");explanation:qsTr("Use an imported map or detect isolated hot pixels in the master dark. The correction runs before demosaicing and preserves the Bayer pattern.")}
                 IconButton {text:qsTr("Bad pixel map…");Layout.fillWidth:true;Layout.minimumWidth:0;enabled:!controller.busy;onClicked:root.importFiles("BadPixels")}
                 }
-                IconButton {id:advanced;objectName:"deepSkyAdvanced";property bool expanded:false;visible:root.workflowStep===1;Layout.fillWidth:true;Layout.minimumWidth:0;text:(expanded?"▾ ":"▸ ")+qsTr("Advanced stack settings");borderColor:expanded?"#6ca5f8":"#344150";onClicked:expanded=!expanded}
-                ColumnLayout {
-                    visible:root.workflowStep===1 && advanced.expanded;Layout.fillWidth:true;Layout.minimumWidth:0
-                    SectionTitle {label:qsTr("Star analysis");explanation:qsTr("Star count and FWHM are measured on import. FWHM is expressed in pixels, not arcseconds. Inspect clouds, trails and focus before excluding a frame.")}
-                }
-                ColumnLayout {
-                    visible:root.workflowStep===1 && advanced.expanded;Layout.fillWidth:true;Layout.minimumWidth:0
-                    SectionTitle {label:qsTr("Reference and alignment");explanation:qsTr("Reference selects one light per filter group. Other frames are aligned to its stars. Choose a sharp frame with many recognizable stars; this is not the frame used as the final output.")}
-                }
-                ColumnLayout {
-                    visible:root.workflowStep===1 && advanced.expanded;Layout.fillWidth:true;Layout.minimumWidth:0
-                    SectionTitle {label:qsTr("Normalization");explanation:qsTr("Match stellar flux and background offsets to the reference. Disable for data normalized externally. This is global normalization, not photometric color calibration.")}
-                    CheckBox {Layout.fillWidth:true;Layout.minimumWidth:0;implicitWidth:settingsScroll.availableWidth;contentItem:Text {text:parent.text;font:parent.font;color:"#e8edf5";wrapMode:Text.Wrap;leftPadding:parent.indicator.width+parent.spacing;verticalAlignment:Text.AlignVCenter} id:normalize;text:qsTr("Normalize to the reference");checked:true;enabled:!controller.busy}
-                }
-                ColumnLayout {
-                    visible:root.workflowStep===1 && advanced.expanded;Layout.fillWidth:true;Layout.minimumWidth:0
-                    SectionTitle {label:qsTr("Integration");explanation:qsTr("Robust rejection requires at least three accepted lights. Lower sigma rejects more aggressively. Mean without rejection keeps all usable samples. Borders are cropped to common coverage.")}
-                    ComboBox {id:integrationMethod;Layout.fillWidth:true;Layout.minimumWidth:0;model:[qsTr("Mean with robust rejection"),qsTr("Mean without rejection")];enabled:!controller.busy}
-                    RowLayout {
-                        ParameterLabel {label:qsTr("Rejection σ");explanation:qsTr("Lower sigma removes more outliers; higher sigma keeps more samples. Start at 3. Rejection needs at least three accepted lights.")}
-                        SpinBox {id:sigma;from:1;to:10;value:3;enabled:!controller.busy && integrationMethod.currentIndex===0}
+                Rectangle {
+                    id:advancedPanel;objectName:"deepSkyAdvancedPanel";visible:root.workflowStep===1
+                    Layout.fillWidth:true;Layout.minimumWidth:0;implicitHeight:advancedContents.implicitHeight+24
+                    color:"#141a22";radius:8;border.color:"#344150"
+                    ColumnLayout {
+                        id:advancedContents;anchors.left:parent.left;anchors.right:parent.right;anchors.top:parent.top;anchors.margins:12;spacing:12
+                        ToolButton {
+                            id:advanced;objectName:"deepSkyAdvanced";property bool expanded:false
+                            Layout.fillWidth:true;implicitHeight:36;padding:0
+                            contentItem:RowLayout {
+                                Label {text:qsTr("Advanced stack settings");color:"#eef3fa";font.pixelSize:16;font.bold:true;Layout.fillWidth:true;wrapMode:Text.Wrap}
+                                Label {text:advanced.expanded?"▾":"▸";color:"#9aa7b8";font.pixelSize:18}
+                            }
+                            background:Item {}
+                            onClicked:expanded=!expanded
+                        }
+                        ColumnLayout {
+                            visible:advanced.expanded;Layout.fillWidth:true;spacing:12
+                            Label {text:qsTr("Normalization, stacking method and rejection threshold.");color:"#b5c3d4";font.pixelSize:12;wrapMode:Text.Wrap;Layout.fillWidth:true}
+                            ParameterLabel {label:qsTr("Normalization");explanation:qsTr("Match stellar flux and background offsets to the reference. Disable for data normalized externally. This is global normalization, not photometric color calibration.")}
+                            CheckBox {id:normalize;text:qsTr("Normalize to the reference");checked:true;enabled:!controller.busy;Layout.fillWidth:true}
+                            Rectangle {Layout.fillWidth:true;Layout.preferredHeight:1;color:"#344150"}
+                            ParameterLabel {label:qsTr("Integration");explanation:qsTr("Robust rejection requires at least three accepted lights. Lower sigma rejects more aggressively. Mean without rejection keeps all usable samples. Borders are cropped to common coverage.")}
+                            ComboBox {id:integrationMethod;Layout.fillWidth:true;Layout.minimumWidth:0;model:[qsTr("Mean with robust rejection"),qsTr("Mean without rejection")];enabled:!controller.busy}
+                            RowLayout {
+                                Layout.fillWidth:true
+                                ParameterLabel {label:qsTr("Rejection σ");explanation:qsTr("Lower sigma removes more outliers; higher sigma keeps more samples. Start at 3. Rejection needs at least three accepted lights.")}
+                                SpinBox {id:sigma;from:1;to:10;value:3;enabled:!controller.busy && integrationMethod.currentIndex===0}
+                            }
+                        }
                     }
                 }
-
-                IconButton {visible:root.workflowStep!==6;objectName:"deepSkyIntegrate";text:qsTr("Create the stacked image");Layout.fillWidth:true;Layout.minimumWidth:0;enabled:!controller.busy && controller.frames.length>0;onClicked:controller.integrate(calibrated.checked,integrationMethod.currentIndex===0?sigma.value:0,normalize.checked,badPixels.checked)}
+                ParameterLabel {visible:root.workflowStep===1;label:qsTr("Reference and alignment");explanation:qsTr("Reference selects one light per filter group. Other frames are aligned to its stars. Choose a sharp frame with many recognizable stars; this is not the frame used as the final output.")}
+                Label {visible:root.workflowStep===1;text:qsTr("Check the stars, FWHM and reference in the image list before stacking.");color:"#9daec3";font.pixelSize:12;wrapMode:Text.Wrap;Layout.fillWidth:true}
+                Rectangle {objectName:"deepSkyStackDivider";visible:root.workflowStep===1;Layout.fillWidth:true;Layout.preferredHeight:1;color:"#526174";Layout.topMargin:8;Layout.bottomMargin:8}
+                IconButton {visible:root.workflowStep===1;objectName:"deepSkyIntegrate";text:qsTr("Create the stacked image");Layout.fillWidth:true;Layout.minimumWidth:0;enabled:!controller.busy && controller.frames.some(row=>row.selected && row.role==="Light");onClicked:controller.integrate(calibrated.checked,integrationMethod.currentIndex===0?sigma.value:0,normalize.checked,badPixels.checked)}
                 ColumnLayout {
                 visible:root.workflowStep===6;Layout.fillWidth:true;Layout.minimumWidth:0
                 ColumnLayout {Layout.fillWidth:true;Layout.minimumWidth:0;visible:controller.groups.length>1
@@ -305,7 +335,7 @@ Control {
                     model:lightRows.map(row=>row.name);enabled:!controller.busy && controller.hasResult
                     onActivated:controller.chooseRawComparison(lightRows[currentIndex].index)
                 }
-                IconButton {text:qsTr("Raw exposure (hold)");Layout.fillWidth:true;Layout.minimumWidth:0;enabled:!controller.busy && controller.hasResult && controller.hasRawComparison;onPressedChanged:controller.showRawComparison(pressed)}
+                IconButton {text:qsTr("Raw exposure (hold)");Layout.fillWidth:true;Layout.minimumWidth:0;enabled:!controller.busy && controller.hasResult && controller.hasRawComparison;onPressedChanged:root.compareRaw(pressed)}
                 IconButton {visible:!livePreview.checked;text:qsTr("Apply adjustments");Layout.fillWidth:true;Layout.minimumWidth:0;enabled:root.finishEditable;onClicked:if(root.previewAdjustments())root.applyStoredFinish();}
                 SectionTitle {label:qsTr("Export");explanation:qsTr("Linear FITS preserves the integration. Final image offers 16-bit TIFF or JPEG with the current finish. Details and caption transfers the finished pixels and acquisition summary to Processing.")}
                 ColumnLayout {
@@ -327,7 +357,7 @@ Control {
                 IconButton {text:qsTr("Show stacked result");visible:controller.hasResult && !controller.displayingResult;enabled:!controller.busy;onClicked:controller.restoreResult()}
             }
             ImageViewport {
-                id:viewport;objectName:"deepSkyViewport";Layout.fillWidth:true;Layout.fillHeight:true;Layout.minimumHeight:100
+                id:viewport;objectName:"deepSkyViewport";preserveViewOnSourceResize:root.rawViewState!==null;Layout.fillWidth:true;Layout.fillHeight:true;Layout.minimumHeight:100
                 sourceWidth:controller.imageWidth;sourceHeight:controller.imageHeight
                 DeepSkyImageItem {parent:viewport.imageContainer;anchors.fill:parent;controller:root.controller}
                 Label {anchors.centerIn:parent;visible:controller.imageWidth===0;text:qsTr("Add light frames to begin\nThe preview is automatically stretched; source pixels stay linear.");color:"#a8b5c6";horizontalAlignment:Text.AlignHCenter;wrapMode:Text.Wrap;width:parent.width-40}
@@ -425,15 +455,15 @@ Control {
                     }
                 }
             }
-            ProgressBar {Layout.fillWidth:true;visible:controller.busy;from:0;to:100;value:controller.progress}
+            ProgressBar {Layout.fillWidth:true;Layout.preferredHeight:6;Layout.minimumHeight:6;Layout.maximumHeight:6;opacity:controller.busy?1:0;from:0;to:100;value:controller.progress}
             RowLayout {
                 Layout.fillWidth:true
-                ScrollView {Layout.fillWidth:true;Layout.preferredHeight:52;clip:true;Label {width:parent.width;text:controller.status;color:"#a8b5c6";wrapMode:Text.Wrap}}
-                IconButton {text:qsTr("Cancel");visible:controller.busy;onClicked:controller.cancel()}
+                ScrollView {Layout.fillWidth:true;Layout.preferredHeight:52;Layout.minimumHeight:52;Layout.maximumHeight:52;clip:true;Label {width:parent.width;text:controller.status;color:"#a8b5c6";wrapMode:Text.Wrap}}
+                IconButton {text:qsTr("Cancel");opacity:controller.busy?1:0;enabled:controller.busy;onClicked:controller.cancel()}
             }
         }
     }
-    Dialog {
+    DarkDialog {
         id:presetDialog;objectName:"deepSkyPresetDialog";parent:Overlay.overlay;anchors.centerIn:parent;modal:true
         title:qsTr("Deep-sky presets");width:Math.min(440,root.width-32)
         ColumnLayout {
@@ -450,12 +480,11 @@ Control {
             }
         }
     }
-    Dialog {id:helpDialog;property string message;parent:Overlay.overlay;anchors.centerIn:parent;modal:true;title:qsTr("Parameter help");width:Math.min(420,root.width-40);standardButtons:Dialog.Close;contentItem:Label {text:helpDialog.message;wrapMode:Text.Wrap;color:"#e8edf5"}}
     FolderDialog {id:folderDialog;title:qsTr("Import an image folder");onAccepted:controller.addFolder(selectedFolder,root.selectedRole(),group.currentText,Number(aduScale.text))}
     FileDialog {id:inputDialog;title:qsTr("Add deep-sky images");fileMode:FileDialog.OpenFiles;nameFilters:["Astro images (*.fits *.fit *.fts *.fz *.tif *.tiff *.png *.cr2 *.cr3 *.nef *.nrw *.arw *.dng *.orf *.raf *.rw2 *.pef)"];onAccepted:controller.addFiles(selectedFiles,root.importRole,group.currentText,Number(aduScale.text))}
     FileDialog {id:exportDialog;fileMode:FileDialog.SaveFile;onAccepted:{let path=selectedFile.toString();if(!/\.(fits?|fts|tiff?|jpe?g)$/i.test(path))path+=root.linearExport?".fits":(selectedNameFilter.index===1?".jpg":".tif");controller.exportImage(path,root.linearExport);}}
     FileDialog {id:projectOpen;fileMode:FileDialog.OpenFile;nameFilters:["AstroCapture project (*.astroproject)"];onAccepted:controller.loadProject(selectedFile)}
     FileDialog {id:projectSave;fileMode:FileDialog.SaveFile;nameFilters:["AstroCapture project (*.astroproject)"];onAccepted:controller.saveProject(selectedFile.toString().endsWith(".astroproject")?selectedFile:selectedFile.toString()+".astroproject")}
-    Dialog {id:clearConfirm;parent:Overlay.overlay;anchors.centerIn:parent;modal:true;title:qsTr("Clear this project?");standardButtons:Dialog.Ok|Dialog.Cancel;Label {text:qsTr("Export results or save the project first. Original files remain unchanged.");width:300;wrapMode:Text.Wrap}
+    DarkDialog {id:clearConfirm;parent:Overlay.overlay;anchors.centerIn:parent;modal:true;title:qsTr("Clear this project?");standardButtons:Dialog.Ok|Dialog.Cancel;Label {text:qsTr("Export results or save the project first. Original files remain unchanged.");width:300;wrapMode:Text.Wrap}
         onAccepted:controller.clear()}
 }

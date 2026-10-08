@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.1.0 — 2026-10-08
+
+- Save, load, duplicate, replace and delete named deep-sky finishing presets locally.
+- Add independent parameter-only undo/redo histories for two A/B versions of the
+  same linear stack; group slider drags and limit each history to 100 changes.
+- Add an enlarged image view for A/B inspection, keeping histograms accessible.
+- Reject corrupt finishing snapshots before replacing the current project.
+- Save both versions and the selected version in projects; recreate saved finishes
+  after integration. A new stack or channel composition resets the pair.
+- Validate finishing parameters and prevent final export or transfer when live
+  preview is off and settings have not been applied. Add contextual help and guide.
+
+
 ## 1.0.3 — 2026-10-08
 
 - Add a bilingual guide topic for evaluating processing quality and update the

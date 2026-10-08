@@ -1,5 +1,6 @@
 #include "DeepSkyController.hpp"
 #include "ImagePreview.hpp"
+#include "DeepSkySettings.hpp"
 #include <astro/recording/AstroImage.hpp>
 #include <astro/recording/TiffWriter.hpp>
 #include <QFileInfo>
@@ -111,7 +112,7 @@ void DeepSkyController::run(const QString& status,std::function<void(std::stop_t
 }
 void DeepSkyController::show(std::shared_ptr<const processing::FloatImage> image,bool result,QImage preview,std::shared_ptr<const processing::FloatImage> displayed,QVariantMap stretch) {
     comparingRaw_=false;displayingResult_=result;
-    if(result){linear_=image;finished_=displayed;resultPreview_=preview;stretch_=stretch;histogram_=stretch.value("histogram").toMap();emit resultChanged();}
+    if(result){finishSettings_=defaultDeepSkySettings();for(auto it=finishSettings_.begin();it!=finishSettings_.end();++it)if(stretch.contains(it.key()))it.value()=stretch[it.key()];if(auto validated=checkedDeepSkySettings(finishSettings_))finishSettings_=*validated;linear_=image;finished_=displayed;resultPreview_=preview;stretch_=stretch;histogram_=stretch.value("histogram").toMap();emit resultChanged();}
     preview_=std::move(preview);emit imageChanged();emit changed();
 }
 void DeepSkyController::setRole(int index,const QString& role){if(busy_||index<0||index>=frames_.size()||!QStringList{"Light","Dark","Flat","Bias","DarkFlat","BadPixels"}.contains(role))return;auto row=frames_[index].toMap();if(references_.contains(row["group"].toString())&&references_[row["group"].toString()]==row["path"].toString())references_.erase(row["group"].toString());row["role"]=role;row["reference"]=false;frames_[index]=row;emit changed();}
@@ -180,7 +181,7 @@ void DeepSkyController::setReference(int index) {
     emit changed();
 }
 void DeepSkyController::remove(int index){if(busy_||index<0||index>=frames_.size())return;frames_.removeAt(index);emit changed();}
-void DeepSkyController::clear(){if(busy_)return;projectOptions_.clear();rawPreview_={};rawName_.clear();comparingRaw_=false;histogram_.clear();pendingAdjustments_.reset();displayingResult_=false;stage_.clear();frames_.clear();references_.clear();stacks_.clear();groupExposure_.clear();groupCounts_.clear();exposureCount_=0;resultFilters_.clear();groups_.clear();linear_.reset();finished_.reset();preview_={};resultPreview_={};status_.clear();emit projectOptionsChanged();emit changed();emit imageChanged();}
+void DeepSkyController::clear(){if(busy_)return;projectOptions_.clear();finishSettings_.clear();rawPreview_={};rawName_.clear();comparingRaw_=false;histogram_.clear();pendingAdjustments_.reset();displayingResult_=false;stage_.clear();frames_.clear();references_.clear();stacks_.clear();groupExposure_.clear();groupCounts_.clear();exposureCount_=0;resultFilters_.clear();groups_.clear();linear_.reset();finished_.reset();preview_={};resultPreview_={};status_.clear();emit projectOptionsChanged();emit changed();emit imageChanged();}
 void DeepSkyController::chooseRawComparison(int index){
     if(busy_||index<0||index>=frames_.size()||frames_[index].toMap()["role"]!="Light")return;
     const auto row=frames_[index].toMap();
@@ -244,12 +245,16 @@ void DeepSkyController::compose(const QString& red,const QString& green,const QS
 }
 void DeepSkyController::apply(const QVariantMap& options) {
     if(busy_){if(adjusting_){pendingAdjustments_=options;worker_.request_stop();}return;}
-    if(!linear_)return;const auto image=linear_;processing::Finish f;
+    if(!linear_)return;
+    auto settings=defaultDeepSkySettings();for(auto it=settings.begin();it!=settings.end();++it)if(options.contains(it.key()))it.value()=options[it.key()];
+    const auto validated=checkedDeepSkySettings(settings);
+    if(!validated){status_=tr("Invalid finishing settings. Check levels and parameter ranges.");emit changed();return;}
+    const auto image=linear_;processing::Finish f;
     f.background=options["background"].toBool();f.stretch=options.value("stretch",true).toBool();f.black=options.value("black",0).toFloat();f.white=options.value("white",1).toFloat();f.midtones=options.value("midtones",.15).toFloat();
     f.color={options.value("red",1).toFloat(),options.value("green",1).toFloat(),options.value("blue",1).toFloat()};f.denoise=options.value("denoise",0).toFloat();f.asinh=options.value("asinh",false).toBool();f.asinhStrength=options.value("asinhStrength",20).toFloat();f.saturation=options.value("saturation",1).toFloat();
     for(float value:{f.black,f.white,f.midtones,f.color[0],f.color[1],f.color[2],f.denoise,f.asinhStrength,f.saturation})if(!std::isfinite(value)){status_=tr("Adjustment values must be finite.");emit changed();return;}
     adjusting_=true;
-    run(tr("Adjusting background, colors and stretch…"),[this,image,f](std::stop_token stop){auto preview=allocateImagePreview(*image);const auto target=previewTarget(preview);auto result=std::make_shared<processing::FloatImage>(processing::finishDeepSky(*image,f,[stop]{check(stop);},nullptr,&target));const auto histogram=makeLinearHistogram(*image,f.color,f.black,f.white);check(stop);post([this,result,preview,histogram,stop]{if(stop.stop_requested())return;histogram_=histogram;finished_=result;resultPreview_=preview;preview_=preview;comparingRaw_=false;displayingResult_=true;status_=tr("Adjustments applied. Linear FITS retains the original integration.");progress_=100;emit imageChanged();emit changed();});});
+    run(tr("Adjusting background, colors and stretch…"),[this,image,f,settings=*validated](std::stop_token stop){auto preview=allocateImagePreview(*image);const auto target=previewTarget(preview);auto result=std::make_shared<processing::FloatImage>(processing::finishDeepSky(*image,f,[stop]{check(stop);},nullptr,&target));const auto histogram=makeLinearHistogram(*image,f.color,f.black,f.white);check(stop);post([this,result,preview,histogram,settings,stop]{if(stop.stop_requested())return;finishSettings_=settings;histogram_=histogram;finished_=result;resultPreview_=preview;preview_=preview;comparingRaw_=false;displayingResult_=true;status_=tr("Adjustments applied. Linear FITS retains the original integration.");progress_=100;emit imageChanged();emit changed();});});
 }
 void DeepSkyController::exportImage(const QUrl& url,bool linear) {
     if(!linear_||!url.isLocalFile())return;
@@ -292,7 +297,21 @@ void DeepSkyController::loadProject(const QUrl& url) {
     if(error.error!=QJsonParseError::NoError||object["version"].toInt()!=1||!object["frames"].isArray()||object["frames"].toArray().size()>2000){status_=tr("Invalid AstroCapture project.");emit changed();return;}
     auto frames=object["frames"].toArray().toVariantList();
     for(const auto& value:frames){const auto row=value.toMap();if(!QFileInfo(row["path"].toString()).isFile()||!QStringList{"Light","Dark","Flat","Bias","DarkFlat","BadPixels"}.contains(row["role"].toString())){status_=tr("Project contains missing files or invalid roles.");emit changed();return;}}
-    clear();projectOptions_=object["options"].toObject().toVariantMap();emit projectOptionsChanged();frames_=std::move(frames);for(const auto& value:frames_){const auto row=value.toMap();if(row["reference"].toBool())references_[row["group"].toString()]=row["path"].toString();}status_=tr("Project loaded. Integrate to recreate the result.");emit changed();
+    auto options=object["options"].toObject().toVariantMap();
+    if(options.contains("finish")) {
+        auto finish=defaultDeepSkySettings();const auto saved=options["finish"].toMap();
+        for(auto it=saved.cbegin();it!=saved.cend();++it)finish[it.key()]=it.value();
+        const auto checked=checkedDeepSkySettings(finish);
+        if(!checked){status_=tr("Invalid AstroCapture project.");emit changed();return;}
+        options["finish"]=*checked;
+    }
+    if(options.contains("versions")) {
+        const auto checked=checkedDeepSkySnapshot(options["versions"].toMap());
+        if(!checked){status_=tr("Invalid AstroCapture project.");emit changed();return;}
+        options["versions"]=*checked;
+        options["finish"]=(*checked)[(*checked)["active"].toString()];
+    }
+    clear();projectOptions_=std::move(options);emit projectOptionsChanged();frames_=std::move(frames);for(const auto& value:frames_){const auto row=value.toMap();if(row["reference"].toBool())references_[row["group"].toString()]=row["path"].toString();}status_=tr("Project loaded. Integrate to recreate the result.");emit changed();
 }
 QVariant DeepSkyController::processingDocument() const {
     if(!finished_)return {};

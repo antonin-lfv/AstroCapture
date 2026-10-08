@@ -28,6 +28,7 @@ class DeepSkyController : public QObject {
     Q_PROPERTY(bool displayingResult READ displayingResult NOTIFY changed)
     Q_PROPERTY(int imageWidth READ imageWidth NOTIFY imageChanged)
     Q_PROPERTY(int imageHeight READ imageHeight NOTIFY imageChanged)
+    Q_PROPERTY(QVariantMap finishSettings READ finishSettings NOTIFY changed)
     Q_PROPERTY(QVariantMap suggestedStretch READ suggestedStretch NOTIFY resultChanged)
 public:
     explicit DeepSkyController(QObject* parent=nullptr):QObject(parent){}
@@ -50,6 +51,7 @@ public:
     QImage image() const{return preview_;}
     QVariantMap projectOptions() const{return projectOptions_;}
     void setProjectOptions(const QVariantMap& options){if(!busy_){projectOptions_=options;emit projectOptionsChanged();}}
+    QVariantMap finishSettings() const{return finishSettings_;}
     QVariantMap suggestedStretch() const{return stretch_;}
     Q_INVOKABLE void addFiles(const QList<QUrl>& urls,const QString& role="Light",const QString& group="Auto",double inputScale=0);
     Q_INVOKABLE void addFolder(const QUrl&,const QString& role="Auto",const QString& group="Auto",double inputScale=0);
@@ -93,7 +95,7 @@ private:
     bool displayingResult_{},comparingRaw_{};
     QString rawName_;
     QImage preview_,resultPreview_,rawPreview_;
-    QVariantMap stretch_,projectOptions_;
+    QVariantMap stretch_,projectOptions_,finishSettings_;
     std::map<QString,std::shared_ptr<const processing::FloatImage>> stacks_;
     std::shared_ptr<const processing::FloatImage> linear_,finished_;
     double totalExposure_{};

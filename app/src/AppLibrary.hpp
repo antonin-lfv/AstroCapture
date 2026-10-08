@@ -18,6 +18,7 @@ class AppLibrary : public QObject {
     Q_PROPERTY(QString status READ status NOTIFY changed)
     Q_PROPERTY(QVariantList recentVideos READ recentVideos NOTIFY changed)
     Q_PROPERTY(QUrl lastVideoDirectory READ lastVideoDirectory NOTIFY changed)
+    Q_PROPERTY(QStringList deepSkyPresetNames READ deepSkyPresetNames NOTIFY changed)
     Q_PROPERTY(QStringList processingPresetNames READ processingPresetNames NOTIFY changed)
     Q_PROPERTY(bool compactProcessing READ compactProcessing WRITE setCompactProcessing NOTIFY changed)
     Q_PROPERTY(int processingPanelWidth READ processingPanelWidth WRITE setProcessingPanelWidth NOTIFY changed)
@@ -31,6 +32,10 @@ public:
     QString status() const { return status_; }
     QVariantList recentVideos() const;
     QUrl lastVideoDirectory() const;
+    QStringList deepSkyPresetNames() const { return deepSkyPresets_.keys(); }
+    Q_INVOKABLE bool saveDeepSkyPreset(const QString&, const QVariantMap&, bool overwrite=false);
+    Q_INVOKABLE QVariantMap deepSkyPreset(const QString&) const;
+    Q_INVOKABLE void removeDeepSkyPreset(const QString&);
     QStringList processingPresetNames() const { return processingPresets_.keys(); }
     bool compactProcessing() const { return compactProcessing_; }
     int processingPanelWidth() const { return processingPanelWidth_; }
@@ -66,7 +71,7 @@ private:
     bool historyEnabled_{true};
     QVariantList images_;
     QStringList recentVideos_;
-    QVariantMap processingPresets_;
+    QVariantMap processingPresets_,deepSkyPresets_;
     bool compactProcessing_{false};
     int processingPanelWidth_{330};
 };

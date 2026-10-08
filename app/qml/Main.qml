@@ -64,6 +64,7 @@ ApplicationWindow {
         id: deepSkyWorkspace
         anchors.fill: parent
         visible: window.currentTab === "deepSky"
+        shortcutsAllowed: !window.textEditing && !settingsPanel.opened
         controller: deepSkyController
         library: appLibrary
         canEditResult: !processingController.busy && !processingWorkspace.adjustmentsDirty && !processingWorkspace.playing

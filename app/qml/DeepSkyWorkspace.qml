@@ -9,6 +9,11 @@ Control {
     required property AppLibrary library
     signal editResult()
     property bool canEditResult: true
+    property bool shortcutsAllowed: true
+    property string editError: ""
+    property bool imageFocus: false
+    property alias finishEdits: edits
+    DeepSkyEdits {id:edits;objectName:"deepSkyEdits";onValuesChanged:root.restoreFinish(values)}
     property string importRole: "Auto"
     readonly property var roles:["Auto","Light","Dark","Flat","Bias","DarkFlat","BadPixels"]
     readonly property var roleNames:[qsTr("Detect image type"),qsTr("Lights"),qsTr("Darks"),qsTr("Flats"),qsTr("Bias"),qsTr("Dark flats"),qsTr("Bad pixel map")]
@@ -21,10 +26,32 @@ Control {
     property int workflowStep: 0
     property bool updatingControls: false
     property var pendingProjectFinish: null
+    readonly property bool finishDirty: controller.hasResult && (editError.length>0 || Object.keys(edits.values).some(key=>edits.values[key]!==controller.finishSettings[key]))
     readonly property bool finishEditable: controller.hasResult && (!controller.busy || controller.adjusting)
-    function previewAdjustments() {if(livePreview.checked && finishEditable && !updatingControls && Number(white.text)>Number(black.text))adjustmentTimer.restart();}
+    function restoreFinish(finish) {
+        const previous=updatingControls;updatingControls=true;
+        background.checked=finish.background;stretch.checked=finish.stretch;
+        black.text=String(finish.black);white.text=String(finish.white);
+        midtones.value=finish.midtones;redGain.value=finish.red;greenGain.value=finish.green;blueGain.value=finish.blue;
+        denoise.value=finish.denoise;asinh.checked=finish.asinh;asinhStrength.value=finish.asinhStrength;saturation.value=finish.saturation;
+        updatingControls=previous;
+    }
+    function previewAdjustments() {
+        if(!finishEditable || updatingControls)return false;
+        if(!edits.applyValues(options())){editError=qsTr("Check the levels: white must exceed black and all values must be valid.");return false;}
+        editError="";
+        if(livePreview.checked)adjustmentTimer.restart();
+        return true;
+    }
+    function applyStoredFinish() {adjustmentTimer.stop();editError="";controller.apply(edits.values);}
+    function setFinish(values) {edits.endEdit();if(edits.applyValues(values))applyStoredFinish();}
+    function undoFinish() {adjustmentTimer.stop();edits.undo();applyStoredFinish();}
+    function redoFinish() {adjustmentTimer.stop();edits.redo();applyStoredFinish();}
+    function switchVersion(version) {adjustmentTimer.stop();edits.selectVersion(version);applyStoredFinish();}
+    Shortcut {sequences:[StandardKey.Undo];enabled:root.visible && root.shortcutsAllowed && !root.dialogOpen && root.finishEditable && edits.canUndo;onActivated:root.undoFinish()}
+    Shortcut {sequences:[StandardKey.Redo];enabled:root.visible && root.shortcutsAllowed && !root.dialogOpen && root.finishEditable && edits.canRedo;onActivated:root.redoFinish()}
     Timer {id:adjustmentTimer;interval:200;onTriggered:controller.apply(root.options())}
-    readonly property bool dialogOpen: inputDialog.visible || folderDialog.visible || helpDialog.visible || exportDialog.visible || projectOpen.visible || projectSave.visible
+    readonly property bool dialogOpen: inputDialog.visible || folderDialog.visible || helpDialog.visible || exportDialog.visible || projectOpen.visible || projectSave.visible || presetDialog.visible || projectMenu.visible
     background: Rectangle {color:"#0b0d10"}
     palette.window: "#0b0d10"
     palette.windowText: "#e8edf5"
@@ -38,7 +65,11 @@ Control {
     palette.light: "#3a4048"
     palette.dark: "#12161c"
     function importFiles(role) { importRole=role; inputDialog.open(); }
-    function saveOptions() {controller.projectOptions={calibrated:calibrated.checked,normalize:normalize.checked,badPixels:badPixels.checked,sigma:sigma.value,method:integrationMethod.currentIndex,finish:options()};}
+    function saveOptions() {
+        if(!edits.applyValues(options())){editError=qsTr("Check the levels: white must exceed black and all values must be valid.");return false;}
+        edits.endEdit();
+        controller.projectOptions={calibrated:calibrated.checked,normalize:normalize.checked,badPixels:badPixels.checked,sigma:sigma.value,method:integrationMethod.currentIndex,finish:edits.values,versions:edits.snapshot()};return true;
+    }
     function options() {return {background: background.checked, stretch: stretch.checked, black:Number(black.text),white:Number(white.text),midtones:midtones.value,red:redGain.value,green:greenGain.value,blue:blueGain.value,denoise:denoise.value,asinh:asinh.checked,asinhStrength:asinhStrength.value,saturation:saturation.value};}
     Connections {
         target: root.controller
@@ -58,28 +89,23 @@ Control {
             if(settings.sigma!==undefined)sigma.value=settings.sigma;
             if(settings.method!==undefined)integrationMethod.currentIndex=settings.method;
             const finish=settings.finish;
-            root.pendingProjectFinish = !controller.hasResult && finish ? finish : null;
-            if(finish) {
-                background.checked=finish.background;
-                stretch.checked=finish.stretch;
-                black.text=String(finish.black);
-                white.text=String(finish.white);
-                midtones.value=finish.midtones;
-                redGain.value=finish.red;
-                greenGain.value=finish.green;
-                blueGain.value=finish.blue;
-                denoise.value=finish.denoise;
-                asinh.checked=finish.asinh||false;asinhStrength.value=finish.asinhStrength===undefined?20:finish.asinhStrength;saturation.value=finish.saturation===undefined?1:finish.saturation;
+            if(!controller.hasResult) {
+                adjustmentTimer.stop();root.editError="";
+                const initial={background:false,stretch:true,black:0,white:1,midtones:.15,red:1,green:1,blue:1,denoise:0,asinh:false,asinhStrength:20,saturation:1};
+                edits.resetSession(Object.assign(initial,finish||{}));
+                if(settings.versions)edits.restoreSession(settings.versions);
             }
+            else if(finish) {edits.endEdit();edits.applyValues(Object.assign({},edits.values,finish));}
+            root.pendingProjectFinish = !controller.hasResult && finish ? edits.values : null;
             root.updatingControls=false;
         }
         function onResultChanged() {
             if(controller.hasResult)root.workflowStep=6;
             if(controller.hasResult && !root.pendingProjectFinish && controller.suggestedStretch.black !== undefined) {
                 root.updatingControls=true;
-                black.text=Number(controller.suggestedStretch.black).toPrecision(6);
-                white.text=Number(controller.suggestedStretch.white).toPrecision(6);
-                midtones.value=controller.suggestedStretch.midtones;redGain.value=controller.suggestedStretch.red;greenGain.value=controller.suggestedStretch.green;blueGain.value=controller.suggestedStretch.blue;
+                const suggested=controller.suggestedStretch;
+                edits.resetSession({background:false,stretch:true,black:suggested.black,white:suggested.white,midtones:suggested.midtones,red:suggested.red,green:suggested.green,blue:suggested.blue,denoise:0,asinh:false,asinhStrength:20,saturation:1});
+                root.editError="";
                 root.updatingControls=false;
             }
         }
@@ -127,7 +153,7 @@ Control {
     Menu {
         id:projectMenu
         MenuItem {text:qsTr("Open project…");enabled:!controller.busy;onTriggered:projectOpen.open()}
-        MenuItem {text:qsTr("Save project…");enabled:!controller.busy && controller.frames.length>0;onTriggered:{root.saveOptions();projectSave.open();}}
+        MenuItem {text:qsTr("Save project…");enabled:!controller.busy && controller.frames.length>0;onTriggered:if(root.saveOptions())projectSave.open();}
         MenuSeparator {}
         MenuItem {text:qsTr("Clear project");enabled:!controller.busy && controller.frames.length>0;onTriggered:clearConfirm.open()}
     }
@@ -218,11 +244,33 @@ Control {
                 }
                 IconButton {text:qsTr("Combine channels");Layout.fillWidth:true;Layout.minimumWidth:0;enabled:!controller.busy && controller.groups.length>0;onClicked:controller.compose(redChannel.currentText,greenChannel.currentText,blueChannel.currentText,luminanceChannel.currentIndex>0?luminanceChannel.currentText:"")}
                 }
+                SectionTitle {label:qsTr("Presets and history");explanation:qsTr("Presets save finishing controls only. They do not change calibration, filters or channel composition. Absolute black and white levels depend on your data: check the histogram after loading. Each A/B version has its own undo history, limited to 100 changes.")}
+                RowLayout {
+                    Layout.fillWidth:true
+                    ComboBox {id:presetChooser;objectName:"deepSkyPresetChooser";Layout.fillWidth:true;Layout.minimumWidth:0;model:root.library.deepSkyPresetNames;displayText:currentIndex>=0?currentText:qsTr("Your presets")}
+                    IconButton {text:qsTr("Load");enabled:root.finishEditable && presetChooser.currentIndex>=0;onClicked:root.setFinish(root.library.deepSkyPreset(presetChooser.currentText))}
+                }
+                IconButton {text:qsTr("Manage presets…");Layout.fillWidth:true;enabled:root.finishEditable;onClicked:{presetName.text=presetChooser.currentIndex>=0?presetChooser.currentText:"";presetDialog.open();}}
+                RowLayout {
+                    Layout.fillWidth:true
+                    IconButton {objectName:"deepSkyUndo";text:qsTr("Undo");Layout.fillWidth:true;enabled:root.finishEditable && edits.canUndo;onClicked:root.undoFinish()}
+                    IconButton {objectName:"deepSkyRedo";text:qsTr("Redo");Layout.fillWidth:true;enabled:root.finishEditable && edits.canRedo;onClicked:root.redoFinish()}
+                }
+                SectionTitle {label:qsTr("Versions A/B");explanation:qsTr("A and B use the same linear stack and framing, with independent finishing controls and histories. Switch versions to compare; edits and final exports use the selected version. Copy duplicates the current settings into the other version. A new stack or channel composition starts a fresh pair.")}
+                RowLayout {
+                    Layout.fillWidth:true
+                    IconButton {objectName:"deepSkyVersionA";text:qsTr("Version A");Layout.fillWidth:true;borderColor:edits.version==="A"?"#6ca5f8":"#344150";enabled:root.finishEditable;onClicked:root.switchVersion("A")}
+                    IconButton {objectName:"deepSkyVersionB";text:qsTr("Version B");Layout.fillWidth:true;borderColor:edits.version==="B"?"#6ca5f8":"#344150";enabled:root.finishEditable;onClicked:root.switchVersion("B")}
+                }
+                IconButton {text:edits.version==="A"?qsTr("Copy A to B"):qsTr("Copy B to A");Layout.fillWidth:true;enabled:root.finishEditable;onClicked:edits.copyToOther()}
+                Label {text:qsTr("Selected version %1").arg(edits.version);color:"#a8b5c6";wrapMode:Text.Wrap;Layout.fillWidth:true}
+                Label {text:qsTr("Preview has unapplied settings. Apply them before final export.");visible:root.finishDirty && !livePreview.checked;color:"#edb06c";wrapMode:Text.Wrap;Layout.fillWidth:true}
+                Label {text:root.editError;color:"#edb06c";visible:text.length>0;wrapMode:Text.Wrap;Layout.fillWidth:true}
                 SectionTitle {label:qsTr("Display and stretch");explanation:qsTr("Every adjustment starts from the linear stack. Live preview can be disabled. Automatic starting point is optional; Reset to linear restores un-stretched pixels and neutral gains.")}
                 CheckBox {Layout.fillWidth:true;Layout.minimumWidth:0;implicitWidth:settingsScroll.availableWidth;contentItem:Text {text:parent.text;font:parent.font;color:"#e8edf5";wrapMode:Text.Wrap;leftPadding:parent.indicator.width+parent.spacing;verticalAlignment:Text.AlignVCenter} id:livePreview;objectName:"deepSkyLivePreview";text:qsTr("Live adjustment preview");checked:true;enabled:controller.hasResult}
                 ColumnLayout {Layout.fillWidth:true;Layout.minimumWidth:0;enabled:root.finishEditable
-                    IconButton {text:qsTr("Automatic starting point");Layout.fillWidth:true;Layout.minimumWidth:0;onClicked:{root.updatingControls=true;const s=controller.suggestedStretch;black.text=String(s.black);white.text=String(s.white);midtones.value=s.midtones;redGain.value=s.red;greenGain.value=s.green;blueGain.value=s.blue;stretch.checked=true;asinh.checked=false;saturation.value=1;denoise.value=0;background.checked=false;root.updatingControls=false;controller.apply(root.options());}}
-                    IconButton {text:qsTr("Reset to linear");Layout.fillWidth:true;Layout.minimumWidth:0;onClicked:{root.updatingControls=true;black.text="0";white.text="1";midtones.value=.15;asinh.checked=false;stretch.checked=false;background.checked=false;redGain.value=greenGain.value=blueGain.value=1;saturation.value=1;denoise.value=0;root.updatingControls=false;controller.apply(root.options());}}
+                    IconButton {text:qsTr("Automatic starting point");Layout.fillWidth:true;Layout.minimumWidth:0;onClicked:{const s=controller.suggestedStretch;root.setFinish({background:false,stretch:true,black:s.black,white:s.white,midtones:s.midtones,red:s.red,green:s.green,blue:s.blue,denoise:0,asinh:false,asinhStrength:20,saturation:1});}}
+                    IconButton {text:qsTr("Reset to linear");Layout.fillWidth:true;Layout.minimumWidth:0;onClicked:root.setFinish({background:false,stretch:false,black:0,white:1,midtones:.15,red:1,green:1,blue:1,denoise:0,asinh:false,asinhStrength:20,saturation:1})}
                 }
                 SectionTitle {label:qsTr("Background");explanation:qsTr("The optional correction fits a plane to the sky background. It may affect extended nebulosity: compare with correction disabled. Manual background samples are not available yet.")}
                 CheckBox {Layout.fillWidth:true;Layout.minimumWidth:0;implicitWidth:settingsScroll.availableWidth;contentItem:Text {text:parent.text;font:parent.font;color:"#e8edf5";wrapMode:Text.Wrap;leftPadding:parent.indicator.width+parent.spacing;verticalAlignment:Text.AlignVCenter} id:background;onClicked:root.previewAdjustments();text:qsTr("Correct background gradient");enabled:root.finishEditable}
@@ -236,20 +284,20 @@ Control {
                 }
                 CheckBox {Layout.fillWidth:true;Layout.minimumWidth:0;implicitWidth:settingsScroll.availableWidth;contentItem:Text {text:parent.text;font:parent.font;color:"#e8edf5";wrapMode:Text.Wrap;leftPadding:parent.indicator.width+parent.spacing;verticalAlignment:Text.AlignVCenter} id:asinh;onClicked:root.previewAdjustments();text:qsTr("Asinh stretch · preserve color ratios");enabled:root.finishEditable && stretch.checked}
                 ParameterLabel {visible:asinh.checked;label:qsTr("Asinh strength · %1").arg(asinhStrength.value.toFixed(0));explanation:qsTr("Controls the strength of the color-ratio-preserving asinh stretch. This is an alternative to the midtones transfer function, not an additional cumulative step.")}
-                Slider {id:asinhStrength;onMoved:root.previewAdjustments();visible:asinh.checked;Layout.fillWidth:true;Layout.minimumWidth:0;from:1;to:200;value:20;enabled:root.finishEditable}
+                Slider {id:asinhStrength;onMoved:root.previewAdjustments();onPressedChanged:{if(pressed)edits.beginEdit();else edits.endEdit();}visible:asinh.checked;Layout.fillWidth:true;Layout.minimumWidth:0;from:1;to:200;value:20;enabled:root.finishEditable}
                 ParameterLabel {visible:!asinh.checked;label:qsTr("Midtones · %1").arg(midtones.value.toFixed(3));explanation:qsTr("Lower values brighten faint detail. This changes the stretch curve without changing the black and white thresholds.")}
-                Slider {id:midtones;onMoved:root.previewAdjustments();visible:!asinh.checked;Layout.fillWidth:true;Layout.minimumWidth:0;from:.001;to:.999;value:.15;enabled:root.finishEditable}
+                Slider {id:midtones;onMoved:root.previewAdjustments();onPressedChanged:{if(pressed)edits.beginEdit();else edits.endEdit();}visible:!asinh.checked;Layout.fillWidth:true;Layout.minimumWidth:0;from:.001;to:.999;value:.15;enabled:root.finishEditable}
                 SectionTitle {label:qsTr("Color and noise")}
                 ParameterLabel {label:qsTr("Red gain · %1").arg(redGain.value.toFixed(2));explanation:qsTr("Multiply the red channel before stretching. Initial gains estimate a neutral background; adjust manually for your intended colors.")}
-                Slider {id:redGain;onMoved:root.previewAdjustments();Layout.fillWidth:true;Layout.minimumWidth:0;from:.1;to:3;value:1;enabled:root.finishEditable}
+                Slider {id:redGain;onMoved:root.previewAdjustments();onPressedChanged:{if(pressed)edits.beginEdit();else edits.endEdit();}Layout.fillWidth:true;Layout.minimumWidth:0;from:.1;to:3;value:1;enabled:root.finishEditable}
                 ParameterLabel {label:qsTr("Green gain · %1").arg(greenGain.value.toFixed(2));explanation:qsTr("Multiply the green channel before stretching. This is not SCNR or photometric calibration.")}
-                Slider {id:greenGain;onMoved:root.previewAdjustments();Layout.fillWidth:true;Layout.minimumWidth:0;from:.1;to:3;value:1;enabled:root.finishEditable}
+                Slider {id:greenGain;onMoved:root.previewAdjustments();onPressedChanged:{if(pressed)edits.beginEdit();else edits.endEdit();}Layout.fillWidth:true;Layout.minimumWidth:0;from:.1;to:3;value:1;enabled:root.finishEditable}
                 ParameterLabel {label:qsTr("Blue gain · %1").arg(blueGain.value.toFixed(2));explanation:qsTr("Multiply the blue channel before stretching. Watch the background and stellar colors while adjusting.")}
-                Slider {id:blueGain;onMoved:root.previewAdjustments();Layout.fillWidth:true;Layout.minimumWidth:0;from:.1;to:3;value:1;enabled:root.finishEditable}
+                Slider {id:blueGain;onMoved:root.previewAdjustments();onPressedChanged:{if(pressed)edits.beginEdit();else edits.endEdit();}Layout.fillWidth:true;Layout.minimumWidth:0;from:.1;to:3;value:1;enabled:root.finishEditable}
                 ParameterLabel {label:qsTr("Saturation · %1").arg(saturation.value.toFixed(2));explanation:qsTr("1 preserves saturation, 0 removes color, values above 1 strengthen it. The darkest background is protected to avoid amplifying color noise.")}
-                Slider {id:saturation;onMoved:root.previewAdjustments();Layout.fillWidth:true;Layout.minimumWidth:0;from:0;to:3;value:1;enabled:root.finishEditable}
+                Slider {id:saturation;onMoved:root.previewAdjustments();onPressedChanged:{if(pressed)edits.beginEdit();else edits.endEdit();}Layout.fillWidth:true;Layout.minimumWidth:0;from:0;to:3;value:1;enabled:root.finishEditable}
                 ParameterLabel {label:qsTr("Noise smoothing · %1").arg(denoise.value.toFixed(2));explanation:qsTr("Blends a small Gaussian smoothing into the image. Use low values and inspect at 100 percent to preserve fine structures.")}
-                Slider {id:denoise;onMoved:root.previewAdjustments();Layout.fillWidth:true;Layout.minimumWidth:0;from:0;to:1;value:0;enabled:root.finishEditable}
+                Slider {id:denoise;onMoved:root.previewAdjustments();onPressedChanged:{if(pressed)edits.beginEdit();else edits.endEdit();}Layout.fillWidth:true;Layout.minimumWidth:0;from:0;to:1;value:0;enabled:root.finishEditable}
                 SectionTitle {label:qsTr("Comparison");explanation:qsTr("Choose an original light and hold Raw exposure. Its framing and automatic stretch are independent from the final stack. The comparison does not change exports.")}
                 ComboBox {
                     id:rawComparisonChoice;objectName:"deepSkyRawChoice";Layout.fillWidth:true;Layout.minimumWidth:0
@@ -258,14 +306,14 @@ Control {
                     onActivated:controller.chooseRawComparison(lightRows[currentIndex].index)
                 }
                 IconButton {text:qsTr("Raw exposure (hold)");Layout.fillWidth:true;Layout.minimumWidth:0;enabled:!controller.busy && controller.hasResult && controller.hasRawComparison;onPressedChanged:controller.showRawComparison(pressed)}
-                IconButton {visible:!livePreview.checked;text:qsTr("Apply adjustments");Layout.fillWidth:true;Layout.minimumWidth:0;enabled:root.finishEditable;onClicked:{adjustmentTimer.stop();controller.apply(root.options());}}
+                IconButton {visible:!livePreview.checked;text:qsTr("Apply adjustments");Layout.fillWidth:true;Layout.minimumWidth:0;enabled:root.finishEditable;onClicked:if(root.previewAdjustments())root.applyStoredFinish();}
                 SectionTitle {label:qsTr("Export");explanation:qsTr("Linear FITS preserves the integration. Final image offers 16-bit TIFF or JPEG with the current finish. Details and caption transfers the finished pixels and acquisition summary to Processing.")}
                 ColumnLayout {
                     Layout.fillWidth:true;Layout.minimumWidth:0;enabled:!controller.busy && controller.hasResult
                     IconButton {text:qsTr("Linear FITS…");Layout.fillWidth:true;Layout.minimumWidth:0;onClicked:{root.linearExport=true;exportDialog.nameFilters=["FITS (*.fits)"];exportDialog.open();}}
-                    IconButton {text:qsTr("Final image…");Layout.fillWidth:true;Layout.minimumWidth:0;onClicked:{root.linearExport=false;exportDialog.nameFilters=["TIFF (*.tif)","JPEG (*.jpg)"];exportDialog.open();}}
+                    IconButton {text:qsTr("Final image…");enabled:!root.finishDirty;Layout.fillWidth:true;Layout.minimumWidth:0;onClicked:{root.linearExport=false;exportDialog.nameFilters=["TIFF (*.tif)","JPEG (*.jpg)"];exportDialog.open();}}
                 }
-                IconButton {text:qsTr("Details and caption…");Layout.fillWidth:true;Layout.minimumWidth:0;enabled:!controller.busy && controller.hasResult && root.canEditResult;onClicked:root.editResult()}
+                IconButton {text:qsTr("Details and caption…");Layout.fillWidth:true;Layout.minimumWidth:0;enabled:!controller.busy && controller.hasResult && !root.finishDirty && root.canEditResult;onClicked:root.editResult()}
                 }
 
             }
@@ -274,23 +322,25 @@ Control {
             Layout.fillWidth:true;Layout.fillHeight:true;spacing:8
             RowLayout {
                 Layout.fillWidth:true
-                Label {text:controller.comparingRaw?qsTr("Raw exposure · %1 · automatic stretch").arg(controller.rawComparisonName):controller.displayingResult?qsTr("Stacked result"):qsTr("Source image preview · automatic stretch");color:"#e8edf5";Layout.fillWidth:true;wrapMode:Text.Wrap}
+                Label {text:controller.comparingRaw?qsTr("Raw exposure · %1 · automatic stretch").arg(controller.rawComparisonName):controller.displayingResult?(root.finishDirty?qsTr("Stacked result · pending adjustments"):qsTr("Stacked result · version %1").arg(edits.version)):qsTr("Source image preview · automatic stretch");color:"#e8edf5";Layout.fillWidth:true;wrapMode:Text.Wrap}
+                IconButton {objectName:"deepSkyImageFocus";text:root.imageFocus?qsTr("Show histograms"):qsTr("Enlarge preview");onClicked:root.imageFocus=!root.imageFocus;ToolTip.visible:hovered;ToolTip.text:qsTr("Temporarily hide histograms and the image list to inspect A/B. Zoom and framing stay shared.")}
                 IconButton {text:qsTr("Show stacked result");visible:controller.hasResult && !controller.displayingResult;enabled:!controller.busy;onClicked:controller.restoreResult()}
             }
             ImageViewport {
-                id:viewport;Layout.fillWidth:true;Layout.fillHeight:true;Layout.minimumHeight:100
+                id:viewport;objectName:"deepSkyViewport";Layout.fillWidth:true;Layout.fillHeight:true;Layout.minimumHeight:100
                 sourceWidth:controller.imageWidth;sourceHeight:controller.imageHeight
                 DeepSkyImageItem {parent:viewport.imageContainer;anchors.fill:parent;controller:root.controller}
                 Label {anchors.centerIn:parent;visible:controller.imageWidth===0;text:qsTr("Add light frames to begin\nThe preview is automatically stretched; source pixels stay linear.");color:"#a8b5c6";horizontalAlignment:Text.AlignHCenter;wrapMode:Text.Wrap;width:parent.width-40}
             }
             RowLayout {
                 Layout.fillWidth:true
+                visible:!root.imageFocus
                 Label {text:qsTr("Displayed image histogram");color:"#a8b5c6";Layout.fillWidth:true}
                 ComboBox {id:histogramMode;model:["RGB",qsTr("Luminance")];Layout.preferredWidth:140}
             }
-            DeepSkyHistogramItem {Layout.fillWidth:true;Layout.preferredHeight:64;controller:root.controller;luminanceOnly:histogramMode.currentIndex===1}
+            DeepSkyHistogramItem {visible:!root.imageFocus;Layout.fillWidth:true;Layout.preferredHeight:64;controller:root.controller;luminanceOnly:histogramMode.currentIndex===1}
             ColumnLayout {
-                visible:root.workflowStep===6 && controller.hasResult;Layout.fillWidth:true;spacing:3
+                visible:!root.imageFocus && root.workflowStep===6 && controller.hasResult;Layout.fillWidth:true;spacing:3
                 RowLayout {
                     Layout.fillWidth:true
                     Label {text:qsTr("Linear histogram and stretch curve");color:"#e8edf5";Layout.fillWidth:true}
@@ -336,7 +386,9 @@ Control {
                             else if(!asinh.checked)midtones.value=Math.max(.001,Math.min(.999,(value-Number(black.text))/(Number(white.text)-Number(black.text))));
                             root.previewAdjustments();linearHistogram.requestPaint();
                         }
-                        onPressed:mouse=>changePoint(mouse.x)
+                        onPressed:mouse=>{edits.beginEdit();changePoint(mouse.x);}
+                        onReleased:edits.endEdit()
+                        onCanceled:edits.endEdit()
                         onPositionChanged:mouse=>{if(pressed)changePoint(mouse.x);}
                     }
                 }
@@ -345,13 +397,14 @@ Control {
             }
             RowLayout {
                 Layout.fillWidth:true
+                visible:!root.imageFocus
                 ComboBox {id:frameFilterChoice;objectName:"deepSkyFrameFilter";model:[qsTr("All images")].concat(root.roleNames.slice(1));Layout.preferredWidth:155;onActivated:root.frameFilter=currentIndex===0?"All":root.roles[currentIndex]}
                 Label {text:qsTr("%1 / %2 images").arg(root.visibleFrames.length).arg(controller.frames.length);color:"#9daec3";Layout.fillWidth:true}
                 IconButton {text:qsTr("Select all");enabled:!controller.busy;onClicked:root.visibleFrames.forEach(row=>controller.setSelected(row.sourceIndex,true))}
                 IconButton {text:qsTr("Select none");enabled:!controller.busy;onClicked:root.visibleFrames.forEach(row=>controller.setSelected(row.sourceIndex,false))}
             }
             ListView {
-                id:frameList;objectName:"deepSkyFrameList";Layout.fillWidth:true;Layout.preferredHeight:root.workflowStep===6?80:200;clip:true;model:root.visibleFrames
+                id:frameList;objectName:"deepSkyFrameList";visible:!root.imageFocus;Layout.fillWidth:true;Layout.preferredHeight:root.workflowStep===6?80:200;clip:true;model:root.visibleFrames
                 ScrollBar.vertical:ScrollBar {}
                 delegate:Rectangle {
                     required property var modelData
@@ -377,6 +430,23 @@ Control {
                 Layout.fillWidth:true
                 ScrollView {Layout.fillWidth:true;Layout.preferredHeight:52;clip:true;Label {width:parent.width;text:controller.status;color:"#a8b5c6";wrapMode:Text.Wrap}}
                 IconButton {text:qsTr("Cancel");visible:controller.busy;onClicked:controller.cancel()}
+            }
+        }
+    }
+    Dialog {
+        id:presetDialog;objectName:"deepSkyPresetDialog";parent:Overlay.overlay;anchors.centerIn:parent;modal:true
+        title:qsTr("Deep-sky presets");width:Math.min(440,root.width-32)
+        ColumnLayout {
+            width:parent.width;spacing:12
+            Label {text:qsTr("Name this finish for your camera, filters or intent. Use a new name to duplicate it. Presets are kept locally across updates.");color:"#b5c3d4";wrapMode:Text.Wrap;Layout.fillWidth:true}
+            TextField {id:presetName;objectName:"deepSkyPresetName";Layout.fillWidth:true;maximumLength:80;placeholderText:qsTr("Preset name")}
+            Label {text:qsTr("This name exists. Replace overwrites its settings.");color:"#edb06c";visible:root.library.deepSkyPresetNames.indexOf(presetName.text.trim())>=0;wrapMode:Text.Wrap;Layout.fillWidth:true}
+            RowLayout {
+                Layout.fillWidth:true
+                IconButton {text:qsTr("Cancel");onClicked:presetDialog.close()}
+                IconButton {text:qsTr("Delete");enabled:root.library.deepSkyPresetNames.indexOf(presetName.text.trim())>=0;onClicked:{root.library.removeDeepSkyPreset(presetName.text.trim());presetDialog.close();}}
+                Item {Layout.fillWidth:true}
+                IconButton {text:root.library.deepSkyPresetNames.indexOf(presetName.text.trim())>=0?qsTr("Replace"):qsTr("Save");enabled:presetName.text.trim().length>0;onClicked:{if(root.library.saveDeepSkyPreset(presetName.text,edits.values,true))presetDialog.close();}}
             }
         }
     }

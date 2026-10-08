@@ -79,6 +79,9 @@ qt_add_qml_module(AstroCapture
         src/MosaicController.hpp
         src/MosaicController.cpp
         src/MosaicImageItem.hpp
+        src/DeepSkyEdits.hpp
+        src/DeepSkyEdits.cpp
+        src/DeepSkySettings.hpp
         src/ProcessingEdits.hpp
         src/ProcessingEdits.cpp
         src/ProcessingSettings.hpp

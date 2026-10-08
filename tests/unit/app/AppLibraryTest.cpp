@@ -7,6 +7,7 @@
 #include <QTemporaryDir>
 #include "AppLibrary.hpp"
 #include "ProcessingSettings.hpp"
+#include "DeepSkySettings.hpp"
 #include "Check.hpp"
 
 int main(int argc, char** argv) {
@@ -32,6 +33,15 @@ int main(int argc, char** argv) {
     const QUrlQuery reportQuery(QUrl::fromEncoded(report.toEncoded()));
     ASTRO_TEST_CHECK(reportQuery.queryItemValue("subject", QUrl::FullyDecoded).contains("1.0.2"));
     ASTRO_TEST_CHECK(reportQuery.queryItemValue("body", QUrl::FullyDecoded).contains("\n\nSteps to reproduce:"));
+    auto deepSettings=astro::app::defaultDeepSkySettings();deepSettings["saturation"]=1.4;
+    ASTRO_TEST_CHECK(library.saveDeepSkyPreset("  RGB doux  ",deepSettings));
+    ASTRO_TEST_CHECK(!library.saveDeepSkyPreset("RGB doux",deepSettings));
+    deepSettings["saturation"]=1.8;ASTRO_TEST_CHECK(library.saveDeepSkyPreset("RGB doux",deepSettings,true));
+    ASTRO_TEST_CHECK(library.saveDeepSkyPreset("HOO",deepSettings));
+    auto invalidDeep=deepSettings;invalidDeep["white"]=invalidDeep["black"];
+    ASTRO_TEST_CHECK(!library.saveDeepSkyPreset("invalid",invalidDeep));
+    {astro::app::AppLibrary restored;ASTRO_TEST_CHECK(restored.deepSkyPresetNames().size()==2 && restored.deepSkyPreset("RGB doux")==deepSettings);}
+    library.removeDeepSkyPreset("HOO");ASTRO_TEST_CHECK(library.deepSkyPresetNames()==QStringList{"RGB doux"});
     library.chooseExportDirectory(QUrl::fromLocalFile(folder));
     ASTRO_TEST_CHECK(library.suggestedExport(suggestion).toLocalFile() == folder + "/video-processed.tif");
     ASTRO_TEST_CHECK(library.exportFolderFor(suggestion).toLocalFile() == folder);

@@ -298,3 +298,13 @@ installées séparément pour utiliser le DMG.
 Le numéro de version est visible dans le titre de la fenêtre et les paramètres.
 Le bouton **Signaler un bug** prépare un e-mail vers antoninlefevre45@gmail.com
 avec la version et les étapes de reproduction, à relire avant envoi.
+
+Dans **Ciel profond → Finition et export**, les préréglages conservent les réglages
+de finition (niveaux absolus inclus), sans calibration ni composition des canaux.
+Chaque version A/B possède ses réglages et son historique de 100 modifications.
+Un déplacement de curseur compte comme une action ; Annuler/Rétablir et leurs
+raccourcis habituels permettent de revenir sur les essais. Copier A vers B (ou
+l’inverse) duplique la finition. Le nouvel empilement ou la nouvelle composition
+réinitialise A/B. Les projets sauvegardent les deux versions et la version active,
+mais pas les historiques d’annulation. Sans aperçu automatique, appliquer les
+réglages en attente est nécessaire avant l’export final ou le transfert.

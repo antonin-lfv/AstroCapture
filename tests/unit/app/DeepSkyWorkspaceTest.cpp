@@ -11,9 +11,12 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QDir>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <astro/recording/AstroImage.hpp>
 #include <cmath>
 #include "DeepSkyController.hpp"
+#include "DeepSkyEdits.hpp"
 #include "DeepSkyImageItem.hpp"
 #include "AppLibrary.hpp"
 #include "Check.hpp"
@@ -24,6 +27,7 @@ int main(int argc,char** argv){
     QTranslator translator;if(qEnvironmentVariableIsSet("ASTRO_UI_TRANSLATION_PATH") && translator.load(qEnvironmentVariable("ASTRO_UI_TRANSLATION_PATH")))application.installTranslator(&translator);
     QCoreApplication::setOrganizationName("AstroCaptureTest");QCoreApplication::setApplicationName("DeepSkyWorkspaceTest");
     QSettings::setDefaultFormat(QSettings::IniFormat);QSettings::setPath(QSettings::IniFormat,QSettings::UserScope,directory.path());
+    qmlRegisterType<app::DeepSkyEdits>("AstroCapture",1,0,"DeepSkyEdits");
     qmlRegisterType<app::DeepSkyController>("AstroCapture",1,0,"DeepSkyController");qmlRegisterType<app::DeepSkyHistogramItem>("AstroCapture",1,0,"DeepSkyHistogramItem");qmlRegisterType<app::DeepSkyImageItem>("AstroCapture",1,0,"DeepSkyImageItem");qmlRegisterType<app::AppLibrary>("AstroCapture",1,0,"AppLibrary");
     std::unique_ptr<app::DeepSkyController> screenshotController;
     app::DeepSkyController controller;app::AppLibrary library;QQmlEngine engine;QQmlComponent component(&engine);
@@ -76,6 +80,31 @@ int main(int argc,char** argv){
     controller.setProjectOptions({{"calibrated",true},{"finish",finish}});
     controller.apply(finish);wait(controller);
     const auto savedPixels=controller.processingDocument().value<app::ImageDocument>().pixels;
+    auto* edits=root->findChild<app::DeepSkyEdits*>("deepSkyEdits");ASTRO_TEST_CHECK(edits);
+    ASTRO_TEST_CHECK(!root->property("finishDirty").toBool());
+    auto bFinish=finish;bFinish["saturation"]=.2;bFinish["midtones"]=.6;
+    edits->copyToOther();
+    ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root,"switchVersion",Q_ARG(QVariant,QVariant("B"))));wait(controller);
+    ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root,"setFinish",Q_ARG(QVariant,QVariant(bFinish))));wait(controller);
+    const auto bPixels=controller.processingDocument().value<app::ImageDocument>().pixels;
+    ASTRO_TEST_CHECK(edits->version()=="B" && controller.finishSettings()["midtones"]==.6);
+    ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root,"undoFinish"));wait(controller);
+    ASTRO_TEST_CHECK(controller.finishSettings()["midtones"]==.37);
+    ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root,"redoFinish"));wait(controller);
+    ASTRO_TEST_CHECK(controller.finishSettings()["midtones"]==.6);
+    ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root,"switchVersion",Q_ARG(QVariant,QVariant("A"))));wait(controller);
+    ASTRO_TEST_CHECK(controller.finishSettings()["midtones"]==.37);
+    // With live preview off, changing a valid control marks the result dirty.
+    auto pendingFinish=finish;pendingFinish["saturation"]=.8;
+    edits->applyValues(pendingFinish);ASTRO_TEST_CHECK(root->property("finishDirty").toBool());
+    ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root,"undoFinish"));wait(controller);
+    ASTRO_TEST_CHECK(!root->property("finishDirty").toBool());
+    ASTRO_TEST_CHECK(library.saveDeepSkyPreset("Test finish",edits->values()));
+    edits->applyValues(bFinish);
+    ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root,"setFinish",Q_ARG(QVariant,QVariant(library.deepSkyPreset("Test finish")))));wait(controller);
+    ASTRO_TEST_CHECK(controller.finishSettings()["midtones"]==.37);
+    QVariant savedOptions;
+    ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root,"saveOptions",Q_RETURN_ARG(QVariant,savedOptions))&&savedOptions.toBool());
     const auto project=QUrl::fromLocalFile(directory.filePath("session.astroproject"));controller.saveProject(project);controller.clear();root->setProperty("workflowStep",0);controller.loadProject(project);ASTRO_TEST_CHECK(controller.frames().size()==3&&!controller.frames()[2].toMap()["selected"].toBool()&&!controller.hasResult());
     controller.integrate(true);wait(controller);ASTRO_TEST_CHECK(controller.hasResult());
     ASTRO_TEST_CHECK(root->property("workflowStep").toInt()==6);
@@ -90,7 +119,26 @@ int main(int argc,char** argv){
     ASTRO_TEST_CHECK(recreated->rgb.size()==savedPixels->rgb.size());
     for(std::size_t i=0;i<recreated->rgb.size();++i)ASTRO_TEST_CHECK(std::abs(recreated->rgb[i]-savedPixels->rgb[i])<1e-6);
     ASTRO_TEST_CHECK(!root->property("pendingProjectFinish").isValid() || root->property("pendingProjectFinish").isNull());
+    ASTRO_TEST_CHECK(edits->version()=="A" && !edits->canUndo());
+    ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root,"switchVersion",Q_ARG(QVariant,QVariant("B"))));wait(controller);
+    ASTRO_TEST_CHECK(!edits->canUndo() && edits->values()["midtones"]==.6);
+    const auto restoredB=controller.processingDocument().value<app::ImageDocument>().pixels;
+    ASTRO_TEST_CHECK(restoredB->rgb.size()==bPixels->rgb.size());
+    for(std::size_t i=0;i<restoredB->rgb.size();++i)ASTRO_TEST_CHECK(std::abs(restoredB->rgb[i]-bPixels->rgb[i])<1e-6);
+    ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root,"switchVersion",Q_ARG(QVariant,QVariant("A"))));wait(controller);
     const auto previous=controller.processingDocument().value<app::ImageDocument>().pixels;
+    QFile savedProject(project.toLocalFile());ASTRO_TEST_CHECK(savedProject.open(QIODevice::ReadOnly));
+    auto corruptProject=QJsonDocument::fromJson(savedProject.readAll()).object();savedProject.close();
+    auto corruptOptions=corruptProject["options"].toObject();auto corruptVersions=corruptOptions["versions"].toObject();
+    auto corruptB=corruptVersions["B"].toObject();corruptB["white"]=corruptB["black"];
+    corruptVersions["B"]=corruptB;corruptOptions["versions"]=corruptVersions;corruptProject["options"]=corruptOptions;
+    const auto badProject=directory.filePath("invalid.astroproject");QFile badFile(badProject);ASTRO_TEST_CHECK(badFile.open(QIODevice::WriteOnly));
+    badFile.write(QJsonDocument(corruptProject).toJson());badFile.close();controller.loadProject(QUrl::fromLocalFile(badProject));
+    ASTRO_TEST_CHECK(controller.hasResult()&&!controller.status().isEmpty()&&controller.processingDocument().value<app::ImageDocument>().pixels==previous);
+    const auto linearAfter=QUrl::fromLocalFile(directory.filePath("linear-after-edits.fits"));controller.exportImage(linearAfter,true);wait(controller);
+    const auto scientific=recording::readAstroImage(linearAfter.toLocalFile().toStdString());
+    ASTRO_TEST_CHECK(scientific.samples.size()==result.samples.size());
+    for(std::size_t i=0;i<scientific.samples.size();++i)ASTRO_TEST_CHECK(std::abs(scientific.samples[i]-result.samples[i])<1e-6);
     controller.integrate(true);controller.cancel();wait(controller);ASTRO_TEST_CHECK(controller.processingDocument().value<app::ImageDocument>().pixels==previous);
     QFile original(urls[0].toLocalFile());ASTRO_TEST_CHECK(original.open(QIODevice::ReadOnly));const auto before=original.readAll();original.close();controller.exportImage(urls[0],true);ASTRO_TEST_CHECK(!controller.busy());ASTRO_TEST_CHECK(original.open(QIODevice::ReadOnly));ASTRO_TEST_CHECK(original.readAll()==before);
     app::DeepSkyController guarded;guarded.addFiles({urls[0]});wait(guarded);guarded.addFiles({urls[1]},"Dark");wait(guarded);guarded.integrate(true);wait(guarded);ASTRO_TEST_CHECK(!guarded.hasResult()&&guarded.status().contains("Calibration files are selected"));
@@ -107,8 +155,19 @@ int main(int argc,char** argv){
         screenshotController->integrate(true);wait(*screenshotController);ASTRO_TEST_CHECK(screenshotController->hasResult());
         auto settings=screenshotController->suggestedStretch();
         screenshotController->apply(settings);wait(*screenshotController);ASTRO_TEST_CHECK(screenshotController->processingDocument().value<app::ImageDocument>().pixels);
-        root->setProperty("workflowStep",6);QCoreApplication::processEvents();QThread::msleep(50);QCoreApplication::processEvents();
+        root->setProperty("workflowStep",6);root->setProperty("imageFocus",true);QCoreApplication::processEvents();QThread::msleep(50);QCoreApplication::processEvents();
         if(qEnvironmentVariableIsSet("ASTRO_UI_SNAPSHOT_PATH"))ASTRO_TEST_CHECK(window.grabWindow().save(qEnvironmentVariable("ASTRO_UI_SNAPSHOT_PATH")));
+        ASTRO_TEST_CHECK(root->findChild<QObject*>("deepSkyViewport")->property("height").toDouble()>280);
+        const auto beforeAB=screenshotController->processingDocument().value<app::ImageDocument>().pixels;
+        auto realB=root->findChild<app::DeepSkyEdits*>("deepSkyEdits")->values();realB["midtones"]=.35;realB["asinh"]=false;
+        ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root,"switchVersion",Q_ARG(QVariant,QVariant("B"))));wait(*screenshotController);
+        ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root,"setFinish",Q_ARG(QVariant,QVariant(realB))));wait(*screenshotController);
+        QCoreApplication::processEvents();
+        if(qEnvironmentVariableIsSet("ASTRO_UI_SNAPSHOT_PATH"))ASTRO_TEST_CHECK(window.grabWindow().save(qEnvironmentVariable("ASTRO_UI_SNAPSHOT_PATH")+"-B.png"));
+        ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root,"switchVersion",Q_ARG(QVariant,QVariant("A"))));wait(*screenshotController);
+        const auto afterAB=screenshotController->processingDocument().value<app::ImageDocument>().pixels;
+        ASTRO_TEST_CHECK(beforeAB->rgb.size()==afterAB->rgb.size());
+        for(std::size_t i=0;i<afterAB->rgb.size();i+=997)ASTRO_TEST_CHECK(std::abs(beforeAB->rgb[i]-afterAB->rgb[i])<1e-6);
     }
     std::cout<<"OK\n";
 }

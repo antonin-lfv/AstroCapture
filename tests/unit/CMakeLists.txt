@@ -165,6 +165,7 @@ astro_add_unit_test(astro_processing_deep_sky_test
 set_tests_properties(astro_processing_deep_sky_test PROPERTIES TIMEOUT 120)
 astro_add_unit_test(astro_app_deep_sky_workspace_test
     SOURCES app/DeepSkyWorkspaceTest.cpp
+        ../../app/src/DeepSkyEdits.cpp ../../app/src/DeepSkyEdits.hpp
         ../../app/src/DeepSkyController.cpp ../../app/src/DeepSkyController.hpp
         ../../app/src/DeepSkyImageItem.hpp ../../app/src/AppLibrary.cpp ../../app/src/AppLibrary.hpp
     LIBS Qt6::Quick Qt6::Gui astro::processing astro::recording
@@ -182,3 +183,10 @@ astro_add_unit_test(astro_processing_metal_test
     LIBS astro::processing Threads::Threads
 )
 set_tests_properties(astro_processing_metal_test PROPERTIES TIMEOUT 60)
+
+astro_add_unit_test(astro_app_deep_sky_edits_test
+    SOURCES app/DeepSkyEditsTest.cpp ../../app/src/DeepSkyEdits.cpp ../../app/src/DeepSkyEdits.hpp
+    LIBS Qt6::Quick Qt6::Gui
+)
+set_target_properties(astro_app_deep_sky_edits_test PROPERTIES AUTOMOC ON)
+target_include_directories(astro_app_deep_sky_edits_test PRIVATE ../../app/src)

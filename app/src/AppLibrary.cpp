@@ -1,5 +1,6 @@
 #include "AppLibrary.hpp"
 #include "ProcessingSettings.hpp"
+#include "DeepSkySettings.hpp"
 
 #include <QCoreApplication>
 #include <QUrlQuery>
@@ -46,6 +47,10 @@ AppLibrary::AppLibrary(QObject* parent) : QObject(parent) {
     recentVideos_ = settings.value("application/recentVideos").toStringList();
     recentVideos_.removeDuplicates();
     while (recentVideos_.size() > 10) recentVideos_.removeLast();
+    const auto deepPresets=QJsonDocument::fromJson(settings.value("application/deepSkyPresets").toByteArray()).object().toVariantMap();
+    for(auto it=deepPresets.cbegin();it!=deepPresets.cend();++it)
+        if(!it.key().trimmed().isEmpty() && it.key().size()<=80)
+            if(auto values=checkedDeepSkySettings(it.value().toMap()))deepSkyPresets_.insert(it.key(),*values);
     const auto presets = QJsonDocument::fromJson(settings.value("application/processingPresets").toByteArray()).object().toVariantMap();
     for (auto it = presets.begin(); it != presets.end(); ++it) {
         if (auto values = checkedProcessingSettings(it.value().toMap())) processingPresets_.insert(it.key(), *values);
@@ -82,6 +87,7 @@ void AppLibrary::save() {
     settings.setValue("application/processingPanelWidth", processingPanelWidth_);
     settings.setValue("application/recentVideos", recentVideos_);
     settings.setValue("application/processingPresets", QJsonDocument(QJsonObject::fromVariantMap(processingPresets_)).toJson(QJsonDocument::Compact));
+    settings.setValue("application/deepSkyPresets",QJsonDocument(QJsonObject::fromVariantMap(deepSkyPresets_)).toJson(QJsonDocument::Compact));
     settings.remove("application/showScrollbars");
     settings.setValue("application/language", language_);
     settings.setValue("application/historyEnabled", historyEnabled_);
@@ -128,6 +134,13 @@ void AppLibrary::setProcessingPanelWidth(int value) {
     processingPanelWidth_ = value;
     save();
 }
+bool AppLibrary::saveDeepSkyPreset(const QString& inputName,const QVariantMap& input,bool overwrite) {
+    const auto name=inputName.trimmed();const auto values=checkedDeepSkySettings(input);
+    if(name.isEmpty()||name.size()>80||!values||(deepSkyPresets_.contains(name)&&!overwrite))return false;
+    deepSkyPresets_.insert(name,*values);status_=tr("Deep-sky preset saved.");save();return true;
+}
+QVariantMap AppLibrary::deepSkyPreset(const QString& name) const{return deepSkyPresets_.value(name).toMap();}
+void AppLibrary::removeDeepSkyPreset(const QString& name){if(!deepSkyPresets_.remove(name))return;status_=tr("Deep-sky preset removed.");save();}
 bool AppLibrary::saveProcessingPreset(const QString& inputName, const QVariantMap& input, bool overwrite) {
     const auto name = inputName.trimmed();
     const auto values = checkedProcessingSettings(input);

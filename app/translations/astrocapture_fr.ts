@@ -977,7 +977,35 @@ L’aperçu est automatiquement éclairci ; les données restent linéaires.</tr
             <source>Export results or save the project first. Original files remain unchanged.</source>
             <translation>Exportez les résultats ou enregistrez le projet d’abord. Les fichiers originaux sont conservés.</translation>
         </message>
-    </context>
+    <message><source>Check the levels: white must exceed black and all values must be valid.</source><translation>Vérifiez les niveaux : le blanc doit dépasser le noir et toutes les valeurs doivent être valides.</translation></message>
+<message><source>Presets and history</source><translation>Préréglages et historique</translation></message>
+<message><source>Presets save finishing controls only. They do not change calibration, filters or channel composition. Absolute black and white levels depend on your data: check the histogram after loading. Each A/B version has its own undo history, limited to 100 changes.</source><translation>Les préréglages conservent uniquement les réglages de finition. Ils ne modifient pas la calibration, les filtres ni la composition des canaux. Les niveaux absolus de noir et de blanc dépendent de vos données : vérifiez l’histogramme après chargement. Chaque version A/B possède son propre historique, limité à 100 modifications.</translation></message>
+<message><source>Your presets</source><translation>Vos préréglages</translation></message>
+<message><source>Load</source><translation>Charger</translation></message>
+<message><source>Undo</source><translation>Annuler</translation></message>
+<message><source>Redo</source><translation>Rétablir</translation></message>
+<message><source>Versions A/B</source><translation>Versions A/B</translation></message>
+<message><source>A and B use the same linear stack and framing, with independent finishing controls and histories. Switch versions to compare; edits and final exports use the selected version. Copy duplicates the current settings into the other version. A new stack or channel composition starts a fresh pair.</source><translation>A et B utilisent le même empilement linéaire et le même cadrage, avec des réglages de finition et des historiques indépendants. Basculez entre les versions pour comparer ; les modifications et les exports finaux utilisent la version sélectionnée. Copier duplique les réglages actuels dans l’autre version. Un nouvel empilement ou une nouvelle composition des canaux crée une nouvelle paire.</translation></message>
+<message><source>Version A</source><translation>Version A</translation></message>
+<message><source>Version B</source><translation>Version B</translation></message>
+<message><source>Copy A to B</source><translation>Copier A vers B</translation></message>
+<message><source>Copy B to A</source><translation>Copier B vers A</translation></message>
+<message><source>Selected version %1</source><translation>Version sélectionnée : %1</translation></message>
+<message><source>Preview has unapplied settings. Apply them before final export.</source><translation>Des réglages ne sont pas encore appliqués à l’aperçu. Appliquez-les avant l’export final.</translation></message>
+<message><source>Deep-sky presets</source><translation>Préréglages de ciel profond</translation></message>
+<message><source>Name this finish for your camera, filters or intent. Use a new name to duplicate it. Presets are kept locally across updates.</source><translation>Nommez cette finition selon votre caméra, vos filtres ou votre objectif. Utilisez un nouveau nom pour la dupliquer. Les préréglages sont conservés localement lors des mises à jour.</translation></message>
+<message><source>Preset name</source><translation>Nom du préréglage</translation></message>
+<message><source>This name exists. Replace overwrites its settings.</source><translation>Ce nom existe déjà. Remplacer écrase ses réglages.</translation></message>
+<message><source>Delete</source><translation>Supprimer</translation></message>
+<message><source>Replace</source><translation>Remplacer</translation></message>
+<message><source>Save</source><translation>Enregistrer</translation></message>
+<message><source>Manage presets…</source><translation>Gérer les préréglages…</translation></message>
+<message><source>Stacked result · pending adjustments</source><translation>Résultat empilé · réglages en attente</translation></message>
+<message><source>Stacked result · version %1</source><translation>Résultat empilé · version %1</translation></message>
+<message><source>Show histograms</source><translation>Afficher les histogrammes</translation></message>
+<message><source>Enlarge preview</source><translation>Agrandir l’aperçu</translation></message>
+<message><source>Temporarily hide histograms and the image list to inspect A/B. Zoom and framing stay shared.</source><translation>Masquez temporairement les histogrammes et la liste des images pour examiner A/B. Le zoom et le cadrage restent communs.</translation></message>
+</context>
     <context>
         <name>GlobalSettingsWorkspace</name>
         <message>
@@ -1577,6 +1605,8 @@ L’aperçu est automatiquement éclairci ; les données restent linéaires.</tr
 <message><source>Change one control at a time. Compare with a less processed version at similar brightness. Inspect a faint area, a bright area and a detailed area at 100%, then return to the whole image. Reduce the last adjustment slightly: if artifacts disappear while useful detail remains, keep the gentler setting. The deep-sky raw comparison uses independent stretching and original framing; it is a visual reference, not a numerical noise measurement.</source><translation>Modifiez un seul réglage à la fois. Comparez avec une version moins traitée à luminosité similaire. Examinez à 100 % une zone faible, une zone lumineuse et une zone riche en détails, puis revenez à l’image entière. Diminuez légèrement le dernier réglage : si les artefacts disparaissent et que les détails utiles restent, gardez la valeur plus douce. La comparaison avec une brute du ciel profond utilise un étirement indépendant et le cadrage original : c’est un repère visuel, pas une mesure numérique du bruit.</translation></message>
 <message><source>More contrast is not more signal</source><translation>Le contraste ne crée pas de signal</translation></message>
 <message><source>Stacking can improve signal-to-noise ratio. Stretching makes existing signal visible, and sharpening can amplify both detail and noise. No single sharpness score proves that a finished image is good. Keep the originals and the linear FITS so you can revisit your choices.</source><translation>L’empilement peut améliorer le rapport signal/bruit. L’étirement rend visible le signal existant, et l’accentuation peut amplifier les détails comme le bruit. Aucun score de netteté ne prouve à lui seul la qualité d’une image finale. Conservez les originaux et le FITS linéaire pour pouvoir reprendre vos choix.</translation></message>
+<message><source>Presets, undo and versions A/B</source><translation>Préréglages, annulation et versions A/B</translation></message>
+<message><source>In Finish and export, load or manage your named finishing presets. Save with a new name to duplicate a preset; Replace updates an existing name. Presets contain stretch, levels, color, background and smoothing, but no calibration files or channel composition. Check the histogram because absolute levels depend on the data. Undo and Redo operate separately in A and B; a slider drag is one change. Switch versions to compare two finishes on the same linear stack and framing. Enlarge preview temporarily hides histograms and the image list; Show histograms restores them. Copy duplicates settings into the other version. The final export uses the selected, applied version. With live preview off, apply pending settings before export. Projects save both versions and the selected version, but not undo histories. A new stack or channel composition resets both versions and their histories.</source><translation>Dans Finition et export, chargez ou gérez vos préréglages de finition nommés. Un nouveau nom duplique un préréglage ; Remplacer met à jour un nom existant. Les préréglages conservent l’étirement, les niveaux, les couleurs, le fond et le lissage, sans fichiers de calibration ni composition des canaux. Vérifiez l’histogramme : les niveaux absolus dépendent des données. Annuler et Rétablir fonctionnent séparément dans A et B ; un déplacement de curseur compte comme une modification. Basculez entre les versions pour comparer deux finitions du même empilement linéaire et du même cadrage. Agrandir l’aperçu masque temporairement les histogrammes et la liste ; Afficher les histogrammes les rétablit. Copier duplique les réglages dans l’autre version. L’export final utilise la version sélectionnée et appliquée. Sans aperçu automatique, appliquez les réglages en attente avant l’export. Les projets conservent les deux versions et la version sélectionnée, mais pas les historiques d’annulation. Un nouvel empilement ou une nouvelle composition des canaux réinitialise les deux versions et leurs historiques.</translation></message>
 </context>
     <context>
         <name>HistoryWorkspace</name>
@@ -3003,6 +3033,8 @@ Résultat attendu :
 Résultat obtenu :
 </translation></message>
 <message><source>Could not open your email application. Contact antoninlefevre45@gmail.com.</source><translation>Impossible d’ouvrir votre application de messagerie. Contactez antoninlefevre45@gmail.com.</translation></message>
+<message><source>Deep-sky preset saved.</source><translation>Préréglage de ciel profond enregistré.</translation></message>
+<message><source>Deep-sky preset removed.</source><translation>Préréglage de ciel profond supprimé.</translation></message>
 </context>
     <context>
         <name>astro::app::DeepSkyController</name>
@@ -3168,7 +3200,8 @@ Résultat obtenu :
             <source>Deep sky · %1 exposures · %2 s total · filters: %3</source>
             <translation>Ciel profond · %1 poses · %2 s au total · filtres : %3</translation>
         </message>
-    </context>
+    <message><source>Invalid finishing settings. Check levels and parameter ranges.</source><translation>Réglages de finition invalides. Vérifiez les niveaux et les plages des paramètres.</translation></message>
+</context>
     <context>
         <name>astro::app::MosaicController</name>
         <message>

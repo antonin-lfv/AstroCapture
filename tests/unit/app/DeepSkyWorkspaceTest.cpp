@@ -63,8 +63,34 @@ int main(int argc,char** argv){
     const auto tiff=QUrl::fromLocalFile(directory.filePath("finished.tif"));controller.exportImage(tiff,false);wait(controller);ASTRO_TEST_CHECK(QFileInfo::exists(tiff.toLocalFile()));
     controller.inspect(0);wait(controller);ASTRO_TEST_CHECK(!controller.displayingResult());controller.restoreResult();ASTRO_TEST_CHECK(controller.displayingResult()&&controller.image().size()==document.preview.size());const auto handoff=controller.processingDocument().value<app::ImageDocument>();ASTRO_TEST_CHECK(handoff.preview.size()==QSize(handoff.pixels->width,handoff.pixels->height));
     QCoreApplication::processEvents();if(qEnvironmentVariableIsSet("ASTRO_UI_SNAPSHOT_PATH"))window.grabWindow().save(qEnvironmentVariable("ASTRO_UI_SNAPSHOT_PATH"));
-    const auto project=QUrl::fromLocalFile(directory.filePath("session.astroproject"));controller.saveProject(project);controller.clear();controller.loadProject(project);ASTRO_TEST_CHECK(controller.frames().size()==3&&!controller.frames()[2].toMap()["selected"].toBool()&&!controller.hasResult());
-    controller.integrate(true);wait(controller);ASTRO_TEST_CHECK(controller.hasResult());const auto previous=controller.processingDocument().value<app::ImageDocument>().pixels;
+    // Persist custom controls, restore them, and verify the recreated pixels,
+    // including with live preview disabled (restoration must still apply).
+    ASTRO_TEST_CHECK(root->findChild<QObject*>("deepSkyLivePreview")->setProperty("checked",false));
+    QVariant customFinish;
+    ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root,"options",Q_RETURN_ARG(QVariant,customFinish)));
+    auto finish=customFinish.toMap();
+    finish["black"]=.01;finish["white"]=.6;finish["midtones"]=.37;
+    finish["red"]=1.2;finish["green"]=.9;finish["blue"]=1.1;
+    finish["background"]=false;finish["denoise"]=.4;
+    finish["asinh"]=true;finish["asinhStrength"]=12.;finish["saturation"]=1.3;
+    controller.setProjectOptions({{"calibrated",true},{"finish",finish}});
+    controller.apply(finish);wait(controller);
+    const auto savedPixels=controller.processingDocument().value<app::ImageDocument>().pixels;
+    const auto project=QUrl::fromLocalFile(directory.filePath("session.astroproject"));controller.saveProject(project);controller.clear();root->setProperty("workflowStep",0);controller.loadProject(project);ASTRO_TEST_CHECK(controller.frames().size()==3&&!controller.frames()[2].toMap()["selected"].toBool()&&!controller.hasResult());
+    controller.integrate(true);wait(controller);ASTRO_TEST_CHECK(controller.hasResult());
+    ASTRO_TEST_CHECK(root->property("workflowStep").toInt()==6);
+    QVariant restoredFinish;
+    ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root,"options",Q_RETURN_ARG(QVariant,restoredFinish)));
+    const auto restored=restoredFinish.toMap();
+    for(auto it=finish.cbegin();it!=finish.cend();++it) {
+        if(it.value().typeId()==QMetaType::Bool)ASTRO_TEST_CHECK(restored[it.key()].toBool()==it.value().toBool());
+        else ASTRO_TEST_CHECK(std::abs(restored[it.key()].toDouble()-it.value().toDouble())<1e-5);
+    }
+    const auto recreated=controller.processingDocument().value<app::ImageDocument>().pixels;
+    ASTRO_TEST_CHECK(recreated->rgb.size()==savedPixels->rgb.size());
+    for(std::size_t i=0;i<recreated->rgb.size();++i)ASTRO_TEST_CHECK(std::abs(recreated->rgb[i]-savedPixels->rgb[i])<1e-6);
+    ASTRO_TEST_CHECK(!root->property("pendingProjectFinish").isValid() || root->property("pendingProjectFinish").isNull());
+    const auto previous=controller.processingDocument().value<app::ImageDocument>().pixels;
     controller.integrate(true);controller.cancel();wait(controller);ASTRO_TEST_CHECK(controller.processingDocument().value<app::ImageDocument>().pixels==previous);
     QFile original(urls[0].toLocalFile());ASTRO_TEST_CHECK(original.open(QIODevice::ReadOnly));const auto before=original.readAll();original.close();controller.exportImage(urls[0],true);ASTRO_TEST_CHECK(!controller.busy());ASTRO_TEST_CHECK(original.open(QIODevice::ReadOnly));ASTRO_TEST_CHECK(original.readAll()==before);
     app::DeepSkyController guarded;guarded.addFiles({urls[0]});wait(guarded);guarded.addFiles({urls[1]},"Dark");wait(guarded);guarded.integrate(true);wait(guarded);ASTRO_TEST_CHECK(!guarded.hasResult()&&guarded.status().contains("Calibration files are selected"));

@@ -180,7 +180,7 @@ void DeepSkyController::setReference(int index) {
     emit changed();
 }
 void DeepSkyController::remove(int index){if(busy_||index<0||index>=frames_.size())return;frames_.removeAt(index);emit changed();}
-void DeepSkyController::clear(){if(busy_)return;projectOptions_.clear();rawPreview_={};rawName_.clear();comparingRaw_=false;histogram_.clear();pendingAdjustments_.reset();displayingResult_=false;stage_.clear();frames_.clear();references_.clear();stacks_.clear();groupExposure_.clear();groupCounts_.clear();exposureCount_=0;resultFilters_.clear();groups_.clear();linear_.reset();finished_.reset();preview_={};resultPreview_={};status_.clear();emit changed();emit imageChanged();}
+void DeepSkyController::clear(){if(busy_)return;projectOptions_.clear();rawPreview_={};rawName_.clear();comparingRaw_=false;histogram_.clear();pendingAdjustments_.reset();displayingResult_=false;stage_.clear();frames_.clear();references_.clear();stacks_.clear();groupExposure_.clear();groupCounts_.clear();exposureCount_=0;resultFilters_.clear();groups_.clear();linear_.reset();finished_.reset();preview_={};resultPreview_={};status_.clear();emit projectOptionsChanged();emit changed();emit imageChanged();}
 void DeepSkyController::chooseRawComparison(int index){
     if(busy_||index<0||index>=frames_.size()||frames_[index].toMap()["role"]!="Light")return;
     const auto row=frames_[index].toMap();

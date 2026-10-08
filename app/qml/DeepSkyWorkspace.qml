@@ -20,6 +20,7 @@ Control {
     property bool linearExport: true
     property int workflowStep: 0
     property bool updatingControls: false
+    property var pendingProjectFinish: null
     readonly property bool finishEditable: controller.hasResult && (!controller.busy || controller.adjusting)
     function previewAdjustments() {if(livePreview.checked && finishEditable && !updatingControls && Number(white.text)>Number(black.text))adjustmentTimer.restart();}
     Timer {id:adjustmentTimer;interval:200;onTriggered:controller.apply(root.options())}
@@ -41,8 +42,15 @@ Control {
     function options() {return {background: background.checked, stretch: stretch.checked, black:Number(black.text),white:Number(white.text),midtones:midtones.value,red:redGain.value,green:greenGain.value,blue:blueGain.value,denoise:denoise.value,asinh:asinh.checked,asinhStrength:asinhStrength.value,saturation:saturation.value};}
     Connections {
         target: root.controller
-        function onChanged() {if(!controller.busy && controller.rawComparisonName){const index=rawComparisonChoice.lightRows.findIndex(row=>row.name===controller.rawComparisonName);if(index>=0)rawComparisonChoice.currentIndex=index;}}
+        function onChanged() {
+            if (!controller.busy && controller.hasResult && root.pendingProjectFinish) {
+                const finish = root.pendingProjectFinish;
+                root.pendingProjectFinish = null;
+                controller.apply(finish);
+            }
+            if(!controller.busy && controller.rawComparisonName){const index=rawComparisonChoice.lightRows.findIndex(row=>row.name===controller.rawComparisonName);if(index>=0)rawComparisonChoice.currentIndex=index;}}
         function onProjectOptionsChanged() {
+            root.updatingControls=true;
             const settings=controller.projectOptions;
             if(settings.calibrated!==undefined)calibrated.checked=settings.calibrated;
             if(settings.normalize!==undefined)normalize.checked=settings.normalize;
@@ -50,6 +58,7 @@ Control {
             if(settings.sigma!==undefined)sigma.value=settings.sigma;
             if(settings.method!==undefined)integrationMethod.currentIndex=settings.method;
             const finish=settings.finish;
+            root.pendingProjectFinish = !controller.hasResult && finish ? finish : null;
             if(finish) {
                 background.checked=finish.background;
                 stretch.checked=finish.stretch;
@@ -62,11 +71,12 @@ Control {
                 denoise.value=finish.denoise;
                 asinh.checked=finish.asinh||false;asinhStrength.value=finish.asinhStrength===undefined?20:finish.asinhStrength;saturation.value=finish.saturation===undefined?1:finish.saturation;
             }
+            root.updatingControls=false;
         }
         function onResultChanged() {
-            if(controller.hasResult && controller.suggestedStretch.black !== undefined) {
+            if(controller.hasResult)root.workflowStep=6;
+            if(controller.hasResult && !root.pendingProjectFinish && controller.suggestedStretch.black !== undefined) {
                 root.updatingControls=true;
-                root.workflowStep=6;
                 black.text=Number(controller.suggestedStretch.black).toPrecision(6);
                 white.text=Number(controller.suggestedStretch.white).toPrecision(6);
                 midtones.value=controller.suggestedStretch.midtones;redGain.value=controller.suggestedStretch.red;greenGain.value=controller.suggestedStretch.green;blueGain.value=controller.suggestedStretch.blue;
@@ -209,7 +219,7 @@ Control {
                 IconButton {text:qsTr("Combine channels");Layout.fillWidth:true;Layout.minimumWidth:0;enabled:!controller.busy && controller.groups.length>0;onClicked:controller.compose(redChannel.currentText,greenChannel.currentText,blueChannel.currentText,luminanceChannel.currentIndex>0?luminanceChannel.currentText:"")}
                 }
                 SectionTitle {label:qsTr("Display and stretch");explanation:qsTr("Every adjustment starts from the linear stack. Live preview can be disabled. Automatic starting point is optional; Reset to linear restores un-stretched pixels and neutral gains.")}
-                CheckBox {Layout.fillWidth:true;Layout.minimumWidth:0;implicitWidth:settingsScroll.availableWidth;contentItem:Text {text:parent.text;font:parent.font;color:"#e8edf5";wrapMode:Text.Wrap;leftPadding:parent.indicator.width+parent.spacing;verticalAlignment:Text.AlignVCenter} id:livePreview;text:qsTr("Live adjustment preview");checked:true;enabled:controller.hasResult}
+                CheckBox {Layout.fillWidth:true;Layout.minimumWidth:0;implicitWidth:settingsScroll.availableWidth;contentItem:Text {text:parent.text;font:parent.font;color:"#e8edf5";wrapMode:Text.Wrap;leftPadding:parent.indicator.width+parent.spacing;verticalAlignment:Text.AlignVCenter} id:livePreview;objectName:"deepSkyLivePreview";text:qsTr("Live adjustment preview");checked:true;enabled:controller.hasResult}
                 ColumnLayout {Layout.fillWidth:true;Layout.minimumWidth:0;enabled:root.finishEditable
                     IconButton {text:qsTr("Automatic starting point");Layout.fillWidth:true;Layout.minimumWidth:0;onClicked:{root.updatingControls=true;const s=controller.suggestedStretch;black.text=String(s.black);white.text=String(s.white);midtones.value=s.midtones;redGain.value=s.red;greenGain.value=s.green;blueGain.value=s.blue;stretch.checked=true;asinh.checked=false;saturation.value=1;denoise.value=0;background.checked=false;root.updatingControls=false;controller.apply(root.options());}}
                     IconButton {text:qsTr("Reset to linear");Layout.fillWidth:true;Layout.minimumWidth:0;onClicked:{root.updatingControls=true;black.text="0";white.text="1";midtones.value=.15;asinh.checked=false;stretch.checked=false;background.checked=false;redGain.value=greenGain.value=blueGain.value=1;saturation.value=1;denoise.value=0;root.updatingControls=false;controller.apply(root.options());}}

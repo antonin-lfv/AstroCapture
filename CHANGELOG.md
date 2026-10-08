@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.3 — 2026-10-08
+
+- Restore saved deep-sky finishing controls and automatically reapply them after
+  recreating the stack, including when live preview is disabled.
+- Clear pending restoration when clearing a project; suppress automatic preview
+  requests while restoring controls. Verify restored settings and output pixels.
+
+
 ## 1.0.2 — 2026-10-08
 
 - Show the application version in the window title and settings.

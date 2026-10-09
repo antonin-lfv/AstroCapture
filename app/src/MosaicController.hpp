@@ -18,6 +18,7 @@ class MosaicController : public QObject {
     Q_PROPERTY(int selectedCount READ selectedCount NOTIFY selectionChanged)
     Q_PROPERTY(QStringList excludedFiles READ excludedFiles NOTIFY selectionChanged)
     Q_PROPERTY(QVariantMap exportAnnotation READ exportAnnotation WRITE setExportAnnotation NOTIFY annotationChanged)
+    Q_PROPERTY(QString captionTechnicalText READ captionTechnicalText NOTIFY annotationChanged)
     Q_PROPERTY(QVariant exportSizeInput READ exportSizeInput NOTIFY exportSizeInputChanged)
     Q_PROPERTY(bool busy READ busy NOTIFY changed)
     Q_PROPERTY(bool hasResult READ hasResult NOTIFY changed)
@@ -46,6 +47,7 @@ public:
     QImage image() const { return preview_; }
     QUrl exportUrl() const;
     QVariantMap exportAnnotation() const { return annotation_; }
+    QString captionTechnicalText() const;
     void setExportAnnotation(const QVariantMap& value);
     QImage annotationImage() const { return annotationImage_; }
     QVariant exportSizeInput() const { return QVariant::fromValue(ExportSizeInput{result_,annotationImage_}); }

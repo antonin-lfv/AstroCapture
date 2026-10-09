@@ -53,6 +53,12 @@ int main(int argc,char** argv) {
     const auto plainDocument=controller.processingDocument().value<astro::app::ImageDocument>();
     ASTRO_TEST_CHECK(plainDocument.pixels && plainDocument.preview==controller.image());
     ASTRO_TEST_CHECK(plainDocument.mosaicImageCount==2);
+    ASTRO_TEST_CHECK(!controller.captionTechnicalText().isEmpty() && !controller.exportAnnotation().contains("technicalText"));
+    controller.setExportAnnotation({{"enabled",true},{"technicalText","Mosaïque · filtre solaire Hα"}});
+    ASTRO_TEST_CHECK(controller.captionTechnicalText()=="Mosaïque · filtre solaire Hα");
+    ASTRO_TEST_CHECK(controller.processingDocument().value<astro::app::ImageDocument>().annotation.value("technicalText")=="Mosaïque · filtre solaire Hα");
+    controller.setExportAnnotation({{"enabled",true},{"technicalText",""}});
+    ASTRO_TEST_CHECK(controller.captionTechnicalText().isEmpty() && controller.annotationImage().isNull());
     controller.setExportAnnotation({{"enabled",true},{"technical",false},{"title","Lune · été"}});
     const auto titleOnly=controller.annotationImage();
     ASTRO_TEST_CHECK(!titleOnly.isNull());

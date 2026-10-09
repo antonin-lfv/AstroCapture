@@ -96,8 +96,12 @@ void MosaicController::setExportAnnotation(const QVariantMap& value) {
     auto normalized=cleanAnnotation(value); if(normalized==annotation_)return;
     annotation_=std::move(normalized); updateAnnotation();
 }
+QString MosaicController::captionTechnicalText() const {
+    const auto suggestion = result_ ? tr("Mosaic · %1 images · %2 × %3 px").arg(resultCount_).arg(result_->width).arg(result_->height) : QString{};
+    return annotationTechnicalText(annotation_, suggestion);
+}
 void MosaicController::updateAnnotation() {
-    try { annotationImage_=result_ ? makeAnnotation({result_->width,result_->height},annotation_,tr("Mosaic · %1 images · %2 × %3 px").arg(resultCount_).arg(result_->width).arg(result_->height)) : QImage{}; }
+    try { annotationImage_=result_ ? makeAnnotation({result_->width,result_->height},annotation_,captionTechnicalText()) : QImage{}; }
     catch(const std::exception& e) { annotationImage_={}; annotation_["enabled"]=false; status_=localizedError(QString::fromUtf8(e.what())); emit changed(); }
     emit annotationChanged();
 }

@@ -18,6 +18,7 @@ class ProcessingController : public QObject {
   Q_OBJECT
   QML_ELEMENT
   Q_PROPERTY(QVariantMap exportAnnotation READ exportAnnotation WRITE setExportAnnotation NOTIFY annotationChanged)
+  Q_PROPERTY(QString captionTechnicalText READ captionTechnicalText NOTIFY annotationChanged)
   Q_PROPERTY(QVariant exportSizeInput READ exportSizeInput NOTIFY exportSizeInputChanged)
   Q_PROPERTY(bool stillImage READ stillImage NOTIFY changed)
   Q_PROPERTY(QUrl sourceUrl READ sourceUrl NOTIFY changed)
@@ -64,6 +65,7 @@ public:
   QVariantList qualities() const { return qualities_; }
   QImage image() const { return preview_; }
   QVariantMap exportAnnotation() const { return annotation_; }
+  QString captionTechnicalText() const;
   void setExportAnnotation(const QVariantMap& value);
   QImage annotationImage() const { return annotationImage_; }
   QVariant exportSizeInput() const { return QVariant::fromValue(ExportSizeInput{result_,annotationImage_}); }

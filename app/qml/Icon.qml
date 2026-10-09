@@ -36,8 +36,12 @@ Item {
     }
 
     Canvas {
+        id: refreshIcon
         anchors.fill: parent
         visible: root.name === "refresh"
+        onWidthChanged: requestPaint()
+        onHeightChanged: requestPaint()
+        Connections { target: root; function onColorChanged() { refreshIcon.requestPaint(); } }
         onPaint: {
             const ctx = getContext("2d");
             ctx.reset();

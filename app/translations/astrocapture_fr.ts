@@ -222,6 +222,22 @@ Télescope · caméra · accessoires</translation>
             <source>Preview</source>
             <translation>Aperçu</translation>
         </message>
+        <message>
+            <source>Image and processing information</source>
+            <translation>Informations de l’image et du traitement</translation>
+        </message>
+        <message>
+            <source>Include image and processing information</source>
+            <translation>Inclure les informations de l’image et du traitement</translation>
+        </message>
+        <message>
+            <source>You can correct this text before export.</source>
+            <translation>Vous pouvez corriger ce texte avant l’export.</translation>
+        </message>
+        <message>
+            <source>Restore suggested information</source>
+            <translation>Revenir aux informations proposées</translation>
+        </message>
     </context>
     <context>
         <name>DeepSkyAdvancedTools</name>

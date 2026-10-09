@@ -4,6 +4,7 @@
 #include <QFile>
 #include <QPainter>
 #include <QMouseEvent>
+#include <QKeyEvent>
 #include <QDragEnterEvent>
 #include <QDragMoveEvent>
 #include <QDropEvent>
@@ -161,7 +162,61 @@ int main(int argc, char** argv) {
     ASTRO_TEST_CHECK(controller.exportAnnotation().value("title") == "Titre accessible");
     ASTRO_TEST_CHECK(controller.exportAnnotation().value("enabled").toBool());
     ASTRO_TEST_CHECK(!controller.annotationImage().isNull());
-    controller.setExportAnnotation({{"enabled", true}, {"technical", false}, {"title", "Lune"}, {"top", "30 mai · été"}, {"bottom", "NexImage 5"}});
+    // Suggestions stay automatic until edited, including when the popup is
+    // hidden. Corrections survive recalculation, toggling and reopening.
+    auto* technicalText = root->findChild<QObject*>("annotationTechnicalText");
+    auto* technicalToggle = root->findChild<QObject*>("annotationTechnicalEnabled");
+    auto* technicalReset = root->findChild<QObject*>("annotationTechnicalReset");
+    auto* captionPopup = root->findChild<QObject*>("annotationPopup");
+    ASTRO_TEST_CHECK(technicalText && technicalToggle && technicalReset && captionPopup);
+    const auto suggestedInformation = controller.captionTechnicalText();
+    const auto dimensions = QCoreApplication::translate("astro::app::ProcessingController", "%1 × %2 px").arg(after.width()).arg(after.height());
+    ASTRO_TEST_CHECK(suggestedInformation.contains(dimensions) && suggestedInformation.contains(controller.stackSummary()));
+    ASTRO_TEST_CHECK(technicalText->property("text").toString() == suggestedInformation);
+    ASTRO_TEST_CHECK(!controller.exportAnnotation().contains("technicalText"));
+    const QString correctedInformation = "Orion · 6 poses de 60 s\nFiltre Hα · 9 octobre 2026";
+    ASTRO_TEST_CHECK(QMetaObject::invokeMethod(captionPopup,"open"));
+    until([&]{return captionPopup->property("opened").toBool();});
+    qobject_cast<QQuickItem*>(technicalText)->forceActiveFocus();
+    ASTRO_TEST_CHECK(QMetaObject::invokeMethod(technicalText,"selectAll"));
+    QKeyEvent captionInput(QEvent::KeyPress,Qt::Key_unknown,Qt::NoModifier,correctedInformation);
+    QCoreApplication::sendEvent(&window,&captionInput);
+    ASTRO_TEST_CHECK(controller.captionTechnicalText() == correctedInformation);
+    QKeyEvent captionUndo(QEvent::KeyPress,Qt::Key_Z,Qt::ControlModifier);
+    QCoreApplication::sendEvent(&window,&captionUndo);
+    ASTRO_TEST_CHECK(controller.captionTechnicalText() == suggestedInformation);
+    QKeyEvent captionRedo(QEvent::KeyPress,Qt::Key_Z,Qt::ControlModifier|Qt::ShiftModifier);
+    QCoreApplication::sendEvent(&window,&captionRedo);
+    ASTRO_TEST_CHECK(controller.captionTechnicalText() == correctedInformation);
+    ASTRO_TEST_CHECK(QMetaObject::invokeMethod(captionPopup,"close"));
+    controller.apply({0,0,0,0,0,0},0,1,1,1,1); until([&]{return !controller.busy();});
+    ASTRO_TEST_CHECK(technicalText->property("text").toString() == correctedInformation);
+    technicalToggle->setProperty("checked", false);
+    ASTRO_TEST_CHECK(QMetaObject::invokeMethod(technicalToggle,"toggled"));
+    ASTRO_TEST_CHECK(!controller.exportAnnotation().value("technical").toBool());
+    ASTRO_TEST_CHECK(controller.captionTechnicalText() == correctedInformation);
+    technicalToggle->setProperty("checked", true);
+    ASTRO_TEST_CHECK(QMetaObject::invokeMethod(technicalToggle,"toggled"));
+    ASTRO_TEST_CHECK(QMetaObject::invokeMethod(captionPopup,"open"));
+    ASTRO_TEST_CHECK(technicalText->property("text").toString() == correctedInformation);
+    ASTRO_TEST_CHECK(QMetaObject::invokeMethod(captionPopup,"close"));
+    technicalText->setProperty("text", "");
+    ASTRO_TEST_CHECK(controller.exportAnnotation().contains("technicalText") && controller.captionTechnicalText().isEmpty());
+    ASTRO_TEST_CHECK(QMetaObject::invokeMethod(technicalReset,"clicked"));
+    ASTRO_TEST_CHECK(!controller.exportAnnotation().contains("technicalText"));
+    ASTRO_TEST_CHECK(technicalText->property("text").toString() == suggestedInformation);
+    // Restore the tested result after exercising the recalculation above.
+    controller.apply({2,0,0,0,0,0},0,1,1,1,1); until([&]{return !controller.busy();});
+    ASTRO_TEST_CHECK(controller.image() == after);
+    controller.setExportAnnotation({{"enabled", true}, {"technical", true}, {"technicalText", correctedInformation}, {"title", "Lune"}, {"top", "30 mai · été"}, {"bottom", "NexImage 5"}});
+    const auto correctedOverlay = controller.annotationImage();
+    auto literalCaption = controller.exportAnnotation();
+    literalCaption["technical"] = false;
+    literalCaption["bottom"] = "NexImage 5\n" + correctedInformation;
+    controller.setExportAnnotation(literalCaption);
+    ASTRO_TEST_CHECK(controller.annotationImage() == correctedOverlay);
+    literalCaption["technical"] = true; literalCaption["bottom"] = "NexImage 5";
+    controller.setExportAnnotation(literalCaption);
     ASTRO_TEST_CHECK(!controller.annotationImage().isNull());
     root->setProperty("compareImages", false);
     { QPainter painter(&painted); paintItem->paint(&painter); }
@@ -251,6 +306,7 @@ int main(int argc, char** argv) {
     ASTRO_TEST_CHECK(!controller.showingResult()); // Comparison never replaces the source video.
     controller.openPath(path); until([&] { return !controller.busy(); });
     ASTRO_TEST_CHECK(controller.exportAnnotation().value("top").toString().isEmpty());
+    ASTRO_TEST_CHECK(!controller.exportAnnotation().contains("technicalText"));
     ASTRO_TEST_CHECK(controller.annotationImage().isNull());
     auto pixelsImage=std::make_shared<astro::processing::FloatImage>();
     *pixelsImage={96,64,std::vector<float>(96*64*3,.123456f)};
@@ -259,6 +315,17 @@ int main(int argc, char** argv) {
     ASTRO_TEST_CHECK(controller.stillImage() && !controller.loaded() && controller.hasResult() && !controller.ranked());
     ASTRO_TEST_CHECK(controller.stackSummary()==QCoreApplication::translate("astro::app::ProcessingController","Still image · no stacking needed"));
     ASTRO_TEST_CHECK(controller.exportAnnotation().value("title")=="Mosaïque lunaire");
+    auto correctedDoc = doc;
+    correctedDoc.annotation["technicalText"] = correctedInformation;
+    ASTRO_TEST_CHECK(controller.openDocument(QVariant::fromValue(correctedDoc)));
+    ASTRO_TEST_CHECK(controller.captionTechnicalText() == correctedInformation);
+    ASTRO_TEST_CHECK(technicalText->property("text").toString() == correctedInformation);
+    correctedDoc.annotation["technicalText"] = "";
+    ASTRO_TEST_CHECK(controller.openDocument(QVariant::fromValue(correctedDoc)));
+    ASTRO_TEST_CHECK(controller.captionTechnicalText().isEmpty());
+    ASTRO_TEST_CHECK(controller.openDocument(QVariant::fromValue(doc)));
+    ASTRO_TEST_CHECK(!controller.exportAnnotation().contains("technicalText"));
+    ASTRO_TEST_CHECK(technicalText->property("text").toString() == controller.captionTechnicalText());
     QCoreApplication::processEvents();
     ASTRO_TEST_CHECK(!cutoff->isVisible());
     controller.apply({0,0,0,0,0,0},0,1,1,1,1); until([&]{return !controller.busy();});

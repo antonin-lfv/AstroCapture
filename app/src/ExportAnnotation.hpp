@@ -13,13 +13,21 @@ namespace astro::app {
 inline QVariantMap cleanAnnotation(const QVariantMap& values) {
     double size = values.value("size", 1.5).toDouble();
     if (!std::isfinite(size)) size = 1.5;
-    return {{"enabled", values.value("enabled", false).toBool()},
+    QVariantMap cleaned{{"enabled", values.value("enabled", false).toBool()},
             {"technical", values.value("technical", true).toBool()},
             {"title", values.value("title").toString().left(120).replace('\n', ' ').replace('\r', ' ')},
             {"top", values.value("top").toString().left(400)},
             {"bottom", values.value("bottom").toString().left(400)},
             {"gold", values.value("gold", false).toBool()},
             {"size", std::clamp(size, 0.8, 3.0)}};
+    // An absent override keeps the live suggestion; an empty override is an
+    // intentional deletion. Preserve that distinction in saved projects.
+    if (values.contains("technicalText"))
+        cleaned["technicalText"] = values.value("technicalText").toString().left(1000);
+    return cleaned;
+}
+inline QString annotationTechnicalText(const QVariantMap& settings, const QString& suggestion) {
+    return settings.contains("technicalText") ? settings.value("technicalText").toString() : suggestion;
 }
 // One full-resolution overlay is shared by preview and export. The astronomical
 // image remains untouched; alpha is blended into 16-bit export samples only.
@@ -28,8 +36,9 @@ inline QImage makeAnnotation(QSize size, const QVariantMap& settings, const QStr
     const QString title = settings.value("title").toString().trimmed();
     QString top = settings.value("top").toString().trimmed();
     QString bottom = settings.value("bottom").toString().trimmed();
-    if (settings.value("technical").toBool() && !technical.isEmpty())
-        bottom += (bottom.isEmpty() ? "" : "\n") + technical;
+    const auto information = annotationTechnicalText(settings, technical).trimmed();
+    if (settings.value("technical").toBool() && !information.isEmpty())
+        bottom += (bottom.isEmpty() ? "" : "\n") + information;
     if (title.isEmpty() && top.isEmpty() && bottom.isEmpty()) return {};
     QImage overlay(size, QImage::Format_ARGB32);
     if (overlay.isNull()) throw std::runtime_error("Not enough memory for the image caption.");

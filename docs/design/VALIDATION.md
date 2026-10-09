@@ -29,8 +29,28 @@ montrent l'application, et non le prototype HTML.
 - Les valeurs numériques abrégées à l'affichage conservent leur précision interne.
 
 Le TIFF source contient déjà des textes jaunes dans ses pixels. L'option de légende
-concerne un ajout. La correction des informations techniques préremplies demeure
-une tâche à venir dans `DESIGN_SYSTEM.md`.
+concerne un ajout. Le texte proposé pour cet ajout est désormais modifiable.
+
+## Informations préremplies de la légende
+
+Le champ commun aux exports de Traitement, Finition et Mosaïque permet de modifier
+le texte automatique. Un texte vide et l'absence de correction sont distingués :
+vider le champ retire ces informations ; revenir au texte proposé réactive le
+contenu calculé par l'application. Désactiver la section conserve la correction.
+
+L'interface française a été inspectée avec Orion à 1440 × 960, 1100 × 800 et
+900 × 700, avec et sans aperçu. Les captures `previews/native/caption-*.png`
+montrent le champ prérempli et le texte corrigé. Le contrôle dans l'application
+complète couvre une vraie saisie clavier, Cmd+Z / Cmd+Maj+Z, la fermeture puis la
+réouverture de la modale et la sauvegarde / réouverture / recalcul du projet.
+
+Les six tests ciblés de cette modification couvrent les contrôleurs de traitement
+et mosaïque, les interfaces de traitement, ciel profond et mosaïque et l'estimateur
+de taille. Ils vérifient la conservation du texte (y compris un champ vide), le
+retour aux informations proposées, les anciens documents sans correction et la
+persistance dans le projet. Le rendu corrigé est comparé à la même légende saisie
+manuellement ; PNG et TIFF utilisent le même aperçu et gardent les échantillons
+16 bits hors de la légende.
 
 ## Vérifications automatiques
 

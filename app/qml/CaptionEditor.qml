@@ -19,6 +19,23 @@ Popup {
             let options = Object.assign({}, controller.exportAnnotation);
             options[key] = value; controller.exportAnnotation = options;
         }
+        function refreshTechnicalText() {
+            const value = controller.captionTechnicalText;
+            if (technicalText.text === value) return;
+            technicalText.synchronizing = true;
+            technicalText.text = value;
+            technicalText.synchronizing = false;
+        }
+        function restoreTechnicalText() {
+            const options = Object.assign({}, controller.exportAnnotation);
+            delete options.technicalText;
+            controller.exportAnnotation = options;
+        }
+        Connections {
+            target: editor.controller
+            function onAnnotationChanged() { editor.refreshTechnicalText(); }
+        }
+        Component.onCompleted: refreshTechnicalText()
         objectName: "annotationPopup"
         parent: Overlay.overlay
         anchors.centerIn: parent
@@ -64,7 +81,39 @@ Popup {
                 ColumnLayout {
                     width: captionSettings.availableWidth; spacing: 12
                     enabled:!editor.controller.busy
-                    Label {text:editor.controller.stackSummary || "";visible:text.length>0;color:Atelier.secondary;wrapMode:Text.Wrap;Layout.fillWidth:true}
+                    RowLayout {
+                        Layout.fillWidth: true
+                        Label { text: qsTr("Image and processing information"); color: Atelier.secondary; wrapMode: Text.Wrap; Layout.fillWidth: true }
+                        CaptionSwitch {
+                            objectName: "annotationTechnicalEnabled"
+                            checked: editor.controller.exportAnnotation.technical
+                            Accessible.name: qsTr("Include image and processing information")
+                            onToggled: editor.setAnnotation("technical", checked)
+                        }
+                    }
+                    TextArea {
+                        id: technicalText
+                        objectName: "annotationTechnicalText"
+                        property bool synchronizing: false
+                        visible: editor.controller.exportAnnotation.technical
+                        Layout.fillWidth: true; Layout.minimumHeight: 96
+                        Accessible.name: qsTr("Image and processing information")
+                        wrapMode: TextEdit.Wrap; selectByMouse: true
+                        color: Atelier.text; selectionColor: Atelier.accent; selectedTextColor: Atelier.canvas
+                        background: Rectangle { color: Atelier.field; radius: Atelier.controlRadius; border.color: parent.activeFocus ? Atelier.accent : Atelier.border }
+                        onTextChanged: if (!synchronizing) editor.setAnnotation("technicalText", text)
+                    }
+                    RowLayout {
+                        visible: editor.controller.exportAnnotation.technical
+                        Layout.fillWidth: true
+                        Label { text: qsTr("You can correct this text before export."); color: Atelier.muted; font.pixelSize: 12; wrapMode: Text.Wrap; Layout.fillWidth: true }
+                        IconAction {
+                            objectName: "annotationTechnicalReset"
+                            iconName: "refresh"; text: qsTr("Restore suggested information")
+                            enabled: editor.controller.exportAnnotation.technicalText !== undefined
+                            onClicked: editor.restoreTechnicalText()
+                        }
+                    }
                     Label { text: qsTr("Title · above the caption"); color: Atelier.secondary }
                     TextField {
                         objectName: "annotationTitle"
@@ -97,14 +146,6 @@ Popup {
                         color: Atelier.text; placeholderTextColor: Atelier.muted
                         background: Rectangle { color: Atelier.field; radius: 6; border.color: parent.activeFocus ? Atelier.accent : Atelier.border }
                         onTextChanged: editor.setAnnotation("bottom", text)
-                    }
-                    RowLayout {
-                        Caption { text: qsTr("Add dimensions and processing summary") }
-                        CaptionSwitch {
-                            checked: editor.controller.exportAnnotation.technical
-                            Accessible.name: qsTr("Add dimensions and processing summary")
-                            onCheckedChanged: editor.setAnnotation("technical", checked)
-                        }
                     }
                     RowLayout {
                         Caption { text: qsTr("Text color") }

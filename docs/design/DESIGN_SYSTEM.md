@@ -104,13 +104,18 @@ Les poids sans légende viennent de l'estimateur natif sur l'image complète
 FITS 312,5 Mo. Le PNG/JPEG avec une nouvelle légende reste indiqué comme
 à estimer dans cette maquette. Le TIFF non compressé conserve le même poids.
 
-## Tâches à venir
+## Légendes
 
-- [ ] **Légendes : rendre modifiables les informations préremplies.** Permettre de
-  corriger les informations proposées automatiquement avant l'export : objet, date,
-  matériel, poses, durée d'exposition, filtres et autres champs de la légende.
-  Conserver les corrections manuelles lors d'une actualisation et les sauvegarder
-  avec le projet. L'aperçu et l'export doivent reprendre ces valeurs corrigées.
+- [x] **Rendre modifiables les informations préremplies.** Le champ « Informations
+  de l'image et du traitement » contient le texte proposé automatiquement et permet
+  de corriger librement dimensions, poses, durée, filtres ou toute autre information.
+  Les champs existants gardent le titre, l'objet, la date, les notes et le matériel.
+  Les corrections manuelles restent présentes lors d'une actualisation et dans le
+  projet sauvegardé. L'aperçu et l'export reprennent le même texte corrigé.
+  Désactiver ces informations conserve le texte ; le vider retire le texte ajouté.
+  Une commande avec infobulle permet de revenir aux informations proposées.
+  Les anciens projets continuent à utiliser le texte automatique tant qu'il n'est
+  pas modifié. La saisie conserve ses raccourcis d'annulation et de rétablissement.
 
 ## Livrables et état
 

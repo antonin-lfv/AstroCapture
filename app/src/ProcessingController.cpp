@@ -71,11 +71,14 @@ void ProcessingController::setExportAnnotation(const QVariantMap &value) {
   annotation_ = normalized;
   updateAnnotation();
 }
+QString ProcessingController::captionTechnicalText() const {
+  const QString suggestion = result_ ? tr("%1 × %2 px").arg(result_->width).arg(result_->height)
+                                      + "\n" + stackSummary_ : QString{};
+  return annotationTechnicalText(annotation_, suggestion);
+}
 void ProcessingController::updateAnnotation() {
-  const QString technical = result_ ? tr("%1 × %2 px").arg(result_->width).arg(result_->height)
-                                     + "\n" + stackSummary_ : QString{};
   try {
-    annotationImage_ = result_ ? makeAnnotation({result_->width, result_->height}, annotation_, technical) : QImage{};
+    annotationImage_ = result_ ? makeAnnotation({result_->width, result_->height}, annotation_, captionTechnicalText()) : QImage{};
   } catch (const std::exception &error) {
     annotationImage_ = {};
     annotation_["enabled"] = false;

@@ -210,13 +210,15 @@ int main(int argc,char** argv){
     edits->applyValues(bFinish);
     ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root,"setFinish",Q_ARG(QVariant,QVariant(library.deepSkyPreset("Test finish")))));wait(controller);
     ASTRO_TEST_CHECK(controller.finishSettings()["midtones"]==.37);
-    root->setProperty("captionOptions",QVariantMap{{"enabled",true},{"title",QString("M8 / M20")},{"top",QString("Poses Siril")}});
+    const QString correctedCaption="M8 / M20 · 2 poses de 60 s\nFiltre Hα · observatoire";
+    root->setProperty("captionOptions",QVariantMap{{"enabled",true},{"title",QString("M8 / M20")},{"top",QString("Poses Siril")},{"technicalText",correctedCaption}});
     QVariant savedOptions;
     ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root,"saveOptions",Q_RETURN_ARG(QVariant,savedOptions))&&savedOptions.toBool());
     QObject::connect(&controller,&app::DeepSkyController::projectSaved,&library,&app::AppLibrary::recordProject);
     QObject::connect(&controller,&app::DeepSkyController::projectOpened,&library,&app::AppLibrary::recordProject);
     const auto project=QUrl::fromLocalFile(directory.filePath("session.astroproject"));controller.saveProject(project);controller.clear();root->setProperty("workflowStep",0);controller.loadProject(project);ASTRO_TEST_CHECK(controller.frames().size()==3&&!controller.frames()[2].toMap()["selected"].toBool()&&!controller.hasResult());
     ASTRO_TEST_CHECK(root->property("captionOptions").toMap()["title"].toString()=="M8 / M20");
+    ASTRO_TEST_CHECK(root->property("captionOptions").toMap()["technicalText"].toString()==correctedCaption);
     controller.integrate(true);wait(controller);ASTRO_TEST_CHECK(controller.hasResult());
     ASTRO_TEST_CHECK(root->property("workflowStep").toInt()==6);
     QVariant restoredFinish;

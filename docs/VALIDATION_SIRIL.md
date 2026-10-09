@@ -111,3 +111,20 @@ L’interface Qt/QML réelle, en français avec Orion, est inspectée à exactem
 Les captures sont dans `docs/design/previews/native/1.7.0-*`.
 Le détail des formats et des limites est dans
 [ADR-016](decisions/ADR-016-astrometry-colors.md).
+
+### Installateur 1.7.0 vérifié
+
+Le code et les contrôles Orion sont committés (`34b208e`, `d99fd9b`) avant la
+reconstruction finale du paquet. Le DMG mesure **85 394 898 octets** (81,44 Mio).
+`hdiutil verify` valide toutes ses sommes de contrôle. Monté en lecture seule,
+il contient la version 1.7.0 ; son exécutable correspond exactement à celui
+de l’application construite. La signature locale passe la vérification profonde
+et stricte. QtNetwork, les extensions TLS et la notice Gaia/CALSPEC/SVO sont
+présents ; la notice est identique à celle du dépôt. Le contrôle de dépendances
+du paquet ne trouve aucune référence absolue à Homebrew dans les binaires.
+
+Le montage de contrôle est démonté par son propre chemin. La signature demeure
+locale ad hoc ; Developer ID et notarisation restent dans la feuille de route.
+
+SHA-256 du DMG : `e5e3cbbbd4dfcc64ad3f3c6088658f46d0f44fc329b02476a215e33311d4fbce`.
+SHA-256 de l’exécutable : `e6c4f155a160c37ebe05fcf0e35b6a512c95cd70dd5e66ef14491e494d6c8d5d`.

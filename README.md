@@ -166,8 +166,9 @@ désactivée sur des nébulosités étendues.
 Limites actuelles : **32 MP par image**, **500 poses sélectionnées par groupe**,
 **2000 fichiers par projet**. Les RAW X-Trans et les autres matrices non Bayer
 ne sont pas pris en charge. Le drizzle, la correction optique dynamique, les
-projections grand angle, la fusion HDR, la résolution astrométrique automatique
-et la calibration spectrophotométrique restent à développer. La précision de centroidage annoncée par APP
+projections grand angle, la fusion HDR, la résolution astrométrique aveugle
+et une bibliothèque de réponses mesurées caméra/filtres restent à développer.
+Le WCS guidé et les calibrations PCC/SPCC sont décrits ci-dessous. La précision de centroidage annoncée par APP
 n’est pas une mesure de performance d’AstroCapture.
 
 ### Transformations avancées du ciel profond

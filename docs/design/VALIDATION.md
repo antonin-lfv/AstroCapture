@@ -280,3 +280,13 @@ La sauvegarde/réouverture portable, l’annulation et le FITS WCS sont vérifi�
 Orion. Les résultats et leurs limites scientifiques sont consignés dans
 [VALIDATION_SIRIL.md](../VALIDATION_SIRIL.md) : les captures SPCC utilisent une
 réponse virtuelle de contrôle, pas un profil mesuré de la caméra.
+
+### Livraison 1.7.0 vérifiée
+
+Le DMG final est reconstruit après `d99fd9b`, y compris le dernier changement
+du choix PCC/SPCC. Sommes de contrôle valides, version 1.7.0, exécutable identique
+à l’application construite et signature locale vérifiée. Les composants réseau
+et TLS ainsi que les notices des données scientifiques sont inclus.
+L’image disque mesure 85 394 898 octets (81,44 Mio).
+
+SHA-256 : `e5e3cbbbd4dfcc64ad3f3c6088658f46d0f44fc329b02476a215e33311d4fbce`.

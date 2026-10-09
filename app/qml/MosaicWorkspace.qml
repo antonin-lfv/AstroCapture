@@ -14,6 +14,10 @@ Rectangle {
     property bool balanceExposure: true
     property bool skipUnmatched: true
     property bool softenEdges: true
+    readonly property var sessionState: ({balanceExposure:balanceExposure, skipUnmatched:skipUnmatched, softenEdges:softenEdges})
+    function restoreSessionState(state) {
+        balanceExposure=state.balanceExposure!==false;skipUnmatched=state.skipUnmatched!==false;softenEdges=state.softenEdges!==false;
+    }
     color: Atelier.canvas
     FileDialog {
         id: openDialog

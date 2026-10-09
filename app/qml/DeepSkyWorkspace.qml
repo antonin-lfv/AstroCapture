@@ -117,6 +117,21 @@ Control {
         edits.endEdit();
         controller.projectOptions={calibrated:calibrated.checked,normalize:normalize.checked,badPixels:badPixels.checked,sequenceBackground:sequenceBackground.checked,sigma:sigma.value,method:integrationMethod.currentIndex,finish:edits.values,caption:root.captionOptions,versions:edits.snapshot()};return true;
     }
+    readonly property var sessionState: {
+        edits.values; edits.version; edits.canUndo; edits.canRedo;
+        return {options:{calibrated:calibrated.checked,normalize:normalize.checked,badPixels:badPixels.checked,sequenceBackground:sequenceBackground.checked,
+            sigma:sigma.value,method:integrationMethod.currentIndex,finish:edits.values,caption:root.captionOptions,versions:edits.snapshot()},
+            step:workflowStep,tool:finishingTool,comparison:comparisonMode};
+    }
+    function restoreSessionState(state) {
+        adjustmentTimer.stop();pendingProjectFinish=null;
+        controller.projectOptions=state.options || controller.projectOptions;
+        updatingControls=true;
+        if(state.options && state.options.versions)edits.restoreSession(state.options.versions);
+        else if(controller.hasResult)edits.resetSession(controller.finishSettings);
+        workflowStep=controller.hasResult?6:(state.step || 0);finishingTool=state.tool || 0;comparisonMode=state.comparison || "result";
+        editError="";updatingControls=false;
+    }
     function options() {return Object.assign({},root.advancedOptions,{operations:root.operations,scnr:scnr.checked,scnrMethod:scnrMethod.currentIndex,scnrAmount:scnrAmount.value,scnrPreserve:scnrPreserve.checked,backgroundPoints:root.backgroundPoints,backgroundDegree:backgroundDegree.currentIndex+1,backgroundSamples:backgroundSamples.value,backgroundTolerance:backgroundTolerance.value,rotation:rotation.currentIndex,mirrorHorizontal:mirrorHorizontal.checked,mirrorVertical:mirrorVertical.checked,background: background.checked, stretch: stretch.checked, black:Number(black.text),white:Number(white.text),midtones:midtones.value,red:redGain.value,green:greenGain.value,blue:blueGain.value,denoise:denoise.value,asinh:asinh.checked,asinhStrength:asinhStrength.value,asinhLuminance:asinhLuminance.currentIndex,saturation:saturation.value});}
     Connections {
         target: root.controller

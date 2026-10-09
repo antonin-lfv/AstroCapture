@@ -215,3 +215,16 @@ astro_add_unit_test(astro_app_export_size_estimator_test
 set_target_properties(astro_app_export_size_estimator_test PROPERTIES AUTOMOC ON)
 target_include_directories(astro_app_export_size_estimator_test PRIVATE ../../app/src)
 set_tests_properties(astro_app_export_size_estimator_test PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen" TIMEOUT 30)
+
+astro_add_unit_test(astro_app_session_test
+    SOURCES app/SessionTest.cpp
+        ../../app/src/SessionController.cpp ../../app/src/SessionController.hpp
+        ../../app/src/SessionStorage.cpp ../../app/src/WorkspaceSessions.cpp
+        ../../app/src/ProcessingController.cpp ../../app/src/ProcessingController.hpp
+        ../../app/src/DeepSkyController.cpp ../../app/src/DeepSkyController.hpp
+        ../../app/src/MosaicController.cpp ../../app/src/MosaicController.hpp
+    LIBS Qt6::Quick Qt6::Gui astro::processing astro::recording
+)
+set_target_properties(astro_app_session_test PROPERTIES AUTOMOC ON)
+target_include_directories(astro_app_session_test PRIVATE ../../app/src)
+set_tests_properties(astro_app_session_test PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_BACKEND=software" TIMEOUT 45)

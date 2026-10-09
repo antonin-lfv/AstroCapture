@@ -219,13 +219,16 @@ void ProcessingController::open(const QUrl &url) {
   }
   run(tr("Opening video…"), [this, path](std::stop_token stop) {
     SequenceReader reader(nativePath(path));
-    auto image = preview(readImage(reader, 0));
+    auto pixels = std::make_shared<FloatImage>(readImage(reader, 0));
+    auto image = preview(*pixels);
     auto source = std::make_shared<Source>(
         Source{path, int(reader.width), int(reader.height), int(reader.count),
                int(reader.bits)});
     check(stop);
-    post([this, source, image] {
+    post([this, source, image, pixels] {
       source_ = source;
+      frameCache_ = pixels;
+      appliedSettings_ = defaultProcessingSettings();
       document_ = {};
       ranks_.clear();
       qualities_.clear();
@@ -262,6 +265,7 @@ void ProcessingController::acceptDocument(ImageDocument document) {
   document_=std::move(document); source_.reset(); ranks_.clear(); qualities_.clear();
   pendingSeek_.reset(); pendingAdjustments_.reset(); ++adjustmentRevision_;
   stack_=document_.pixels; result_=stack_; beforePreview_=document_.preview; afterPreview_=beforePreview_;
+  frameCache_.reset(); appliedSettings_=defaultProcessingSettings();
   stackSummary_=!document_.processingSummary.isEmpty()?document_.processingSummary:document_.mosaicImageCount>0
     ? tr("Mosaic · %1 images assembled").arg(document_.mosaicImageCount)
     : tr("Still image · no stacking needed");
@@ -284,12 +288,14 @@ void ProcessingController::seek(int index) {
       {},
       [this, source, index](std::stop_token stop) {
         SequenceReader reader(nativePath(source->path));
-        auto image = preview(readImage(reader, index));
+        auto pixels = std::make_shared<FloatImage>(readImage(reader, index));
+        auto image = preview(*pixels);
         check(stop);
-        post([this, image, index, stop] {
+        post([this, image, pixels, index, stop] {
           if (stop.stop_requested())
             return;
           index_ = index;
+          frameCache_ = pixels;
           display(image, tr("Source · frame %1").arg(index + 1));
         });
       },
@@ -322,12 +328,14 @@ void ProcessingController::analyze() {
               .quality /
           ranks.front().quality);
     const int best = ranks.front().index;
-    auto image = preview(readImage(reader, best));
+    auto pixels = std::make_shared<FloatImage>(readImage(reader, best));
+    auto image = preview(*pixels);
     check(stop);
-    post([this, ranks = std::move(ranks), curve, image, best]() mutable {
+    post([this, ranks = std::move(ranks), curve, image, pixels, best]() mutable {
       ranks_ = std::move(ranks);
       qualities_ = curve;
       index_ = best;
+      frameCache_ = pixels;
       progress_ = 100;
       status_ = tr("Ranked by sharpness. Choose how many frames to keep.");
       display(image, tr("Sharpest source frame · %1").arg(best + 1));
@@ -393,6 +401,7 @@ void ProcessingController::stack(int keepCount, bool surface, int patchSize, boo
         post([this, output, image, summary, selection] {
           stack_ = output;
           result_ = output;
+          appliedSettings_ = defaultProcessingSettings();
           beforePreview_ = image;
           afterPreview_ = image;
           progress_ = 100;
@@ -444,10 +453,13 @@ void ProcessingController::startAdjustments(const Adjustments &settings) {
         }
         if(edgeMask)image=preview(*result,[&]{check(stop);});
         check(stop);
-        post([this, result, image, revision] {
+        post([this, result, image, revision, settings] {
           if (revision != adjustmentRevision_)
             return;
           result_ = result;
+          for(int i=0;i<6;++i)appliedSettings_[QString("level%1").arg(i+1)]=settings.gains[i];
+          appliedSettings_["denoise"]=settings.denoise;appliedSettings_["red"]=settings.color[0];
+          appliedSettings_["green"]=settings.color[1];appliedSettings_["blue"]=settings.color[2];appliedSettings_["gamma"]=settings.gamma;
           afterPreview_ = image;
           progress_ = 100;
           status_ = tr("Adjustments applied. Compare before / after, then export.");

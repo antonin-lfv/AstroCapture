@@ -13,6 +13,8 @@ Rectangle {
     property string processingName:""
     property bool projectBusy:false
     property bool processingBusy:false
+    property var session: null
+    property bool recoveryEnabled:true
     signal navigate(string tab)
     signal chooseProject()
     signal openProject(url source)
@@ -61,6 +63,20 @@ Rectangle {
                 StartCard {objectName:"homeCapture";heading:qsTr("Capture the sky");detail:qsTr("Camera · SER video · FITS exposures");iconName:"camera";onClicked:root.navigate("capture")}
                 StartCard {objectName:"homeProcessing";heading:qsTr("Process an image");detail:qsTr("Planets, Moon and Sun · Still images");iconName:"processing";enabled:!root.recording;onClicked:root.navigate("processing")}
                 StartCard {objectName:"homeDeepSky";heading:qsTr("Explore deep sky");detail:qsTr("Calibration · Stacking · Finishing");iconName:"stars";enabled:!root.recording;onClicked:root.navigate("deepSky")}
+            }
+            Rectangle {
+                visible:!!root.session && root.session.recoveryAvailable && root.recoveryEnabled
+                Layout.fillWidth:true;implicitHeight:recoveryContent.implicitHeight+32;color:Atelier.surface;radius:Atelier.controlRadius;border.color:Atelier.border
+                ColumnLayout {
+                    id:recoveryContent;anchors.left:parent.left;anchors.right:parent.right;anchors.margins:16;anchors.verticalCenter:parent.verticalCenter;spacing:8
+                    Label {text:qsTr("Your previous session is available");color:Atelier.text;font.pixelSize:15;Layout.fillWidth:true;wrapMode:Text.Wrap}
+                    Label {text:qsTr("Restore the images, calculated results, settings and captions saved on this Mac.");color:Atelier.secondary;Layout.fillWidth:true;wrapMode:Text.Wrap}
+                    Label {text:root.session?root.session.status:"";visible:text.length>0;color:Atelier.secondary;Layout.fillWidth:true;wrapMode:Text.Wrap}
+                    RowLayout {
+                        IconButton {objectName:"homeRestoreSession";text:qsTr("Restore session");primary:true;enabled:!!root.session && !root.session.busy;onClicked:root.session.restoreLast()}
+                        IconButton {objectName:"homeDiscardSession";text:qsTr("Start a new session");ghost:true;enabled:!!root.session && !root.session.busy;onClicked:root.session.discardRecovery()}
+                    }
+                }
             }
             ColumnLayout {
                 Layout.fillWidth:true;spacing:0

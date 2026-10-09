@@ -7,6 +7,8 @@
 #include <QVariantList>
 #include "ExportAnnotation.hpp"
 #include "ImageDocument.hpp"
+#include "WorkspaceSnapshot.hpp"
+#include "ProcessingSettings.hpp"
 #include <astro/processing/Planetary.hpp>
 #include <functional>
 #include <memory>
@@ -19,6 +21,7 @@ class ProcessingController : public QObject {
   QML_ELEMENT
   Q_PROPERTY(QVariantMap exportAnnotation READ exportAnnotation WRITE setExportAnnotation NOTIFY annotationChanged)
   Q_PROPERTY(QString captionTechnicalText READ captionTechnicalText NOTIFY annotationChanged)
+  Q_PROPERTY(QVariantMap appliedSettings READ appliedSettings NOTIFY changed)
   Q_PROPERTY(QVariant exportSizeInput READ exportSizeInput NOTIFY exportSizeInputChanged)
   Q_PROPERTY(bool stillImage READ stillImage NOTIFY changed)
   Q_PROPERTY(QUrl sourceUrl READ sourceUrl NOTIFY changed)
@@ -70,6 +73,10 @@ public:
   QImage annotationImage() const { return annotationImage_; }
   QVariant exportSizeInput() const { return QVariant::fromValue(ExportSizeInput{result_,annotationImage_}); }
   QImage beforeImage() const { return beforePreview_; }
+  QVariantMap appliedSettings() const { return appliedSettings_; }
+  WorkspaceSnapshot sessionSnapshot() const;
+  bool canRestoreSession(const WorkspaceSnapshot&) const;
+  void restoreSession(const WorkspaceSnapshot&);
   QUrl sourceUrl() const { return source_ ? QUrl::fromLocalFile(source_->path) : QUrl{}; }
   int imageWidth() const { return preview_.width(); }
   int imageHeight() const { return preview_.height(); }
@@ -126,6 +133,8 @@ private:
   std::vector<RankedFrame> ranks_;
   QVariantList qualities_;
   std::shared_ptr<const processing::FloatImage> stack_, result_;
+  std::shared_ptr<const processing::FloatImage> frameCache_;
+  QVariantMap appliedSettings_{defaultProcessingSettings()};
   void updateAnnotation();
   QVariantMap annotation_{cleanAnnotation({})};
   QImage annotationImage_;

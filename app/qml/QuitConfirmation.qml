@@ -17,6 +17,7 @@ DarkDialog {
     property bool hasProcessing: false
     property bool busy: false
     property bool recording: false
+    property bool canSaveSession:false
     property var exportTargets: []
     property string saveStatus: ""
     property string preferredTarget: ""
@@ -24,6 +25,7 @@ DarkDialog {
     signal saveSettingsRequested()
     signal exportRequested(string target)
     signal quitRequested()
+    signal saveSessionRequested()
     onOpened: {
         const index=exportTargets.findIndex(target=>target.id===preferredTarget);
         exportChoice.currentIndex=index>=0?index:0;
@@ -46,6 +48,11 @@ DarkDialog {
             color: "#edb06c"; wrapMode: Text.Wrap; Layout.fillWidth: true
         }
         Label {text:dialog.saveStatus;visible:text.length>0;color:Atelier.secondary;wrapMode:Text.Wrap;Layout.fillWidth:true}
+        IconButton {
+            objectName:"quitSaveSession";text:qsTr("Save session and quit");primary:true
+            visible:dialog.canSaveSession;enabled:!dialog.busy && !dialog.recording;Layout.fillWidth:true
+            onClicked:dialog.saveSessionRequested()
+        }
         IconButton {
             objectName: "quitSaveProject";text:qsTr("Save project and settings")
             visible:dialog.hasProject;enabled:!dialog.busy && !dialog.recording;Layout.fillWidth:true

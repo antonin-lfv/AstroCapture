@@ -8,6 +8,7 @@
 #include <astro/processing/DeepSky.hpp>
 #include <thread>
 #include "ImageDocument.hpp"
+#include "WorkspaceSnapshot.hpp"
 namespace astro::app {
 class DeepSkyController : public QObject {
     Q_OBJECT
@@ -111,6 +112,9 @@ public:
     Q_INVOKABLE void saveProject(const QUrl&);
     Q_INVOKABLE void loadProject(const QUrl&);
     Q_INVOKABLE QVariant processingDocument() const;
+    WorkspaceSnapshot sessionSnapshot() const;
+    bool canRestoreSession(const WorkspaceSnapshot&) const;
+    void restoreSession(const WorkspaceSnapshot&);
     Q_INVOKABLE void cancel(){pendingAdjustments_.reset();worker_.request_stop();}
 signals:
     void operationFinished(bool success, const QString& message);

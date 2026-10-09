@@ -33,8 +33,9 @@ ApplicationWindow {
     property bool quitSavePending: false
     property string quitExportTarget: ""
     property bool quitExportUsesCaption: false
-    readonly property bool quitBusy: previewController.recording || deepSkyController.busy || processingController.busy || mosaicController.busy || captionController.busy
-    readonly property bool hasOpenWork: previewController.recording || deepSkyController.frames.length>0 || processingController.loaded || mosaicController.files.length>0 || quitBusy
+    property bool quitAfterSessionSave:false
+    readonly property bool quitBusy: previewController.recording || deepSkyController.busy || processingController.busy || mosaicController.busy || captionController.busy || sessionController.busy
+    readonly property bool hasOpenWork: previewController.recording || deepSkyController.frames.length>0 || processingController.loaded || processingController.stillImage || processingController.hasResult || mosaicController.files.length>0 || quitBusy
     onClosing: close => {
         if(quitApproved || !hasOpenWork)return;
         close.accepted=false;
@@ -46,6 +47,7 @@ ApplicationWindow {
         hasProcessing:processingController.hasResult
         busy:window.quitBusy
         recording:previewController.recording
+        canSaveSession:window.hasOpenWork
         preferredTarget:window.currentTab
         exportTargets: {
             let targets=[];
@@ -55,6 +57,10 @@ ApplicationWindow {
             return targets;
         }
         onQuitRequested:{window.quitApproved=true;close();window.close();}
+        onSaveSessionRequested: {
+            window.quitAfterSessionSave=true;
+            if(!sessionController.saveNow()){window.quitAfterSessionSave=false;saveStatus=sessionController.status;}
+        }
         onSaveProjectRequested: {
             if(!deepSkyWorkspace.saveOptions()){saveStatus=deepSkyWorkspace.editError;return;}
             saveStatus="";close();quitProjectSave.open();
@@ -131,6 +137,23 @@ ApplicationWindow {
     }
     MosaicController { id: mosaicController }
     DeepSkyController { id: deepSkyController;objectName:"deepSkyController" }
+    SessionController {
+        id:sessionController;objectName:"sessionController"
+        processing:processingController;deepSky:deepSkyController;mosaic:mosaicController
+        uiState:({tab:window.currentTab, processing:processingWorkspace.sessionState, deepSky:deepSkyWorkspace.sessionState, mosaic:mosaicWorkspace.sessionState})
+        onSessionRestored: state => {
+            processingWorkspace.restoreSessionState(state.processing || {});
+            deepSkyWorkspace.restoreSessionState(state.deepSky || {});
+            mosaicWorkspace.restoreSessionState(state.mosaic || {});
+            window.currentTab=["home","processing","deepSky","mosaic","history","guide","settings"].indexOf(state.tab)>=0?state.tab:"home";
+        }
+        onSaveFinished: success => {
+            if(!window.quitAfterSessionSave)return;
+            window.quitAfterSessionSave=false;
+            if(success){window.quitApproved=true;quitConfirmation.close();window.close();}
+            else quitConfirmation.saveStatus=status;
+        }
+    }
     readonly property string activityTab: previewController.recording?"capture":deepSkyController.busy?"deepSky":mosaicController.busy?"mosaic":processingController.busy && !processingController.seeking?"processing":""
     readonly property string activityText: previewController.recording?qsTr("Recording…"):deepSkyController.busy?qsTr("Deep sky · %1%").arg(deepSkyController.progress):mosaicController.busy?qsTr("Mosaic · processing…"):processingController.busy && !processingController.seeking?qsTr("Processing · %1%").arg(processingController.progress):""
     function navigate(tab) {
@@ -149,12 +172,13 @@ ApplicationWindow {
         RowLayout {
             anchors.fill:parent;anchors.leftMargin:20;anchors.rightMargin:16;spacing:8
             Rectangle {Layout.preferredWidth:6;Layout.preferredHeight:6;radius:3;color:window.activityTab.length>0?Atelier.accent:Atelier.success}
-            Label {text:window.activityText||qsTr("Ready");color:Atelier.secondary;font.pixelSize:12;Layout.fillWidth:true;elide:Text.ElideRight}
+            Label {text:window.activityText||sessionController.status||qsTr("Ready");color:Atelier.secondary;font.pixelSize:12;Layout.fillWidth:true;elide:Text.ElideRight}
             Label {text:previewController.connected?previewController.cameraName:qsTr("Camera not connected");color:Atelier.secondary;font.pixelSize:12;elide:Text.ElideRight;Layout.maximumWidth:window.width*.3}
         }
     }
     HomeWorkspace {
         id:homeWorkspace;anchors.fill:parent;visible:window.currentTab==="home"
+        session:sessionController;recoveryEnabled:!window.hasOpenWork
         library:appLibrary;recording:previewController.recording
         deepSkyOpen:deepSkyController.frames.length>0;deepSkyCount:deepSkyController.frames.length
         processingOpen:processingController.loaded;processingName:processingController.sourceName

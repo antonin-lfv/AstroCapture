@@ -2,6 +2,7 @@
 #include <QObject>
 #include "ExportAnnotation.hpp"
 #include "ImageDocument.hpp"
+#include "WorkspaceSnapshot.hpp"
 #include <QImage>
 #include <QUrl>
 #include <QVariantList>
@@ -52,6 +53,9 @@ public:
     QImage annotationImage() const { return annotationImage_; }
     QVariant exportSizeInput() const { return QVariant::fromValue(ExportSizeInput{result_,annotationImage_}); }
     Q_INVOKABLE QVariant processingDocument() const;
+    WorkspaceSnapshot sessionSnapshot() const;
+    bool canRestoreSession(const WorkspaceSnapshot&) const;
+    void restoreSession(const WorkspaceSnapshot&);
     Q_INVOKABLE void addImages(const QList<QUrl>& urls);
     Q_INVOKABLE void removeImage(int index);
     Q_INVOKABLE void setImageSelected(int index, bool selected);

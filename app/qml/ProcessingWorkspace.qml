@@ -88,6 +88,17 @@ Rectangle {
         adjustmentsDirty = false;
         compareImages = false; holdBefore = false;
     }
+    readonly property var sessionState: ({values:edits.values, compare:compareImages, split:compareSplit, keep:keep.value,
+        surface:surfaceMode, local:localSelection, patch:surfacePatchSize, fit:imageView.fitMode, zoom:imageView.zoom, panX:imageView.panX, panY:imageView.panY})
+    function restoreSessionState(state) {
+        restoringControls=true;playing=false;adjustmentTimer.stop();edits.resetSession();
+        edits.applyValues(state.values || controller.appliedSettings);
+        surfaceMode=!!state.surface;localSelection=state.local!==false;surfacePatchSize=state.patch===64||state.patch===160?state.patch:96;
+        compareImages=state.compare || false;compareSplit=state.split===undefined?.5:state.split;
+        if(state.keep!==undefined)keep.value=state.keep;
+        imageView.fitMode=state.fit!==false;imageView.zoom=state.zoom || 1;imageView.panX=state.panX || 0;imageView.panY=state.panY || 0;
+        adjustmentsDirty=false;restoringControls=false;imageView.constrainPan();
+    }
     function applyAdjustments() {
         const values = edits.values;
         let gains = [];

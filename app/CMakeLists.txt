@@ -92,6 +92,12 @@ qt_add_qml_module(AstroCapture
     RESOURCES
         qml/assets/logo.png
     SOURCES
+        src/WorkspaceSnapshot.hpp
+        src/WorkspaceSessions.cpp
+        src/SessionStorage.hpp
+        src/SessionStorage.cpp
+        src/SessionController.hpp
+        src/SessionController.cpp
         src/DeepSkyController.hpp
         src/DeepSkyController.cpp
         src/DeepSkyImageItem.hpp

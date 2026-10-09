@@ -3583,6 +3583,22 @@ Ajoutez-le depuis son nouvel emplacement.</translation>
             <source>Open a project</source>
             <translation>Ouvrir un projet</translation>
         </message>
+        <message>
+            <source>Your previous session is available</source>
+            <translation>Votre session précédente est disponible</translation>
+        </message>
+        <message>
+            <source>Restore the images, calculated results, settings and captions saved on this Mac.</source>
+            <translation>Retrouvez les images, les résultats calculés, les réglages et les légendes enregistrés sur ce Mac.</translation>
+        </message>
+        <message>
+            <source>Restore session</source>
+            <translation>Reprendre la session</translation>
+        </message>
+        <message>
+            <source>Start a new session</source>
+            <translation>Nouvelle session</translation>
+        </message>
     </context>
     <context>
         <name>ImageViewport</name>
@@ -5335,6 +5351,10 @@ Résultat obtenu :
             <source>Bayer %1 source · raw mosaic preview</source>
             <translation>Source Bayer %1 · aperçu de la mosaïque brute</translation>
         </message>
+        <message>
+            <source>Session restored. Cached results are ready.</source>
+            <translation>Session reprise. Les résultats sauvegardés sont disponibles.</translation>
+        </message>
     </context>
     <context>
         <name>astro::app::MosaicController</name>
@@ -5746,6 +5766,10 @@ Résultat obtenu :
             <source>Processing produced a non-finite sample; previous result is preserved.</source>
             <translation type="vanished">Le traitement a produit une valeur non finie ; le résultat précédent est conservé.</translation>
         </message>
+        <message>
+            <source>Session restored. Cached results are ready.</source>
+            <translation>Session reprise. Les résultats sauvegardés sont disponibles.</translation>
+        </message>
     </context>
     <context>
         <name>astro::app::PreviewController</name>
@@ -6083,6 +6107,10 @@ Résultat obtenu :
             <source>Exporting image…</source>
             <translation>Export de l’image…</translation>
         </message>
+        <message>
+            <source>Session restored. Cached results are ready.</source>
+            <translation>Session reprise. Les résultats sauvegardés sont disponibles.</translation>
+        </message>
     </context>
     <context>
         <name>QuitConfirmation</name>
@@ -6125,6 +6153,10 @@ Résultat obtenu :
         <message>
             <source>Quit anyway</source>
             <translation>Quitter quand même</translation>
+        </message>
+        <message>
+            <source>Save session and quit</source>
+            <translation>Sauvegarder la session et quitter</translation>
         </message>
     </context>
     <context>
@@ -6171,6 +6203,53 @@ Résultat obtenu :
         <message>
             <source>Current adjustment family</source>
             <translation>Famille de réglages active</translation>
+        </message>
+    </context>
+    <context>
+        <name>astro::app::SessionController</name>
+        <message>
+            <source>Saving session…</source>
+            <translation>Sauvegarde de la session…</translation>
+        </message>
+        <message>
+            <source>Session saved automatically.</source>
+            <translation>Session sauvegardée automatiquement.</translation>
+        </message>
+        <message>
+            <source>Session could not be saved: %1</source>
+            <translation>Impossible de sauvegarder la session : %1</translation>
+        </message>
+        <message>
+            <source>A workspace is already open. Save it before restoring another session.</source>
+            <translation>Un espace de travail est déjà ouvert. Sauvegardez-le avant de reprendre une autre session.</translation>
+        </message>
+        <message>
+            <source>Restoring session…</source>
+            <translation>Reprise de la session…</translation>
+        </message>
+        <message>
+            <source>Session could not be restored: %1</source>
+            <translation>Impossible de reprendre la session : %1</translation>
+        </message>
+        <message>
+            <source>Invalid saved settings.</source>
+            <translation>Réglages sauvegardés invalides.</translation>
+        </message>
+        <message>
+            <source>Session restored. %1 source files are unavailable; cached results can still be exported.</source>
+            <translation>Session reprise. %1 fichiers sources sont introuvables ; les résultats sauvegardés restent exportables.</translation>
+        </message>
+        <message>
+            <source>Session restored. Cached results are ready.</source>
+            <translation>Session reprise. Les résultats sauvegardés sont disponibles.</translation>
+        </message>
+        <message>
+            <source>Saved session removed. Original files are unchanged.</source>
+            <translation>Session sauvegardée supprimée. Les fichiers sources sont conservés.</translation>
+        </message>
+        <message>
+            <source>Cannot remove the saved session: %1</source>
+            <translation>Impossible de supprimer la session sauvegardée : %1</translation>
         </message>
     </context>
 </TS>

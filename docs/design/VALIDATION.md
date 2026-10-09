@@ -251,3 +251,32 @@ démonté par son propre chemin, sans toucher aux autres volumes.
 
 SHA-256 du DMG : `b84856b833b137eab4e48f08ad4ebbd9108d4242238ea488c5d25d3f4876445e`.
 SHA-256 de l’exécutable : `20ae92d7aa1a52b54cb28e4f8e33340c69d3adcf59de9884f381b2583d39fa62`.
+
+## Lot 1.7.0 — astrométrie et couleurs (10 octobre 2026)
+
+L’accès est dans Ciel profond → Finition → Couleur → Astrométrie · PCC / SPCC.
+Le dialogue suit deux étapes : résoudre et vérifier le WCS, puis calibrer les
+couleurs. Les réglages photométriques se déplient à la demande. Chaque paramètre
+possède une aide pratique ; calcul en cours, progression, annulation et erreurs
+conservent une place visible. Le bilan nomme la méthode, le profil et le blanc,
+avec étoiles acceptées/rejetées, dispersion, gains et causes de rejet.
+
+La composition est contrôlée en français avec le FITS réel d’Orion, aux tailles
+exactes 1440 × 960, 1100 × 800 et 900 × 700. Ces captures utilisent les composants
+Qt/QML natifs avec le rendu logiciel hors écran, après un premier contrôle Cocoa.
+Les six images `previews/native/1.7.0-wcs-*` et `1.7.0-spcc-*` montrent les deux
+étapes. Aucun libellé ni bouton ne chevauche la modale ; le pied reste visible
+et le contenu peut défiler sans barre apparente. Les repères d’étoiles sont
+facultatifs et désactivés par défaut.
+
+Le choix utilisateur d’une méthode rétablit 60 candidates en SPCC, 150 en PCC ;
+la réouverture restaure la limite mémorisée. La régression couvre une affectation
+préalable du champ, qui casse sa liaison QML initiale. Les longues listes de
+références ne sont plus enveloppées à répétition lors de la comparaison des réglages.
+Une seconde calibration identique termine normalement. Le catalogue et la réponse
+complets restent conservés dans le projet, indépendamment de la vue légère du dialogue.
+
+La sauvegarde/réouverture portable, l’annulation et le FITS WCS sont vérifiés sur
+Orion. Les résultats et leurs limites scientifiques sont consignés dans
+[VALIDATION_SIRIL.md](../VALIDATION_SIRIL.md) : les captures SPCC utilisent une
+réponse virtuelle de contrôle, pas un profil mesuré de la caméra.

@@ -57,7 +57,11 @@ public:
     explicit DeepSkyController(QObject* parent=nullptr):QObject(parent){}
     ~DeepSkyController() override;
     QVariantMap advancedReport() const{return advancedReport_;}
-    QVariantMap astrometry() const{return astrometry_;}
+    QVariantMap astrometry() const {
+        auto view=astrometry_;
+        for(const auto& key:{"catalog","localCatalog","response"})view.remove(key);
+        return view;
+    }
     Q_INVOKABLE void solveAstrometry(const QVariantMap& options);
     Q_INVOKABLE void prepareCatalogCalibration(int method,const QVariantMap& options);
     Q_INVOKABLE void importAstrometryCatalog(const QUrl&);

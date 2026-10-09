@@ -51,6 +51,18 @@ int main(int argc,char** argv){
     ASTRO_TEST_CHECK(!object->findChild<QObject*>("deepSkyCalibrated")->property("checked").toBool());
     QQuickWindow window;window.resize(1100,720);auto* root=qobject_cast<QQuickItem*>(object.get());root->setParentItem(window.contentItem());root->setSize({1100,720});window.show();
     QCoreApplication::processEvents();
+    // Opening the dialog restores stored limits; a user changing methods must
+    // still get the appropriate default after that assignment breaks the binding.
+    auto* calibrationMethod=root->findChild<QObject*>("catalogCalibrationMethod");
+    auto* calibrationLimit=root->findChild<QObject*>("catalogCalibrationLimitField");
+    ASTRO_TEST_CHECK(calibrationMethod && calibrationLimit);
+    calibrationLimit->setProperty("text","24");
+    calibrationMethod->setProperty("currentIndex",1);
+    ASTRO_TEST_CHECK(QMetaObject::invokeMethod(calibrationMethod,"activated",Q_ARG(int,1)));
+    ASTRO_TEST_CHECK(calibrationLimit->property("text").toString()=="60");
+    calibrationMethod->setProperty("currentIndex",0);
+    ASTRO_TEST_CHECK(QMetaObject::invokeMethod(calibrationMethod,"activated",Q_ARG(int,0)));
+    ASTRO_TEST_CHECK(calibrationLimit->property("text").toString()=="150");
     auto* finishTab=visualItem(root,"deepSkyFinishTab");ASTRO_TEST_CHECK(finishTab);
     ASTRO_TEST_CHECK(!finishTab->property("enabled").toBool());
     ASTRO_TEST_CHECK(!object->findChild<QObject*>("deepSkyIntegrate")->property("visible").toBool());

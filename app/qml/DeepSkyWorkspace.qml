@@ -76,7 +76,14 @@ Control {
     property var geometry:({crop:false,x:0,y:0,width:1,height:1,angle:0,scale:1,interpolation:4,clamp:true,keepSize:false})
     property bool updatingControls: false
     property var pendingProjectFinish: null
-    readonly property bool finishDirty: controller.hasResult && (editError.length>0 || Object.keys(edits.values).some(key=>JSON.stringify(edits.values[key])!==JSON.stringify(controller.finishSettings[key])))
+    readonly property bool finishDirty: {
+        if(!controller.hasResult)return false;
+        if(editError.length>0)return true;
+        // Read each C++ map once: repeatedly wrapping the reference lists in
+        // QML makes identical catalog calibrations expensive to compare.
+        const expected=edits.values,applied=controller.finishSettings;
+        return Object.keys(expected).some(key=>JSON.stringify(expected[key])!==JSON.stringify(applied[key]));
+    }
     readonly property bool finishEditable: controller.hasResult && (!controller.busy || controller.adjusting)
     function restoreFinish(finish) {
         const previous=updatingControls;updatingControls=true;

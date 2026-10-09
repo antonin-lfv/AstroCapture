@@ -6220,6 +6220,118 @@ Résultat obtenu :
             <source>A source file changed since import. Reimport it before saving a portable project.</source>
             <translation>Une source a changé depuis l’import. Importez-la à nouveau avant de sauvegarder un projet portable.</translation>
         </message>
+        <message>
+            <source>Cannot read the saved session.</source>
+            <translation>Impossible de lire la session sauvegardée.</translation>
+        </message>
+        <message>
+            <source>Invalid saved session.</source>
+            <translation>Session sauvegardée invalide.</translation>
+        </message>
+        <message>
+            <source>A saved session file is missing.</source>
+            <translation>Un fichier de la session sauvegardée est introuvable.</translation>
+        </message>
+        <message>
+            <source>Cannot read a saved session file.</source>
+            <translation>Impossible de lire un fichier de la session.</translation>
+        </message>
+        <message>
+            <source>Invalid saved session file name.</source>
+            <translation>Nom de fichier de session invalide.</translation>
+        </message>
+        <message>
+            <source>Invalid saved session image.</source>
+            <translation>Image sauvegardée invalide.</translation>
+        </message>
+        <message>
+            <source>Cannot save the session. Check free disk space.</source>
+            <translation>Impossible de sauvegarder la session. Vérifiez l’espace disque disponible.</translation>
+        </message>
+        <message>
+            <source>Cannot finish saving the session.</source>
+            <translation>Impossible de terminer la sauvegarde.</translation>
+        </message>
+        <message>
+            <source>A saved session image is missing.</source>
+            <translation>Une image sauvegardée est introuvable.</translation>
+        </message>
+        <message>
+            <source>Incomplete saved session image.</source>
+            <translation>Image sauvegardée incomplète.</translation>
+        </message>
+        <message>
+            <source>Invalid values in a saved session image.</source>
+            <translation>L’image sauvegardée contient des valeurs invalides.</translation>
+        </message>
+        <message>
+            <source>Cannot create the session folder.</source>
+            <translation>Impossible de créer le dossier de session.</translation>
+        </message>
+        <message>
+            <source>Invalid saved mask.</source>
+            <translation>Masque sauvegardé invalide.</translation>
+        </message>
+        <message>
+            <source>Invalid saved mask size.</source>
+            <translation>Dimensions du masque sauvegardé invalides.</translation>
+        </message>
+        <message>
+            <source>Cannot save the session preview.</source>
+            <translation>Impossible de sauvegarder l’aperçu.</translation>
+        </message>
+        <message>
+            <source>The saved session settings are too large.</source>
+            <translation>Les réglages de session sont trop volumineux.</translation>
+        </message>
+        <message>
+            <source>Cannot save the session settings.</source>
+            <translation>Impossible de sauvegarder les réglages.</translation>
+        </message>
+        <message>
+            <source>Invalid session workspaces.</source>
+            <translation>Espaces de travail sauvegardés invalides.</translation>
+        </message>
+        <message>
+            <source>Invalid session workspace.</source>
+            <translation>Espace de travail sauvegardé invalide.</translation>
+        </message>
+        <message>
+            <source>Too many saved session images.</source>
+            <translation>La session contient trop d’images.</translation>
+        </message>
+        <message>
+            <source>Too many saved session masks.</source>
+            <translation>La session contient trop de masques.</translation>
+        </message>
+        <message>
+            <source>Too many session previews.</source>
+            <translation>La session contient trop d’aperçus.</translation>
+        </message>
+        <message>
+            <source>Invalid session preview dimensions.</source>
+            <translation>Dimensions de l’aperçu sauvegardé invalides.</translation>
+        </message>
+        <message>
+            <source>Cannot read the session preview.</source>
+            <translation>Impossible de lire l’aperçu sauvegardé.</translation>
+        </message>
+        <message>
+            <source>Cannot remove the saved session.</source>
+            <translation>Impossible de supprimer la session sauvegardée.</translation>
+        </message>
+        <message>
+            <source>Invalid saved session checksum.</source>
+            <translation>Contrôle d’intégrité de session invalide.</translation>
+        </message>
+        <message>
+            <source>The saved session exceeds the 4 GiB recovery limit.</source>
+            <translation>La session dépasse la limite de reprise de 4 Gio.</translation>
+        </message>
+        <message>
+            <source>A saved session file is damaged.</source>
+            <translation>Un fichier de la session sauvegardée est endommagé.</translation>
+        </message>
     </context>
     <context>
         <name>astro::app::MosaicController</name>

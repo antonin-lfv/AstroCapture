@@ -30,6 +30,7 @@ class ProcessingController : public QObject {
   Q_PROPERTY(int imageHeight READ imageHeight NOTIFY imageChanged)
   Q_PROPERTY(bool showingResult READ showingResult NOTIFY imageChanged)
   Q_PROPERTY(bool busy READ busy NOTIFY changed)
+  Q_PROPERTY(bool exporting READ exporting NOTIFY changed)
   Q_PROPERTY(bool seeking READ seeking NOTIFY changed)
   Q_PROPERTY(bool adjusting READ adjusting NOTIFY changed)
   Q_PROPERTY(bool analyzing READ analyzing NOTIFY changed)
@@ -50,6 +51,7 @@ public:
   explicit ProcessingController(QObject *parent = nullptr);
   ~ProcessingController() override;
   bool busy() const { return busy_; }
+  bool exporting() const { return busy_ && work_ == Work::Export; }
   bool seeking() const { return busy_ && work_ == Work::Seek; }
   bool adjusting() const { return busy_ && work_ == Work::Adjust; }
   bool analyzing() const { return busy_ && work_ == Work::Analyze; }
@@ -108,7 +110,7 @@ signals:
   void imageExported(const QUrl& url);
 
 private:
-  enum class Work { Task, Seek, Adjust, Analyze, Stack };
+  enum class Work { Task, Seek, Adjust, Analyze, Stack, Export };
   struct Adjustments {
     std::array<float, 6> gains;
     float denoise;

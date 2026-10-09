@@ -16,6 +16,7 @@ Button {
     property bool active: false
     property bool primary: false
     property bool ghost: false
+    property bool busy: false
 
     implicitHeight: Math.max(Atelier.controlHeight, contentItem.implicitHeight + topPadding + bottomPadding)
     hoverEnabled: true
@@ -28,13 +29,26 @@ Button {
     contentItem: RowLayout {
         spacing: 6
 
-        Icon {
-            visible: control.iconName.length > 0
-            name: control.iconName
-            color: !control.enabled ? Atelier.muted : control.primary ? Atelier.onPrimary : control.active ? Atelier.danger : Atelier.text
+        Item {
+            visible: control.iconName.length > 0 || control.busy
             Layout.preferredWidth: 14
             Layout.preferredHeight: 14
             Layout.alignment: Qt.AlignVCenter
+            Icon {
+                anchors.fill: parent
+                visible: !control.busy
+                name: control.iconName
+                color: !control.enabled ? Atelier.muted : control.primary ? Atelier.onPrimary : control.active ? Atelier.danger : Atelier.text
+            }
+            Icon {
+                id: spinner
+                objectName: "buttonActivitySpinner"
+                anchors.fill: parent
+                visible: control.busy
+                name: "loading"
+                color: control.primary ? Atelier.onPrimary : Atelier.accent
+                RotationAnimator { target: spinner; from: 0; to: 360; duration: 900; loops: Animation.Infinite; running: control.busy && control.visible }
+            }
         }
 
         Text {

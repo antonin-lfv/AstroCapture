@@ -193,7 +193,8 @@ Rectangle {
                 }
                 ExportSizeHint {controller:root.controller;format:"tif";ready:!root.controller.busy;visible:root.controller.hasResult;Layout.fillWidth:true}
                 IconButton {
-                    text: qsTr("Export TIFF"); Layout.fillWidth: true
+                    objectName:"mosaicExportButton"; iconName:"export"; busy:root.controller.exporting;
+                    text: root.controller.exporting?qsTr("Exporting…"):qsTr("Export TIFF"); Layout.fillWidth: true
                     enabled: root.controller.hasResult && !root.controller.busy
                     onClicked: {
                         saveDialog.currentFolder=root.library.exportFolderFor(root.controller.exportUrl);

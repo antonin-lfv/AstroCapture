@@ -8,7 +8,7 @@
 
 AstroCapture réunit la capture vidéo et FITS, le traitement planétaire, la calibration et l’empilement du ciel profond, les transformations de finition, les ondelettes et les mosaïques. Son studio conserve les espaces de travail entre les onglets, avec une interface en français et en anglais. Les fichiers et les traitements restent sur votre ordinateur. Les aides au survol des réglages du ciel profond décrivent le calcul appliqué, son effet visuel et ses limites : seuils et écrêtage, courbes d’étirement, modèle polynomial du fond, rejet robuste, saturation et lissage.
 
-![Traitement d’une vidéo SER dans AstroCapture](assets/screenshots/processing.png)
+[Capture](#capture) · [Ciel profond](#ciel-profond) · [Traitement](#traitement) · [Mosaïque](#mosaïque) · [Historique](#historique) · [Guide](#guide-intégré)
 
 ## Installer sur macOS
 
@@ -56,16 +56,22 @@ Les autres systèmes utilisent le moteur CPU, sans dépendance Metal.
 
 ## Ciel profond
 
+![Finition du ciel profond dans AstroCapture : nébuleuse d’Orion, histogramme et correction du fond de ciel](assets/screenshots/deep-sky.png)
+
 L’onglet **Ciel profond** propose un parcours inspiré de l’organisation
 d’Astro Pixel Processor, avec les principes de calibration et de traitement
 linéaire décrits dans le [tutoriel de Siril](https://siril.org/fr/tutorials/tuto-scripts/) : charger, calibrer, analyser les étoiles, aligner,
 normaliser, empiler puis finir l’image. Réglez les étapes puis lancez toute la
-chaîne avec **Créer l’image empilée**. Les panneaux **Images**, **Réglages
-d’empilement** et **Finition et export** organisent les réglages : aucune étape
-numérotée à exécuter séparément. Le mode brut est sélectionné par défaut ;
+chaîne avec **Créer l’image empilée**. Les onglets **Images**, **Empilement** et **Finition** organisent les réglages.
+Dans Finition, l’histogramme accompagne l’image et les familles **Étirement**,
+**Fond de ciel**, **Couleur**, **Géométrie** et **Transformations avancées** se
+déplient indépendamment : vous pouvez en ouvrir plusieurs ou toutes les refermer.
+La comparaison reste accessible en bas du panneau ; supprimer les réglages agit
+sur la famille indiquée et reste annulable avec **⌘ Z**. Le rouage du projet
+rassemble la sauvegarde et les préréglages de toute la finition. Le mode brut est sélectionné par défaut ;
 cochez **Poses déjà calibrées** uniquement pour des données déjà prétraitées.
 
-- Utilisez **Ajouter des fichiers…** ou **Importer un dossier…**. Le mode de
+- Utilisez **Ajouter des fichiers** ou **Importer un dossier**. Le mode de
   détection automatique classe les images selon leurs métadonnées et noms ;
   vérifiez et corrigez les types et groupes directement dans la liste. Les
   fichiers de résultat nommés resultat, stack, rvb ou hoo sont écartés de
@@ -262,9 +268,9 @@ dépendent des capacités du pilote et doivent être validées sur le matériel 
 
 Déposez un fichier **SER ou ACRAW** dans la fenêtre, ouvrez-le avec le sélecteur de fichiers ou retrouvez-le dans **Récents**. Les dix dernières vidéos ouvertes avec succès sont mémorisées.
 
-Pour retoucher une image existante, utilisez **Ouvrir…** ou déposez un **PNG ou TIFF** dans l’onglet Traitement. Les ondelettes, la couleur, la comparaison avant / après et la légende sont disponibles directement, sans analyse ni empilement. Les images 8 et 16 bits sont acceptées, jusqu’à **32 MP**, avec conservation des valeurs 16 bits. Les fichiers multipages ne sont pas acceptés et la transparence est placée sur fond noir. Choisissez **PNG 16 bits** (par défaut) ou **TIFF 16 bits** dans la section Export. Les deux formats conservent les détails sans compression destructive et acceptent une légende. L’export crée une copie ; l’original est protégé contre l’écrasement.
+Pour retoucher une image existante, utilisez **Ouvrir une image ou une vidéo** ou déposez un **PNG ou TIFF** dans l’onglet Traitement. Les ondelettes, la couleur, la comparaison avant / après et la légende sont disponibles directement, sans analyse ni empilement. Les images 8 et 16 bits sont acceptées, jusqu’à **32 MP**, avec conservation des valeurs 16 bits. Les fichiers multipages ne sont pas acceptés et la transparence est placée sur fond noir. Choisissez **PNG 16 bits** (par défaut) ou **TIFF 16 bits** dans la fenêtre **Exporter**. Les deux formats conservent les détails sans compression destructive et acceptent une légende. L’export crée une copie ; l’original est protégé contre l’écrasement.
 
-![Retouche directe d’une image TIFF](assets/screenshots/processing-image.png)
+![Finition d’une mosaïque lunaire dans Traitement : ondelettes, couleur et comparaison](assets/screenshots/processing-image.png)
 
 ### 1. Sélectionner les images
 
@@ -294,21 +300,19 @@ Les six niveaux d’ondelettes agissent sur des échelles de détail qui doublen
 
 Ces échelles se recouvrent : un niveau ne correspond pas à un objet astronomique précis. Les gains vont de **0 à 50 pour le niveau 1**, de **0 à 20 pour les niveaux 2 et 3**, et de **0 à 10 pour les niveaux 4 à 6**. Un gain nul n’ajoute aucun détail à cette échelle ; augmenter le gain renforce aussi le bruit et peut créer des halos. Les valeurs ne sont pas interchangeables avec celles d’autres logiciels. Le débruitage atténue les petites variations des détails ajoutés ; les gains rouge, vert et bleu et le gamma permettent d’ajuster la couleur et la luminosité.
 
-L’aperçu se met à jour après une courte pause pendant les réglages. **Annuler / Rétablir** permet de parcourir jusqu’à 100 modifications des paramètres, chaque glissement comptant comme une modification. Les préréglages nommés enregistrent les ondelettes, le débruitage, les gains couleur et le gamma pour les réutiliser sur une autre vidéo.
+L’aperçu se met à jour après une courte pause pendant les réglages. **⌘ Z / ⌘ ⇧ Z** permettent de parcourir jusqu’à 100 modifications des paramètres, chaque glissement comptant comme une modification. Les préréglages nommés enregistrent les ondelettes, le débruitage, les gains couleur et le gamma pour les réutiliser sur une autre vidéo.
 
 Maintenez **Avant** pour revoir l’empilement sans les réglages de finition, ou activez **Comparer** : la séparation déplaçable montre l’avant à gauche et l’après à droite. Le zoom, le déplacement de l’image et la comparaison n’affectent pas le fichier exporté.
 
-![Comparaison avant et après les réglages de finition](assets/screenshots/comparison.png)
+![Comparaison de Saturne avant et après les ondelettes, à partir d’une vidéo SER](assets/screenshots/comparison.png)
 
 ### 4. Exporter
 
-Le résultat est enregistré en **PNG ou TIFF RGB 16 bits par canal**, en conservant la précision issue de l’empilement et des réglages. Le SER d’origine reste inchangé. Le dossier utilisé pour le dernier export réussi est mémorisé.
+Le bouton à disquette **Exporter** ouvre le choix du format : **PNG ou TIFF RGB 16 bits par canal**, sans perte, ou **JPEG 8 bits** pour le partage. PNG est le format proposé par défaut ; choisissez PNG ou TIFF pour conserver la précision issue de l’empilement et des réglages. Le SER d’origine reste inchangé. Le dossier utilisé pour le dernier export réussi est mémorisé.
 
 Le **poids estimé** apparaît avant l’export et s’actualise selon le format et la légende. Le TIFF et le FITS linéaire utilisent un calcul de taille ; pour les grands PNG/JPEG, l’estimation repose sur des portions de l’image à pleine résolution. Le signe **≈** indique que le poids final peut varier avec la compression.
 
-Une **légende facultative** peut être inscrite dans le TIFF : objet, date d’observation, notes en haut à gauche ; observateur et matériel en bas à gauche. Un champ **Titre** place un titre plus grand juste au-dessus du texte de la légende. Le texte, sa taille et sa couleur (blanc ou doré) sont réglables. Les dimensions et le bilan d’empilement peuvent être ajoutés automatiquement. L’aperçu montre le résultat avant export ; désactiver la légende permet d’exporter l’image sans texte, toujours en 16 bits. Les dates et coordonnées astronomiques sont à renseigner manuellement. La légende est effacée à l’ouverture d’une autre vidéo pour éviter de réutiliser les informations d’une autre observation.
-
-![Aperçu de la légende avant export](assets/screenshots/caption.png)
+Une **légende facultative** peut être inscrite dans l’image exportée : objet, date d’observation, notes en haut à gauche ; observateur et matériel en bas à gauche. Un champ **Titre** place un titre plus grand juste au-dessus du texte de la légende. Le texte, sa taille et sa couleur (blanc ou doré) sont réglables. Les dimensions et le bilan d’empilement sont proposés dans un champ texte modifiable. L’aperçu est affiché dès l’ouverture et réapparaît lorsque vous activez la légende. Désactiver celle-ci conserve les textes saisis et exporte l’image sans ajout de texte. Une icône animée indique que l’export est en cours ; le bouton d’annulation reste disponible. Les dates et coordonnées astronomiques sont à renseigner manuellement. La légende est effacée à l’ouverture d’une autre vidéo pour éviter de réutiliser les informations d’une autre observation.
 
 | Usage | Formats |
 | --- | --- |
@@ -316,20 +320,20 @@ Une **légende facultative** peut être inscrite dans le TIFF : objet, date d’
 | Image à retoucher directement | PNG ou TIFF, 8 ou 16 bits, une seule image, jusqu’à 32 MP. |
 | Images issues de la caméra | PNG, TIFF 16 bits, FITS brut ; séries de FITS individuels. |
 | Ciel profond | FITS (entiers, flottants, compressés), RAW Bayer, PNG, TIFF. |
-| Résultat du traitement | PNG ou TIFF RGB 16 bits par canal. |
+| Résultat du traitement | PNG ou TIFF RGB 16 bits par canal, JPEG 8 bits pour le partage. |
 | Images à assembler en mosaïque ou à ajouter à l’historique | TIFF, PNG, JPEG. |
 
 En capture, enregistrer une source 8 bits dans un TIFF 16 bits conserve ses valeurs sans créer de nouvelles informations. En traitement, l’empilement calcule des valeurs intermédiaires que l’export 16 bits permet de préserver.
 
 ## Mosaïque
 
-![Assemblage de vues qui se chevauchent](assets/screenshots/mosaic.png)
+![Mosaïque de la Lune : sélection de 29 vues et assemblage automatique](assets/screenshots/mosaic.png)
 
 Déposez plusieurs **TIFF, PNG ou JPEG** dans **Mosaïque**, puis cliquez sur **Assembler automatiquement**. L’application recherche les détails communs, ajuste la position, la rotation et les petits écarts d’échelle, puis fond les recouvrements. L’option **Harmoniser la luminosité** compense les différences globales d’exposition entre les vues. Les images apparaissent dans une **grille de vignettes** : cochez les vues à utiliser et décochez celles à laisser de côté. Le compteur distingue les images sélectionnées du total chargé. Le sélecteur de fichiers utilise le panneau natif de macOS, filtré sur TIFF, PNG et JPEG. Seules les vignettes visibles se chargent, en arrière-plan. Le résultat peut être examiné au zoom, accompagné d’une **légende avec titre**, exporté en TIFF 16 bits et ajouté à l’historique.
 
-**Retoucher dans Traitement…** transfère la mosaïque pour ajuster les ondelettes, le débruitage, les couleurs et le gamma, sans l’empiler de nouveau. La précision de l’image est conservée et la légende reste modifiable. Pour un résultat homogène, empilez d’abord chaque portion, assemblez-les, puis appliquez une finition légère à l’ensemble et ajoutez la légende. Le transfert remplace l’image actuellement ouverte dans Traitement ; exportez un résultat à conserver avant de le remplacer.
+**Retoucher dans Traitement** transfère la mosaïque pour ajuster les ondelettes, le débruitage, les couleurs et le gamma, sans l’empiler de nouveau. La précision de l’image est conservée et la légende reste modifiable. Pour un résultat homogène, empilez d’abord chaque portion, assemblez-les, puis appliquez une finition légère à l’ensemble et ajoutez la légende. Le transfert remplace l’image actuellement ouverte dans Traitement ; exportez un résultat à conserver avant de le remplacer.
 
-![Finition de la mosaïque dans Traitement](assets/screenshots/mosaic-processing.png)
+La capture de retouche lunaire dans [Traitement](#traitement) montre cette dernière étape.
 
 Pour reconstituer la Lune ou le Soleil, prévoyez **25 à 40 % de recouvrement**, avec le même matériel, la même séance et des réglages aussi constants que possible. Des portions déjà empilées donnent généralement une base plus propre. Assemblez les images avant d’y inscrire une légende. La surface doit présenter des détails reconnaissables : une zone solaire uniforme ou un champ presque entièrement noir peut empêcher le raccordement.
 
@@ -343,7 +347,7 @@ L’assemblage ne corrige pas la rotation solaire, l’évolution des protubéra
 
 ## Historique
 
-![Consultation d’une image dans l’historique](assets/screenshots/history.png)
+![Historique des exports : consultation de la nébuleuse d’Orion et accès au fichier](assets/screenshots/history.png)
 
 L’historique rassemble jusqu’à **500 chemins d’images**. Les exports peuvent y être ajoutés automatiquement ; les images déjà traitées s’ajoutent par glisser-déposer ou avec **Ajouter des images**.
 
@@ -373,7 +377,7 @@ Les paramètres globaux centralisent :
 - **La langue** : français ou anglais, avec changement immédiat.
 - **La présentation du traitement** : mode guidé avec explications ou compact. La largeur du panneau se règle en déplaçant sa séparation et reste mémorisée.
 - **Le dossier de capture** : images de la caméra et vidéos, réparties dans les sous-dossiers `Images` et `Videos` d’un dossier personnalisé.
-- **Le dossier d’export du traitement** : TIFF produits après empilement et finition, ainsi que les mosaïques.
+- **Le dossier d’export du traitement** : images produites après empilement et finition, ainsi que les mosaïques.
 - **L’ajout automatique à l’historique**, activable indépendamment de l’ajout manuel.
 
 Les commandes propres à la caméra restent dans **Capture**. Les préférences et les préréglages persistent après un redémarrage ou une mise à jour. La session de Traitement, Ciel profond et Mosaïque est sauvegardée automatiquement deux secondes après une modification stable. Elle conserve les sources référencées, les résultats en flottants, les réglages et les légendes. **Accueil → Reprendre la session** restaure le travail ; les résultats restent exportables si une source a été déplacée. **Sauvegarder la session et quitter** attend la fin de la sauvegarde avant la fermeture. Une session existante n’est pas chargée par-dessus un travail ouvert. La pile des annulations n’est pas conservée après redémarrage ; les versions A/B le sont. Les acquisitions de caméra restent des fichiers de capture, sans relance automatique de la caméra.

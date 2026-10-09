@@ -566,6 +566,6 @@ void ProcessingController::exportImage(const QUrl &url) {
       status_ = tr("Saved image: ") + path;
       emit imageExported(QUrl::fromLocalFile(path));
     });
-  });
+  }, Work::Export);
 }
 } // namespace astro::app

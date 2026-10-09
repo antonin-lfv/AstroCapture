@@ -80,7 +80,7 @@ void MosaicController::run(std::function<void(std::stop_token)> task) {
             const auto error=localizedError(QString::fromUtf8(e.what()));
             post([this,error]{status_=tr("Mosaic could not be completed: %1").arg(error);});
         }
-        post([this]{busy_=false;emit changed();});
+        post([this]{busy_=false;exporting_=false;emit changed();});
     });
 }
 QVariantList MosaicController::files() const {
@@ -184,6 +184,7 @@ void MosaicController::exportImage(const QUrl& url) {
     for(const auto& input:inputs_) if(sameFile(path,input.path)) {status_=tr("An original image cannot be overwritten.");emit changed();return;}
     for(const auto& input:excluded_) if(sameFile(path,input.path)) {status_=tr("An original image cannot be overwritten.");emit changed();return;}
     const auto result=result_; const auto overlay=annotationImage_; status_=tr("Exporting 16-bit TIFF…");
+    exporting_=true;
     run([this,result,path,overlay](std::stop_token stop){
         std::vector<std::uint16_t> samples(result->rgb.size());
         for(int y=0;y<result->height;++y) { check(stop); for(int x=0;x<result->width*3;++x) {

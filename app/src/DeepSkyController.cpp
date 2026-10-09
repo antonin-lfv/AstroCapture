@@ -220,7 +220,7 @@ void DeepSkyController::run(const QString& status,std::function<void(std::stop_t
         bool success=true;
         try{task(stop);success=!stop.stop_requested();}catch(const Cancelled&){success=false;post([this]{status_=tr("Cancelled. Previous results are preserved.");});}
         catch(const std::exception& e){success=false;const auto message=tr(e.what());post([this,message]{status_=message;});}
-        post([this,success]{busy_=false;adjusting_=false;if(pendingAdjustments_){auto next=std::move(*pendingAdjustments_);pendingAdjustments_.reset();apply(next);return;}emit changed();emit operationFinished(success,status_);});
+        post([this,success]{busy_=false;adjusting_=false;exporting_=false;if(pendingAdjustments_){auto next=std::move(*pendingAdjustments_);pendingAdjustments_.reset();apply(next);return;}emit changed();emit operationFinished(success,status_);});
     });
 }
 void DeepSkyController::show(std::shared_ptr<const processing::FloatImage> image,bool result,QImage preview,std::shared_ptr<const processing::FloatImage> displayed,QVariantMap stretch,QImage before) {
@@ -467,12 +467,13 @@ QUrl DeepSkyController::exportUrl() const {
     return QUrl::fromLocalFile(source.dir().filePath(source.completeBaseName()+"-stacked.tif"));
 }
 void DeepSkyController::exportImage(const QUrl& url,bool linear) {
-    if(!linear_||!url.isLocalFile())return;
+    if(busy_||!linear_||!url.isLocalFile())return;
     const auto path=url.toLocalFile();
     if(projectUrl_.isLocalFile()&&sameFile(projectUrl_.toLocalFile(),path)){status_=tr("A project file cannot be overwritten by an image.");emit changed();return;}
     for(const auto& value:frames_)if(sameFile(value.toMap()["path"].toString(),path)){status_=tr("An original image cannot be overwritten.");emit changed();return;}
     const auto masks=referencedMasks(finishSettings_,projectOptions_);for(const auto& mask:masks)if(sameFile(mask,path)){status_=tr("An original image cannot be overwritten.");emit changed();return;}
     const auto image=linear?linear_:finished_;const auto exposure=totalExposure_;
+    exporting_=true;
     run(tr("Exporting image…"),[this,image,path,linear,exposure](std::stop_token stop){
         QTemporaryDir directory(QFileInfo(path).dir().filePath(".astrocapture-XXXXXX"));if(!directory.isValid())throw std::runtime_error("Cannot create temporary export files.");
         const auto temp=directory.filePath("image");

@@ -201,3 +201,37 @@ dans la feuille de route.
 
 SHA-256 du DMG : `14af7483d9e463952a102e55789863af555fb5071c518c2826339236a0da9201`.
 SHA-256 de l'exécutable : `59ad87cf5e8dae41865a72414425a331fbbf13c11653393b22d83fbe061d8c67`.
+
+
+## Lot 1.6.1 — légende, exports et familles indépendantes (10 octobre 2026)
+
+L’aperçu est visible à chaque ouverture du dialogue d’export et se réaffiche
+lorsque la légende est activée. PNG, TIFF et JPEG gardent le même rendu et la
+même précision qu’avant. L’icône de chargement accompagne le bouton durant
+l’export de Traitement, de l’image finale du Ciel profond, du FITS linéaire
+et de la mosaïque. Les états du moteur distinguent l’export des autres calculs
+et se terminent également après une erreur ou une annulation.
+
+Les cinq familles de Finition se déplient indépendamment, à toutes les tailles
+de fenêtre. Toutes peuvent être refermées. La comparaison reste dans le pied
+de l’inspecteur ; la suppression nomme la famille active et reste annulable.
+La composition par filtres reste dans Couleur, et tous les outils avancés restent
+accessibles. Le projet et la session conservent les familles ouvertes, y compris
+la liste vide. Les vues d’anciens projets ouvrent la famille précédemment choisie.
+Les tests font passer ces vues par une sérialisation JSON réelle pour couvrir
+les séquences Qt et les tableaux JavaScript.
+
+Le parcours natif utilise le FITS linéaire d’Orion, 6 244 × 4 170 pixels,
+en français, à 1440 × 960, 1100 × 800 et 900 × 700. Les clics ouvrent deux
+familles puis les referment toutes, sans modifier les paramètres ni les pixels
+flottants. L’aperçu, les textes, la zone de comparaison et les boutons restent
+dans leurs panneaux. Les captures `previews/native/1.6.1-*` documentent ces états.
+Un vrai export PNG avec légende confirme l’animation et son arrêt ; les parcours
+d’erreur de destination et d’annulation la font également disparaître.
+
+Les 36 tests passent en Debug (112,82 s), avec les régressions d’export,
+d’aperçu, de fermeture complète et de restauration des familles. Le test de
+l’espace Ciel profond passe aussi après la dernière correction de restauration
+(3,57 s). Les cinq captures fournies sont copiées sans transformation : leurs
+empreintes correspondent aux originaux. Toutes les images référencées dans
+le README existent ; les captures remplacées et devenues inutilisées sont retirées.

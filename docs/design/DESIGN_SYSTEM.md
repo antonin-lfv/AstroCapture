@@ -24,11 +24,13 @@ restent accessibles et portent leurs vrais noms.
 8. Comparaison et suppression des réglages dans le pied de l'inspecteur.
 
 La navigation entre étapes conserve la vue et les réglages. L'ouverture d'une famille
-ne réinitialise rien. Une seule famille est dépliée à la fois. En fenêtre étroite,
-l'inspecteur passe de 360 à 320 px et un sélecteur rassemble les familles. Sous
-1 000 px de largeur, l'histogramme peut être déplié à la demande. Les actions de
-comparaison et le zoom conservent leur place. Seuls les contrôles de la famille
-peuvent défiler ; les commandes de navigation et de comparaison restent accessibles.
+ne réinitialise rien. Les familles se déplient indépendamment : plusieurs peuvent
+rester ouvertes et toutes peuvent être refermées. Leur état est conservé dans le
+projet et la session. En fenêtre étroite, l'inspecteur passe de 360 à 320 px et
+garde les mêmes en-têtes dépliables. Sous 1 000 px de largeur, l'histogramme peut
+être déplié à la demande. Les familles et leurs contrôles défilent ensemble ;
+les commandes de comparaison et le zoom conservent leur place. Le bouton de
+suppression nomme la famille active, sélectionnée par son en-tête ou ses contrôles.
 
 ## Fondations
 
@@ -83,6 +85,8 @@ avancement. Une erreur est expliquée près de la commande concernée.
 - Supprimer ces réglages agit sur la famille courante et reste annulable par Cmd+Z.
 - Le menu Exporter distingue FITS linéaire et Image finale. L'export classique rassemble
   format, légende facultative, dimensions et poids estimé avant la confirmation.
+- L’aperçu de l’image finale est visible dès l’ouverture du dialogue ; activer la
+  légende le réaffiche. Pendant l’export, une icône animée accompagne le bouton.
 - PNG 16 bits et TIFF 16 bits sont présentés comme sans perte ; JPEG expose sa perte
   de précision. Une estimation compressée est identifiée comme approximative.
 - Fermer l'application conserve la protection existante contre les pertes de travail.

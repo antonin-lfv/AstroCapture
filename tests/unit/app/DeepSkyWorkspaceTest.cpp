@@ -3,6 +3,7 @@
 #include <QGuiApplication>
 #include <QQmlEngine>
 #include <QQmlComponent>
+#include <QJSValue>
 #include <QQuickItem>
 #include <QQuickWindow>
 #include <QMouseEvent>
@@ -136,7 +137,43 @@ int main(int argc,char** argv){
     ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root,"setFinish",Q_ARG(QVariant,QVariant(controller.finishSettings()))));wait(controller);
     ASTRO_TEST_CHECK(!object->findChild<QObject*>("deepSkyVersionA"));
     ASTRO_TEST_CHECK(object->findChild<QObject*>("deepSkyExportButton"));
-    ASTRO_TEST_CHECK(object->findChild<QObject*>("deepSkyFinishFamily"));
+    // Disclosure families can coexist, close completely, and survive session restore.
+    const auto disclosureSettings=controller.finishSettings();
+    const auto disclosurePixels=controller.processingDocument().value<app::ImageDocument>().pixels;
+    auto openFamilies=[&] {
+        auto value=root->property("expandedFamilies");
+        if(value.metaType()==QMetaType::fromType<QJSValue>())value=value.value<QJSValue>().toVariant();
+        return value.toList();
+    };
+    auto toggleFamily=[&](int index) {
+        auto* header=root->findChild<QObject*>(QString("deepSkyFamily%1Header").arg(index));
+        ASTRO_TEST_CHECK(header && QMetaObject::invokeMethod(header,"clicked"));
+        QCoreApplication::processEvents();
+    };
+    toggleFamily(1);
+    ASTRO_TEST_CHECK(root->findChild<QObject*>("deepSkyFamily0")->property("expanded").toBool());
+    ASTRO_TEST_CHECK(root->findChild<QObject*>("deepSkyFamily1")->property("expanded").toBool());
+    toggleFamily(0);toggleFamily(1);
+    ASTRO_TEST_CHECK(openFamilies().isEmpty());
+    ASTRO_TEST_CHECK(!root->findChild<QObject*>("deepSkyResetFamily")->property("enabled").toBool());
+    const auto closedState=root->property("sessionState");
+    toggleFamily(2);toggleFamily(3);
+    ASTRO_TEST_CHECK(root->findChild<QObject*>("deepSkyFamily2")->property("expanded").toBool());
+    ASTRO_TEST_CHECK(root->findChild<QObject*>("deepSkyFamily3")->property("expanded").toBool());
+    const auto openState=root->property("sessionState");
+    const auto storedClosed=QJsonDocument::fromJson(QJsonDocument(QJsonObject::fromVariantMap(closedState.toMap())).toJson()).object().toVariantMap();
+    const auto storedOpen=QJsonDocument::fromJson(QJsonDocument(QJsonObject::fromVariantMap(openState.toMap())).toJson()).object().toVariantMap();
+    ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root,"restoreSessionState",Q_ARG(QVariant,QVariant(storedClosed))));
+    ASTRO_TEST_CHECK(openFamilies().isEmpty());
+    ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root,"restoreSessionState",Q_ARG(QVariant,QVariant(storedOpen))));
+    ASTRO_TEST_CHECK(openFamilies()==QVariantList({2,3}));
+    auto legacyView=openState.toMap();legacyView.remove("expandedFamilies");legacyView["tool"]=2;
+    ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root,"restoreSessionState",Q_ARG(QVariant,QVariant(legacyView))));
+    ASTRO_TEST_CHECK(openFamilies()==QVariantList{QVariant(2)});
+    ASTRO_TEST_CHECK(controller.finishSettings()==disclosureSettings);
+    ASTRO_TEST_CHECK(controller.processingDocument().value<app::ImageDocument>().pixels==disclosurePixels);
+    root->setProperty("expandedFamilies",QVariantList{0});
+    root->setProperty("finishingTool",0);
     auto beforeFamily=controller.finishSettings();beforeFamily["red"]=1.4;beforeFamily["rotation"]=1;
     ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root,"setFinish",Q_ARG(QVariant,QVariant(beforeFamily))));wait(controller);
     root->setProperty("finishingTool",2);
@@ -149,7 +186,12 @@ int main(int argc,char** argv){
     ASTRO_TEST_CHECK(!root->findChild<QObject*>("deepSkyCommitTransformation"));
     ASTRO_TEST_CHECK(!root->findChild<QObject*>("deepSkyUndo"));
     ASTRO_TEST_CHECK(!root->findChild<QObject*>("deepSkyRedo"));
-    const auto output=QUrl::fromLocalFile(directory.filePath("linear.fits"));controller.exportImage(output,true);wait(controller);
+    const auto output=QUrl::fromLocalFile(directory.filePath("linear.fits"));controller.exportImage(output,true);
+    ASTRO_TEST_CHECK(controller.exporting()&&root->findChild<QObject*>("deepSkyExportButton")->property("busy").toBool());
+    wait(controller);
+    ASTRO_TEST_CHECK(!controller.exporting()&&!root->findChild<QObject*>("deepSkyExportButton")->property("busy").toBool());
+    controller.exportImage(QUrl::fromLocalFile(directory.filePath("invalid.extension")),true);wait(controller);
+    ASTRO_TEST_CHECK(!controller.exporting()&&!QFileInfo::exists(directory.filePath("invalid.extension")));
     ASTRO_TEST_CHECK(controller.linearExportBytes()==QFileInfo(output.toLocalFile()).size());
     auto* fitsSize=root->findChild<QObject*>("exportSizeHint");ASTRO_TEST_CHECK(fitsSize && fitsSize->property("estimatedBytes").toDouble()==controller.linearExportBytes());
     auto result=recording::readAstroImage(output.toLocalFile().toStdString());ASTRO_TEST_CHECK(result.exposure==120&&result.channels==3&&result.width<160);

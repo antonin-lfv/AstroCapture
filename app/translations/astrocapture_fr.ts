@@ -270,7 +270,11 @@ Télescope · caméra · accessoires</translation>
         <source>Scales the added text relative to the image dimensions. Larger values improve readability but cover more of the image. Preview at the intended viewing size.</source>
         <translation>Adapte la taille du texte ajouté aux dimensions de l’image. Une valeur élevée améliore la lisibilité mais couvre davantage l’image. Vérifiez l’aperçu à la taille de consultation prévue.</translation>
     </message>
-</context>
+        <message>
+            <source>Exporting…</source>
+            <translation>Export en cours…</translation>
+        </message>
+    </context>
     <context>
         <name>DeepSkyAdvancedTools</name>
         <message>
@@ -2774,6 +2778,14 @@ L’aperçu est automatiquement éclairci ; les données restent linéaires.</tr
             <source>1 missing source</source>
             <translation>1 source manquante</translation>
         </message>
+        <message>
+            <source>Exporting…</source>
+            <translation>Export en cours…</translation>
+        </message>
+        <message>
+            <source>Delete adjustments: %1</source>
+            <translation>Supprimer les réglages : %1</translation>
+        </message>
     </context>
     <context>
         <name>GlobalSettingsWorkspace</name>
@@ -4805,7 +4817,11 @@ Les détails communs relient les vues. Les zones manquantes restent noires ; auc
         <source>Fades the outer coverage boundary into black and protects it from sharpening in Processing. A narrow border becomes darker; missing areas are not reconstructed.</source>
         <translation>Fond progressivement le bord extérieur de couverture dans le noir et le protège de l’accentuation dans Traitement. Une bande étroite s’assombrit ; les zones absentes ne sont pas reconstruites.</translation>
     </message>
-</context>
+        <message>
+            <source>Exporting…</source>
+            <translation>Export en cours…</translation>
+        </message>
+    </context>
     <context>
         <name>ProcessingWorkspace</name>
         <message>
@@ -5484,7 +5500,11 @@ Télescope · caméra · accessoires</translation>
         <source>Name used to save this complete set of adjustments locally. A new name creates a separate preset; saving an existing name replaces its settings. The source image files are not included.</source>
         <translation>Nom utilisé pour sauvegarder localement cet ensemble de réglages. Un nouveau nom crée un préréglage distinct ; un nom existant remplace ses réglages. Les fichiers image source ne sont pas inclus.</translation>
     </message>
-</context>
+        <message>
+            <source>Exporting…</source>
+            <translation>Export en cours…</translation>
+        </message>
+    </context>
     <context>
         <name>QObject</name>
         <message>
@@ -7212,6 +7232,14 @@ Résultat obtenu :
         <message>
             <source>Current adjustment family</source>
             <translation>Famille de réglages active</translation>
+        </message>
+        <message>
+            <source>Collapse this adjustment family</source>
+            <translation>Refermer cette famille de réglages</translation>
+        </message>
+        <message>
+            <source>Expand this adjustment family</source>
+            <translation>Ouvrir cette famille de réglages</translation>
         </message>
     </context>
     <context>

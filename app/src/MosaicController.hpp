@@ -22,6 +22,7 @@ class MosaicController : public QObject {
     Q_PROPERTY(QString captionTechnicalText READ captionTechnicalText NOTIFY annotationChanged)
     Q_PROPERTY(QVariant exportSizeInput READ exportSizeInput NOTIFY exportSizeInputChanged)
     Q_PROPERTY(bool busy READ busy NOTIFY changed)
+    Q_PROPERTY(bool exporting READ exporting NOTIFY changed)
     Q_PROPERTY(bool hasResult READ hasResult NOTIFY changed)
     Q_PROPERTY(int progress READ progress NOTIFY changed)
     Q_PROPERTY(QString status READ status NOTIFY changed)
@@ -40,6 +41,7 @@ public:
     int selectedCount() const;
     QVariantList selection() const;
     bool busy() const { return busy_; }
+    bool exporting() const { return busy_ && exporting_; }
     bool hasResult() const { return bool(result_); }
     int progress() const { return progress_; }
     QString status() const { return status_; }
@@ -85,7 +87,7 @@ private:
     QVariantMap annotation_{cleanAnnotation({})};
     QString status_;
     int progress_{}, resultCount_{};
-    bool busy_{};
+    bool busy_{},exporting_{};
     std::jthread worker_;
 };
 }

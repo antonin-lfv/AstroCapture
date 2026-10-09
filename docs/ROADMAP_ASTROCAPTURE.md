@@ -1,9 +1,14 @@
 # AstroCapture — prochaines étapes
 
-État après le lot 1.6.0 du 9 octobre 2026. Cette liste distingue ce qui est livré
+État après le lot 1.6.1 du 10 octobre 2026. Cette liste distingue ce qui est livré
 et les prochains travaux ; elle ne promet pas une équivalence complète avec Siril.
 
 ## Déjà livré
+
+- [x] Aperçu de légende affiché dès l’ouverture, indicateur animé d’export,
+  familles de Finition indépendantes et état conservé après réouverture.
+- [x] README illustré avec les cinq captures fournies : Ciel profond,
+  Traitement (Saturne et Lune), Mosaïque et Historique.
 
 - [x] Sauvegarde automatique et reprise de Traitement, Ciel profond et Mosaïque,
   avec résultats calculés en flottants, réglages, légendes, versions A/B et vue.

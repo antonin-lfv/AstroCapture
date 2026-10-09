@@ -9,7 +9,7 @@ Popup {
         required property var library
         required property Component previewContent
         property bool exportStarted:false
-        property bool previewOpen:false
+        property bool previewOpen:true
         property bool compressedFormats: true
         readonly property bool dialogOpen:opened || saveCaption.visible
         signal previewRequested()
@@ -55,7 +55,7 @@ Popup {
             Label {text:exportFormat.suffix==="jpg"?qsTr("Lossy compression · 8-bit · for sharing"):qsTr("Lossless · preserves detail and precision");color:Atelier.secondary;font.pixelSize:12;Layout.fillWidth:true;wrapMode:Text.Wrap}
             Label {text:editor.controller.imageWidth+" × "+editor.controller.imageHeight+" px";color:Atelier.text;font.pixelSize:13}
             RowLayout {Layout.fillWidth:true
-                HelpCheckBox {explanation: qsTr("Adds your text to the exported image pixels. Turning it off preserves your caption settings. It cannot remove a caption already present in an imported photograph."); objectName:"annotationEnabled";text:qsTr("Add a caption");checked:editor.controller.exportAnnotation.enabled;enabled:!editor.controller.busy;onClicked:{editor.setAnnotation("enabled",checked);editor.previewRequested()}}
+                HelpCheckBox {explanation: qsTr("Adds your text to the exported image pixels. Turning it off preserves your caption settings. It cannot remove a caption already present in an imported photograph."); objectName:"annotationEnabled";text:qsTr("Add a caption");checked:editor.controller.exportAnnotation.enabled;enabled:!editor.controller.busy;onClicked:{editor.setAnnotation("enabled",checked);if(checked)editor.previewOpen=true;editor.previewRequested()}}
                 Item {Layout.fillWidth:true}
                 IconButton {text:editor.previewOpen?qsTr("Hide preview"):qsTr("Preview");ghost:true;onClicked:editor.previewOpen=!editor.previewOpen}
             }
@@ -165,12 +165,12 @@ Popup {
                 Label {text:editor.exportStarted?editor.controller.status:"";color:Atelier.secondary;wrapMode:Text.Wrap;Layout.fillWidth:true;Layout.maximumHeight:50}
                 IconButton {text:qsTr("Cancel export");visible:editor.controller.busy;onClicked:editor.controller.cancel()}
 
-                IconButton {objectName:"captionExport";text:qsTr("Export");iconName:"export";primary:true;enabled:!editor.controller.busy && editor.controller.hasResult;onClicked:{saveCaption.currentFolder=editor.library.exportFolderFor(editor.controller.exportUrl);saveCaption.selectedFile=editor.library.suggestedExport(editor.controller.exportUrl).toString().replace(/\.[^/.]+$/, "."+exportFormat.suffix);saveCaption.open()}}
+                IconButton {objectName:"captionExport";text:editor.controller.exporting?qsTr("Exporting…"):qsTr("Export");iconName:"export";busy:editor.controller.exporting;primary:true;enabled:!editor.controller.busy && editor.controller.hasResult;onClicked:{saveCaption.currentFolder=editor.library.exportFolderFor(editor.controller.exportUrl);saveCaption.selectedFile=editor.library.suggestedExport(editor.controller.exportUrl).toString().replace(/\.[^/.]+$/, "."+exportFormat.suffix);saveCaption.open()}}
                 IconButton {text:qsTr("Close");enabled:!editor.controller.busy;onClicked:editor.close()}
             }
         }
         FileDialog {id:saveCaption;title:qsTr("Export image");fileMode:FileDialog.SaveFile;nameFilters:exportFormat.suffix==="png"?[qsTr("16-bit PNG image (*.png)")]:exportFormat.suffix==="tif"?[qsTr("16-bit TIFF image (*.tif *.tiff)")]:[qsTr("JPEG image (*.jpg *.jpeg)")];defaultSuffix:exportFormat.suffix;onAccepted:{editor.exportStarted=true;let path=selectedFile.toString();if(!/\.(png|tiff?|jpe?g)$/i.test(path))path+="."+exportFormat.suffix;editor.controller.exportImage(path)}}
-        onOpened:{exportStarted=false;if(controller.showResult)controller.showResult(false)}
+        onOpened:{exportStarted=false;previewOpen=true;if(controller.showResult)controller.showResult(false)}
         component CaptionSwitch: Switch {
         id: control
         indicator: Rectangle {

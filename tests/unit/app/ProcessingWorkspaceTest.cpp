@@ -122,7 +122,11 @@ int main(int argc, char** argv) {
     auto exported = [&](const QString& name) {
         const QString destination = temp.filePath(name);
         controller.exportImage(QUrl::fromLocalFile(destination));
+        ASTRO_TEST_CHECK(controller.exporting());
+        auto* exportButton=root->findChild<QObject*>("captionExport");
+        ASTRO_TEST_CHECK(exportButton && exportButton->property("busy").toBool());
         until([&] { return !controller.busy(); });
+        ASTRO_TEST_CHECK(!controller.exporting() && !exportButton->property("busy").toBool());
         QFile file(destination); ASTRO_TEST_CHECK(file.open(QIODevice::ReadOnly));
         return file.readAll();
     };
@@ -177,8 +181,15 @@ int main(int argc, char** argv) {
     ASTRO_TEST_CHECK(technicalText->property("text").toString() == suggestedInformation);
     ASTRO_TEST_CHECK(!controller.exportAnnotation().contains("technicalText"));
     const QString correctedInformation = "Orion · 6 poses de 60 s\nFiltre Hα · 9 octobre 2026";
+    captionPopup->setProperty("previewOpen",false);
     ASTRO_TEST_CHECK(QMetaObject::invokeMethod(captionPopup,"open"));
     until([&]{return captionPopup->property("opened").toBool();});
+    ASTRO_TEST_CHECK(captionPopup->property("previewOpen").toBool());
+    ASTRO_TEST_CHECK(root->findChild<QQuickItem*>("captionPreview")->isVisible());
+    captionPopup->setProperty("previewOpen",false);
+    captionEnabled->setProperty("checked",false);ASTRO_TEST_CHECK(QMetaObject::invokeMethod(captionEnabled,"clicked"));
+    captionEnabled->setProperty("checked",true);ASTRO_TEST_CHECK(QMetaObject::invokeMethod(captionEnabled,"clicked"));
+    ASTRO_TEST_CHECK(captionPopup->property("previewOpen").toBool());
     qobject_cast<QQuickItem*>(technicalText)->forceActiveFocus();
     ASTRO_TEST_CHECK(QMetaObject::invokeMethod(technicalText,"selectAll"));
     QKeyEvent captionInput(QEvent::KeyPress,Qt::Key_unknown,Qt::NoModifier,correctedInformation);

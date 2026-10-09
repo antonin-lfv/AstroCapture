@@ -29,6 +29,7 @@ class DeepSkyController : public QObject {
     Q_PROPERTY(bool sourceAutoStretch READ sourceAutoStretch WRITE setSourceAutoStretch NOTIFY changed)
     Q_PROPERTY(QVariantList backgroundSamples READ backgroundSamples NOTIFY changed)
     Q_PROPERTY(bool busy READ busy NOTIFY changed)
+    Q_PROPERTY(bool exporting READ exporting NOTIFY changed)
     Q_PROPERTY(bool restoringProject READ restoringProject NOTIFY changed)
     Q_PROPERTY(QVariantList missingSources READ missingSources NOTIFY changed)
     Q_PROPERTY(double portableProjectBytes READ portableProjectBytes NOTIFY changed)
@@ -72,6 +73,7 @@ public:
     void setSourceAutoStretch(bool);
     QVariantList backgroundSamples() const{return backgroundSamples_;}
     bool busy() const{return busy_;}
+    bool exporting() const{return busy_ && exporting_;}
     bool restoringProject() const{return restoringProject_;}
     QVariantList missingSources() const;
     double portableProjectBytes() const;
@@ -165,7 +167,7 @@ private:
     bool sourceDebayer_{true},sourceAutoStretch_{true};
     std::map<QString,QString> references_;
     int progress_{};
-    bool busy_{},adjusting_{};
+    bool busy_{},adjusting_{},exporting_{};
     std::optional<QVariantMap> pendingAdjustments_;
     QVariantMap histogram_,advancedReport_;
     QVariantList psfKernel_;

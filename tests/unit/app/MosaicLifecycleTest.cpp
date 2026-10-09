@@ -75,10 +75,10 @@ int main(int argc,char** argv) {
     ASTRO_TEST_CHECK(captionDocument.pixels==plainDocument.pixels && captionDocument.preview==plainDocument.preview);
     ASTRO_TEST_CHECK(captionDocument.annotation.value("title")=="Lune · été" && captionDocument.protectedPaths.contains(QFileInfo(a).canonicalFilePath()));
     int exports=0;QObject::connect(&controller,&astro::app::MosaicController::imageExported,[&]{++exports;});
-    const auto out=temp.filePath("mosaic.tif"); controller.exportImage(QUrl::fromLocalFile(out));wait(controller);
+    const auto out=temp.filePath("mosaic.tif"); controller.exportImage(QUrl::fromLocalFile(out));ASTRO_TEST_CHECK(controller.exporting());wait(controller);ASTRO_TEST_CHECK(!controller.exporting());
     ASTRO_TEST_CHECK(exports==1 && QFileInfo(out).size()>1000000);
     if(QImageReader::supportedImageFormats().contains("tiff")){QImageReader reader(out);ASTRO_TEST_CHECK(reader.read().size()==QSize(controller.imageWidth(),controller.imageHeight()));}
-    controller.exportImage(QUrl::fromLocalFile(temp.filePath("missing/mosaic.tif")));wait(controller);ASTRO_TEST_CHECK(exports==1);
+    controller.exportImage(QUrl::fromLocalFile(temp.filePath("missing/mosaic.tif")));wait(controller);ASTRO_TEST_CHECK(exports==1&&!controller.exporting());
     const auto old=controller.image();controller.assemble();controller.cancel();wait(controller);ASTRO_TEST_CHECK(controller.image()==old);
     controller.removeImage(0);ASTRO_TEST_CHECK(!controller.hasResult()&&controller.files().size()==1&&QFileInfo::exists(a));
     controller.clear();ASTRO_TEST_CHECK(controller.files().isEmpty());

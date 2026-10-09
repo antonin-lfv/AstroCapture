@@ -10,6 +10,7 @@ Control {
     required property AppLibrary library
     signal editResult()
     property bool canEditResult: true
+    property bool finalExportBusy: false
     property bool portableSave: true
     property url relinkFolder: ""
     function sizeText(bytes) {return bytes<0?qsTr("Unavailable while sources are missing"):bytes>=1000000000?qsTr("≈ %1 GB").arg(Number(bytes/1000000000).toLocaleString(Qt.locale(),"f",1)):qsTr("≈ %1 MB").arg(Number(bytes/1000000).toLocaleString(Qt.locale(),"f",1));}
@@ -22,12 +23,25 @@ Control {
     readonly property var advancedKeys:["maskStrokes","maskBaseWhite","maskFile","maskBlurRadius","maskScope","pedestal","ghs", "ghsStrength", "ghsLocal", "ghsSymmetry", "ghsShadows", "ghsHighlights", "ghsInverse", "ghsMode", "maskType", "maskLow", "maskHigh", "maskFeather", "maskX", "maskY", "maskRadius", "maskStarRadius", "maskInvert", "deconvolution", "psfProfile", "psfFwhm", "psfBeta", "rlIterations", "rlDamping", "rlBlend", "rlStopping", "advancedDenoise", "noiseScales", "noiseThreshold", "noiseAmount", "noiseChroma", "photometry", "photometryReferences", "photometryAperture", "photometryInner", "photometryOuter", "photometrySaturation"]
     readonly property bool linearRecipeInput:!operations.some(op=>op.enabled && (op.settings.stretch || op.settings.scnr || op.settings.saturation!==1 || op.settings.rotation || op.settings.mirrorHorizontal || op.settings.mirrorVertical || (op.settings.geometry && (op.settings.geometry.crop || op.settings.geometry.angle || op.settings.geometry.scale!==1))))
     property int finishingTool:0
+    property var expandedFamilies: [0]
+    readonly property var familyNames: [qsTr("Stretch"), qsTr("Background"), qsTr("Color"), qsTr("Geometry"), qsTr("Advanced transformations")]
+    function familyOpen(index) { return expandedFamilies.indexOf(index) >= 0; }
+    function openFamily(index) {
+        if (!familyOpen(index)) expandedFamilies = expandedFamilies.concat([index]);
+        finishingTool = index;
+    }
+    function toggleFamily(index) {
+        if (!familyOpen(index)) { openFamily(index); return; }
+        expandedFamilies = expandedFamilies.filter(value => value !== index);
+        if (finishingTool === index && expandedFamilies.length > 0)
+            finishingTool = expandedFamilies[expandedFamilies.length - 1];
+    }
     readonly property bool compactInspector: width < 1150
     property int inspectorWidth: library.deepSkyPanelWidth
     property bool histogramExpanded: false
     property string comparisonMode: "result"
     property real comparisonSplit: 0.5
-    onFinishingToolChanged: if(settingsScroll.contentItem)settingsScroll.contentItem.contentY=0
+    onFinishingToolChanged: if(!familyOpen(finishingTool)) expandedFamilies = expandedFamilies.concat([finishingTool]);
     property var operations:[]
     property var backgroundPoints:[]
     property bool editingBackgroundSamples:false
@@ -128,7 +142,7 @@ Control {
         edits.values; edits.version; edits.canUndo; edits.canRedo;
         return {options:{calibrated:calibrated.checked,normalize:normalize.checked,badPixels:badPixels.checked,sequenceBackground:sequenceBackground.checked,
             sigma:sigma.value,method:integrationMethod.currentIndex,finish:edits.values,caption:root.captionOptions,versions:edits.snapshot()},
-            step:workflowStep,tool:finishingTool,advancedTool:advancedTools.toolIndex,comparison:comparisonMode,split:comparisonSplit,fit:viewport.fitMode,zoom:viewport.zoom,panX:viewport.panX,panY:viewport.panY};
+            step:workflowStep,tool:finishingTool,expandedFamilies:expandedFamilies.slice(),advancedTool:advancedTools.toolIndex,comparison:comparisonMode,split:comparisonSplit,fit:viewport.fitMode,zoom:viewport.zoom,panX:viewport.panX,panY:viewport.panY};
     }
     function restoreSessionState(state) {
         adjustmentTimer.stop();pendingProjectFinish=null;
@@ -147,7 +161,13 @@ Control {
             const initial={background:false,stretch:true,black:0,white:1,midtones:.15,red:1,green:1,blue:1,denoise:0,asinh:false,asinhStrength:20,saturation:1};
             edits.resetSession(Object.assign(initial,controller.hasResult?controller.finishSettings:{},restored.finish||{}));
         }
-        workflowStep=controller.hasResult?6:(state.step || 0);finishingTool=state.tool || 0;advancedTools.toolIndex=state.advancedTool||0;comparisonMode=state.comparison || "result";comparisonSplit=state.split===undefined?.5:state.split;viewport.fitMode=state.fit!==false;viewport.zoom=state.zoom||1;viewport.panX=state.panX||0;viewport.panY=state.panY||0;viewport.constrainPan();
+        workflowStep=controller.hasResult?6:(state.step || 0);
+        finishingTool=Math.max(0,Math.min(4,Number(state.tool)||0));
+        // Stored QVariant lists are Qt sequences rather than JavaScript arrays.
+        const restoredFamilies=state.expandedFamilies;
+        expandedFamilies=restoredFamilies&&typeof restoredFamilies!=="string"&&Number.isInteger(restoredFamilies.length)&&restoredFamilies.length<=5
+            ?Array.from(restoredFamilies).filter((value,index,items)=>Number.isInteger(value)&&value>=0&&value<5&&items.indexOf(value)===index):[finishingTool];
+        advancedTools.toolIndex=state.advancedTool||0;comparisonMode=state.comparison || "result";comparisonSplit=state.split===undefined?.5:state.split;viewport.fitMode=state.fit!==false;viewport.zoom=state.zoom||1;viewport.panX=state.panX||0;viewport.panY=state.panY||0;viewport.constrainPan();
         pendingProjectFinish=!controller.hasResult&&restored.finish?edits.values:null;
         editError="";updatingControls=false;
     }
@@ -239,7 +259,7 @@ Control {
                 Label {text:(controller.frames.length===1?qsTr("1 image"):qsTr("%1 images").arg(controller.frames.length))+(controller.imageWidth>0?" · "+controller.imageWidth+" × "+controller.imageHeight+" px · RGB":"");font.pixelSize:11;color:Atelier.secondary}
             }
             IconAction {objectName:"deepSkyProjectMenu";iconName:"gear";text:qsTr("Project options");hint:qsTr("Project and finishing presets");onClicked:projectMenu.open()}
-            IconButton {objectName:"deepSkyExportButton";iconName:"export";text:qsTr("Export");primary:true;enabled:!controller.busy && controller.hasResult;onClicked:exportPanel.open()}
+            IconButton {objectName:"deepSkyExportButton";iconName:"export";text:controller.exporting||root.finalExportBusy?qsTr("Exporting…"):qsTr("Export");busy:controller.exporting||root.finalExportBusy;primary:true;enabled:!controller.busy && controller.hasResult;onClicked:exportPanel.open()}
         }
         RowLayout {
             Layout.fillWidth:true;Layout.preferredHeight:42;Layout.minimumHeight:42;Layout.maximumHeight:42
@@ -314,7 +334,7 @@ DropArea {
                 }
                 Canvas {
                     id:sampleOverlay;objectName:"deepSkySampleOverlay";z:10;parent:viewport.imageContainer;anchors.fill:parent
-                    visible:root.workflowStep===6 && root.finishingTool===1 && root.editingBackgroundSamples && background.checked && controller.displayingResult && !controller.comparingRaw && !root.geometry.crop && !root.geometry.angle && root.geometry.scale===1 && rotation.currentIndex===0 && !mirrorHorizontal.checked && !mirrorVertical.checked
+                    visible:root.workflowStep===6 && root.familyOpen(1) && root.editingBackgroundSamples && background.checked && controller.displayingResult && !controller.comparingRaw && !root.geometry.crop && !root.geometry.angle && root.geometry.scale===1 && rotation.currentIndex===0 && !mirrorHorizontal.checked && !mirrorVertical.checked
                     property real sampleZoom:viewport.effectiveZoom
                     onSampleZoomChanged:requestPaint()
                     onVisibleChanged:if(visible)requestPaint()
@@ -473,15 +493,7 @@ DropArea {
                         }
                     }
                 }
-                DarkComboBox {objectName:"deepSkyFinishFamily";visible:root.workflowStep===6&&root.compactInspector;Layout.fillWidth:true;model:[qsTr("Stretch"),qsTr("Background"),qsTr("Color"),qsTr("Geometry"),qsTr("Advanced transformations")];currentIndex:root.finishingTool;onActivated:root.finishingTool=currentIndex;Accessible.name:qsTr("Adjustment family")}
-                Item {id:genericSettingsSlot;visible:root.workflowStep!==6;Layout.fillWidth:true;Layout.fillHeight:true;Layout.minimumHeight:0}
-                ColumnLayout {visible:root.workflowStep===6;Layout.fillWidth:true;Layout.fillHeight:true;Layout.minimumHeight:0;spacing:0
-                    InspectorFamily {id:family0;title:qsTr("Stretch");expanded:root.finishingTool===0;visible:!root.compactInspector||expanded;headerVisible:!root.compactInspector;onActivated:root.finishingTool=0}
-                    InspectorFamily {id:family1;title:qsTr("Background");expanded:root.finishingTool===1;visible:!root.compactInspector||expanded;headerVisible:!root.compactInspector;onActivated:root.finishingTool=1}
-                    InspectorFamily {id:family2;title:qsTr("Color");expanded:root.finishingTool===2;visible:!root.compactInspector||expanded;headerVisible:!root.compactInspector;onActivated:root.finishingTool=2}
-                    InspectorFamily {id:family3;title:qsTr("Geometry");expanded:root.finishingTool===3;visible:!root.compactInspector||expanded;headerVisible:!root.compactInspector;onActivated:root.finishingTool=3}
-                    InspectorFamily {id:family4;title:qsTr("Advanced transformations");expanded:root.finishingTool===4;visible:!root.compactInspector||expanded;headerVisible:!root.compactInspector;onActivated:root.finishingTool=4}
-                }
+                Item {id:settingsSlot;Layout.fillWidth:true;Layout.fillHeight:true;Layout.minimumHeight:0}
                 ColumnLayout {visible:root.workflowStep===6;Layout.fillWidth:true;spacing:8
                     RowLayout {Layout.fillWidth:true
                         Label {text:qsTr("Comparison");color:Atelier.text;font.weight:Font.Medium;Layout.fillWidth:true}
@@ -493,14 +505,14 @@ DropArea {
                             delegate:IconButton {required property var modelData;objectName:"deepSkyCompare_"+modelData.key;text:modelData.label;ghost:root.comparisonMode!==modelData.key;Layout.fillWidth:true;borderColor:root.comparisonMode===modelData.key?Atelier.border:"transparent";onClicked:root.comparisonMode=modelData.key;Accessible.description:modelData.key==="before"?qsTr("Stack before finishing, displayed without stretch"):""}
                         }
                     }
-                    IconButton {objectName:"deepSkyResetFamily";text:qsTr("Delete these adjustments");Layout.fillWidth:true;enabled:root.finishEditable;active:true;onClicked:root.resetFamily();Accessible.description:qsTr("Reset the selected family. Cmd+Z restores its settings.")}
+                    IconButton {objectName:"deepSkyResetFamily";text:qsTr("Delete adjustments: %1").arg(root.familyNames[root.finishingTool]);Layout.fillWidth:true;enabled:root.finishEditable&&root.expandedFamilies.length>0;active:true;onClicked:root.resetFamily();Accessible.description:qsTr("Reset the selected family. Cmd+Z restores its settings.")}
                 }
             }
         }
     }
     ScrollView {
         id:settingsScroll;objectName:"deepSkyInspector"
-        parent:root.workflowStep===6?[family0.body,family1.body,family2.body,family3.body,family4.body][root.finishingTool]:genericSettingsSlot
+        parent:settingsSlot
         anchors.fill:parent;padding:0;clip:true;contentWidth:availableWidth
         ScrollBar.horizontal.policy:ScrollBar.AlwaysOff
         ColumnLayout {
@@ -572,7 +584,7 @@ DropArea {
 
             ColumnLayout {visible:root.workflowStep===6;Layout.fillWidth:true;spacing:8
                 Label {text:root.editError;color:Atelier.warning;visible:text.length>0;wrapMode:Text.Wrap;Layout.fillWidth:true}
-                ColumnLayout {visible:root.finishingTool===0;Layout.fillWidth:true
+                InspectorFamily {id:family0;objectName:"deepSkyFamily0";title:root.familyNames[0];expanded:root.familyOpen(0);current:root.finishingTool===0;onActivated:root.toggleFamily(0);onInteracted:root.finishingTool=0
                 HelpCheckBox {explanation: qsTr("Turns linear brightness into a visible finished image using levels and the selected curve. Disable to keep linear brightness; the preview may look dark. The Linear FITS export always keeps the original integration."); Layout.fillWidth:true;Layout.minimumWidth:0;id:stretch;onClicked:{if(!checked)scnr.checked=false;root.previewAdjustments();}text:qsTr("Enable stretch");checked:true;enabled:root.finishEditable}
                 IconButton {text:qsTr("Automatic stretch");Layout.fillWidth:true;enabled:root.finishEditable;onClicked:{const suggested=controller.suggestedStretch;root.setFinish(Object.assign({},root.options(),{stretch:true,black:suggested.black,white:suggested.white,midtones:suggested.midtones,asinh:false}));}}
 RowLayout {Layout.fillWidth:true
@@ -591,7 +603,7 @@ ParameterControl {id:black;label:qsTr("Black level");textIsValue:true;text:"0";f
                 ParameterControl {id:midtones;label:qsTr("Midtones");decimals:4;explanation:qsTr("For normalized brightness u, the curve is f(u) = (m − 1)u / ((2m − 1)u − m). At m = 0.5 it is neutral; below 0.5 it brightens midtones, above 0.5 it darkens them. The endpoints stay 0 and 1. Brightening also reveals noise; it does not recover clipped data.");onMoved:root.previewAdjustments();onGestureStarted:edits.beginEdit();onGestureEnded:edits.endEdit();visible:!asinh.checked&&!root.advancedOptions.ghs;Layout.fillWidth:true;Layout.minimumWidth:0;from:.001;to:.999;value:.15;enabled:root.finishEditable}
                 ParameterControl {id:white;label:qsTr("White level");textIsValue:true;text:"1";from:Math.min(0,Number(controller.linearHistogram.minimum||0));to:Math.max(1,Number(controller.linearHistogram.maximum||1));inputMinimum:-1e12;inputMaximum:1e12;decimals:4;explanation:qsTr("With stretch enabled, white sets the value mapped to 1 after channel gain. Values at or above it merge into the same maximum: bright cores lose detail. Lowering white brightens the image but increases highlight clipping. White must remain above black.");enabled:root.finishEditable;onMoved:root.previewAdjustments();onGestureStarted:edits.beginEdit();onGestureEnded:edits.endEdit()}
 }
-                ColumnLayout {visible:root.finishingTool===1;Layout.fillWidth:true
+                InspectorFamily {id:family1;objectName:"deepSkyFamily1";title:root.familyNames[1];expanded:root.familyOpen(1);current:root.finishingTool===1;onActivated:root.toggleFamily(1);onInteracted:root.finishingTool=1
                 SectionTitle {label:qsTr("Background");explanation:qsTr("The optional correction fits a polynomial independently in each color channel. Bright grid samples are rejected using the tolerance. Compare with correction disabled to protect extended nebulosity. Enable sample editing to add or remove points directly on the image.")}
                 HelpCheckBox {explanation: qsTr("Fits and subtracts uneven sky brightness while retaining the sampled sky median. Useful for light pollution or illumination gradients. Avoid samples on nebulae: the fit could remove real signal."); Layout.fillWidth:true;Layout.minimumWidth:0;id:background;onClicked:root.previewAdjustments();text:qsTr("Correct background gradient");enabled:root.finishEditable}
                 RowLayout {Layout.fillWidth:true;CheckBox {text:qsTr("Show extracted background model");checked:controller.showingBackgroundModel;enabled:!controller.busy && controller.hasBackgroundModel && !root.geometry.crop && !root.geometry.angle && root.geometry.scale===1 && rotation.currentIndex===0 && !mirrorHorizontal.checked && !mirrorVertical.checked;onClicked:controller.showingBackgroundModel=checked;Layout.fillWidth:true} HelpIcon {text:qsTr("Displays the fitted background with an automatic display stretch. Export always uses the processed image. Inspect the model for traces of real astronomical objects.")}}
@@ -608,7 +620,7 @@ ParameterControl {id:black;label:qsTr("Black level");textIsValue:true;text:"0";f
                     ParameterControl {id:backgroundTolerance;label:qsTr("Grid tolerance");decimals:2;explanation:qsTr("Automatic samples are excluded when their brightness exceeds median + tolerance × MAD in any channel. MAD is the median absolute distance from the median. Lower tolerance excludes more bright regions; higher tolerance retains more points, including possible objects. Manually selected samples bypass this automatic rejection.");Layout.fillWidth:true;from:0;to:10;value:1;onMoved:root.previewAdjustments()}
                 }
                 }
-                ColumnLayout {visible:root.finishingTool===2;Layout.fillWidth:true
+                InspectorFamily {id:family2;objectName:"deepSkyFamily2";title:root.familyNames[2];expanded:root.familyOpen(2);current:root.finishingTool===2;onActivated:root.toggleFamily(2);onInteracted:root.finishingTool=2
                 SectionTitle {label:qsTr("Color and noise")}
 
                 ParameterControl {id:redGain;label:qsTr("Red gain");decimals:3;explanation:qsTr("Multiply the red channel before stretching. Initial gains estimate a neutral background; adjust manually for your intended colors.");onMoved:root.previewAdjustments();onGestureStarted:edits.beginEdit();onGestureEnded:edits.endEdit();Layout.fillWidth:true;Layout.minimumWidth:0;from:.1;to:3;value:1;enabled:root.finishEditable}
@@ -628,15 +640,7 @@ ParameterControl {id:black;label:qsTr("Black level");textIsValue:true;text:"0";f
                 }
 
                 ParameterControl {id:denoise;label:qsTr("Noise smoothing");decimals:2;explanation:qsTr("Output = (1 − amount) × image + amount × GaussianBlur(image), with a Gaussian standard deviation of 0.7 pixel. At 0 nothing changes; at 1 the full blur is used. It reduces small-scale fluctuations but also softens stars and fine structures. Inspect at 100% and start low. This is not an adaptive denoiser.");onMoved:root.previewAdjustments();onGestureStarted:edits.beginEdit();onGestureEnded:edits.endEdit();Layout.fillWidth:true;Layout.minimumWidth:0;from:0;to:1;value:0;enabled:root.finishEditable}
-                }
-                ColumnLayout {visible:root.finishingTool===3;Layout.fillWidth:true;enabled:!root.editingBackgroundSamples
-                SectionTitle {label:qsTr("Orientation");explanation:qsTr("Rotate clockwise, then mirror the finished image. The original linear integration remains unchanged. Orientation is saved with the project and can be undone.")}
-                DarkComboBox {explanation: qsTr("Rotates the finished image clockwise in 90° steps without interpolating the pixel values. Mirrors are applied after this rotation; crop and free geometry come afterwards."); id:rotation;objectName:"deepSkyRotation";Layout.fillWidth:true;model:[qsTr("Original orientation"),"90°","180°","270°"];enabled:root.finishEditable;onActivated:root.previewAdjustments()}
-                HelpCheckBox {explanation: qsTr("Swaps left and right after rotation. Useful for matching the orientation of an optical setup. It only changes the finished image; the original linear integration remains unchanged."); id:mirrorHorizontal;text:qsTr("Mirror horizontally");enabled:root.finishEditable;onClicked:root.previewAdjustments()}
-                IconButton {text:qsTr("Crop, rotate and resize");Layout.fillWidth:true;enabled:root.finishEditable;onClicked:geometryEditor.edit(controller.geometryImage,root.geometry)}
-                HelpCheckBox {explanation: qsTr("Swaps top and bottom after rotation. It only changes the finished image and can be undone with Cmd+Z."); id:mirrorVertical;text:qsTr("Mirror vertically");enabled:root.finishEditable;onClicked:root.previewAdjustments()}
-                }
-                ColumnLayout {Layout.fillWidth:true;Layout.minimumWidth:0;visible:controller.groups.length>1 && root.finishingTool===2
+                ColumnLayout {Layout.fillWidth:true;Layout.minimumWidth:0;visible:controller.groups.length>1
                 SectionTitle {label:qsTr("Channel composition");explanation:qsTr("Assign R/G/B or a narrowband palette. RGB uses R/G/B, SHO uses SII/HA/OIII and HOO uses HA/OIII/OIII. Optional luminance adds detail. Each chosen filter must have an integrated result.")}
                 DarkComboBox {explanation: qsTr("Chooses which integrated filter result to finish or use in a composition. Check the filter name before adjusting colors or exporting."); id:resultGroup;Layout.fillWidth:true;Layout.minimumWidth:0;model:controller.groups;enabled:!controller.busy && count>0;onActivated:controller.selectResult(currentText)}
                 Label {text:qsTr("Combine integrated filters: RGB = R/G/B, SHO = SII/HA/OIII, HOO = HA/OIII/OIII.");color:Atelier.secondary;wrapMode:Text.Wrap;Layout.fillWidth:true;Layout.minimumWidth:0;font.pixelSize:11}
@@ -653,14 +657,24 @@ ParameterControl {id:black;label:qsTr("Black level");textIsValue:true;text:"0";f
                 }
                 IconButton {text:qsTr("Combine channels");Layout.fillWidth:true;Layout.minimumWidth:0;enabled:!controller.busy && controller.groups.length>0;onClicked:controller.compose(redChannel.currentText,greenChannel.currentText,blueChannel.currentText,luminanceChannel.currentIndex>0?luminanceChannel.currentText:"")}
                 }
+                }
+                InspectorFamily {id:family3;objectName:"deepSkyFamily3";title:root.familyNames[3];expanded:root.familyOpen(3);current:root.finishingTool===3;onActivated:root.toggleFamily(3);onInteracted:root.finishingTool=3
+                SectionTitle {label:qsTr("Orientation");explanation:qsTr("Rotate clockwise, then mirror the finished image. The original linear integration remains unchanged. Orientation is saved with the project and can be undone.")}
+                DarkComboBox {explanation: qsTr("Rotates the finished image clockwise in 90° steps without interpolating the pixel values. Mirrors are applied after this rotation; crop and free geometry come afterwards."); id:rotation;objectName:"deepSkyRotation";Layout.fillWidth:true;model:[qsTr("Original orientation"),"90°","180°","270°"];enabled:root.finishEditable;onActivated:root.previewAdjustments()}
+                HelpCheckBox {explanation: qsTr("Swaps left and right after rotation. Useful for matching the orientation of an optical setup. It only changes the finished image; the original linear integration remains unchanged."); id:mirrorHorizontal;text:qsTr("Mirror horizontally");enabled:root.finishEditable;onClicked:root.previewAdjustments()}
+                IconButton {text:qsTr("Crop, rotate and resize");Layout.fillWidth:true;enabled:root.finishEditable;onClicked:geometryEditor.edit(controller.geometryImage,root.geometry)}
+                HelpCheckBox {explanation: qsTr("Swaps top and bottom after rotation. It only changes the finished image and can be undone with Cmd+Z."); id:mirrorVertical;text:qsTr("Mirror vertically");enabled:root.finishEditable;onClicked:root.previewAdjustments()}
+                }
+                InspectorFamily {id:family4;objectName:"deepSkyFamily4";title:root.familyNames[4];expanded:root.familyOpen(4);current:root.finishingTool===4;onActivated:root.toggleFamily(4);onInteracted:root.finishingTool=4
                 DeepSkyAdvancedTools {
-        Layout.fillWidth:true;visible:root.finishingTool===4
+        Layout.fillWidth:true
         id:advancedTools;controller:root.controller;values:root.advancedOptions;editable:root.finishEditable;linearInput:root.linearRecipeInput;draftError:root.editError;draftPending:root.finishDirty;livePreview:true
         onPreviewRequested:if(root.previewAdjustments())root.applyStoredFinish()
         onEdited:settings=>{const enablingGhs=settings.ghs&&!root.advancedOptions.ghs;root.advancedOptions=settings;if(enablingGhs){stretch.checked=true;asinh.checked=false;}root.previewAdjustments();}
         onGestureStarted:edits.beginEdit()
         onGestureEnded:edits.endEdit()
     }
+                }
             }
         }
     }

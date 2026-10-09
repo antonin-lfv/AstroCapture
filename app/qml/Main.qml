@@ -216,6 +216,7 @@ ApplicationWindow {
         controller: deepSkyController
         library: appLibrary
         canEditResult: !captionController.busy
+        finalExportBusy: captionController.exporting
         onEditResult: {
             const caption=deepSkyWorkspace.captionOptions;
             if(captionController.openDocument(deepSkyController.processingDocument())) {

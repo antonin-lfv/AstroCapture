@@ -296,7 +296,7 @@ Rectangle {
                 Label {visible:root.controller.imageWidth>0;text:root.controller.imageWidth+" × "+root.controller.imageHeight+" px";color:Atelier.secondary;font.pixelSize:11}
             }
             IconAction {iconName:"gear";text:qsTr("Processing options");enabled:root.controller.hasResult;onClicked:processingMenu.open()}
-            IconButton {iconName:"export";text:qsTr("Export");primary:true;enabled:root.controller.hasResult&&!root.controlsBusy&&!root.adjustmentsDirty;onClicked:annotationPopup.open()}
+            IconButton {iconName:"export";text:root.controller.exporting?qsTr("Exporting…"):qsTr("Export");busy:root.controller.exporting;primary:true;enabled:root.controller.hasResult&&!root.controlsBusy&&!root.adjustmentsDirty;onClicked:annotationPopup.open()}
         }
         RowLayout {
             Layout.fillWidth: true

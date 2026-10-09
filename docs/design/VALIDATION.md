@@ -106,3 +106,14 @@ Cette vérification ne relance pas l’intégration M8/M20 ni une comparaison de
 qualité avec Siril ; elle ne valide pas l’astrométrie, SPCC ou de nouveau matériel.
 La sauvegarde locale est limitée à 4 Gio ; les acquisitions et calculs interrompus
 ne sont pas repris, et les masques importés restent des fichiers externes.
+
+### Vérification de livraison 1.5.0
+
+Les 35 tests passent aussi en Release (24,99 s). Le DMG autonome de 81,1 Mio
+a été vérifié par `hdiutil verify`, puis monté en lecture seule. La signature
+locale de l’application contenue est valide ; sa version est 1.5.0 et son
+exécutable est identique au paquet construit (SHA-256 comparé). Le volume de
+vérification a ensuite été démonté.
+
+SHA-256 du DMG :
+`6b616089bd84beae658af67314b1f93841efc5db0d02ada18c6a17b245331cd0`.

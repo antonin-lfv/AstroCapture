@@ -235,3 +235,19 @@ l’espace Ciel profond passe aussi après la dernière correction de restaurati
 (3,57 s). Les cinq captures fournies sont copiées sans transformation : leurs
 empreintes correspondent aux originaux. Toutes les images référencées dans
 le README existent ; les captures remplacées et devenues inutilisées sont retirées.
+
+
+### Livraison 1.6.1 vérifiée
+
+La suite complète Release passe également : 36 tests, 24,26 s, après reconstruction
+des exécutables de test. Le code et le README étaient committés (`d1fbfdc`) avant
+la création du paquet.
+
+Le DMG contient la version 1.6.1 et mesure 88 557 484 octets
+(84,5 Mio). Sa somme de contrôle est valide. Monté en lecture seule, son
+exécutable correspond exactement à l’application construite et sa signature
+locale passe la vérification profonde et stricte. Le montage de contrôle a été
+démonté par son propre chemin, sans toucher aux autres volumes.
+
+SHA-256 du DMG : `b84856b833b137eab4e48f08ad4ebbd9108d4242238ea488c5d25d3f4876445e`.
+SHA-256 de l’exécutable : `20ae92d7aa1a52b54cb28e4f8e33340c69d3adcf59de9884f381b2583d39fa62`.

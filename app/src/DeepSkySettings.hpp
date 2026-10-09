@@ -1,12 +1,13 @@
 #pragma once
 #include <QVariantMap>
+#include "GeometrySettings.hpp"
 #include <cmath>
 #include <algorithm>
 #include <optional>
 
 namespace astro::app {
 inline QVariantMap defaultDeepSkySettings() {
-    return {{"pedestal",0.0},{"ghs",false},{"ghsStrength",0.0},{"ghsLocal",0.0},{"ghsSymmetry",0.0},{"ghsShadows",0.0},{"ghsHighlights",1.0},{"ghsInverse",false},{"ghsMode",0},{"maskType",0},{"maskLow",0.0},{"maskHigh",1.0},{"maskFeather",.05},{"maskX",.5},{"maskY",.5},{"maskRadius",.25},{"maskStarRadius",2.0},{"maskInvert",false},{"deconvolution",false},{"psfProfile",0},{"psfFwhm",3.0},{"psfBeta",3.0},{"rlIterations",10},{"rlDamping",.001},{"rlBlend",1.0},{"rlStopping",.0001},{"advancedDenoise",false},{"noiseScales",3},{"noiseThreshold",3.0},{"noiseAmount",.5},{"noiseChroma",.5},{"photometry",false},{"photometryReferences",QVariantList{}},{"photometryAperture",5.0},{"photometryInner",8.0},{"photometryOuter",12.0},{"photometrySaturation",1.0},{"background",false},{"stretch",true},{"black",0.0},{"white",1.0},
+    return {{"geometry",defaultGeometry()},{"pedestal",0.0},{"ghs",false},{"ghsStrength",0.0},{"ghsLocal",0.0},{"ghsSymmetry",0.0},{"ghsShadows",0.0},{"ghsHighlights",1.0},{"ghsInverse",false},{"ghsMode",0},{"maskType",0},{"maskLow",0.0},{"maskHigh",1.0},{"maskFeather",.05},{"maskX",.5},{"maskY",.5},{"maskRadius",.25},{"maskStarRadius",2.0},{"maskInvert",false},{"deconvolution",false},{"psfProfile",0},{"psfFwhm",3.0},{"psfBeta",3.0},{"rlIterations",10},{"rlDamping",.001},{"rlBlend",1.0},{"rlStopping",.0001},{"advancedDenoise",false},{"noiseScales",3},{"noiseThreshold",3.0},{"noiseAmount",.5},{"noiseChroma",.5},{"photometry",false},{"photometryReferences",QVariantList{}},{"photometryAperture",5.0},{"photometryInner",8.0},{"photometryOuter",12.0},{"photometrySaturation",1.0},{"background",false},{"stretch",true},{"black",0.0},{"white",1.0},
             {"midtones",.15},{"red",1.0},{"green",1.0},{"blue",1.0},
             {"operations",QVariantList{}},{"scnr",false},{"scnrMethod",0},{"scnrAmount",1.0},{"scnrPreserve",true},{"backgroundPoints",QVariantList{}},{"backgroundDegree",1},{"backgroundSamples",20},{"backgroundTolerance",1.0},
             {"rotation",0},{"mirrorHorizontal",false},{"mirrorVertical",false},{"denoise",0.0},{"asinh",false},{"asinhLuminance",0},{"asinhStrength",20.0},{"saturation",1.0}};
@@ -14,10 +15,11 @@ inline QVariantMap defaultDeepSkySettings() {
 // Full parameter snapshots: reject missing/unknown fields and invalid input.
 inline std::optional<QVariantMap> checkedDeepSkySettings(const QVariantMap& input) {
     auto result=defaultDeepSkySettings();
-    const QStringList extensions{"pedestal","ghs","ghsStrength","ghsLocal","ghsSymmetry","ghsShadows","ghsHighlights","ghsInverse","ghsMode","maskType","maskLow","maskHigh","maskFeather","maskX","maskY","maskRadius","maskStarRadius","maskInvert","deconvolution","psfProfile","psfFwhm","psfBeta","rlIterations","rlDamping","rlBlend","rlStopping","advancedDenoise","noiseScales","noiseThreshold","noiseAmount","noiseChroma","photometry","photometryReferences","photometryAperture","photometryInner","photometryOuter","photometrySaturation","asinhLuminance","operations","scnr","scnrMethod","scnrAmount","scnrPreserve","backgroundPoints","backgroundDegree","backgroundSamples","backgroundTolerance","rotation","mirrorHorizontal","mirrorVertical"};
+    const QStringList extensions{"geometry","pedestal","ghs","ghsStrength","ghsLocal","ghsSymmetry","ghsShadows","ghsHighlights","ghsInverse","ghsMode","maskType","maskLow","maskHigh","maskFeather","maskX","maskY","maskRadius","maskStarRadius","maskInvert","deconvolution","psfProfile","psfFwhm","psfBeta","rlIterations","rlDamping","rlBlend","rlStopping","advancedDenoise","noiseScales","noiseThreshold","noiseAmount","noiseChroma","photometry","photometryReferences","photometryAperture","photometryInner","photometryOuter","photometrySaturation","asinhLuminance","operations","scnr","scnrMethod","scnrAmount","scnrPreserve","backgroundPoints","backgroundDegree","backgroundSamples","backgroundTolerance","rotation","mirrorHorizontal","mirrorVertical"};
     for(auto it=input.begin();it!=input.end();++it)if(!result.contains(it.key()))return std::nullopt;
     for(auto it=result.begin();it!=result.end();++it) {
         if(!input.contains(it.key())){if(extensions.contains(it.key()))continue;return std::nullopt;}
+        if(it.key()=="geometry"){auto g=checkedGeometry(input["geometry"].toMap());if(!g)return {};it.value()=*g;continue;}
         if(it.key()=="operations") {
             if(input[it.key()].typeId()!=QMetaType::QVariantList)return std::nullopt;
             const auto operations=input[it.key()].toList();if(operations.size()>100)return std::nullopt;QVariantList normalized;
@@ -76,7 +78,7 @@ inline std::optional<QVariantMap> checkedDeepSkySettings(const QVariantMap& inpu
     if(result["photometryInner"].toDouble()<=result["photometryAperture"].toDouble()||result["photometryOuter"].toDouble()<=result["photometryInner"].toDouble())return std::nullopt;
     // Scientific measurements require an un-stretched and unrotated reference image.
     bool nonlinear=false,oriented=false;
-    for(const auto& value:result["operations"].toList()){const auto op=value.toMap();if(!op["enabled"].toBool())continue;const auto settings=op["settings"].toMap();if((nonlinear||oriented)&&(settings["photometry"].toBool()||settings["deconvolution"].toBool()))return std::nullopt;nonlinear|=settings["stretch"].toBool()||settings["scnr"].toBool()||settings["saturation"].toDouble()!=1;oriented|=settings["rotation"].toInt()!=0||settings["mirrorHorizontal"].toBool()||settings["mirrorVertical"].toBool();}
+    for(const auto& value:result["operations"].toList()){const auto op=value.toMap();if(!op["enabled"].toBool())continue;const auto settings=op["settings"].toMap();if((nonlinear||oriented)&&(settings["photometry"].toBool()||settings["deconvolution"].toBool()))return std::nullopt;nonlinear|=settings["stretch"].toBool()||settings["scnr"].toBool()||settings["saturation"].toDouble()!=1;oriented|=geometryActive(settings["geometry"].toMap())||settings["rotation"].toInt()!=0||settings["mirrorHorizontal"].toBool()||settings["mirrorVertical"].toBool();}
     if((nonlinear||oriented)&&(result["photometry"].toBool()||result["deconvolution"].toBool()))return std::nullopt;
     if(result["photometry"].toBool()&&result["maskType"].toInt()!=0)return std::nullopt;
     return result;

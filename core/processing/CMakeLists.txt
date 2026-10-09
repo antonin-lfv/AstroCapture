@@ -2,6 +2,7 @@ find_package(Threads REQUIRED)
 
 add_library(astro_processing STATIC
     src/Planetary.cpp
+    src/Geometry.cpp
     src/DeepSky.cpp
     src/DeepSkyAdvanced.cpp
     src/Surface.cpp

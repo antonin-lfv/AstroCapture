@@ -1,3 +1,4 @@
+#include "ImageGeometry.hpp"
 #include "DeepSkyController.hpp"
 #include <astro/processing/DeepSkyAdvanced.hpp>
 #include <numeric>
@@ -102,7 +103,7 @@ QVariantList comparisonOrientations(const QVariantMap& settings) {
     auto append=[&](const QVariantMap& values) {
         const int rotation=values.value("rotation").toInt();
         const bool horizontal=values.value("mirrorHorizontal").toBool(),vertical=values.value("mirrorVertical").toBool();
-        if(rotation||horizontal||vertical)orientations<<QVariant::fromValue(QVariantList{rotation,horizontal,vertical});
+        if(rotation||horizontal||vertical||geometryActive(values["geometry"].toMap()))orientations<<QVariant::fromValue(QVariantList{rotation,horizontal,vertical,values["geometry"]});
     };
     for(const auto& value:settings.value("operations").toList()) {
         const auto operation=value.toMap();
@@ -116,6 +117,7 @@ QImage orientComparison(QImage image,const QVariantList& orientations) {
         const auto step=value.toList();
         if(step[0].toInt())image=image.transformed(QTransform().rotate(step[0].toInt()*90));
         if(step[1].toBool()||step[2].toBool())image=image.transformed(QTransform().scale(step[1].toBool()?-1:1,step[2].toBool()?-1:1));
+        if(step.size()>3)image=imageGeometry(image,step[3].toMap());
     }
     return image;
 }
@@ -177,6 +179,7 @@ processing::FloatImage evaluateOperations(const processing::FloatImage& source,c
         if(settings["scnr"].toBool())image=processing::removeGreen(image,settings["scnrMethod"].toInt(),settings["scnrAmount"].toFloat(),settings["scnrPreserve"].toBool(),check);
         if(original)processing::blendMask(*original,image,mask,check);
         if(settings["rotation"].toInt()||settings["mirrorHorizontal"].toBool()||settings["mirrorVertical"].toBool())image=processing::orientImage(image,settings["rotation"].toInt(),settings["mirrorHorizontal"].toBool(),settings["mirrorVertical"].toBool(),check);
+        if(geometryActive(settings["geometry"].toMap()))image=processing::transformGeometry(image,geometryFrom(settings["geometry"].toMap()),check);
     }
     return image;
 }
@@ -202,7 +205,7 @@ void DeepSkyController::run(const QString& status,std::function<void(std::stop_t
 void DeepSkyController::show(std::shared_ptr<const processing::FloatImage> image,bool result,QImage preview,std::shared_ptr<const processing::FloatImage> displayed,QVariantMap stretch,QImage before) {
     showingMask_=false;maskPreview_={};advancedReport_.clear();psfKernel_.clear();showingBackgroundModel_=false;backgroundPreview_={};comparingRaw_=false;displayingResult_=result;
     if(result){finishSettings_=defaultDeepSkySettings();for(auto it=finishSettings_.begin();it!=finishSettings_.end();++it)if(stretch.contains(it.key()))it.value()=stretch[it.key()];if(auto validated=checkedDeepSkySettings(finishSettings_))finishSettings_=*validated;linear_=image;linearPreview_=before;comparisonPreview_=before;comparisonOrientationKey_=QJsonDocument(QJsonArray{}).toJson(QJsonDocument::Compact);finished_=displayed;resultPreview_=preview;stretch_=stretch;histogram_=stretch.value("histogram").toMap();emit resultChanged();}
-    preview_=std::move(preview);emit imageChanged();emit changed();
+    geometryPreview_=preview;maskSourcePreview_=preview;preview_=std::move(preview);emit imageChanged();emit changed();
 }
 void DeepSkyController::setShowingMask(bool enabled){if(busy_||!linear_)return;showingMask_=enabled&&!maskPreview_.isNull();showingBackgroundModel_=false;comparingRaw_=false;preview_=showingMask_?maskPreview_:resultPreview_;emit imageChanged();emit changed();}
 QVariantList DeepSkyController::ghsCurve(const QVariantMap& parameters) const {
@@ -283,7 +286,7 @@ void DeepSkyController::setReference(int index) {
     emit changed();
 }
 void DeepSkyController::remove(int index){if(busy_||index<0||index>=frames_.size())return;frames_.removeAt(index);emit changed();}
-void DeepSkyController::clear(){if(busy_)return;advancedReport_.clear();psfKernel_.clear();maskPreview_={};showingMask_=false;projectOptions_.clear();sourceRow_.clear();sourceInterpretation_.clear();sourceDebayer_=sourceAutoStretch_=true;finishSettings_.clear();rawPreview_={};backgroundPreview_={};showingBackgroundModel_=false;rawName_.clear();comparingRaw_=false;histogram_.clear();pendingAdjustments_.reset();displayingResult_=false;stage_.clear();frames_.clear();backgroundSamples_.clear();references_.clear();stacks_.clear();groupExposure_.clear();groupCounts_.clear();exposureCount_=0;resultFilters_.clear();groups_.clear();linear_.reset();finished_.reset();pipelineCache_.reset();pipelineSource_.reset();pipelineCacheKey_.clear();preview_={};resultPreview_={};linearPreview_={};comparisonPreview_={};comparisonOrientationKey_.clear();status_.clear();emit projectOptionsChanged();emit changed();emit imageChanged();}
+void DeepSkyController::clear(){if(busy_)return;geometryPreview_={};maskSourcePreview_={};advancedReport_.clear();psfKernel_.clear();maskPreview_={};showingMask_=false;projectOptions_.clear();sourceRow_.clear();sourceInterpretation_.clear();sourceDebayer_=sourceAutoStretch_=true;finishSettings_.clear();rawPreview_={};backgroundPreview_={};showingBackgroundModel_=false;rawName_.clear();comparingRaw_=false;histogram_.clear();pendingAdjustments_.reset();displayingResult_=false;stage_.clear();frames_.clear();backgroundSamples_.clear();references_.clear();stacks_.clear();groupExposure_.clear();groupCounts_.clear();exposureCount_=0;resultFilters_.clear();groups_.clear();linear_.reset();finished_.reset();pipelineCache_.reset();pipelineSource_.reset();pipelineCacheKey_.clear();preview_={};resultPreview_={};linearPreview_={};comparisonPreview_={};comparisonOrientationKey_.clear();status_.clear();emit projectOptionsChanged();emit changed();emit imageChanged();}
 void DeepSkyController::chooseRawComparison(int index){
     if(busy_||index<0||index>=frames_.size()||frames_[index].toMap()["role"]!="Light")return;
     const auto row=frames_[index].toMap();
@@ -370,9 +373,10 @@ void DeepSkyController::apply(const QVariantMap& options) {
     const auto orientations=comparisonOrientations(*validated);
     const auto orientationKey=QJsonDocument(QJsonArray::fromVariantList(orientations)).toJson(QJsonDocument::Compact);
     const auto beforeSource=linearPreview_;
+    const auto maskSourceCache=(pipelineSource_==image&&pipelineCacheKey_==cacheKey)?maskSourcePreview_:QImage{};
     const auto beforeCache=orientationKey==comparisonOrientationKey_?comparisonPreview_:QImage{};
     adjusting_=true;
-    run(tr("Adjusting background, colors and stretch…"),[this,image,settings=*validated,cache,cacheKey,beforeSource,beforeCache,orientations,orientationKey](std::stop_token stop) {
+    run(tr("Adjusting background, colors and stretch…"),[this,image,settings=*validated,cache,cacheKey,beforeSource,beforeCache,orientations,orientationKey,maskSourceCache](std::stop_token stop) {
         const auto checkpoint=[stop]{check(stop);};
         const auto before=beforeCache.isNull()?orientComparison(beforeSource,orientations):beforeCache;
         checkpoint();
@@ -413,15 +417,18 @@ void DeepSkyController::apply(const QVariantMap& options) {
         const auto histogram=makeLinearHistogram(source,f.color,f.black,f.white);
         if(extras){if(settings["scnr"].toBool())*result=processing::removeGreen(*result,settings["scnrMethod"].toInt(),settings["scnrAmount"].toFloat(),settings["scnrPreserve"].toBool(),checkpoint);if(!mask.empty())processing::blendMask(operationInput,*result,mask,checkpoint);if(settings["rotation"].toInt()||settings["mirrorHorizontal"].toBool()||settings["mirrorVertical"].toBool())*result=processing::orientImage(*result,settings["rotation"].toInt(),settings["mirrorHorizontal"].toBool(),settings["mirrorVertical"].toBool(),checkpoint);preview=makeImagePreview(*result,checkpoint);}
         if(!maskPreview.isNull()&&(settings["rotation"].toInt()||settings["mirrorHorizontal"].toBool()||settings["mirrorVertical"].toBool())){maskPreview=maskPreview.transformed(QTransform().rotate(settings["rotation"].toInt()*90));maskPreview=maskPreview.transformed(QTransform().scale(settings["mirrorHorizontal"].toBool()?-1:1,settings["mirrorVertical"].toBool()?-1:1));}
+        const auto geometryPreview=preview;
+        const auto maskSourcePreview=maskSourceCache.isNull()?makeImagePreview(operationInput,checkpoint):maskSourceCache;
+        if(geometryActive(settings["geometry"].toMap())){*result=processing::transformGeometry(*result,geometryFrom(settings["geometry"].toMap()),checkpoint);preview=makeImagePreview(*result,checkpoint);if(!maskPreview.isNull())maskPreview=imageGeometry(maskPreview,settings["geometry"].toMap());}
         double low=std::numeric_limits<double>::infinity(),high=-low;std::uint64_t below=0,above=0;
         for(std::size_t i=0;i<result->rgb.size();++i){if(i%65536==0)checkpoint();const double value=result->rgb[i];if(!std::isfinite(value))throw std::runtime_error("Processing produced a non-finite sample; previous result is preserved.");low=std::min(low,value);high=std::max(high,value);below+=value<0;above+=value>1;}
         advancedReport["outputMinimum"]=low;advancedReport["outputMaximum"]=high;advancedReport["outputBelowZero"]=100.*below/result->rgb.size();advancedReport["outputAboveOne"]=100.*above/result->rgb.size();
         check(stop);
-        post([this,image,pipeline,cacheKey,result,preview,backgroundPreview,histogram,samples,settings,stop,advancedReport,maskPreview,psfKernel,before,orientationKey] {
+        post([this,image,pipeline,cacheKey,result,preview,backgroundPreview,histogram,samples,settings,stop,advancedReport,maskPreview,psfKernel,before,orientationKey,geometryPreview,maskSourcePreview] {
             if(stop.stop_requested())return;
             pipelineSource_=image;pipelineCache_=pipeline;pipelineCacheKey_=cacheKey;
             advancedReport_=advancedReport;maskPreview_=maskPreview;psfKernel_=psfKernel;if(maskPreview.isNull())showingMask_=false;
-            finishSettings_=settings;backgroundSamples_=samples;histogram_=histogram;
+            geometryPreview_=geometryPreview;maskSourcePreview_=maskSourcePreview;finishSettings_=settings;backgroundSamples_=samples;histogram_=histogram;
             comparisonPreview_=before;comparisonOrientationKey_=orientationKey;
             finished_=result;resultPreview_=preview;backgroundPreview_=backgroundPreview;preview_=showingMask_&&!maskPreview.isNull()?maskPreview:showingBackgroundModel_&&!backgroundPreview.isNull()?backgroundPreview:preview;
             if(backgroundPreview.isNull())showingBackgroundModel_=false;

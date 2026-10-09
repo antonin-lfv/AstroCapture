@@ -16,7 +16,7 @@ Control {
     property bool imageFocus: false
     property var advancedOptions: ({})
     readonly property var advancedKeys:["pedestal","ghs", "ghsStrength", "ghsLocal", "ghsSymmetry", "ghsShadows", "ghsHighlights", "ghsInverse", "ghsMode", "maskType", "maskLow", "maskHigh", "maskFeather", "maskX", "maskY", "maskRadius", "maskStarRadius", "maskInvert", "deconvolution", "psfProfile", "psfFwhm", "psfBeta", "rlIterations", "rlDamping", "rlBlend", "rlStopping", "advancedDenoise", "noiseScales", "noiseThreshold", "noiseAmount", "noiseChroma", "photometry", "photometryReferences", "photometryAperture", "photometryInner", "photometryOuter", "photometrySaturation"]
-    readonly property bool linearRecipeInput:!operations.some(op=>op.enabled && (op.settings.stretch || op.settings.scnr || op.settings.saturation!==1 || op.settings.rotation || op.settings.mirrorHorizontal || op.settings.mirrorVertical))
+    readonly property bool linearRecipeInput:!operations.some(op=>op.enabled && (op.settings.stretch || op.settings.scnr || op.settings.saturation!==1 || op.settings.rotation || op.settings.mirrorHorizontal || op.settings.mirrorVertical || (op.settings.geometry && (op.settings.geometry.crop || op.settings.geometry.angle || op.settings.geometry.scale!==1))))
     property int finishingTool:0
     readonly property bool compactInspector: width < 1150
     property int inspectorWidth: library.deepSkyPanelWidth
@@ -55,6 +55,7 @@ Control {
     property bool linearExport: true
     property int workflowStep: 0
     onWorkflowStepChanged:{frameListOpen=workflowStep!==6;if(workflowStep!==6)comparisonMode="result";if(settingsScroll.contentItem)settingsScroll.contentItem.contentY=0}
+    property var geometry:({crop:false,x:0,y:0,width:1,height:1,angle:0,scale:1,interpolation:4,clamp:true,keepSize:false})
     property bool updatingControls: false
     property var pendingProjectFinish: null
     readonly property bool finishDirty: controller.hasResult && (editError.length>0 || Object.keys(edits.values).some(key=>JSON.stringify(edits.values[key])!==JSON.stringify(controller.finishSettings[key])))
@@ -62,7 +63,7 @@ Control {
     function restoreFinish(finish) {
         const previous=updatingControls;updatingControls=true;
         const advanced={};for(const key of root.advancedKeys)advanced[key]=finish[key];root.advancedOptions=advanced;
-        operations=finish.operations||[];scnr.checked=finish.scnr||false;scnrMethod.currentIndex=finish.scnrMethod||0;scnrAmount.value=finish.scnrAmount===undefined?1:finish.scnrAmount;scnrPreserve.checked=finish.scnrPreserve===undefined?true:finish.scnrPreserve;
+        geometry=finish.geometry||geometry;operations=finish.operations||[];scnr.checked=finish.scnr||false;scnrMethod.currentIndex=finish.scnrMethod||0;scnrAmount.value=finish.scnrAmount===undefined?1:finish.scnrAmount;scnrPreserve.checked=finish.scnrPreserve===undefined?true:finish.scnrPreserve;
         backgroundPoints=finish.backgroundPoints||[];background.checked=finish.background;stretch.checked=finish.stretch;
         backgroundDegree.currentIndex=(finish.backgroundDegree||1)-1;backgroundSamples.value=finish.backgroundSamples||20;backgroundTolerance.value=finish.backgroundTolerance===undefined?1:finish.backgroundTolerance;
         rotation.currentIndex=finish.rotation||0;mirrorHorizontal.checked=finish.mirrorHorizontal||false;mirrorVertical.checked=finish.mirrorVertical||false;
@@ -71,11 +72,12 @@ Control {
         asinhLuminance.currentIndex=finish.asinhLuminance||0;denoise.value=finish.denoise;asinh.checked=finish.asinh;asinhStrength.value=finish.asinhStrength;saturation.value=finish.saturation;
         updatingControls=previous;
     }
+    GeometryEditor {id:geometryEditor;onAccepted:(values)=>root.setFinish(Object.assign({},root.options(),{geometry:values}))}
     function resetFamily() {
         const families=[{stretch:false,black:0,white:1,midtones:.15,asinh:false,asinhStrength:20,asinhLuminance:0,ghs:false,ghsStrength:0,ghsLocal:0,ghsSymmetry:0,ghsShadows:0,ghsHighlights:1,ghsInverse:false,ghsMode:0},
             {background:false,backgroundDegree:1,backgroundSamples:20,backgroundTolerance:1,backgroundPoints:[]},
             {red:1,green:1,blue:1,saturation:1,denoise:0,scnr:false,scnrMethod:0,scnrAmount:1,scnrPreserve:true},
-            {rotation:0,mirrorHorizontal:false,mirrorVertical:false}];
+            {rotation:0,mirrorHorizontal:false,mirrorVertical:false,geometry:{crop:false,x:0,y:0,width:1,height:1,angle:0,scale:1,interpolation:4,clamp:true,keepSize:false}}];
         if(root.finishingTool===4) {
             const defaults={pedestal:0,ghs:false,ghsStrength:0,ghsLocal:0,ghsSymmetry:0,ghsShadows:0,ghsHighlights:1,ghsInverse:false,ghsMode:0,maskType:0,maskLow:0,maskHigh:1,maskFeather:0.05,maskX:0.5,maskY:0.5,maskRadius:0.25,maskStarRadius:2,maskInvert:false,deconvolution:false,psfProfile:0,psfFwhm:3,psfBeta:3,rlIterations:10,rlDamping:0.001,rlBlend:1,rlStopping:0.0001,advancedDenoise:false,noiseScales:3,noiseThreshold:3,noiseAmount:0.5,noiseChroma:0.5,photometry:false,photometryReferences:[],photometryAperture:5,photometryInner:8,photometryOuter:12,photometrySaturation:1};
             root.setFinish(Object.assign({},options(),defaults));
@@ -132,7 +134,7 @@ Control {
         workflowStep=controller.hasResult?6:(state.step || 0);finishingTool=state.tool || 0;comparisonMode=state.comparison || "result";
         editError="";updatingControls=false;
     }
-    function options() {return Object.assign({},root.advancedOptions,{operations:root.operations,scnr:scnr.checked,scnrMethod:scnrMethod.currentIndex,scnrAmount:scnrAmount.value,scnrPreserve:scnrPreserve.checked,backgroundPoints:root.backgroundPoints,backgroundDegree:backgroundDegree.currentIndex+1,backgroundSamples:backgroundSamples.value,backgroundTolerance:backgroundTolerance.value,rotation:rotation.currentIndex,mirrorHorizontal:mirrorHorizontal.checked,mirrorVertical:mirrorVertical.checked,background: background.checked, stretch: stretch.checked, black:Number(black.text),white:Number(white.text),midtones:midtones.value,red:redGain.value,green:greenGain.value,blue:blueGain.value,denoise:denoise.value,asinh:asinh.checked,asinhStrength:asinhStrength.value,asinhLuminance:asinhLuminance.currentIndex,saturation:saturation.value});}
+    function options() {return Object.assign({},root.advancedOptions,{geometry:root.geometry,operations:root.operations,scnr:scnr.checked,scnrMethod:scnrMethod.currentIndex,scnrAmount:scnrAmount.value,scnrPreserve:scnrPreserve.checked,backgroundPoints:root.backgroundPoints,backgroundDegree:backgroundDegree.currentIndex+1,backgroundSamples:backgroundSamples.value,backgroundTolerance:backgroundTolerance.value,rotation:rotation.currentIndex,mirrorHorizontal:mirrorHorizontal.checked,mirrorVertical:mirrorVertical.checked,background: background.checked, stretch: stretch.checked, black:Number(black.text),white:Number(white.text),midtones:midtones.value,red:redGain.value,green:greenGain.value,blue:blueGain.value,denoise:denoise.value,asinh:asinh.checked,asinhStrength:asinhStrength.value,asinhLuminance:asinhLuminance.currentIndex,saturation:saturation.value});}
     Connections {
         target: root.controller
         function onOperationFinished(success, message) {
@@ -603,6 +605,7 @@ ParameterControl {id:black;label:qsTr("Black level");textIsValue:true;text:"0";f
                 SectionTitle {label:qsTr("Orientation");explanation:qsTr("Rotate clockwise, then mirror the finished image. The original linear integration remains unchanged. Orientation is saved with the project and can be undone.")}
                 DarkComboBox {id:rotation;objectName:"deepSkyRotation";Layout.fillWidth:true;model:[qsTr("Original orientation"),"90°","180°","270°"];enabled:root.finishEditable;onActivated:root.previewAdjustments()}
                 CheckBox {id:mirrorHorizontal;text:qsTr("Mirror horizontally");enabled:root.finishEditable;onClicked:root.previewAdjustments()}
+                IconButton {text:qsTr("Crop, rotate and resize");Layout.fillWidth:true;enabled:root.finishEditable;onClicked:geometryEditor.edit(controller.geometryImage,root.geometry)}
                 CheckBox {id:mirrorVertical;text:qsTr("Mirror vertically");enabled:root.finishEditable;onClicked:root.previewAdjustments()}
                 }
                 ColumnLayout {Layout.fillWidth:true;Layout.minimumWidth:0;visible:controller.groups.length>1 && root.finishingTool===2

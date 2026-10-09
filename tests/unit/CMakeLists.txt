@@ -228,3 +228,7 @@ astro_add_unit_test(astro_app_session_test
 set_target_properties(astro_app_session_test PROPERTIES AUTOMOC ON)
 target_include_directories(astro_app_session_test PRIVATE ../../app/src)
 set_tests_properties(astro_app_session_test PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_BACKEND=software" TIMEOUT 45)
+astro_add_unit_test(astro_processing_geometry_test SOURCES processing/GeometryTest.cpp LIBS astro::processing)
+foreach(workspace_test IN ITEMS astro_app_processing_workspace_test astro_app_deep_sky_workspace_test)
+    target_sources(${workspace_test} PRIVATE ../../app/src/ImagePixelsItem.hpp)
+endforeach()

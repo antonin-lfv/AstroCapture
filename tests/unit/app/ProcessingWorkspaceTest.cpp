@@ -1,3 +1,4 @@
+#include "ImagePixelsItem.hpp"
 #include <QImageReader>
 #include <QGuiApplication>
 #include <QElapsedTimer>
@@ -41,6 +42,7 @@ int main(int argc, char** argv) {
     QCoreApplication::setApplicationName("ProcessingWorkspaceTest");
     QSettings::setDefaultFormat(QSettings::IniFormat);
     QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, temp.path());
+    qmlRegisterType<astro::app::ImagePixelsItem>("AstroCapture",1,0,"ImagePixelsItem");
     qmlRegisterType<astro::app::ProcessingController>("AstroCapture", 1, 0, "ProcessingController");
     qmlRegisterType<astro::app::ProcessingEdits>("AstroCapture", 1, 0, "ProcessingEdits");
     qmlRegisterType<astro::app::ProcessingImageItem>("AstroCapture", 1, 0, "ProcessingImageItem");

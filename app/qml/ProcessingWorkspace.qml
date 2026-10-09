@@ -104,7 +104,7 @@ Rectangle {
         let gains = [];
         for (let i = 1; i <= 6; ++i) gains.push(values["level" + i]);
         submittedRevision = adjustmentRevision;
-        controller.apply(gains, values.denoise, values.red, values.green, values.blue, values.gamma);
+        controller.apply(gains, values.denoise, values.red, values.green, values.blue, values.gamma, values.geometry);
     }
     Shortcut { sequence: "Space"; enabled: root.localShortcuts && root.controller.loaded; onActivated: root.togglePlayback() }
     Shortcut { sequence: "Left"; enabled: root.localShortcuts && root.controller.loaded; onActivated: root.stepFrame(-1) }
@@ -139,6 +139,7 @@ Rectangle {
                 root.controller.seek((root.controller.frameIndex + 1) % root.controller.frameCount);
         }
     }
+    GeometryEditor {id:geometryEditor;onAccepted:(values)=>edits.applyValues(Object.assign({},edits.values,{geometry:values}))}
     FileDialog {
         id: openDialog
         title: qsTr("Open a video or image")
@@ -706,6 +707,7 @@ Rectangle {
                             }
                         }
 
+                        IconButton {text:qsTr("Crop, rotate and resize");Layout.fillWidth:true;enabled:root.canEdit;onClicked:geometryEditor.edit(root.controller.geometryImage,edits.values.geometry)}
                         IconButton {text:qsTr("Delete these adjustments");active:true;Layout.fillWidth:true;onClicked:edits.reset()}
 
                     }

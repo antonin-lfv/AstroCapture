@@ -21,6 +21,7 @@ class ProcessingController : public QObject {
   QML_ELEMENT
   Q_PROPERTY(QVariantMap exportAnnotation READ exportAnnotation WRITE setExportAnnotation NOTIFY annotationChanged)
   Q_PROPERTY(QString captionTechnicalText READ captionTechnicalText NOTIFY annotationChanged)
+  Q_PROPERTY(QImage geometryImage READ geometryImage NOTIFY imageChanged)
   Q_PROPERTY(QVariantMap appliedSettings READ appliedSettings NOTIFY changed)
   Q_PROPERTY(QVariant exportSizeInput READ exportSizeInput NOTIFY exportSizeInputChanged)
   Q_PROPERTY(bool stillImage READ stillImage NOTIFY changed)
@@ -72,6 +73,7 @@ public:
   void setExportAnnotation(const QVariantMap& value);
   QImage annotationImage() const { return annotationImage_; }
   QVariant exportSizeInput() const { return QVariant::fromValue(ExportSizeInput{result_,annotationImage_}); }
+  QImage geometryImage() const { return geometryPreview_; }
   QImage beforeImage() const { return beforePreview_; }
   QVariantMap appliedSettings() const { return appliedSettings_; }
   WorkspaceSnapshot sessionSnapshot() const;
@@ -90,7 +92,7 @@ public:
   Q_INVOKABLE void analyze();
   Q_INVOKABLE void stack(int keepCount, bool surface = false, int patchSize = 96, bool localSelection = false);
   Q_INVOKABLE void apply(const QVariantList &gains, double denoise, double red,
-                         double green, double blue, double gamma);
+                         double green, double blue, double gamma, const QVariantMap& geometry = {});
   Q_INVOKABLE void showResult(bool before);
   Q_INVOKABLE void exportImage(const QUrl &url);
   Q_INVOKABLE void cancel();
@@ -112,6 +114,7 @@ private:
     float denoise;
     std::array<float, 3> color;
     float gamma;
+    QVariantMap geometry;
   };
   struct Source {
     QString path;
@@ -138,6 +141,7 @@ private:
   void updateAnnotation();
   QVariantMap annotation_{cleanAnnotation({})};
   QImage annotationImage_;
+  QImage geometryPreview_;
   QImage preview_, beforePreview_, afterPreview_;
   QString status_, imageLabel_;
   QString stackSummary_;

@@ -74,6 +74,7 @@ qt_add_qml_module(AstroCapture
         qml/MosaicWorkspace.qml
         qml/CaptionEditor.qml
         qml/ImageViewport.qml
+    qml/GeometryEditor.qml
         qml/GlobalSettingsWorkspace.qml
         qml/HistoryWorkspace.qml
         qml/GuideWorkspace.qml
@@ -92,7 +93,8 @@ qt_add_qml_module(AstroCapture
     RESOURCES
         qml/assets/logo.png
     SOURCES
-        src/WorkspaceSnapshot.hpp
+        src/ImagePixelsItem.hpp
+    src/WorkspaceSnapshot.hpp
         src/WorkspaceSessions.cpp
         src/SessionStorage.hpp
         src/SessionStorage.cpp

@@ -1,5 +1,6 @@
 #pragma once
 #include <QVariantMap>
+#include "GeometrySettings.hpp"
 #include <cmath>
 #include <optional>
 
@@ -7,12 +8,13 @@ namespace astro::app {
 inline QVariantMap defaultProcessingSettings() {
     QVariantMap values{{"denoise", 0.0}, {"red", 1.0}, {"green", 1.0}, {"blue", 1.0}, {"gamma", 1.0}};
     for (int i = 1; i <= 6; ++i) values.insert(QString("level%1").arg(i), 0.0);
-    return values;
+    values["geometry"]=defaultGeometry();return values;
 }
 inline std::optional<QVariantMap> checkedProcessingSettings(const QVariantMap& input) {
     auto result = defaultProcessingSettings();
-    if (input.size() != result.size()) return std::nullopt;
+    for(auto i=input.begin();i!=input.end();++i)if(!result.contains(i.key()))return {};
     for (auto it = result.begin(); it != result.end(); ++it) {
+        if(it.key()=="geometry"){if(input.contains("geometry")){auto g=checkedGeometry(input["geometry"].toMap());if(!g)return {};it.value()=*g;}continue;}
         bool valid = false;
         const double value = input.value(it.key()).toDouble(&valid);
         const bool level = it.key().startsWith("level");

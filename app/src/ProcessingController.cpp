@@ -1,3 +1,4 @@
+#include "ImageGeometry.hpp"
 #include "ProcessingController.hpp"
 #include "ImagePreview.hpp"
 
@@ -264,7 +265,7 @@ bool ProcessingController::openDocument(const QVariant& value) {
 void ProcessingController::acceptDocument(ImageDocument document) {
   document_=std::move(document); source_.reset(); ranks_.clear(); qualities_.clear();
   pendingSeek_.reset(); pendingAdjustments_.reset(); ++adjustmentRevision_;
-  stack_=document_.pixels; result_=stack_; beforePreview_=document_.preview; afterPreview_=beforePreview_;
+  stack_=document_.pixels; result_=stack_; beforePreview_=document_.preview;geometryPreview_=beforePreview_; afterPreview_=beforePreview_;
   frameCache_.reset(); appliedSettings_=defaultProcessingSettings();
   stackSummary_=!document_.processingSummary.isEmpty()?document_.processingSummary:document_.mosaicImageCount>0
     ? tr("Mosaic · %1 images assembled").arg(document_.mosaicImageCount)
@@ -402,7 +403,7 @@ void ProcessingController::stack(int keepCount, bool surface, int patchSize, boo
           stack_ = output;
           result_ = output;
           appliedSettings_ = defaultProcessingSettings();
-          beforePreview_ = image;
+          beforePreview_ = image;geometryPreview_=image;
           afterPreview_ = image;
           progress_ = 100;
           status_ = summary;
@@ -415,13 +416,14 @@ void ProcessingController::stack(int keepCount, bool surface, int patchSize, boo
 }
 void ProcessingController::apply(const QVariantList &values, double denoise,
                                  double red, double green, double blue,
-                                 double gamma) {
+                                 double gamma, const QVariantMap& geometry) {
   if ((busy_ && !adjusting()) || !stack_ || values.size() != 6)
     return;
   Adjustments settings{{},
                        float(denoise),
                        {float(red), float(green), float(blue)},
-                       float(gamma)};
+                       float(gamma),geometry.isEmpty()?defaultGeometry():geometry};
+  if(!checkedGeometry(settings.geometry)){status_=tr("Invalid geometry parameters.");emit changed();return;}
   for (int i = 0; i < 6; ++i)
     settings.gains[i] = values[i].toFloat();
   ++adjustmentRevision_;
@@ -436,9 +438,10 @@ void ProcessingController::startAdjustments(const Adjustments &settings) {
   const auto original = stack_;
   const auto edgeMask = document_.edgeMask;
   const auto revision = adjustmentRevision_;
+  const auto basePreview=geometryPreview_;
   run(
       tr("Applying wavelets…"),
-      [this, original, edgeMask, settings, revision](std::stop_token stop) {
+      [this, original, edgeMask, settings, revision, basePreview](std::stop_token stop) {
         auto image=allocateImagePreview(*original);const auto target=previewTarget(image);
         auto result = std::make_shared<FloatImage>(
             wavelets(*original, settings.gains, settings.denoise,
@@ -452,14 +455,17 @@ void ProcessingController::startAdjustments(const Adjustments &settings) {
           }}
         }
         if(edgeMask)image=preview(*result,[&]{check(stop);});
+        const auto before=imageGeometry(basePreview,settings.geometry);
+        if(geometryActive(settings.geometry)){*result=processing::transformGeometry(*result,geometryFrom(settings.geometry),[&]{check(stop);});image=preview(*result,[&]{check(stop);});}
         check(stop);
-        post([this, result, image, revision, settings] {
+        post([this, result, image, revision, settings, before] {
           if (revision != adjustmentRevision_)
             return;
           result_ = result;
           for(int i=0;i<6;++i)appliedSettings_[QString("level%1").arg(i+1)]=settings.gains[i];
           appliedSettings_["denoise"]=settings.denoise;appliedSettings_["red"]=settings.color[0];
           appliedSettings_["green"]=settings.color[1];appliedSettings_["blue"]=settings.color[2];appliedSettings_["gamma"]=settings.gamma;
+          appliedSettings_["geometry"]=settings.geometry;beforePreview_=before;updateAnnotation();
           afterPreview_ = image;
           progress_ = 100;
           status_ = tr("Adjustments applied. Compare before / after, then export.");

@@ -67,8 +67,8 @@ Popup {
             NumberField {label:qsTr("Height (px)");key:"height";maximum:pixels.sourceHeight}
         }
         RowLayout {Layout.fillWidth:true;spacing:12
-            ParameterControl {label:qsTr("Angle (°)");Layout.fillWidth:true;from:-180;to:180;decimals:2;value:root.draft.angle;onMoved:root.update("angle",value)}
-            ParameterControl {label:qsTr("Scale (%)");Layout.fillWidth:true;from:10;to:400;decimals:1;value:root.draft.scale*100;onMoved:root.update("scale",value/100)}
+            ParameterControl {label:qsTr("Angle (°)");Layout.fillWidth:true;from:-180;to:180;decimals:2;value:root.draft.angle;onMoved:{root.update("angle",value);value=Qt.binding(()=>root.draft.angle)}}
+            ParameterControl {label:qsTr("Scale (%)");Layout.fillWidth:true;from:10;to:400;decimals:1;value:root.draft.scale*100;onMoved:{root.update("scale",value/100);value=Qt.binding(()=>root.draft.scale*100)}}
             DarkComboBox {Layout.preferredWidth:150;model:[qsTr("Nearest neighbour"),qsTr("Bilinear"),qsTr("Bicubic"),qsTr("Area"),"Lanczos-4"];currentIndex:root.draft.interpolation;Accessible.name:qsTr("Interpolation");onActivated:root.update("interpolation",currentIndex)}
         }
         RowLayout {Layout.fillWidth:true

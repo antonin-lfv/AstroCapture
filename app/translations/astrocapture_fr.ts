@@ -816,6 +816,66 @@ Télescope · caméra · accessoires</translation>
             <source>Stretch curve</source>
             <translation>Courbe d’étirement</translation>
         </message>
+        <message>
+            <source>Import a mask</source>
+            <translation>Importer un masque</translation>
+        </message>
+        <message>
+            <source>Mask images (*.fits *.fit *.fts *.png *.tif *.tiff)</source>
+            <translation>Images de masque (*.fits *.fit *.fts *.png *.tif *.tiff)</translation>
+        </message>
+        <message>
+            <source>Painted mask</source>
+            <translation>Masque peint</translation>
+        </message>
+        <message>
+            <source>Imported mask</source>
+            <translation>Masque importé</translation>
+        </message>
+        <message>
+            <source>White applies the adjustments, black preserves its input, gray blends them: output = input + mask × (processed − input). The mask uses the recipe input before geometry and is applied once after the selected treatment. Photometric calibration is global and cannot be masked.</source>
+            <translation>Le blanc applique les réglages, le noir conserve l’entrée et le gris mélange : sortie = entrée + masque × (traitement − entrée). Le masque utilise l’entrée de la recette avant la géométrie et agit une fois après le traitement choisi. La calibration photométrique reste globale.</translation>
+        </message>
+        <message>
+            <source>Paint mask</source>
+            <translation>Peindre le masque</translation>
+        </message>
+        <message>
+            <source>Import mask</source>
+            <translation>Importer</translation>
+        </message>
+        <message>
+            <source>Choose a mask image first.</source>
+            <translation>Choisissez d’abord une image de masque.</translation>
+        </message>
+        <message>
+            <source>Mask all finishing adjustments</source>
+            <translation>Toute la finition</translation>
+        </message>
+        <message>
+            <source>Mask multiscale denoising only</source>
+            <translation>Débruitage multiscale uniquement</translation>
+        </message>
+        <message>
+            <source>Mask deconvolution only</source>
+            <translation>Déconvolution uniquement</translation>
+        </message>
+        <message>
+            <source>Mask stretch and color only</source>
+            <translation>Étirement et couleur uniquement</translation>
+        </message>
+        <message>
+            <source>Mask scope</source>
+            <translation>Portée du masque</translation>
+        </message>
+        <message>
+            <source>Edge blur σ (px)</source>
+            <translation>Flou du bord σ (px)</translation>
+        </message>
+        <message>
+            <source>Gaussian edge smoothing in image pixels. Zero keeps the painted or imported edges.</source>
+            <translation>Lissage gaussien du bord, en pixels de l’image. Zéro conserve les bords peints ou importés.</translation>
+        </message>
     </context>
     <context>
         <name>DeepSkyWorkspace</name>
@@ -2410,6 +2470,10 @@ L’aperçu est automatiquement éclairci ; les données restent linéaires.</tr
         <message>
             <source>Final image</source>
             <translation>Image finale</translation>
+        </message>
+        <message>
+            <source>Crop, rotate and resize</source>
+            <translation>Recadrer, pivoter et redimensionner</translation>
         </message>
     </context>
     <context>
@@ -4864,6 +4928,10 @@ Télescope · caméra · accessoires</translation>
             <source>Delete these adjustments</source>
             <translation>Supprimer ces réglages</translation>
         </message>
+        <message>
+            <source>Crop, rotate and resize</source>
+            <translation>Recadrer, pivoter et redimensionner</translation>
+        </message>
     </context>
     <context>
         <name>QObject</name>
@@ -5354,6 +5422,62 @@ Résultat obtenu :
         <message>
             <source>Session restored. Cached results are ready.</source>
             <translation>Session reprise. Les résultats sauvegardés sont disponibles.</translation>
+        </message>
+        <message>
+            <source>The crop rectangle exceeds the image boundaries.</source>
+            <translation>Le rectangle de recadrage dépasse les limites de l’image.</translation>
+        </message>
+        <message>
+            <source>Choose a mask image first.</source>
+            <translation>Choisissez d’abord une image de masque.</translation>
+        </message>
+        <message>
+            <source>Invalid geometry parameters.</source>
+            <translation>Paramètres de géométrie invalides.</translation>
+        </message>
+        <message>
+            <source>The transformed image exceeds 32 million pixels.</source>
+            <translation>L’image transformée dépasse 32 millions de pixels.</translation>
+        </message>
+        <message>
+            <source>Invalid transformed image samples.</source>
+            <translation>L’image transformée contient des valeurs invalides.</translation>
+        </message>
+        <message>
+            <source>Cannot allocate geometry preview.</source>
+            <translation>Impossible de créer l’aperçu de géométrie.</translation>
+        </message>
+        <message>
+            <source>Reading mask image…</source>
+            <translation>Lecture du masque…</translation>
+        </message>
+        <message>
+            <source>Mask image loaded. White applies; black protects.</source>
+            <translation>Masque chargé. Le blanc applique ; le noir protège.</translation>
+        </message>
+        <message>
+            <source>The imported mask must match the image dimensions.</source>
+            <translation>Le masque importé doit avoir les mêmes dimensions que l’image.</translation>
+        </message>
+        <message>
+            <source>Mask values must be between zero and one.</source>
+            <translation>Les valeurs du masque doivent être comprises entre zéro et un.</translation>
+        </message>
+        <message>
+            <source>Invalid local mask parameters.</source>
+            <translation>Paramètres de masque local invalides.</translation>
+        </message>
+        <message>
+            <source>Invalid mask brush stroke.</source>
+            <translation>Trait de pinceau du masque invalide.</translation>
+        </message>
+        <message>
+            <source>Invalid mask brush coordinates.</source>
+            <translation>Coordonnées du pinceau invalides.</translation>
+        </message>
+        <message>
+            <source>Cannot allocate mask preview.</source>
+            <translation>Impossible de créer l’aperçu du masque.</translation>
         </message>
     </context>
     <context>
@@ -6111,6 +6235,26 @@ Résultat obtenu :
             <source>Session restored. Cached results are ready.</source>
             <translation>Session reprise. Les résultats sauvegardés sont disponibles.</translation>
         </message>
+        <message>
+            <source>Invalid geometry parameters.</source>
+            <translation>Paramètres de géométrie invalides.</translation>
+        </message>
+        <message>
+            <source>The crop rectangle exceeds the image boundaries.</source>
+            <translation>Le rectangle de recadrage dépasse les limites de l’image.</translation>
+        </message>
+        <message>
+            <source>The transformed image exceeds 32 million pixels.</source>
+            <translation>L’image transformée dépasse 32 millions de pixels.</translation>
+        </message>
+        <message>
+            <source>Invalid transformed image samples.</source>
+            <translation>L’image transformée contient des valeurs invalides.</translation>
+        </message>
+        <message>
+            <source>Cannot allocate geometry preview.</source>
+            <translation>Impossible de créer l’aperçu de géométrie.</translation>
+        </message>
     </context>
     <context>
         <name>QuitConfirmation</name>
@@ -6250,6 +6394,188 @@ Résultat obtenu :
         <message>
             <source>Cannot remove the saved session: %1</source>
             <translation>Impossible de supprimer la session sauvegardée : %1</translation>
+        </message>
+    </context>
+    <context>
+        <name>GeometryEditor</name>
+        <message>
+            <source>Crop, rotate and resize</source>
+            <translation>Recadrer, pivoter et redimensionner</translation>
+        </message>
+        <message>
+            <source>Close</source>
+            <translation>Fermer</translation>
+        </message>
+        <message>
+            <source>Drag a rectangle on the image. Coordinates start at the top left, in original pixels.</source>
+            <translation>Tracez un rectangle sur l’image. Les coordonnées partent du coin supérieur gauche, en pixels d’origine.</translation>
+        </message>
+        <message>
+            <source>Free aspect ratio</source>
+            <translation>Proportions libres</translation>
+        </message>
+        <message>
+            <source>Original aspect ratio</source>
+            <translation>Proportions d’origine</translation>
+        </message>
+        <message>
+            <source>Pan image</source>
+            <translation>Déplacer l’image</translation>
+        </message>
+        <message>
+            <source>Full image</source>
+            <translation>Image entière</translation>
+        </message>
+        <message>
+            <source>X (px)</source>
+            <translation>X (px)</translation>
+        </message>
+        <message>
+            <source>Y (px)</source>
+            <translation>Y (px)</translation>
+        </message>
+        <message>
+            <source>Width (px)</source>
+            <translation>Largeur (px)</translation>
+        </message>
+        <message>
+            <source>Height (px)</source>
+            <translation>Hauteur (px)</translation>
+        </message>
+        <message>
+            <source>Angle (°)</source>
+            <translation>Angle (°)</translation>
+        </message>
+        <message>
+            <source>Scale (%)</source>
+            <translation>Échelle (%)</translation>
+        </message>
+        <message>
+            <source>Nearest neighbour</source>
+            <translation>Plus proche voisin</translation>
+        </message>
+        <message>
+            <source>Bilinear</source>
+            <translation>Bilinéaire</translation>
+        </message>
+        <message>
+            <source>Bicubic</source>
+            <translation>Bicubique</translation>
+        </message>
+        <message>
+            <source>Area</source>
+            <translation>Moyenne de zone</translation>
+        </message>
+        <message>
+            <source>Interpolation</source>
+            <translation>Interpolation</translation>
+        </message>
+        <message>
+            <source>Keep canvas size</source>
+            <translation>Conserver le cadre</translation>
+        </message>
+        <message>
+            <source>Limit interpolation overshoot</source>
+            <translation>Limiter les dépassements</translation>
+        </message>
+        <message>
+            <source>Output: %1 × %2 px</source>
+            <translation>Sortie : %1 × %2 px</translation>
+        </message>
+        <message>
+            <source>The crop rectangle exceeds the image boundaries.</source>
+            <translation>Le rectangle de recadrage dépasse les limites de l’image.</translation>
+        </message>
+        <message>
+            <source>Cancel</source>
+            <translation>Annuler</translation>
+        </message>
+        <message>
+            <source>Apply geometry</source>
+            <translation>Appliquer</translation>
+        </message>
+    </context>
+    <context>
+        <name>MaskEditor</name>
+        <message>
+            <source>Paint the mask</source>
+            <translation>Peindre le masque</translation>
+        </message>
+        <message>
+            <source>Close</source>
+            <translation>Fermer</translation>
+        </message>
+        <message>
+            <source>Red protects the image. White applies the treatment; black protects it. Cmd+Z removes the last stroke.</source>
+            <translation>Le rouge protège l’image. Le blanc applique le traitement ; le noir protège. Cmd+Z annule le dernier trait.</translation>
+        </message>
+        <message>
+            <source>The mask contains 200 strokes. Undo a stroke before painting more.</source>
+            <translation>Le masque contient 200 traits. Annulez un trait pour continuer à peindre.</translation>
+        </message>
+        <message>
+            <source>The mask reached its point limit. Undo a stroke before painting more.</source>
+            <translation>Le masque a atteint sa limite de points. Annulez un trait pour continuer.</translation>
+        </message>
+        <message>
+            <source>Protect · black brush</source>
+            <translation>Protéger · pinceau noir</translation>
+        </message>
+        <message>
+            <source>Reveal · white brush</source>
+            <translation>Appliquer · pinceau blanc</translation>
+        </message>
+        <message>
+            <source>Brush action</source>
+            <translation>Action du pinceau</translation>
+        </message>
+        <message>
+            <source>Pan image</source>
+            <translation>Déplacer l’image</translation>
+        </message>
+        <message>
+            <source>View mask only</source>
+            <translation>Voir le masque seul</translation>
+        </message>
+        <message>
+            <source>Brush radius (px)</source>
+            <translation>Rayon (px)</translation>
+        </message>
+        <message>
+            <source>Hardness (%)</source>
+            <translation>Dureté (%)</translation>
+        </message>
+        <message>
+            <source>Opacity (%)</source>
+            <translation>Opacité (%)</translation>
+        </message>
+        <message>
+            <source>White background · apply everywhere</source>
+            <translation>Fond blanc · appliquer partout</translation>
+        </message>
+        <message>
+            <source>Black background · protect everywhere</source>
+            <translation>Fond noir · protéger partout</translation>
+        </message>
+        <message>
+            <source>Edge blur σ (px)</source>
+            <translation>Flou du bord σ (px)</translation>
+        </message>
+        <message>
+            <source>Invert mask</source>
+            <translation>Inverser le masque</translation>
+        </message>
+        <message>
+            <source>Clear strokes</source>
+            <translation>Effacer les traits</translation>
+        </message>
+        <message>
+            <source>Cancel</source>
+            <translation>Annuler</translation>
+        </message>
+        <message>
+            <source>Apply mask</source>
+            <translation>Appliquer le masque</translation>
         </message>
     </context>
 </TS>

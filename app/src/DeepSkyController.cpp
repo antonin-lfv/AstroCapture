@@ -1,3 +1,4 @@
+#include "MaskSettings.hpp"
 #include "ImageGeometry.hpp"
 #include "DeepSkyController.hpp"
 #include <astro/processing/DeepSkyAdvanced.hpp>
@@ -139,10 +140,12 @@ processing::Finish finishFromSettings(const QVariantMap& s) {
     f.saturation=s["saturation"].toFloat();f.denoise=s["denoise"].toFloat();
     return f;
 }
-processing::MaskOptions maskFromSettings(const QVariantMap& s) {
-    return {s["maskType"].toInt(),s["maskLow"].toDouble(),s["maskHigh"].toDouble(),s["maskFeather"].toDouble(),s["maskX"].toDouble(),s["maskY"].toDouble(),s["maskRadius"].toDouble(),s["maskStarRadius"].toDouble(),s["maskInvert"].toBool()};
+processing::MaskOptions maskFromSettings(const QVariantMap& s,const processing::FloatImage& input) {
+    auto options=maskOptions(s);
+    if(options.type==5){const auto path=s["maskFile"].toString();if(path.isEmpty())throw std::runtime_error("Choose a mask image first.");const auto image=readFrame({{"path",path},{"scale",1.0}});if(image.width!=input.width||image.height!=input.height)throw std::runtime_error("The imported mask must match the image dimensions.");options.raster.resize(std::size_t(input.width)*input.height);for(std::size_t p=0;p<options.raster.size();++p){double v=image.channels==1?image.samples[p]:.2126*image.samples[p*image.channels]+.7152*image.samples[p*image.channels+1]+.0722*image.samples[p*image.channels+2];if(!std::isfinite(v)||v<0||v>1)throw std::runtime_error("Mask values must be between zero and one.");options.raster[p]=float(v);}}
+    return options;
 }
-processing::FloatImage scientificPreparation(const processing::FloatImage& source,const QVariantMap& s,const processing::CheckCancel& check,QVariantMap* report=nullptr,const processing::Progress& progress={}) {
+processing::FloatImage scientificPreparation(const processing::FloatImage& source,const QVariantMap& s,const processing::CheckCancel& check,QVariantMap* report=nullptr,const processing::Progress& progress={},const std::vector<float>* mask=nullptr) {
     auto image=source;
     const float pedestal=s["pedestal"].toFloat();if(pedestal!=0)for(std::size_t i=0;i<image.rgb.size();++i){if(i%65536==0&&check)check();image.rgb[i]+=pedestal;}
     if(s["photometry"].toBool()) {
@@ -155,12 +158,14 @@ processing::FloatImage scientificPreparation(const processing::FloatImage& sourc
     if(s["advancedDenoise"].toBool()) {
         auto reduced=processing::denoiseMultiscale(image,{s["noiseScales"].toInt(),s["noiseThreshold"].toDouble(),s["noiseAmount"].toDouble(),s["noiseChroma"].toDouble()},check);
         if(report){(*report)["noiseBefore"]=reduced.noiseBefore;(*report)["noiseAfter"]=reduced.noiseAfter;}
+        if(mask&&s["maskScope"].toInt()==1)processing::blendMask(image,reduced.image,*mask,check);
         image=std::move(reduced.image);
     }
     if(s["deconvolution"].toBool()) {
         processing::DeconvolutionOptions options;options.psf={s["psfProfile"].toInt(),s["psfFwhm"].toDouble(),s["psfBeta"].toDouble()};options.iterations=s["rlIterations"].toInt();options.damping=s["rlDamping"].toDouble();options.blend=s["rlBlend"].toDouble();options.stopping=s["rlStopping"].toDouble();
         auto restored=processing::deconvolve(image,options,check,progress);
         if(report){(*report)["rlIterations"]=restored.iterations;(*report)["rlChange"]=restored.relativeChange;(*report)["psfFwhm"]=options.psf.fwhm;}
+        if(mask&&s["maskScope"].toInt()==2)processing::blendMask(image,restored.image,*mask,check);
         image=std::move(restored.image);
     }
     return image;
@@ -172,12 +177,14 @@ processing::FloatImage evaluateOperations(const processing::FloatImage& source,c
         if(check)check();
         const auto settings=op["settings"].toMap();auto f=finishFromSettings(settings);
         std::optional<processing::FloatImage> original;std::vector<float> mask;
-        if(settings["maskType"].toInt()){original=image;mask=processing::makeMask(image,maskFromSettings(settings),check);}
+        if(settings["maskType"].toInt()){original=image;mask=processing::makeMask(image,maskFromSettings(settings,image),check);}
         if(f.background){image=processing::extractBackground(image,f.backgroundOptions,check).image;f.background=false;}
-        if(settings["pedestal"].toDouble()!=0||settings["photometry"].toBool()||settings["advancedDenoise"].toBool()||settings["deconvolution"].toBool())image=scientificPreparation(image,settings,check);
+        if(settings["pedestal"].toDouble()!=0||settings["photometry"].toBool()||settings["advancedDenoise"].toBool()||settings["deconvolution"].toBool())image=scientificPreparation(image,settings,check,nullptr,{},mask.empty()?nullptr:&mask);
+        const auto finishingInput=settings["maskScope"].toInt()==3&&!mask.empty()?std::optional<processing::FloatImage>(image):std::nullopt;
         image=processing::finishDeepSky(image,f,check);
         if(settings["scnr"].toBool())image=processing::removeGreen(image,settings["scnrMethod"].toInt(),settings["scnrAmount"].toFloat(),settings["scnrPreserve"].toBool(),check);
-        if(original)processing::blendMask(*original,image,mask,check);
+        if(original&&settings["maskScope"].toInt()==0)processing::blendMask(*original,image,mask,check);
+        if(finishingInput)processing::blendMask(*finishingInput,image,mask,check);
         if(settings["rotation"].toInt()||settings["mirrorHorizontal"].toBool()||settings["mirrorVertical"].toBool())image=processing::orientImage(image,settings["rotation"].toInt(),settings["mirrorHorizontal"].toBool(),settings["mirrorVertical"].toBool(),check);
         if(geometryActive(settings["geometry"].toMap()))image=processing::transformGeometry(image,geometryFrom(settings["geometry"].toMap()),check);
     }
@@ -286,7 +293,7 @@ void DeepSkyController::setReference(int index) {
     emit changed();
 }
 void DeepSkyController::remove(int index){if(busy_||index<0||index>=frames_.size())return;frames_.removeAt(index);emit changed();}
-void DeepSkyController::clear(){if(busy_)return;geometryPreview_={};maskSourcePreview_={};advancedReport_.clear();psfKernel_.clear();maskPreview_={};showingMask_=false;projectOptions_.clear();sourceRow_.clear();sourceInterpretation_.clear();sourceDebayer_=sourceAutoStretch_=true;finishSettings_.clear();rawPreview_={};backgroundPreview_={};showingBackgroundModel_=false;rawName_.clear();comparingRaw_=false;histogram_.clear();pendingAdjustments_.reset();displayingResult_=false;stage_.clear();frames_.clear();backgroundSamples_.clear();references_.clear();stacks_.clear();groupExposure_.clear();groupCounts_.clear();exposureCount_=0;resultFilters_.clear();groups_.clear();linear_.reset();finished_.reset();pipelineCache_.reset();pipelineSource_.reset();pipelineCacheKey_.clear();preview_={};resultPreview_={};linearPreview_={};comparisonPreview_={};comparisonOrientationKey_.clear();status_.clear();emit projectOptionsChanged();emit changed();emit imageChanged();}
+void DeepSkyController::clear(){if(busy_)return;maskImportPreview_={};maskImportPath_.clear();geometryPreview_={};maskSourcePreview_={};advancedReport_.clear();psfKernel_.clear();maskPreview_={};showingMask_=false;projectOptions_.clear();sourceRow_.clear();sourceInterpretation_.clear();sourceDebayer_=sourceAutoStretch_=true;finishSettings_.clear();rawPreview_={};backgroundPreview_={};showingBackgroundModel_=false;rawName_.clear();comparingRaw_=false;histogram_.clear();pendingAdjustments_.reset();displayingResult_=false;stage_.clear();frames_.clear();backgroundSamples_.clear();references_.clear();stacks_.clear();groupExposure_.clear();groupCounts_.clear();exposureCount_=0;resultFilters_.clear();groups_.clear();linear_.reset();finished_.reset();pipelineCache_.reset();pipelineSource_.reset();pipelineCacheKey_.clear();preview_={};resultPreview_={};linearPreview_={};comparisonPreview_={};comparisonOrientationKey_.clear();status_.clear();emit projectOptionsChanged();emit changed();emit imageChanged();}
 void DeepSkyController::chooseRawComparison(int index){
     if(busy_||index<0||index>=frames_.size()||frames_[index].toMap()["role"]!="Light")return;
     const auto row=frames_[index].toMap();
@@ -401,21 +408,21 @@ void DeepSkyController::apply(const QVariantMap& options) {
         }
         QVariantMap advancedReport;QImage maskPreview;std::vector<float> mask;
         if(settings["maskType"].toInt()) {
-            mask=processing::makeMask(operationInput,maskFromSettings(settings),checkpoint);
+            mask=processing::makeMask(operationInput,maskFromSettings(settings,operationInput),checkpoint);
             maskPreview=QImage(operationInput.width,operationInput.height,QImage::Format_RGB32);if(maskPreview.isNull())throw std::runtime_error("Cannot allocate mask preview.");
             for(int y=0;y<operationInput.height;++y){checkpoint();auto* row=reinterpret_cast<QRgb*>(maskPreview.scanLine(y));for(int x=0;x<operationInput.width;++x){const int v=int(std::lround(mask[std::size_t(y)*operationInput.width+x]*255));row[x]=qRgb(v,v,v);}}
             advancedReport["maskCoverage"]=100.*std::accumulate(mask.begin(),mask.end(),0.)/mask.size();
         }
         std::optional<processing::FloatImage> prepared;
         if(settings["pedestal"].toDouble()!=0||settings["photometry"].toBool()||settings["deconvolution"].toBool()||settings["advancedDenoise"].toBool())
-            prepared=scientificPreparation(corrected?*corrected:operationInput,settings,checkpoint,&advancedReport,[this,stop](int done,int total,const std::string& label){post([this,stop,done,total,label]{if(stop.stop_requested())return;progress_=total?done*100/total:0;stage_=QString::fromStdString(label);emit changed();});});
+            prepared=scientificPreparation(corrected?*corrected:operationInput,settings,checkpoint,&advancedReport,[this,stop](int done,int total,const std::string& label){post([this,stop,done,total,label]{if(stop.stop_requested())return;progress_=total?done*100/total:0;stage_=QString::fromStdString(label);emit changed();});},mask.empty()?nullptr:&mask);
         const auto& source=prepared?*prepared:corrected?*corrected:operationInput;
         QVariantList psfKernel;int psfSize;const auto kernel=processing::makePsf({settings["psfProfile"].toInt(),settings["psfFwhm"].toDouble(),settings["psfBeta"].toDouble()},&psfSize);for(float v:kernel)psfKernel<<v;advancedReport["psfSize"]=psfSize;
         auto preview=allocateImagePreview(source);const auto target=previewTarget(preview);
         const bool extras=!mask.empty()||settings["scnr"].toBool()||settings["rotation"].toInt()||settings["mirrorHorizontal"].toBool()||settings["mirrorVertical"].toBool();
         auto result=std::make_shared<processing::FloatImage>(processing::finishDeepSky(source,f,checkpoint,nullptr,extras?nullptr:&target));
         const auto histogram=makeLinearHistogram(source,f.color,f.black,f.white);
-        if(extras){if(settings["scnr"].toBool())*result=processing::removeGreen(*result,settings["scnrMethod"].toInt(),settings["scnrAmount"].toFloat(),settings["scnrPreserve"].toBool(),checkpoint);if(!mask.empty())processing::blendMask(operationInput,*result,mask,checkpoint);if(settings["rotation"].toInt()||settings["mirrorHorizontal"].toBool()||settings["mirrorVertical"].toBool())*result=processing::orientImage(*result,settings["rotation"].toInt(),settings["mirrorHorizontal"].toBool(),settings["mirrorVertical"].toBool(),checkpoint);preview=makeImagePreview(*result,checkpoint);}
+        if(extras){if(settings["scnr"].toBool())*result=processing::removeGreen(*result,settings["scnrMethod"].toInt(),settings["scnrAmount"].toFloat(),settings["scnrPreserve"].toBool(),checkpoint);if(!mask.empty()&&settings["maskScope"].toInt()==0)processing::blendMask(operationInput,*result,mask,checkpoint);if(!mask.empty()&&settings["maskScope"].toInt()==3)processing::blendMask(source,*result,mask,checkpoint);if(settings["rotation"].toInt()||settings["mirrorHorizontal"].toBool()||settings["mirrorVertical"].toBool())*result=processing::orientImage(*result,settings["rotation"].toInt(),settings["mirrorHorizontal"].toBool(),settings["mirrorVertical"].toBool(),checkpoint);preview=makeImagePreview(*result,checkpoint);}
         if(!maskPreview.isNull()&&(settings["rotation"].toInt()||settings["mirrorHorizontal"].toBool()||settings["mirrorVertical"].toBool())){maskPreview=maskPreview.transformed(QTransform().rotate(settings["rotation"].toInt()*90));maskPreview=maskPreview.transformed(QTransform().scale(settings["mirrorHorizontal"].toBool()?-1:1,settings["mirrorVertical"].toBool()?-1:1));}
         const auto geometryPreview=preview;
         const auto maskSourcePreview=maskSourceCache.isNull()?makeImagePreview(operationInput,checkpoint):maskSourceCache;
@@ -447,6 +454,7 @@ void DeepSkyController::exportImage(const QUrl& url,bool linear) {
     if(!linear_||!url.isLocalFile())return;
     const auto path=url.toLocalFile();
     for(const auto& value:frames_)if(QFileInfo(value.toMap()["path"].toString()).canonicalFilePath()==QFileInfo(path).canonicalFilePath()){status_=tr("An original image cannot be overwritten.");emit changed();return;}
+    QStringList masks{finishSettings_["maskFile"].toString()};for(const auto& op:finishSettings_["operations"].toList())masks<<op.toMap()["settings"].toMap()["maskFile"].toString();for(const auto& mask:masks)if(!mask.isEmpty()&&(QFileInfo(mask).absoluteFilePath()==QFileInfo(path).absoluteFilePath()||(!QFileInfo(mask).canonicalFilePath().isEmpty()&&QFileInfo(mask).canonicalFilePath()==QFileInfo(path).canonicalFilePath()))){status_=tr("An original image cannot be overwritten.");emit changed();return;}
     const auto image=linear?linear_:finished_;const auto exposure=totalExposure_;
     run(tr("Exporting image…"),[this,image,path,linear,exposure](std::stop_token stop){
         QTemporaryDir directory(QFileInfo(path).dir().filePath(".astrocapture-XXXXXX"));if(!directory.isValid())throw std::runtime_error("Cannot create temporary export files.");
@@ -503,10 +511,26 @@ void DeepSkyController::loadProject(const QUrl& url) {
 }
 QVariant DeepSkyController::processingDocument() const {
     if(!finished_)return {};
-    QStringList protectedPaths;for(const auto& value:frames_)protectedPaths<<value.toMap()["path"].toString();
+    QStringList protectedPaths;for(const auto& value:frames_)protectedPaths<<value.toMap()["path"].toString();if(!finishSettings_["maskFile"].toString().isEmpty())protectedPaths<<finishSettings_["maskFile"].toString();for(const auto& op:finishSettings_["operations"].toList()){const auto path=op.toMap()["settings"].toMap()["maskFile"].toString();if(!path.isEmpty())protectedPaths<<path;}
     ImageDocument document{finished_,resultPreview_,{},tr("Deep-sky result"),exportUrl(),protectedPaths};
     document.exposureCount=exposureCount_;document.totalExposure=totalExposure_;document.filters=resultFilters_;
     document.processingSummary=tr("Deep sky · %1 exposures · %2 s total · filters: %3").arg(exposureCount_).arg(totalExposure_,0,'f',1).arg(resultFilters_.join(", "));
     return QVariant::fromValue(document);
+}
+}
+
+namespace astro::app {
+void DeepSkyController::loadMaskFile(const QUrl& url) {
+    if(busy_||!linear_||!url.isLocalFile())return;
+    const auto source=pipelineCache_?pipelineCache_:linear_;const auto path=url.toLocalFile();
+    run(tr("Reading mask image…"),[this,source,path](std::stop_token stop){
+        const auto image=readFrame({{"path",path},{"scale",1.0}});check(stop);
+        if(image.width!=source->width||image.height!=source->height)throw std::runtime_error("The imported mask must match the image dimensions.");
+        for(float v:image.samples){if(!std::isfinite(v)||v<0||v>1)throw std::runtime_error("Mask values must be between zero and one.");}
+        const int w=std::min(1024,image.width),h=std::max(1,int(std::lround(double(image.height)*w/image.width)));
+        QImage preview(w,h,QImage::Format_Grayscale8);if(preview.isNull())throw std::runtime_error("Cannot allocate mask preview.");
+        for(int y=0;y<h;++y){check(stop);auto* row=preview.scanLine(y);for(int x=0;x<w;++x){const auto p=std::size_t(y*image.height/h)*image.width+x*image.width/w;const double value=image.channels==1?image.samples[p]:.2126*image.samples[p*image.channels]+.7152*image.samples[p*image.channels+1]+.0722*image.samples[p*image.channels+2];row[x]=uchar(std::lround(value*255));}}
+        post([this,path,preview,stop]{if(stop.stop_requested())return;maskImportPath_=path;maskImportPreview_=preview;pipelineCache_.reset();pipelineSource_.reset();status_=tr("Mask image loaded. White applies; black protects.");emit maskFileChanged();emit maskFileReady(path);});
+    });
 }
 }

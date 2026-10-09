@@ -15,11 +15,13 @@ Control {
     signal previewRequested
     property bool editable: false
     property bool linearInput: true
+    property bool pendingMaskImport:false
+    property bool pendingMaskEditor:false
     property int toolIndex: 0
     signal edited(var settings)
     signal gestureStarted
     signal gestureEnded
-    readonly property bool catalogOpen: catalog.visible
+    readonly property bool catalogOpen: catalog.visible || maskEditor.visible || maskImport.visible
     implicitHeight: contentItem.implicitHeight
     padding: 0
     palette.windowText: Atelier.text
@@ -33,6 +35,13 @@ Control {
         const copy = Object.assign({}, values);
         copy[key] = value;
         edited(copy);
+    }
+    MaskEditor {id:maskEditor;onAccepted:(values)=>tools.edited(values)}
+    FileDialog {id:maskImport;title:qsTr("Import a mask");nameFilters:[qsTr("Mask images (*.fits *.fit *.fts *.png *.tif *.tiff)")];onAccepted:{tools.pendingMaskImport=true;tools.controller.loadMaskFile(selectedFile);}}
+    function openMaskEditor(){if(values.maskType===5&&controller.importedMaskPath!==values.maskFile){pendingMaskEditor=true;controller.loadMaskFile("file://"+encodeURI(values.maskFile));}else maskEditor.edit(controller.maskSourceImage,values,controller.importedMaskImage);}
+    Connections {target:tools.controller
+        function onMaskFileReady(path){if(tools.pendingMaskImport){tools.pendingMaskImport=false;tools.edited(Object.assign({},tools.values,{maskType:5,maskFile:path,maskStrokes:[]}));}if(tools.pendingMaskEditor){tools.pendingMaskEditor=false;maskEditor.edit(tools.controller.maskSourceImage,tools.values,tools.controller.importedMaskImage);}}
+        function onOperationFinished(success,message){if(!success){tools.pendingMaskImport=false;tools.pendingMaskEditor=false;}}
     }
     component Explanation: Label {
         color: Atelier.secondary
@@ -418,14 +427,20 @@ Control {
                     DarkComboBox {
                         objectName: "deepSkyMaskType"
                         Layout.fillWidth: true
-                        model: [qsTr("No mask"), qsTr("Luminance range"), qsTr("Radial region"), qsTr("Detected stars")]
+                        model: [qsTr("No mask"), qsTr("Luminance range"), qsTr("Radial region"), qsTr("Detected stars"),qsTr("Painted mask"),qsTr("Imported mask")]
                         currentIndex: tools.values.maskType || 0
                         enabled: tools.editable && !tools.values.photometry
-                        onActivated: tools.change("maskType", currentIndex)
+                        onActivated:{if(currentIndex===5&&!tools.values.maskFile)maskImport.open();else tools.change("maskType",currentIndex);}
                     }
                     Explanation {
-                        text: qsTr("White applies the adjustments, black preserves its input, gray blends them: output = input + mask × (processed − input). The mask is generated from the recipe input before processing and is applied once at the end. Photometric calibration is global and cannot be masked.")
+                        text: qsTr("White applies the adjustments, black preserves its input, gray blends them: output = input + mask × (processed − input). The mask uses the recipe input before geometry and is applied once after the selected treatment. Photometric calibration is global and cannot be masked.")
                     }
+                    RowLayout {Layout.fillWidth:true;visible:tools.values.maskType===4||tools.values.maskType===5
+                        IconButton {objectName:"deepSkyPaintMask";text:qsTr("Paint mask");Layout.fillWidth:true;enabled:tools.editable&&!tools.controller.busy;onClicked:tools.openMaskEditor()}
+                        IconButton {text:qsTr("Import mask");enabled:tools.editable&&!tools.controller.busy;onClicked:maskImport.open()}
+                    }
+                    Label {visible:tools.values.maskType===5;text:tools.values.maskFile||qsTr("Choose a mask image first.");color:Atelier.secondary;elide:Text.ElideMiddle;Layout.fillWidth:true}
+                    DarkComboBox {visible:tools.values.maskType!==0;Layout.fillWidth:true;model:[qsTr("Mask all finishing adjustments"),qsTr("Mask multiscale denoising only"),qsTr("Mask deconvolution only"),qsTr("Mask stretch and color only")];currentIndex:tools.values.maskScope||0;Accessible.name:qsTr("Mask scope");onActivated:tools.change("maskScope",currentIndex)}
                     ColumnLayout {
                         visible: tools.values.maskType === 1
                         Layout.fillWidth: true
@@ -472,12 +487,13 @@ Control {
                         explanation: qsTr("Build circular regions around up to 150 detected stars, with radius = measured FWHM × multiplier. Faint or crowded stars may be missed. Invert to protect detected stars while processing the rest.")
                     }
                     NumberSetting {
-                        visible: tools.values.maskType !== 0
+                        visible: tools.values.maskType > 0 && tools.values.maskType < 4
                         key: "maskFeather"
                         label: qsTr("Feathering")
                         minimum: .001
                         explanation: qsTr("Smoothstep t²(3 − 2t) softens mask edges. For luminance it is an intensity width; for radial regions a fraction of the shorter side; for stars a fraction of each star radius.")
                     }
+                    NumberSetting {visible:tools.values.maskType>=4;key:"maskBlurRadius";label:qsTr("Edge blur σ (px)");maximum:100;explanation:qsTr("Gaussian edge smoothing in image pixels. Zero keeps the painted or imported edges.")}
                     Toggle {
                         visible: tools.values.maskType !== 0
                         key: "maskInvert"

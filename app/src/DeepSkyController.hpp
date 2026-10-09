@@ -14,6 +14,8 @@ class DeepSkyController : public QObject {
     Q_OBJECT
     Q_PROPERTY(QImage geometryImage READ geometryImage NOTIFY imageChanged)
     Q_PROPERTY(QImage maskSourceImage READ maskSourceImage NOTIFY imageChanged)
+    Q_PROPERTY(QImage importedMaskImage READ importedMaskImage NOTIFY maskFileChanged)
+    Q_PROPERTY(QString importedMaskPath READ importedMaskPath NOTIFY maskFileChanged)
     QML_ELEMENT
     Q_PROPERTY(bool hasFinishComparison READ hasFinishComparison NOTIFY imageChanged)
     Q_PROPERTY(QVariantMap advancedReport READ advancedReport NOTIFY changed)
@@ -100,6 +102,9 @@ public:
     Q_INVOKABLE void remove(int index);
     Q_INVOKABLE void clear();
     QImage geometryImage() const{return geometryPreview_;}
+    Q_INVOKABLE void loadMaskFile(const QUrl&);
+    QImage importedMaskImage()const{return maskImportPreview_;}
+    QString importedMaskPath()const{return maskImportPath_;}
     QImage maskSourceImage() const{return maskSourcePreview_;}
     Q_INVOKABLE void inspect(int index);
     Q_INVOKABLE void restoreResult();
@@ -121,6 +126,8 @@ public:
     void restoreSession(const WorkspaceSnapshot&);
     Q_INVOKABLE void cancel(){pendingAdjustments_.reset();worker_.request_stop();}
 signals:
+    void maskFileChanged();
+    void maskFileReady(const QString& path);
     void operationFinished(bool success, const QString& message);
     void changed();
     void imageChanged();
@@ -148,7 +155,8 @@ private:
     bool showingMask_{};
     bool displayingResult_{},comparingRaw_{};
     QString rawName_;
-    QImage geometryPreview_,maskSourcePreview_;
+    QImage geometryPreview_,maskSourcePreview_,maskImportPreview_;
+    QString maskImportPath_;
     QImage preview_,resultPreview_,rawPreview_,backgroundPreview_;
     QImage linearPreview_,comparisonPreview_;
     QByteArray comparisonOrientationKey_;

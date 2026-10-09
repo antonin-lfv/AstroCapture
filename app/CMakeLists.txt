@@ -75,6 +75,7 @@ qt_add_qml_module(AstroCapture
         qml/CaptionEditor.qml
         qml/ImageViewport.qml
     qml/GeometryEditor.qml
+    qml/MaskEditor.qml
         qml/GlobalSettingsWorkspace.qml
         qml/HistoryWorkspace.qml
         qml/GuideWorkspace.qml
@@ -94,6 +95,7 @@ qt_add_qml_module(AstroCapture
         qml/assets/logo.png
     SOURCES
         src/ImagePixelsItem.hpp
+    src/MaskOverlayItem.hpp
     src/WorkspaceSnapshot.hpp
         src/WorkspaceSessions.cpp
         src/SessionStorage.hpp

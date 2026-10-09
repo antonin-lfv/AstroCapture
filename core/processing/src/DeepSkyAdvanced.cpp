@@ -157,19 +157,36 @@ std::vector<float> makeMask(const FloatImage &image, const MaskOptions &o,
        {o.low, o.high, o.feather, o.centerX, o.centerY, o.radius, o.starRadius})
     if (!std::isfinite(v))
       throw std::runtime_error("Invalid mask parameters.");
-  if (o.type < 0 || o.type > 3 || o.low < 0 || o.high > 1 || o.low >= o.high ||
+  if (o.type < 0 || o.type > 5 || o.low < 0 || o.high > 1 || o.low >= o.high ||
       o.feather <= 0 || o.feather > 1 || o.radius <= 0 || o.radius > 2 ||
       o.centerX < 0 || o.centerX > 1 || o.centerY < 0 || o.centerY > 1 ||
       o.starRadius < .5 || o.starRadius > 6)
     throw std::runtime_error("Invalid mask ranges.");
   std::vector<float> mask(std::size_t(image.width) * image.height,
-                          o.type == 3 ? 0.f : 1.f);
+                          o.type == 3 || ((o.type==4||o.type==5)&&!o.baseWhite) ? 0.f : 1.f);
   const double scale = std::min(image.width, image.height);
   auto smooth = [](double x) {
     x = std::clamp(x, 0., 1.);
     return x * x * (3 - 2 * x);
   };
-  if (o.type == 3) {
+  if (!std::isfinite(o.blurRadius)||o.blurRadius<0||o.blurRadius>100||o.strokes.size()>200)
+    throw std::runtime_error("Invalid local mask parameters.");
+  if(o.type==4||o.type==5) {
+    if(o.type==5){if(o.raster.size()!=mask.size())throw std::runtime_error("The imported mask must match the image dimensions.");for(float v:o.raster)if(!std::isfinite(v)||v<0||v>1)throw std::runtime_error("Mask values must be between zero and one.");mask=o.raster;}
+    std::size_t pointCount=0;
+    for(const auto& stroke:o.strokes){
+      checkpoint(check);pointCount+=stroke.points.size();
+      if(stroke.points.empty()||pointCount>10000||!std::isfinite(stroke.radius)||stroke.radius<=0||stroke.radius>.5||!std::isfinite(stroke.hardness)||stroke.hardness<0||stroke.hardness>1||!std::isfinite(stroke.opacity)||stroke.opacity<0||stroke.opacity>1||(stroke.value!=0&&stroke.value!=1))throw std::runtime_error("Invalid mask brush stroke.");
+      double minX=image.width,minY=image.height,maxX=0,maxY=0;const double radius=stroke.radius*scale;
+      for(const auto& p:stroke.points){if(!std::isfinite(p[0])||!std::isfinite(p[1])||p[0]<0||p[0]>1||p[1]<0||p[1]>1)throw std::runtime_error("Invalid mask brush coordinates.");minX=std::min(minX,p[0]*image.width);maxX=std::max(maxX,p[0]*image.width);minY=std::min(minY,p[1]*image.height);maxY=std::max(maxY,p[1]*image.height);}
+      const int left=std::max(0,int(std::floor(minX-radius))),top=std::max(0,int(std::floor(minY-radius))),right=std::min(image.width-1,int(std::ceil(maxX+radius))),bottom=std::min(image.height-1,int(std::ceil(maxY+radius))),width=right-left+1;
+      std::vector<float> coverage(std::size_t(width)*(bottom-top+1),0);
+      for(std::size_t n=0;n<stroke.points.size();++n){const auto a=stroke.points[n? n-1:0],b=stroke.points[n];const double ax=a[0]*image.width,ay=a[1]*image.height,bx=b[0]*image.width,by=b[1]*image.height,dx=bx-ax,dy=by-ay,length=dx*dx+dy*dy;
+        for(int y=std::max(top,int(std::floor(std::min(ay,by)-radius)));y<=std::min(bottom,int(std::ceil(std::max(ay,by)+radius)));++y){checkpoint(check);for(int x=std::max(left,int(std::floor(std::min(ax,bx)-radius)));x<=std::min(right,int(std::ceil(std::max(ax,bx)+radius)));++x){const double t=length?std::clamp(((x+.5-ax)*dx+(y+.5-ay)*dy)/length,0.,1.):0;const double r=std::hypot(x+.5-ax-t*dx,y+.5-ay-t*dy)/radius;const float weight=float(r>=1?0:r<=stroke.hardness?1:1-smooth((r-stroke.hardness)/(1-stroke.hardness)));auto& v=coverage[std::size_t(y-top)*width+x-left];v=std::max(v,weight);}}}
+      // Opacity is applied once per continuous stroke, including overlapping segments.
+      for(int y=top;y<=bottom;++y){checkpoint(check);for(int x=left;x<=right;++x){const float amount=coverage[std::size_t(y-top)*width+x-left]*stroke.opacity;auto& v=mask[std::size_t(y)*image.width+x];v=float(v+amount*(stroke.value-v));}}
+    }
+  } else if (o.type == 3) {
     const auto stars = detectStars(image, check);
     if (stars.empty())
       throw std::runtime_error("No stars found for the mask.");
@@ -208,6 +225,7 @@ std::vector<float> makeMask(const FloatImage &image, const MaskOptions &o,
       }
     }
   }
+  if(o.blurRadius>0&&o.type!=0){checkpoint(check);cv::Mat plane(image.height,image.width,CV_32F,mask.data());cv::GaussianBlur(plane,plane,cv::Size(),o.blurRadius,o.blurRadius,cv::BORDER_REPLICATE);checkpoint(check);for(auto& v:mask)v=std::clamp(v,0.f,1.f);}
   if (o.invert && o.type != 0)
     for (auto &v : mask)
       v = 1 - v;

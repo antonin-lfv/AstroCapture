@@ -7,7 +7,7 @@
 
 namespace astro::app {
 inline QVariantMap defaultDeepSkySettings() {
-    return {{"geometry",defaultGeometry()},{"pedestal",0.0},{"ghs",false},{"ghsStrength",0.0},{"ghsLocal",0.0},{"ghsSymmetry",0.0},{"ghsShadows",0.0},{"ghsHighlights",1.0},{"ghsInverse",false},{"ghsMode",0},{"maskType",0},{"maskLow",0.0},{"maskHigh",1.0},{"maskFeather",.05},{"maskX",.5},{"maskY",.5},{"maskRadius",.25},{"maskStarRadius",2.0},{"maskInvert",false},{"deconvolution",false},{"psfProfile",0},{"psfFwhm",3.0},{"psfBeta",3.0},{"rlIterations",10},{"rlDamping",.001},{"rlBlend",1.0},{"rlStopping",.0001},{"advancedDenoise",false},{"noiseScales",3},{"noiseThreshold",3.0},{"noiseAmount",.5},{"noiseChroma",.5},{"photometry",false},{"photometryReferences",QVariantList{}},{"photometryAperture",5.0},{"photometryInner",8.0},{"photometryOuter",12.0},{"photometrySaturation",1.0},{"background",false},{"stretch",true},{"black",0.0},{"white",1.0},
+    return {{"geometry",defaultGeometry()},{"pedestal",0.0},{"ghs",false},{"ghsStrength",0.0},{"ghsLocal",0.0},{"ghsSymmetry",0.0},{"ghsShadows",0.0},{"ghsHighlights",1.0},{"ghsInverse",false},{"ghsMode",0},{"maskStrokes",QVariantList{}},{"maskBaseWhite",true},{"maskFile",QString{}},{"maskBlurRadius",0.0},{"maskScope",0},{"maskType",0},{"maskLow",0.0},{"maskHigh",1.0},{"maskFeather",.05},{"maskX",.5},{"maskY",.5},{"maskRadius",.25},{"maskStarRadius",2.0},{"maskInvert",false},{"deconvolution",false},{"psfProfile",0},{"psfFwhm",3.0},{"psfBeta",3.0},{"rlIterations",10},{"rlDamping",.001},{"rlBlend",1.0},{"rlStopping",.0001},{"advancedDenoise",false},{"noiseScales",3},{"noiseThreshold",3.0},{"noiseAmount",.5},{"noiseChroma",.5},{"photometry",false},{"photometryReferences",QVariantList{}},{"photometryAperture",5.0},{"photometryInner",8.0},{"photometryOuter",12.0},{"photometrySaturation",1.0},{"background",false},{"stretch",true},{"black",0.0},{"white",1.0},
             {"midtones",.15},{"red",1.0},{"green",1.0},{"blue",1.0},
             {"operations",QVariantList{}},{"scnr",false},{"scnrMethod",0},{"scnrAmount",1.0},{"scnrPreserve",true},{"backgroundPoints",QVariantList{}},{"backgroundDegree",1},{"backgroundSamples",20},{"backgroundTolerance",1.0},
             {"rotation",0},{"mirrorHorizontal",false},{"mirrorVertical",false},{"denoise",0.0},{"asinh",false},{"asinhLuminance",0},{"asinhStrength",20.0},{"saturation",1.0}};
@@ -15,10 +15,16 @@ inline QVariantMap defaultDeepSkySettings() {
 // Full parameter snapshots: reject missing/unknown fields and invalid input.
 inline std::optional<QVariantMap> checkedDeepSkySettings(const QVariantMap& input) {
     auto result=defaultDeepSkySettings();
-    const QStringList extensions{"geometry","pedestal","ghs","ghsStrength","ghsLocal","ghsSymmetry","ghsShadows","ghsHighlights","ghsInverse","ghsMode","maskType","maskLow","maskHigh","maskFeather","maskX","maskY","maskRadius","maskStarRadius","maskInvert","deconvolution","psfProfile","psfFwhm","psfBeta","rlIterations","rlDamping","rlBlend","rlStopping","advancedDenoise","noiseScales","noiseThreshold","noiseAmount","noiseChroma","photometry","photometryReferences","photometryAperture","photometryInner","photometryOuter","photometrySaturation","asinhLuminance","operations","scnr","scnrMethod","scnrAmount","scnrPreserve","backgroundPoints","backgroundDegree","backgroundSamples","backgroundTolerance","rotation","mirrorHorizontal","mirrorVertical"};
+    const QStringList extensions{"maskStrokes","maskBaseWhite","maskFile","maskBlurRadius","maskScope","geometry","pedestal","ghs","ghsStrength","ghsLocal","ghsSymmetry","ghsShadows","ghsHighlights","ghsInverse","ghsMode","maskType","maskLow","maskHigh","maskFeather","maskX","maskY","maskRadius","maskStarRadius","maskInvert","deconvolution","psfProfile","psfFwhm","psfBeta","rlIterations","rlDamping","rlBlend","rlStopping","advancedDenoise","noiseScales","noiseThreshold","noiseAmount","noiseChroma","photometry","photometryReferences","photometryAperture","photometryInner","photometryOuter","photometrySaturation","asinhLuminance","operations","scnr","scnrMethod","scnrAmount","scnrPreserve","backgroundPoints","backgroundDegree","backgroundSamples","backgroundTolerance","rotation","mirrorHorizontal","mirrorVertical"};
     for(auto it=input.begin();it!=input.end();++it)if(!result.contains(it.key()))return std::nullopt;
     for(auto it=result.begin();it!=result.end();++it) {
         if(!input.contains(it.key())){if(extensions.contains(it.key()))continue;return std::nullopt;}
+        if(it.key()=="maskFile"){if(input[it.key()].typeId()!=QMetaType::QString||input[it.key()].toString().size()>4096)return {};it.value()=input[it.key()];continue;}
+        if(it.key()=="maskStrokes"){
+            if(input[it.key()].typeId()!=QMetaType::QVariantList)return {};const auto strokes=input[it.key()].toList();if(strokes.size()>200)return {};int count=0;
+            for(const auto& stroke:strokes){if(stroke.typeId()!=QMetaType::QVariantMap)return {};const auto s=stroke.toMap();if(s.size()!=5)return {};for(const auto& key:QStringList{"radius","opacity","hardness","value"}){bool ok=false;const auto v=s[key].toDouble(&ok);if(!ok||!std::isfinite(v)||v<0||v>(key=="radius"?.5:1)||(key=="radius"&&v==0)||(key=="value"&&v!=0&&v!=1))return {};}if(s["points"].typeId()!=QMetaType::QVariantList)return {};const auto points=s["points"].toList();count+=points.size();if(points.isEmpty()||count>10000)return {};for(const auto& p:points){if(p.typeId()!=QMetaType::QVariantList||p.toList().size()!=2)return {};for(const auto& c:p.toList()){bool ok=false;const auto v=c.toDouble(&ok);if(!ok||!std::isfinite(v)||v<0||v>1)return {};}}}
+            it.value()=strokes;continue;
+        }
         if(it.key()=="geometry"){auto g=checkedGeometry(input["geometry"].toMap());if(!g)return {};it.value()=*g;continue;}
         if(it.key()=="operations") {
             if(input[it.key()].typeId()!=QMetaType::QVariantList)return std::nullopt;
@@ -51,7 +57,9 @@ inline std::optional<QVariantMap> checkedDeepSkySettings(const QVariantMap& inpu
         if((k=="ghsStrength"&&(v<0||v>20))||(k=="ghsLocal"&&(v< -5||v>15)))return std::nullopt;
         if((QStringList{"ghsSymmetry","ghsShadows","ghsHighlights","maskLow","maskHigh","maskX","maskY","rlBlend","noiseAmount","noiseChroma"}.contains(k))&&(v<0||v>1))return std::nullopt;
         if((k=="ghsMode"||k=="psfProfile")&&(v<0||v>1||v!=std::floor(v)))return std::nullopt;
-        if(k=="maskType"&&(v<0||v>3||v!=std::floor(v)))return std::nullopt;
+        if(k=="maskType"&&(v<0||v>5||v!=std::floor(v)))return std::nullopt;
+        if(k=="maskScope"&&(v<0||v>3||v!=std::floor(v)))return {};
+        if(k=="maskBlurRadius"&&(v<0||v>100))return {};
         if(k=="maskFeather"&&(v<.001||v>1))return std::nullopt;
         if(k=="maskRadius"&&(v<.001||v>2))return std::nullopt;
         if(k=="maskStarRadius"&&(v<.5||v>6))return std::nullopt;

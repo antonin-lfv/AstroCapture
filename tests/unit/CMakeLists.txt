@@ -232,3 +232,15 @@ astro_add_unit_test(astro_processing_geometry_test SOURCES processing/GeometryTe
 foreach(workspace_test IN ITEMS astro_app_processing_workspace_test astro_app_deep_sky_workspace_test)
     target_sources(${workspace_test} PRIVATE ../../app/src/ImagePixelsItem.hpp)
 endforeach()
+
+target_sources(astro_app_deep_sky_workspace_test PRIVATE ../../app/src/MaskOverlayItem.hpp)
+astro_add_unit_test(astro_processing_local_mask_test SOURCES processing/LocalMaskTest.cpp LIBS astro::processing)
+astro_add_unit_test(astro_app_scientific_editing_test
+    SOURCES app/ScientificEditingTest.cpp ../../app/src/DeepSkyController.cpp ../../app/src/DeepSkyController.hpp
+        ../../app/src/ProcessingController.cpp ../../app/src/ProcessingController.hpp
+        ../../app/src/MosaicController.cpp ../../app/src/MosaicController.hpp ../../app/src/WorkspaceSessions.cpp
+    LIBS Qt6::Quick Qt6::Gui astro::processing astro::recording
+)
+set_target_properties(astro_app_scientific_editing_test PROPERTIES AUTOMOC ON)
+target_include_directories(astro_app_scientific_editing_test PRIVATE ../../app/src)
+set_tests_properties(astro_app_scientific_editing_test PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_BACKEND=software" TIMEOUT 45)

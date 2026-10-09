@@ -1,3 +1,4 @@
+#include "MaskOverlayItem.hpp"
 #include "ImagePixelsItem.hpp"
 #include <QGuiApplication>
 #include <QQmlEngine>
@@ -36,6 +37,7 @@ int main(int argc,char** argv){
     QCoreApplication::setOrganizationName("AstroCaptureTest");QCoreApplication::setApplicationName("DeepSkyWorkspaceTest");
     QSettings::setDefaultFormat(QSettings::IniFormat);QSettings::setPath(QSettings::IniFormat,QSettings::UserScope,directory.path());
     qmlRegisterType<astro::app::ImagePixelsItem>("AstroCapture",1,0,"ImagePixelsItem");
+    qmlRegisterType<app::MaskOverlayItem>("AstroCapture",1,0,"MaskOverlayItem");
     qmlRegisterType<app::DeepSkyEdits>("AstroCapture",1,0,"DeepSkyEdits");
     qmlRegisterType<app::ExportSizeEstimator>("AstroCapture",1,0,"ExportSizeEstimator");
     qmlRegisterType<app::DeepSkyController>("AstroCapture",1,0,"DeepSkyController");qmlRegisterType<app::DeepSkyHistogramItem>("AstroCapture",1,0,"DeepSkyHistogramItem");qmlRegisterType<app::DeepSkyImageItem>("AstroCapture",1,0,"DeepSkyImageItem");qmlRegisterType<app::AppLibrary>("AstroCapture",1,0,"AppLibrary");

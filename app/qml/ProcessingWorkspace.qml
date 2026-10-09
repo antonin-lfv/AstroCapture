@@ -28,7 +28,7 @@ Rectangle {
     property bool shortcutsAllowed: true
     readonly property bool canEdit: controller.hasResult && !playing && (!controller.busy || controller.adjusting)
     readonly property bool dialogOpen: processingMenu.opened || presetPopup.opened || annotationPopup.dialogOpen || openDialog.visible
-    readonly property bool localShortcuts: visible && shortcutsAllowed && !processingMenu.opened && !presetPopup.opened && !annotationPopup.dialogOpen && !openDialog.visible
+    readonly property bool localShortcuts: visible && shortcutsAllowed && !processingMenu.opened && !presetPopup.opened && !annotationPopup.dialogOpen && !openDialog.visible && !geometryEditor.visible
     ProcessingEdits { id: edits; objectName: "processingEdits" }
     Connections {
         target: edits

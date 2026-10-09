@@ -20,11 +20,19 @@ private:
   GhsOptions options_;
   double d_{}, low_{}, range_{1};
 };
+struct MaskStroke {
+  std::vector<std::array<double,2>> points; // Normalized image coordinates.
+  double radius{.02},hardness{.7},opacity{1},value{};
+};
 struct MaskOptions {
-  int type{}; // 0: none, 1: luminance range, 2: radial, 3: detected stars
+  int type{}; // 0: none, 1: luminance range, 2: radial, 3: detected stars, 4: painted, 5: imported
   double low{}, high{1}, feather{.05}, centerX{.5}, centerY{.5}, radius{.25},
       starRadius{2};
   bool invert{};
+  bool baseWhite{true};
+  double blurRadius{}; // Gaussian sigma in image pixels.
+  std::vector<MaskStroke> strokes;
+  std::vector<float> raster; // Imported mask, exact image dimensions, [0,1].
 };
 std::vector<float> makeMask(const FloatImage &, const MaskOptions &,
                             const CheckCancel & = {});

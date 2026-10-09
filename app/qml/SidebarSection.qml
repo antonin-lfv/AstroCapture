@@ -1,3 +1,4 @@
+import "Atelier.js" as Atelier
 import QtQuick
 import QtQuick.Layouts
 
@@ -13,7 +14,7 @@ ColumnLayout {
     default property alias content: inner.children
 
     Layout.fillWidth: true
-    spacing: 10
+    spacing: 8
     Layout.topMargin: 10
 
     RowLayout {
@@ -22,11 +23,11 @@ ColumnLayout {
 
         Text {
             text: root.title
-            color: "#6e7681"
-            font.pixelSize: 10
+            color: Atelier.muted
+            font.pixelSize: 13
             font.weight: Font.DemiBold
-            font.capitalization: Font.AllUppercase
-            font.letterSpacing: 0.8
+            font.capitalization: Font.MixedCase
+            font.letterSpacing: 0
             Layout.fillWidth: true
         }
 
@@ -39,6 +40,6 @@ ColumnLayout {
     ColumnLayout {
         id: inner
         Layout.fillWidth: true
-        spacing: 10
+        spacing: 8
     }
 }

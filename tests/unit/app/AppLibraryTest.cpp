@@ -117,6 +117,12 @@ int main(int argc, char** argv) {
     ASTRO_TEST_CHECK(emptyRestore.saveProcessingPreset("Saturne doux", values, true));
     emptyRestore.setCompactProcessing(true);
     emptyRestore.setProcessingPanelWidth(400);
+    ASTRO_TEST_CHECK(emptyRestore.deepSkyPanelWidth()==360);
+    emptyRestore.setDeepSkyPanelWidth(10);
+    ASTRO_TEST_CHECK(emptyRestore.deepSkyPanelWidth()==320);
+    emptyRestore.setDeepSkyPanelWidth(900);
+    ASTRO_TEST_CHECK(emptyRestore.deepSkyPanelWidth()==480);
+    emptyRestore.setDeepSkyPanelWidth(392);
     const auto video = QUrl::fromLocalFile(temp.filePath("Lune é #1.ser"));
     ASTRO_TEST_CHECK(QFile::copy(other.toLocalFile(), video.toLocalFile()));
     emptyRestore.recordVideo(video);
@@ -126,7 +132,9 @@ int main(int argc, char** argv) {
     astro::app::AppLibrary preferences;
     ASTRO_TEST_CHECK(preferences.processingPreset("Saturne doux") == values);
     ASTRO_TEST_CHECK(preferences.compactProcessing() && preferences.processingPanelWidth() == 400);
-    ASTRO_TEST_CHECK(preferences.recentVideos().size() == 1);
+    ASTRO_TEST_CHECK(preferences.deepSkyPanelWidth()==392);
+    ASTRO_TEST_CHECK(preferences.recentVideos().size() == 2);
+    ASTRO_TEST_CHECK(preferences.recentVideos().first().toMap().value("url").toUrl()==QUrl::fromLocalFile(QFileInfo(png.toLocalFile()).canonicalFilePath()));
     ASTRO_TEST_CHECK(preferences.lastVideoDirectory().toLocalFile() == QFileInfo(video.toLocalFile()).canonicalPath());
     preferences.removeProcessingPreset("Saturne doux");
     astro::app::AppLibrary deletedPreset;

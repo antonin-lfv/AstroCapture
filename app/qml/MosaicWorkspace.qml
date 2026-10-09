@@ -1,3 +1,4 @@
+import "Atelier.js" as Atelier
 import QtQuick
 import QtQuick.Controls.Basic
 import QtQuick.Layouts
@@ -13,7 +14,7 @@ Rectangle {
     property bool balanceExposure: true
     property bool skipUnmatched: true
     property bool softenEdges: true
-    color: "#0b0d10"
+    color: Atelier.canvas
     FileDialog {
         id: openDialog
         title: qsTr("Add overlapping Moon or Sun images")
@@ -41,16 +42,16 @@ Rectangle {
         id: optionsPopup
         parent: Overlay.overlay; anchors.centerIn: parent; width: Math.min(480, root.width - 32)
         padding: 20; modal: true; focus: true
-        background: Rectangle { color: "#151b24"; radius: 10; border.color: "#39465a" }
+        background: Rectangle { color: Atelier.surface; radius: 10; border.color: Atelier.border }
         contentItem: ColumnLayout {
             spacing: 14
-            Label { text: qsTr("Assembly options"); color: "#eef3fa"; font.pixelSize: 18 }
+            Label { text: qsTr("Assembly options"); color: Atelier.text; font.pixelSize: 18 }
             OptionSwitch { text: qsTr("Match brightness"); checked: root.balanceExposure; onCheckedChanged: root.balanceExposure = checked }
             OptionSwitch { text: qsTr("Automatically exclude unmatched images"); checked: root.skipUnmatched; onCheckedChanged: root.skipUnmatched = checked }
-            Label { text: qsTr("Keeps the largest connected group. Excluded images can be restored; files are never deleted. At least two matching views are needed."); color: "#9aa7b8"; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+            Label { text: qsTr("Keeps the largest connected group. Excluded images can be restored; files are never deleted. At least two matching views are needed."); color: Atelier.muted; wrapMode: Text.WordWrap; Layout.fillWidth: true }
             OptionSwitch { objectName: "mosaicSoftenEdges"; text: qsTr("Soften mosaic edges"); checked: root.softenEdges; onCheckedChanged: root.softenEdges = checked }
-            Label { text: qsTr("Fades the outer coverage boundary into black and protects it from sharpening in Processing. A narrow strip at the edge is darkened; missing areas are not reconstructed."); color: "#9aa7b8"; wrapMode: Text.WordWrap; Layout.fillWidth: true }
-            Label { text: qsTr("Changes apply to the next assembly."); color: "#9aa7b8"; Layout.fillWidth: true }
+            Label { text: qsTr("Fades the outer coverage boundary into black and protects it from sharpening in Processing. A narrow strip at the edge is darkened; missing areas are not reconstructed."); color: Atelier.muted; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+            Label { text: qsTr("Changes apply to the next assembly."); color: Atelier.muted; Layout.fillWidth: true }
             IconButton { text: qsTr("Done"); Layout.alignment: Qt.AlignRight; onClicked: optionsPopup.close() }
         }
     }
@@ -58,10 +59,10 @@ Rectangle {
         id: excludedPopup
         parent: Overlay.overlay; anchors.centerIn: parent; width: Math.min(500, root.width - 32); height: Math.min(460, root.height - 32)
         padding: 20; modal: true; focus: true
-        background: Rectangle { color: "#151b24"; radius: 10; border.color: "#39465a" }
+        background: Rectangle { color: Atelier.surface; radius: 10; border.color: Atelier.border }
         contentItem: ColumnLayout {
-            Label { text: qsTr("Excluded images"); color: "#eef3fa"; font.pixelSize: 18 }
-            Label { text: qsTr("These views could not be connected reliably to the retained group. They remain in the grid, unchecked. Original files are unchanged."); color: "#9aa7b8"; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+            Label { text: qsTr("Excluded images"); color: Atelier.text; font.pixelSize: 18 }
+            Label { text: qsTr("These views could not be connected reliably to the retained group. They remain in the grid, unchecked. Original files are unchanged."); color: Atelier.muted; wrapMode: Text.WordWrap; Layout.fillWidth: true }
             ListView {
                 Layout.fillWidth: true; Layout.fillHeight: true; clip: true
                 model: root.controller.excludedFiles
@@ -81,23 +82,23 @@ Rectangle {
         contentItem: Label { text: option.text; color: "#dbe5f2"; wrapMode: Text.WordWrap; rightPadding: 50; verticalAlignment: Text.AlignVCenter }
         indicator: Rectangle {
             implicitWidth: 38; implicitHeight: 22; x: option.width-width; y: (option.height-height)/2; radius: 11
-            color: option.checked ? "#6ca5f8" : "#394351"
-            Rectangle { width: 16; height: 16; radius: 8; y: 3; x: option.checked ? 19 : 3; color: "#eef3fa" }
+            color: option.checked ? Atelier.accent : Atelier.border
+            Rectangle { width: 16; height: 16; radius: 8; y: 3; x: option.checked ? 19 : 3; color: Atelier.text }
         }
-        background: Rectangle { color: "transparent"; border.color: option.visualFocus ? "#eef3fa" : "transparent"; radius: 6 }
+        background: Rectangle { color: "transparent"; border.color: option.visualFocus ? Atelier.text : "transparent"; radius: 6 }
     }
     Connections { target: root.controller; function onImageChanged() { viewport.fit(); } }
     ColumnLayout {
         anchors.fill: parent; anchors.margins: 20; spacing: 14
         RowLayout {
             Layout.fillWidth: true
-            Label { text: qsTr("Mosaic"); color: "#eef3fa"; font.pixelSize: 22; font.weight:Font.Medium; Layout.fillWidth: true }
+            Label { text: qsTr("Mosaic"); color: Atelier.text; font.pixelSize: 22; font.weight:Font.Medium; Layout.fillWidth: true }
             IconButton { text: qsTr("Add images"); enabled: !root.controller.busy; onClicked: openDialog.open() }
             IconButton { text: qsTr("Clear"); enabled: !root.controller.busy && root.controller.files.length>0; onClicked: root.controller.clear() }
         }
         Label {
             text: qsTr("Reassemble the Moon or Sun from overlapping views. Use images from the same session and setup, preferably already stacked, with 25–40% overlap and no captions.")
-            color: "#9aa7b8"; wrapMode: Text.WordWrap; Layout.fillWidth: true
+            color: Atelier.muted; wrapMode: Text.WordWrap; Layout.fillWidth: true
         }
         RowLayout {
             Layout.fillWidth: true; Layout.fillHeight: true; spacing: 16
@@ -106,7 +107,7 @@ Rectangle {
                 Layout.preferredWidth: Math.min(340, root.width * .38)
                 Layout.maximumWidth: Math.min(340, root.width * .38)
                 Layout.minimumWidth: 220; Layout.fillHeight: true
-                Label { text: qsTr("%1 / %2 images selected").arg(root.controller.selectedCount).arg(root.controller.files.length); color: "#c5cfdd" }
+                Label { text: qsTr("%1 / %2 images selected").arg(root.controller.selectedCount).arg(root.controller.files.length); color: Atelier.secondary }
                 GridView {
                     id: files
                     objectName: "mosaicFiles"
@@ -134,7 +135,7 @@ Rectangle {
                                     asynchronous: true; cache: false
                                     sourceSize.width: 256; sourceSize.height: 192
                                     fillMode: Image.PreserveAspectFit
-                                    Label { anchors.centerIn: parent; visible: parent.status === Image.Error; text: qsTr("Preview unavailable"); color: "#9aa7b8"; font.pixelSize: 10 }
+                                    Label { anchors.centerIn: parent; visible: parent.status === Image.Error; text: qsTr("Preview unavailable"); color: Atelier.muted; font.pixelSize: 10 }
                                 }
                             }
                             Label { text: modelData.name; color: "#dbe5f2"; elide: Text.ElideMiddle; Layout.fillWidth: true; font.pixelSize: 11 }
@@ -150,10 +151,10 @@ Rectangle {
                                 onCheckedChanged: if (initialized) root.controller.setImageSelected(tile.index, checked)
                                 indicator: Rectangle {
                                     implicitWidth: 18; implicitHeight: 18; x: selection.leftPadding; y: (selection.height-height)/2
-                                    radius: 4; color: selection.checked ? "#6ca5f8" : "#151b24"; border.color: selection.visualFocus ? "#eef3fa" : "#526579"
+                                    radius: 4; color: selection.checked ? Atelier.accent : Atelier.surface; border.color: selection.visualFocus ? Atelier.text : "#526579"
                                     Label { anchors.centerIn: parent; text: selection.checked ? "✓" : ""; color: "#0d1726"; font.pixelSize: 14 }
                                 }
-                                contentItem: Label { text: selection.text; leftPadding: 25; verticalAlignment: Text.AlignVCenter; color: "#c5cfdd"; font.pixelSize: 11 }
+                                contentItem: Label { text: selection.text; leftPadding: 25; verticalAlignment: Text.AlignVCenter; color: Atelier.secondary; font.pixelSize: 11 }
                             }
                         }
                     }
@@ -175,7 +176,7 @@ Rectangle {
                 }
                 RowLayout {
                     Layout.fillWidth: true; enabled: root.controller.hasResult && !root.controller.busy
-                    Label { text: qsTr("Image caption"); color: "#c5cfdd"; Layout.fillWidth: true }
+                    Label { text: qsTr("Image caption"); color: Atelier.secondary; Layout.fillWidth: true }
                     IconButton { text: qsTr("Edit caption");enabled:root.controller.hasResult && !root.controller.busy; onClicked: annotationPopup.open() }
                 }
                 IconButton {
@@ -204,9 +205,9 @@ Rectangle {
                 ColumnLayout {
                     anchors.centerIn:parent;width:Math.min(420,parent.width-50);spacing:12
                     visible:!root.controller.hasResult
-                    Icon {name:"mosaic";color:"#91b8ff";Layout.preferredWidth:32;Layout.preferredHeight:32;Layout.alignment:Qt.AlignHCenter}
-                    Label {text:root.controller.busy?qsTr("Building your mosaic…"):qsTr("Build your mosaic");font.pixelSize:22;color:"#eef3fa";wrapMode:Text.Wrap;horizontalAlignment:Text.AlignHCenter;Layout.fillWidth:true}
-                    Label {text:qsTr("Add overlapping Moon or Sun images, then assemble them.");color:"#9aa7b8";wrapMode:Text.Wrap;horizontalAlignment:Text.AlignHCenter;Layout.fillWidth:true}
+                    Icon {name:"mosaic";color:Atelier.accent;Layout.preferredWidth:32;Layout.preferredHeight:32;Layout.alignment:Qt.AlignHCenter}
+                    Label {text:root.controller.busy?qsTr("Building your mosaic…"):qsTr("Build your mosaic");font.pixelSize:16;color:Atelier.text;wrapMode:Text.Wrap;horizontalAlignment:Text.AlignHCenter;Layout.fillWidth:true}
+                    Label {text:qsTr("Add overlapping Moon or Sun images, then assemble them.");color:Atelier.muted;wrapMode:Text.Wrap;horizontalAlignment:Text.AlignHCenter;Layout.fillWidth:true}
                     IconButton {text:qsTr("Add images");iconName:"folder";enabled:!root.controller.busy;visible:root.controller.files.length===0;Layout.alignment:Qt.AlignHCenter;onClicked:openDialog.open()}
                 }
             }
@@ -235,8 +236,8 @@ Rectangle {
         onDropped: drop => { if(!accepts(drop))return; root.controller.addImages(drop.urls); drop.acceptProposedAction(); }
         Rectangle {
             anchors.fill: parent; anchors.margins: 8; radius: 10
-            visible: parent.containsDrag; color: "#e6111c2c"; border.color: "#6ca5f8"; border.width: 2
-            Label { anchors.centerIn: parent; text: qsTr("Drop to add mosaic images"); color: "#eef3fa"; font.pixelSize: 22 }
+            visible: parent.containsDrag; color: "#e6111c2c"; border.color: Atelier.accent; border.width: 2
+            Label { anchors.centerIn: parent; text: qsTr("Drop to add mosaic images"); color: Atelier.text; font.pixelSize: 22 }
         }
     }
 }

@@ -1,3 +1,4 @@
+import "Atelier.js" as Atelier
 import QtQuick
 import QtQuick.Controls.Basic
 import QtQuick.Layouts
@@ -35,7 +36,7 @@ Rectangle {
         onTriggered: root.library.refresh()
     }
     onSelectedPathChanged: historyView.fit()
-    color: "#0b0d10"
+    color: Atelier.canvas
     onVisibleChanged: if (visible) library.refresh()
     FileDialog {
         id: importDialog
@@ -66,10 +67,10 @@ Rectangle {
             anchors.margins: 8
             visible: imageDrop.containsDrag
             color: "#e6111c2c"
-            border.color: "#6ca5f8"
+            border.color: Atelier.accent
             border.width: 2
             radius: 8
-            Label { anchors.centerIn: parent; text: qsTr("Drop to add images to History"); color: "#eef3fa"; font.pixelSize: 24 }
+            Label { anchors.centerIn: parent; text: qsTr("Drop to add images to History"); color: Atelier.text; font.pixelSize: 24 }
         }
     }
     ColumnLayout {
@@ -78,7 +79,7 @@ Rectangle {
         spacing: 12
         RowLayout {
             Layout.fillWidth: true
-            Label { text: qsTr("History"); color: "#eef3fa"; font.pixelSize: 22; font.weight:Font.Medium; Layout.fillWidth: true }
+            Label { text: qsTr("History"); color: Atelier.text; font.pixelSize: 20; font.weight:Font.Medium; Layout.fillWidth: true }
             IconButton { text: qsTr("Add images"); onClicked: importDialog.open() }
             IconButton { text: qsTr("Refresh"); onClicked: root.library.refresh() }
             IconButton {
@@ -90,7 +91,7 @@ Rectangle {
                 Accessible.description: helpText
             }
         }
-        Label { text: qsTr("Drop TIFF, PNG or JPEG images here. Files stay in their original folders."); color: "#9aa7b8"; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+        Label { text: qsTr("Drop TIFF, PNG or JPEG images here. Files stay in their original folders."); color: Atelier.muted; wrapMode: Text.WordWrap; Layout.fillWidth: true }
         RowLayout {
             Layout.fillWidth: true
             Layout.fillHeight: true
@@ -111,19 +112,19 @@ Rectangle {
                     width: list.width
                     height: 82
                     radius: 6
-                    color: ListView.isCurrentItem ? "#1b2b42" : "#141a22"
-                    border.color: ListView.isCurrentItem ? "#6ca5f8" : "#26303c"
+                    color: ListView.isCurrentItem ? Atelier.hover : Atelier.surface
+                    border.color: ListView.isCurrentItem ? Atelier.accent : Atelier.border
                     ColumnLayout {
                         anchors.fill: parent
                         anchors.margins: 10
                         spacing: 3
-                        Label { text: entry.modelData.name; color: "#eef3fa"; elide: Text.ElideMiddle; Layout.fillWidth: true }
-                        Label { text: entry.modelData.path; color: "#9aa7b8"; font.pixelSize: 11; elide: Text.ElideMiddle; Layout.fillWidth: true }
-                        Label { text: entry.modelData.exists ? qsTr("Added ") + new Date(entry.modelData.date).toLocaleString(Qt.locale(root.library.language === "fr" ? "fr_FR" : "en_US"), Locale.ShortFormat) : qsTr("File moved or missing"); color: entry.modelData.exists ? "#9aa7b8" : "#edb06c"; font.pixelSize: 11; elide: Text.ElideRight; Layout.fillWidth: true }
+                        Label { text: entry.modelData.name; color: Atelier.text; elide: Text.ElideMiddle; Layout.fillWidth: true }
+                        Label { text: entry.modelData.path; color: Atelier.muted; font.pixelSize: 11; elide: Text.ElideMiddle; Layout.fillWidth: true }
+                        Label { text: entry.modelData.exists ? qsTr("Added ") + new Date(entry.modelData.date).toLocaleString(Qt.locale(root.library.language === "fr" ? "fr_FR" : "en_US"), Locale.ShortFormat) : qsTr("File moved or missing"); color: entry.modelData.exists ? Atelier.muted : "#edb06c"; font.pixelSize: 11; elide: Text.ElideRight; Layout.fillWidth: true }
                     }
                     MouseArea { anchors.fill: parent; onClicked: root.selectedPath = entry.modelData.path }
                 }
-                Label { anchors.centerIn: parent; width: parent.width - 24; visible: list.count === 0; text: qsTr("Drop processed images here, or choose Add images."); color: "#9aa7b8"; wrapMode: Text.WordWrap; horizontalAlignment: Text.AlignHCenter }
+                Label { anchors.centerIn: parent; width: parent.width - 24; visible: list.count === 0; text: qsTr("Drop processed images here, or choose Add images."); color: Atelier.muted; wrapMode: Text.WordWrap; horizontalAlignment: Text.AlignHCenter }
             }
             ColumnLayout {
                 Layout.fillWidth: true
@@ -151,10 +152,10 @@ Rectangle {
                         width: parent.width - 40
                         text: !root.selected ? qsTr("Select an image") : (!root.selected.exists ? qsTr("This file has been moved or deleted.\nAdd it again from its new location.") : qsTr("Preview unavailable. You can open the image in your image viewer."))
                         visible: !root.selected || !root.selected.exists || preview.status === Image.Error
-                        color: "#9aa7b8"; wrapMode: Text.WordWrap; horizontalAlignment: Text.AlignHCenter
+                        color: Atelier.muted; wrapMode: Text.WordWrap; horizontalAlignment: Text.AlignHCenter
                     }
                 }
-                Label { text: root.selected ? root.selected.path : ""; color: "#a8b5c6"; elide: Text.ElideMiddle; Layout.fillWidth: true }
+                Label { text: root.selected ? root.selected.path : ""; color: Atelier.secondary; elide: Text.ElideMiddle; Layout.fillWidth: true }
                 RowLayout {
                     enabled: root.selected !== null && root.selected.exists
                     IconButton { text: qsTr("Open image"); onClicked: root.library.openImage(root.selected.url) }
@@ -162,6 +163,6 @@ Rectangle {
                 }
             }
         }
-        Label { text: root.library.status; color: "#bdd7fa"; elide: Text.ElideRight; Layout.fillWidth: true; Layout.preferredHeight: 20 }
+        Label { text: root.library.status; color: Atelier.accent; elide: Text.ElideRight; Layout.fillWidth: true; Layout.preferredHeight: 20 }
     }
 }

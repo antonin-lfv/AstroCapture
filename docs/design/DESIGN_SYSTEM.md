@@ -1,7 +1,8 @@
 # AstroCapture — Atelier
 
-Direction proposée pour l'interface. Point de départ sauvegardé : `b18d96a`.
-La maquette de Finition sert de référence avant la migration des écrans de l'application.
+Direction validée par l'utilisateur le 9 octobre 2026 et intégrée à l'application.
+Point de départ sauvegardé : `b18d96a` ; référence approuvée : `dd15949`.
+La maquette de Finition reste la référence visuelle des écrans de l'application.
 
 ## Intention
 
@@ -32,7 +33,7 @@ peuvent défiler ; les commandes de navigation et de comparaison restent accessi
 ## Fondations
 
 Les valeurs de référence sont dans `tokens.json`. Les noms sémantiques sont communs
-à la maquette, au prototype et aux futurs composants QML.
+à la maquette, au prototype et aux composants QML de production (`app/qml/Atelier.js`).
 
 - Gris neutres pour les surfaces : aucune dominante bleue dans la zone d'image.
 - Un bleu doux signale sélection et focus. Un bleu plus soutenu distingue l'export.
@@ -82,9 +83,9 @@ avancement. Une erreur est expliquée près de la commande concernée.
   de précision. Une estimation compressée est identifiée comme approximative.
 - Fermer l'application conserve la protection existante contre les pertes de travail.
 
-## Vérification avant migration
+## Vérification de la composition
 
-La maquette doit être inspectée à 1440 × 960, 1100 × 800 et 900 × 700. Vérifier les
+L'application doit être inspectée à 1440 × 960, 1100 × 800 et 900 × 700. Vérifier les
 libellés français, les menus au survol, le focus clavier, les valeurs longues, les
 familles avancées, la comparaison, le zoom et la modale d'export. Aucune commande ne
 doit chevaucher le bord d'un panneau ou dépendre uniquement de sa couleur.
@@ -115,6 +116,8 @@ FITS 312,5 Mo. Le PNG/JPEG avec une nouvelle légende reste indiqué comme
 
 - `atelier-finition.html` : maquette interactive, image et données incluses.
 - `previews/` : vues de référence aux trois tailles et parcours d'export.
+- `previews/native/` : captures de l'application intégrée, avec Orion.
+- `VALIDATION.md` : contrôles de l'application et périmètre de la livraison.
 - `tokens.json` : couleurs, typographie, espacements et dimensions de référence.
 - `AGENTS.md` à la racine : règles de travail et de cohérence pour les prochaines étapes.
 

@@ -1,73 +1,56 @@
 import QtQuick
 import QtQuick.Controls.Basic
 import QtQuick.Layouts
+import "Atelier.js" as Atelier
 
 Rectangle {
-    id:root
-    property string currentTab:"home"
-    property bool recording:false
-    property string activityText:""
-    property string activityTab:""
+    id: root
+    property string currentTab: "home"
+    property bool recording: false
+    property string activityText: ""
+    property string activityTab: ""
     signal navigate(string tab)
-    readonly property var tabs:[
-        {key:"home",label:qsTr("Home"),icon:"home"},
-        {key:"capture",label:qsTr("Capture"),icon:"camera"},
-        {key:"processing",label:qsTr("Processing"),icon:"processing"},
-        {key:"deepSky",label:qsTr("Deep sky"),icon:"stars"},
-        {key:"mosaic",label:qsTr("Mosaic"),icon:"mosaic"},
-        {key:"history",label:qsTr("History"),icon:"history"},
-        {key:"guide",label:qsTr("Guide"),icon:"book"},
-        {key:"settings",label:qsTr("Settings"),icon:"gear"}
+    readonly property var tabs: [
+        {key:"home",label:qsTr("Home")}, {key:"capture",label:qsTr("Capture")},
+        {key:"processing",label:qsTr("Processing")}, {key:"deepSky",label:qsTr("Deep sky")},
+        {key:"mosaic",label:qsTr("Mosaic")}, {key:"history",label:qsTr("History")},
+        {key:"guide",label:qsTr("Guide")}
     ]
-    implicitHeight:104
-    color:"#10141b"
-    ColumnLayout {
-        anchors.fill:parent;spacing:0
-        RowLayout {
-            Layout.fillWidth:true;Layout.preferredHeight:52
-            Layout.leftMargin:20;Layout.rightMargin:16;spacing:10
-            Icon {name:"stars";color:"#91b8ff";Layout.preferredWidth:24;Layout.preferredHeight:24}
-            Label {text:"AstroCapture";font.pixelSize:16;font.weight:Font.DemiBold;color:"#eef3fa"}
-            Label {text:Qt.application.version;font.pixelSize:12;color:"#9aa7b8"}
-            Item {Layout.fillWidth:true}
-            Button {
-                objectName:"studioActivity";visible:root.activityText.length>0
-                Layout.maximumWidth:Math.max(100,root.width*.3)
-                onClicked:root.navigate(root.activityTab)
-                contentItem:Label {text:root.activityText;color:root.recording?"#f5aaa4":"#91b8ff";elide:Text.ElideRight;font.pixelSize:12}
-                background:Item {}
-                DarkToolTip {visible:parent.hovered;text:root.activityText}
+    implicitHeight: 44
+    color: Atelier.toolbar
+    RowLayout {
+        anchors.fill: parent
+        anchors.leftMargin: 12;anchors.rightMargin:12
+        spacing: 4
+        Repeater {
+            model: root.tabs
+            delegate: Button {
+                id: tab
+                required property var modelData
+                objectName: "studioTab_"+modelData.key
+                readonly property bool selected: root.currentTab===modelData.key
+                enabled: !root.recording || ["home","capture","guide"].indexOf(modelData.key)>=0
+                Accessible.name: modelData.label
+                Accessible.role: Accessible.PageTab
+                Accessible.description: selected?qsTr("Current workspace"):""
+                implicitHeight: Atelier.controlHeight
+                leftPadding: root.width<1100?9:12;rightPadding:leftPadding
+                onClicked: root.navigate(modelData.key)
+                contentItem: Label {text:tab.modelData.label;color:tab.enabled?(tab.selected?Atelier.text:Atelier.secondary):Atelier.muted;font.pixelSize:13;verticalAlignment:Text.AlignVCenter;horizontalAlignment:Text.AlignHCenter}
+                background: Rectangle {radius:Atelier.controlRadius;color:tab.selected?Atelier.field:tab.hovered?Atelier.hover:"transparent";border.width:tab.activeFocus?1:0;border.color:Atelier.accent}
             }
-
         }
-        Rectangle {Layout.fillWidth:true;Layout.preferredHeight:1;color:"#29313d"}
-        RowLayout {
-            Layout.fillWidth:true;Layout.fillHeight:true;Layout.leftMargin:12;Layout.rightMargin:12;spacing:3
-            Repeater {
-                model:root.tabs
-                delegate:Button {
-                    id:tab;required property var modelData
-                    objectName:modelData.key==="settings"?"studioSettings":"studioTab_"+modelData.key
-                    readonly property bool selected:root.currentTab===modelData.key
-                    enabled:!root.recording || ["home","capture","guide"].indexOf(modelData.key)>=0
-                    Accessible.name:modelData.label;Accessible.role:Accessible.PageTab
-                    Accessible.description:selected?qsTr("Current workspace"):""
-                    leftPadding:root.width<1100?9:12;rightPadding:leftPadding
-                    topPadding:9;bottomPadding:9
-                    onClicked:root.navigate(modelData.key)
-                    contentItem:RowLayout {
-                        spacing:7
-                        Icon {visible:root.width>=1100;name:tab.modelData.icon;color:tab.selected?"#eef3fa":"#a2aec0";Layout.preferredWidth:16;Layout.preferredHeight:16}
-                        Label {text:tab.modelData.label;color:!tab.enabled?"#687486":tab.selected?"#eef3fa":"#a2aec0";font.pixelSize:13}
-                    }
-                    background:Rectangle {
-                        radius:6;color:tab.selected?"#253348":tab.hovered?"#1a222e":"transparent"
-                        Rectangle {anchors.bottom:parent.bottom;anchors.left:parent.left;anchors.right:parent.right;anchors.margins:5;height:2;radius:1;color:"#91b8ff";visible:tab.selected}
-                    }
-                }
-            }
-            Item {Layout.fillWidth:true}
+        Item {Layout.fillWidth:true}
+        Button {
+            objectName: "studioActivity"
+            visible: root.activityText.length>0
+            Layout.maximumWidth: Math.max(100,root.width*.25)
+            onClicked: root.navigate(root.activityTab)
+            contentItem: Label {text:root.activityText;color:root.recording?Atelier.danger:Atelier.accent;elide:Text.ElideRight;font.pixelSize:11}
+            background: Item {}
+            DarkToolTip {visible:parent.hovered;text:root.activityText}
         }
-        Rectangle {Layout.fillWidth:true;Layout.preferredHeight:1;color:"#29313d"}
+        IconAction {objectName:"studioSettings";iconName:"gear";text:qsTr("Settings");enabled:!root.recording;onClicked:root.navigate("settings")}
     }
+    Rectangle {anchors.bottom:parent.bottom;width:parent.width;height:1;color:Atelier.border}
 }

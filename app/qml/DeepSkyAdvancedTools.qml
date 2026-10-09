@@ -1,3 +1,4 @@
+import "Atelier.js" as Atelier
 import QtQuick
 import QtQuick.Controls.Basic
 import QtQuick.Layouts
@@ -21,12 +22,12 @@ Control {
     readonly property bool catalogOpen: catalog.visible
     implicitHeight: contentItem.implicitHeight
     padding: 0
-    palette.windowText: "#e8edf5"
-    palette.text: "#e8edf5"
-    palette.base: "#202a36"
-    palette.button: "#202a36"
-    palette.buttonText: "#e8edf5"
-    palette.highlight: "#6ca5f8"
+    palette.windowText: Atelier.text
+    palette.text: Atelier.text
+    palette.base: Atelier.field
+    palette.button: Atelier.field
+    palette.buttonText: Atelier.text
+    palette.highlight: Atelier.accent
     background: Item {}
     function change(key, value) {
         const copy = Object.assign({}, values);
@@ -34,7 +35,7 @@ Control {
         edited(copy);
     }
     component Explanation: Label {
-        color: "#b5c2d2"
+        color: Atelier.secondary
         wrapMode: Text.Wrap
         Layout.fillWidth: true
         font.pixelSize: 12
@@ -53,7 +54,7 @@ Control {
             Layout.fillWidth: true
             Label {
                 text: setting.label
-                color: "#e8edf5"
+                color: Atelier.text
                 Layout.fillWidth: true
                 wrapMode: Text.Wrap
             }
@@ -99,7 +100,7 @@ Control {
         Layout.fillWidth: true
         Layout.minimumWidth: 0
         contentItem: Text {
-            text: toggle.text; font: toggle.font; color: toggle.enabled ? "#e8edf5" : "#657184"
+            text: toggle.text; font: toggle.font; color: toggle.enabled ? Atelier.text : Atelier.muted
             leftPadding: toggle.indicator.width + toggle.spacing
             wrapMode: Text.Wrap; verticalAlignment: Text.AlignVCenter
         }
@@ -111,7 +112,7 @@ Control {
             Layout.fillWidth: true
             Label {
                 text: qsTr("Advanced transformations")
-                color: "#eef3fa"
+                color: Atelier.text
                 font.pixelSize: 20
                 font.bold: true
                 Layout.fillWidth: true
@@ -140,7 +141,7 @@ Control {
         Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: 1
-            color: "#344150"
+            color: Atelier.border
         }
         ColumnLayout {
             id: advancedScroll
@@ -164,7 +165,7 @@ Control {
                     }
                     RowLayout {
                         Layout.fillWidth: true
-                        Label {text:qsTr("Stretch curve");color:"#b5c2d2";Layout.fillWidth:true}
+                        Label {text:qsTr("Stretch curve");color:Atelier.secondary;Layout.fillWidth:true}
                         HelpIcon {text:qsTr("Curve: normalized input 0–1 horizontally, output 0–1 vertically. Gray is identity. Shared-luminance color blending and masks can change the final per-channel result.")}
                     }
                     Canvas {
@@ -252,7 +253,7 @@ Control {
                     Layout.fillWidth: true
                     Explanation {
                         text: tools.linearInput ? qsTr("Use on linear data before stretching. The circular PSF describes a spatially constant blur; inspect stars at 100% for dark rings or amplified noise.") : qsTr("Earlier transformations changed brightness or orientation. Deconvolution and stellar PSF measurement are blocked; return to a linear, unrotated recipe input.")
-                        color: tools.linearInput ? "#b5c2d2" : "#edb06c"
+                        color: tools.linearInput ? Atelier.secondary : "#edb06c"
                     }
                     Toggle {
                         objectName: "deepSkyDeconvolutionEnabled"
@@ -559,7 +560,7 @@ Control {
         Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: 1
-            color: "#344150"
+            color: Atelier.border
         }
         Explanation {
             visible: tools.controller.advancedReport.outputMinimum !== undefined
@@ -587,7 +588,7 @@ Control {
             }
             Label {
                 text: tools.controller.busy ? tools.controller.stage : tools.controller.status
-                color: "#a8b5c6"
+                color: Atelier.secondary
                 wrapMode: Text.Wrap
                 Layout.fillWidth: true
                 font.pixelSize: 11

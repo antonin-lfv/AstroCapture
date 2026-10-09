@@ -1,3 +1,4 @@
+import "Atelier.js" as Atelier
 import QtQuick
 import QtQuick.Controls.Basic
 import QtQuick.Layouts
@@ -23,7 +24,7 @@ Rectangle {
     Component.onCompleted:refreshRecents()
     onVisibleChanged:if(visible)refreshRecents()
     Connections {target:Qt.application;function onStateChanged(){if(root.visible && Qt.application.state===Qt.ApplicationActive)root.refreshRecents();}}
-    color:"#0b0d10"
+    color:Atelier.canvas
     objectName:"studioHome"
     component StartCard:Button {
         id:card
@@ -35,11 +36,11 @@ Rectangle {
         padding:22
         contentItem:ColumnLayout {
             spacing:12
-            Icon {name:card.iconName;color:"#91b8ff";Layout.preferredWidth:26;Layout.preferredHeight:26}
-            Label {text:card.heading;color:card.enabled?"#eef3fa":"#728095";font.pixelSize:17;wrapMode:Text.Wrap;Layout.fillWidth:true}
-            Label {text:card.detail;color:"#a2aec0";font.pixelSize:13;wrapMode:Text.Wrap;Layout.fillWidth:true}
+            Icon {name:card.iconName;color:Atelier.accent;Layout.preferredWidth:26;Layout.preferredHeight:26}
+            Label {text:card.heading;color:card.enabled?Atelier.text:Atelier.muted;font.pixelSize:17;wrapMode:Text.Wrap;Layout.fillWidth:true}
+            Label {text:card.detail;color:Atelier.secondary;font.pixelSize:13;wrapMode:Text.Wrap;Layout.fillWidth:true}
         }
-        background:Rectangle {radius:10;color:card.hovered?"#1d2633":"#151a22";border.color:card.hovered?"#537298":"#29313d"}
+        background:Rectangle {radius:Atelier.controlRadius;color:card.hovered?Atelier.hover:Atelier.surface;border.color:card.hovered?Atelier.border:Atelier.border}
     }
     ScrollView {
         id:scroll;anchors.fill:parent;anchors.margins:root.width<900?24:36
@@ -50,8 +51,8 @@ Rectangle {
                 Layout.fillWidth:true;spacing:16
                 ColumnLayout {
                     Layout.fillWidth:true;spacing:8
-                    Label {text:qsTr("Your next image starts here.");color:"#eef3fa";font.pixelSize:root.width<900?24:28;font.weight:Font.Medium;wrapMode:Text.Wrap;Layout.fillWidth:true}
-                    Label {text:qsTr("Capture, process or return to a project.");color:"#a2aec0";wrapMode:Text.Wrap;Layout.fillWidth:true}
+                    Label {text:qsTr("Your next image starts here.");color:Atelier.text;font.pixelSize:root.width<900?24:28;font.weight:Font.Medium;wrapMode:Text.Wrap;Layout.fillWidth:true}
+                    Label {text:qsTr("Capture, process or return to a project.");color:Atelier.secondary;wrapMode:Text.Wrap;Layout.fillWidth:true}
                 }
                 IconButton {objectName:"homeOpenProject";text:qsTr("Open a project");iconName:"folder";enabled:!root.recording && !root.projectBusy;onClicked:root.chooseProject()}
             }
@@ -63,12 +64,12 @@ Rectangle {
             }
             ColumnLayout {
                 Layout.fillWidth:true;spacing:0
-                Label {text:qsTr("Continue your work");color:"#eef3fa";font.pixelSize:17;Layout.bottomMargin:12}
+                Label {text:qsTr("Continue your work");color:Atelier.text;font.pixelSize:17;Layout.bottomMargin:12}
                 RowLayout {
                     visible:root.deepSkyOpen;Layout.fillWidth:true;Layout.topMargin:10;Layout.bottomMargin:10
                     ColumnLayout {Layout.fillWidth:true;spacing:3
-                        Label {text:qsTr("Current deep-sky project");color:"#eef3fa"}
-                        Label {text:qsTr("%1 images · current session").arg(root.deepSkyCount);color:"#a2aec0";font.pixelSize:12}
+                        Label {text:qsTr("Current deep-sky project");color:Atelier.text}
+                        Label {text:qsTr("%1 images · current session").arg(root.deepSkyCount);color:Atelier.secondary;font.pixelSize:12}
                     }
                     Item {Layout.fillWidth:true}
                     IconButton {objectName:"homeResumeDeepSky";text:qsTr("Resume");enabled:!root.recording;onClicked:root.navigate("deepSky")}
@@ -76,8 +77,8 @@ Rectangle {
                 RowLayout {
                     visible:root.processingOpen;Layout.fillWidth:true;Layout.topMargin:10;Layout.bottomMargin:10
                     ColumnLayout {Layout.fillWidth:true;spacing:3
-                        Label {text:root.processingName;color:"#eef3fa";elide:Text.ElideMiddle;Layout.fillWidth:true}
-                        Label {text:qsTr("Processing · current session");color:"#a2aec0";font.pixelSize:12}
+                        Label {text:root.processingName;color:Atelier.text;elide:Text.ElideMiddle;Layout.fillWidth:true}
+                        Label {text:qsTr("Processing · current session");color:Atelier.secondary;font.pixelSize:12}
                     }
                     Item {Layout.fillWidth:true}
                     IconButton {objectName:"homeResumeProcessing";text:qsTr("Resume");enabled:!root.recording;onClicked:root.navigate("processing")}
@@ -87,12 +88,12 @@ Rectangle {
                     delegate:ColumnLayout {
                         required property var modelData
                         Layout.fillWidth:true;spacing:0
-                        Rectangle {Layout.fillWidth:true;Layout.preferredHeight:1;color:"#29313d"}
+                        Rectangle {Layout.fillWidth:true;Layout.preferredHeight:1;color:Atelier.border}
                         RowLayout {
                             Layout.fillWidth:true;Layout.topMargin:12;Layout.bottomMargin:12
                             ColumnLayout {Layout.fillWidth:true;spacing:3
-                                Label {text:modelData.name;color:"#eef3fa";elide:Text.ElideMiddle;Layout.fillWidth:true}
-                                Label {text:modelData.exists?qsTr("Saved deep-sky project"):qsTr("File unavailable");color:"#a2aec0";font.pixelSize:12}
+                                Label {text:modelData.name;color:Atelier.text;elide:Text.ElideMiddle;Layout.fillWidth:true}
+                                Label {text:modelData.exists?qsTr("Saved deep-sky project"):qsTr("File unavailable");color:Atelier.secondary;font.pixelSize:12}
                             }
                             IconButton {text:qsTr("Open");enabled:modelData.exists && !root.recording && !root.projectBusy;onClicked:root.openProject(modelData.url);DarkToolTip {visible:parent.hovered;text:modelData.path}}
                             IconButton {objectName:"homeRemoveProject";text:"×";Accessible.name:qsTr("Remove from recent projects");onClicked:root.library.removeRecentProject(modelData.url)}
@@ -104,26 +105,26 @@ Rectangle {
                     delegate:ColumnLayout {
                         required property var modelData
                         Layout.fillWidth:true;spacing:0
-                        Rectangle {Layout.fillWidth:true;Layout.preferredHeight:1;color:"#29313d"}
+                        Rectangle {Layout.fillWidth:true;Layout.preferredHeight:1;color:Atelier.border}
                         RowLayout {
                             Layout.fillWidth:true;Layout.topMargin:12;Layout.bottomMargin:12
                             ColumnLayout {Layout.fillWidth:true;spacing:3
-                                Label {text:modelData.name;color:"#eef3fa";elide:Text.ElideMiddle;Layout.fillWidth:true}
-                                Label {text:modelData.exists?qsTr("Recent SER video"):qsTr("File unavailable");color:"#a2aec0";font.pixelSize:12}
+                                Label {text:modelData.name;color:Atelier.text;elide:Text.ElideMiddle;Layout.fillWidth:true}
+                                Label {text:modelData.exists?qsTr("Recent SER video"):qsTr("File unavailable");color:Atelier.secondary;font.pixelSize:12}
                             }
                             IconButton {text:qsTr("Open");enabled:modelData.exists && !root.recording && !root.processingBusy;onClicked:root.openVideo(modelData.url)}
                             IconButton {objectName:"homeRemoveVideo";text:"×";Accessible.name:qsTr("Remove from recent videos");onClicked:root.library.removeRecentVideo(modelData.url)}
                         }
                     }
                 }
-                Label {visible:!root.deepSkyOpen && !root.processingOpen && root.projects.length===0 && root.videos.length===0;text:qsTr("Your recent projects and videos will appear here.");color:"#a2aec0";wrapMode:Text.Wrap;Layout.fillWidth:true;Layout.topMargin:12}
+                Label {visible:!root.deepSkyOpen && !root.processingOpen && root.projects.length===0 && root.videos.length===0;text:qsTr("Your recent projects and videos will appear here.");color:Atelier.secondary;wrapMode:Text.Wrap;Layout.fillWidth:true;Layout.topMargin:12}
             }
-            Rectangle {Layout.fillWidth:true;Layout.preferredHeight:1;color:"#29313d"}
+            Rectangle {Layout.fillWidth:true;Layout.preferredHeight:1;color:Atelier.border}
             RowLayout {
                 Layout.fillWidth:true
                 ColumnLayout {Layout.fillWidth:true;spacing:4
-                    Label {text:qsTr("First session?");color:"#eef3fa";font.pixelSize:16}
-                    Label {text:qsTr("Learn acquisition, calibration and finishing at your own pace.");color:"#a2aec0";wrapMode:Text.Wrap;Layout.fillWidth:true}
+                    Label {text:qsTr("First session?");color:Atelier.text;font.pixelSize:16}
+                    Label {text:qsTr("Learn acquisition, calibration and finishing at your own pace.");color:Atelier.secondary;wrapMode:Text.Wrap;Layout.fillWidth:true}
                 }
                 IconButton {text:qsTr("Open the guide");iconName:"book";onClicked:root.navigate("guide")}
             }

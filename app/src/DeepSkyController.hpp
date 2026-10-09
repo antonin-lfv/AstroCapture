@@ -12,6 +12,7 @@ namespace astro::app {
 class DeepSkyController : public QObject {
     Q_OBJECT
     QML_ELEMENT
+    Q_PROPERTY(bool hasFinishComparison READ hasFinishComparison NOTIFY imageChanged)
     Q_PROPERTY(QVariantMap advancedReport READ advancedReport NOTIFY changed)
     Q_PROPERTY(bool showingMask READ showingMask WRITE setShowingMask NOTIFY changed)
     Q_PROPERTY(bool hasMask READ hasMask NOTIFY changed)
@@ -77,6 +78,8 @@ public:
     int imageWidth() const{return preview_.width();}
     int imageHeight() const{return preview_.height();}
     QImage image() const{return preview_;}
+    bool hasFinishComparison() const{return !comparisonPreview_.isNull();}
+    QImage comparisonImage() const{return comparisonPreview_;}
     QVariantMap projectOptions() const{return projectOptions_;}
     void setProjectOptions(const QVariantMap& options){if(!busy_){projectOptions_=options;emit projectOptionsChanged();}}
     QVariantMap finishSettings() const{return finishSettings_;}
@@ -121,7 +124,7 @@ signals:
 private:
     void run(const QString&,std::function<void(std::stop_token)>);
     void post(std::function<void()>);
-    void show(std::shared_ptr<const processing::FloatImage>,bool result, QImage preview, std::shared_ptr<const processing::FloatImage> displayed, QVariantMap stretch);
+    void show(std::shared_ptr<const processing::FloatImage>,bool result, QImage preview, std::shared_ptr<const processing::FloatImage> displayed, QVariantMap stretch, QImage before = {});
     QVariantList frames_,backgroundSamples_;
     QStringList groups_;
     QString status_,stage_,sourceInterpretation_;
@@ -138,6 +141,8 @@ private:
     bool displayingResult_{},comparingRaw_{};
     QString rawName_;
     QImage preview_,resultPreview_,rawPreview_,backgroundPreview_;
+    QImage linearPreview_,comparisonPreview_;
+    QByteArray comparisonOrientationKey_;
     bool showingBackgroundModel_{};
     QVariantMap stretch_,projectOptions_,finishSettings_;
     std::map<QString,std::shared_ptr<const processing::FloatImage>> stacks_;

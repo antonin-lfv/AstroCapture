@@ -1,3 +1,4 @@
+import "Atelier.js" as Atelier
 import QtQuick
 import QtQuick.Controls.Basic
 import QtQuick.Layouts
@@ -26,8 +27,8 @@ Rectangle {
     property real compareSplit: 0.5
     property bool shortcutsAllowed: true
     readonly property bool canEdit: controller.hasResult && !playing && (!controller.busy || controller.adjusting)
-    readonly property bool dialogOpen: presetPopup.opened || annotationPopup.dialogOpen || openDialog.visible || saveDialog.visible
-    readonly property bool localShortcuts: visible && shortcutsAllowed && !presetPopup.opened && !annotationPopup.dialogOpen && !openDialog.visible && !saveDialog.visible
+    readonly property bool dialogOpen: processingMenu.opened || presetPopup.opened || annotationPopup.dialogOpen || openDialog.visible
+    readonly property bool localShortcuts: visible && shortcutsAllowed && !processingMenu.opened && !presetPopup.opened && !annotationPopup.dialogOpen && !openDialog.visible
     ProcessingEdits { id: edits; objectName: "processingEdits" }
     Connections {
         target: edits
@@ -63,7 +64,7 @@ Rectangle {
         if (playing || adjustmentsDirty || !controller.loaded || (controller.busy && !controller.seeking)) return;
         controller.seek(Math.max(0, Math.min(controller.frameCount - 1, controller.frameIndex + delta)));
     }
-    color: "#0b0d10"
+    color: Atelier.canvas
     DropArea {
         anchors.fill: parent; z: 100
         enabled: root.visible && !root.controlsBusy && !root.dialogOpen
@@ -75,8 +76,8 @@ Rectangle {
         onDropped: drop => { if(!accepts(drop))return; root.openFile(drop.urls[0]); drop.acceptProposedAction(); }
         Rectangle {
             anchors.fill: parent; anchors.margins: 8; radius: 8
-            visible: parent.containsDrag; color: "#e6111c2c"; border.color: "#6ca5f8"; border.width: 2
-            Label { anchors.centerIn: parent; text: qsTr("Drop to adjust this image"); color: "#e8edf5"; font.pixelSize: 24 }
+            visible: parent.containsDrag; color: "#e6111c2c"; border.color: Atelier.accent; border.width: 2
+            Label { anchors.centerIn: parent; text: qsTr("Drop to adjust this image"); color: Atelier.text; font.pixelSize: 24 }
         }
     }
     function resetControls() {
@@ -133,19 +134,6 @@ Rectangle {
         nameFilters: [qsTr("Videos and images (*.ser *.acraw *.SER *.png *.PNG *.tif *.TIF *.tiff *.TIFF)")]
         onAccepted: root.openFile(selectedFile)
     }
-    FileDialog {
-        id: saveDialog
-        objectName: "processingExportDialog"
-        title: qsTr("Export processed image")
-        fileMode: FileDialog.SaveFile
-        nameFilters: exportFormat.currentIndex===0 ? [qsTr("16-bit PNG image (*.png)")] : [qsTr("16-bit TIFF image (*.tif *.tiff)")]
-        defaultSuffix: exportFormat.suffix
-        onAccepted: {
-            let path=selectedFile.toString();
-            if(!/\.(png|tiff?)$/i.test(path))path+="."+exportFormat.suffix;
-            root.controller.exportImage(path);
-        }
-    }
     Popup {
         id: presetPopup
         parent: Overlay.overlay
@@ -154,13 +142,15 @@ Rectangle {
         padding: 18
         modal: true
         focus: true
-        background: Rectangle { color: "#151b24"; radius: 10; border.color: "#39465a" }
+        background: Rectangle { color: Atelier.surface; radius: 10; border.color: Atelier.border }
         ColumnLayout {
             width: parent.width
             spacing: 12
-            Label { text: qsTr("Processing presets"); color: "#eef3fa"; font.pixelSize: 18 }
-            Label { text: qsTr("Save your wavelets, denoise, color and gamma settings. Loading a preset can be undone."); color: "#a8b5c6"; wrapMode: Text.WordWrap; Layout.fillWidth: true }
-            TextField { id: presetName; objectName: "processingPresetName"; Layout.fillWidth: true; placeholderText: qsTr("Preset name"); maximumLength: 80; color: "#eef3fa"; background: Rectangle { color: "#202a37"; radius: 5; border.color: "#526279" } }
+            Label { text: qsTr("Processing presets"); color: Atelier.text; font.pixelSize: 18 }
+            Label { text: qsTr("Save your wavelets, denoise, color and gamma settings. Loading a preset can be undone."); color: Atelier.secondary; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+            DarkComboBox {id:presetChooser;objectName:"processingPresetChooser";Layout.fillWidth:true;model:root.library.processingPresetNames;displayText:currentIndex>=0?currentText:qsTr("Processing presets");onActivated:presetName.text=currentText}
+            IconButton {text:qsTr("Load");Layout.fillWidth:true;enabled:presetChooser.currentIndex>=0 && root.canEdit;onClicked:{edits.applyValues(root.library.processingPreset(presetChooser.currentText));presetPopup.close()}}
+            TextField { id: presetName; objectName: "processingPresetName"; Layout.fillWidth: true; placeholderText: qsTr("Preset name"); maximumLength: 80; color: Atelier.text; background: Rectangle { color: Atelier.field; radius: 4; border.color: Atelier.border } }
             Label { visible: root.library.processingPresetNames.indexOf(presetName.text.trim()) >= 0; text: qsTr("This name already exists. Replace will overwrite its saved settings."); color: "#edb06c"; wrapMode: Text.WordWrap; Layout.fillWidth: true }
             RowLayout {
                 Layout.fillWidth: true
@@ -180,10 +170,10 @@ Rectangle {
         indicator: Rectangle {
             implicitWidth: 38; implicitHeight: 22
             x: control.leftPadding; y: (control.height - height) / 2
-            radius: 11; color: control.checked ? "#6ca5f8" : "#394351"
-            Rectangle { width: 16; height: 16; radius: 8; y: 3; x: control.checked ? 19 : 3; color: "#eef3fa" }
+            radius: 11; color: control.checked ? Atelier.accent : Atelier.border
+            Rectangle { width: 16; height: 16; radius: 8; y: 3; x: control.checked ? 19 : 3; color: Atelier.text }
         }
-        background: Rectangle { color: "transparent"; radius: 6; border.color: control.visualFocus ? "#eef3fa" : "transparent" }
+        background: Rectangle { color: "transparent"; radius: 6; border.color: control.visualFocus ? Atelier.text : "transparent" }
     }
     CaptionEditor {
         id: annotationPopup
@@ -194,13 +184,13 @@ Rectangle {
         onPreviewRequested: root.controller.showResult(false)
     }
     component Caption: Label {
-        color: "#9aa7b8"
+        color: Atelier.muted
         wrapMode: Text.WordWrap
         font.pixelSize: 12
         Layout.fillWidth: true
     }
     component SectionTitle: Label {
-        color: "#eef3fa"
+        color: Atelier.text
         font.pixelSize: 15
         font.weight: Font.DemiBold
         Layout.topMargin: 14
@@ -222,7 +212,7 @@ Rectangle {
                 onPaint: {
                     const ctx = getContext("2d");
                     ctx.reset();
-                    ctx.strokeStyle = "#8dbaff";
+                    ctx.strokeStyle = Atelier.accent;
                     ctx.lineWidth = 2;
                     ctx.lineCap = "round";
                     ctx.beginPath();
@@ -248,15 +238,15 @@ Rectangle {
             width: control.availableWidth
             height: 4
             radius: 2
-            color: "#2e3948"
-            Rectangle { width: control.visualPosition * parent.width; height: parent.height; radius: 2; color: control.enabled ? "#6ca5f8" : "#445164" }
+            color: Atelier.border
+            Rectangle { width: control.visualPosition * parent.width; height: parent.height; radius: 2; color: control.enabled ? Atelier.accent : "#445164" }
         }
         handle: Rectangle {
             x: control.leftPadding + control.visualPosition * (control.availableWidth - width)
             y: control.topPadding + control.availableHeight / 2 - height / 2
             implicitWidth: 14; implicitHeight: 14
             radius: 7
-            color: control.enabled ? "#bdd7fa" : "#566170"
+            color: control.enabled ? Atelier.accent : "#566170"
         }
     }
     component Adjustment: RowLayout {
@@ -267,7 +257,7 @@ Rectangle {
         property real minimum: 0.5
         property real maximum: 2
         Layout.fillWidth: true
-        Label { text: adjustment.label; color: "#c5cfdd"; Layout.preferredWidth: 72; font.pixelSize: 12 }
+        Label { text: adjustment.label; color: Atelier.secondary; Layout.preferredWidth: 72; font.pixelSize: 12 }
         HelpIcon { text: adjustment.help; visible: adjustment.help.length > 0 }
         DarkSlider {
             Layout.fillWidth: true
@@ -276,13 +266,25 @@ Rectangle {
             onPressedChanged: pressed ? edits.beginEdit() : edits.endEdit()
             onMoved: edits.setValue(adjustment.settingKey, value)
         }
-        Label { text: Number(edits.values[adjustment.settingKey] || 0).toFixed(adjustment.maximum < 1 ? 3 : 2); color: "#a8b5c6"; Layout.preferredWidth: 40; font.pixelSize: 11 }
+        Label { text: Number(edits.values[adjustment.settingKey] || 0).toFixed(adjustment.maximum < 1 ? 3 : 2); color: Atelier.secondary; Layout.preferredWidth: 40; font.pixelSize: 11 }
+    }
+    AtelierMenu {
+        id:processingMenu;parent:root;x:Math.max(12,root.width-width-16);y:60
+        AtelierMenuItem {text:qsTr("Processing presets");onTriggered:root.saveCurrentPreset()}
     }
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: 20
+        anchors.margins: 16
         spacing: 12
-        Label {text:qsTr("Processing");color:"#eef3fa";font.pixelSize:22;font.weight:Font.Medium}
+        RowLayout {
+            Layout.fillWidth:true;Layout.preferredHeight:44
+            ColumnLayout {Layout.fillWidth:true;spacing:2
+                Label {text:root.controller.sourceName.replace(/ · \d+ ×.*$/, "") || qsTr("Processing");color:Atelier.text;font.pixelSize:16;font.weight:Font.DemiBold;Layout.fillWidth:true;elide:Text.ElideRight}
+                Label {visible:root.controller.imageWidth>0;text:root.controller.imageWidth+" × "+root.controller.imageHeight+" px";color:Atelier.secondary;font.pixelSize:11}
+            }
+            IconAction {iconName:"gear";text:qsTr("Processing options");enabled:root.controller.hasResult;onClicked:processingMenu.open()}
+            IconButton {iconName:"export";text:qsTr("Export");primary:true;enabled:root.controller.hasResult&&!root.controlsBusy&&!root.adjustmentsDirty;onClicked:annotationPopup.open()}
+        }
         RowLayout {
             Layout.fillWidth: true
             IconButton {
@@ -305,11 +307,11 @@ Rectangle {
                     width: Math.min(420, root.width - 40)
                     popupType: Popup.Item
                     padding: 6
-                    palette.window: "#151b24"
-                    palette.text: "#eef3fa"
-                    palette.highlight: "#293b54"
+                    palette.window: Atelier.surface
+                    palette.text: Atelier.text
+                    palette.highlight: Atelier.hover
                     palette.highlightedText: "#ffffff"
-                    background: Rectangle { color: "#151b24"; radius: 8; border.color: "#39465a" }
+                    background: Rectangle { color: Atelier.surface; radius: 8; border.color: Atelier.border }
                     Instantiator {
                         model: root.library.recentVideos
                         delegate: MenuItem {
@@ -324,14 +326,14 @@ Rectangle {
                             enabled: modelData.exists
                             contentItem: Text {
                                 text: recentEntry.text
-                                color: recentEntry.enabled ? "#eef3fa" : "#788496"
+                                color: recentEntry.enabled ? Atelier.text : Atelier.muted
                                 font.pixelSize: 12
                                 verticalAlignment: Text.AlignVCenter
                                 elide: Text.ElideMiddle
                             }
                             background: Rectangle {
                                 radius: 4
-                                color: recentEntry.enabled && (recentEntry.highlighted || recentEntry.hovered) ? "#293b54" : "#151b24"
+                                color: recentEntry.enabled && (recentEntry.highlighted || recentEntry.hovered) ? Atelier.hover : Atelier.surface
                             }
                             onTriggered: root.openFile(modelData.url)
                             DarkToolTip { visible: recentEntry.hovered; text: recentEntry.modelData.path }
@@ -341,13 +343,7 @@ Rectangle {
                     }
                 }
             }
-            Label {
-                text: root.controller.sourceName
-                color: "#a8b5c6"
-                elide: Text.ElideMiddle
-                Layout.fillWidth: true
-                font.pixelSize: 12
-            }
+            Item {Layout.fillWidth:true}
         }
         RowLayout {
             Layout.fillWidth: true
@@ -356,7 +352,7 @@ Rectangle {
             Layout.maximumHeight: 20
             Label {
                 text: root.controller.stillImage ? qsTr("Still image · adjust details, color and caption") : root.controller.loaded ? (root.surfaceMode && root.localSelection ? qsTr("Per area: ") : qsTr("Selected: ")) + keep.value + " / " + root.controller.frameCount + qsTr(" frames (") + (100 * keep.value / root.controller.frameCount).toFixed(1) + "%)" : qsTr("Open a video to stack, or an image to adjust.")
-                color: "#bdd7fa"
+                color: Atelier.accent
                 font.pixelSize: 12
                 font.weight: Font.DemiBold
                 elide: Text.ElideRight
@@ -364,7 +360,7 @@ Rectangle {
             }
             Label {
                 text: root.controller.stackSummary
-                color: "#a8b5c6"
+                color: Atelier.secondary
                 font.pixelSize: 12
                 elide: Text.ElideRight
                 Layout.fillWidth: true
@@ -377,7 +373,7 @@ Rectangle {
         RowLayout {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            spacing: 18
+            spacing: 12
             ColumnLayout {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
@@ -405,8 +401,8 @@ Rectangle {
                         width: 24 / imageView.effectiveZoom
                         x: parent.width * root.compareSplit - width / 2
                         visible: root.compareImages && root.controller.showingResult && !root.holdBefore
-                        Rectangle { anchors.horizontalCenter: parent.horizontalCenter; width: 1 / imageView.effectiveZoom; height: parent.height; color: "#bdd7fa" }
-                        Rectangle { anchors.centerIn: parent; width: parent.width; height: 32 / imageView.effectiveZoom; radius: width / 3; color: "#6ca5f8"; opacity: 0.85 }
+                        Rectangle { anchors.horizontalCenter: parent.horizontalCenter; width: 1 / imageView.effectiveZoom; height: parent.height; color: Atelier.accent }
+                        Rectangle { anchors.centerIn: parent; width: parent.width; height: 32 / imageView.effectiveZoom; radius: width / 3; color: Atelier.accent; opacity: 0.85 }
                         MouseArea {
                             anchors.fill: parent
                             cursorShape: Qt.SplitHCursor
@@ -419,7 +415,7 @@ Rectangle {
                         anchors.centerIn: parent
                         width: Math.min(360, parent.width - 36)
                         visible: !root.controller.loaded && !root.controller.hasResult
-                        Label { text: qsTr("From capture to final image"); color: "#e8edf5"; font.pixelSize: 22; Layout.fillWidth: true; wrapMode: Text.WordWrap; horizontalAlignment: Text.AlignHCenter }
+                        Label { text: qsTr("From capture to final image"); color: Atelier.text; font.pixelSize: 22; Layout.fillWidth: true; wrapMode: Text.WordWrap; horizontalAlignment: Text.AlignHCenter }
                         Caption { text: qsTr("Open or drop a SER, PNG or TIFF here. Analyze and stack a video, or adjust an image directly."); horizontalAlignment: Text.AlignHCenter }
                         Caption { text: qsTr("Your original files stay untouched."); horizontalAlignment: Text.AlignHCenter }
                         IconButton {text:qsTr("Open image or video");iconName:"folder";Layout.alignment:Qt.AlignHCenter;onClicked:root.chooseSource()}
@@ -427,7 +423,7 @@ Rectangle {
                 }
                 RowLayout {
                     Layout.fillWidth: true
-                    Label { text: root.controller.imageLabel; color: "#a8b5c6"; font.pixelSize: 12; Layout.fillWidth: true; elide: Text.ElideRight }
+                    Label { text: root.controller.imageLabel; color: Atelier.secondary; font.pixelSize: 12; Layout.fillWidth: true; elide: Text.ElideRight }
                     IconButton {
                         text: root.controller.stillImage ? qsTr("Show result") : qsTr("Show stacked result")
                         visible: root.controller.hasResult
@@ -467,7 +463,7 @@ Rectangle {
                     Label {
                         id: frameCounter
                         text: (root.controller.loaded ? root.controller.frameIndex + 1 : 0) + " / " + root.controller.frameCount
-                        color: "#a8b5c6"
+                        color: Atelier.secondary
                         font.pixelSize: 12
                         font.family: "monospace"
                         horizontalAlignment: Text.AlignRight
@@ -486,8 +482,7 @@ Rectangle {
                 visible:root.controller.loaded || root.controller.hasResult
                 Layout.preferredWidth: 7
                 Layout.fillHeight: true
-                color: resizeHandle.containsMouse || resizeHandle.pressed ? "#6ca5f8" : "#26303c"
-                radius: 3
+                color: resizeHandle.containsMouse || resizeHandle.pressed ? Atelier.accent : Atelier.border
                 MouseArea {
                     id: resizeHandle
                     objectName: "processingResizeHandle"
@@ -518,7 +513,7 @@ Rectangle {
                     spacing: 8
                     RowLayout {
                         Layout.fillWidth: true
-                        Label { text: qsTr("Processing controls"); color: "#a8b5c6"; Layout.fillWidth: true; elide: Text.ElideRight }
+                        Label { text: qsTr("Processing controls"); color: Atelier.secondary; Layout.fillWidth: true; elide: Text.ElideRight }
                         IconButton { text: root.library.compactProcessing ? qsTr("Show explanations") : qsTr("Hide explanations"); onClicked: root.library.compactProcessing = !root.library.compactProcessing }
                     }
                     ColumnLayout {
@@ -545,7 +540,7 @@ Rectangle {
                             let ctx = getContext("2d"); ctx.reset();
                             ctx.fillStyle = "#121820"; ctx.fillRect(0, 0, width, height);
                             if (!points.length) return;
-                            ctx.strokeStyle = "#6ca5f8"; ctx.lineWidth = 2; ctx.beginPath();
+                            ctx.strokeStyle = Atelier.accent; ctx.lineWidth = 2; ctx.beginPath();
                             for (let i = 0; i < points.length; ++i) {
                                 let x = i * width / Math.max(1, points.length - 1);
                                 let y = height - 5 - points[i] * (height - 10);
@@ -557,7 +552,7 @@ Rectangle {
                         Rectangle {
                             x: Math.min(parent.width - width, Math.max(0, parent.width * keep.value / Math.max(1, root.controller.frameCount) - width / 2))
                             width: 2; height: parent.height; color: "#b7d5ff"
-                            Rectangle { width: 10; height: 20; radius: 4; anchors.centerIn: parent; color: "#6ca5f8" }
+                            Rectangle { width: 10; height: 20; radius: 4; anchors.centerIn: parent; color: Atelier.accent }
                         }
                         MouseArea {
                             objectName: "qualitySelectionHandle"
@@ -595,7 +590,7 @@ Rectangle {
                             delegate: IconButton {
                                 required property int modelData
                                 text: modelData + "%"
-                                borderColor: root.controller.loaded && keep.value === Math.max(1, Math.round(root.controller.frameCount * modelData / 100)) ? "#6ca5f8" : "#3a4048"
+                                borderColor: root.controller.loaded && keep.value === Math.max(1, Math.round(root.controller.frameCount * modelData / 100)) ? Atelier.accent : Atelier.border
                                 Layout.fillWidth: true
                                 enabled: root.controller.loaded && !root.controlsBusy
                                 onClicked: keep.value = Math.max(1, Math.round(root.controller.frameCount * modelData / 100))
@@ -609,8 +604,8 @@ Rectangle {
                     SectionTitle { text: qsTr("2   Align and stack") }
                     RowLayout {
                         enabled: !root.controlsBusy
-                        IconButton { text: qsTr("Planet"); Layout.fillWidth: true; borderColor: !root.surfaceMode ? "#6ca5f8" : "#3a4048"; onClicked: root.surfaceMode = false }
-                        IconButton { text: qsTr("Moon / Sun"); Layout.fillWidth: true; borderColor: root.surfaceMode ? "#6ca5f8" : "#3a4048"; onClicked: root.surfaceMode = true }
+                        IconButton { text: qsTr("Planet"); Layout.fillWidth: true; borderColor: !root.surfaceMode ? Atelier.accent : Atelier.border; onClicked: root.surfaceMode = false }
+                        IconButton { text: qsTr("Moon / Sun"); Layout.fillWidth: true; borderColor: root.surfaceMode ? Atelier.accent : Atelier.border; onClicked: root.surfaceMode = true }
                     }
                     Caption { visible: root.surfaceMode; text: qsTr("Local alignment follows surface details to reduce turbulence distortions. Unreliable areas use global alignment. It cannot recover detail lost to blur.") }
                     RowLayout {
@@ -622,7 +617,7 @@ Rectangle {
                                 required property int modelData
                                 text: modelData + " px"
                                 Layout.fillWidth: true
-                                borderColor: root.surfacePatchSize === modelData ? "#6ca5f8" : "#3a4048"
+                                borderColor: root.surfacePatchSize === modelData ? Atelier.accent : Atelier.border
                                 onClicked: root.surfacePatchSize = modelData
                             }
                         }
@@ -681,11 +676,7 @@ Rectangle {
                         Adjustment { settingKey: "gamma"; label: qsTr("Gamma") }
                         RowLayout {
                             Caption { text: root.adjustmentsDirty ? ((adjustmentTimer.running || root.controller.adjusting) ? qsTr("Updating preview…") : qsTr("Preview paused · adjust a slider to resume")) : qsTr("Automatic preview") }
-                            IconButton { text: qsTr("Reset"); onClicked: edits.reset() }
-                        }
-                        RowLayout {
-                            IconButton { text: qsTr("Undo"); enabled: edits.canUndo && root.canEdit; Layout.fillWidth: true; onClicked: edits.undo() }
-                            IconButton { text: qsTr("Redo"); enabled: edits.canRedo && root.canEdit; Layout.fillWidth: true; onClicked: edits.redo() }
+                            Label {text:"⌘ Z";color:Atelier.muted;font.pixelSize:11}
                         }
                         RowLayout {
                             enabled: !root.controlsBusy && !root.adjustmentsDirty
@@ -699,98 +690,15 @@ Rectangle {
                             IconButton {
                                 text: qsTr("Compare")
                                 Layout.fillWidth: true
-                                borderColor: root.compareImages ? "#6ca5f8" : "#3a4048"
+                                borderColor: root.compareImages ? Atelier.accent : Atelier.border
                                 onClicked: { root.controller.showResult(false); root.compareImages = !root.compareImages; }
                             }
                         }
-                        RowLayout {
-                            Layout.fillWidth: true
-                            DarkComboBox {
-                                id: presetChooser
-                                objectName: "processingPresetChooser"
-                                Layout.fillWidth: true
-                                Layout.minimumWidth: 0
-                                implicitHeight: 34
-                                leftPadding: 10; rightPadding: 30
-                                model: root.library.processingPresetNames
-                                displayText: currentIndex >= 0 ? currentText : qsTr("Processing presets")
-                                contentItem: Text {
-                                    text: presetChooser.displayText
-                                    color: presetChooser.enabled ? "#dbe5f2" : "#697586"
-                                    font.pixelSize: 12
-                                    verticalAlignment: Text.AlignVCenter
-                                    elide: Text.ElideRight
-                                }
-                                background: Rectangle {
-                                    radius: 6
-                                    color: presetChooser.down ? "#253346" : presetChooser.hovered ? "#202a37" : "#151d28"
-                                    border.color: presetChooser.visualFocus || presetChooser.popup.visible ? "#6ca5f8" : "#39465a"
-                                }
-                                indicator: Text {
-                                    text: "⌄"; color: "#a9bdd8"; font.pixelSize: 18
-                                    x: presetChooser.width - width - 10
-                                    y: (presetChooser.height - height) / 2 - 2
-                                }
-                                delegate: ItemDelegate {
-                                    required property int index
-                                    required property string modelData
-                                    width: presetChooser.width - 2
-                                    highlighted: presetChooser.highlightedIndex === index
-                                    contentItem: Text { text: modelData; elide: Text.ElideRight; color: "#e4edf9"; font.pixelSize: 12 }
-                                    background: Rectangle { color: parent.highlighted ? "#2a3d56" : "#151d28"; radius: 4 }
-                                }
-                                popup: Popup {
-                                    y: presetChooser.height + 5
-                                    width: presetChooser.width
-                                    padding: 1
-                                    implicitHeight: Math.min(contentItem.implicitHeight + 2, 220)
-                                    background: Rectangle { color: "#151d28"; radius: 6; border.color: "#45566e" }
-                                    contentItem: ListView {
-                                        clip: true
-                                        implicitHeight: contentHeight
-                                        model: presetChooser.popup.visible ? presetChooser.delegateModel : null
-                                        currentIndex: presetChooser.highlightedIndex
-                                        boundsBehavior: Flickable.StopAtBounds
-                                    }
-                                }
-                            }
-                            IconButton { text: qsTr("Load"); enabled: presetChooser.currentIndex >= 0; onClicked: edits.applyValues(root.library.processingPreset(presetChooser.currentText)) }
-                        }
-                        IconButton { text: qsTr("Manage presets"); Layout.fillWidth: true; onClicked: { presetName.text = presetChooser.currentIndex >= 0 ? presetChooser.currentText : ""; presetPopup.open(); } }
+
+                        IconButton {text:qsTr("Delete these adjustments");active:true;Layout.fillWidth:true;onClicked:edits.reset()}
 
                     }
-                    SectionTitle { text: root.controller.stillImage ? qsTr("Export") : qsTr("4   Export") }
-                    Caption { text: root.adjustmentsDirty ? qsTr("Waiting for the latest adjustments before export.") : qsTr("PNG and TIFF preserve 16-bit detail without lossy compression.") }
-                    DarkComboBox {
-                        id:exportFormat;objectName:"processingExportFormat"
-                        Layout.fillWidth:true
-                        model:[qsTr("PNG · 16-bit, lossless"),qsTr("TIFF · 16-bit, lossless")]
-                        property string suffix:currentIndex===0?"png":"tif"
-                    }
-                    RowLayout {
-                        Layout.fillWidth: true
-                        enabled: root.controller.hasResult
-                        Caption { text: qsTr("Image caption") }
-                        CaptionSwitch {
-                            objectName: "annotationEnabled"
-                            checked: root.controller.exportAnnotation.enabled
-                            Accessible.name: qsTr("Add a caption to the exported image")
-                            onToggled: { root.setAnnotation("enabled", checked); root.controller.showResult(false); }
-                        }
-                        IconButton { text: qsTr("Edit caption"); enabled:root.controller.hasResult && !root.controlsBusy && !root.adjustmentsDirty;onClicked: annotationPopup.open() }
-                    }
-                    ExportSizeHint {controller:root.controller;format:exportFormat.suffix;ready:!root.adjustmentsDirty && !root.controlsBusy;visible:root.controller.hasResult;Layout.fillWidth:true}
-                    IconButton {
-                        text: qsTr("Export image")
-                        Layout.fillWidth: true
-                        enabled: root.controller.hasResult && !root.controlsBusy && !root.adjustmentsDirty
-                        onClicked: {
-                            saveDialog.currentFolder = root.library.exportFolderFor(root.controller.exportUrl);
-                            saveDialog.selectedFile = root.library.suggestedExport(root.controller.exportUrl).toString().replace(/\.[^/.]+$/, "."+exportFormat.suffix);
-                            saveDialog.open();
-                        }
-                    }
-                    Item { Layout.preferredHeight: 16 }
+
                 }
             }
         }

@@ -1,3 +1,4 @@
+import "Atelier.js" as Atelier
 import QtQuick
 
 // Small monochrome vector icon set drawn from basic shapes/Canvas paths,
@@ -8,7 +9,7 @@ Item {
     id: root
 
     property string name: ""
-    property color color: "#e8eaed"
+    property color color: Atelier.text
 
     implicitWidth: 16
     implicitHeight: 16

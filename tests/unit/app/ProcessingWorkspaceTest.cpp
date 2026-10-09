@@ -157,6 +157,7 @@ int main(int argc, char** argv) {
     ASTRO_TEST_CHECK(controller.exportAnnotation().value("title") == "Titre ");
     captionTitle->setProperty("text", "Titre accessible");
     captionEnabled->setProperty("checked", true);
+    ASTRO_TEST_CHECK(QMetaObject::invokeMethod(captionEnabled,"clicked"));
     ASTRO_TEST_CHECK(controller.exportAnnotation().value("title") == "Titre accessible");
     ASTRO_TEST_CHECK(controller.exportAnnotation().value("enabled").toBool());
     ASTRO_TEST_CHECK(!controller.annotationImage().isNull());
@@ -326,7 +327,9 @@ int main(int argc, char** argv) {
     auto* caption=root->findChild<QObject*>("annotationPopup");ASTRO_TEST_CHECK(caption);
     ASTRO_TEST_CHECK(QMetaObject::invokeMethod(caption,"open"));
     QElapsedTimer captionWait;captionWait.start();while(captionWait.elapsed()<200){QCoreApplication::processEvents();QThread::msleep(1);}
-    auto* captionPreview=root->findChild<QQuickItem*>("captionPreview");ASTRO_TEST_CHECK(captionPreview && captionPreview->width()>100 && captionPreview->height()>100);
+    caption->setProperty("previewOpen",true);QCoreApplication::processEvents();
+    auto* captionPreview=root->findChild<QQuickItem*>("captionPreview");ASTRO_TEST_CHECK(captionPreview);
+    until([&]{return captionPreview->width()>100 && captionPreview->height()>100;});
     auto* captionSize=caption->findChild<astro::app::ExportSizeEstimator*>();ASTRO_TEST_CHECK(captionSize);
     until([&]{return captionSize->bytes()>=0 && !captionSize->calculating();});
     if(qEnvironmentVariableIsSet("ASTRO_CAPTION_SNAPSHOT"))ASTRO_TEST_CHECK(window.grabWindow().save(qEnvironmentVariable("ASTRO_CAPTION_SNAPSHOT")));

@@ -12,14 +12,19 @@ class DeepSkyImageItem : public QQuickPaintedItem {
     Q_OBJECT
     QML_ELEMENT
     Q_PROPERTY(astro::app::DeepSkyController* controller READ controller WRITE setController NOTIFY controllerChanged)
+    Q_PROPERTY(bool beforeFinish READ beforeFinish WRITE setBeforeFinish NOTIFY comparisonChanged)
 public:
     explicit DeepSkyImageItem(QQuickItem* parent=nullptr):QQuickPaintedItem(parent){}
     DeepSkyController* controller()const{return controller_;}
-    void setController(DeepSkyController* value){if(controller_==value)return;if(controller_)disconnect(controller_,nullptr,this,nullptr);controller_=value;image_=value?value->image():QImage{};if(value)connect(value,&DeepSkyController::imageChanged,this,[this]{image_=controller_->image();update();});emit controllerChanged();update();}
+    void setController(DeepSkyController* value){if(controller_==value)return;if(controller_)disconnect(controller_,nullptr,this,nullptr);controller_=value;refresh();if(value)connect(value,&DeepSkyController::imageChanged,this,[this]{refresh();update();});emit controllerChanged();update();}
+    bool beforeFinish() const{return beforeFinish_;}
+    void setBeforeFinish(bool value){if(beforeFinish_==value)return;beforeFinish_=value;refresh();emit comparisonChanged();update();}
     void paint(QPainter* painter)override{if(!image_.isNull())painter->drawImage(QRectF(0,0,width(),height()),image_);}
 signals:
-    void controllerChanged();
+    void controllerChanged();void comparisonChanged();
 private:
+    void refresh(){image_=controller_?(beforeFinish_?controller_->comparisonImage():controller_->image()):QImage{};}
+    bool beforeFinish_{};
     QPointer<DeepSkyController> controller_;QImage image_;
 };
 }

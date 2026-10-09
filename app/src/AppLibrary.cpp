@@ -21,6 +21,9 @@ bool isSupportedImage(const QString& path) {
     const QString suffix = QFileInfo(path).suffix().toLower();
     return suffix == "tif" || suffix == "tiff" || suffix == "png" || suffix == "jpg" || suffix == "jpeg";
 }
+bool isSupportedProcessingSource(const QFileInfo& file) {
+    return QStringList{"ser","acraw","png","tif","tiff"}.contains(file.suffix().toLower());
+}
 constexpr int historyLimit = 500;
 }
 QUrl AppLibrary::bugReportUrl() const {
@@ -43,6 +46,7 @@ AppLibrary::AppLibrary(QObject* parent) : QObject(parent) {
     language_ = settings.value("application/language", "en").toString() == "fr" ? "fr" : "en";
     historyEnabled_ = settings.value("application/historyEnabled", true).toBool();
     compactProcessing_ = settings.value("application/compactProcessing", false).toBool();
+    deepSkyPanelWidth_ = std::clamp(settings.value("application/deepSkyPanelWidth", 360).toInt(), 320, 480);
     processingPanelWidth_ = std::clamp(settings.value("application/processingPanelWidth", 330).toInt(), 260, 600);
     recentProjects_ = settings.value("application/recentProjects").toStringList();
     recentProjects_.removeDuplicates();
@@ -88,6 +92,7 @@ void AppLibrary::save() {
     settings.setValue("application/exportDirectory", exportDirectory_);
     settings.setValue("application/compactProcessing", compactProcessing_);
     settings.setValue("application/processingPanelWidth", processingPanelWidth_);
+    settings.setValue("application/deepSkyPanelWidth", deepSkyPanelWidth_);
     settings.setValue("application/recentVideos", recentVideos_);
     settings.setValue("application/recentProjects", recentProjects_);
     settings.setValue("application/processingPresets", QJsonDocument(QJsonObject::fromVariantMap(processingPresets_)).toJson(QJsonDocument::Compact));
@@ -134,7 +139,7 @@ QVariantList AppLibrary::recentVideos() const {
     QVariantList result;
     for (const auto& path : recentVideos_) {
         const QFileInfo file(path);
-        if (!file.isFile() || !QDir::isAbsolutePath(path) || file.suffix().compare("ser", Qt::CaseInsensitive) != 0) continue;
+        if (!file.isFile() || !QDir::isAbsolutePath(path) || !isSupportedProcessingSource(file)) continue;
         result.append(QVariantMap{{"name", file.fileName()}, {"path", path},
                                   {"url", QUrl::fromLocalFile(path)}, {"exists", file.isFile()}});
     }
@@ -150,7 +155,7 @@ QUrl AppLibrary::lastVideoDirectory() const {
 void AppLibrary::recordVideo(const QUrl& url) {
     if (!url.isLocalFile()) return;
     const QFileInfo file(url.toLocalFile());
-    if (!file.isFile() || file.suffix().compare("ser", Qt::CaseInsensitive) != 0) return;
+    if (!file.isFile() || !isSupportedProcessingSource(file)) return;
     const auto path = file.canonicalFilePath();
     recentVideos_.removeAll(path);
     recentVideos_.prepend(path);
@@ -161,6 +166,11 @@ void AppLibrary::setCompactProcessing(bool value) {
     if (value == compactProcessing_) return;
     compactProcessing_ = value;
     save();
+}
+void AppLibrary::setDeepSkyPanelWidth(int value) {
+    value=std::clamp(value,320,480);
+    if(value==deepSkyPanelWidth_)return;
+    deepSkyPanelWidth_=value;save();
 }
 void AppLibrary::setProcessingPanelWidth(int value) {
     value = std::clamp(value, 260, 600);

@@ -1,3 +1,4 @@
+import "Atelier.js" as Atelier
 import QtQuick
 import QtQuick.Controls.Basic
 import QtQuick.Layouts
@@ -32,19 +33,19 @@ DarkDialog {
         spacing: 14
         Label {
             text: qsTr("Your current work will close. Save the project, the finished image or your settings before leaving.")
-            color: "#e8edf5"; wrapMode: Text.Wrap; Layout.fillWidth: true
+            color: Atelier.text; wrapMode: Text.Wrap; Layout.fillWidth: true
         }
         Label {
             visible: dialog.hasProject
             text: qsTr("The deep-sky project keeps source references, stacking options, finishing settings and the caption. A TIFF keeps the finished image.")
-            color: "#a8b5c6"; wrapMode: Text.Wrap; Layout.fillWidth: true
+            color: Atelier.secondary; wrapMode: Text.Wrap; Layout.fillWidth: true
         }
         Label {
             visible: dialog.recording || dialog.busy
             text: dialog.recording ? qsTr("Recording is in progress. Stop it before quitting.") : qsTr("A task is in progress. Wait for it to finish, or return to the workspace to cancel it.")
             color: "#edb06c"; wrapMode: Text.Wrap; Layout.fillWidth: true
         }
-        Label {text:dialog.saveStatus;visible:text.length>0;color:"#a8b5c6";wrapMode:Text.Wrap;Layout.fillWidth:true}
+        Label {text:dialog.saveStatus;visible:text.length>0;color:Atelier.secondary;wrapMode:Text.Wrap;Layout.fillWidth:true}
         IconButton {
             objectName: "quitSaveProject";text:qsTr("Save project and settings")
             visible:dialog.hasProject;enabled:!dialog.busy && !dialog.recording;Layout.fillWidth:true

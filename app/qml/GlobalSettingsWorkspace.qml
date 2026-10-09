@@ -1,3 +1,4 @@
+import "Atelier.js" as Atelier
 import QtQuick
 import QtQuick.Controls.Basic
 import QtQuick.Layouts
@@ -7,7 +8,7 @@ Rectangle {
     id: root
     required property AppLibrary library
     required property PreviewController captureController
-    color: "#0b0d10"
+    color: Atelier.canvas
     FolderDialog {
         id: exportFolderDialog
         title: qsTr("Choose the processing export folder")
@@ -21,18 +22,18 @@ Rectangle {
         onAccepted: root.captureController.chooseSaveDirectory(selectedFolder)
     }
     component Card: Rectangle {
-        color: "#141a22"
-        radius: 10
-        border.color: "#26303c"
+        color: Atelier.surface
+        radius: 4
+        border.color: Atelier.border
         Layout.fillWidth: true
         implicitHeight: content.implicitHeight + 32
         default property alias contents: content.data
         ColumnLayout { id: content; anchors.fill: parent; anchors.margins: 16; spacing: 12 }
     }
-    component Heading: Label { color: "#eef3fa"; font.pixelSize: 17; Layout.fillWidth: true }
-    component Description: Label { color: "#9aa7b8"; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+    component Heading: Label { color: Atelier.text; font.pixelSize: 16; Layout.fillWidth: true }
+    component Description: Label { color: Atelier.muted; wrapMode: Text.WordWrap; Layout.fillWidth: true }
     component FolderPath: Label {
-        color: "#c5cfdd"; elide: Text.ElideMiddle; Layout.fillWidth: true
+        color: Atelier.secondary; elide: Text.ElideMiddle; Layout.fillWidth: true
         HoverHandler { id: pathHover }
         ToolTip.visible: pathHover.hovered && truncated
         ToolTip.text: text
@@ -48,22 +49,22 @@ Rectangle {
         ColumnLayout {
             width: settingsScroll.availableWidth
             spacing: 16
-            Label { text: qsTr("Application settings"); color: "#eef3fa"; font.pixelSize: 22; font.weight:Font.Medium }
+            Label { text: qsTr("Application settings"); color: Atelier.text; font.pixelSize: 20; font.weight:Font.Medium }
             Description { text: qsTr("Saved locally and kept when you update the application.") }
             Card {
                 RowLayout {
                     Layout.fillWidth: true
                     Heading { text: qsTr("Language") }
-                    IconButton { text: "English"; borderColor: root.library.language === "en" ? "#6ca5f8" : "#3a4048"; onClicked: root.library.language = "en" }
-                    IconButton { text: "Français"; borderColor: root.library.language === "fr" ? "#6ca5f8" : "#3a4048"; onClicked: root.library.language = "fr" }
+                    IconButton { text: "English"; borderColor: root.library.language === "en" ? Atelier.accent : Atelier.border; onClicked: root.library.language = "en" }
+                    IconButton { text: "Français"; borderColor: root.library.language === "fr" ? Atelier.accent : Atelier.border; onClicked: root.library.language = "fr" }
                 }
                 Description { text: qsTr("Applies immediately throughout the interface.") }
             }
             Card {
                 Heading { text: qsTr("Processing layout") }
                 RowLayout {
-                    IconButton { text: qsTr("Guided"); borderColor: !root.library.compactProcessing ? "#6ca5f8" : "#3a4048"; onClicked: root.library.compactProcessing = false }
-                    IconButton { text: qsTr("Compact"); borderColor: root.library.compactProcessing ? "#6ca5f8" : "#3a4048"; onClicked: root.library.compactProcessing = true }
+                    IconButton { text: qsTr("Guided"); borderColor: !root.library.compactProcessing ? Atelier.accent : Atelier.border; onClicked: root.library.compactProcessing = false }
+                    IconButton { text: qsTr("Compact"); borderColor: root.library.compactProcessing ? Atelier.accent : Atelier.border; onClicked: root.library.compactProcessing = true }
                 }
                 Description { text: qsTr("Compact mode hides explanations. Help buttons remain available. Drag the divider in Processing to resize its controls; your layout is remembered.") }
             }
@@ -105,15 +106,15 @@ Rectangle {
                             x: historySwitch.leftPadding
                             y: (historySwitch.height - height) / 2
                             radius: 12
-                            color: historySwitch.checked ? "#6ca5f8" : "#394351"
+                            color: historySwitch.checked ? Atelier.accent : Atelier.border
                             Rectangle {
                                 width: 18; height: 18; radius: 9; y: 3
                                 x: historySwitch.checked ? 23 : 3
-                                color: "#eef3fa"
+                                color: Atelier.text
                                 Behavior on x { NumberAnimation { duration: 120 } }
                             }
                         }
-                        background: Rectangle { color: "transparent"; radius: 6; border.color: historySwitch.visualFocus ? "#eef3fa" : "transparent" }
+                        background: Rectangle { color: "transparent"; radius: 6; border.color: historySwitch.visualFocus ? Atelier.text : "transparent" }
                     }
                 }
                 Description { text: qsTr("Keeps up to 500 image paths locally. Images stay in their original folders. Turning this off keeps existing entries and still allows manual imports.") }

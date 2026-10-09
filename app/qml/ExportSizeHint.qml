@@ -1,3 +1,4 @@
+import "Atelier.js" as Atelier
 import QtQuick
 import QtQuick.Controls.Basic
 import AstroCapture 1.0
@@ -11,7 +12,7 @@ Label {
     property bool estimating: visible
     readonly property real estimatedBytes: fixedBytes>=0 ? fixedBytes : estimator.bytes
     objectName: "exportSizeHint"
-    color: "#a8b5c6"
+    color: Atelier.secondary
     font.pixelSize: 12
     wrapMode: Text.Wrap
     function formattedSize(bytes) {

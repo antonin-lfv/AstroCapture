@@ -1,3 +1,4 @@
+import "Atelier.js" as Atelier
 import QtQuick
 // The native macOS style ignores background/contentItem customization, so
 // controls we style ourselves (e.g. IconButton) silently keep their
@@ -10,22 +11,23 @@ import QtQuick.Dialogs
 ApplicationWindow {
     id: window
 
-    width: 1280
-    height: 820
+    width: 1440
+    height: 960
     minimumWidth: 900
-    minimumHeight: 640
+    minimumHeight: 700
     visible: true
+    font.pixelSize: 13
     title: "AstroCapture" + (Qt.application.version ? " · " + Qt.application.version : "")
-    color: "#0b0d10"
-    palette.window: "#0b0d10"
-    palette.windowText: "#eef3fa"
-    palette.base: "#1c2026"
-    palette.text: "#eef3fa"
-    palette.placeholderText: "#9aa7b8"
-    palette.button: "#1c2026"
-    palette.buttonText: "#eef3fa"
-    palette.highlight: "#6ca5f8"
-    palette.highlightedText: "#0b0d10"
+    color: Atelier.canvas
+    palette.window: Atelier.canvas
+    palette.windowText: Atelier.text
+    palette.base: Atelier.field
+    palette.text: Atelier.text
+    palette.placeholderText: Atelier.muted
+    palette.button: Atelier.field
+    palette.buttonText: Atelier.text
+    palette.highlight: Atelier.accent
+    palette.highlightedText: Atelier.canvas
 
     property bool quitApproved: false
     property bool quitSavePending: false
@@ -116,8 +118,8 @@ ApplicationWindow {
     readonly property bool textEditing: activeFocusItem instanceof TextInput || activeFocusItem instanceof TextEdit
     readonly property bool processingMode: currentTab === "processing"
     AppLibrary { id: appLibrary; objectName: "appLibrary" }
-    ProcessingController { id: processingController }
-    ProcessingController { id: captionController }
+    ProcessingController { id: processingController;objectName:"processingController" }
+    ProcessingController { id: captionController;objectName:"captionController" }
     CaptionEditor {
         id:sharedCaptionEditor;controller:captionController;library:appLibrary
         previewContent:Component {ProcessingImageItem {controller:captionController}}
@@ -128,7 +130,7 @@ ApplicationWindow {
         function onImageExported(url){appLibrary.recordExport(url);}
     }
     MosaicController { id: mosaicController }
-    DeepSkyController { id: deepSkyController }
+    DeepSkyController { id: deepSkyController;objectName:"deepSkyController" }
     readonly property string activityTab: previewController.recording?"capture":deepSkyController.busy?"deepSky":mosaicController.busy?"mosaic":processingController.busy && !processingController.seeking?"processing":""
     readonly property string activityText: previewController.recording?qsTr("Recording…"):deepSkyController.busy?qsTr("Deep sky · %1%").arg(deepSkyController.progress):mosaicController.busy?qsTr("Mosaic · processing…"):processingController.busy && !processingController.seeking?qsTr("Processing · %1%").arg(processingController.progress):""
     function navigate(tab) {
@@ -142,13 +144,13 @@ ApplicationWindow {
         onNavigate:tab=>window.navigate(tab)
     }
     footer:Rectangle {
-        height:30;color:"#10141b"
-        Rectangle {anchors.top:parent.top;width:parent.width;height:1;color:"#29313d"}
+        height:24;color:Atelier.canvas
+        Rectangle {anchors.top:parent.top;width:parent.width;height:1;color:Atelier.border}
         RowLayout {
             anchors.fill:parent;anchors.leftMargin:20;anchors.rightMargin:16;spacing:8
-            Rectangle {Layout.preferredWidth:6;Layout.preferredHeight:6;radius:3;color:window.activityTab.length>0?"#91b8ff":"#8cbfa1"}
-            Label {text:window.activityText||qsTr("Ready");color:"#a2aec0";font.pixelSize:12;Layout.fillWidth:true;elide:Text.ElideRight}
-            Label {text:previewController.connected?previewController.cameraName:qsTr("Camera not connected");color:"#a2aec0";font.pixelSize:12;elide:Text.ElideRight;Layout.maximumWidth:window.width*.3}
+            Rectangle {Layout.preferredWidth:6;Layout.preferredHeight:6;radius:3;color:window.activityTab.length>0?Atelier.accent:Atelier.success}
+            Label {text:window.activityText||qsTr("Ready");color:Atelier.secondary;font.pixelSize:12;Layout.fillWidth:true;elide:Text.ElideRight}
+            Label {text:previewController.connected?previewController.cameraName:qsTr("Camera not connected");color:Atelier.secondary;font.pixelSize:12;elide:Text.ElideRight;Layout.maximumWidth:window.width*.3}
         }
     }
     HomeWorkspace {
@@ -240,8 +242,8 @@ ApplicationWindow {
         function accepts(event) {return event.hasUrls && event.urls.length>0 && event.urls.every(url => /^file:/i.test(url.toString()) && /\.(fits?|fts|fz|cr2|cr3|nef|nrw|arw|dng|orf|raf|rw2|pef)$/i.test(url.toString()));}
         onEntered:drag=>{drag.accepted=accepts(drag);}
         onDropped:drop=>{if(!accepts(drop))return;window.currentTab="deepSky";deepSkyController.addFiles(drop.urls);drop.acceptProposedAction();}
-        Rectangle {anchors.fill:parent;anchors.margins:8;visible:parent.containsDrag;color:"#e6111c2c";border.color:"#6ca5f8";radius:8
-            Label {anchors.centerIn:parent;text:qsTr("Drop to open in Deep sky");color:"#e8edf5";font.pixelSize:24}
+        Rectangle {anchors.fill:parent;anchors.margins:8;visible:parent.containsDrag;color:"#e6111c2c";border.color:Atelier.accent;radius:8
+            Label {anchors.centerIn:parent;text:qsTr("Drop to open in Deep sky");color:Atelier.text;font.pixelSize:24}
         }
     }
 
@@ -267,13 +269,13 @@ ApplicationWindow {
             anchors.margins: 8
             visible: serDrop.containsDrag
             color: "#e6111c2c"
-            border.color: "#6ca5f8"
+            border.color: Atelier.accent
             border.width: 2
             radius: 8
             Label {
                 anchors.centerIn: parent
                 text: qsTr("Drop to open in Processing")
-                color: "#e8edf5"
+                color: Atelier.text
                 font.pixelSize: 24
             }
         }
@@ -503,7 +505,7 @@ ApplicationWindow {
                     anchors.margins: 4
                     text: qsTr("min ") + histogramItem.minValue + qsTr("  max ") + histogramItem.maxValue + qsTr("  mean ") +
                           histogramItem.meanValue.toFixed(1)
-                    color: "#9aa0a6"
+                    color: Atelier.muted
                     font.pixelSize: 10
                 }
             }
@@ -513,13 +515,13 @@ ApplicationWindow {
             Layout.fillWidth: false
             Layout.fillHeight: true
             Layout.preferredWidth: 1
-            color: "#242830"
+            color: Atelier.border
         }
 
         Rectangle {
             Layout.preferredWidth: 300
             Layout.fillHeight: true
-            color: "#101318"
+            color: Atelier.surface
 
             ScrollView {
                 ScrollBar.vertical.policy: ScrollBar.AlwaysOff
@@ -544,17 +546,16 @@ ApplicationWindow {
 
                         Text {
                             text: previewController.cameraName
-                            color: "#e8eaed"
+                            color: Atelier.text
                             font.pixelSize: 14
                             font.weight: Font.DemiBold
                             elide: Text.ElideRight
                             Layout.fillWidth: true
                         }
 
-                        IconButton {
+                        IconAction {
                             iconName: "gear"
                             text:qsTr("Capture settings")
-                            borderColor: "#242830"
                             onClicked: settingsPanel.open()
 
 
@@ -567,13 +568,13 @@ ApplicationWindow {
 
                         Text {
                             text: formatCount(previewController.frameCount) + qsTr(" frames")
-                            color: "#9aa0a6"
+                            color: Atelier.muted
                             font.pixelSize: 11
                         }
 
                         Text {
                             text: previewController.fps.toFixed(1) + qsTr(" fps")
-                            color: "#9aa0a6"
+                            color: Atelier.muted
                             font.pixelSize: 11
                         }
 
@@ -588,7 +589,7 @@ ApplicationWindow {
 
                         Text {
                             text: qsTr("skipped ") + previewController.previewSkippedFrames
-                            color: "#5f6368"
+                            color: Atelier.muted
                             font.pixelSize: 11
                         }
                     }
@@ -596,13 +597,13 @@ ApplicationWindow {
                     IconButton {
                         Layout.fillWidth: true
                         text: qsTr("Disconnect")
-                        borderColor: "#242830"
+                        borderColor: Atelier.border
                         onClicked: previewController.disconnectCamera()
 
                         helpText: qsTr("Disconnect this camera so Rescan can pick a different one.")
                     }
 
-                    Rectangle { Layout.fillWidth: true; height: 1; color: "#242830" }
+                    Rectangle { Layout.fillWidth: true; height: 1; color: Atelier.border }
 
                     SidebarSection {
                         title: qsTr("Capture")
@@ -612,17 +613,17 @@ ApplicationWindow {
                             Layout.fillWidth: true
                             placeholderText: qsTr("Target (optional)")
                             text: previewController.targetName
-                            color: "#e8eaed"
-                            placeholderTextColor: "#9aa0a6"
-                            selectedTextColor: "#e8eaed"
-                            selectionColor: "#2a3d6b"
+                            color: Atelier.text
+                            placeholderTextColor: Atelier.muted
+                            selectedTextColor: Atelier.text
+                            selectionColor: Atelier.hover
                             font.pixelSize: 12
                             onEditingFinished: previewController.targetName = text
                             background: Rectangle {
                                 implicitHeight: 28
                                 radius: 6
-                                color: "#1c2026"
-                                border.color: "#3a4048"
+                                color: Atelier.field
+                                border.color: Atelier.border
                                 border.width: 1
                             }
                         }
@@ -643,7 +644,7 @@ ApplicationWindow {
                         Text {
                             visible: previewController.videoFormat === "FITS"
                             text: qsTr("Set exposure and frame count, then start. Raw pixels are saved before demosaicing. Camera limits still apply; mount guiding is external.")
-                            color: "#9aa0a6"; font.pixelSize:11; wrapMode:Text.Wrap; Layout.fillWidth:true
+                            color: Atelier.muted; font.pixelSize:11; wrapMode:Text.Wrap; Layout.fillWidth:true
                         }
                         RowLayout {
                             Layout.fillWidth: true
@@ -676,13 +677,13 @@ ApplicationWindow {
                             Layout.fillWidth: true
                             visible: previewController.lastCaptureStatus.length > 0
                             text: previewController.lastCaptureStatus
-                            color: "#9aa0a6"
+                            color: Atelier.muted
                             font.pixelSize: 11
                             wrapMode: Text.Wrap
                         }
                     }
 
-                    Rectangle { Layout.fillWidth: true; height: 1; color: "#242830" }
+                    Rectangle { Layout.fillWidth: true; height: 1; color: Atelier.border }
 
                     SidebarSection {
                         title: qsTr("Recording")
@@ -696,7 +697,7 @@ ApplicationWindow {
 
                             Text {
                                 text: qsTr("Stop recording after")
-                                color: "#9aa0a6"
+                                color: Atelier.muted
                                 font.pixelSize: 12
                             }
 
@@ -716,10 +717,10 @@ ApplicationWindow {
                                     value: previewController.recordingTargetFrameCount
                                     onValueModified: previewController.recordingTargetFrameCount = value
                                 }
-                                Text { text: qsTr("frames"); color: "#9aa0a6"; font.pixelSize: 11 }
+                                Text { text: qsTr("frames"); color: Atelier.muted; font.pixelSize: 11 }
                             }
 
-                            Text { text: qsTr("or"); color: "#5f6368"; font.pixelSize: 11 }
+                            Text { text: qsTr("or"); color: Atelier.muted; font.pixelSize: 11 }
 
                             RowLayout {
                                 Layout.fillWidth: true
@@ -732,12 +733,12 @@ ApplicationWindow {
                                     value: previewController.recordingTargetDurationSeconds
                                     onValueModified: previewController.recordingTargetDurationSeconds = value
                                 }
-                                Text { text: qsTr("sec"); color: "#9aa0a6"; font.pixelSize: 11 }
+                                Text { text: qsTr("sec"); color: Atelier.muted; font.pixelSize: 11 }
                             }
 
                             Text {
                                 text: qsTr("0 = unlimited")
-                                color: "#5f6368"
+                                color: Atelier.muted
                                 font.pixelSize: 10
                             }
                         }
@@ -752,7 +753,7 @@ ApplicationWindow {
                                 Rectangle { width: 8; height: 8; radius: 4; color: "#e5484d" }
                                 Text {
                                     text: previewController.recordingElapsedSeconds.toFixed(1) + qsTr(" s")
-                                    color: "#e8eaed"
+                                    color: Atelier.text
                                     font.pixelSize: 13
                                     font.weight: Font.DemiBold
                                 }
@@ -760,7 +761,7 @@ ApplicationWindow {
 
                             Text {
                                 text: qsTr("Recorded: ") + formatCount(previewController.recordingFrameCount)
-                                color: "#9aa0a6"
+                                color: Atelier.muted
                                 font.pixelSize: 12
                             }
 
@@ -770,7 +771,7 @@ ApplicationWindow {
                             // happens.
                             Text {
                                 text: qsTr("Dropped: ") + previewController.recordingDroppedFrames
-                                color: previewController.recordingDroppedFrames > 0 ? "#e5484d" : "#9aa0a6"
+                                color: previewController.recordingDroppedFrames > 0 ? "#e5484d" : Atelier.muted
                                 font.pixelSize: 12
                             }
 
@@ -785,7 +786,7 @@ ApplicationWindow {
                                                          : 0
                                 text: qsTr("Write: ") + writeFps.toFixed(1) + qsTr(" fps  (capture: ") +
                                       previewController.fps.toFixed(1) + " fps)"
-                                color: writeFps < previewController.fps * 0.9 ? "#e5484d" : "#9aa0a6"
+                                color: writeFps < previewController.fps * 0.9 ? "#e5484d" : Atelier.muted
                                 font.pixelSize: 12
                             }
                         }
@@ -794,7 +795,7 @@ ApplicationWindow {
                             Layout.fillWidth: true
                             visible: !previewController.recording && previewController.recordingStatus.length > 0
                             text: previewController.recordingStatus
-                            color: "#9aa0a6"
+                            color: Atelier.muted
                             font.pixelSize: 11
                             wrapMode: Text.Wrap
                         }
@@ -803,7 +804,7 @@ ApplicationWindow {
                     Rectangle {
                         Layout.fillWidth: true
                         height: 1
-                        color: "#242830"
+                        color: Atelier.border
                         visible: previewController.exposureSupported || previewController.gainSupported ||
                                  previewController.extraControls.length > 0
                     }
@@ -823,15 +824,15 @@ ApplicationWindow {
 
                             RowLayout {
                                 Layout.fillWidth: true
-                                Text { text: qsTr("Exposure"); color: "#9aa0a6"; font.pixelSize: 12; Layout.fillWidth: true }
+                                Text { text: qsTr("Exposure"); color: Atelier.muted; font.pixelSize: 12; Layout.fillWidth: true }
                                 Text {
                                     text: (previewController.exposureMicroseconds / 1000).toFixed(1) + qsTr(" ms")
-                                    color: "#e8eaed"
+                                    color: Atelier.text
                                     font.pixelSize: 12
                                 }
                             }
 
-                            Slider {
+                            AtelierSlider {
                                 id: exposureSlider
                                 Layout.fillWidth: true
                                 // Logarithmic: the min/max range spans 100us
@@ -858,15 +859,15 @@ ApplicationWindow {
 
                             RowLayout {
                                 Layout.fillWidth: true
-                                Text { text: qsTr("Gain"); color: "#9aa0a6"; font.pixelSize: 12; Layout.fillWidth: true }
+                                Text { text: qsTr("Gain"); color: Atelier.muted; font.pixelSize: 12; Layout.fillWidth: true }
                                 Text {
                                     text: previewController.gainValue
-                                    color: "#e8eaed"
+                                    color: Atelier.text
                                     font.pixelSize: 12
                                 }
                             }
 
-                            Slider {
+                            AtelierSlider {
                                 id: gainSlider
                                 Layout.fillWidth: true
                                 from: previewController.gainMin
@@ -891,7 +892,7 @@ ApplicationWindow {
                                     Layout.fillWidth: true
                                     Text {
                                         text: qsTranslate("CameraControls", modelData.label)
-                                        color: "#9aa0a6"
+                                        color: Atelier.muted
                                         font.pixelSize: 12
                                         Layout.fillWidth: true
                                     }
@@ -909,12 +910,12 @@ ApplicationWindow {
                                         text: (modelData.isFloat ? extraSlider.value.toFixed(2)
                                                                   : Math.round(extraSlider.value)) +
                                               (modelData.unit.length > 0 ? " " + modelData.unit : "")
-                                        color: "#e8eaed"
+                                        color: Atelier.text
                                         font.pixelSize: 12
                                     }
                                 }
 
-                                Slider {
+                                AtelierSlider {
                                     id: extraSlider
                                     Layout.fillWidth: true
                                     from: modelData.min
@@ -930,7 +931,7 @@ ApplicationWindow {
                     Rectangle {
                         Layout.fillWidth: true
                         height: 1
-                        color: "#242830"
+                        color: Atelier.border
                         visible: previewController.roiSupported
                     }
 
@@ -954,7 +955,7 @@ ApplicationWindow {
                             Layout.fillWidth: true
                             text: previewController.roiWidth + " × " + previewController.roiHeight + qsTr(" of ") +
                                   previewController.sensorWidth + " × " + previewController.sensorHeight
-                            color: "#9aa0a6"
+                            color: Atelier.muted
                             font.pixelSize: 11
                         }
 
@@ -992,7 +993,7 @@ ApplicationWindow {
         Text {
             Layout.alignment: Qt.AlignHCenter
             text: qsTr("No camera connected")
-            color: "#e8eaed"
+            color: Atelier.text
             font.pixelSize: 22
             font.weight: Font.DemiBold
         }
@@ -1003,7 +1004,7 @@ ApplicationWindow {
             text: previewController.errorMessage.length > 0
                   ? previewController.errorMessage
                   : qsTr("Connect a supported planetary camera to start a live preview.")
-            color: previewController.errorMessage.length > 0 ? "#e8776a" : "#9aa0a6"
+            color: previewController.errorMessage.length > 0 ? "#e8776a" : Atelier.muted
             font.pixelSize: 14
             wrapMode: Text.WordWrap
             horizontalAlignment: Text.AlignHCenter
@@ -1030,7 +1031,7 @@ ApplicationWindow {
             Text {
                 Layout.alignment: Qt.AlignHCenter
                 text: qsTr("Multiple cameras found — choose one:")
-                color: "#9aa0a6"
+                color: Atelier.muted
                 font.pixelSize: 12
             }
 
@@ -1051,7 +1052,7 @@ ApplicationWindow {
             Layout.alignment: Qt.AlignHCenter
             Layout.topMargin: 24
             text: qsTr("Development build")
-            color: "#5f6368"
+            color: Atelier.muted
             font.pixelSize: 11
         }
     }
@@ -1063,7 +1064,7 @@ ApplicationWindow {
         visible: !previewController.connected && window.currentTab === "capture"
         iconName: "gear"
         text:qsTr("Capture settings")
-        borderColor: "#242830"
+        borderColor: Atelier.border
         onClicked: settingsPanel.open()
 
 
@@ -1097,9 +1098,9 @@ ApplicationWindow {
         width: 332
 
         background: Rectangle {
-            color: "#15181d"
+            color: Atelier.surface
             radius: 10
-            border.color: "#3a4048"
+            border.color: Atelier.border
             border.width: 1
         }
 
@@ -1116,7 +1117,7 @@ ApplicationWindow {
 
             Text {
                 text: qsTr("No real camera found.")
-                color: "#e8eaed"
+                color: Atelier.text
                 font.pixelSize: 14
                 font.weight: Font.DemiBold
                 wrapMode: Text.Wrap
@@ -1125,7 +1126,7 @@ ApplicationWindow {
 
             Text {
                 text: qsTr("Use the mock test camera instead?")
-                color: "#9aa0a6"
+                color: Atelier.muted
                 font.pixelSize: 12
                 wrapMode: Text.Wrap
                 Layout.fillWidth: true

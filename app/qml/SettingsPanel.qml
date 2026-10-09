@@ -1,3 +1,4 @@
+import "Atelier.js" as Atelier
 import QtQuick
 import QtQuick.Controls.Basic
 import QtQuick.Layouts
@@ -18,7 +19,7 @@ Popup {
     background: Rectangle {
         color: "#15181d"
         radius: 10
-        border.color: "#3a4048"
+        border.color: Atelier.border
         border.width: 1
     }
 
@@ -41,7 +42,7 @@ Popup {
         background: Rectangle {
             color: "#15181d"
             radius: 10
-            border.color: "#3a4048"
+            border.color: Atelier.border
             border.width: 1
         }
 
@@ -51,7 +52,7 @@ Popup {
 
             Text {
                 text: qsTr("Replace preset “%1”?").arg(overwriteConfirm.pendingName)
-                color: "#e8eaed"
+                color: Atelier.text
                 font.pixelSize: 13
                 wrapMode: Text.Wrap
                 Layout.fillWidth: true
@@ -110,9 +111,9 @@ Popup {
         }
 
         background: Rectangle {
-            color: "#1c2026"
+            color: Atelier.field
             radius: 8
-            border.color: "#3a4048"
+            border.color: Atelier.border
             border.width: 1
         }
 
@@ -128,7 +129,7 @@ Popup {
 
             Text {
                 text: toast.message
-                color: "#e8eaed"
+                color: Atelier.text
                 font.pixelSize: 12
             }
         }
@@ -156,7 +157,7 @@ Popup {
 
             Text {
                 text: qsTr("Capture settings")
-                color: "#e8eaed"
+                color: Atelier.text
                 font.pixelSize: 14
                 font.weight: Font.DemiBold
                 Layout.fillWidth: true
@@ -296,16 +297,16 @@ Popup {
                     id: presetNameField
                     Layout.fillWidth: true
                     placeholderText: qsTr("Preset name")
-                    color: "#e8eaed"
+                    color: Atelier.text
                     placeholderTextColor: "#9aa0a6"
-                    selectedTextColor: "#e8eaed"
+                    selectedTextColor: Atelier.text
                     selectionColor: "#2a3d6b"
                     font.pixelSize: 12
                     background: Rectangle {
                         implicitHeight: 28
                         radius: 6
-                        color: "#1c2026"
-                        border.color: "#3a4048"
+                        color: Atelier.field
+                        border.color: Atelier.border
                         border.width: 1
                     }
                 }
@@ -351,7 +352,7 @@ Popup {
                     Text {
                         Layout.fillWidth: true
                         text: modelData
-                        color: "#e8eaed"
+                        color: Atelier.text
                         font.pixelSize: 12
                         elide: Text.ElideRight
                     }
@@ -374,7 +375,7 @@ Popup {
             Text {
                 visible: controller && controller.presetNames.length === 0
                 text: qsTr("No presets yet.")
-                color: "#5f6368"
+                color: Atelier.muted
                 font.pixelSize: 11
             }
         }

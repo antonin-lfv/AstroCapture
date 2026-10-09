@@ -51,10 +51,20 @@ if(APPLE)
     )
 endif()
 
+# This is a relative JavaScript library, not a public module type. Exporting
+# it as a qmldir namespace as well makes the module's self-import ambiguous.
+set_source_files_properties(qml/Atelier.js PROPERTIES QT_QML_SKIP_QMLDIR_ENTRY TRUE)
+
 qt_add_qml_module(AstroCapture
     URI AstroCapture
     VERSION 1.0
     QML_FILES
+        qml/Atelier.js
+        qml/AtelierSlider.qml
+        qml/InspectorFamily.qml
+        qml/ParameterControl.qml
+        qml/AtelierMenu.qml
+        qml/AtelierMenuItem.qml
         qml/StudioNavigation.qml
         qml/HomeWorkspace.qml
         qml/Main.qml

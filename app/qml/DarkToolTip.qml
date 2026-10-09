@@ -1,3 +1,4 @@
+import "Atelier.js" as Atelier
 import QtQuick
 import QtQuick.Controls.Basic
 
@@ -12,13 +13,13 @@ ToolTip {
     padding: 12
     contentItem: Text {
         text: tip.text
-        color: "#eef3fa"
+        color: Atelier.text
         font.pixelSize: 13
         wrapMode: Text.WordWrap
     }
     background: Rectangle {
-        color: "#151b24"
+        color: Atelier.surface
         radius: 8
-        border.color: "#39465a"
+        border.color: Atelier.border
     }
 }

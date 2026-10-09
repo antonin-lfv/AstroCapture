@@ -1,3 +1,4 @@
+import "Atelier.js" as Atelier
 import QtQuick
 import QtQuick.Controls.Basic
 import QtQuick.Layouts
@@ -8,6 +9,7 @@ Rectangle {
     property real sourceWidth: 0
     property real sourceHeight: 0
     property alias imageContainer: imageLayer
+    property alias viewingSurface: surface
     property bool preserveViewOnSourceResize: false
     property bool fitMode: true
     property real zoom: 1
@@ -15,13 +17,13 @@ Rectangle {
     property real panY: 0
     readonly property real pixelRatio: Screen.devicePixelRatio || 1
     readonly property bool hasImage: sourceWidth > 0 && sourceHeight > 0
-    readonly property real fitZoom: hasImage ? Math.min(surface.width * pixelRatio / sourceWidth, surface.height * pixelRatio / sourceHeight) : 1
+    readonly property real fitZoom: hasImage ? Math.min(Math.max(1,surface.width-32) * pixelRatio / sourceWidth, Math.max(1,surface.height-32) * pixelRatio / sourceHeight) : 1
     readonly property real effectiveZoom: fitMode ? fitZoom : zoom
     readonly property real renderedWidth: sourceWidth * effectiveZoom / pixelRatio
     readonly property real renderedHeight: sourceHeight * effectiveZoom / pixelRatio
-    color: "#07090c"
-    radius: 8
-    border.color: "#232a34"
+    color: Atelier.image
+    radius: 0
+    border.width: 0
 
     function constrainPan() {
         const xLimit = Math.max(0, (renderedWidth - surface.width) / 2);
@@ -50,7 +52,7 @@ Rectangle {
     Item {
         id: surface
         objectName: "viewportSurface"
-        anchors { left: parent.left; right: parent.right; top: parent.top; bottom: toolbar.top; margins: 8 }
+        anchors { left: parent.left; right: parent.right; top: parent.top; bottom: toolbarBackground.top; margins: 0 }
         clip: true
         MouseArea {
             anchors.fill: parent
@@ -95,16 +97,23 @@ Rectangle {
             onActiveScaleChanged: root.zoomAt(initialZoom * activeScale, centroid.position.x, centroid.position.y)
         }
     }
-    RowLayout {
-        id: toolbar
-        anchors { left: parent.left; right: parent.right; bottom: parent.bottom; margins: 12 }
-        height: implicitHeight
-        spacing: 6
-        enabled: root.hasImage
-        IconButton { text: "−"; Layout.preferredWidth: 34; onClicked: root.zoomAt(root.effectiveZoom / 1.25, surface.width / 2, surface.height / 2); Accessible.name: qsTr("Zoom out") }
-        IconButton { text: "+"; Layout.preferredWidth: 34; onClicked: root.zoomAt(root.effectiveZoom * 1.25, surface.width / 2, surface.height / 2); Accessible.name: qsTr("Zoom in") }
-        Label { text: Math.round(root.effectiveZoom * 100) + "%"; color: "#a8b5c6"; font.pixelSize: 11; Layout.fillWidth: true; horizontalAlignment: Text.AlignHCenter; elide: Text.ElideRight }
-        IconButton { text: "100%"; onClicked: root.actualSize();  helpText: qsTr("One image pixel per screen pixel") }
-        IconButton { text: qsTr("Fit"); borderColor: root.fitMode ? "#6ca5f8" : "#3a4048"; onClicked: root.fit();  helpText: qsTr("Fit to window. Double-click the image to switch between Fit and 100%.") }
+    Rectangle {
+        id: toolbarBackground
+        anchors {left:parent.left;right:parent.right;bottom:parent.bottom}
+        height: 56
+        color: Atelier.canvas
+        RowLayout {
+            id: toolbar
+            anchors.fill: parent
+            anchors.margins: 12
+            spacing: 6
+            enabled: root.hasImage
+            IconButton {text:"−";ghost:true;Layout.preferredWidth:32;onClicked:root.zoomAt(root.effectiveZoom/1.25,surface.width/2,surface.height/2);Accessible.name:qsTr("Zoom out")}
+            IconButton {text:"+";ghost:true;Layout.preferredWidth:32;onClicked:root.zoomAt(root.effectiveZoom*1.25,surface.width/2,surface.height/2);Accessible.name:qsTr("Zoom in")}
+            Label {text:Math.round(root.effectiveZoom*100)+" %";color:Atelier.secondary;font.pixelSize:12;Layout.leftMargin:4;Layout.preferredWidth:56}
+            Item {Layout.fillWidth:true}
+            IconButton {text:"100 %";ghost:true;onClicked:root.actualSize();Accessible.name:qsTr("One image pixel per screen pixel")}
+            IconButton {text:qsTr("Fit");onClicked:root.fit();Accessible.name:qsTr("Fit to window")}
+        }
     }
 }

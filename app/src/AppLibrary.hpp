@@ -22,6 +22,7 @@ class AppLibrary : public QObject {
     Q_PROPERTY(QStringList deepSkyPresetNames READ deepSkyPresetNames NOTIFY changed)
     Q_PROPERTY(QStringList processingPresetNames READ processingPresetNames NOTIFY changed)
     Q_PROPERTY(bool compactProcessing READ compactProcessing WRITE setCompactProcessing NOTIFY changed)
+    Q_PROPERTY(int deepSkyPanelWidth READ deepSkyPanelWidth WRITE setDeepSkyPanelWidth NOTIFY changed)
     Q_PROPERTY(int processingPanelWidth READ processingPanelWidth WRITE setProcessingPanelWidth NOTIFY changed)
 public:
     explicit AppLibrary(QObject* parent = nullptr);
@@ -44,6 +45,8 @@ public:
     Q_INVOKABLE void removeDeepSkyPreset(const QString&);
     QStringList processingPresetNames() const { return processingPresets_.keys(); }
     bool compactProcessing() const { return compactProcessing_; }
+    int deepSkyPanelWidth() const { return deepSkyPanelWidth_; }
+    void setDeepSkyPanelWidth(int value);
     int processingPanelWidth() const { return processingPanelWidth_; }
     void setCompactProcessing(bool value);
     void setProcessingPanelWidth(int value);
@@ -80,5 +83,6 @@ private:
     QVariantMap processingPresets_,deepSkyPresets_;
     bool compactProcessing_{false};
     int processingPanelWidth_{330};
+    int deepSkyPanelWidth_{360};
 };
 }

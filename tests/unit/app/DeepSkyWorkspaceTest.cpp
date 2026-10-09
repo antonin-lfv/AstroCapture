@@ -51,7 +51,7 @@ int main(int argc,char** argv){
     ASTRO_TEST_CHECK(!object->findChild<QObject*>("deepSkyIntegrate")->property("visible").toBool());
     auto* presetDialog=object->findChild<QObject*>("deepSkyPresetDialog");ASTRO_TEST_CHECK(presetDialog);
     auto* dialogBackground=presetDialog->property("background").value<QObject*>();ASTRO_TEST_CHECK(dialogBackground);
-    ASTRO_TEST_CHECK(dialogBackground->property("color").value<QColor>()==QColor("#0b0d10"));
+    ASTRO_TEST_CHECK(dialogBackground->property("color").value<QColor>()==QColor("#1c1e22"));
     auto* gear=visualItem(root,"deepSkyProjectMenu");ASTRO_TEST_CHECK(gear);
     const auto gearPoint=gear->mapToScene(QPointF(gear->width()/2,gear->height()/2));
     QMouseEvent gearPress(QEvent::MouseButtonPress,gearPoint,gearPoint,Qt::LeftButton,Qt::LeftButton,Qt::NoModifier);QGuiApplication::sendEvent(&window,&gearPress);
@@ -98,6 +98,16 @@ int main(int argc,char** argv){
     const auto handed=controller.processingDocument().value<app::ImageDocument>();ASTRO_TEST_CHECK(handed.exposureCount==2&&handed.totalExposure==120&&handed.filters==QStringList{"R"}&&!handed.processingSummary.isEmpty());
     const auto integratedPixels=handed.pixels;
     const auto integratedPreview=controller.image();
+    ASTRO_TEST_CHECK(controller.hasFinishComparison());
+    const auto beforeFinish=controller.comparisonImage();
+    ASTRO_TEST_CHECK(beforeFinish.size()==integratedPreview.size());
+    for(const QString mode:{QString("before"),QString("split"),QString("result")}) {
+        auto* comparisonButton=visualItem(root,"deepSkyCompare_"+mode);ASTRO_TEST_CHECK(comparisonButton);
+        ASTRO_TEST_CHECK(QMetaObject::invokeMethod(comparisonButton,"clicked"));
+        ASTRO_TEST_CHECK(root->property("comparisonMode").toString()==mode);
+        ASTRO_TEST_CHECK(controller.image()==integratedPreview);
+        ASTRO_TEST_CHECK(controller.processingDocument().value<app::ImageDocument>().pixels==integratedPixels);
+    }
     controller.showRawComparison(true);ASTRO_TEST_CHECK(controller.comparingRaw()&&controller.imageWidth()==160&&controller.processingDocument().value<app::ImageDocument>().pixels==integratedPixels);
     controller.showRawComparison(false);ASTRO_TEST_CHECK(!controller.comparingRaw()&&controller.image()==integratedPreview);
     controller.chooseRawComparison(1);wait(controller);ASTRO_TEST_CHECK(controller.rawComparisonName()=="light-1.fits");
@@ -116,6 +126,7 @@ int main(int argc,char** argv){
     auto recipe=controller.finishSettings();auto first=recipe;first.remove("operations");first["stretch"]=false;first["red"]=1.2;first["green"]=1.;first["blue"]=1.;
     recipe["operations"]=QVariantList{QVariantMap{{"name",QString("Red gain")},{"enabled",true},{"settings",first}}};recipe["rotation"]=1;
     controller.apply(recipe);wait(controller);const auto oriented=controller.processingDocument().value<app::ImageDocument>();ASTRO_TEST_CHECK(oriented.pixels->width==integratedPixels->height&&oriented.pixels->height==integratedPixels->width);
+    ASTRO_TEST_CHECK(controller.comparisonImage()==beforeFinish.transformed(QTransform().rotate(90)));
     ASTRO_TEST_CHECK(controller.linearHistogram()["shadowChannels"].toList().size()==3);
     controller.apply(controller.suggestedStretch());wait(controller);
     ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root,"setFinish",Q_ARG(QVariant,QVariant(controller.finishSettings()))));wait(controller);

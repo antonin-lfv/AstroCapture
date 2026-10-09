@@ -1,3 +1,4 @@
+import "Atelier.js" as Atelier
 import QtQuick
 import QtQuick.Controls.Basic
 
@@ -11,7 +12,7 @@ SpinBox {
 
     contentItem: TextInput {
         text: control.textFromValue(control.value, control.locale)
-        color: "#e8eaed"
+        color: Atelier.text
         font.pixelSize: 12
         horizontalAlignment: Qt.AlignHCenter
         verticalAlignment: Qt.AlignVCenter
@@ -24,14 +25,14 @@ SpinBox {
         x: control.width - width
         width: 24
         height: control.height
-        color: control.up.pressed ? "#2a3038" : "#1c2026"
-        border.color: "#3a4048"
+        color: control.up.pressed ? Atelier.hover : Atelier.field
+        border.color: Atelier.border
         border.width: 1
 
         Text {
             text: "+"
             anchors.centerIn: parent
-            color: "#e8eaed"
+            color: Atelier.text
             font.pixelSize: 13
         }
     }
@@ -40,14 +41,14 @@ SpinBox {
         x: 0
         width: 24
         height: control.height
-        color: control.down.pressed ? "#2a3038" : "#1c2026"
-        border.color: "#3a4048"
+        color: control.down.pressed ? Atelier.hover : Atelier.field
+        border.color: Atelier.border
         border.width: 1
 
         Text {
             text: "−"
             anchors.centerIn: parent
-            color: "#e8eaed"
+            color: Atelier.text
             font.pixelSize: 13
         }
     }
@@ -55,7 +56,7 @@ SpinBox {
     background: Rectangle {
         implicitHeight: 28
         color: "#14171c"
-        border.color: "#3a4048"
+        border.color: Atelier.border
         border.width: 1
         radius: 6
     }

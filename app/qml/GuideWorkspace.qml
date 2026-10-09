@@ -1,10 +1,11 @@
+import "Atelier.js" as Atelier
 import QtQuick
 import QtQuick.Controls.Basic
 import QtQuick.Layouts
 
 Rectangle {
     id: root
-    color: "#0b0d10"
+    color: Atelier.canvas
     property bool captureActive: false
     property int topic: 0
     signal navigate(string tab)
@@ -41,8 +42,8 @@ Rectangle {
             {title: qsTr("Stack settings"), body: qsTr("Inspect star counts, FWHM and source previews; uncheck poor frames and choose a reference per filter. Normalization and rejection are configurable in Advanced stack settings. Start Create the stacked image from Stack settings after checking calibration, reference and advanced options. It runs calibration, alignment, normalization and integration together. Finish and export becomes available when a result exists. Hover parameter labels for help.")},
             {title: qsTr("Source or stacked result?"), body: qsTr("The image label tells you whether you are viewing a source or the stacked result. Clicking a file name previews that source without replacing the export result. Use Show stacked result to return. Stacking primarily improves noise; finishing reveals faint detail.")},
             {title: qsTr("Histogram and manual stretch"), body: qsTr("In Finish and export, the linear histogram shows data with the current color gains and the stretch curve. Select Black, Midtones or White, then drag in the graph, or edit numeric levels and the midtones slider. Zoom only changes the graph view. Watch the sampled clipping estimates; moving white can clip bright stars. Asinh offers a different stretch that preserves color ratios.")},
-            {title: qsTr("Live preview and before / after"), body: qsTr("Adjustments update automatically after you move a control. Choose a light in the comparison list and hold Raw exposure to compare it with the finished stack. Exports use the finished stack.")},
-            {title: qsTr("Finishing adjustments"), body: qsTr("Choose Stretch, Background, Color and noise, Orientation or Advanced transformations. Changes apply automatically. Delete these adjustments resets only the selected family. Use Cmd+Z to undo. Projects preserve all finishing settings.")},
+            {title: qsTr("Live preview and before / after"), body: qsTr("Adjustments update automatically. Before, Result and Split compare the stack before finishing with the current result; Before is displayed without stretch. The comparison follows rotations and mirrors. To compare a source exposure, open the folder button beside Comparison and hold Raw exposure. Exports use the finished stack.")},
+            {title: qsTr("Finishing adjustments"), body: qsTr("Open Stretch, Background, Color, Geometry or Advanced transformations. In smaller windows, choose the family from the selector. Changes apply automatically. Delete these adjustments resets only the selected family; Cmd+Z restores the previous settings. The project gear contains presets for the entire finish. Projects preserve all finishing settings.")},
             {title: qsTr("Color, background and export"), body: qsTr("Combine multiple filters as RGB, LRGB, SHO or HOO. Adjust color gains, saturation and smoothing manually. The initial gains estimate a neutral background; they are not photometric calibration. Gradient extraction uses independent color-channel polynomials (degrees 1 to 4), a configurable grid and manually editable sky samples. Optional degree-1 extraction can run on each calibrated, debayered exposure before stacking. Avoid fitting real nebulosity. Green noise reduction offers four SCNR protection methods and optional CIE lightness preservation. Use it after stretching and color balance; intentional green colors should be preserved. Advanced transformations provides GHS, circular-PSF Richardson-Lucy, multiscale wavelet denoising, generated masks and local matched-reference photometric colors. Automatic astrometry, online catalogues and spectrophotometric calibration are not available. Export linear 32-bit FITS for further work. Classic export opens the shared editor with a choice of PNG, TIFF or JPEG and an optional caption. PNG and TIFF preserve 16-bit detail without lossy compression. The technical caption includes the accepted exposure count, total exposure time and filters. Deep-sky caption settings are saved in the project.")},
             {title: qsTr("GHS: controlled contrast"), body: qsTr("Enable GHS in Advanced transformations; it enables stretch and replaces midtones/asinh. Start with low strength, place SP near the intensity of interest, then adjust local intensity b. LP ≤ SP ≤ HP controls tangent extensions for shadows and highlights. The curve shows normalized input versus output; gray is identity. Independent RGB and shared-luminance RGB blending have different color behavior. Inverse reverses the scalar curve, not clipping, masks or color blending. Adjust the strength gradually.")},
             {title: qsTr("PSF and restoration"), body: qsTr("Work on an unstretched, unrotated recipe input. Measure central stars, review the FWHM and scatter, then explicitly use the Gaussian estimate; Moffat beta remains manual. PSF preview is display-scaled, while its linear kernel sums to 1. Richardson-Lucy restores weighted luminance with a shared RGB factor. Start with 10 iterations, damping 0.001 and stopping 0.0001 in normalized image units. Compare at 100%; rings and amplified noise mean the correction is too strong. Negative input is rejected. An explicit pedestal is available and remains in the result. It is residual-damped restoration, not blind or spatially varying deconvolution.")},
@@ -82,21 +83,21 @@ Rectangle {
           cards:[
             {title:qsTr("Move between workspaces"),body:qsTr("The top tabs stay visible. Switching tabs preserves loaded images, framing and controls, and calculations continue in the background. Click the activity label to return to a running task. During recording, Home, Capture and Guide remain available; other workspaces are locked.")},
             {title:qsTr("Return to a project"),body:qsTr("Resume returns to the current session without loading files again. Open reloads a saved deep-sky project; recreate its stack to restore the saved finish. Keep its source files in place. Settings is a workspace in the top navigation. The deep-sky gear manages the project and finishing presets.")},
-            {title:qsTr("Deep-sky tools on the right"),body:qsTr("Images, Stack and Finish are in the right inspector. Stack contains calibration and integration settings. Finish unlocks after stacking and contains the editable linear histogram and finishing controls. The floppy icon exports the image; the gear manages projects and finishing presets. The image and displayed histogram stay on the left. Source files toggles the source list, which starts collapsed in Finish.")}
+            {title:qsTr("Deep-sky tools on the right"),body:qsTr("Images, Stack and Finish form the bar above the image. Stack contains calibration and integration settings. Finish unlocks after stacking. Its right inspector contains the input histogram and adjustment families; the image stays on the left with zoom below it. The floppy button opens final-image or linear FITS export. The project gear manages projects and finishing presets. In Images and Stack, the folder button toggles the source list.")}
           ],action:qsTr("Go to Home"),tab:"home"}
     ]
     readonly property var lesson: lessons[topic]
     ColumnLayout {
         anchors.top:parent.top;anchors.bottom:parent.bottom;anchors.horizontalCenter:parent.horizontalCenter;anchors.topMargin:20;anchors.bottomMargin:20;width:Math.min(1040,parent.width-40);spacing:16
-        Label { text: qsTr("Guide"); color: "#eef3fa"; font.pixelSize: 22; font.weight:Font.Medium }
-        Label { text: qsTr("From the first recording to the finished image, at your own pace."); color: "#9aa7b8"; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+        Label { text: qsTr("Guide"); color: Atelier.text; font.pixelSize: 20; font.weight:Font.Medium }
+        Label { text: qsTr("From the first recording to the finished image, at your own pace."); color: Atelier.muted; wrapMode: Text.WordWrap; Layout.fillWidth: true }
         Flow {
             Layout.fillWidth: true; spacing: 8
             Repeater {
                 model: root.lessons
                 IconButton {
                     required property int index; required property var modelData
-                    text: modelData.title; borderColor: root.topic===index ? "#6ca5f8" : "#39465a"
+                    text: modelData.title; borderColor: root.topic===index ? Atelier.accent : Atelier.border
                     onClicked: { root.topic=index; lessonScroll.contentItem.contentY=0; }
                 }
             }
@@ -110,19 +111,19 @@ Rectangle {
             ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
             ColumnLayout {
                 width: lessonScroll.availableWidth; spacing: 14
-                Label { text: root.lesson.lead; font.pixelSize: 22; color: "#eef3fa"; wrapMode: Text.WordWrap; Layout.fillWidth: true }
-                Label { text: root.lesson.intro; color: "#b5c3d4"; wrapMode: Text.WordWrap; Layout.fillWidth: true; bottomPadding: 8 }
+                Label { text: root.lesson.lead; font.pixelSize: 20; color: Atelier.text; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+                Label { text: root.lesson.intro; color: Atelier.secondary; wrapMode: Text.WordWrap; Layout.fillWidth: true; bottomPadding: 8 }
                 Repeater {
                     model: root.lesson.cards
                     Rectangle {
                         required property var modelData
                         Layout.fillWidth: true; implicitHeight: cardText.implicitHeight+32
-                        color: "#141a22"; radius: 10; border.color: "#26303c"
+                        color: Atelier.surface; radius: 4; border.color: Atelier.border
                         ColumnLayout {
                             id: cardText
                             anchors.left: parent.left; anchors.right: parent.right; anchors.top: parent.top; anchors.margins: 16; spacing: 8
-                            Label { text: modelData.title; font.pixelSize: 16; color: "#e3ecf7"; wrapMode: Text.WordWrap; Layout.fillWidth: true }
-                            Label { text: modelData.body; font.pixelSize: 13; color: "#b5c3d4"; wrapMode: Text.WordWrap; Layout.fillWidth: true; lineHeight: 1.2 }
+                            Label { text: modelData.title; font.pixelSize: 16; color: Atelier.text; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+                            Label { text: modelData.body; font.pixelSize: 13; color: Atelier.secondary; wrapMode: Text.WordWrap; Layout.fillWidth: true; lineHeight: 1.2 }
                         }
                     }
                 }

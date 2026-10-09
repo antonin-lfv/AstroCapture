@@ -148,9 +148,9 @@ Télescope · caméra · accessoires</translation>
         <message>
             <location filename="../qml/CaptionEditor.qml" line="122" />
             <source>16-bit TIFF image (*.tif *.tiff)</source>
-            <translation type="unfinished">Image TIFF 16 bits (*.tif *.tiff)</translation>
+            <translation>Image TIFF 16 bits (*.tif *.tiff)</translation>
         </message>
-            <message>
+        <message>
             <source>Classic export</source>
             <translation>Export classique</translation>
         </message>
@@ -176,7 +176,7 @@ Télescope · caméra · accessoires</translation>
         </message>
         <message>
             <source>Export</source>
-            <translation>Export</translation>
+            <translation>Exporter</translation>
         </message>
         <message>
             <source>Export image</source>
@@ -190,7 +190,39 @@ Télescope · caméra · accessoires</translation>
             <source>JPEG image (*.jpg *.jpeg)</source>
             <translation>Image JPEG (*.jpg *.jpeg)</translation>
         </message>
-</context>
+        <message>
+            <source>Export final image</source>
+            <translation>Exporter l’image finale</translation>
+        </message>
+        <message>
+            <source>Close</source>
+            <translation>Fermer</translation>
+        </message>
+        <message>
+            <source>Format</source>
+            <translation>Format</translation>
+        </message>
+        <message>
+            <source>Lossy compression · 8-bit · for sharing</source>
+            <translation>Compression avec perte · 8 bits · pour le partage</translation>
+        </message>
+        <message>
+            <source>Lossless · preserves detail and precision</source>
+            <translation>Sans perte · conserve les détails et la précision</translation>
+        </message>
+        <message>
+            <source>Add a caption</source>
+            <translation>Ajouter une légende</translation>
+        </message>
+        <message>
+            <source>Hide preview</source>
+            <translation>Masquer l’aperçu</translation>
+        </message>
+        <message>
+            <source>Preview</source>
+            <translation>Aperçu</translation>
+        </message>
+    </context>
     <context>
         <name>DeepSkyAdvancedTools</name>
         <message>
@@ -232,7 +264,7 @@ Télescope · caméra · accessoires</translation>
         <message>
             <location filename="../qml/DeepSkyAdvancedTools.qml" line="135" />
             <source>These are draft settings. Review the image, then commit a transformation in the main workspace. A mask blends the whole draft; orientation is applied afterwards.</source>
-            <translation>Ces réglages forment un brouillon. Inspectez l’image, puis validez une transformation dans l’espace principal. Un masque mélange tout le brouillon ; l’orientation est appliquée ensuite.</translation>
+            <translation>Ces réglages forment un brouillon. Inspectez l’image, puis validez une transformation dans l’espace principal. Un masque mélange toute l’opération ; l’orientation est appliquée ensuite.</translation>
         </message>
         <message>
             <location filename="../qml/DeepSkyAdvancedTools.qml" line="138" />
@@ -517,7 +549,7 @@ Télescope · caméra · accessoires</translation>
         <message>
             <location filename="../qml/DeepSkyAdvancedTools.qml" line="429" />
             <source>White applies the whole draft, black preserves its input, gray blends them: output = input + mask × (processed − input). The mask is generated from the recipe input before processing and is applied once at the end. Photometric calibration is global and cannot be masked.</source>
-            <translation>Le blanc applique tout le brouillon, le noir conserve son entrée, le gris les mélange : sortie = entrée + masque × (traitement − entrée). Le masque est généré sur l’entrée de recette avant traitement et appliqué une fois à la fin. La calibration photométrique est globale et ne peut pas être masquée.</translation>
+            <translation>Le blanc applique toute l’opération, le noir conserve son entrée, le gris les mélange : sortie = entrée + masque × (traitement − entrée). Le masque est généré sur l’entrée de recette avant traitement et appliqué une fois à la fin. La calibration photométrique est globale et ne peut pas être masquée.</translation>
         </message>
         <message>
             <location filename="../qml/DeepSkyAdvancedTools.qml" line="436" />
@@ -728,7 +760,7 @@ Télescope · caméra · accessoires</translation>
             <source>Background → explicit pedestal → photometric colors → multiscale denoising → Richardson–Lucy → channel gains and stretch → saturation and smoothing → SCNR → mask blending → orientation. Commit separate transformations to choose another order. Scientific measurements cannot follow an earlier stretch or orientation.</source>
             <translation>Fond → piédestal explicite → couleurs photométriques → réduction du bruit multiéchelle → Richardson–Lucy → gains et étirement → saturation et lissage → SCNR → mélange du masque → orientation. Validez des transformations séparées pour choisir un autre ordre. Les mesures scientifiques ne peuvent pas suivre un étirement ou une orientation précédents.</translation>
         </message>
-            <message>
+        <message>
             <source>Changes are applied automatically. A mask blends the adjustments; orientation is applied afterwards.</source>
             <translation>Les modifications s’appliquent automatiquement. Un masque mélange les réglages ; l’orientation s’applique ensuite.</translation>
         </message>
@@ -756,10 +788,19 @@ Télescope · caméra · accessoires</translation>
             <source>Update preview</source>
             <translation>Actualiser l’aperçu</translation>
         </message>
-<message><source>Use on linear data before stretching. The circular PSF describes a spatially constant blur; inspect stars at 100% for dark rings or amplified noise.</source><translation>Utilisez des données linéaires avant étirement. La PSF circulaire décrit un flou uniforme ; inspectez les étoiles à 100 % pour détecter des anneaux sombres ou une amplification du bruit.</translation></message>
-<message><source>Import matched reference CSV</source><translation>Importer les références associées en CSV</translation></message>
-<message><source>Stretch curve</source><translation>Courbe d’étirement</translation></message>
-</context>
+        <message>
+            <source>Use on linear data before stretching. The circular PSF describes a spatially constant blur; inspect stars at 100% for dark rings or amplified noise.</source>
+            <translation>Utilisez des données linéaires avant étirement. La PSF circulaire décrit un flou uniforme ; inspectez les étoiles à 100 % pour détecter des anneaux sombres ou une amplification du bruit.</translation>
+        </message>
+        <message>
+            <source>Import matched reference CSV</source>
+            <translation>Importer les références associées en CSV</translation>
+        </message>
+        <message>
+            <source>Stretch curve</source>
+            <translation>Courbe d’étirement</translation>
+        </message>
+    </context>
     <context>
         <name>DeepSkyWorkspace</name>
         <message>
@@ -1444,7 +1485,7 @@ Télescope · caméra · accessoires</translation>
             <location filename="../qml/DeepSkyWorkspace.qml" line="84" />
             <location filename="../qml/DeepSkyWorkspace.qml" line="137" />
             <source>Check parameters and operation order: white must exceed black; photometry and deconvolution require linear, unrotated input; photometry cannot be masked.</source>
-            <translation type="unfinished">Vérifiez les paramètres et l’ordre : blanc supérieur au noir ; photométrie et déconvolution sur une entrée linéaire non tournée ; photométrie sans masque.</translation>
+            <translation>Vérifiez les paramètres et l’ordre des opérations : le blanc doit dépasser le noir ; la photométrie et la déconvolution nécessitent une entrée linéaire sans rotation ; la photométrie ne peut pas être masquée.</translation>
         </message>
         <message>
             <location filename="../qml/DeepSkyWorkspace.qml" line="89" />
@@ -2150,7 +2191,7 @@ L’aperçu est automatiquement éclairci ; les données restent linéaires.</tr
             <source>Only changes the source preview. Disable to view linear pixel brightness.</source>
             <translation>Modifie uniquement l’aperçu de la source. Désactivez pour voir la luminosité linéaire des pixels.</translation>
         </message>
-            <message>
+        <message>
             <source>Presets</source>
             <translation>Préréglages</translation>
         </message>
@@ -2210,17 +2251,151 @@ L’aperçu est automatiquement éclairci ; les données restent linéaires.</tr
             <source>Classic export</source>
             <translation>Export classique</translation>
         </message>
-<message><source>1 image</source><translation>1 image</translation></message>
-<message><source>Export image</source><translation>Exporter l’image</translation></message>
-<message><source>Project and finishing presets</source><translation>Projet et préréglages de finition</translation></message>
-<message><source>Finishing presets</source><translation>Préréglages de finition</translation></message>
-<message><source>Finishing tools</source><translation>Outils de finition</translation></message>
-<message><source>Black level</source><translation>Niveau de noir</translation></message>
-<message><source>White level</source><translation>Niveau de blanc</translation></message>
-<message><source>Export the finished image to share it, or keep linear FITS for further processing.</source><translation>Exportez l’image finale pour la partager, ou conservez le FITS linéaire pour poursuivre le traitement.</translation></message>
-<message><source>PNG, TIFF or JPEG · optional caption</source><translation>PNG, TIFF ou JPEG · légende facultative</translation></message>
-<message><source>Original stack · 32-bit linear data</source><translation>Empilement original · données linéaires 32 bits</translation></message>
-</context>
+        <message>
+            <source>1 image</source>
+            <translation>1 image</translation>
+        </message>
+        <message>
+            <source>Export image</source>
+            <translation>Exporter l’image</translation>
+        </message>
+        <message>
+            <source>Project and finishing presets</source>
+            <translation>Projet et préréglages de finition</translation>
+        </message>
+        <message>
+            <source>Finishing presets</source>
+            <translation>Préréglages de finition</translation>
+        </message>
+        <message>
+            <source>Finishing tools</source>
+            <translation>Outils de finition</translation>
+        </message>
+        <message>
+            <source>Black level</source>
+            <translation>Niveau de noir</translation>
+        </message>
+        <message>
+            <source>White level</source>
+            <translation>Niveau de blanc</translation>
+        </message>
+        <message>
+            <source>Export the finished image to share it, or keep linear FITS for further processing.</source>
+            <translation>Exportez l’image finale pour la partager, ou conservez le FITS linéaire pour poursuivre le traitement.</translation>
+        </message>
+        <message>
+            <source>PNG, TIFF or JPEG · optional caption</source>
+            <translation>PNG, TIFF ou JPEG · légende facultative</translation>
+        </message>
+        <message>
+            <source>Original stack · 32-bit linear data</source>
+            <translation>Empilement original · données linéaires 32 bits</translation>
+        </message>
+        <message>
+            <source>All adjustment families</source>
+            <translation>Toutes les familles de réglages</translation>
+        </message>
+        <message>
+            <source>Show adjustment panel</source>
+            <translation>Afficher les réglages</translation>
+        </message>
+        <message>
+            <source>Resize adjustment panel</source>
+            <translation>Redimensionner le panneau de réglages</translation>
+        </message>
+        <message>
+            <source>Input histogram</source>
+            <translation>Histogramme d’entrée</translation>
+        </message>
+        <message>
+            <source>Show or hide histogram</source>
+            <translation>Afficher ou masquer l’histogramme</translation>
+        </message>
+        <message>
+            <source>Shadows %1% · Highlights %2%</source>
+            <translation>Ombres %1 % · Hautes lumières %2 %</translation>
+        </message>
+        <message>
+            <source>Color</source>
+            <translation>Couleur</translation>
+        </message>
+        <message>
+            <source>Geometry</source>
+            <translation>Géométrie</translation>
+        </message>
+        <message>
+            <source>Compare a source exposure</source>
+            <translation>Comparer une pose source</translation>
+        </message>
+        <message>
+            <source>Before</source>
+            <translation>Avant</translation>
+        </message>
+        <message>
+            <source>Result</source>
+            <translation>Résultat</translation>
+        </message>
+        <message>
+            <source>Split</source>
+            <translation>Partagé</translation>
+        </message>
+        <message>
+            <source>Stack before finishing, displayed without stretch</source>
+            <translation>Empilement avant finition, affiché sans étirement</translation>
+        </message>
+        <message>
+            <source>Reset the selected family. Cmd+Z restores its settings.</source>
+            <translation>Supprime les réglages de la famille sélectionnée. Cmd+Z les rétablit.</translation>
+        </message>
+        <message>
+            <source>Enable stretch</source>
+            <translation>Activer l’étirement</translation>
+        </message>
+        <message>
+            <source>Automatic stretch</source>
+            <translation>Réglage automatique</translation>
+        </message>
+        <message>
+            <source>Method</source>
+            <translation>Méthode</translation>
+        </message>
+        <message>
+            <source>GHS · advanced transformations</source>
+            <translation>GHS · transformations avancées</translation>
+        </message>
+        <message>
+            <source>Asinh strength</source>
+            <translation>Intensité Asinh</translation>
+        </message>
+        <message>
+            <source>Red gain</source>
+            <translation>Gain rouge</translation>
+        </message>
+        <message>
+            <source>Green gain</source>
+            <translation>Gain vert</translation>
+        </message>
+        <message>
+            <source>Blue gain</source>
+            <translation>Gain bleu</translation>
+        </message>
+        <message>
+            <source>Saturation</source>
+            <translation>Saturation</translation>
+        </message>
+        <message>
+            <source>Amount</source>
+            <translation>Intensité</translation>
+        </message>
+        <message>
+            <source>Noise smoothing</source>
+            <translation>Lissage du bruit</translation>
+        </message>
+        <message>
+            <source>Final image</source>
+            <translation>Image finale</translation>
+        </message>
+    </context>
     <context>
         <name>GlobalSettingsWorkspace</name>
         <message>
@@ -2350,10 +2525,19 @@ L’aperçu est automatiquement éclairci ; les données restent linéaires.</tr
             <source>Report a bug</source>
             <translation>Signaler un bug</translation>
         </message>
-    <message><source>Choose folder</source><translation>Choisir un dossier</translation></message>
-<message><source>Export folder</source><translation>Dossier d’export</translation></message>
-<message><source>Finished PNG and TIFF images, with your current adjustments.</source><translation>Images finales PNG et TIFF, avec vos réglages actuels.</translation></message>
-</context>
+        <message>
+            <source>Choose folder</source>
+            <translation>Choisir un dossier</translation>
+        </message>
+        <message>
+            <source>Export folder</source>
+            <translation>Dossier d’export</translation>
+        </message>
+        <message>
+            <source>Finished PNG and TIFF images, with your current adjustments.</source>
+            <translation>Images finales PNG et TIFF, avec vos réglages actuels.</translation>
+        </message>
+    </context>
     <context>
         <name>GuideWorkspace</name>
         <message>
@@ -2884,7 +3068,7 @@ L’aperçu est automatiquement éclairci ; les données restent linéaires.</tr
         <message>
             <location filename="../qml/GuideWorkspace.qml" line="47" />
             <source>GHS: controlled contrast</source>
-            <translation type="unfinished">GHS : contrôler le contraste</translation>
+            <translation>GHS : contraste contrôlé</translation>
         </message>
         <message>
             <location filename="../qml/GuideWorkspace.qml" line="47" />
@@ -2894,32 +3078,32 @@ L’aperçu est automatiquement éclairci ; les données restent linéaires.</tr
         <message>
             <location filename="../qml/GuideWorkspace.qml" line="48" />
             <source>PSF and restoration</source>
-            <translation type="unfinished">PSF et restauration</translation>
+            <translation>PSF et restauration</translation>
         </message>
         <message>
             <location filename="../qml/GuideWorkspace.qml" line="48" />
             <source>Work on an unstretched, unrotated recipe input. Measure central stars, review the FWHM and scatter, then explicitly use the Gaussian estimate; Moffat beta remains manual. PSF preview is display-scaled, while its linear kernel sums to 1. Richardson-Lucy restores weighted luminance with a shared RGB factor. Start with 10 iterations, damping 0.001 and stopping 0.0001 in normalized image units. Compare at 100%; rings and amplified noise mean the correction is too strong. Negative input is rejected. An explicit pedestal is available and remains in the result. It is residual-damped restoration, not blind or spatially varying deconvolution.</source>
-            <translation type="unfinished">Travaillez sur une entrée de recette non étirée et non tournée. Mesurez les étoiles centrales, contrôlez FWHM et dispersion puis utilisez explicitement l’estimation gaussienne ; le β Moffat reste manuel. L’aperçu de PSF est réétalonné pour l’affichage ; le noyau linéaire a une somme de 1. Richardson–Lucy restaure la luminance pondérée avec un facteur RVB commun. Commencez à 10 itérations, amortissement 0,001 et arrêt 0,0001 en unités normalisées. Comparez à 100 % : anneaux et bruit amplifié indiquent un traitement trop fort. Les valeurs négatives sont refusées. Un piédestal explicite est disponible et reste dans le résultat. Ce n’est pas une déconvolution aveugle ni variable dans le champ.</translation>
+            <translation>Travaillez sur une entrée sans étirement ni rotation. Mesurez les étoiles centrales, examinez la FWHM et sa dispersion, puis choisissez d’utiliser l’estimation gaussienne ; le bêta Moffat reste manuel. L’aperçu de la PSF est ajusté à l’affichage, tandis que la somme de son noyau linéaire vaut 1. Richardson-Lucy restaure la luminance pondérée avec un facteur commun aux canaux RVB. Commencez avec 10 itérations, un amortissement de 0,001 et un seuil d’arrêt de 0,0001 en unités normalisées. Comparez à 100 % : des anneaux ou un bruit amplifié indiquent une correction trop forte. Les valeurs négatives sont refusées. Un piédestal explicite est disponible et reste dans le résultat. Cette restauration amortit le résidu ; elle n’est ni aveugle ni variable dans l’espace.</translation>
         </message>
         <message>
             <location filename="../qml/GuideWorkspace.qml" line="49" />
             <source>Denoising and masks</source>
-            <translation type="unfinished">Bruit et masques</translation>
+            <translation>Débruitage et masques</translation>
         </message>
         <message>
             <location filename="../qml/GuideWorkspace.qml" line="49" />
             <source>Multiscale denoising uses a B3-spline à trous decomposition and soft thresholds from per-scale MAD, with separate luminance and chroma strengths. Start with 3 scales, threshold 3, and strengths 0.5. The noise estimate is a diagnostic, not a quality score. Prefer it before stretch and restoration. Luminance, radial and detected-star masks select where the complete draft applies: white processes, black protects, gray blends. Inspect the mask; inverted star masks protect only detected stars. Masks are regenerated from each operation input, applied after processing, and saved as parameters. They are not brush masks or imported bitmap masks.</source>
-            <translation type="unfinished">La réduction multiéchelle utilise une décomposition à trous par B3-spline et des seuils doux issus de la MAD à chaque échelle, avec intensités séparées pour luminance et chrominance. Commencez avec 3 échelles, seuil 3 et intensités 0,5. L’estimation du bruit est un diagnostic, pas un score de qualité. Préférez-la avant étirement et restauration. Les masques de luminance, circulaires et stellaires sélectionnent où appliquer tout le brouillon : blanc traite, noir protège, gris mélange. Inspectez le masque ; les masques stellaires inversés ne protègent que les étoiles détectées. Chaque masque est régénéré sur l’entrée de son opération, appliqué après calcul et sauvegardé par paramètres. Ce ne sont pas des masques au pinceau ni des images importées.</translation>
+            <translation type="unfinished">La réduction multiéchelle utilise une décomposition à trous par B3-spline et des seuils doux issus de la MAD à chaque échelle, avec intensités séparées pour luminance et chrominance. Commencez avec 3 échelles, seuil 3 et intensités 0,5. L’estimation du bruit est un diagnostic, pas un score de qualité. Préférez-la avant étirement et restauration. Les masques de luminance, circulaires et stellaires sélectionnent où appliquer toute l’opération : blanc traite, noir protège, gris mélange. Inspectez le masque ; les masques stellaires inversés ne protègent que les étoiles détectées. Chaque masque est régénéré sur l’entrée de son opération, appliqué après calcul et sauvegardé par paramètres. Ce ne sont pas des masques au pinceau ni des images importées.</translation>
         </message>
         <message>
             <location filename="../qml/GuideWorkspace.qml" line="50" />
             <source>Local photometric references</source>
-            <translation type="unfinished">Références photométriques locales</translation>
+            <translation>Références photométriques locales</translation>
         </message>
         <message>
             <location filename="../qml/GuideWorkspace.qml" line="50" />
             <source>Use linear broadband RGB and a CSV with header x,y,red,green,blue. Supply at least three already-matched stars, zero-based pixel coordinates from the top left, and positive reference fluxes for the intended filters. This does not identify stars or download a catalogue. Aperture photometry subtracts local annulus medians; saturated, edge and inconsistent references are rejected. Median log color ratios produce R/B gains relative to green. Inspect the accepted count, gains and residual scatter. Aperture/annulus defaults are 5/8/12 pixels and saturation 1; adapt them to your stars and data scale. This is relative color calibration, not absolute or spectrophotometric calibration. References are image-specific even when saved in a preset.</source>
-            <translation type="unfinished">Utilisez un RVB linéaire à bande large et un CSV avec l’en-tête x,y,red,green,blue. Fournissez au moins trois étoiles déjà associées, des coordonnées en pixels partant de zéro en haut à gauche et des flux de référence positifs pour les filtres visés. Aucun catalogue n’est téléchargé et aucune étoile n’est identifiée automatiquement. La photométrie d’ouverture retire la médiane locale de l’anneau ; références saturées, proches des bords ou incohérentes sont rejetées. La médiane des rapports logarithmiques donne les gains R/B relatifs au vert. Contrôlez nombre accepté, gains et dispersion. Ouverture/anneau : 5/8/12 pixels par défaut, saturation 1 ; adaptez-les aux étoiles et à l’échelle. Ce n’est ni une calibration absolue ni spectrophotométrique. Les références restent propres à une image, même dans un préréglage.</translation>
+            <translation>Utilisez une image RVB linéaire à large bande et un CSV avec l’en-tête x,y,red,green,blue. Fournissez au moins trois étoiles déjà identifiées, leurs coordonnées en pixels depuis le coin supérieur gauche (origine 0) et des flux de référence positifs pour les filtres utilisés. L’outil n’identifie pas les étoiles et ne télécharge pas de catalogue. La photométrie d’ouverture soustrait la médiane d’un anneau local ; les références saturées, proches du bord ou incohérentes sont rejetées. Les médianes des rapports logarithmiques donnent les gains rouge et bleu par rapport au vert. Examinez le nombre de références acceptées, les gains et la dispersion des résidus. Les rayons par défaut sont de 5/8/12 pixels, avec un seuil de saturation de 1 ; adaptez-les à vos étoiles et à l’échelle des données. Il s’agit d’un étalonnage relatif des couleurs, pas d’un étalonnage absolu ou spectrophotométrique. Les références sont propres à l’image, même si elles sont enregistrées dans un préréglage.</translation>
         </message>
         <message>
             <location filename="../qml/GuideWorkspace.qml" line="51" />
@@ -3018,7 +3202,7 @@ L’aperçu est automatiquement éclairci ; les données restent linéaires.</tr
             <source>Combine multiple filters as RGB, LRGB, SHO or HOO. Adjust color gains, saturation and smoothing manually. The initial gains estimate a neutral background; they are not photometric calibration. Gradient extraction uses independent color-channel polynomials (degrees 1 to 4), a configurable grid and manually editable sky samples. Optional degree-1 extraction can run on each calibrated, debayered exposure before stacking. Avoid fitting real nebulosity. Green noise reduction offers four SCNR protection methods and optional CIE lightness preservation. Use it after stretching and color balance; intentional green colors should be preserved. Advanced transformations provides GHS, circular-PSF Richardson-Lucy, multiscale wavelet denoising, generated masks and local matched-reference photometric colors. Automatic astrometry, online catalogues and spectrophotometric calibration are not available. Export linear 32-bit FITS for further work, or the finished 32-bit FITS, 16-bit TIFF or JPEG. Final FITS retains processed floating-point values; Linear FITS exports the original integration. Details and caption transfers the finished result to Processing with the accepted exposure count, total exposure time and filters for the technical caption.</source>
             <translation type="vanished">Composez les filtres en RVB, LRGB, SHO ou HOO. Ajustez gains, saturation et lissage ; les gains initiaux neutralisent le fond sans calibration photométrique. Le gradient ajuste chaque canal par un polynôme de degré 1 à 4, avec grille réglable et échantillons de ciel éditables. Une correction de degré 1 peut agir sur chaque pose calibrée et dématricée avant empilement. Évitez de modéliser la nébulosité réelle. La suppression du vert propose quatre protections SCNR et la préservation de luminosité CIE ; utilisez-la après étirement et balance, en conservant les couleurs vertes intentionnelles. Transformations avancées propose GHS, Richardson–Lucy à PSF circulaire, bruit multiéchelle, masques générés et calibration couleur par références locales associées. Astrométrie automatique, catalogues en ligne et calibration spectrophotométrique restent absents. Exportez l’intégration originale en FITS linéaire 32 bits, ou le résultat traité en FITS 32 bits, TIFF 16 bits ou JPEG. Détails et légende transmet le résultat avec poses acceptées, temps total et filtres.</translation>
         </message>
-            <message>
+        <message>
             <source>Adjustments update automatically after you move a control. Choose a light in the comparison list and hold Raw exposure to compare it with the finished stack. Exports use the finished stack.</source>
             <translation>Les réglages s’actualisent automatiquement après chaque modification. Choisissez une pose dans la liste de comparaison et maintenez Pose brute pour la comparer à l’empilement finalisé. Les exports utilisent l’empilement finalisé.</translation>
         </message>
@@ -3042,17 +3226,59 @@ L’aperçu est automatiquement éclairci ; les données restent linéaires.</tr
             <source>Presets at the top of Finish save or restore all finishing families. Use Cmd+Z to undo. Export offers Linear FITS for the original integration and Classic export for PNG, TIFF or JPEG with an optional caption. PNG and TIFF preserve 16-bit detail without lossy compression.</source>
             <translation>Préréglages, en haut de Finition, enregistre ou restaure toutes les familles de finition. Utilisez Cmd+Z pour annuler. Exporter propose FITS linéaire pour l’intégration originale et Export classique pour un PNG, TIFF ou JPEG avec une légende facultative. PNG et TIFF conservent les détails en 16 bits sans compression destructive.</translation>
         </message>
-<message><source>Combine multiple filters as RGB, LRGB, SHO or HOO. Adjust color gains, saturation and smoothing manually. The initial gains estimate a neutral background; they are not photometric calibration. Gradient extraction uses independent color-channel polynomials (degrees 1 to 4), a configurable grid and manually editable sky samples. Optional degree-1 extraction can run on each calibrated, debayered exposure before stacking. Avoid fitting real nebulosity. Green noise reduction offers four SCNR protection methods and optional CIE lightness preservation. Use it after stretching and color balance; intentional green colors should be preserved. Advanced transformations provides GHS, circular-PSF Richardson-Lucy, multiscale wavelet denoising, generated masks and local matched-reference photometric colors. Automatic astrometry, online catalogues and spectrophotometric calibration are not available. Export linear 32-bit FITS for further work. Classic export opens the shared editor with a choice of PNG, TIFF or JPEG and an optional caption. PNG and TIFF preserve 16-bit detail without lossy compression. The technical caption includes the accepted exposure count, total exposure time and filters. Deep-sky caption settings are saved in the project.</source><translation>Combinez les filtres en RGB, LRGB, SHO ou HOO. Réglez les gains, la saturation et le lissage manuellement. Les gains initiaux neutralisent approximativement le fond ; ce n’est pas une calibration photométrique. Le gradient est ajusté par couche, avec polynôme de degré 1 à 4, grille et échantillons manuels. Une extraction de degré 1 peut être appliquée à chaque pose calibrée et dématricée avant empilement ; évitez de modéliser la nébulosité réelle. SCNR réduit la dominance verte après étirement ; préservez les couleurs vertes intentionnelles. Les outils avancés proposent GHS, Richardson–Lucy avec PSF circulaire, réduction du bruit multiéchelle, masques générés et calibration couleur par références locales associées. Astrométrie automatique, catalogues en ligne et calibration spectrophotométrique restent absents. Exportez le FITS linéaire 32 bits pour poursuivre le travail. Export classique ouvre l’éditeur commun avec choix du PNG, TIFF ou JPEG et une légende facultative. PNG et TIFF conservent les détails en 16 bits sans compression destructive. La légende technique inclut les poses acceptées, le temps total et les filtres. Les réglages de légende sont enregistrés dans le projet.</translation></message>
-<message><source>Multiscale denoising uses a B3-spline à trous decomposition and soft thresholds from per-scale MAD, with separate luminance and chroma strengths. Start with 3 scales, threshold 3, and strengths 0.5. The noise estimate is a diagnostic, not a quality score. Prefer it before stretch and restoration. Luminance, radial and detected-star masks select where the adjustments apply: white processes, black protects, gray blends. Inspect the mask; inverted star masks protect only detected stars. Masks are regenerated from each operation input, applied after processing, and saved as parameters. They are not brush masks or imported bitmap masks.</source><translation>La réduction multiéchelle utilise une décomposition à trous par B3-spline et des seuils doux issus de la MAD à chaque échelle, avec intensités séparées pour luminance et chrominance. Commencez avec 3 échelles, seuil 3 et intensités 0,5. L’estimation du bruit est un diagnostic, pas un score de qualité. Préférez-la avant étirement et restauration. Les masques de luminance, circulaires et stellaires sélectionnent où appliquer tous les réglages : blanc traite, noir protège, gris mélange. Inspectez le masque ; les masques stellaires inversés ne protègent que les étoiles détectées. Chaque masque est régénéré sur l’entrée de son opération, appliqué après calcul et sauvegardé par paramètres. Ce ne sont pas des masques au pinceau ni des images importées.</translation></message>
-<message><source>Increase wavelets gradually, adjust color and compare before / after. Export a 16-bit PNG or TIFF. Keep the original SER so you can try a different selection later.</source><translation>Augmentez les ondelettes progressivement, ajustez la couleur et comparez avant / après. Exportez en PNG ou TIFF 16 bits. Conservez le SER original pour pouvoir essayer une autre sélection plus tard.</translation></message>
-<message><source>Finishing presets in the project gear save or restore all finishing families. Use Cmd+Z to undo. Export offers Linear FITS for the original integration and Classic export for PNG, TIFF or JPEG with an optional caption. PNG and TIFF preserve 16-bit detail without lossy compression.</source><translation>Préréglages de finition, dans le rouage du projet, enregistre ou restaure toutes les familles. Utilisez Cmd+Z pour annuler. Exporter propose FITS linéaire pour l’intégration originale et Export classique pour un PNG, TIFF ou JPEG avec une légende facultative. PNG et TIFF conservent les détails en 16 bits sans compression destructive.</translation></message>
-<message><source>Resume returns to the current session without loading files again. Open reloads a saved deep-sky project; recreate its stack to restore the saved finish. Keep its source files in place. Settings is a workspace in the top navigation. The deep-sky gear manages the project and finishing presets.</source><translation>Reprendre revient à la session en cours sans recharger les fichiers. Ouvrir recharge un projet ciel profond enregistré ; recréez son empilement pour retrouver sa finition. Conservez les fichiers source à leur emplacement. Paramètres est un espace de la navigation principale. Le rouage de Ciel profond regroupe le projet et ses préréglages de finition.</translation></message>
-<message><source>PNG / TIFF 16-bit · the finished result</source><translation>PNG / TIFF 16 bits · le résultat final</translation></message>
-<message><source>Processing exports 16-bit RGB PNG or TIFF files, preserving the precision of the result. Mosaic exports TIFF. A 16-bit file cannot recover information absent from an 8-bit original. JPEG is accepted in Mosaic, but is not a direct Processing input.</source><translation>Traitement exporte des fichiers PNG ou TIFF RVB 16 bits, en conservant la précision du résultat. Mosaïque exporte en TIFF. Un fichier 16 bits ne peut pas récupérer des informations absentes d’un original 8 bits. JPEG est accepté dans Mosaïque, mais pas directement dans Traitement.</translation></message>
-<message><source>In Capture, choose Deep sky · FITS sequence, set the camera exposure and frame count, and start. Raw sensor samples and acquisition metadata are saved in individual FITS. Mount tracking and guiding remain external. Use the gear menu to open, save or clear a project. Saving preserves file references, frame selection, stack settings and finishing controls. Reopen the project and recreate the stack to reapply the saved finish. Keep the source files in place.</source><translation>Dans Capture, choisissez Ciel profond · séquence FITS, réglez la pose et le nombre d’images, puis démarrez. Les données brutes du capteur et les métadonnées sont enregistrées dans chaque FITS. Le suivi et le guidage restent externes. Le rouage permet d’ouvrir, d’enregistrer ou de vider un projet. Celui-ci conserve les références aux fichiers, la sélection des images, les réglages d’empilement et de finition. Rouvrez le projet et recréez son empilement pour retrouver sa finition. Conservez les fichiers source à leur emplacement.</translation></message>
-<message><source>Processing exports PNG or TIFF; Mosaic exports TIFF. An imported source image is protected from overwriting; choose a different file name. Captions are optional, and their title appears above the caption text. Once exported, the caption is part of the image.</source><translation>Traitement exporte en PNG ou TIFF ; Mosaïque exporte en TIFF. Une image source importée est protégée contre l’écrasement ; choisissez un autre nom de fichier. La légende est facultative et son titre apparaît au-dessus du texte. Après l’export, la légende fait partie de l’image.</translation></message>
-<message><source>Images, Stack and Finish are in the right inspector. Stack contains calibration and integration settings. Finish unlocks after stacking and contains the editable linear histogram and finishing controls. The floppy icon exports the image; the gear manages projects and finishing presets. The image and displayed histogram stay on the left. Source files toggles the source list, which starts collapsed in Finish.</source><translation>Images, Empilement et Finition sont dans le panneau de droite. Empilement contient les réglages de calibration et d’intégration. Finition devient disponible après l’empilement et propose l’histogramme linéaire modifiable et les réglages de finition. La disquette exporte l’image ; le rouage regroupe les projets et les préréglages de finition. L’image et son histogramme restent à gauche. Fichiers sources affiche ou masque la liste, initialement repliée dans Finition.</translation></message>
-</context>
+        <message>
+            <source>Combine multiple filters as RGB, LRGB, SHO or HOO. Adjust color gains, saturation and smoothing manually. The initial gains estimate a neutral background; they are not photometric calibration. Gradient extraction uses independent color-channel polynomials (degrees 1 to 4), a configurable grid and manually editable sky samples. Optional degree-1 extraction can run on each calibrated, debayered exposure before stacking. Avoid fitting real nebulosity. Green noise reduction offers four SCNR protection methods and optional CIE lightness preservation. Use it after stretching and color balance; intentional green colors should be preserved. Advanced transformations provides GHS, circular-PSF Richardson-Lucy, multiscale wavelet denoising, generated masks and local matched-reference photometric colors. Automatic astrometry, online catalogues and spectrophotometric calibration are not available. Export linear 32-bit FITS for further work. Classic export opens the shared editor with a choice of PNG, TIFF or JPEG and an optional caption. PNG and TIFF preserve 16-bit detail without lossy compression. The technical caption includes the accepted exposure count, total exposure time and filters. Deep-sky caption settings are saved in the project.</source>
+            <translation>Combinez les filtres en RGB, LRGB, SHO ou HOO. Réglez les gains, la saturation et le lissage manuellement. Les gains initiaux neutralisent approximativement le fond ; ce n’est pas une calibration photométrique. Le gradient est ajusté par couche, avec polynôme de degré 1 à 4, grille et échantillons manuels. Une extraction de degré 1 peut être appliquée à chaque pose calibrée et dématricée avant empilement ; évitez de modéliser la nébulosité réelle. SCNR réduit la dominance verte après étirement ; préservez les couleurs vertes intentionnelles. Les outils avancés proposent GHS, Richardson–Lucy avec PSF circulaire, réduction du bruit multiéchelle, masques générés et calibration couleur par références locales associées. Astrométrie automatique, catalogues en ligne et calibration spectrophotométrique restent absents. Exportez le FITS linéaire 32 bits pour poursuivre le travail. Export classique ouvre l’éditeur commun avec choix du PNG, TIFF ou JPEG et une légende facultative. PNG et TIFF conservent les détails en 16 bits sans compression destructive. La légende technique inclut les poses acceptées, le temps total et les filtres. Les réglages de légende sont enregistrés dans le projet.</translation>
+        </message>
+        <message>
+            <source>Multiscale denoising uses a B3-spline à trous decomposition and soft thresholds from per-scale MAD, with separate luminance and chroma strengths. Start with 3 scales, threshold 3, and strengths 0.5. The noise estimate is a diagnostic, not a quality score. Prefer it before stretch and restoration. Luminance, radial and detected-star masks select where the adjustments apply: white processes, black protects, gray blends. Inspect the mask; inverted star masks protect only detected stars. Masks are regenerated from each operation input, applied after processing, and saved as parameters. They are not brush masks or imported bitmap masks.</source>
+            <translation>La réduction multiéchelle utilise une décomposition à trous par B3-spline et des seuils doux issus de la MAD à chaque échelle, avec intensités séparées pour luminance et chrominance. Commencez avec 3 échelles, seuil 3 et intensités 0,5. L’estimation du bruit est un diagnostic, pas un score de qualité. Préférez-la avant étirement et restauration. Les masques de luminance, circulaires et stellaires sélectionnent où appliquer tous les réglages : blanc traite, noir protège, gris mélange. Inspectez le masque ; les masques stellaires inversés ne protègent que les étoiles détectées. Chaque masque est régénéré sur l’entrée de son opération, appliqué après calcul et sauvegardé par paramètres. Ce ne sont pas des masques au pinceau ni des images importées.</translation>
+        </message>
+        <message>
+            <source>Increase wavelets gradually, adjust color and compare before / after. Export a 16-bit PNG or TIFF. Keep the original SER so you can try a different selection later.</source>
+            <translation>Augmentez les ondelettes progressivement, ajustez la couleur et comparez avant / après. Exportez en PNG ou TIFF 16 bits. Conservez le SER original pour pouvoir essayer une autre sélection plus tard.</translation>
+        </message>
+        <message>
+            <source>Finishing presets in the project gear save or restore all finishing families. Use Cmd+Z to undo. Export offers Linear FITS for the original integration and Classic export for PNG, TIFF or JPEG with an optional caption. PNG and TIFF preserve 16-bit detail without lossy compression.</source>
+            <translation>Préréglages de finition, dans le rouage du projet, enregistre ou restaure toutes les familles. Utilisez Cmd+Z pour annuler. Exporter propose FITS linéaire pour l’intégration originale et Export classique pour un PNG, TIFF ou JPEG avec une légende facultative. PNG et TIFF conservent les détails en 16 bits sans compression destructive.</translation>
+        </message>
+        <message>
+            <source>Resume returns to the current session without loading files again. Open reloads a saved deep-sky project; recreate its stack to restore the saved finish. Keep its source files in place. Settings is a workspace in the top navigation. The deep-sky gear manages the project and finishing presets.</source>
+            <translation>Reprendre revient à la session en cours sans recharger les fichiers. Ouvrir recharge un projet ciel profond enregistré ; recréez son empilement pour retrouver sa finition. Conservez les fichiers source à leur emplacement. Paramètres est un espace de la navigation principale. Le rouage de Ciel profond regroupe le projet et ses préréglages de finition.</translation>
+        </message>
+        <message>
+            <source>PNG / TIFF 16-bit · the finished result</source>
+            <translation>PNG / TIFF 16 bits · le résultat final</translation>
+        </message>
+        <message>
+            <source>Processing exports 16-bit RGB PNG or TIFF files, preserving the precision of the result. Mosaic exports TIFF. A 16-bit file cannot recover information absent from an 8-bit original. JPEG is accepted in Mosaic, but is not a direct Processing input.</source>
+            <translation>Traitement exporte des fichiers PNG ou TIFF RVB 16 bits, en conservant la précision du résultat. Mosaïque exporte en TIFF. Un fichier 16 bits ne peut pas récupérer des informations absentes d’un original 8 bits. JPEG est accepté dans Mosaïque, mais pas directement dans Traitement.</translation>
+        </message>
+        <message>
+            <source>In Capture, choose Deep sky · FITS sequence, set the camera exposure and frame count, and start. Raw sensor samples and acquisition metadata are saved in individual FITS. Mount tracking and guiding remain external. Use the gear menu to open, save or clear a project. Saving preserves file references, frame selection, stack settings and finishing controls. Reopen the project and recreate the stack to reapply the saved finish. Keep the source files in place.</source>
+            <translation>Dans Capture, choisissez Ciel profond · séquence FITS, réglez la pose et le nombre d’images, puis démarrez. Les données brutes du capteur et les métadonnées sont enregistrées dans chaque FITS. Le suivi et le guidage restent externes. Le rouage permet d’ouvrir, d’enregistrer ou de vider un projet. Celui-ci conserve les références aux fichiers, la sélection des images, les réglages d’empilement et de finition. Rouvrez le projet et recréez son empilement pour retrouver sa finition. Conservez les fichiers source à leur emplacement.</translation>
+        </message>
+        <message>
+            <source>Processing exports PNG or TIFF; Mosaic exports TIFF. An imported source image is protected from overwriting; choose a different file name. Captions are optional, and their title appears above the caption text. Once exported, the caption is part of the image.</source>
+            <translation>Traitement exporte en PNG ou TIFF ; Mosaïque exporte en TIFF. Une image source importée est protégée contre l’écrasement ; choisissez un autre nom de fichier. La légende est facultative et son titre apparaît au-dessus du texte. Après l’export, la légende fait partie de l’image.</translation>
+        </message>
+        <message>
+            <source>Images, Stack and Finish are in the right inspector. Stack contains calibration and integration settings. Finish unlocks after stacking and contains the editable linear histogram and finishing controls. The floppy icon exports the image; the gear manages projects and finishing presets. The image and displayed histogram stay on the left. Source files toggles the source list, which starts collapsed in Finish.</source>
+            <translation>Images, Empilement et Finition sont dans le panneau de droite. Empilement contient les réglages de calibration et d’intégration. Finition devient disponible après l’empilement et propose l’histogramme linéaire modifiable et les réglages de finition. La disquette exporte l’image ; le rouage regroupe les projets et les préréglages de finition. L’image et son histogramme restent à gauche. Fichiers sources affiche ou masque la liste, initialement repliée dans Finition.</translation>
+        </message>
+        <message>
+            <source>Adjustments update automatically. Before, Result and Split compare the stack before finishing with the current result; Before is displayed without stretch. The comparison follows rotations and mirrors. To compare a source exposure, open the folder button beside Comparison and hold Raw exposure. Exports use the finished stack.</source>
+            <translation>Les réglages s’appliquent automatiquement. Avant, Résultat et Partagé comparent l’empilement avant finition au résultat actuel ; Avant est affiché sans étirement. La comparaison suit les rotations et les miroirs. Pour comparer une pose source, ouvrez le bouton dossier à côté de Comparaison et maintenez Pose brute. Les exports utilisent l’empilement final.</translation>
+        </message>
+        <message>
+            <source>Open Stretch, Background, Color, Geometry or Advanced transformations. In smaller windows, choose the family from the selector. Changes apply automatically. Delete these adjustments resets only the selected family; Cmd+Z restores the previous settings. The project gear contains presets for the entire finish. Projects preserve all finishing settings.</source>
+            <translation>Ouvrez Étirement, Fond de ciel, Couleur, Géométrie ou Transformations avancées. Dans les petites fenêtres, choisissez la famille dans le sélecteur. Les changements s’appliquent automatiquement. Supprimer ces réglages réinitialise uniquement la famille sélectionnée ; Cmd+Z restaure les réglages précédents. Le rouage du projet contient les préréglages de toute la finition. Les projets conservent tous les réglages de finition.</translation>
+        </message>
+        <message>
+            <source>Images, Stack and Finish form the bar above the image. Stack contains calibration and integration settings. Finish unlocks after stacking. Its right inspector contains the input histogram and adjustment families; the image stays on the left with zoom below it. The floppy button opens final-image or linear FITS export. The project gear manages projects and finishing presets. In Images and Stack, the folder button toggles the source list.</source>
+            <translation>Images, Empilement et Finition forment la barre au-dessus de l’image. Empilement contient la calibration et l’intégration. Finition devient disponible après l’empilement. Son inspecteur à droite contient l’histogramme d’entrée et les familles de réglages ; l’image reste à gauche, avec le zoom en dessous. Le bouton disquette ouvre l’export de l’image finale ou du FITS linéaire. Le rouage du projet gère les projets et les préréglages de finition. Dans Images et Empilement, le bouton dossier affiche ou masque les fichiers sources.</translation>
+        </message>
+    </context>
     <context>
         <name>HistoryWorkspace</name>
         <message>
@@ -3197,7 +3423,7 @@ Ajoutez-le depuis son nouvel emplacement.</translation>
         </message>
         <message>
             <source>Multiscale denoising uses a B3-spline à trous decomposition and soft thresholds from per-scale MAD, with separate luminance and chroma strengths. Start with 3 scales, threshold 3, and strengths 0.5. The noise estimate is a diagnostic, not a quality score. Prefer it before stretch and restoration. Luminance, radial and detected-star masks select where the complete draft applies: white processes, black protects, gray blends. Inspect the mask; inverted star masks protect only detected stars. Masks are regenerated from each operation input, applied after processing, and saved as parameters. They are not brush masks or imported bitmap masks.</source>
-            <translation type="vanished">La réduction multiéchelle utilise une décomposition à trous par B3-spline et des seuils doux issus de la MAD à chaque échelle, avec intensités séparées pour luminance et chrominance. Commencez avec 3 échelles, seuil 3 et intensités 0,5. L’estimation du bruit est un diagnostic, pas un score de qualité. Préférez-la avant étirement et restauration. Les masques de luminance, circulaires et stellaires sélectionnent où appliquer tout le brouillon : blanc traite, noir protège, gris mélange. Inspectez le masque ; les masques stellaires inversés ne protègent que les étoiles détectées. Chaque masque est régénéré sur l’entrée de son opération, appliqué après calcul et sauvegardé par paramètres. Ce ne sont pas des masques au pinceau ni des images importées.</translation>
+            <translation type="vanished">La réduction multiéchelle utilise une décomposition à trous par B3-spline et des seuils doux issus de la MAD à chaque échelle, avec intensités séparées pour luminance et chrominance. Commencez avec 3 échelles, seuil 3 et intensités 0,5. L’estimation du bruit est un diagnostic, pas un score de qualité. Préférez-la avant étirement et restauration. Les masques de luminance, circulaires et stellaires sélectionnent où appliquer toute l’opération : blanc traite, noir protège, gris mélange. Inspectez le masque ; les masques stellaires inversés ne protègent que les étoiles détectées. Chaque masque est régénéré sur l’entrée de son opération, appliqué après calcul et sauvegardé par paramètres. Ce ne sont pas des masques au pinceau ni des images importées.</translation>
         </message>
         <message>
             <source>Local photometric references</source>
@@ -3207,8 +3433,11 @@ Ajoutez-le depuis son nouvel emplacement.</translation>
             <source>Use linear broadband RGB and a CSV with header x,y,red,green,blue. Supply at least three already-matched stars, zero-based pixel coordinates from the top left, and positive reference fluxes for the intended filters. This does not identify stars or download a catalogue. Aperture photometry subtracts local annulus medians; saturated, edge and inconsistent references are rejected. Median log color ratios produce R/B gains relative to green. Inspect the accepted count, gains and residual scatter. Aperture/annulus defaults are 5/8/12 pixels and saturation 1; adapt them to your stars and data scale. This is relative color calibration, not absolute or spectrophotometric calibration. References are image-specific even when saved in a preset.</source>
             <translation type="vanished">Utilisez un RVB linéaire à bande large et un CSV avec l’en-tête x,y,red,green,blue. Fournissez au moins trois étoiles déjà associées, des coordonnées en pixels partant de zéro en haut à gauche et des flux de référence positifs pour les filtres visés. Aucun catalogue n’est téléchargé et aucune étoile n’est identifiée automatiquement. La photométrie d’ouverture retire la médiane locale de l’anneau ; références saturées, proches des bords ou incohérentes sont rejetées. La médiane des rapports logarithmiques donne les gains R/B relatifs au vert. Contrôlez nombre accepté, gains et dispersion. Ouverture/anneau : 5/8/12 pixels par défaut, saturation 1 ; adaptez-les aux étoiles et à l’échelle. Ce n’est ni une calibration absolue ni spectrophotométrique. Les références restent propres à une image, même dans un préréglage.</translation>
         </message>
-    <message><source>Add images</source><translation>Ajouter des images</translation></message>
-</context>
+        <message>
+            <source>Add images</source>
+            <translation>Ajouter des images</translation>
+        </message>
+    </context>
     <context>
         <name>HomeWorkspace</name>
         <message>
@@ -3334,8 +3563,11 @@ Ajoutez-le depuis son nouvel emplacement.</translation>
             <source>Open the guide</source>
             <translation>Ouvrir le guide</translation>
         </message>
-    <message><source>Open a project</source><translation>Ouvrir un projet</translation></message>
-</context>
+        <message>
+            <source>Open a project</source>
+            <translation>Ouvrir un projet</translation>
+        </message>
+    </context>
     <context>
         <name>ImageViewport</name>
         <message>
@@ -3362,6 +3594,10 @@ Ajoutez-le depuis son nouvel emplacement.</translation>
             <location filename="../qml/ImageViewport.qml" line="108" />
             <source>Fit to window. Double-click the image to switch between Fit and 100%.</source>
             <translation>Adapter à la fenêtre. Double-cliquez sur l’image pour basculer entre Adapter et 100 %.</translation>
+        </message>
+        <message>
+            <source>Fit to window</source>
+            <translation>Adapter à la fenêtre</translation>
         </message>
     </context>
     <context>
@@ -3693,13 +3929,31 @@ Ajoutez-le depuis son nouvel emplacement.</translation>
             <source>Drop to open in Processing</source>
             <translation>Déposer pour ouvrir dans Traitement</translation>
         </message>
-    <message><source>Save project before quitting</source><translation>Sauvegarder le projet avant de quitter</translation></message>
-<message><source>AstroCapture project (*.astroproject)</source><translation>Projet AstroCapture (*.astroproject)</translation></message>
-<message><source>Save finished TIFF before quitting</source><translation>Sauvegarder le TIFF avant de quitter</translation></message>
-<message><source>16-bit TIFF image (*.tif *.tiff)</source><translation>Image TIFF 16 bits (*.tif *.tiff)</translation></message>
-<message><source>Cannot prepare this image for captioned export. Return to Deep sky to export the image.</source><translation>Impossible de préparer cette image pour un export avec légende. Revenez à Ciel profond pour exporter l’image.</translation></message>
-<message><source>Capture settings</source><translation>Réglages de capture</translation></message>
-</context>
+        <message>
+            <source>Save project before quitting</source>
+            <translation>Sauvegarder le projet avant de quitter</translation>
+        </message>
+        <message>
+            <source>AstroCapture project (*.astroproject)</source>
+            <translation>Projet AstroCapture (*.astroproject)</translation>
+        </message>
+        <message>
+            <source>Save finished TIFF before quitting</source>
+            <translation>Sauvegarder le TIFF avant de quitter</translation>
+        </message>
+        <message>
+            <source>16-bit TIFF image (*.tif *.tiff)</source>
+            <translation>Image TIFF 16 bits (*.tif *.tiff)</translation>
+        </message>
+        <message>
+            <source>Cannot prepare this image for captioned export. Return to Deep sky to export the image.</source>
+            <translation>Impossible de préparer cette image pour un export avec légende. Revenez à Ciel profond pour exporter l’image.</translation>
+        </message>
+        <message>
+            <source>Capture settings</source>
+            <translation>Réglages de capture</translation>
+        </message>
+    </context>
     <context>
         <name>MosaicWorkspace</name>
         <message>
@@ -3923,14 +4177,35 @@ Les détails communs relient les vues. Les zones manquantes restent noires ; auc
             <source>%1 of %2 images selected.</source>
             <translation type="vanished">%1 images sélectionnées sur %2.</translation>
         </message>
-    <message><source>Add images</source><translation>Ajouter des images</translation></message>
-<message><source>Edit caption</source><translation>Modifier la légende</translation></message>
-<message><source>Edit in Processing</source><translation>Retoucher dans Traitement</translation></message>
-<message><source>Export TIFF</source><translation>Exporter en TIFF</translation></message>
-<message><source>Build your mosaic</source><translation>Créez votre mosaïque</translation></message>
-<message><source>Add overlapping Moon or Sun images, then assemble them.</source><translation>Ajoutez des vues de la Lune ou du Soleil qui se chevauchent, puis assemblez-les.</translation></message>
-<message><source>%1 excluded images</source><translation>%1 images écartées</translation></message>
-</context>
+        <message>
+            <source>Add images</source>
+            <translation>Ajouter des images</translation>
+        </message>
+        <message>
+            <source>Edit caption</source>
+            <translation>Modifier la légende</translation>
+        </message>
+        <message>
+            <source>Edit in Processing</source>
+            <translation>Retoucher dans Traitement</translation>
+        </message>
+        <message>
+            <source>Export TIFF</source>
+            <translation>Exporter en TIFF</translation>
+        </message>
+        <message>
+            <source>Build your mosaic</source>
+            <translation>Créez votre mosaïque</translation>
+        </message>
+        <message>
+            <source>Add overlapping Moon or Sun images, then assemble them.</source>
+            <translation>Ajoutez des vues de la Lune ou du Soleil qui se chevauchent, puis assemblez-les.</translation>
+        </message>
+        <message>
+            <source>%1 excluded images</source>
+            <translation>%1 images écartées</translation>
+        </message>
+    </context>
     <context>
         <name>ProcessingWorkspace</name>
         <message>
@@ -4501,19 +4776,63 @@ Télescope · caméra · accessoires</translation>
             <source>Drop to adjust this image</source>
             <translation>Déposer pour retoucher cette image</translation>
         </message>
-    <message><source>16-bit PNG image (*.png)</source><translation>Image PNG 16 bits (*.png)</translation></message>
-<message><source>PNG and TIFF preserve 16-bit detail without lossy compression.</source><translation>PNG et TIFF conservent les détails en 16 bits sans compression destructive.</translation></message>
-<message><source>PNG · 16-bit, lossless</source><translation>PNG · 16 bits, sans perte</translation></message>
-<message><source>TIFF · 16-bit, lossless</source><translation>TIFF · 16 bits, sans perte</translation></message>
-<message><source>Save image</source><translation>Enregistrer l’image</translation></message>
-<message><source>Open image or video</source><translation>Ouvrir une image ou une vidéo</translation></message>
-<message><source>Show explanations</source><translation>Afficher les aides</translation></message>
-<message><source>Hide explanations</source><translation>Masquer les aides</translation></message>
-<message><source>Manage presets</source><translation>Gérer les préréglages</translation></message>
-<message><source>Edit caption</source><translation>Modifier la légende</translation></message>
-<message><source>Export image</source><translation>Exporter l’image</translation></message>
-<message><source>Recent files</source><translation>Fichiers récents</translation></message>
-</context>
+        <message>
+            <source>16-bit PNG image (*.png)</source>
+            <translation>Image PNG 16 bits (*.png)</translation>
+        </message>
+        <message>
+            <source>PNG and TIFF preserve 16-bit detail without lossy compression.</source>
+            <translation>PNG et TIFF conservent les détails en 16 bits sans compression destructive.</translation>
+        </message>
+        <message>
+            <source>PNG · 16-bit, lossless</source>
+            <translation>PNG · 16 bits, sans perte</translation>
+        </message>
+        <message>
+            <source>TIFF · 16-bit, lossless</source>
+            <translation>TIFF · 16 bits, sans perte</translation>
+        </message>
+        <message>
+            <source>Save image</source>
+            <translation>Enregistrer l’image</translation>
+        </message>
+        <message>
+            <source>Open image or video</source>
+            <translation>Ouvrir une image ou une vidéo</translation>
+        </message>
+        <message>
+            <source>Show explanations</source>
+            <translation>Afficher les aides</translation>
+        </message>
+        <message>
+            <source>Hide explanations</source>
+            <translation>Masquer les aides</translation>
+        </message>
+        <message>
+            <source>Manage presets</source>
+            <translation>Gérer les préréglages</translation>
+        </message>
+        <message>
+            <source>Edit caption</source>
+            <translation>Modifier la légende</translation>
+        </message>
+        <message>
+            <source>Export image</source>
+            <translation>Exporter l’image</translation>
+        </message>
+        <message>
+            <source>Recent files</source>
+            <translation>Fichiers récents</translation>
+        </message>
+        <message>
+            <source>Processing options</source>
+            <translation>Options de traitement</translation>
+        </message>
+        <message>
+            <source>Delete these adjustments</source>
+            <translation>Supprimer ces réglages</translation>
+        </message>
+    </context>
     <context>
         <name>QObject</name>
         <message>
@@ -4799,22 +5118,22 @@ Résultat obtenu :
         <message>
             <location filename="../src/DeepSkyController.cpp" line="188" />
             <source>Loaded %1 photometric references.</source>
-            <translation type="unfinished">%1 références photométriques chargées.</translation>
+            <translation>%1 références photométriques chargées.</translation>
         </message>
         <message>
             <location filename="../src/DeepSkyController.cpp" line="192" />
             <source>PSF estimation requires a linear, unrotated recipe input. Remove earlier stretches or use a new version.</source>
-            <translation type="unfinished">La mesure de PSF exige une entrée linéaire non tournée. Retirez les étirements précédents ou utilisez une nouvelle version.</translation>
+            <translation>L’estimation de la PSF nécessite une entrée linéaire sans rotation. Retirez les étirements précédents ou utilisez une nouvelle version.</translation>
         </message>
         <message>
             <location filename="../src/DeepSkyController.cpp" line="193" />
             <source>Measuring stellar PSF…</source>
-            <translation type="unfinished">Mesure de la PSF stellaire…</translation>
+            <translation>Mesure de la PSF stellaire…</translation>
         </message>
         <message>
             <location filename="../src/DeepSkyController.cpp" line="193" />
             <source>PSF measured from %1 stars. Review the estimate before using it.</source>
-            <translation type="unfinished">PSF mesurée sur %1 étoiles. Vérifiez l’estimation avant de l’utiliser.</translation>
+            <translation>PSF mesurée sur %1 étoiles. Vérifiez l’estimation avant de l’utiliser.</translation>
         </message>
         <message>
             <location filename="../src/DeepSkyController.cpp" line="209" />
@@ -4928,7 +5247,7 @@ Résultat obtenu :
         <message>
             <location filename="../src/DeepSkyController.cpp" line="433" />
             <source>Project exceeds 4 MiB. Reduce saved sample or reference lists before saving.</source>
-            <translation type="unfinished">Le projet dépasse 4 Mio. Réduisez les listes d’échantillons ou de références avant de sauvegarder.</translation>
+            <translation>Le projet dépasse 4 Mio. Réduisez les listes de points ou de références avant d’enregistrer.</translation>
         </message>
         <message>
             <location filename="../src/DeepSkyController.cpp" line="434" />
@@ -5740,30 +6059,102 @@ Résultat obtenu :
             <source>Image · before adjustments</source>
             <translation>Image · avant retouches</translation>
         </message>
-    <message><source>Saved image: </source><translation>Image enregistrée : </translation></message>
-<message><source>Exporting image…</source><translation>Export de l’image…</translation></message>
-</context>
-<context><name>QuitConfirmation</name><message><source>Save before quitting?</source><translation>Sauvegarder avant de quitter ?</translation></message>
-<message><source>Your current work will close. Save the project, the finished image or your settings before leaving.</source><translation>Votre travail en cours va se fermer. Sauvegardez le projet, l’image finale ou vos réglages avant de quitter.</translation></message>
-<message><source>The deep-sky project keeps source references, stacking options, finishing settings and the caption. A TIFF keeps the finished image.</source><translation>Le projet ciel profond conserve les références des fichiers source, les options d’empilement, les réglages de finition et la légende. Un TIFF conserve l’image finale.</translation></message>
-<message><source>Recording is in progress. Stop it before quitting.</source><translation>Un enregistrement est en cours. Arrêtez-le avant de quitter.</translation></message>
-<message><source>A task is in progress. Wait for it to finish, or return to the workspace to cancel it.</source><translation>Un traitement est en cours. Attendez sa fin ou revenez à l’espace de travail pour l’annuler.</translation></message>
-<message><source>Save project and settings</source><translation>Sauvegarder le projet et les réglages</translation></message>
-<message><source>Save finished TIFF</source><translation>Sauvegarder l’image en TIFF</translation></message>
-<message><source>Save processing settings</source><translation>Enregistrer les réglages de traitement</translation></message>
-<message><source>Keep working</source><translation>Continuer à travailler</translation></message>
-<message><source>Quit anyway</source><translation>Quitter quand même</translation></message>
-</context>
-<context>
-<name>ExportSizeHint</name>
-<message><source>%1 MB</source><translation>%1 Mo</translation></message>
-<message><source>%1 kB</source><translation>%1 ko</translation></message>
-<message><source>%1 bytes</source><translation>%1 octets</translation></message>
-<message><source>Estimated file size: %1</source><translation>Poids estimé : %1</translation></message>
-<message><source>Updating size estimate…</source><translation>Actualisation du poids estimé…</translation></message>
-<message><source>Estimating file size…</source><translation>Estimation du poids…</translation></message>
-<message><source>File size estimate unavailable</source><translation>Estimation indisponible</translation></message>
-<message><source>Calculated for the selected export format.</source><translation>Calculé pour le format d’export choisi.</translation></message>
-<message><source>Estimated from native-resolution image samples, including the caption. Compression depends on image content; the final file size may vary.</source><translation>Estimation à partir de portions de l’image à pleine résolution, légende incluse. La compression dépend du contenu ; le poids final peut varier.</translation></message>
-</context>
+        <message>
+            <source>Saved image: </source>
+            <translation>Image enregistrée : </translation>
+        </message>
+        <message>
+            <source>Exporting image…</source>
+            <translation>Export de l’image…</translation>
+        </message>
+    </context>
+    <context>
+        <name>QuitConfirmation</name>
+        <message>
+            <source>Save before quitting?</source>
+            <translation>Sauvegarder avant de quitter ?</translation>
+        </message>
+        <message>
+            <source>Your current work will close. Save the project, the finished image or your settings before leaving.</source>
+            <translation>Votre travail en cours va se fermer. Sauvegardez le projet, l’image finale ou vos réglages avant de quitter.</translation>
+        </message>
+        <message>
+            <source>The deep-sky project keeps source references, stacking options, finishing settings and the caption. A TIFF keeps the finished image.</source>
+            <translation>Le projet ciel profond conserve les références des fichiers source, les options d’empilement, les réglages de finition et la légende. Un TIFF conserve l’image finale.</translation>
+        </message>
+        <message>
+            <source>Recording is in progress. Stop it before quitting.</source>
+            <translation>Un enregistrement est en cours. Arrêtez-le avant de quitter.</translation>
+        </message>
+        <message>
+            <source>A task is in progress. Wait for it to finish, or return to the workspace to cancel it.</source>
+            <translation>Un traitement est en cours. Attendez sa fin ou revenez à l’espace de travail pour l’annuler.</translation>
+        </message>
+        <message>
+            <source>Save project and settings</source>
+            <translation>Sauvegarder le projet et les réglages</translation>
+        </message>
+        <message>
+            <source>Save finished TIFF</source>
+            <translation>Sauvegarder l’image en TIFF</translation>
+        </message>
+        <message>
+            <source>Save processing settings</source>
+            <translation>Enregistrer les réglages de traitement</translation>
+        </message>
+        <message>
+            <source>Keep working</source>
+            <translation>Continuer à travailler</translation>
+        </message>
+        <message>
+            <source>Quit anyway</source>
+            <translation>Quitter quand même</translation>
+        </message>
+    </context>
+    <context>
+        <name>ExportSizeHint</name>
+        <message>
+            <source>%1 MB</source>
+            <translation>%1 Mo</translation>
+        </message>
+        <message>
+            <source>%1 kB</source>
+            <translation>%1 ko</translation>
+        </message>
+        <message>
+            <source>%1 bytes</source>
+            <translation>%1 octets</translation>
+        </message>
+        <message>
+            <source>Estimated file size: %1</source>
+            <translation>Poids estimé : %1</translation>
+        </message>
+        <message>
+            <source>Updating size estimate…</source>
+            <translation>Actualisation du poids estimé…</translation>
+        </message>
+        <message>
+            <source>Estimating file size…</source>
+            <translation>Estimation du poids…</translation>
+        </message>
+        <message>
+            <source>File size estimate unavailable</source>
+            <translation>Estimation indisponible</translation>
+        </message>
+        <message>
+            <source>Calculated for the selected export format.</source>
+            <translation>Calculé pour le format d’export choisi.</translation>
+        </message>
+        <message>
+            <source>Estimated from native-resolution image samples, including the caption. Compression depends on image content; the final file size may vary.</source>
+            <translation>Estimation à partir de portions de l’image à pleine résolution, légende incluse. La compression dépend du contenu ; le poids final peut varier.</translation>
+        </message>
+    </context>
+    <context>
+        <name>InspectorFamily</name>
+        <message>
+            <source>Current adjustment family</source>
+            <translation>Famille de réglages active</translation>
+        </message>
+    </context>
 </TS>

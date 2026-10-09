@@ -11,8 +11,10 @@
 
 - La direction visuelle est décrite dans `docs/design/DESIGN_SYSTEM.md` ; les valeurs
   de référence sont dans `docs/design/tokens.json`.
-- La maquette est une proposition. Sa migration dans l'application doit être explicitement
-  comprise dans la demande en cours ; ne pas confondre prototype et fonctionnalités livrées.
+- La direction Atelier et la maquette de Finition ont été validées par l'utilisateur
+  le 9 octobre 2026. Les captures natives dans `docs/design/previews/native/` documentent
+  leur intégration. Toute nouvelle refonte doit rester dans la demande en cours ;
+  ne pas confondre prototype et fonctionnalités livrées.
 - Pour toute migration autorisée, réutiliser des composants QML communs et des noms de
   couleurs sémantiques plutôt que dupliquer des styles par écran.
 - Donner la priorité à l'image, aux valeurs précises, à la stabilité des commandes et

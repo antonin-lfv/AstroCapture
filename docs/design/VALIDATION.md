@@ -69,7 +69,7 @@ ont été réexécutés après les derniers ajustements. Ils couvrent notamment 
 
 ## Paquet macOS
 
-Le script `scripts/package_macos.sh` reconstruit le paquet autonome et le DMG 1.5.0.
+Le script `scripts/package_macos.sh` reconstruit le paquet autonome et le DMG 1.5.1.
 La vérification de signature du paquet et celle de l'intégrité du DMG sont effectuées
 avant livraison. La signature reste locale (ad hoc), comme pour le paquet précédent.
 
@@ -134,3 +134,11 @@ Le survol réel, l’aide au focus clavier, les limites de fenêtre, la proximit
 contrôle après défilement et la disparition au changement d’onglet sont contrôlés.
 Consulter ces aides ne modifie ni les pixels ni les réglages de traitement.
 Les captures sont enregistrées sous `previews/native/1.5.1-*`.
+
+Les quatre tests concernés passent aussi en Release (5,84 s). Le DMG 1.5.1 de
+81,3 Mio passe la vérification d’intégrité. Monté en lecture seule, il contient
+la bonne version, une signature locale valide et un exécutable identique au paquet
+construit. Le volume de vérification a été démonté après contrôle.
+
+SHA-256 du DMG :
+`6dad40782d7fa2a327bce0487dbf16800cb6897a07d7020a536fd4155e928ef2`.

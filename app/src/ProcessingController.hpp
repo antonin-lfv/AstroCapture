@@ -18,6 +18,7 @@ class ProcessingController : public QObject {
   Q_OBJECT
   QML_ELEMENT
   Q_PROPERTY(QVariantMap exportAnnotation READ exportAnnotation WRITE setExportAnnotation NOTIFY annotationChanged)
+  Q_PROPERTY(QVariant exportSizeInput READ exportSizeInput NOTIFY exportSizeInputChanged)
   Q_PROPERTY(bool stillImage READ stillImage NOTIFY changed)
   Q_PROPERTY(QUrl sourceUrl READ sourceUrl NOTIFY changed)
   Q_PROPERTY(int imageWidth READ imageWidth NOTIFY imageChanged)
@@ -65,6 +66,7 @@ public:
   QVariantMap exportAnnotation() const { return annotation_; }
   void setExportAnnotation(const QVariantMap& value);
   QImage annotationImage() const { return annotationImage_; }
+  QVariant exportSizeInput() const { return QVariant::fromValue(ExportSizeInput{result_,annotationImage_}); }
   QImage beforeImage() const { return beforePreview_; }
   QUrl sourceUrl() const { return source_ ? QUrl::fromLocalFile(source_->path) : QUrl{}; }
   int imageWidth() const { return preview_.width(); }
@@ -84,6 +86,7 @@ public:
   Q_INVOKABLE void exportImage(const QUrl &url);
   Q_INVOKABLE void cancel();
 signals:
+  void exportSizeInputChanged();
   void annotationChanged();
   void changed();
   void imageChanged();

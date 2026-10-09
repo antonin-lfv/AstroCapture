@@ -13,7 +13,8 @@ ColumnLayout {
     default property alias content: inner.children
 
     Layout.fillWidth: true
-    spacing: 8
+    spacing: 10
+    Layout.topMargin: 10
 
     RowLayout {
         Layout.fillWidth: true

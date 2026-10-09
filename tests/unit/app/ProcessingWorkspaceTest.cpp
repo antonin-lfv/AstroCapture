@@ -1,3 +1,4 @@
+#include <QImageReader>
 #include <QGuiApplication>
 #include <QElapsedTimer>
 #include <QFile>
@@ -15,6 +16,7 @@
 #include <QSettings>
 #include <QTemporaryDir>
 #include <QThread>
+#include <QTranslator>
 #include <QtEndian>
 #include <astro/recording/SerRecorder.hpp>
 #include <cmath>
@@ -22,6 +24,7 @@
 #include "ProcessingEdits.hpp"
 #include "ProcessingImageItem.hpp"
 #include "AppLibrary.hpp"
+#include "ExportSizeEstimator.hpp"
 #include "Check.hpp"
 
 static void until(const std::function<bool()>& ready) {
@@ -31,6 +34,7 @@ static void until(const std::function<bool()>& ready) {
 }
 int main(int argc, char** argv) {
     QGuiApplication application(argc, argv);
+    QTranslator translator;if(translator.load(qEnvironmentVariable("ASTRO_UI_TRANSLATION_PATH")))application.installTranslator(&translator);
     QTemporaryDir temp;
     QCoreApplication::setOrganizationName("AstroCaptureTest");
     QCoreApplication::setApplicationName("ProcessingWorkspaceTest");
@@ -40,6 +44,7 @@ int main(int argc, char** argv) {
     qmlRegisterType<astro::app::ProcessingEdits>("AstroCapture", 1, 0, "ProcessingEdits");
     qmlRegisterType<astro::app::ProcessingImageItem>("AstroCapture", 1, 0, "ProcessingImageItem");
     qmlRegisterType<astro::app::AppLibrary>("AstroCapture", 1, 0, "AppLibrary");
+    qmlRegisterType<astro::app::ExportSizeEstimator>("AstroCapture",1,0,"ExportSizeEstimator");
     astro::app::AppLibrary library;
     astro::app::ProcessingController controller;
     QQmlEngine engine;
@@ -54,6 +59,7 @@ int main(int argc, char** argv) {
     auto* root = qobject_cast<QQuickItem*>(object.get());
     QQuickWindow window;
     window.resize(1100, 720); root->setParentItem(window.contentItem()); root->setSize({1100, 720}); window.show();
+    auto* controls=root->findChild<QQuickItem*>("processingControls");ASTRO_TEST_CHECK(controls && !controls->isVisible());
     const QString path = temp.filePath("test.ser");
     astro::domain::FrameDescriptor descriptor;
     descriptor.width = 96; descriptor.height = 64;
@@ -95,7 +101,7 @@ int main(int argc, char** argv) {
     until([&] { return !root->property("adjustmentsDirty").toBool() && !controller.busy(); });
     ASTRO_TEST_CHECK(controller.image() != before);
     const auto after = controller.image();
-    auto* paintItem = root->findChild<astro::app::ProcessingImageItem*>();
+    auto* paintItem = root->findChild<astro::app::ProcessingImageItem*>("processingPreviewImage");
     ASTRO_TEST_CHECK(paintItem);
     paintItem->setWidth(after.width()); paintItem->setHeight(after.height());
     root->setProperty("holdBefore", true);
@@ -118,6 +124,32 @@ int main(int argc, char** argv) {
         return file.readAll();
     };
     const auto plainTiff = exported("plain.tif");
+    astro::app::ExportSizeEstimator sizeEstimate;
+    sizeEstimate.setInput(controller.exportSizeInput());sizeEstimate.setActive(true);
+    auto checkExportSize=[&](const QString& format,const QString& name) {
+        sizeEstimate.setFormat(format);
+        until([&]{return sizeEstimate.bytes()>=0 && !sizeEstimate.calculating();});
+        ASTRO_TEST_CHECK(sizeEstimate.exact());
+        ASTRO_TEST_CHECK(sizeEstimate.bytes()==QFileInfo(temp.filePath(name)).size());
+    };
+    checkExportSize("tif","plain.tif");
+    exported("plain.png");
+    checkExportSize("png","plain.png");
+    QImageReader pngReader(temp.filePath("plain.png"));
+    const auto pngImage=pngReader.read();
+    const auto tiffImage=QImageReader(temp.filePath("plain.tif")).read();
+    ASTRO_TEST_CHECK(!pngImage.isNull() && pngImage.depth()==64);
+    auto samePixels=[](QImage a,QImage b) {
+      a=a.convertToFormat(QImage::Format_RGBA64);b=b.convertToFormat(QImage::Format_RGBA64);
+      if(a.size()!=b.size())return false;
+      for(int y=0;y<a.height();++y)for(int x=0;x<a.width();++x)
+        if(reinterpret_cast<const QRgba64*>(a.constScanLine(y))[x]!=reinterpret_cast<const QRgba64*>(b.constScanLine(y))[x])return false;
+      return true;
+    };
+    ASTRO_TEST_CHECK(samePixels(pngImage,tiffImage));
+    exported("plain.jpg");
+    checkExportSize("jpg","plain.jpg");
+    ASTRO_TEST_CHECK(!QImageReader(temp.filePath("plain.jpg")).read().isNull());
     auto* captionTitle = root->findChild<QObject*>("annotationTitle");
     auto* captionEnabled = root->findChild<QObject*>("annotationEnabled");
     ASTRO_TEST_CHECK(captionTitle && captionEnabled);
@@ -134,6 +166,10 @@ int main(int argc, char** argv) {
     { QPainter painter(&painted); paintItem->paint(&painter); }
     ASTRO_TEST_CHECK(painted != after && controller.image() == after);
     const auto captionedTiff = exported("caption.tif");
+    exported("caption.png");
+    sizeEstimate.setInput(controller.exportSizeInput());
+    checkExportSize("png","caption.png");
+    ASTRO_TEST_CHECK(samePixels(QImageReader(temp.filePath("caption.png")).read(),QImageReader(temp.filePath("caption.tif")).read()));
     ASTRO_TEST_CHECK(captionedTiff.size() == plainTiff.size() && captionedTiff != plainTiff);
     const auto u16 = [](const QByteArray& bytes, int offset) { return qFromLittleEndian<quint16>(bytes.constData() + offset); };
     const auto u32 = [](const QByteArray& bytes, int offset) { return qFromLittleEndian<quint32>(bytes.constData() + offset); };
@@ -165,7 +201,7 @@ int main(int argc, char** argv) {
     { astro::app::AppLibrary restored; ASTRO_TEST_CHECK(restored.processingPreset("Strong")["level1"].toDouble() == 50); }
     controller.apply({10, 0, 0, 0, 0, 0}, 0, 1, 1, 1, 1);
     until([&] { return !controller.busy(); });
-    ASTRO_TEST_CHECK(controller.status().contains("Adjustments applied"));
+    ASTRO_TEST_CHECK(controller.status().contains(QCoreApplication::translate("astro::app::ProcessingController","Adjustments applied. Compare before / after, then export.")));
     edits->undo(); until([&] { return !root->property("adjustmentsDirty").toBool() && !controller.busy(); });
     ASTRO_TEST_CHECK(controller.image() == before);
     edits->redo(); until([&] { return !root->property("adjustmentsDirty").toBool() && !controller.busy(); });
@@ -220,7 +256,7 @@ int main(int argc, char** argv) {
     const auto doc=astro::app::ImageDocument{pixelsImage,QImage(96,64,QImage::Format_RGB32),{{"title","Mosaïque lunaire"},{"enabled",true}},"Mosaic",QUrl::fromLocalFile(temp.filePath("mosaic-processed.tif")),{QFileInfo(path).canonicalFilePath()}};
     ASTRO_TEST_CHECK(controller.openDocument(QVariant::fromValue(doc)));
     ASTRO_TEST_CHECK(controller.stillImage() && !controller.loaded() && controller.hasResult() && !controller.ranked());
-    ASTRO_TEST_CHECK(controller.stackSummary()=="Still image · no stacking needed");
+    ASTRO_TEST_CHECK(controller.stackSummary()==QCoreApplication::translate("astro::app::ProcessingController","Still image · no stacking needed"));
     ASTRO_TEST_CHECK(controller.exportAnnotation().value("title")=="Mosaïque lunaire");
     QCoreApplication::processEvents();
     ASTRO_TEST_CHECK(!cutoff->isVisible());
@@ -233,10 +269,10 @@ int main(int argc, char** argv) {
     auto protectedDoc=doc;auto edgeMask=std::make_shared<std::vector<float>>(96*64,1.f);(*edgeMask)[0]=0;protectedDoc.edgeMask=edgeMask;
     protectedDoc.mosaicImageCount=3;
     ASTRO_TEST_CHECK(controller.openDocument(QVariant::fromValue(protectedDoc)));
-    ASTRO_TEST_CHECK(controller.stackSummary()=="Mosaic · 3 images assembled");
+    ASTRO_TEST_CHECK(controller.stackSummary()==QCoreApplication::translate("astro::app::ProcessingController","Mosaic · %1 images assembled").arg(3));
     controller.setExportAnnotation({{"enabled",false}});
     controller.apply({0,0,0,0,0,0},0,2,1,1,1);until([&]{return !controller.busy();});
-    ASTRO_TEST_CHECK(controller.stackSummary()=="Mosaic · 3 images assembled");
+    ASTRO_TEST_CHECK(controller.stackSummary()==QCoreApplication::translate("astro::app::ProcessingController","Mosaic · %1 images assembled").arg(3));
     const auto protectedTiff=exported("protected-edges.tif");
     ASTRO_TEST_CHECK(u16(protectedTiff,stillPixels)==std::lround(.123456f*65535));
     ASTRO_TEST_CHECK(u16(protectedTiff,stillPixels+6)==std::lround(.246912f*65535));
@@ -248,12 +284,13 @@ int main(int argc, char** argv) {
     controller.openPath(temp.filePath("still.tif")); until([&]{return !controller.busy();});
     ASTRO_TEST_CHECK(controller.stillImage() && controller.hasResult() && !controller.loaded());
     ASTRO_TEST_CHECK(controller.sourceName().contains("still.tif") && controller.frameCount()==0);
-    ASTRO_TEST_CHECK(controller.imageLabel()=="Image · before adjustments");
+    ASTRO_TEST_CHECK(controller.imageLabel()==QCoreApplication::translate("astro::app::ProcessingController","Image · before adjustments"));
+    QCoreApplication::processEvents();ASTRO_TEST_CHECK(controls->isVisible() && controls->width()>=260);
     const auto reopened=exported("reopened.tif");
     ASTRO_TEST_CHECK(u16(reopened,stillPixels)==std::lround(.123456f*65535));
     const auto originalBytes=stillTiff;
     controller.exportImage(QUrl::fromLocalFile(temp.filePath("still.tif")));
-    ASTRO_TEST_CHECK(controller.status().contains("cannot be overwritten"));
+    ASTRO_TEST_CHECK(controller.status().contains(QCoreApplication::translate("astro::app::ProcessingController","An original image cannot be overwritten.")));
     QFile originalFile(temp.filePath("still.tif")); ASTRO_TEST_CHECK(originalFile.open(QIODevice::ReadOnly));
     ASTRO_TEST_CHECK(originalFile.readAll()==originalBytes);
     QImage png(96,64,QImage::Format_RGB32); png.fill(qRgb(91,102,113));
@@ -286,6 +323,14 @@ int main(int argc, char** argv) {
     QFile broken(temp.filePath("broken.png")); ASTRO_TEST_CHECK(broken.open(QIODevice::WriteOnly)); broken.write("invalid"); broken.close();
     controller.openPath(broken.fileName()); until([&]{return !controller.busy();});
     ASTRO_TEST_CHECK(controller.image()==goodPreview && controller.sourceName().contains("precise.png"));
+    auto* caption=root->findChild<QObject*>("annotationPopup");ASTRO_TEST_CHECK(caption);
+    ASTRO_TEST_CHECK(QMetaObject::invokeMethod(caption,"open"));
+    QElapsedTimer captionWait;captionWait.start();while(captionWait.elapsed()<200){QCoreApplication::processEvents();QThread::msleep(1);}
+    auto* captionPreview=root->findChild<QQuickItem*>("captionPreview");ASTRO_TEST_CHECK(captionPreview && captionPreview->width()>100 && captionPreview->height()>100);
+    auto* captionSize=caption->findChild<astro::app::ExportSizeEstimator*>();ASTRO_TEST_CHECK(captionSize);
+    until([&]{return captionSize->bytes()>=0 && !captionSize->calculating();});
+    if(qEnvironmentVariableIsSet("ASTRO_CAPTION_SNAPSHOT"))ASTRO_TEST_CHECK(window.grabWindow().save(qEnvironmentVariable("ASTRO_CAPTION_SNAPSHOT")));
+    ASTRO_TEST_CHECK(QMetaObject::invokeMethod(caption,"close"));
     controller.openPath(path); until([&]{return !controller.busy();});
     ASTRO_TEST_CHECK(!controller.stillImage() && controller.loaded() && !controller.hasResult());
     root->setParentItem(nullptr);

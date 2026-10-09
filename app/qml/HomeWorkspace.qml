@@ -19,8 +19,10 @@ Rectangle {
     property int recentRefresh:0
     readonly property var projects:{recentRefresh;return library.recentProjects;}
     readonly property var videos:{recentRefresh;return library.recentVideos;}
-    onVisibleChanged:if(visible)recentRefresh++
-    Connections {target:Qt.application;function onStateChanged(){if(root.visible && Qt.application.state===Qt.ApplicationActive)root.recentRefresh++;}}
+    function refreshRecents() {library.pruneUnavailableRecents();recentRefresh++;}
+    Component.onCompleted:refreshRecents()
+    onVisibleChanged:if(visible)refreshRecents()
+    Connections {target:Qt.application;function onStateChanged(){if(root.visible && Qt.application.state===Qt.ApplicationActive)root.refreshRecents();}}
     color:"#0b0d10"
     objectName:"studioHome"
     component StartCard:Button {
@@ -51,7 +53,7 @@ Rectangle {
                     Label {text:qsTr("Your next image starts here.");color:"#eef3fa";font.pixelSize:root.width<900?24:28;font.weight:Font.Medium;wrapMode:Text.Wrap;Layout.fillWidth:true}
                     Label {text:qsTr("Capture, process or return to a project.");color:"#a2aec0";wrapMode:Text.Wrap;Layout.fillWidth:true}
                 }
-                IconButton {objectName:"homeOpenProject";text:qsTr("Open a project…");iconName:"folder";enabled:!root.recording && !root.projectBusy;onClicked:root.chooseProject()}
+                IconButton {objectName:"homeOpenProject";text:qsTr("Open a project");iconName:"folder";enabled:!root.recording && !root.projectBusy;onClicked:root.chooseProject()}
             }
             GridLayout {
                 columns:root.width<900?1:3;Layout.fillWidth:true;columnSpacing:14;rowSpacing:12
@@ -93,6 +95,7 @@ Rectangle {
                                 Label {text:modelData.exists?qsTr("Saved deep-sky project"):qsTr("File unavailable");color:"#a2aec0";font.pixelSize:12}
                             }
                             IconButton {text:qsTr("Open");enabled:modelData.exists && !root.recording && !root.projectBusy;onClicked:root.openProject(modelData.url);DarkToolTip {visible:parent.hovered;text:modelData.path}}
+                            IconButton {objectName:"homeRemoveProject";text:"×";Accessible.name:qsTr("Remove from recent projects");onClicked:root.library.removeRecentProject(modelData.url)}
                         }
                     }
                 }
@@ -109,6 +112,7 @@ Rectangle {
                                 Label {text:modelData.exists?qsTr("Recent SER video"):qsTr("File unavailable");color:"#a2aec0";font.pixelSize:12}
                             }
                             IconButton {text:qsTr("Open");enabled:modelData.exists && !root.recording && !root.processingBusy;onClicked:root.openVideo(modelData.url)}
+                            IconButton {objectName:"homeRemoveVideo";text:"×";Accessible.name:qsTr("Remove from recent videos");onClicked:root.library.removeRecentVideo(modelData.url)}
                         }
                     }
                 }

@@ -33,6 +33,9 @@ public:
     QString status() const { return status_; }
     QVariantList recentVideos() const;
     QVariantList recentProjects() const;
+    Q_INVOKABLE void removeRecentProject(const QUrl& url);
+    Q_INVOKABLE void removeRecentVideo(const QUrl& url);
+    Q_INVOKABLE void pruneUnavailableRecents();
     Q_INVOKABLE void recordProject(const QUrl& url);
     QUrl lastVideoDirectory() const;
     QStringList deepSkyPresetNames() const { return deepSkyPresets_.keys(); }

@@ -5,6 +5,8 @@
 #include "SequenceReader.hpp"
 #include <QFileInfo>
 #include <QImageReader>
+#include <QImageWriter>
+#include <QColorSpace>
 #include <QSaveFile>
 #include <QTemporaryFile>
 #include <algorithm>
@@ -33,7 +35,10 @@ std::filesystem::path nativePath(const QString &path) {
 FloatImage readImage(SequenceReader& reader,int index) {return reader.image(index);}
 QImage preview(const FloatImage &image,const processing::CheckCancel& check={}) {return makeImagePreview(image,check);}
 } // namespace
-ProcessingController::ProcessingController(QObject *parent) : QObject(parent) {}
+ProcessingController::ProcessingController(QObject *parent) : QObject(parent) {
+  connect(this,&ProcessingController::imageChanged,this,&ProcessingController::exportSizeInputChanged);
+  connect(this,&ProcessingController::annotationChanged,this,&ProcessingController::exportSizeInputChanged);
+}
 ProcessingController::~ProcessingController() {
   worker_.request_stop();
   if (worker_.joinable())
@@ -464,7 +469,10 @@ void ProcessingController::exportImage(const QUrl &url) {
   }
   QString path = url.toLocalFile();
   if (!path.endsWith(".tif", Qt::CaseInsensitive) &&
-      !path.endsWith(".tiff", Qt::CaseInsensitive))
+      !path.endsWith(".tiff", Qt::CaseInsensitive) &&
+      !path.endsWith(".png", Qt::CaseInsensitive) &&
+      !path.endsWith(".jpg", Qt::CaseInsensitive) &&
+      !path.endsWith(".jpeg", Qt::CaseInsensitive))
     path += ".tif";
   if (source_ && QFileInfo(path).canonicalFilePath() ==
                      QFileInfo(source_->path).canonicalFilePath()) {
@@ -477,7 +485,7 @@ void ProcessingController::exportImage(const QUrl &url) {
   }
   const auto result = result_;
   const auto overlay = annotationImage_;
-  run(tr("Exporting 16-bit TIFF…"), [this, result, path, overlay](std::stop_token stop) {
+  run(tr("Exporting image…"), [this, result, path, overlay](std::stop_token stop) {
     std::vector<std::uint16_t> samples(result->rgb.size());
     for (int y = 0; y < result->height; ++y) {
       check(stop);
@@ -495,10 +503,29 @@ void ProcessingController::exportImage(const QUrl &url) {
       throw std::runtime_error("Cannot create an export in this folder.");
     const QString tempPath = temporary.fileName();
     temporary.close();
-    auto written = recording::writeTiff16Samples(
-        tempPath.toStdString(), result->width, result->height, samples.data());
-    if (!written)
-      throw std::runtime_error(written.error().message);
+    const auto suffix=QFileInfo(path).suffix().toLower();
+    if(suffix=="png" || suffix=="jpg" || suffix=="jpeg") {
+      QImage image(result->width,result->height,QImage::Format_RGBA64);
+      if(image.isNull())throw std::runtime_error("Cannot allocate export image.");
+      image.setColorSpace(QColorSpace::SRgb);
+      for(int y=0;y<result->height;++y) {
+        check(stop);
+        auto* row=reinterpret_cast<QRgba64*>(image.scanLine(y));
+        for(int x=0;x<result->width;++x) {
+          const auto i=(std::size_t(y)*result->width+x)*3;
+          row[x]=QRgba64::fromRgba64(samples[i],samples[i+1],samples[i+2],65535);
+        }
+      }
+      const bool png=suffix=="png";
+      if(!png)image=image.convertToFormat(QImage::Format_RGB888);
+      QImageWriter writer(tempPath,png?"PNG":"JPEG");
+      if(!png)writer.setQuality(95);
+      if(!writer.write(image))throw std::runtime_error(writer.errorString().toStdString());
+    } else {
+      auto written = recording::writeTiff16Samples(
+          tempPath.toStdString(), result->width, result->height, samples.data());
+      if (!written)throw std::runtime_error(written.error().message);
+    }
     QFile input(tempPath);
     QSaveFile output(path);
     if (!input.open(QIODevice::ReadOnly) || !output.open(QIODevice::WriteOnly))
@@ -515,7 +542,7 @@ void ProcessingController::exportImage(const QUrl &url) {
       throw std::runtime_error("Could not finish saving the image.");
     post([this, path] {
       progress_ = 100;
-      status_ = tr("Saved 16-bit TIFF: ") + path;
+      status_ = tr("Saved image: ") + path;
       emit imageExported(QUrl::fromLocalFile(path));
     });
   });

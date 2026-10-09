@@ -21,5 +21,10 @@ struct ImageDocument {
     double totalExposure{};
     QStringList filters;
 };
+struct ExportSizeInput {
+    std::shared_ptr<const processing::FloatImage> pixels;
+    QImage overlay;
+};
 }
 Q_DECLARE_METATYPE(astro::app::ImageDocument)
+Q_DECLARE_METATYPE(astro::app::ExportSizeInput)

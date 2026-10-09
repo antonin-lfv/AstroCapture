@@ -16,7 +16,7 @@ AstroImage detectBadPixels(const AstroImage& dark,double sigma=8);
 AstroImage calibrate(AstroImage light, const Calibration&, const CheckCancel& = {});
 FloatImage linearRgb(const AstroImage&, const CheckCancel& = {});
 struct Star { double x{},y{},flux{},fwhm{}; };
-std::vector<Star> detectStars(const FloatImage&, const CheckCancel& = {});
+std::vector<Star> detectStars(const FloatImage&, const CheckCancel& = {},int maximumStars=150);
 struct StarAlignment {
     std::array<double,6> matrix{1,0,0,0,1,0}; // source -> reference
     int matches{};
@@ -51,6 +51,10 @@ struct Finish {
     std::array<float,3> color{1,1,1};
     float denoise{};
     bool asinh{};
+    bool ghs{};
+    double ghsStrength{},ghsLocal{},ghsSymmetry{},ghsShadows{},ghsHighlights{1};
+    bool ghsInverse{};
+    int ghsMode{};
     float asinhStrength{20},saturation{1};
     int asinhLuminance{}; // 0: maximum (legacy), 1: human weighted, 2: mean
     ComputePreference compute{ComputePreference::Auto};

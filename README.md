@@ -6,7 +6,7 @@
 
 **De la caméra à l’image finale, dans une seule application sur Mac.**
 
-AstroCapture réunit la capture vidéo et FITS, le traitement planétaire, la calibration et l’empilement du ciel profond, les transformations de finition, les ondelettes et les mosaïques. Son studio conserve les espaces de travail entre les onglets, avec une interface en français et en anglais. Les fichiers et les traitements restent sur votre ordinateur.
+AstroCapture réunit la capture vidéo et FITS, le traitement planétaire, la calibration et l’empilement du ciel profond, les transformations de finition, les ondelettes et les mosaïques. Son studio conserve les espaces de travail entre les onglets, avec une interface en français et en anglais. Les fichiers et les traitements restent sur votre ordinateur. Les aides au survol des réglages du ciel profond décrivent le calcul appliqué, son effet visuel et ses limites : seuils et écrêtage, courbes d’étirement, modèle polynomial du fond, rejet robuste, saturation et lissage.
 
 ![Traitement d’une vidéo SER dans AstroCapture](assets/screenshots/processing.png)
 
@@ -96,7 +96,7 @@ cochez **Poses déjà calibrées** uniquement pour des données déjà prétrait
   ciel, les gains couleur, les niveaux noir/blanc, les tons moyens ou l’étirement
   asinh (maximum, luminance visuelle ou moyenne RGB), la saturation avec protection du fond sombre et le lissage
   du bruit. L’histogramme RGB/luminance représente l’image affichée. Un second
-  histogramme montre l’entrée du brouillon, après la recette et la correction
+  histogramme montre l’entrée des réglages, après la recette et la correction
   de gradient, avec les gains couleur courants et
   la courbe d’étirement : choisissez Noir, Tons moyens ou Blanc et glissez
   dans le graphique. Le zoom du graphique ne modifie pas les données. Les
@@ -117,27 +117,17 @@ cochez **Poses déjà calibrées** uniquement pour des données déjà prétrait
   de luminosité. Elle agit sur des valeurs RGB étirées dans [0, 1]. Les méthodes
   par masque proposent un dosage ; les méthodes neutres n’utilisent pas ce dosage.
   Préservez les couleurs vertes intentionnelles des comètes, nébuleuses ou palettes SHO.
-- L’aperçu des réglages en direct peut être désactivé. Les demandes successives
-  de finition sont regroupées : la dernière position des curseurs est conservée.
-  Choisissez une pose dans la liste de comparaison et maintenez **Pose brute**
-  pour afficher cette source face au résultat courant. Son étirement automatique
-  et son cadrage sont indépendants ; cette vue n’est pas un recalage pixel à pixel.
-  La comparaison ne change pas l’export. Revenez au linéaire ou utilisez la proposition
-  automatique. Les valeurs numériques restent éditables ; les calculs repartent
-  de l’intégration linéaire et rejouent les transformations appliquées dans leur ordre.
-  **Appliquer le brouillon comme transformation** valide les réglages courants,
-  puis remet les commandes à zéro. Cela permet notamment plusieurs étirements
-  successifs. Chaque transformation peut être modifiée, désactivée, remontée ou
-  supprimée ; les suivantes sont recalculées. Le projet et les préréglages
-  conservent cette recette, les deux versions A/B et leurs réglages. Un cache
-  borné évite de rejouer une recette inchangée pendant les ajustements suivants.
-- Exportez le **FITS linéaire 32 bits** pour préserver l’intégration, ou le
-  **TIFF 16 bits final** avec profil sRGB. Un JPEG sRGB peut aussi être exporté.
-  **Image finale…** propose ces deux formats. **Détails et légende…** transmet
-  le résultat final à Traitement, avec le nombre de poses, leur durée totale et
-  les filtres pour la légende technique.
+- Les réglages s’appliquent automatiquement après chaque modification. Les demandes
+  successives sont regroupées pour conserver la dernière position des curseurs.
+  Choisissez une pose dans la comparaison et maintenez **Pose brute** pour afficher
+  cette source face au résultat courant. Son cadrage et son étirement sont indépendants.
+  Les projets et les préréglages conservent tous les réglages de finition.
+- **Exporter** propose **FITS linéaire 32 bits** pour préserver l’intégration originale,
+  ou **Export classique** pour choisir PNG 16 bits, TIFF 16 bits ou JPEG et ajouter
+  une légende facultative dans l’éditeur commun. PNG et TIFF préservent les détails
+  sans compression destructive. La légende est sauvegardée dans le projet.
 - Le **rouage** regroupe ouvrir, enregistrer et vider le projet. Les
-  paramètres avancés se déplient et les boutons **?** expliquent les réglages.
+  paramètres avancés se déplient et les aides au survol expliquent les réglages.
 - Les projets **.astroproject** conservent les références des fichiers,
   leurs rôles, groupes, sélections, références et les options. Les fichiers
   sources doivent rester accessibles ; les intégrations sont recalculées.
@@ -145,8 +135,8 @@ cochez **Poses déjà calibrées** uniquement pour des données déjà prétrait
 Les données originales restent linéaires et ne sont jamais écrasées. Le premier
 aperçu et la première finition utilisent un étirement adaptatif et des gains
 couleur estimés sur le fond de ciel, sans calibration photométrique ; les exports
-linéaires ne l’appliquent pas. Les réglages repartent toujours de l’intégration
-linéaire, sans accumuler les traitements précédents.
+linéaires ne l’appliquent pas. La recette est rejouée depuis l’intégration
+linéaire ; les transformations validées s’accumulent dans leur ordre sauvegardé.
 
 **Échelle des données :** les FITS entiers sont normalisés selon leur plage.
 Pour les FITS flottants sans indication spécifique, des valeurs supérieures à
@@ -159,9 +149,83 @@ désactivée sur des nébulosités étendues.
 Limites actuelles : **32 MP par image**, **500 poses sélectionnées par groupe**,
 **2000 fichiers par projet**. Les RAW X-Trans et les autres matrices non Bayer
 ne sont pas pris en charge. Le drizzle, la correction optique dynamique, les
-projections grand angle, la fusion HDR et la calibration photométrique des
-couleurs restent à développer. La précision de centroidage annoncée par APP
+projections grand angle, la fusion HDR, la résolution astrométrique automatique
+et la calibration spectrophotométrique restent à développer. La précision de centroidage annoncée par APP
 n’est pas une mesure de performance d’AstroCapture.
+
+### Transformations avancées du ciel profond
+
+La fenêtre **Transformations avancées** conserve l’image visible et regroupe
+cinq outils. Les paramètres entrent dans l’historique, les
+préréglages et les projets existants ; les anciens projets gardent des valeurs
+neutres pour les nouveaux outils. Les diagnostics décrivent le dernier résultat
+appliqué, pas les paramètres encore en attente.
+
+- **GHS** : implémentation indépendante des [équations publiées par Payne et
+  Cranfield](https://www.ghsastro.co.uk/doc/tools/GeneralizedHyperbolicStretch/GeneralizedHyperbolicStretch.html).
+  Force `ln(D+1)` de 0 à 20 (0 par défaut), intensité locale `b` de −5 à 15,
+  `0 ≤ LP ≤ SP ≤ HP ≤ 1`, courbe directe/inverse et deux modes : RVB
+  indépendant ou luminance pondérée avec protection par mélange RVB.
+  La courbe d’aperçu utilise le même calcul en double précision que le moteur.
+  L’inverse scalaire ne restaure pas les pertes dues aux seuils, aux masques
+  ou au mélange couleur. Le GHS remplace tons moyens/asinh quand il est actif.
+- **PSF et Richardson–Lucy** : PSF circulaire gaussienne ou Moffat, FWHM
+  0,5–12 pixels et β Moffat 1,5–10. Noyau fini centré, symétrique, normalisé
+  à somme 1 ; l’aperçu du noyau utilise une racine carrée d’affichage.
+  La mesure des étoiles centrales estime une FWHM gaussienne par moments,
+  avec au moins trois étoiles non saturées parmi 1 500 candidates au maximum ; elle n’est pas un ajustement
+  Moffat ni une estimation aveugle. Vérifiez-la avant d’utiliser l’estimation.
+  Richardson–Lucy agit sur la luminance pondérée puis multiplie les canaux
+  par un facteur commun. Réglages initiaux : 10 itérations, amortissement
+  du résidu 0,001, mélange 1 et arrêt relatif 0,0001. L’amortissement n’est
+  pas une régularisation TV. Le calcul indique les itérations réellement
+  effectuées. Les bords utilisent une réflexion ; la PSF est constante sur
+  tout le champ. Les valeurs non finies ou négatives sont refusées. Un
+  piédestal **explicite**, sauvegardé et conservé dans le résultat, est disponible.
+- **Réduction du bruit multiéchelle** : B3-spline à trous, 1–5 échelles,
+  seuillage doux selon la MAD de chaque échelle, dosage indépendant des
+  détails de luminance et de chrominance. Valeurs initiales : 3 échelles,
+  seuil 3 σ robustes, intensités 0,5. Le résidu grossier reste inchangé.
+  L’estimation du bruit avant/après repose sur les différences entre pixels
+  voisins ; elle ne mesure pas la qualité scientifique de l’image. Ce
+  moteur ne prétend pas reproduire NL-Bayes, DA3D ou un débruitage neuronal.
+- **Masques** : plage de luminance, région circulaire ou étoiles détectées
+  (150 au maximum), contour progressif et inversion. La visualisation du
+  masque est indépendante de l’export. Blanc = traitement complet,
+  noir = entrée intacte, gris = mélange pondéré. Le masque est calculé sur
+  l’entrée de chaque opération, appliqué une fois après traitement, puis
+  l’orientation transforme l’ensemble. Il porte sur **tous les réglages**.
+  Il ne s’agit pas encore de masques peints, importés ou variables pendant
+  les itérations de déconvolution.
+- **Couleurs photométriques par références locales** : CSV strict
+  `x,y,red,green,blue`, avec au moins 3 étoiles déjà identifiées dans l’image,
+  coordonnées en pixels depuis zéro en haut à gauche et flux de référence
+  positifs (pas des magnitudes). Photométrie d’ouverture, soustraction du
+  fond par médiane d’anneau, rejet des étoiles saturées/proches des bords et
+  rejet robuste des rapports incohérents. Les médianes de rapports
+  logarithmiques donnent les gains R et B relatifs au vert fixé à 1.
+  Ouverture/anneau par défaut : 5/8/12 pixels, seuil de saturation 1 à adapter
+  à l’import. Le bilan expose références acceptées/rejetées, gains et
+  dispersion robuste en magnitudes. C’est une calibration **relative** sur
+  RVB linéaire à bande large : pas de résolution astrométrique, de téléchargement
+  de catalogue, de calibration absolue ni de SPCC. Les références sont
+  spécifiques à une image, même lorsqu’un préréglage les conserve.
+
+L’ordre des traitements est : gradient → piédestal → photométrie →
+réduction du bruit multiéchelle → déconvolution → gains et étirement →
+saturation et lissage → SCNR → mélange du masque → orientation. Les mesures photométriques
+et la déconvolution sont bloquées après une transformation étirée ou orientée ;
+la photométrie est globale et refuse un masque. Les fichiers d’entrée doivent
+réellement être linéaires : le logiciel ne peut pas déduire un étirement externe
+uniquement de l’extension FITS.
+
+**Image finale** propose aussi le FITS 32 bits traité, qui conserve les valeurs
+flottantes sans l’écrêtage des exports TIFF/JPEG. **FITS linéaire** conserve
+l’intégration originale. Les nouveaux outils utilisent pour l’instant le CPU ;
+les chemins Metal existants restent actifs pour les opérations prises en charge.
+La validation couvre des fixtures analytiques et synthétiques, l’annulation,
+la sauvegarde et un aperçu GHS/bruit/masque sur une brute réelle de 26 MP ;
+elle ne constitue pas une comparaison de qualité exhaustive avec Siril.
 
 ### Acquisition de séries FITS
 
@@ -180,7 +244,7 @@ dépendent des capacités du pilote et doivent être validées sur le matériel 
 
 Déposez un fichier **SER ou ACRAW** dans la fenêtre, ouvrez-le avec le sélecteur de fichiers ou retrouvez-le dans **Récents**. Les dix dernières vidéos ouvertes avec succès sont mémorisées.
 
-Pour retoucher une image existante, utilisez **Ouvrir…** ou déposez un **PNG ou TIFF** dans l’onglet Traitement. Les ondelettes, la couleur, la comparaison avant / après et la légende sont disponibles directement, sans analyse ni empilement. Les images 8 et 16 bits sont acceptées, jusqu’à **32 MP**, avec conservation des valeurs 16 bits. Les fichiers multipages ne sont pas acceptés et la transparence est placée sur fond noir. L’export crée un TIFF distinct ; l’original est protégé contre l’écrasement.
+Pour retoucher une image existante, utilisez **Ouvrir…** ou déposez un **PNG ou TIFF** dans l’onglet Traitement. Les ondelettes, la couleur, la comparaison avant / après et la légende sont disponibles directement, sans analyse ni empilement. Les images 8 et 16 bits sont acceptées, jusqu’à **32 MP**, avec conservation des valeurs 16 bits. Les fichiers multipages ne sont pas acceptés et la transparence est placée sur fond noir. Choisissez **PNG 16 bits** (par défaut) ou **TIFF 16 bits** dans la section Export. Les deux formats conservent les détails sans compression destructive et acceptent une légende. L’export crée une copie ; l’original est protégé contre l’écrasement.
 
 ![Retouche directe d’une image TIFF](assets/screenshots/processing-image.png)
 
@@ -220,7 +284,9 @@ Maintenez **Avant** pour revoir l’empilement sans les réglages de finition, o
 
 ### 4. Exporter
 
-Le résultat est enregistré en **TIFF RGB 16 bits par canal**, en conservant la précision issue de l’empilement et des réglages. Le SER d’origine reste inchangé. Le dossier utilisé pour le dernier export réussi est mémorisé.
+Le résultat est enregistré en **PNG ou TIFF RGB 16 bits par canal**, en conservant la précision issue de l’empilement et des réglages. Le SER d’origine reste inchangé. Le dossier utilisé pour le dernier export réussi est mémorisé.
+
+Le **poids estimé** apparaît avant l’export et s’actualise selon le format et la légende. Le TIFF et le FITS linéaire utilisent un calcul de taille ; pour les grands PNG/JPEG, l’estimation repose sur des portions de l’image à pleine résolution. Le signe **≈** indique que le poids final peut varier avec la compression.
 
 Une **légende facultative** peut être inscrite dans le TIFF : objet, date d’observation, notes en haut à gauche ; observateur et matériel en bas à gauche. Un champ **Titre** place un titre plus grand juste au-dessus du texte de la légende. Le texte, sa taille et sa couleur (blanc ou doré) sont réglables. Les dimensions et le bilan d’empilement peuvent être ajoutés automatiquement. L’aperçu montre le résultat avant export ; désactiver la légende permet d’exporter l’image sans texte, toujours en 16 bits. Les dates et coordonnées astronomiques sont à renseigner manuellement. La légende est effacée à l’ouverture d’une autre vidéo pour éviter de réutiliser les informations d’une autre observation.
 
@@ -232,7 +298,7 @@ Une **légende facultative** peut être inscrite dans le TIFF : objet, date d’
 | Image à retoucher directement | PNG ou TIFF, 8 ou 16 bits, une seule image, jusqu’à 32 MP. |
 | Images issues de la caméra | PNG, TIFF 16 bits, FITS brut ; séries de FITS individuels. |
 | Ciel profond | FITS (entiers, flottants, compressés), RAW Bayer, PNG, TIFF. |
-| Résultat du traitement | TIFF RGB 16 bits par canal. |
+| Résultat du traitement | PNG ou TIFF RGB 16 bits par canal. |
 | Images à assembler en mosaïque ou à ajouter à l’historique | TIFF, PNG, JPEG. |
 
 En capture, enregistrer une source 8 bits dans un TIFF 16 bits conserve ses valeurs sans créer de nouvelles informations. En traitement, l’empilement calcule des valeurs intermédiaires que l’export 16 bits permet de préserver.
@@ -322,15 +388,15 @@ Le numéro de version est visible dans le titre de la fenêtre et les paramètre
 Le bouton **Signaler un bug** prépare un e-mail vers antoninlefevre45@gmail.com
 avec la version et les étapes de reproduction, à relire avant envoi.
 
-Dans **Ciel profond → Finition et export**, les préréglages conservent les réglages
-de finition (niveaux absolus inclus), sans calibration ni composition des canaux.
-Chaque version A/B possède ses réglages et son historique de 100 modifications.
-Un déplacement de curseur compte comme une action ; Annuler/Rétablir et leurs
-raccourcis habituels permettent de revenir sur les essais. Copier A vers B (ou
-l’inverse) duplique la finition. Le nouvel empilement ou la nouvelle composition
-réinitialise A/B. Les projets sauvegardent les deux versions et la version active,
-mais pas les historiques d’annulation. Sans aperçu automatique, appliquer les
-réglages en attente est nécessaire avant l’export final ou le transfert.
+Dans **Ciel profond → Finition**, choisissez Étirement, Fond de ciel, Couleur et bruit,
+Orientation ou Transformations avancées. **Supprimer ces réglages**, en rouge après
+la comparaison, réinitialise uniquement la famille sélectionnée. **Cmd+Z** annule
+la dernière modification ; un déplacement de curseur compte comme une action.
+
+**Préréglages de finition**, dans le rouage du projet, enregistre ou restaure toutes les familles.
+**Exporter**, à côté du rouage, propose le FITS linéaire ou un export classique
+avec choix du format et légende facultative. Une pose source affichée pour inspection
+ne remplace jamais le résultat exporté.
 
 ### Interface Studio (1.2.0)
 
@@ -350,3 +416,10 @@ réglages de l’application, celui du projet gère ses fichiers.
 Raccourcis : Ctrl+1 Accueil, Ctrl+2 Capture, Ctrl+3 Traitement, Ctrl+4 Ciel profond,
 Ctrl+5 Mosaïque, Ctrl+6 Historique, Ctrl+7 Guide, Ctrl+8 Réglages. Pendant une
 capture, les onglets Accueil, Capture et Guide restent disponibles.
+
+À la fermeture, y compris avec **Cmd+Q**, AstroCapture propose de sauvegarder
+le projet ciel profond et ses réglages, d’exporter un résultat en TIFF ou
+d’enregistrer les réglages de Traitement dans un préréglage. Si plusieurs résultats
+sont ouverts, choisissez celui à exporter. La confirmation revient après chaque
+sauvegarde pour permettre de conserver plusieurs éléments avant de quitter.
+Une sauvegarde annulée ou échouée ne ferme pas l’application.

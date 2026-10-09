@@ -1,5 +1,6 @@
 #include <astro/processing/DeepSky.hpp>
 #include "MetalProcessing.hpp"
+#include <astro/processing/DeepSkyAdvanced.hpp>
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/calib3d.hpp>
@@ -175,7 +176,8 @@ FloatImage linearRgb(const AstroImage& image,const CheckCancel& check) {
     }
     return result;
 }
-std::vector<Star> detectStars(const FloatImage& image,const CheckCancel& check) {
+std::vector<Star> detectStars(const FloatImage& image,const CheckCancel& check,int maximumStars) {
+    if(maximumStars<1||maximumStars>5000)throw std::runtime_error("Invalid star detection limit.");
     checked(check);
     const double resize=std::min(1.,1600./std::max(image.width,image.height));
     cv::Mat rgb(image.height,image.width,CV_32FC3,const_cast<float*>(image.rgb.data())),gray,small;
@@ -210,7 +212,7 @@ std::vector<Star> detectStars(const FloatImage& image,const CheckCancel& check) 
             2.355*std::sqrt(std::max(0.,(sxx/flux-cx*cx+syy/flux-cy*cy)/2))/resize});
     }
     std::sort(stars.begin(),stars.end(),[](const Star& a,const Star& b){return a.flux>b.flux;});
-    if(stars.size()>150)stars.resize(150);return stars;
+    if(stars.size()>std::size_t(maximumStars))stars.resize(maximumStars);return stars;
 }
 namespace {
 struct Triangle {std::array<int,3> vertices;double a{},b{},longest{};};
@@ -420,12 +422,14 @@ FloatImage finishDeepSky(const FloatImage& input,const Finish& options,const Che
         if(detail::metalFinish(source,options,out,check,reason,preview,report)){if(report)report->backend=ComputeBackend::Metal;return out;}
         if(report)report->fallbackReason=std::move(reason);return {};
     };
-    if(!options.background)if(auto out=accelerate(input))return std::move(*out);
+    if(options.ghs&&report)report->fallbackReason="GHS uses the CPU reference implementation.";
+    const GhsCurve ghs({options.ghsStrength,options.ghsLocal,options.ghsSymmetry,options.ghsShadows,options.ghsHighlights,options.ghsInverse,options.ghsMode});
+    if(!options.background&&!options.ghs)if(auto out=accelerate(input))return std::move(*out);
     FloatImage image=input;
     if(options.background) {
         image=extractBackground(input,options.backgroundOptions,check).image;
     }
-    if(options.background)if(auto out=accelerate(image))return std::move(*out);
+    if(options.background&&!options.ghs)if(auto out=accelerate(image))return std::move(*out);
     for(int y=0;y<image.height;++y) {
         checked(check);
         for(int x=0;x<image.width;++x) {
@@ -435,7 +439,11 @@ FloatImage finishDeepSky(const FloatImage& input,const Finish& options,const Che
                 if(options.stretch)pixel[c]=std::clamp((pixel[c]-options.black)/(options.white-options.black),0.f,1.f);
             }
             if(options.stretch) {
-                if(options.asinh) {
+                if(options.ghs) {
+                    const auto original=std::array<float,3>{pixel[0],pixel[1],pixel[2]};
+                    if(options.ghsMode==0)for(int c=0;c<3;++c)pixel[c]=float(ghs(original[c]));
+                    else {const double l=.2126*original[0]+.7152*original[1]+.0722*original[2];const double factor=l>1e-12?ghs(l)/l:1;std::array<double,3> rgb{},independent{};double blend=1;for(int c=0;c<3;++c){rgb[c]=original[c]*factor;independent[c]=ghs(original[c]);if(rgb[c]>1)blend=std::min(blend,(1-independent[c])/(rgb[c]-independent[c]));}for(int c=0;c<3;++c)pixel[c]=float(std::clamp(blend*rgb[c]+(1-blend)*independent[c],0.,1.));}
+                }else if(options.asinh) {
                     const float maximum=options.asinhLuminance==1?.2126f*pixel[0]+.7152f*pixel[1]+.0722f*pixel[2]:options.asinhLuminance==2?(pixel[0]+pixel[1]+pixel[2])/3:std::max({pixel[0],pixel[1],pixel[2]});
                     const float factor=maximum>1e-8f?std::asinh(options.asinhStrength*maximum)/(std::asinh(options.asinhStrength)*maximum):1;
                     for(int c=0;c<3;++c)pixel[c]*=factor;

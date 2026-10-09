@@ -12,6 +12,10 @@ namespace astro::app {
 class DeepSkyController : public QObject {
     Q_OBJECT
     QML_ELEMENT
+    Q_PROPERTY(QVariantMap advancedReport READ advancedReport NOTIFY changed)
+    Q_PROPERTY(bool showingMask READ showingMask WRITE setShowingMask NOTIFY changed)
+    Q_PROPERTY(bool hasMask READ hasMask NOTIFY changed)
+    Q_PROPERTY(QVariantList psfKernel READ psfKernel NOTIFY changed)
     Q_PROPERTY(bool showingBackgroundModel READ showingBackgroundModel WRITE setShowingBackgroundModel NOTIFY changed)
     Q_PROPERTY(bool hasBackgroundModel READ hasBackgroundModel NOTIFY changed)
     Q_PROPERTY(QString sourceInterpretation READ sourceInterpretation NOTIFY changed)
@@ -36,9 +40,18 @@ class DeepSkyController : public QObject {
     Q_PROPERTY(int imageHeight READ imageHeight NOTIFY imageChanged)
     Q_PROPERTY(QVariantMap finishSettings READ finishSettings NOTIFY changed)
     Q_PROPERTY(QVariantMap suggestedStretch READ suggestedStretch NOTIFY resultChanged)
+    Q_PROPERTY(double linearExportBytes READ linearExportBytes NOTIFY resultChanged)
 public:
     explicit DeepSkyController(QObject* parent=nullptr):QObject(parent){}
     ~DeepSkyController() override;
+    QVariantMap advancedReport() const{return advancedReport_;}
+    QVariantList psfKernel() const{return psfKernel_;}
+    bool showingMask() const{return showingMask_;}
+    bool hasMask() const{return !maskPreview_.isNull();}
+    void setShowingMask(bool);
+    Q_INVOKABLE void estimatePsf();
+    Q_INVOKABLE QVariantList importPhotometryCatalog(const QUrl&);
+    Q_INVOKABLE QVariantList ghsCurve(const QVariantMap&) const;
     bool showingBackgroundModel() const{return showingBackgroundModel_;}
     bool hasBackgroundModel() const{return !backgroundPreview_.isNull();}
     void setShowingBackgroundModel(bool);
@@ -68,6 +81,11 @@ public:
     void setProjectOptions(const QVariantMap& options){if(!busy_){projectOptions_=options;emit projectOptionsChanged();}}
     QVariantMap finishSettings() const{return finishSettings_;}
     QVariantMap suggestedStretch() const{return stretch_;}
+    double linearExportBytes() const {
+        if(!linear_)return -1;
+        const auto bytes=std::uint64_t(linear_->width)*linear_->height*12;
+        return double(2880+((bytes+2879)/2880)*2880);
+    }
     Q_INVOKABLE void addFiles(const QList<QUrl>& urls,const QString& role="Light",const QString& group="Auto",double inputScale=0);
     Q_INVOKABLE void addFolder(const QUrl&,const QString& role="Auto",const QString& group="Auto",double inputScale=0);
     Q_INVOKABLE void setSelected(int index,bool selected);
@@ -84,6 +102,8 @@ public:
     Q_INVOKABLE void selectResult(const QString& group);
     Q_INVOKABLE void compose(const QString& red,const QString& green,const QString& blue,const QString& luminance="");
     Q_INVOKABLE void apply(const QVariantMap& options);
+    Q_PROPERTY(QUrl exportUrl READ exportUrl NOTIFY changed)
+    QUrl exportUrl() const;
     Q_INVOKABLE void exportImage(const QUrl&,bool linear=true);
     Q_INVOKABLE void saveProject(const QUrl&);
     Q_INVOKABLE void loadProject(const QUrl&);
@@ -111,7 +131,10 @@ private:
     int progress_{};
     bool busy_{},adjusting_{};
     std::optional<QVariantMap> pendingAdjustments_;
-    QVariantMap histogram_;
+    QVariantMap histogram_,advancedReport_;
+    QVariantList psfKernel_;
+    QImage maskPreview_;
+    bool showingMask_{};
     bool displayingResult_{},comparingRaw_{};
     QString rawName_;
     QImage preview_,resultPreview_,rawPreview_,backgroundPreview_;

@@ -18,6 +18,7 @@ class MosaicController : public QObject {
     Q_PROPERTY(int selectedCount READ selectedCount NOTIFY selectionChanged)
     Q_PROPERTY(QStringList excludedFiles READ excludedFiles NOTIFY selectionChanged)
     Q_PROPERTY(QVariantMap exportAnnotation READ exportAnnotation WRITE setExportAnnotation NOTIFY annotationChanged)
+    Q_PROPERTY(QVariant exportSizeInput READ exportSizeInput NOTIFY exportSizeInputChanged)
     Q_PROPERTY(bool busy READ busy NOTIFY changed)
     Q_PROPERTY(bool hasResult READ hasResult NOTIFY changed)
     Q_PROPERTY(int progress READ progress NOTIFY changed)
@@ -26,7 +27,11 @@ class MosaicController : public QObject {
     Q_PROPERTY(int imageHeight READ imageHeight NOTIFY imageChanged)
     Q_PROPERTY(QUrl exportUrl READ exportUrl NOTIFY changed)
 public:
-    explicit MosaicController(QObject* parent=nullptr) : QObject(parent) {connect(this,&MosaicController::filesChanged,this,&MosaicController::selectionChanged);}
+    explicit MosaicController(QObject* parent=nullptr) : QObject(parent) {
+        connect(this,&MosaicController::filesChanged,this,&MosaicController::selectionChanged);
+        connect(this,&MosaicController::imageChanged,this,&MosaicController::exportSizeInputChanged);
+        connect(this,&MosaicController::annotationChanged,this,&MosaicController::exportSizeInputChanged);
+    }
     ~MosaicController() override;
     QVariantList files() const;
     QStringList excludedFiles() const;
@@ -43,6 +48,7 @@ public:
     QVariantMap exportAnnotation() const { return annotation_; }
     void setExportAnnotation(const QVariantMap& value);
     QImage annotationImage() const { return annotationImage_; }
+    QVariant exportSizeInput() const { return QVariant::fromValue(ExportSizeInput{result_,annotationImage_}); }
     Q_INVOKABLE QVariant processingDocument() const;
     Q_INVOKABLE void addImages(const QList<QUrl>& urls);
     Q_INVOKABLE void removeImage(int index);
@@ -53,6 +59,7 @@ public:
     Q_INVOKABLE void cancel();
     Q_INVOKABLE void exportImage(const QUrl& url);
 signals:
+    void exportSizeInputChanged();
     void filesChanged();
     void selectionChanged();
     void annotationChanged();

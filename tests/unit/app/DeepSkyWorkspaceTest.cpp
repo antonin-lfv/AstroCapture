@@ -9,6 +9,7 @@
 #include <QThread>
 #include <QSettings>
 #include <QTranslator>
+#include "ExportSizeEstimator.hpp"
 #include <QFile>
 #include <QFileInfo>
 #include <QDir>
@@ -34,6 +35,7 @@ int main(int argc,char** argv){
     QCoreApplication::setOrganizationName("AstroCaptureTest");QCoreApplication::setApplicationName("DeepSkyWorkspaceTest");
     QSettings::setDefaultFormat(QSettings::IniFormat);QSettings::setPath(QSettings::IniFormat,QSettings::UserScope,directory.path());
     qmlRegisterType<app::DeepSkyEdits>("AstroCapture",1,0,"DeepSkyEdits");
+    qmlRegisterType<app::ExportSizeEstimator>("AstroCapture",1,0,"ExportSizeEstimator");
     qmlRegisterType<app::DeepSkyController>("AstroCapture",1,0,"DeepSkyController");qmlRegisterType<app::DeepSkyHistogramItem>("AstroCapture",1,0,"DeepSkyHistogramItem");qmlRegisterType<app::DeepSkyImageItem>("AstroCapture",1,0,"DeepSkyImageItem");qmlRegisterType<app::AppLibrary>("AstroCapture",1,0,"AppLibrary");
     std::unique_ptr<app::DeepSkyController> screenshotController;
     app::DeepSkyController controller;app::AppLibrary library;QQmlEngine engine;QQmlComponent component(&engine);
@@ -50,6 +52,22 @@ int main(int argc,char** argv){
     auto* presetDialog=object->findChild<QObject*>("deepSkyPresetDialog");ASTRO_TEST_CHECK(presetDialog);
     auto* dialogBackground=presetDialog->property("background").value<QObject*>();ASTRO_TEST_CHECK(dialogBackground);
     ASTRO_TEST_CHECK(dialogBackground->property("color").value<QColor>()==QColor("#0b0d10"));
+    auto* gear=visualItem(root,"deepSkyProjectMenu");ASTRO_TEST_CHECK(gear);
+    const auto gearPoint=gear->mapToScene(QPointF(gear->width()/2,gear->height()/2));
+    QMouseEvent gearPress(QEvent::MouseButtonPress,gearPoint,gearPoint,Qt::LeftButton,Qt::LeftButton,Qt::NoModifier);QGuiApplication::sendEvent(&window,&gearPress);
+    QMouseEvent gearRelease(QEvent::MouseButtonRelease,gearPoint,gearPoint,Qt::LeftButton,Qt::NoButton,Qt::NoModifier);QGuiApplication::sendEvent(&window,&gearRelease);QCoreApplication::processEvents();
+    auto* projectOptions=root->findChild<QObject*>("deepSkyProjectOptions");ASTRO_TEST_CHECK(projectOptions && projectOptions->property("visible").toBool());
+    ASTRO_TEST_CHECK(projectOptions->property("width").toDouble()>=200.);
+    if(qEnvironmentVariableIsSet("ASTRO_UI_MENU_SNAPSHOT")) {
+        QThread::msleep(200);QCoreApplication::processEvents();
+        ASTRO_TEST_CHECK(window.grabWindow().save(qEnvironmentVariable("ASTRO_UI_MENU_SNAPSHOT")));
+    }
+    ASTRO_TEST_CHECK(QMetaObject::invokeMethod(projectOptions,"close"));QCoreApplication::processEvents();
+    const double tabsY=finishTab->mapToScene(QPointF()).y();
+    auto* inspector=root->findChild<QObject*>("deepSkyInspector");auto* flickable=inspector->property("contentItem").value<QObject*>();ASTRO_TEST_CHECK(flickable);
+    flickable->setProperty("contentY",100.);QCoreApplication::processEvents();
+    ASTRO_TEST_CHECK(finishTab->mapToScene(QPointF()).y()==tabsY);
+    flickable->setProperty("contentY",0.);
     recording::AstroImage data;data.width=160;data.height=128;data.exposure=60;data.filter="Red";data.samples.resize(160*128);
     const std::array<std::array<int,2>,10> stars{{{20,20},{60,16},{105,25},{140,40},{35,60},{80,55},{120,75},{25,105},{75,110},{135,105}}};
     QList<QUrl> urls;
@@ -101,14 +119,24 @@ int main(int argc,char** argv){
     ASTRO_TEST_CHECK(controller.linearHistogram()["shadowChannels"].toList().size()==3);
     controller.apply(controller.suggestedStretch());wait(controller);
     ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root,"setFinish",Q_ARG(QVariant,QVariant(controller.finishSettings()))));wait(controller);
-    const auto draftPixels=controller.processingDocument().value<app::ImageDocument>().pixels;
-    ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root,"commitTransformation"));wait(controller);
-    ASTRO_TEST_CHECK(controller.finishSettings()["operations"].toList().size()==1);
-    const auto committedPixels=controller.processingDocument().value<app::ImageDocument>().pixels;ASTRO_TEST_CHECK(committedPixels->rgb==draftPixels->rgb);
-    ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root,"editOperation",Q_ARG(QVariant,QVariant(0))));wait(controller);ASTRO_TEST_CHECK(root->property("editingOperationIndex").toInt()==0);
-    ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root,"cancelOperationEdit"));wait(controller);ASTRO_TEST_CHECK(controller.processingDocument().value<app::ImageDocument>().pixels->rgb==committedPixels->rgb);
+    ASTRO_TEST_CHECK(!object->findChild<QObject*>("deepSkyVersionA"));
+    ASTRO_TEST_CHECK(object->findChild<QObject*>("deepSkyExportButton"));
+    ASTRO_TEST_CHECK(object->findChild<QObject*>("deepSkyFinishFamily"));
+    auto beforeFamily=controller.finishSettings();beforeFamily["red"]=1.4;beforeFamily["rotation"]=1;
+    ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root,"setFinish",Q_ARG(QVariant,QVariant(beforeFamily))));wait(controller);
+    root->setProperty("finishingTool",2);
+    ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root,"resetFamily"));wait(controller);
+    ASTRO_TEST_CHECK(controller.finishSettings()["red"].toDouble()==1. && controller.finishSettings()["rotation"].toInt()==1);
+    ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root,"undoFinish"));wait(controller);
+    ASTRO_TEST_CHECK(controller.finishSettings()["red"].toDouble()==1.4);
     ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root,"setFinish",Q_ARG(QVariant,QVariant(astro::app::defaultDeepSkySettings()))));wait(controller);
+    root->setProperty("finishingTool",0);
+    ASTRO_TEST_CHECK(!root->findChild<QObject*>("deepSkyCommitTransformation"));
+    ASTRO_TEST_CHECK(!root->findChild<QObject*>("deepSkyUndo"));
+    ASTRO_TEST_CHECK(!root->findChild<QObject*>("deepSkyRedo"));
     const auto output=QUrl::fromLocalFile(directory.filePath("linear.fits"));controller.exportImage(output,true);wait(controller);
+    ASTRO_TEST_CHECK(controller.linearExportBytes()==QFileInfo(output.toLocalFile()).size());
+    auto* fitsSize=root->findChild<QObject*>("exportSizeHint");ASTRO_TEST_CHECK(fitsSize && fitsSize->property("estimatedBytes").toDouble()==controller.linearExportBytes());
     auto result=recording::readAstroImage(output.toLocalFile().toStdString());ASTRO_TEST_CHECK(result.exposure==120&&result.channels==3&&result.width<160);
     QCoreApplication::processEvents();
     const auto viewportHeight=imageViewport->property("height").toDouble();
@@ -135,8 +163,7 @@ int main(int argc,char** argv){
     controller.inspect(0);wait(controller);ASTRO_TEST_CHECK(!controller.displayingResult());controller.restoreResult();ASTRO_TEST_CHECK(controller.displayingResult()&&controller.image().size()==document.preview.size());const auto handoff=controller.processingDocument().value<app::ImageDocument>();ASTRO_TEST_CHECK(handoff.preview.size()==QSize(handoff.pixels->width,handoff.pixels->height));
     QCoreApplication::processEvents();if(qEnvironmentVariableIsSet("ASTRO_UI_SNAPSHOT_PATH"))window.grabWindow().save(qEnvironmentVariable("ASTRO_UI_SNAPSHOT_PATH"));
     // Persist custom controls, restore them, and verify the recreated pixels,
-    // including with live preview disabled (restoration must still apply).
-    ASTRO_TEST_CHECK(root->findChild<QObject*>("deepSkyLivePreview")->setProperty("checked",false));
+    // Restoration applies automatically, just like changes from controls.
     QVariant customFinish;
     ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root,"options",Q_RETURN_ARG(QVariant,customFinish)));
     auto finish=customFinish.toMap();
@@ -172,11 +199,13 @@ int main(int argc,char** argv){
     edits->applyValues(bFinish);
     ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root,"setFinish",Q_ARG(QVariant,QVariant(library.deepSkyPreset("Test finish")))));wait(controller);
     ASTRO_TEST_CHECK(controller.finishSettings()["midtones"]==.37);
+    root->setProperty("captionOptions",QVariantMap{{"enabled",true},{"title",QString("M8 / M20")},{"top",QString("Poses Siril")}});
     QVariant savedOptions;
     ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root,"saveOptions",Q_RETURN_ARG(QVariant,savedOptions))&&savedOptions.toBool());
     QObject::connect(&controller,&app::DeepSkyController::projectSaved,&library,&app::AppLibrary::recordProject);
     QObject::connect(&controller,&app::DeepSkyController::projectOpened,&library,&app::AppLibrary::recordProject);
     const auto project=QUrl::fromLocalFile(directory.filePath("session.astroproject"));controller.saveProject(project);controller.clear();root->setProperty("workflowStep",0);controller.loadProject(project);ASTRO_TEST_CHECK(controller.frames().size()==3&&!controller.frames()[2].toMap()["selected"].toBool()&&!controller.hasResult());
+    ASTRO_TEST_CHECK(root->property("captionOptions").toMap()["title"].toString()=="M8 / M20");
     controller.integrate(true);wait(controller);ASTRO_TEST_CHECK(controller.hasResult());
     ASTRO_TEST_CHECK(root->property("workflowStep").toInt()==6);
     QVariant restoredFinish;
@@ -230,6 +259,29 @@ int main(int argc,char** argv){
     bayerPreview.setSourceAutoStretch(false);wait(bayerPreview);const auto color=bayerPreview.image().pixelColor(50,50);ASTRO_TEST_CHECK(color.red()!=color.blue());
     bayerPreview.setSourceDebayer(false);wait(bayerPreview);const auto rawPixel=bayerPreview.image().pixelColor(50,50);ASTRO_TEST_CHECK(rawPixel.red()==rawPixel.green()&&rawPixel.green()==rawPixel.blue());
     ASTRO_TEST_CHECK(recording::readAstroImage(mosaicPath.toStdString()).bayer==domain::BayerPattern::RGGB);
+    // Advanced controls use the same history/project values as the normal workshop.
+    auto advanced=app::defaultDeepSkySettings();advanced["ghs"]=true;advanced["ghsStrength"]=2.;advanced["ghsSymmetry"]=.2;advanced["maskType"]=2;advanced["advancedDenoise"]=true;
+    ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root,"setFinish",Q_ARG(QVariant,QVariant(advanced))));wait(controller);
+    ASTRO_TEST_CHECK(controller.hasMask()&&controller.psfKernel().size()>0&&controller.advancedReport().contains("noiseBefore"));
+    const auto maskedOutput=controller.processingDocument().value<app::ImageDocument>().pixels;
+    controller.setShowingMask(true);ASTRO_TEST_CHECK(controller.showingMask()&&controller.processingDocument().value<app::ImageDocument>().pixels==maskedOutput);
+    controller.restoreResult();ASTRO_TEST_CHECK(!controller.showingMask());
+    const auto curve=controller.ghsCurve(advanced);ASTRO_TEST_CHECK(curve.size()==513&&curve.front().toDouble()==0&&curve.back().toDouble()==1);
+    auto* advancedPopup=root->findChild<QObject*>("deepSkyAdvancedTools");ASTRO_TEST_CHECK(advancedPopup);
+    root->setProperty("finishingTool",4);QCoreApplication::processEvents();
+    for(int index=0;index<5;++index){advancedPopup->setProperty("toolIndex",index);QCoreApplication::processEvents();ASTRO_TEST_CHECK(advancedPopup->property("visible").toBool());if(qEnvironmentVariableIsSet("ASTRO_UI_SNAPSHOT_PATH")){QThread::msleep(50);QCoreApplication::processEvents();ASTRO_TEST_CHECK(window.grabWindow().save(qEnvironmentVariable("ASTRO_UI_SNAPSHOT_PATH")+QString(".advanced-%1.png").arg(index)));}}
+    root->setProperty("finishingTool",0);
+    const auto catalogPath=directory.filePath("references.csv");QFile catalog(catalogPath);ASTRO_TEST_CHECK(catalog.open(QIODevice::WriteOnly));catalog.write("x,y,red,green,blue\n25,25,1,1,1\n60,60,1,1,1\n100,100,1,1,1\n");catalog.close();
+    const auto references=controller.importPhotometryCatalog(QUrl::fromLocalFile(catalogPath));ASTRO_TEST_CHECK(references.size()==3);
+    auto badPhotometry=app::defaultDeepSkySettings();badPhotometry["photometry"]=true;badPhotometry["photometryReferences"]=QVariantList{};controller.apply(badPhotometry);wait(controller);ASTRO_TEST_CHECK(controller.processingDocument().value<app::ImageDocument>().pixels==maskedOutput);
+    advanced["photometryReferences"]=references;
+    ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root,"setFinish",Q_ARG(QVariant,QVariant(advanced))));wait(controller);
+    ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root,"saveOptions",Q_RETURN_ARG(QVariant,savedOptions)));ASTRO_TEST_CHECK(savedOptions.toBool());
+    const auto advancedProject=QUrl::fromLocalFile(directory.filePath("advanced.astroproject"));controller.saveProject(advancedProject);
+    app::DeepSkyController reopened;reopened.loadProject(advancedProject);const auto advancedSaved=reopened.projectOptions()["finish"].toMap();ASTRO_TEST_CHECK(advancedSaved["ghs"].toBool()&&advancedSaved["maskType"].toInt()==2&&advancedSaved["photometryReferences"].toList()==references);
+    auto hdrSettings=app::defaultDeepSkySettings();hdrSettings["stretch"]=false;hdrSettings["pedestal"]=1.;controller.apply(hdrSettings);wait(controller);
+    const auto hdrPixels=controller.processingDocument().value<app::ImageDocument>().pixels;ASTRO_TEST_CHECK(*std::max_element(hdrPixels->rgb.begin(),hdrPixels->rgb.end())>1);
+    const auto hdrPath=directory.filePath("processed-float.fits");controller.exportImage(QUrl::fromLocalFile(hdrPath),false);wait(controller);const auto hdrRead=recording::readAstroImage(hdrPath.toStdString());ASTRO_TEST_CHECK(hdrRead.samples==hdrPixels->rgb);
     if(qEnvironmentVariableIsSet("ASTRO_UI_FITS_PATH")) {
         screenshotController=std::make_unique<app::DeepSkyController>();root->setProperty("controller",QVariant::fromValue(screenshotController.get()));
         screenshotController->addFiles({QUrl::fromLocalFile(qEnvironmentVariable("ASTRO_UI_FITS_PATH"))});wait(*screenshotController);ASTRO_TEST_CHECK(screenshotController->frames().size()==1);
@@ -237,7 +289,25 @@ int main(int argc,char** argv){
         auto settings=screenshotController->suggestedStretch();
         screenshotController->apply(settings);wait(*screenshotController);ASTRO_TEST_CHECK(screenshotController->processingDocument().value<app::ImageDocument>().pixels);
         root->setProperty("workflowStep",6);root->setProperty("imageFocus",true);QCoreApplication::processEvents();QThread::msleep(50);QCoreApplication::processEvents();
-        if(qEnvironmentVariableIsSet("ASTRO_UI_SNAPSHOT_PATH"))ASTRO_TEST_CHECK(window.grabWindow().save(qEnvironmentVariable("ASTRO_UI_SNAPSHOT_PATH")));
+        if(qEnvironmentVariableIsSet("ASTRO_UI_SNAPSHOT_PATH")) {
+            const auto snapshot=qEnvironmentVariable("ASTRO_UI_SNAPSHOT_PATH");
+            ASTRO_TEST_CHECK(window.grabWindow().save(snapshot));
+            auto* chooser=root->findChild<QObject*>("deepSkyFinishFamily");ASTRO_TEST_CHECK(chooser);
+            auto* popup=chooser->property("popup").value<QObject*>();ASTRO_TEST_CHECK(popup);
+            ASTRO_TEST_CHECK(QMetaObject::invokeMethod(popup,"open"));
+            QCoreApplication::processEvents();QThread::msleep(100);QCoreApplication::processEvents();
+            ASTRO_TEST_CHECK(popup->property("contentItem").value<QObject*>()->property("count").toInt()==5);
+            ASTRO_TEST_CHECK(window.grabWindow().save(snapshot+".dropdown.png"));
+            ASTRO_TEST_CHECK(QMetaObject::invokeMethod(popup,"close"));QCoreApplication::processEvents();
+            ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root->findChild<QObject*>("deepSkyProjectMenu"),"clicked"));QCoreApplication::processEvents();
+            ASTRO_TEST_CHECK(root->findChild<QObject*>("deepSkyProjectOptions")->property("visible").toBool());
+            QThread::msleep(200);QCoreApplication::processEvents();
+            ASTRO_TEST_CHECK(window.grabWindow().save(snapshot+".project-menu.png"));
+            ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root->findChild<QObject*>("deepSkyProjectOptions"),"close"));QCoreApplication::processEvents();
+            ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root->findChild<QObject*>("deepSkyExportButton"),"clicked"));QCoreApplication::processEvents();
+            ASTRO_TEST_CHECK(window.grabWindow().save(snapshot+".export.png"));
+            ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root->findChild<QObject*>("deepSkyExportPanel"),"close"));QCoreApplication::processEvents();
+        }
         ASTRO_TEST_CHECK(root->findChild<QObject*>("deepSkyViewport")->property("height").toDouble()>280);
         if(qEnvironmentVariableIsSet("ASTRO_UI_SNAPSHOT_PATH")) {
             const auto path=qEnvironmentVariable("ASTRO_UI_SNAPSHOT_PATH");
@@ -247,14 +317,14 @@ int main(int argc,char** argv){
             QMetaObject::invokeMethod(presetDialog,"open");QCoreApplication::processEvents();QThread::msleep(200);QCoreApplication::processEvents();
             ASTRO_TEST_CHECK(window.grabWindow().save(path+".dialog.png"));
             QMetaObject::invokeMethod(presetDialog,"close");QCoreApplication::processEvents();
-            root->setProperty("workflowStep",1);QCoreApplication::processEvents();
+            root->setProperty("workflowStep",1);QCoreApplication::processEvents();QThread::msleep(250);QCoreApplication::processEvents();
             QQuickItem* helpTarget=nullptr;
             for(auto* item:root->findChildren<QQuickItem*>()) {
-                const auto position=item->mapToScene(QPointF(20,item->height()/2));
-                if(item->isVisible() && !item->property("explanation").toString().isEmpty() && position.y()>0 && position.y()<window.height()-100) {helpTarget=item;break;}
+                const auto position=item->mapToScene(QPointF(item->width()/2,item->height()/2));
+                if(item->isVisible() && item->objectName()=="helpIcon" && item->property("text").toString().contains("Siril") && position.y()>140 && position.y()<window.height()-100) {helpTarget=item;break;}
             }
             ASTRO_TEST_CHECK(helpTarget);
-            const auto point=helpTarget->mapToScene(QPointF(20,helpTarget->height()/2));
+            const auto point=helpTarget->mapToScene(QPointF(helpTarget->width()/2,helpTarget->height()/2));
             QMouseEvent hover(QEvent::MouseMove,point,point,Qt::NoButton,Qt::NoButton,Qt::NoModifier);QGuiApplication::sendEvent(&window,&hover);
             QElapsedTimer tooltipWait;tooltipWait.start();while(tooltipWait.elapsed()<500){QCoreApplication::processEvents();QThread::msleep(1);}
             bool helpVisible=false;for(auto* tip:root->findChildren<QObject*>("darkHelpTip"))helpVisible|=tip->property("visible").toBool();
@@ -294,6 +364,19 @@ int main(int argc,char** argv){
         const auto afterAB=screenshotController->processingDocument().value<app::ImageDocument>().pixels;
         ASTRO_TEST_CHECK(beforeAB->rgb.size()==afterAB->rgb.size());
         for(std::size_t i=0;i<afterAB->rgb.size();i+=997)ASTRO_TEST_CHECK(std::abs(beforeAB->rgb[i]-afterAB->rgb[i])<1e-6);
+    }
+    if(screenshotController && qEnvironmentVariableIsSet("ASTRO_UI_ADVANCED_QA")) {
+        auto advanced=screenshotController->finishSettings();advanced["background"]=false;advanced["operations"]=QVariantList{};advanced["ghs"]=true;advanced["ghsStrength"]=3.;advanced["ghsLocal"]=2.;advanced["ghsSymmetry"]=.02;advanced["ghsHighlights"]=.8;advanced["advancedDenoise"]=true;advanced["noiseScales"]=2;advanced["maskType"]=2;
+        QElapsedTimer elapsed;elapsed.start();ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root,"setFinish",Q_ARG(QVariant,QVariant(advanced))));wait(*screenshotController);ASTRO_TEST_CHECK(screenshotController->finishSettings()["ghs"].toBool()&&screenshotController->hasMask());
+        std::cout<<"Advanced real-data preview: "<<elapsed.elapsed()<<" ms\n";
+        auto* popup=root->findChild<QObject*>("deepSkyAdvancedTools");root->setProperty("finishingTool",4);QCoreApplication::processEvents();QThread::msleep(200);QCoreApplication::processEvents();
+        if(qEnvironmentVariableIsSet("ASTRO_UI_SNAPSHOT_PATH"))for(int i=0;i<5;++i){popup->setProperty("toolIndex",i);QCoreApplication::processEvents();QThread::msleep(50);QCoreApplication::processEvents();ASTRO_TEST_CHECK(window.grabWindow().save(qEnvironmentVariable("ASTRO_UI_SNAPSHOT_PATH")+QString(".advanced-%1.png").arg(i)));}
+        root->setProperty("finishingTool",0);
+        screenshotController->estimatePsf();wait(*screenshotController);if(!screenshotController->advancedReport().contains("estimatedFwhm"))std::cerr<<"PSF status: "<<screenshotController->status().toStdString()<<"\n";ASTRO_TEST_CHECK(screenshotController->advancedReport().contains("estimatedFwhm"));
+        std::cout<<"Measured PSF: "<<screenshotController->advancedReport()["estimatedFwhm"].toDouble()<<" px, "<<screenshotController->advancedReport()["estimatedStars"].toInt()<<" stars\n";
+        advanced["maskType"]=0;advanced["deconvolution"]=true;advanced["rlIterations"]=2;advanced["rlStopping"]=0.;advanced["rlDamping"]=.002;advanced["advancedDenoise"]=false;elapsed.restart();
+        ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root,"setFinish",Q_ARG(QVariant,QVariant(advanced))));wait(*screenshotController);ASTRO_TEST_CHECK(screenshotController->advancedReport()["rlIterations"].toInt()==2);
+        std::cout<<"Real-data two-iteration restoration: "<<elapsed.elapsed()<<" ms\n";
     }
     std::cout<<"OK\n";
 }

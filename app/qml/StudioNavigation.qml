@@ -16,7 +16,8 @@ Rectangle {
         {key:"deepSky",label:qsTr("Deep sky"),icon:"stars"},
         {key:"mosaic",label:qsTr("Mosaic"),icon:"mosaic"},
         {key:"history",label:qsTr("History"),icon:"history"},
-        {key:"guide",label:qsTr("Guide"),icon:"book"}
+        {key:"guide",label:qsTr("Guide"),icon:"book"},
+        {key:"settings",label:qsTr("Settings"),icon:"gear"}
     ]
     implicitHeight:104
     color:"#10141b"
@@ -37,15 +38,7 @@ Rectangle {
                 background:Item {}
                 DarkToolTip {visible:parent.hovered;text:root.activityText}
             }
-            ToolButton {
-                objectName:"studioSettings";implicitWidth:38;implicitHeight:38;padding:8
-                enabled:!root.recording
-                Accessible.name:qsTr("Settings")
-                onClicked:root.navigate("settings")
-                contentItem:Icon {name:"gear";color:root.currentTab==="settings"||parent.hovered?"#91b8ff":"#a2aec0"}
-                background:Rectangle {radius:6;color:parent.hovered||root.currentTab==="settings"?"#253348":"transparent"}
-                DarkToolTip {visible:parent.hovered;text:qsTr("Settings")}
-            }
+
         }
         Rectangle {Layout.fillWidth:true;Layout.preferredHeight:1;color:"#29313d"}
         RowLayout {
@@ -54,17 +47,17 @@ Rectangle {
                 model:root.tabs
                 delegate:Button {
                     id:tab;required property var modelData
-                    objectName:"studioTab_"+modelData.key
+                    objectName:modelData.key==="settings"?"studioSettings":"studioTab_"+modelData.key
                     readonly property bool selected:root.currentTab===modelData.key
                     enabled:!root.recording || ["home","capture","guide"].indexOf(modelData.key)>=0
                     Accessible.name:modelData.label;Accessible.role:Accessible.PageTab
                     Accessible.description:selected?qsTr("Current workspace"):""
-                    leftPadding:root.width<900?9:12;rightPadding:leftPadding
+                    leftPadding:root.width<1100?9:12;rightPadding:leftPadding
                     topPadding:9;bottomPadding:9
                     onClicked:root.navigate(modelData.key)
                     contentItem:RowLayout {
                         spacing:7
-                        Icon {visible:root.width>=900;name:tab.modelData.icon;color:tab.selected?"#eef3fa":"#a2aec0";Layout.preferredWidth:16;Layout.preferredHeight:16}
+                        Icon {visible:root.width>=1100;name:tab.modelData.icon;color:tab.selected?"#eef3fa":"#a2aec0";Layout.preferredWidth:16;Layout.preferredHeight:16}
                         Label {text:tab.modelData.label;color:!tab.enabled?"#687486":tab.selected?"#eef3fa":"#a2aec0";font.pixelSize:13}
                     }
                     background:Rectangle {

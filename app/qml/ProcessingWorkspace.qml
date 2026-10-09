@@ -26,8 +26,8 @@ Rectangle {
     property real compareSplit: 0.5
     property bool shortcutsAllowed: true
     readonly property bool canEdit: controller.hasResult && !playing && (!controller.busy || controller.adjusting)
-    readonly property bool dialogOpen: presetPopup.opened || annotationPopup.opened || openDialog.visible || saveDialog.visible
-    readonly property bool localShortcuts: visible && shortcutsAllowed && !presetPopup.opened && !annotationPopup.opened && !openDialog.visible && !saveDialog.visible
+    readonly property bool dialogOpen: presetPopup.opened || annotationPopup.dialogOpen || openDialog.visible || saveDialog.visible
+    readonly property bool localShortcuts: visible && shortcutsAllowed && !presetPopup.opened && !annotationPopup.dialogOpen && !openDialog.visible && !saveDialog.visible
     ProcessingEdits { id: edits; objectName: "processingEdits" }
     Connections {
         target: edits
@@ -43,6 +43,7 @@ Rectangle {
         ++adjustmentRevision;
         adjustmentTimer.restart();
     }
+    function saveCurrentPreset() {playing=false;edits.endEdit();presetPopup.open();}
     function chooseSource() {
         playing = false;
         openDialog.currentFolder = library.lastVideoDirectory;
@@ -134,11 +135,16 @@ Rectangle {
     }
     FileDialog {
         id: saveDialog
+        objectName: "processingExportDialog"
         title: qsTr("Export processed image")
         fileMode: FileDialog.SaveFile
-        nameFilters: [qsTr("16-bit TIFF image (*.tif *.tiff)")]
-        defaultSuffix: "tif"
-        onAccepted: root.controller.exportImage(selectedFile)
+        nameFilters: exportFormat.currentIndex===0 ? [qsTr("16-bit PNG image (*.png)")] : [qsTr("16-bit TIFF image (*.tif *.tiff)")]
+        defaultSuffix: exportFormat.suffix
+        onAccepted: {
+            let path=selectedFile.toString();
+            if(!/\.(png|tiff?)$/i.test(path))path+="."+exportFormat.suffix;
+            root.controller.exportImage(path);
+        }
     }
     Popup {
         id: presetPopup
@@ -182,6 +188,8 @@ Rectangle {
     CaptionEditor {
         id: annotationPopup
         controller: root.controller
+        library:root.library
+        previewContent:Component {ProcessingImageItem {controller:root.controller}}
         hostWidth: root.width; hostHeight: root.height
         onPreviewRequested: root.controller.showResult(false)
     }
@@ -272,13 +280,13 @@ Rectangle {
     }
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: 16
+        anchors.margins: 20
         spacing: 12
         Label {text:qsTr("Processing");color:"#eef3fa";font.pixelSize:22;font.weight:Font.Medium}
         RowLayout {
             Layout.fillWidth: true
             IconButton {
-                text: qsTr("Open…")
+                text: qsTr("Open image or video"); iconName:"folder"
                 enabled: !root.controlsBusy
                 onClicked: root.chooseSource()
             }
@@ -288,21 +296,45 @@ Rectangle {
                 onClicked: { root.playing = false; adjustmentTimer.stop(); root.controller.openPath(root.lastRecording); }
             }
             IconButton {
-                text: qsTr("Recent videos")
+                text: qsTr("Recent files")
                 enabled: !root.controlsBusy && root.library.recentVideos.length > 0
                 onClicked: recentMenu.popup()
                 Menu {
                     id: recentMenu
+                    objectName: "processingRecentMenu"
                     width: Math.min(420, root.width - 40)
+                    popupType: Popup.Item
+                    padding: 6
+                    palette.window: "#151b24"
+                    palette.text: "#eef3fa"
+                    palette.highlight: "#293b54"
+                    palette.highlightedText: "#ffffff"
+                    background: Rectangle { color: "#151b24"; radius: 8; border.color: "#39465a" }
                     Instantiator {
                         model: root.library.recentVideos
                         delegate: MenuItem {
+                            id: recentEntry
                             required property var modelData
+                            objectName: "processingRecentEntry"
+                            implicitHeight: 36
+                            hoverEnabled: true
+                            leftPadding: 12
+                            rightPadding: 12
                             text: modelData.name + (modelData.exists ? "" : qsTr(" · unavailable"))
                             enabled: modelData.exists
+                            contentItem: Text {
+                                text: recentEntry.text
+                                color: recentEntry.enabled ? "#eef3fa" : "#788496"
+                                font.pixelSize: 12
+                                verticalAlignment: Text.AlignVCenter
+                                elide: Text.ElideMiddle
+                            }
+                            background: Rectangle {
+                                radius: 4
+                                color: recentEntry.enabled && (recentEntry.highlighted || recentEntry.hovered) ? "#293b54" : "#151b24"
+                            }
                             onTriggered: root.openFile(modelData.url)
-                            ToolTip.visible: hovered
-                            ToolTip.text: modelData.path
+                            DarkToolTip { visible: recentEntry.hovered; text: recentEntry.modelData.path }
                         }
                         onObjectAdded: (index, object) => recentMenu.insertItem(index, object)
                         onObjectRemoved: (index, object) => recentMenu.removeItem(object)
@@ -357,6 +389,7 @@ Rectangle {
                     sourceWidth: root.controller.imageWidth
                     sourceHeight: root.controller.imageHeight
                     ProcessingImageItem {
+                        objectName:"processingPreviewImage"
                         parent: imageView.imageContainer
                         anchors.fill: parent
                         controller: root.controller
@@ -389,6 +422,7 @@ Rectangle {
                         Label { text: qsTr("From capture to final image"); color: "#e8edf5"; font.pixelSize: 22; Layout.fillWidth: true; wrapMode: Text.WordWrap; horizontalAlignment: Text.AlignHCenter }
                         Caption { text: qsTr("Open or drop a SER, PNG or TIFF here. Analyze and stack a video, or adjust an image directly."); horizontalAlignment: Text.AlignHCenter }
                         Caption { text: qsTr("Your original files stay untouched."); horizontalAlignment: Text.AlignHCenter }
+                        IconButton {text:qsTr("Open image or video");iconName:"folder";Layout.alignment:Qt.AlignHCenter;onClicked:root.chooseSource()}
                     }
                 }
                 RowLayout {
@@ -404,17 +438,16 @@ Rectangle {
                 RowLayout {
                     Layout.fillWidth: true
                     enabled: root.controller.loaded
-                    visible: !root.controller.stillImage
+                    visible: root.controller.loaded && !root.controller.stillImage
                     IconButton {
                         text: root.playing ? qsTr("Pause source") : qsTr("Play source")
-                        Layout.preferredWidth: playbackText.width + 24
-                        Layout.minimumWidth: playbackText.width + 24
-                        Layout.maximumWidth: playbackText.width + 24
+                        Layout.preferredWidth: playbackText.width + 50
+                        Layout.minimumWidth: playbackText.width + 50
+                        Layout.maximumWidth: playbackText.width + 50
                         TextMetrics { id: playbackText; text: qsTr("Pause source"); font.pixelSize: 12 }
                         enabled: !root.adjustmentsDirty && (root.playing || !root.controlsBusy)
                         onClicked: root.togglePlayback()
-                        ToolTip.visible: hovered
-                        ToolTip.text: qsTr("Original SER video, up to 10 frames/s. The stack is a single still image.")
+                        helpText: qsTr("Original SER video, up to 10 frames/s. The stack is a single still image.")
                     }
                     DarkSlider {
                         id: timeline
@@ -450,6 +483,7 @@ Rectangle {
                 }
             }
             Rectangle {
+                visible:root.controller.loaded || root.controller.hasResult
                 Layout.preferredWidth: 7
                 Layout.fillHeight: true
                 color: resizeHandle.containsMouse || resizeHandle.pressed ? "#6ca5f8" : "#26303c"
@@ -471,7 +505,9 @@ Rectangle {
                 }
             }
             ScrollView {
-                ScrollBar.vertical.policy: ScrollBar.AlwaysOff
+                objectName:"processingControls"
+                visible:root.controller.loaded || root.controller.hasResult
+                ScrollBar.vertical.policy: ScrollBar.AsNeeded
                 ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
                 Layout.preferredWidth: Math.min(root.panelWidth, root.width * 0.55)
                 Layout.fillHeight: true
@@ -483,7 +519,7 @@ Rectangle {
                     RowLayout {
                         Layout.fillWidth: true
                         Label { text: qsTr("Processing controls"); color: "#a8b5c6"; Layout.fillWidth: true; elide: Text.ElideRight }
-                        IconButton { text: root.library.compactProcessing ? qsTr("Guided") : qsTr("Compact"); onClicked: root.library.compactProcessing = !root.library.compactProcessing }
+                        IconButton { text: root.library.compactProcessing ? qsTr("Show explanations") : qsTr("Hide explanations"); onClicked: root.library.compactProcessing = !root.library.compactProcessing }
                     }
                     ColumnLayout {
                         Layout.fillWidth: true
@@ -669,7 +705,7 @@ Rectangle {
                         }
                         RowLayout {
                             Layout.fillWidth: true
-                            ComboBox {
+                            DarkComboBox {
                                 id: presetChooser
                                 objectName: "processingPresetChooser"
                                 Layout.fillWidth: true
@@ -720,11 +756,17 @@ Rectangle {
                             }
                             IconButton { text: qsTr("Load"); enabled: presetChooser.currentIndex >= 0; onClicked: edits.applyValues(root.library.processingPreset(presetChooser.currentText)) }
                         }
-                        IconButton { text: qsTr("Manage presets…"); Layout.fillWidth: true; onClicked: { presetName.text = presetChooser.currentIndex >= 0 ? presetChooser.currentText : ""; presetPopup.open(); } }
+                        IconButton { text: qsTr("Manage presets"); Layout.fillWidth: true; onClicked: { presetName.text = presetChooser.currentIndex >= 0 ? presetChooser.currentText : ""; presetPopup.open(); } }
 
                     }
                     SectionTitle { text: root.controller.stillImage ? qsTr("Export") : qsTr("4   Export") }
-                    Caption { text: root.adjustmentsDirty ? qsTr("Waiting for the latest adjustments before export.") : qsTr("16-bit RGB TIFF preserves the precision gained from stacking.") }
+                    Caption { text: root.adjustmentsDirty ? qsTr("Waiting for the latest adjustments before export.") : qsTr("PNG and TIFF preserve 16-bit detail without lossy compression.") }
+                    DarkComboBox {
+                        id:exportFormat;objectName:"processingExportFormat"
+                        Layout.fillWidth:true
+                        model:[qsTr("PNG · 16-bit, lossless"),qsTr("TIFF · 16-bit, lossless")]
+                        property string suffix:currentIndex===0?"png":"tif"
+                    }
                     RowLayout {
                         Layout.fillWidth: true
                         enabled: root.controller.hasResult
@@ -735,15 +777,16 @@ Rectangle {
                             Accessible.name: qsTr("Add a caption to the exported image")
                             onToggled: { root.setAnnotation("enabled", checked); root.controller.showResult(false); }
                         }
-                        IconButton { text: qsTr("Edit…"); onClicked: annotationPopup.open() }
+                        IconButton { text: qsTr("Edit caption"); enabled:root.controller.hasResult && !root.controlsBusy && !root.adjustmentsDirty;onClicked: annotationPopup.open() }
                     }
+                    ExportSizeHint {controller:root.controller;format:exportFormat.suffix;ready:!root.adjustmentsDirty && !root.controlsBusy;visible:root.controller.hasResult;Layout.fillWidth:true}
                     IconButton {
-                        text: qsTr("Save image…")
+                        text: qsTr("Export image")
                         Layout.fillWidth: true
                         enabled: root.controller.hasResult && !root.controlsBusy && !root.adjustmentsDirty
                         onClicked: {
                             saveDialog.currentFolder = root.library.exportFolderFor(root.controller.exportUrl);
-                            saveDialog.selectedFile = root.library.suggestedExport(root.controller.exportUrl);
+                            saveDialog.selectedFile = root.library.suggestedExport(root.controller.exportUrl).toString().replace(/\.[^/.]+$/, "."+exportFormat.suffix);
                             saveDialog.open();
                         }
                     }

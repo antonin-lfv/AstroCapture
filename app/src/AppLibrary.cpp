@@ -104,10 +104,22 @@ QVariantList AppLibrary::recentProjects() const {
     QVariantList result;
     for(const auto& path:recentProjects_) {
         const QFileInfo file(path);
-        if(!QDir::isAbsolutePath(path)||file.suffix().compare("astroproject",Qt::CaseInsensitive)!=0)continue;
+        if(!file.isFile()||!QDir::isAbsolutePath(path)||file.suffix().compare("astroproject",Qt::CaseInsensitive)!=0)continue;
         result.append(QVariantMap{{"name",file.completeBaseName()},{"path",path},{"url",QUrl::fromLocalFile(path)},{"exists",file.isFile()}});
     }
     return result;
+}
+void AppLibrary::removeRecentProject(const QUrl& url) {
+    if(url.isLocalFile() && recentProjects_.removeAll(QFileInfo(url.toLocalFile()).absoluteFilePath()))save();
+}
+void AppLibrary::removeRecentVideo(const QUrl& url) {
+    if(url.isLocalFile() && recentVideos_.removeAll(QFileInfo(url.toLocalFile()).absoluteFilePath()))save();
+}
+void AppLibrary::pruneUnavailableRecents() {
+    bool changed=false;
+    for(auto* list:{&recentProjects_,&recentVideos_})
+        for(qsizetype i=list->size();i>0;--i)if(!QFileInfo(list->at(i-1)).isFile()){list->removeAt(i-1);changed=true;}
+    if(changed)save();
 }
 void AppLibrary::recordProject(const QUrl& url) {
     if(!url.isLocalFile())return;
@@ -122,7 +134,7 @@ QVariantList AppLibrary::recentVideos() const {
     QVariantList result;
     for (const auto& path : recentVideos_) {
         const QFileInfo file(path);
-        if (!QDir::isAbsolutePath(path) || file.suffix().compare("ser", Qt::CaseInsensitive) != 0) continue;
+        if (!file.isFile() || !QDir::isAbsolutePath(path) || file.suffix().compare("ser", Qt::CaseInsensitive) != 0) continue;
         result.append(QVariantMap{{"name", file.fileName()}, {"path", path},
                                   {"url", QUrl::fromLocalFile(path)}, {"exists", file.isFile()}});
     }

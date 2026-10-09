@@ -32,105 +32,758 @@
     <context>
         <name>CaptionEditor</name>
         <message>
-            <location filename="../qml/CaptionEditor.qml" line="23" />
+            <location filename="../qml/CaptionEditor.qml" line="29" />
             <source>Image caption</source>
             <translation>Légende de l’image</translation>
         </message>
         <message>
-            <location filename="../qml/CaptionEditor.qml" line="32" />
             <source>Optional text printed on the TIFF. Enter your observation details; dates and planetary coordinates are not calculated. Each area accepts 400 characters. Check the preview for clipping.</source>
-            <translation>Texte facultatif inscrit sur le TIFF. Renseignez votre observation : les dates et coordonnées planétaires ne sont pas calculées. Chaque zone accepte 400 caractères. Vérifiez dans l’aperçu que le texte tient dans l’image.</translation>
+            <translation type="vanished">Texte facultatif inscrit sur le TIFF. Renseignez votre observation : les dates et coordonnées planétaires ne sont pas calculées. Chaque zone accepte 400 caractères. Vérifiez dans l’aperçu que le texte tient dans l’image.</translation>
         </message>
         <message>
-            <location filename="../qml/CaptionEditor.qml" line="34" />
+            <location filename="../qml/CaptionEditor.qml" line="51" />
+            <source>Add text to a copy of the finished image. The original pixels stay unchanged. Enter your observation details; dates and planetary coordinates are not calculated. Each area accepts 400 characters. Check the preview for clipping.</source>
+            <translation>Ajoutez du texte à une copie de l’image finale. Les pixels de l’image d’origine sont conservés. Renseignez vos observations ; les dates et les coordonnées planétaires ne sont pas calculées. Chaque zone accepte 400 caractères. Vérifiez dans l’aperçu que le texte n’est pas coupé.</translation>
+        </message>
+        <message>
+            <location filename="../qml/CaptionEditor.qml" line="53" />
             <source>Include on export</source>
             <translation>Inclure à l’export</translation>
         </message>
         <message>
-            <location filename="../qml/CaptionEditor.qml" line="38" />
+            <location filename="../qml/CaptionEditor.qml" line="57" />
             <source>Add a caption to the exported image</source>
             <translation>Ajouter une légende à l’image exportée</translation>
         </message>
         <message>
-            <location filename="../qml/CaptionEditor.qml" line="42" />
+            <location filename="../qml/CaptionEditor.qml" line="61" />
             <source>Title · above the caption</source>
             <translation>Titre · au-dessus de la légende</translation>
         </message>
         <message>
-            <location filename="../qml/CaptionEditor.qml" line="48" />
+            <location filename="../qml/CaptionEditor.qml" line="67" />
             <source>Moon · Sea of Tranquillity</source>
             <translation>Lune · Mer de la Tranquillité</translation>
         </message>
         <message>
-            <location filename="../qml/CaptionEditor.qml" line="53" />
+            <location filename="../qml/CaptionEditor.qml" line="72" />
             <source>Top left · object, date, notes</source>
             <translation>En haut à gauche · objet, date, notes</translation>
         </message>
         <message>
-            <location filename="../qml/CaptionEditor.qml" line="58" />
+            <location filename="../qml/CaptionEditor.qml" line="77" />
             <source>Object · observation date (UTC)
 Filter, conditions…</source>
             <translation>Objet · date d’observation (UTC)
 Filtre, conditions…</translation>
         </message>
         <message>
-            <location filename="../qml/CaptionEditor.qml" line="64" />
+            <location filename="../qml/CaptionEditor.qml" line="83" />
             <source>Bottom left · observer and equipment</source>
             <translation>En bas à gauche · observateur et matériel</translation>
         </message>
         <message>
-            <location filename="../qml/CaptionEditor.qml" line="69" />
+            <location filename="../qml/CaptionEditor.qml" line="88" />
             <source>Observer · location
 Telescope · camera · accessories</source>
             <translation>Observateur · lieu
 Télescope · caméra · accessoires</translation>
         </message>
         <message>
-            <location filename="../qml/CaptionEditor.qml" line="76" />
-            <location filename="../qml/CaptionEditor.qml" line="79" />
+            <location filename="../qml/CaptionEditor.qml" line="95" />
+            <location filename="../qml/CaptionEditor.qml" line="98" />
             <source>Add dimensions and processing summary</source>
             <translation>Ajouter les dimensions et le bilan du traitement</translation>
         </message>
         <message>
-            <location filename="../qml/CaptionEditor.qml" line="84" />
+            <location filename="../qml/CaptionEditor.qml" line="103" />
             <source>Text color</source>
             <translation>Couleur du texte</translation>
         </message>
         <message>
-            <location filename="../qml/CaptionEditor.qml" line="85" />
+            <location filename="../qml/CaptionEditor.qml" line="104" />
             <source>White</source>
             <translation>Blanc</translation>
         </message>
         <message>
-            <location filename="../qml/CaptionEditor.qml" line="86" />
+            <location filename="../qml/CaptionEditor.qml" line="105" />
             <source>Gold</source>
             <translation>Doré</translation>
         </message>
         <message>
-            <location filename="../qml/CaptionEditor.qml" line="89" />
+            <location filename="../qml/CaptionEditor.qml" line="108" />
             <source>Text size</source>
             <translation>Taille du texte</translation>
         </message>
         <message>
-            <location filename="../qml/CaptionEditor.qml" line="92" />
+            <location filename="../qml/CaptionEditor.qml" line="111" />
             <source>The caption appears in the result preview. It is cleared when you load a new source. Export with the switch off to keep an image without text.</source>
             <translation>La légende apparaît dans l’aperçu du résultat. Elle est effacée au chargement d’une nouvelle source. Désactivez l’option pour exporter sans texte.</translation>
         </message>
         <message>
-            <location filename="../qml/CaptionEditor.qml" line="95" />
+            <location filename="../qml/CaptionEditor.qml" line="116" />
+            <source>Caption preview · original image unchanged</source>
+            <translation>Aperçu de la légende · image d’origine conservée</translation>
+        </message>
+        <message>
+            <location filename="../qml/CaptionEditor.qml" line="117" />
+            <source>Cancel export</source>
+            <translation>Annuler l’export</translation>
+        </message>
+        <message>
+            <location filename="../qml/CaptionEditor.qml" line="118" />
+            <source>Export TIFF…</source>
+            <translation>Exporter en TIFF…</translation>
+        </message>
+        <message>
+            <location filename="../qml/CaptionEditor.qml" line="119" />
             <source>Done</source>
             <translation>Terminé</translation>
         </message>
-    </context>
+        <message>
+            <location filename="../qml/CaptionEditor.qml" line="122" />
+            <source>Export captioned image</source>
+            <translation>Exporter l’image avec légende</translation>
+        </message>
+        <message>
+            <location filename="../qml/CaptionEditor.qml" line="122" />
+            <source>16-bit TIFF image (*.tif *.tiff)</source>
+            <translation type="unfinished">Image TIFF 16 bits (*.tif *.tiff)</translation>
+        </message>
+            <message>
+            <source>Classic export</source>
+            <translation>Export classique</translation>
+        </message>
+        <message>
+            <source>Object · observation date (UTC)\nFilter, conditions…</source>
+            <translation>Object · observation date (UTC)\nFilter, conditions…</translation>
+        </message>
+        <message>
+            <source>Observer · location\nTelescope · camera · accessories</source>
+            <translation>Observer · location\nTelescope · camera · accessories</translation>
+        </message>
+        <message>
+            <source>PNG · 16-bit, lossless</source>
+            <translation>PNG · 16 bits, sans perte</translation>
+        </message>
+        <message>
+            <source>TIFF · 16-bit, lossless</source>
+            <translation>TIFF · 16 bits, sans perte</translation>
+        </message>
+        <message>
+            <source>JPEG · compressed</source>
+            <translation>JPEG · compressé</translation>
+        </message>
+        <message>
+            <source>Export</source>
+            <translation>Export</translation>
+        </message>
+        <message>
+            <source>Export image</source>
+            <translation>Exporter l’image</translation>
+        </message>
+        <message>
+            <source>16-bit PNG image (*.png)</source>
+            <translation>Image PNG 16 bits (*.png)</translation>
+        </message>
+        <message>
+            <source>JPEG image (*.jpg *.jpeg)</source>
+            <translation>Image JPEG (*.jpg *.jpeg)</translation>
+        </message>
+</context>
+    <context>
+        <name>DeepSkyAdvancedTools</name>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="115" />
+            <source>Advanced transformations</source>
+            <translation>Transformations avancées</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="124" />
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="599" />
+            <source>Close</source>
+            <translation>Fermer</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="130" />
+            <source>GHS stretch</source>
+            <translation>Étirement GHS</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="130" />
+            <source>PSF and deconvolution</source>
+            <translation>PSF et déconvolution</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="130" />
+            <source>Multiscale denoising</source>
+            <translation>Réduction du bruit multiéchelle</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="130" />
+            <source>Masks</source>
+            <translation>Masques</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="130" />
+            <source>Photometric colors</source>
+            <translation>Couleurs photométriques</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="135" />
+            <source>These are draft settings. Review the image, then commit a transformation in the main workspace. A mask blends the whole draft; orientation is applied afterwards.</source>
+            <translation>Ces réglages forment un brouillon. Inspectez l’image, puis validez une transformation dans l’espace principal. Un masque mélange tout le brouillon ; l’orientation est appliquée ensuite.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="138" />
+            <source>Draft execution order</source>
+            <translation>Ordre des traitements du brouillon</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="165" />
+            <source>Use generalized hyperbolic stretch</source>
+            <translation>Utiliser l’étirement hyperbolique généralisé</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="168" />
+            <source>GHS replaces the midtones or asinh curve when stretching is enabled. Zero strength is neutral. Work in small increments; the histogram curve uses the same calculation as the image.</source>
+            <translation>Le GHS remplace la courbe des tons moyens ou l’asinh lorsque l’étirement est activé. Une force nulle est neutre. Procédez par petites touches ; la courbe de l’histogramme utilise le même calcul que l’image.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="205" />
+            <source>Stretch strength · ln(D + 1)</source>
+            <translation>Force d’étirement · ln(D + 1)</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="207" />
+            <source>The algorithm uses D = exp(strength) − 1. Increasing strength redistributes contrast around the symmetry point. It reveals existing faint detail and noise; it does not add signal.</source>
+            <translation>L’algorithme utilise D = exp(force) − 1. Augmenter la force redistribue le contraste autour du point de symétrie. Cela révèle les détails faibles et le bruit existants ; aucun signal n’est ajouté.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="211" />
+            <source>Local intensity · b</source>
+            <translation>Intensité locale · b</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="214" />
+            <source>Positive b concentrates contrast near the symmetry point. Negative b distributes it more broadly. The published GHS formula changes continuously between logarithmic, integral, exponential and hyperbolic forms.</source>
+            <translation>Un b positif concentre le contraste près du point de symétrie. Un b négatif le répartit plus largement. La formule GHS publiée évolue continûment entre les formes logarithmique, intégrale, exponentielle et hyperbolique.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="218" />
+            <source>Symmetry point · SP</source>
+            <translation>Point de symétrie · SP</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="221" />
+            <source>SP is the input brightness receiving the greatest contrast. Place it near the histogram feature you want to expand. It must lie between the shadow and highlight protection thresholds.</source>
+            <translation>SP est l’intensité d’entrée qui reçoit le plus de contraste. Placez-le près de la zone de l’histogramme à élargir. Il doit rester entre les seuils de protection des ombres et des hautes lumières.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="225" />
+            <source>Shadow protection · LP</source>
+            <translation>Protection des ombres · LP</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="227" />
+            <source>Below LP the curve follows a tangent line, preserving continuity and reserving contrast for shadows. It does not freeze those pixels. LP must be at or below SP.</source>
+            <translation>Sous LP, la courbe suit une tangente : elle reste continue et réserve du contraste aux ombres. Les pixels ne sont pas figés. LP doit être inférieur ou égal à SP.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="231" />
+            <source>Highlight protection · HP</source>
+            <translation>Protection des hautes lumières · HP</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="233" />
+            <source>Above HP the curve follows a tangent line to reserve contrast for highlights and star cores. It does not reconstruct saturated cores. HP must be at or above SP.</source>
+            <translation>Au-dessus de HP, la courbe suit une tangente pour réserver du contraste aux zones brillantes et aux cœurs d’étoiles. Cela ne reconstruit pas les cœurs saturés. HP doit être supérieur ou égal à SP.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="237" />
+            <source>Independent RGB channels</source>
+            <translation>Canaux RVB indépendants</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="237" />
+            <source>Shared luminance · RGB blend protection</source>
+            <translation>Luminance commune · protection par mélange RVB</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="243" />
+            <source>Shared luminance multiplies RGB by one factor. If a channel would exceed 1, RGB blending mixes in the independent-channel result to stay bounded. This can change color ratios near highlights.</source>
+            <translation>La luminance commune multiplie le RVB par un seul facteur. Si un canal dépasse 1, un mélange avec le résultat des canaux indépendants maintient les valeurs dans les limites. Cela peut modifier les rapports de couleur près des hautes lumières.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="247" />
+            <source>Inverse curve</source>
+            <translation>Courbe inverse</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="250" />
+            <source>Inverse reverses the scalar curve. It cannot recover clipped values or undo a mask or shared-luminance color blending. Use Undo to restore the exact previous settings.</source>
+            <translation>L’inverse renverse la courbe scalaire. Il ne récupère pas les valeurs écrêtées et n’annule ni un masque ni le mélange de couleurs en luminance commune. Utilisez Annuler pour restaurer exactement les réglages précédents.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="257" />
+            <source>Apply before committing any stretch. The circular PSF describes a spatially constant blur; inspect stars at 100% for dark rings or amplified noise.</source>
+            <translation>À appliquer avant de valider un étirement. La PSF circulaire décrit un flou constant sur l’image ; inspectez les étoiles à 100 % pour repérer les anneaux sombres ou le bruit amplifié.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="257" />
+            <source>Earlier transformations changed brightness or orientation. Deconvolution and stellar PSF measurement are blocked; return to a linear, unrotated recipe input.</source>
+            <translation>Des transformations précédentes ont changé les intensités ou l’orientation. La déconvolution et la mesure stellaire de PSF sont bloquées ; revenez à une entrée de recette linéaire et non tournée.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="263" />
+            <source>Richardson–Lucy deconvolution</source>
+            <translation>Déconvolution Richardson–Lucy</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="270" />
+            <source>Measure stellar PSF</source>
+            <translation>Mesurer la PSF stellaire</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="276" />
+            <source>Use estimate</source>
+            <translation>Utiliser l’estimation</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="288" />
+            <source>Estimation uses at least three central, unsaturated stars and Gaussian second moments. It is not a Moffat fit or blind PSF estimation.</source>
+            <translation>L’estimation utilise au moins trois étoiles centrales non saturées et les moments d’ordre deux d’une gaussienne. Ce n’est ni un ajustement Moffat ni une estimation aveugle de PSF.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="288" />
+            <source>Estimated FWHM %1 px · scatter %2 px · %3 stars</source>
+            <translation>FWHM estimée %1 px · dispersion %2 px · %3 étoiles</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="292" />
+            <source>Circular Gaussian PSF</source>
+            <translation>PSF gaussienne circulaire</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="292" />
+            <source>Circular Moffat PSF</source>
+            <translation>PSF Moffat circulaire</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="299" />
+            <source>PSF width · FWHM in pixels</source>
+            <translation>Largeur de PSF · FWHM en pixels</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="302" />
+            <source>Full width at half maximum of the blur. Gaussian σ = FWHM / 2.35482. Too wide a PSF over-corrects stars; too narrow leaves blur. The finite kernel is normalized to sum to 1.</source>
+            <translation>Largeur du flou à mi-hauteur. Pour une gaussienne, σ = FWHM / 2,35482. Une PSF trop large surcorrige les étoiles ; trop étroite, elle laisse du flou. Le noyau fini est normalisé pour que sa somme vaille 1.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="307" />
+            <source>Moffat wings · β</source>
+            <translation>Ailes Moffat · β</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="310" />
+            <source>The profile is (1 + r²/α²)^(−β). Lower β gives stronger wings. α is derived from FWHM; β is manual and is not estimated from stars.</source>
+            <translation>Le profil est (1 + r²/α²)^(−β). Un β plus faible renforce les ailes. α est déduit de la FWHM ; β est manuel et n’est pas estimé sur les étoiles.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="339" />
+            <source>PSF preview uses square-root display scaling; actual kernel values are normalized linear weights.</source>
+            <translation>L’aperçu de PSF utilise une racine carrée pour l’affichage ; les valeurs réelles du noyau sont des poids linéaires normalisés.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="343" />
+            <source>Maximum iterations</source>
+            <translation>Itérations maximales</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="347" />
+            <source>Each iteration compares the observed image with the current estimate blurred by the PSF, then applies a multiplicative correction. More iterations can sharpen detail but amplify noise and rings.</source>
+            <translation>Chaque itération compare l’image observée à l’estimation courante floutée par la PSF, puis applique une correction multiplicative. Davantage d’itérations peuvent préciser les détails mais amplifier le bruit et les anneaux.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="358" />
+            <source>Residual damping · image units</source>
+            <translation>Amortissement du résidu · unités de l’image</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="359" />
+            <source>The residual correction is weighted by r²/(r² + damping²). Small residuals are suppressed. 0 gives undamped Richardson–Lucy. This is residual damping, not total-variation regularization.</source>
+            <translation>La correction du résidu est pondérée par r²/(r² + amortissement²). Les petits résidus sont atténués. À 0, Richardson–Lucy n’est pas amorti. Cet amortissement n’est pas une régularisation par variation totale.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="363" />
+            <source>Early stopping · relative change</source>
+            <translation>Arrêt anticipé · changement relatif</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="365" />
+            <source>Stop when sum(abs(new − old))/sum(abs(old)) falls below this threshold. 0 disables early stopping. The actual iteration count and final change are reported.</source>
+            <translation>Le calcul s’arrête si somme(abs(nouveau − ancien))/somme(abs(ancien)) passe sous ce seuil. 0 désactive l’arrêt anticipé. Le nombre réel d’itérations et le changement final sont indiqués.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="369" />
+            <source>Restoration amount</source>
+            <translation>Intensité de restauration</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="370" />
+            <source>0 preserves the input, 1 uses the restored luminance. A shared luminance factor scales RGB to preserve ratios. Finite non-negative input is required; no hidden pedestal is added.</source>
+            <translation>0 conserve l’entrée, 1 utilise la luminance restaurée. Un facteur de luminance commun multiplie le RVB pour conserver ses rapports. L’entrée doit être finie et non négative ; aucun piédestal caché n’est ajouté.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="374" />
+            <source>Executed %1 iterations · relative change %2</source>
+            <translation>%1 itérations effectuées · changement relatif %2</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="383" />
+            <source>Multiscale wavelet denoising</source>
+            <translation>Réduction du bruit par ondelettes multiéchelles</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="386" />
+            <source>A B3-spline à trous decomposition separates fine to coarse detail. At each scale, soft thresholding shrinks small coefficients using a robust MAD noise estimate. Luminance and chroma have separate strengths. This is not NL-Bayes or an AI model.</source>
+            <translation>Une décomposition à trous par B3-spline sépare les détails fins et larges. À chaque échelle, un seuillage doux réduit les petits coefficients selon une estimation robuste du bruit par MAD. Luminance et chrominance ont des intensités séparées. Ce n’est ni NL-Bayes ni un modèle d’IA.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="390" />
+            <source>Detail scales</source>
+            <translation>Échelles de détail</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="394" />
+            <source>Filter spacing doubles at each scale: 1, 2, 4, 8, 16 pixels. More scales affect larger structures. Broad diffuse signal can be weakened; compare at 100%.</source>
+            <translation>L’espacement du filtre double à chaque échelle : 1, 2, 4, 8, 16 pixels. Plus d’échelles affectent des structures plus grandes. Le signal diffus peut être atténué ; comparez à 100 %.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="398" />
+            <source>Threshold · robust σ</source>
+            <translation>Seuil · σ robuste</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="400" />
+            <source>For detail coefficient d, soft thresholding gives sign(d) × max(abs(d) − threshold × σ, 0). σ = 1.4826 × MAD of that scale. 0 disables shrinkage. Stars and nebulosity can bias the noise estimate.</source>
+            <translation>Pour un coefficient d, le seuillage doux donne signe(d) × max(abs(d) − seuil × σ, 0). σ = 1,4826 × MAD de cette échelle. 0 désactive la réduction. Étoiles et nébulosité peuvent biaiser l’estimation du bruit.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="404" />
+            <source>Luminance reduction</source>
+            <translation>Réduction de luminance</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="405" />
+            <source>Blend original and thresholded luminance details at every selected scale. 0 keeps luminance unchanged; 1 uses full thresholding. The coarse residual remains unchanged.</source>
+            <translation>Mélange les détails de luminance originaux et seuillés à chaque échelle choisie. 0 laisse la luminance inchangée ; 1 applique tout le seuillage. Le résidu grossier reste inchangé.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="409" />
+            <source>Chroma reduction</source>
+            <translation>Réduction de chrominance</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="410" />
+            <source>Shrink R − Y and B − Y details separately, then reconstruct green so weighted luminance stays Y. This targets fine color mottling. 0 keeps chroma detail unchanged.</source>
+            <translation>Réduit séparément les détails R − Y et B − Y, puis reconstruit le vert pour garder la luminance pondérée Y. Cela cible les petites taches colorées. 0 conserve les détails de chrominance.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="414" />
+            <source>Estimated adjacent-pixel luminance noise: %1 → %2. This is a diagnostic, not a measure of image quality.</source>
+            <translation>Bruit de luminance estimé entre pixels voisins : %1 → %2. C’est un diagnostic, pas une mesure de qualité de l’image.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="423" />
+            <source>No mask</source>
+            <translation>Sans masque</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="423" />
+            <source>Luminance range</source>
+            <translation>Plage de luminance</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="423" />
+            <source>Radial region</source>
+            <translation>Région circulaire</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="423" />
+            <source>Detected stars</source>
+            <translation>Étoiles détectées</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="429" />
+            <source>White applies the whole draft, black preserves its input, gray blends them: output = input + mask × (processed − input). The mask is generated from the recipe input before processing and is applied once at the end. Photometric calibration is global and cannot be masked.</source>
+            <translation>Le blanc applique tout le brouillon, le noir conserve son entrée, le gris les mélange : sortie = entrée + masque × (traitement − entrée). Le masque est généré sur l’entrée de recette avant traitement et appliqué une fois à la fin. La calibration photométrique est globale et ne peut pas être masquée.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="436" />
+            <source>Lower luminance bound</source>
+            <translation>Borne basse de luminance</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="438" />
+            <source>Select weighted RGB luminance above this bound. Values use input image units, not the automatically stretched preview. Transition width is controlled by feathering.</source>
+            <translation>Sélectionne la luminance RVB pondérée au-dessus de cette borne. Les valeurs sont celles de l’image d’entrée, pas de l’aperçu automatiquement étiré. La transition dépend du contour progressif.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="442" />
+            <source>Upper luminance bound</source>
+            <translation>Borne haute de luminance</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="444" />
+            <source>Select luminance below this bound. Bright stars can be excluded by lowering it. The bound must stay above the lower bound.</source>
+            <translation>Sélectionne la luminance sous cette borne. La baisser peut exclure les étoiles brillantes. Elle doit rester supérieure à la borne basse.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="452" />
+            <source>Center X · fraction of width</source>
+            <translation>Centre X · fraction de largeur</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="453" />
+            <source>0 is the left edge, 1 the right edge. Coordinates refer to the recipe input before this draft's rotation or mirrors.</source>
+            <translation>0 est le bord gauche, 1 le bord droit. Les coordonnées concernent l’entrée de recette avant la rotation ou les miroirs de ce brouillon.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="457" />
+            <source>Center Y · fraction of height</source>
+            <translation>Centre Y · fraction de hauteur</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="458" />
+            <source>0 is the top edge, 1 the bottom edge. Move the center to isolate an object or a background region.</source>
+            <translation>0 est le bord supérieur, 1 le bord inférieur. Déplacez le centre pour isoler un objet ou une région de fond.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="462" />
+            <source>Radius · fraction of shorter side</source>
+            <translation>Rayon · fraction du petit côté</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="465" />
+            <source>Circular selection in image pixels. Radius and feathering are expressed relative to the shorter image side, so the circle remains circular on rectangular images.</source>
+            <translation>Sélection circulaire en pixels de l’image. Rayon et contour progressif sont exprimés par rapport au petit côté pour garder un cercle sur les images rectangulaires.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="471" />
+            <source>Star radius · FWHM multiplier</source>
+            <translation>Rayon stellaire · multiple de FWHM</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="474" />
+            <source>Build circular regions around up to 150 detected stars, with radius = measured FWHM × multiplier. Faint or crowded stars may be missed. Invert to protect detected stars while processing the rest.</source>
+            <translation>Construit des régions circulaires autour de 150 étoiles détectées au maximum, avec rayon = FWHM mesurée × multiplicateur. Les étoiles faibles ou proches peuvent être manquées. Inversez pour protéger les étoiles détectées et traiter le reste.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="479" />
+            <source>Feathering</source>
+            <translation>Contour progressif</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="481" />
+            <source>Smoothstep t²(3 − 2t) softens mask edges. For luminance it is an intensity width; for radial regions a fraction of the shorter side; for stars a fraction of each star radius.</source>
+            <translation>La fonction t²(3 − 2t) adoucit les bords du masque. Pour la luminance, c’est une largeur d’intensité ; pour une région circulaire, une fraction du petit côté ; pour les étoiles, une fraction de leur rayon.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="486" />
+            <source>Invert mask</source>
+            <translation>Inverser le masque</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="490" />
+            <source>Show mask on the image</source>
+            <translation>Afficher le masque sur l’image</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="497" />
+            <source>Mean mask weight: %1%. Soft edges contribute partial weight; this is not a count of fully selected pixels.</source>
+            <translation>Poids moyen du masque : %1 %. Les contours doux contribuent partiellement ; ce n’est pas le nombre de pixels entièrement sélectionnés.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="504" />
+            <source>Local matched-reference color calibration, for linear broadband RGB. No plate solving or automatic catalogue lookup is performed. Reference positions must match this image; reference RGB fluxes must represent the intended filter response. Magnitudes cannot be entered directly.</source>
+            <translation>Calibration des couleurs par références locales associées, pour un RVB linéaire à bande large. Aucune résolution astrométrique ni recherche automatique de catalogue n’est effectuée. Les positions doivent correspondre à cette image ; les flux RVB doivent représenter la réponse des filtres visée. Les magnitudes ne peuvent pas être saisies directement.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="509" />
+            <source>Calibrate colors from reference stars</source>
+            <translation>Calibrer les couleurs avec des étoiles de référence</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="513" />
+            <source>Import matched reference CSV…</source>
+            <translation>Importer les références associées en CSV…</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="519" />
+            <source>CSV header: x,y,red,green,blue. Coordinates are zero-based pixels from the top left. At least three stars are required; imported references are saved inside the project and preset. Current references: %1.</source>
+            <translation>En-tête CSV : x,y,red,green,blue. Les coordonnées en pixels partent de zéro en haut à gauche. Il faut au moins trois étoiles ; les références importées sont enregistrées dans le projet et le préréglage. Références actuelles : %1.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="523" />
+            <source>Stellar aperture · pixels</source>
+            <translation>Ouverture stellaire · pixels</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="526" />
+            <source>Sum RGB within this radius, then subtract aperture pixel count × median sky from the annulus. The aperture must contain the stellar flux and avoid nearby stars.</source>
+            <translation>Somme le RVB dans ce rayon, puis retire nombre de pixels de l’ouverture × médiane du ciel dans l’anneau. L’ouverture doit contenir le flux stellaire et éviter les étoiles voisines.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="530" />
+            <source>Sky annulus · inner radius</source>
+            <translation>Anneau de ciel · rayon intérieur</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="533" />
+            <source>Start the sky ring beyond the star's wings. A ring contaminated by nebulosity or neighboring stars biases the measured stellar flux.</source>
+            <translation>L’anneau commence au-delà des ailes de l’étoile. La nébulosité ou des étoiles voisines dans l’anneau biaisent le flux stellaire mesuré.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="537" />
+            <source>Sky annulus · outer radius</source>
+            <translation>Anneau de ciel · rayon extérieur</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="540" />
+            <source>Outer limit of the sky sample ring. Stars whose entire ring does not fit in the image are rejected. Keep the ring local while providing enough sky samples.</source>
+            <translation>Limite extérieure de l’anneau de fond. Une étoile est rejetée si l’anneau complet ne tient pas dans l’image. Gardez un fond local avec assez d’échantillons.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="544" />
+            <source>Saturation threshold · image units</source>
+            <translation>Seuil de saturation · unités de l’image</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="547" />
+            <source>Reject a reference when any aperture channel reaches this value. Set it from the actual sensor/import scale. Already saturated sensor cores cannot be repaired by calibration.</source>
+            <translation>Rejette une référence si un canal dans l’ouverture atteint cette valeur. Réglez-la selon l’échelle réelle du capteur ou de l’import. La calibration ne répare pas les cœurs déjà saturés sur le capteur.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="550" />
+            <source>For each usable star, compare reference R/G and B/G with measured ratios. Robust median log-ratios give red and blue gains; green stays 1. Outliers beyond 3 robust σ are rejected. This calibrates relative colors, not absolute magnitudes or spectral response.</source>
+            <translation>Pour chaque étoile utilisable, compare les rapports R/V et B/V de référence aux mesures. La médiane robuste des rapports logarithmiques donne les gains rouge et bleu ; le vert reste à 1. Les valeurs au-delà de 3 σ robustes sont rejetées. Cela calibre les couleurs relatives, pas les magnitudes absolues ni la réponse spectrale.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="556" />
+            <source>References used %1 · rejected %2 · residual scatter %3 mag · RGB gains %4 / %5 / %6</source>
+            <translation>Références utilisées %1 · rejetées %2 · dispersion résiduelle %3 mag · gains RVB %4 / %5 / %6</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="599" />
+            <source>Cancel calculation</source>
+            <translation>Annuler le calcul</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="609" />
+            <source>Matched photometric reference stars</source>
+            <translation>Étoiles photométriques de référence associées</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="610" />
+            <source>CSV catalogue (*.csv)</source>
+            <translation>Catalogue CSV (*.csv)</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="351" />
+            <source>Explicit pedestal · image units</source>
+            <translation>Piédestal explicite · unités de l’image</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="354" />
+            <source>Add this constant after background correction and before scientific tools. If calibration left negative values, a positive pedestal can make Richardson–Lucy input non-negative. The offset is retained in the result and saved; it is not silently removed.</source>
+            <translation>Ajoute cette constante après la correction du fond et avant les outils scientifiques. Si la calibration laisse des valeurs négatives, un piédestal positif peut rendre l’entrée de Richardson–Lucy non négative. Le décalage reste dans le résultat et est sauvegardé ; il n’est pas supprimé en cachette.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="201" />
+            <source>Curve: normalized input 0–1 horizontally, output 0–1 vertically. Gray is identity. Shared-luminance color blending and masks can change the final per-channel result.</source>
+            <translation>Courbe : entrée normalisée 0–1 horizontalement, sortie 0–1 verticalement. Le gris est neutre. Le mélange en luminance commune et les masques peuvent modifier le résultat final de chaque canal.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="573" />
+            <source>Draft not yet applied. Diagnostics describe the last applied result.</source>
+            <translation>Brouillon pas encore appliqué. Les diagnostics décrivent le dernier résultat appliqué.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="579" />
+            <source>Preview draft</source>
+            <translation>Prévisualiser le brouillon</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="569" />
+            <source>Applied output range %1…%2 · channels below 0: %3% · above 1: %4%. Floating FITS preserves these values; display and TIFF/JPEG can clip them.</source>
+            <translation>Plage de sortie appliquée %1…%2 · canaux sous 0 : %3 % · au-dessus de 1 : %4 %. Le FITS flottant conserve ces valeurs ; affichage et TIFF/JPEG peuvent les écrêter.</translation>
+        </message>
+        <message>
+            <source>Draft execution order ⓘ</source>
+            <translation type="vanished">Ordre de calcul du brouillon ⓘ</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyAdvancedTools.qml" line="142" />
+            <source>Background → explicit pedestal → photometric colors → multiscale denoising → Richardson–Lucy → channel gains and stretch → saturation and smoothing → SCNR → mask blending → orientation. Commit separate transformations to choose another order. Scientific measurements cannot follow an earlier stretch or orientation.</source>
+            <translation>Fond → piédestal explicite → couleurs photométriques → réduction du bruit multiéchelle → Richardson–Lucy → gains et étirement → saturation et lissage → SCNR → mélange du masque → orientation. Validez des transformations séparées pour choisir un autre ordre. Les mesures scientifiques ne peuvent pas suivre un étirement ou une orientation précédents.</translation>
+        </message>
+            <message>
+            <source>Changes are applied automatically. A mask blends the adjustments; orientation is applied afterwards.</source>
+            <translation>Les modifications s’appliquent automatiquement. Un masque mélange les réglages ; l’orientation s’applique ensuite.</translation>
+        </message>
+        <message>
+            <source>Processing order</source>
+            <translation>Ordre des traitements</translation>
+        </message>
+        <message>
+            <source>Background → explicit pedestal → photometric colors → multiscale denoising → Richardson–Lucy → channel gains and stretch → saturation and smoothing → SCNR → mask blending → orientation. Scientific measurements cannot follow an earlier stretch or orientation.</source>
+            <translation>Fond de ciel → piédestal explicite → couleurs photométriques → réduction du bruit multiéchelle → Richardson–Lucy → gains couleur et étirement → saturation et lissage → SCNR → mélange du masque → orientation. Les mesures scientifiques ne peuvent pas suivre un étirement ou une orientation antérieure.</translation>
+        </message>
+        <message>
+            <source>White applies the adjustments, black preserves its input, gray blends them: output = input + mask × (processed − input). The mask is generated from the recipe input before processing and is applied once at the end. Photometric calibration is global and cannot be masked.</source>
+            <translation>Le blanc applique les réglages, le noir conserve son entrée, le gris les mélange : sortie = entrée + masque × (traitement − entrée). Le masque est généré sur l’entrée de recette avant traitement et appliqué une fois à la fin. La calibration photométrique est globale et ne peut pas être masquée.</translation>
+        </message>
+        <message>
+            <source>0 is the left edge, 1 the right edge. Coordinates refer to the recipe input before the rotation or mirrors.</source>
+            <translation>0 est le bord gauche, 1 le bord droit. Les coordonnées concernent l’entrée de recette avant la rotation ou les miroirs de ces réglages.</translation>
+        </message>
+        <message>
+            <source>Updating the image. Diagnostics describe the last completed result.</source>
+            <translation>Actualisation de l’image. Les diagnostics décrivent le dernier résultat calculé.</translation>
+        </message>
+        <message>
+            <source>Update preview</source>
+            <translation>Actualiser l’aperçu</translation>
+        </message>
+<message><source>Use on linear data before stretching. The circular PSF describes a spatially constant blur; inspect stars at 100% for dark rings or amplified noise.</source><translation>Utilisez des données linéaires avant étirement. La PSF circulaire décrit un flou uniforme ; inspectez les étoiles à 100 % pour détecter des anneaux sombres ou une amplification du bruit.</translation></message>
+<message><source>Import matched reference CSV</source><translation>Importer les références associées en CSV</translation></message>
+<message><source>Stretch curve</source><translation>Courbe d’étirement</translation></message>
+</context>
     <context>
         <name>DeepSkyWorkspace</name>
-<message><source>Source files</source><translation>Fichiers sources</translation></message>
-<message><source>Stack</source><translation>Empilement</translation></message>
-<message><source>Finish</source><translation>Finition</translation></message>
-
-    <message><source>Operation complete</source><translation>Opération terminée</translation></message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="131" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="542" />
+            <source>Source files</source>
+            <translation>Fichiers sources</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="264" />
+            <source>Stack</source>
+            <translation>Empilement</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="264" />
+            <source>Finish</source>
+            <translation>Finition</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="147" />
+            <source>Operation complete</source>
+            <translation>Opération terminée</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="252" />
             <source>Drop deep-sky light frames</source>
             <translation>Déposer les poses de ciel profond</translation>
         </message>
@@ -179,7 +832,7 @@ Télescope · caméra · accessoires</translation>
             <translation type="vanished">Filtre / groupe : Auto lit l’en-tête FITS. Choisissez un groupe pour les fichiers sans filtre.</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="153" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="291" />
             <source>ADU scale</source>
             <translation>Échelle ADU</translation>
         </message>
@@ -212,7 +865,7 @@ Télescope · caméra · accessoires</translation>
             <translation type="vanished">2 · Calibration</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="161" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="299" />
             <source>Lights already calibrated</source>
             <translation>Poses déjà calibrées</translation>
         </message>
@@ -229,22 +882,20 @@ Télescope · caméra · accessoires</translation>
             <translation type="vanished">Images brutes : les darks, flats et darks de flats importés seront appliqués. Utilisez ce mode pour le tutoriel Siril.</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="111" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="264" />
             <source>Images</source>
             <translation>Images</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="111" />
             <source>Stack settings</source>
-            <translation>Réglages d’empilement</translation>
+            <translation type="vanished">Réglages d’empilement</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="111" />
             <source>Finish and export</source>
-            <translation>Finition et export</translation>
+            <translation type="vanished">Finition et export</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="159" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="297" />
             <source>Calibration</source>
             <translation>Calibration</translation>
         </message>
@@ -257,7 +908,7 @@ Télescope · caméra · accessoires</translation>
             <translation type="vanished">Les darks doivent correspondre à l’exposition, au gain et à la température. Les flats sont associés au groupe ; les darks de flats ou bias corrigent leur offset.</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="163" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="301" />
             <source>Correct bad pixels</source>
             <translation>Corriger les pixels défectueux</translation>
         </message>
@@ -266,7 +917,7 @@ Télescope · caméra · accessoires</translation>
             <translation type="vanished">Importez une carte de pixels défectueux, ou détectez les pixels chauds isolés dans le master dark. La correction respecte la matrice de Bayer.</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="165" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="303" />
             <source>Bad pixel map…</source>
             <translation>Carte de pixels défectueux…</translation>
         </message>
@@ -291,7 +942,7 @@ Télescope · caméra · accessoires</translation>
             <translation type="vanished">5 · Normalisation</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="179" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="325" />
             <source>Normalize to the reference</source>
             <translation>Normaliser sur la référence</translation>
         </message>
@@ -304,17 +955,17 @@ Télescope · caméra · accessoires</translation>
             <translation type="vanished">6 · Empilement</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="184" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="330" />
             <source>Mean with robust rejection</source>
             <translation>Moyenne avec rejet robuste</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="184" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="330" />
             <source>Mean without rejection</source>
             <translation>Moyenne sans rejet</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="186" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="333" />
             <source>Rejection σ</source>
             <translation>Seuil de rejet σ</translation>
         </message>
@@ -331,31 +982,30 @@ Télescope · caméra · accessoires</translation>
             <translation type="vanished">Réglez les étapes puis lancez toute la chaîne. Pour les données calibrées d’iTelescope, cochez « Poses déjà calibrées ».</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="170" />
             <source>Star analysis</source>
-            <translation>Analyse des étoiles</translation>
+            <translation type="vanished">Analyse des étoiles</translation>
         </message>
         <message>
             <source>Registration</source>
             <translation type="vanished">Alignement</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="178" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="324" />
             <source>Normalization</source>
             <translation>Normalisation</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="183" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="329" />
             <source>Integration</source>
             <translation>Empilement</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="167" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="315" />
             <source>Advanced stack settings</source>
             <translation>Réglages avancés</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="191" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="342" />
             <source>Create the stacked image</source>
             <translation>Créer l’image empilée</translation>
         </message>
@@ -368,62 +1018,58 @@ Télescope · caméra · accessoires</translation>
             <translation type="vanished">Couches couleur</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="197" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="425" />
             <source>Combine integrated filters: RGB = R/G/B, SHO = SII/HA/OIII, HOO = HA/OIII/OIII.</source>
             <translation>Combinez les filtres empilés : RGB = R/G/B, SHO = SII/HA/OIII, HOO = HA/OIII/OIII.</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="200" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="428" />
             <source>Red</source>
             <translation>Rouge</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="202" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="430" />
             <source>Green</source>
             <translation>Vert</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="204" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="432" />
             <source>Blue</source>
             <translation>Bleu</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="206" />
-            <location filename="../qml/DeepSkyWorkspace.qml" line="279" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="434" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="581" />
             <source>Luminance</source>
             <translation>Luminance</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="207" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="435" />
             <source>None</source>
             <translation>Aucune</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="209" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="437" />
             <source>Combine channels</source>
             <translation>Combiner les couches</translation>
         </message>
         <message>
-            <source>Finish</source>
-            <translation type="vanished">Finition</translation>
-        </message>
-        <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="212" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="442" />
             <source>Live adjustment preview</source>
             <translation>Aperçu des réglages en direct</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="214" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="444" />
             <source>Automatic starting point</source>
             <translation>Proposition automatique</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="215" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="445" />
             <source>Reset to linear</source>
             <translation>Revenir au linéaire</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="218" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="449" />
             <source>Correct background gradient</source>
             <translation>Corriger le gradient du fond de ciel</translation>
         </message>
@@ -432,19 +1078,19 @@ Télescope · caméra · accessoires</translation>
             <translation type="vanished">La correction automatique peut affecter les nébulosités étendues. Comparez avec la correction désactivée.</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="219" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="471" />
             <source>Stretch faint details</source>
             <translation>Révéler les détails faibles</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="222" />
-            <location filename="../qml/DeepSkyWorkspace.qml" line="287" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="361" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="474" />
             <source>Black</source>
             <translation>Noir</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="224" />
-            <location filename="../qml/DeepSkyWorkspace.qml" line="287" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="361" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="476" />
             <source>White</source>
             <translation>Blanc</translation>
         </message>
@@ -457,37 +1103,37 @@ Télescope · caméra · accessoires</translation>
             <translation type="vanished">L’empilement réduit le bruit ; la finition révèle l’image. Réglez couleur et étirement, appliquez puis exportez. La calibration photométrique et la déconvolution ne sont pas encore disponibles.</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="227" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="479" />
             <source>Asinh stretch · preserve color ratios</source>
             <translation>Étirement asinh · préserver les rapports de couleur</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="228" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="482" />
             <source>Asinh strength · %1</source>
             <translation>Force asinh · %1</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="230" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="484" />
             <source>Midtones · %1</source>
             <translation>Tons moyens · %1</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="233" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="489" />
             <source>Red gain · %1</source>
             <translation>Gain rouge · %1</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="235" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="491" />
             <source>Green gain · %1</source>
             <translation>Gain vert · %1</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="237" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="493" />
             <source>Blue gain · %1</source>
             <translation>Gain bleu · %1</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="239" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="495" />
             <source>Saturation · %1</source>
             <translation>Saturation · %1</translation>
         </message>
@@ -496,7 +1142,7 @@ Télescope · caméra · accessoires</translation>
             <translation type="vanished">La saturation protège le fond le plus sombre. Commencez par une légère augmentation.</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="241" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="505" />
             <source>Noise smoothing · %1</source>
             <translation>Lissage du bruit · %1</translation>
         </message>
@@ -505,7 +1151,7 @@ Télescope · caméra · accessoires</translation>
             <translation type="vanished">La brute utilise son propre étirement automatique et son cadrage original. La comparaison ne change pas le résultat exporté.</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="250" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="529" />
             <source>Raw exposure (hold)</source>
             <translation>Pose brute (maintenir)</translation>
         </message>
@@ -518,12 +1164,17 @@ Télescope · caméra · accessoires</translation>
             <translation type="vanished">Maintenir pour comparer au réglage précédent</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="251" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="530" />
             <source>Apply adjustments</source>
             <translation>Appliquer les réglages</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="255" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="667" />
+            <source>Linear FITS preserves the integration. Final image offers 16-bit TIFF or JPEG with the current finish. Details and caption opens the shared caption editor with the finished image and acquisition summary. Caption export creates a separate 16-bit TIFF.</source>
+            <translation>Le FITS linéaire conserve l’empilement avant finition. Image finale exporte vos retouches. Détails et légende ouvre l’éditeur commun avec l’image finale et le résumé d’acquisition. L’export de la légende crée une copie TIFF 16 bits.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="670" />
             <source>Linear FITS…</source>
             <translation>FITS linéaire…</translation>
         </message>
@@ -532,395 +1183,482 @@ Télescope · caméra · accessoires</translation>
             <translation type="vanished">TIFF final…</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="258" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="673" />
             <source>Details and caption…</source>
             <translation>Détails et légende…</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="119" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="240" />
             <source>Open project…</source>
             <translation>Ouvrir un projet…</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="14" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="45" />
             <source>Detect image type</source>
             <translation>Détecter le type d’image</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="14" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="45" />
             <source>Lights</source>
             <translation>Images brutes</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="14" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="45" />
             <source>Darks</source>
             <translation>Darks</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="14" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="45" />
             <source>Flats</source>
             <translation>Flats</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="14" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="45" />
             <source>Bias</source>
             <translation>Offsets (bias)</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="14" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="45" />
             <source>Dark flats</source>
             <translation>Darks de flats</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="14" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="45" />
             <source>Bad pixel map</source>
             <translation>Carte de pixels défectueux</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="79" />
-            <location filename="../qml/DeepSkyWorkspace.qml" line="373" />
             <source>Parameter help</source>
-            <translation>Aide sur le paramètre</translation>
+            <translation type="vanished">Aide sur le paramètre</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="81" />
             <source>Show explanation</source>
-            <translation>Afficher l’explication</translation>
+            <translation type="vanished">Afficher l’explication</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="105" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="222" />
             <source>Deep sky</source>
             <translation>Ciel profond</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="106" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="223" />
             <source>%1 images</source>
             <translation>%1 images</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="107" />
+            <source>Export…</source>
+            <translation type="vanished">Exporter…</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="227" />
             <source>Project options</source>
             <translation>Options du projet</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="120" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="241" />
             <source>Save project…</source>
             <translation>Enregistrer le projet…</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="122" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="243" />
             <source>Clear project</source>
             <translation>Vider le projet</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="144" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="282" />
             <source>Import</source>
             <translation>Importer</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="144" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="282" />
             <source>Add individual files or import a folder and its subfolders. Automatic detection uses FITS metadata and file/folder names. Long offsets are classified as dark flats. Check and edit the roles in the image list.</source>
             <translation>Ajoutez des fichiers ou importez un dossier et ses sous-dossiers. La détection utilise les métadonnées FITS et les noms des fichiers et dossiers. Les offsets de longue pose sont classés comme darks de flats. Vérifiez et corrigez les types dans la liste.</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="145" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="283" />
             <source>Image type</source>
             <translation>Type d’image</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="145" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="283" />
             <source>Lights contain the object. Darks correct thermal signal. Flats correct dust and uneven illumination. Bias or dark flats correct the flats. Automatic detection can be overridden for each image.</source>
             <translation>Les brutes contiennent l’objet. Les darks corrigent le signal thermique. Les flats corrigent les poussières et l’éclairage inégal. Les offsets ou darks de flats corrigent les flats. Vous pouvez modifier le type de chaque image.</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="147" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="285" />
             <source>Add files…</source>
             <translation>Ajouter des fichiers…</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="148" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="286" />
             <source>Import folder…</source>
             <translation>Importer un dossier…</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="149" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="287" />
             <source>Drop files into this workspace, or import a complete folder. Originals stay unchanged.</source>
             <translation>Déposez vos fichiers ici ou importez un dossier complet. Les originaux sont conservés.</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="150" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="288" />
             <source>Import settings</source>
             <translation>Réglages d’importation</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="151" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="289" />
             <source>Filter / group</source>
             <translation>Filtre / groupe</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="151" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="289" />
             <source>Auto reads the FITS filter. R, G, B, L, HA, OIII and SII are integrated separately. Color-camera data normally belongs to RGB. You can change each image group in the list.</source>
             <translation>Auto lit le filtre FITS. R, G, B, L, HA, OIII et SII sont empilés séparément. Les images d’une caméra couleur appartiennent généralement au groupe RGB. Modifiez le groupe de chaque image dans la liste.</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="153" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="291" />
             <source>Leave 0 for automatic import. Override only when you know the numeric scale of a scientific FITS. Use the same convention for lights and calibration images.</source>
             <translation>Laissez 0 pour l’importation automatique. Ne modifiez cette valeur que si vous connaissez l’échelle numérique du FITS scientifique. Utilisez la même convention pour les brutes et les images de calibration.</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="159" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="297" />
             <source>Raw images need matching darks and flats. A raw dark already includes bias. Dark exposure, gain and known temperature must match. For the Siril tutorial, import Offsets_3s as Dark flats.</source>
             <translation>Les brutes nécessitent des darks et flats compatibles. Un dark brut contient déjà l’offset. La durée de pose, le gain et la température connue des darks doivent correspondre aux brutes. Pour le tutoriel Siril, importez Offsets_3s en darks de flats.</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="160" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="298" />
             <source>Input calibration</source>
             <translation>Calibration des sources</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="160" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="298" />
             <source>Enable Lights already calibrated only when the files have already been preprocessed, for example calibrated iTelescope FITS. In that mode the imported calibration files are not applied.</source>
             <translation>Activez « Brutes déjà calibrées » uniquement pour des fichiers déjà prétraités, par exemple les FITS calibrés d’iTelescope. Les fichiers de calibration importés ne seront alors pas appliqués.</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="162" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="300" />
             <source>Already calibrated</source>
             <translation>Déjà calibrées</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="162" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="300" />
             <source>Raw images · calibration enabled</source>
             <translation>Images brutes · calibration activée</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="164" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="302" />
             <source>Bad pixels</source>
             <translation>Pixels défectueux</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="164" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="302" />
             <source>Use an imported map or detect isolated hot pixels in the master dark. The correction runs before demosaicing and preserves the Bayer pattern.</source>
             <translation>Utilisez une carte importée ou détectez les pixels chauds isolés dans le master dark. La correction précède le dématriçage et préserve la matrice de Bayer.</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="170" />
             <source>Star count and FWHM are measured on import. FWHM is expressed in pixels, not arcseconds. Inspect clouds, trails and focus before excluding a frame.</source>
-            <translation>Le nombre d’étoiles et leur FWHM sont mesurés à l’importation. La FWHM est exprimée en pixels. Vérifiez les nuages, les traînées et la mise au point avant d’exclure une image.</translation>
+            <translation type="vanished">Le nombre d’étoiles et leur FWHM sont mesurés à l’importation. La FWHM est exprimée en pixels. Vérifiez les nuages, les traînées et la mise au point avant d’exclure une image.</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="174" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="339" />
             <source>Reference and alignment</source>
             <translation>Référence et alignement</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="174" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="339" />
             <source>Reference selects one light per filter group. Other frames are aligned to its stars. Choose a sharp frame with many recognizable stars; this is not the frame used as the final output.</source>
             <translation>Choisissez une brute de référence par groupe de filtre. Les autres images seront alignées sur ses étoiles. Préférez une image nette avec beaucoup d’étoiles identifiables. Le résultat final sera l’empilement.</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="178" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="324" />
             <source>Match stellar flux and background offsets to the reference. Disable for data normalized externally. This is global normalization, not photometric color calibration.</source>
             <translation>Harmonise le flux des étoiles et le niveau du fond avec la référence. Désactivez cette option pour des données déjà normalisées. Cette normalisation globale ne calibre pas les couleurs par photométrie.</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="183" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="329" />
             <source>Robust rejection requires at least three accepted lights. Lower sigma rejects more aggressively. Mean without rejection keeps all usable samples. Borders are cropped to common coverage.</source>
             <translation>Le rejet robuste nécessite au moins trois brutes acceptées. Un sigma plus faible rejette davantage. La moyenne sans rejet conserve tous les échantillons utilisables. Les bords sont recadrés sur la zone commune.</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="186" />
-            <source>Lower sigma removes more outliers; higher sigma keeps more samples. Start at 3. Rejection needs at least three accepted lights.</source>
-            <translation>Un sigma faible élimine davantage de valeurs aberrantes ; un sigma élevé conserve plus d’échantillons. Commencez à 3. Le rejet nécessite au moins trois brutes acceptées.</translation>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="333" />
+            <source>At each aligned pixel and channel, estimate spread with 1.4826 × MAD around the median. Reject values farther than σ times that spread, then average the survivors. This removes isolated trails and defects. Too low a threshold can reject real signal. Start at 3; at least three accepted lights are needed.</source>
+            <translation>Pour chaque pixel aligné et chaque canal, on estime la dispersion par 1,4826 × MAD autour de la médiane. Les valeurs éloignées de plus de σ fois cette dispersion sont rejetées, puis les autres sont moyennées. Cela élimine des traces et défauts isolés. Un seuil trop bas peut rejeter du signal réel. Commencez à 3 ; il faut au moins trois poses acceptées.</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="195" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="423" />
             <source>Channel composition</source>
             <translation>Composition des canaux</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="195" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="423" />
             <source>Assign R/G/B or a narrowband palette. RGB uses R/G/B, SHO uses SII/HA/OIII and HOO uses HA/OIII/OIII. Optional luminance adds detail. Each chosen filter must have an integrated result.</source>
             <translation>Attribuez R/G/B ou une palette à bande étroite : RGB = R/G/B, SHO = SII/HA/OIII, HOO = HA/OIII/OIII. La luminance facultative ajoute du détail. Chaque filtre choisi doit avoir été empilé.</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="211" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="441" />
             <source>Display and stretch</source>
             <translation>Affichage et étirement</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="211" />
             <source>Every adjustment starts from the linear stack. Live preview can be disabled. Automatic starting point is optional; Reset to linear restores un-stretched pixels and neutral gains.</source>
-            <translation>Chaque réglage repart de l’empilement linéaire. Vous pouvez désactiver l’aperçu automatique. Le point de départ automatique est facultatif ; le retour au linéaire restaure les pixels sans étirement et des gains neutres.</translation>
+            <translation type="vanished">Chaque réglage repart de l’empilement linéaire. Vous pouvez désactiver l’aperçu automatique. Le point de départ automatique est facultatif ; le retour au linéaire restaure les pixels sans étirement et des gains neutres.</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="217" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="88" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="346" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="448" />
             <source>Background</source>
             <translation>Fond de ciel</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="217" />
             <source>The optional correction fits a plane to the sky background. It may affect extended nebulosity: compare with correction disabled. Manual background samples are not available yet.</source>
-            <translation>La correction facultative ajuste un plan au fond du ciel. Elle peut affecter les nébulosités étendues : comparez avec la correction désactivée. Les échantillons manuels du fond ne sont pas encore disponibles.</translation>
+            <translation type="vanished">La correction facultative ajuste un plan au fond du ciel. Elle peut affecter les nébulosités étendues : comparez avec la correction désactivée. Les échantillons manuels du fond ne sont pas encore disponibles.</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="222" />
-            <source>Values below black are clipped. Raise it carefully to darken the sky without removing faint nebulosity. The histogram reports estimated shadow clipping.</source>
-            <translation>Les valeurs sous le noir sont coupées. Augmentez-le doucement pour assombrir le ciel sans supprimer les nébulosités faibles. L’histogramme estime la proportion d’ombres coupées.</translation>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="474" />
+            <source>With stretch enabled, each channel is mapped to u = clamp((gain × pixel − black) / (white − black), 0, 1). Values at or below black become 0. Raising black darkens the sky but discards faint signal below that threshold. Check shadow clipping before applying.</source>
+            <translation>Lorsque l’étirement est activé, chaque canal devient u = clamp((gain × pixel − noir) / (blanc − noir), 0, 1). Les valeurs inférieures ou égales au noir deviennent 0. Monter le noir assombrit le ciel mais supprime le signal faible sous ce seuil. Vérifiez la perte dans les ombres avant d’appliquer.</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="224" />
-            <source>Values above white are clipped. Lowering it can burn bright star cores. Keep the automatic maximum unless you intentionally want clipping.</source>
-            <translation>Les valeurs au-dessus du blanc sont coupées. Le réduire peut saturer le cœur des étoiles. Conservez le maximum automatique sauf si vous souhaitez volontairement couper les hautes lumières.</translation>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="476" />
+            <source>With stretch enabled, white sets the value mapped to 1 after channel gain. Values at or above it merge into the same maximum: bright cores lose detail. Lowering white brightens the image but increases highlight clipping. White must remain above black.</source>
+            <translation>Lorsque l’étirement est activé, le blanc fixe la valeur ramenée à 1 après le gain du canal. Les valeurs supérieures ou égales fusionnent au même maximum : les cœurs brillants perdent leurs détails. Baisser le blanc éclaircit l’image mais augmente la perte dans les hautes lumières. Le blanc doit rester supérieur au noir.</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="228" />
             <source>Controls the strength of the color-ratio-preserving asinh stretch. This is an alternative to the midtones transfer function, not an additional cumulative step.</source>
-            <translation>Règle la force de l’étirement asinh, qui préserve les rapports de couleur. Il remplace la transformation des tons moyens et ne s’y cumule pas.</translation>
+            <translation type="vanished">Règle la force de l’étirement asinh, qui préserve les rapports de couleur. Il remplace la transformation des tons moyens et ne s’y cumule pas.</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="230" />
-            <source>Lower values brighten faint detail. This changes the stretch curve without changing the black and white thresholds.</source>
-            <translation>Les valeurs faibles éclaircissent les détails ténus. Ce réglage modifie la courbe d’étirement sans déplacer les seuils noir et blanc.</translation>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="484" />
+            <source>For normalized brightness u, the curve is f(u) = (m − 1)u / ((2m − 1)u − m). At m = 0.5 it is neutral; below 0.5 it brightens midtones, above 0.5 it darkens them. The endpoints stay 0 and 1. Brightening also reveals noise; it does not recover clipped data.</source>
+            <translation>Pour une intensité normalisée u, la courbe est f(u) = (m − 1)u / ((2m − 1)u − m). À m = 0,5 elle est neutre ; en dessous elle éclaircit les tons moyens, au-dessus elle les assombrit. Les extrémités restent 0 et 1. Éclaircir révèle aussi le bruit ; cela ne récupère pas les données écrêtées.</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="232" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="88" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="346" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="488" />
             <source>Color and noise</source>
             <translation>Couleur et bruit</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="233" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="78" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="84" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="137" />
+            <source>Check parameters and operation order: white must exceed black; photometry and deconvolution require linear, unrotated input; photometry cannot be masked.</source>
+            <translation type="unfinished">Vérifiez les paramètres et l’ordre : blanc supérieur au noir ; photométrie et déconvolution sur une entrée linéaire non tournée ; photométrie sans masque.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="89" />
+            <source>Photometric colors</source>
+            <translation type="unfinished">Couleurs photométriques</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="89" />
+            <source>PSF and deconvolution</source>
+            <translation type="unfinished">PSF et déconvolution</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="89" />
+            <source>Multiscale denoising</source>
+            <translation type="unfinished">Réduction du bruit multiéchelle</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="89" />
+            <source>GHS stretch</source>
+            <translation type="unfinished">Étirement GHS</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="345" />
+            <source>Adjustment family</source>
+            <translation>Famille de réglages</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="345" />
+            <source>Choose which draft controls to display. Switching families keeps all adjustments. Reset family resets only these controls, and can be undone.</source>
+            <translation>Choisissez les réglages à afficher. Changer de famille conserve tous les réglages. Réinitialiser une famille remet uniquement ses réglages à zéro ; cette action peut être annulée.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="347" />
+            <source>Reset this family</source>
+            <translation>Réinitialiser cette famille</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="349" />
+            <source>Advanced transformations…</source>
+            <translation type="unfinished">Transformations avancées…</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="352" />
+            <source>Undo last change</source>
+            <translation>Annuler la dernière modification</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="353" />
+            <source>Restore undone change</source>
+            <translation>Rétablir la modification annulée</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="348" />
+            <source>Presets…</source>
+            <translation>Préréglages…</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="489" />
             <source>Multiply the red channel before stretching. Initial gains estimate a neutral background; adjust manually for your intended colors.</source>
             <translation>Multiplie le canal rouge avant l’étirement. Les gains initiaux estiment un fond neutre ; ajustez-les selon les couleurs souhaitées.</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="235" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="491" />
             <source>Multiply the green channel before stretching. This is not SCNR or photometric calibration.</source>
             <translation>Multiplie le canal vert avant l’étirement. Ce réglage n’effectue ni SCNR ni calibration photométrique.</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="237" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="493" />
             <source>Multiply the blue channel before stretching. Watch the background and stellar colors while adjusting.</source>
             <translation>Multiplie le canal bleu avant l’étirement. Surveillez le fond du ciel et les couleurs des étoiles.</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="239" />
-            <source>1 preserves saturation, 0 removes color, values above 1 strengthen it. The darkest background is protected to avoid amplifying color noise.</source>
-            <translation>1 conserve la saturation, 0 supprime la couleur, les valeurs supérieures à 1 la renforcent. Le fond le plus sombre est protégé pour limiter l’amplification du bruit coloré.</translation>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="495" />
+            <source>Each channel moves around luminance Y: output = Y + (channel − Y) × effective saturation. 1 is neutral; above 1 increases color differences. Protection leaves Y ≤ 0.03 unchanged and fades out by Y = 0.15. Thus 0 removes color only outside protected shadows. Strong saturation may clip colors when stretch is enabled.</source>
+            <translation>Chaque canal évolue autour de la luminance Y : sortie = Y + (canal − Y) × saturation effective. 1 est neutre ; au-dessus de 1, les écarts de couleur augmentent. La protection laisse Y ≤ 0,03 inchangé et disparaît progressivement jusqu’à Y = 0,15. À 0, seules les zones hors des ombres protégées perdent toute couleur. Une forte saturation peut écrêter les couleurs lorsque l’étirement est activé.</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="241" />
-            <source>Blends a small Gaussian smoothing into the image. Use low values and inspect at 100 percent to preserve fine structures.</source>
-            <translation>Mélange un léger lissage gaussien à l’image. Utilisez des valeurs faibles et vérifiez à 100 % pour préserver les structures fines.</translation>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="505" />
+            <source>Output = (1 − amount) × image + amount × GaussianBlur(image), with a Gaussian standard deviation of 0.7 pixel. At 0 nothing changes; at 1 the full blur is used. It reduces small-scale fluctuations but also softens stars and fine structures. Inspect at 100% and start low. This is not an adaptive denoiser.</source>
+            <translation>Sortie = (1 − intensité) × image + intensité × flouGaussien(image), avec un écart-type gaussien de 0,7 pixel. À 0, rien ne change ; à 1, le flou complet est utilisé. Il réduit les fluctuations fines mais adoucit aussi les étoiles et les structures. Inspectez à 100 % et commencez bas. Ce lissage n’est pas une réduction du bruit adaptative.</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="243" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="522" />
             <source>Comparison</source>
             <translation>Comparaison</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="243" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="522" />
             <source>Choose an original light and hold Raw exposure. Its framing and automatic stretch are independent from the final stack. The comparison does not change exports.</source>
             <translation>Choisissez une brute et maintenez « Pose brute ». Son cadrage et son étirement automatique sont indépendants du résultat final. La comparaison ne modifie pas les exports.</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="252" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="609" />
+            <source>Alignment reference ✓</source>
+            <translation>Référence d’alignement ✓</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="609" />
+            <source>Use as reference</source>
+            <translation>Choisir comme référence</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="649" />
+            <source>Saved presets</source>
+            <translation>Préréglages enregistrés</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="649" />
+            <source>A preset replaces the complete finishing recipe and all draft families, including advanced tools. It does not change the imported files or stacking settings. Undo last change restores the previous finish.</source>
+            <translation>Un préréglage remplace toute la recette de finition et les réglages de toutes les familles, y compris les outils avancés. Les fichiers importés et les réglages d’empilement restent identiques. « Annuler la dernière modification » restaure la finition précédente.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="651" />
+            <source>Restore entire finish</source>
+            <translation>Restaurer toute la finition</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="224" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="665" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="667" />
             <source>Export</source>
             <translation>Exporter</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="252" />
             <source>Linear FITS preserves the integration. Final image offers 16-bit TIFF or JPEG with the current finish. Details and caption transfers the finished pixels and acquisition summary to Processing.</source>
-            <translation>Le FITS linéaire conserve l’empilement. « Image finale » exporte un TIFF 16 bits ou un JPEG avec les réglages actuels. « Détails et légende » transmet les pixels et le résumé d’acquisition à Traitement.</translation>
+            <translation type="vanished">Le FITS linéaire conserve l’empilement. « Image finale » exporte un TIFF 16 bits ou un JPEG avec les réglages actuels. « Détails et légende » transmet les pixels et le résumé d’acquisition à Traitement.</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="256" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="671" />
             <source>Final image…</source>
             <translation>Image finale…</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="267" />
             <source>Stacked result</source>
-            <translation>Résultat empilé</translation>
+            <translation type="vanished">Résultat empilé</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="267" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="541" />
             <source>Source image preview · automatic stretch</source>
             <translation>Aperçu d’une image source · étirement automatique</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="267" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="541" />
             <source>Raw exposure · %1 · automatic stretch</source>
             <translation>Pose brute · %1 · étirement automatique</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="268" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="544" />
             <source>Show stacked result</source>
             <translation>Afficher le résultat empilé</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="274" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="575" />
             <source>Add light frames to begin
 The preview is automatically stretched; source pixels stay linear.</source>
             <translation>Ajoutez des poses pour commencer
 L’aperçu est automatiquement éclairci ; les données restent linéaires.</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="278" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="580" />
             <source>Displayed image histogram</source>
             <translation>Histogramme de l’image affichée</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="286" />
             <source>Linear histogram and stretch curve</source>
-            <translation>Histogramme linéaire et courbe d’étirement</translation>
+            <translation type="vanished">Histogramme linéaire et courbe d’étirement</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="287" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="361" />
             <source>Midtones</source>
             <translation>Tons moyens</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="288" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="362" />
             <source>Zoom</source>
             <translation>Zoom</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="333" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="413" />
             <source>Select Black, Midtones or White, then drag in the graph. Zoom only changes the graph view.</source>
             <translation>Choisissez Noir, Tons moyens ou Blanc, puis glissez dans le graphique. Le zoom modifie seulement la vue du graphique.</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="334" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="416" />
             <source>Estimated clipping · shadows %1% · highlights %2%</source>
             <translation>Coupure estimée · ombres %1 % · hautes lumières %2 %</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="338" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="587" />
             <source>All images</source>
             <translation>Toutes les images</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="339" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="588" />
             <source>%1 / %2 images</source>
             <translation>%1 / %2 images</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="340" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="589" />
             <source>Select all</source>
             <translation>Tout sélectionner</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="341" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="590" />
             <source>Select none</source>
             <translation>Tout désélectionner</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="358" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="607" />
             <source>Change image type</source>
             <translation>Modifier le type d’image</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="359" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="608" />
             <source>Change filter group</source>
             <translation>Modifier le groupe de filtre</translation>
         </message>
@@ -929,7 +1667,7 @@ L’aperçu est automatiquement éclairci ; les données restent linéaires.</tr
             <translation type="vanished">%1 fichiers · décochez une pose pour l’exclure · cliquez sur son nom pour l’aperçu</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="356" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="605" />
             <source> stars</source>
             <translation> étoiles</translation>
         </message>
@@ -938,300 +1676,550 @@ L’aperçu est automatiquement éclairci ; les données restent linéaires.</tr
             <translation type="vanished">Réf</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="360" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="609" />
             <source>Set reference frame</source>
             <translation>Choisir la pose de référence</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="360" />
             <source>Reference</source>
-            <translation>Référence</translation>
+            <translation type="vanished">Référence</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="360" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="609" />
             <source>Align the other lights in this group to this image</source>
             <translation>Aligner les autres brutes de ce groupe sur cette image</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="361" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="610" />
             <source>Remove frame</source>
             <translation>Retirer la pose</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="369" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="625" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="657" />
             <source>Cancel</source>
             <translation>Annuler</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="374" />
+            <source>Details and caption in Processing…</source>
+            <translation type="vanished">Détails et légende dans Traitement…</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="675" />
             <source>Import an image folder</source>
             <translation>Importer un dossier d’images</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="375" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="676" />
             <source>Add deep-sky images</source>
             <translation>Ajouter des images de ciel profond</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="379" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="680" />
             <source>Clear this project?</source>
             <translation>Vider ce projet ?</translation>
         </message>
         <message>
-            <location filename="../qml/DeepSkyWorkspace.qml" line="379" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="680" />
             <source>Export results or save the project first. Original files remain unchanged.</source>
             <translation>Exportez les résultats ou enregistrez le projet d’abord. Les fichiers originaux sont conservés.</translation>
         </message>
-    <message><source>Check the levels: white must exceed black and all values must be valid.</source><translation>Vérifiez les niveaux : le blanc doit dépasser le noir et toutes les valeurs doivent être valides.</translation></message>
-<message><source>Presets and history</source><translation>Préréglages et historique</translation></message>
-<message><source>Presets save finishing controls only. They do not change calibration, filters or channel composition. Absolute black and white levels depend on your data: check the histogram after loading. Each A/B version has its own undo history, limited to 100 changes.</source><translation>Les préréglages conservent uniquement les réglages de finition. Ils ne modifient pas la calibration, les filtres ni la composition des canaux. Les niveaux absolus de noir et de blanc dépendent de vos données : vérifiez l’histogramme après chargement. Chaque version A/B possède son propre historique, limité à 100 modifications.</translation></message>
-<message><source>Your presets</source><translation>Vos préréglages</translation></message>
-<message><source>Load</source><translation>Charger</translation></message>
-<message><source>Undo</source><translation>Annuler</translation></message>
-<message><source>Redo</source><translation>Rétablir</translation></message>
-<message><source>Versions A/B</source><translation>Versions A/B</translation></message>
-<message><source>A and B use the same linear stack and framing, with independent finishing controls and histories. Switch versions to compare; edits and final exports use the selected version. Copy duplicates the current settings into the other version. A new stack or channel composition starts a fresh pair.</source><translation>A et B utilisent le même empilement linéaire et le même cadrage, avec des réglages de finition et des historiques indépendants. Basculez entre les versions pour comparer ; les modifications et les exports finaux utilisent la version sélectionnée. Copier duplique les réglages actuels dans l’autre version. Un nouvel empilement ou une nouvelle composition des canaux crée une nouvelle paire.</translation></message>
-<message><source>Version A</source><translation>Version A</translation></message>
-<message><source>Version B</source><translation>Version B</translation></message>
-<message><source>Copy A to B</source><translation>Copier A vers B</translation></message>
-<message><source>Copy B to A</source><translation>Copier B vers A</translation></message>
-<message><source>Selected version %1</source><translation>Version sélectionnée : %1</translation></message>
-<message><source>Preview has unapplied settings. Apply them before final export.</source><translation>Des réglages ne sont pas encore appliqués à l’aperçu. Appliquez-les avant l’export final.</translation></message>
-<message><source>Deep-sky presets</source><translation>Préréglages de ciel profond</translation></message>
-<message><source>Name this finish for your camera, filters or intent. Use a new name to duplicate it. Presets are kept locally across updates.</source><translation>Nommez cette finition selon votre caméra, vos filtres ou votre objectif. Utilisez un nouveau nom pour la dupliquer. Les préréglages sont conservés localement lors des mises à jour.</translation></message>
-<message><source>Preset name</source><translation>Nom du préréglage</translation></message>
-<message><source>This name exists. Replace overwrites its settings.</source><translation>Ce nom existe déjà. Remplacer écrase ses réglages.</translation></message>
-<message><source>Delete</source><translation>Supprimer</translation></message>
-<message><source>Replace</source><translation>Remplacer</translation></message>
-<message><source>Save</source><translation>Enregistrer</translation></message>
-<message><source>Manage presets…</source><translation>Gérer les préréglages…</translation></message>
-<message><source>Stacked result · pending adjustments</source><translation>Résultat empilé · réglages en attente</translation></message>
-<message><source>Stacked result · version %1</source><translation>Résultat empilé · version %1</translation></message>
-<message><source>Show histograms</source><translation>Afficher les histogrammes</translation></message>
-<message><source>Enlarge preview</source><translation>Agrandir l’aperçu</translation></message>
-<message><source>Temporarily hide histograms and the image list to inspect A/B. Zoom and framing stay shared.</source><translation>Masquez temporairement les histogrammes et la liste des images pour examiner A/B. Le zoom et le cadrage restent communs.</translation></message>
-<message><source>Normalization, stacking method and rejection threshold.</source><translation>Normalisation, méthode d’empilement et seuil de rejet.</translation></message>
-<message><source>Check the stars, FWHM and reference in the image list before stacking.</source><translation>Vérifiez les étoiles, la FWHM et la référence dans la liste des images avant l’empilement.</translation></message>
-    <message>
-        <source>Asinh luminance</source>
-        <translation>Luminance asinh</translation>
-    </message>
-    <message>
-        <source>Human weighted uses eye sensitivity; mean gives equal weight to RGB; maximum preserves the historical behavior. A shared factor links the channels, but black/white clipping can still alter colors.</source>
-        <translation>Pondération visuelle : sensibilité de l’œil. Moyenne : même poids pour chaque couche. Maximum : comportement historique. Un facteur commun relie les couches, mais l’écrêtage noir/blanc peut modifier les couleurs.</translation>
-    </message>
-    <message>
-        <source>Maximum channel</source>
-        <translation>Couche maximale</translation>
-    </message>
-    <message>
-        <source>Human weighted</source>
-        <translation>Pondération visuelle</translation>
-    </message>
-    <message>
-        <source>RGB mean</source>
-        <translation>Moyenne RGB</translation>
-    </message>
-    <message>
-        <source>Controls the asinh stretch strength. The draft uses either asinh or midtones. Commit a transformation to apply another stretch afterwards.</source>
-        <translation>Intensité de l’asinh. Le brouillon utilise soit asinh, soit les tons moyens. Validez une transformation pour effectuer ensuite un autre étirement.</translation>
-    </message>
-    <message>
-        <source>Stretch</source>
-        <translation>Étirement</translation>
-    </message>
-    <message>
-        <source>Orientation</source>
-        <translation>Orientation</translation>
-    </message>
-    <message>
-        <source>Apply or cancel the transformation edit before saving the project.</source>
-        <translation>Appliquez ou annulez la modification de la transformation avant d’enregistrer le projet.</translation>
-    </message>
-    <message>
-        <source>Gradient before stacking</source>
-        <translation>Gradient avant empilement</translation>
-    </message>
-    <message>
-        <source>Optional degree-1 subtraction after calibration and debayering, before alignment. Each exposure gets its own automatic grid (20 samples per line, tolerance 1). Leave disabled for fields filled with nebulosity.</source>
-        <translation>Soustraction facultative d’ordre 1 après calibration et dématriçage, avant alignement. Chaque pose reçoit sa propre grille automatique : 20 échantillons par ligne, tolérance 1. À désactiver pour les champs remplis de nébulosités.</translation>
-    </message>
-    <message>
-        <source>Correct each calibrated exposure</source>
-        <translation>Corriger chaque pose calibrée</translation>
-    </message>
-    <message>
-        <source>Input histogram and stretch curve</source>
-        <translation>Histogramme d’entrée et courbe d’étirement</translation>
-    </message>
-    <message>
-        <source>Shadow / highlight estimates at the level thresholds, after background correction and gains. These are channel samples, not the fraction of whole pixels lost. Later color operations may also clip.</source>
-        <translation>Estimation aux seuils noir et blanc, après correction du fond et gains couleur. Les pourcentages portent sur les échantillons des couches, pas sur les pixels entiers. Les traitements couleur suivants peuvent aussi écrêter.</translation>
-    </message>
-    <message>
-        <source>Versions A/B and presets</source>
-        <translation>Versions A/B et préréglages</translation>
-    </message>
-    <message>
-        <source>Draft adjustments start from the output of applied transformations, or from the linear stack when history is empty. Live preview can be disabled. Automatic starting point is optional; Reset to linear restores un-stretched pixels and neutral gains.</source>
-        <translation>Le brouillon part du résultat des transformations appliquées, ou de l’empilement linéaire si l’historique est vide. L’aperçu direct peut être désactivé. Le point de départ automatique reste facultatif ; revenir au linéaire réinitialise la recette et les gains.</translation>
-    </message>
-    <message>
-        <source>The optional correction fits a polynomial independently in each color channel. Bright grid samples are rejected using the tolerance. Compare with correction disabled to protect extended nebulosity. Enable sample editing to add or remove points directly on the image.</source>
-        <translation>La correction ajuste un polynôme séparément dans chaque couche. La tolérance écarte les zones trop lumineuses. Comparez sans correction pour protéger les nébulosités étendues. Activez l’édition des échantillons pour ajouter ou retirer des points sur l’image.</translation>
-    </message>
-    <message>
-        <source>Show extracted background model</source>
-        <translation>Afficher le modèle du fond extrait</translation>
-    </message>
-    <message>
-        <source>Displays the fitted background with an automatic display stretch. Export always uses the processed image. Inspect the model for traces of real astronomical objects.</source>
-        <translation>Affiche le fond modélisé avec un étirement d’affichage automatique. L’export utilise le résultat traité. Vérifiez que le modèle ne contient pas de structures de l’objet.</translation>
-    </message>
-    <message>
-        <source>Edit background samples on image</source>
-        <translation>Modifier les échantillons sur l’image</translation>
-    </message>
-    <message>
-        <source>Left click adds a sky sample. Right click removes one. Avoid stars and nebulosity. Rotate and mirror are temporarily unavailable while editing samples.</source>
-        <translation>Clic gauche : ajouter un échantillon de ciel. Clic droit : retirer un point. Évitez étoiles et nébulosités. Rotation et miroirs sont désactivés pendant cette édition.</translation>
-    </message>
-    <message>
-        <source>Regenerate automatic samples</source>
-        <translation>Régénérer les échantillons automatiques</translation>
-    </message>
-    <message>
-        <source>Polynomial degree</source>
-        <translation>Ordre du polynôme</translation>
-    </message>
-    <message>
-        <source>Start with degree 1. Higher degrees fit curved gradients but can remove real nebulosity.</source>
-        <translation>Commencez à l’ordre 1. Les ordres supérieurs corrigent les fonds courbes, mais peuvent retirer de vraies nébulosités.</translation>
-    </message>
-    <message>
-        <source>Samples per line</source>
-        <translation>Échantillons par ligne</translation>
-    </message>
-    <message>
-        <source>Density of the automatic background grid. More samples do not guarantee a better model.</source>
-        <translation>Densité de la grille automatique. Davantage d’échantillons ne garantit pas un meilleur modèle.</translation>
-    </message>
-    <message>
-        <source>Grid tolerance</source>
-        <translation>Tolérance de la grille</translation>
-    </message>
-    <message>
-        <source>Reject samples above the median plus this multiple of the median absolute deviation. Increase if too few samples remain.</source>
-        <translation>Rejette les échantillons au-dessus de la médiane augmentée de ce multiple de l’écart absolu médian (MAD). Augmentez si trop peu de points restent.</translation>
-    </message>
-    <message>
-        <source>Rotate clockwise, then mirror the finished image. The original linear integration remains unchanged. Orientation is saved with the project and can be undone.</source>
-        <translation>Rotation horaire, puis miroir de l’image finale. Le FITS linéaire conserve l’intégration source. Ces réglages sont enregistrés dans le projet et peuvent être annulés.</translation>
-    </message>
-    <message>
-        <source>Original orientation</source>
-        <translation>Orientation d’origine</translation>
-    </message>
-    <message>
-        <source>Mirror horizontally</source>
-        <translation>Miroir horizontal</translation>
-    </message>
-    <message>
-        <source>Mirror vertically</source>
-        <translation>Miroir vertical</translation>
-    </message>
-    <message>
-        <source>Green noise reduction</source>
-        <translation>Suppression du bruit vert</translation>
-    </message>
-    <message>
-        <source>Optional SCNR on the stretched image, after background and color balance. Avoid for intentional green colors in comets, planetary nebulae or SHO palettes. This is not photometric calibration.</source>
-        <translation>SCNR facultatif sur l’image étirée, après correction du fond et équilibrage couleur. Préservez les verts intentionnels des comètes, nébuleuses planétaires et palettes SHO. Ce n’est pas un étalonnage photométrique.</translation>
-    </message>
-    <message>
-        <source>Remove green noise</source>
-        <translation>Réduire le vert</translation>
-    </message>
-    <message>
-        <source>Average neutral protection</source>
-        <translation>Protection neutre moyenne</translation>
-    </message>
-    <message>
-        <source>Maximum neutral protection</source>
-        <translation>Protection neutre maximale</translation>
-    </message>
-    <message>
-        <source>Maximum mask protection</source>
-        <translation>Protection par masque maximal</translation>
-    </message>
-    <message>
-        <source>Additive mask protection</source>
-        <translation>Protection par masque additif</translation>
-    </message>
-    <message>
-        <source>Amount · %1</source>
-        <translation>Dosage · %1</translation>
-    </message>
-    <message>
-        <source>Mask methods have an adjustable amount. Neutral methods cap green using red and blue without this parameter.</source>
-        <translation>Le dosage agit sur les méthodes par masque. Les méthodes neutres plafonnent le vert à partir du rouge et du bleu sans utiliser ce réglage.</translation>
-    </message>
-    <message>
-        <source>Preserve CIE lightness</source>
-        <translation>Préserver la luminosité CIE</translation>
-    </message>
-    <message>
-        <source>Apply draft as a transformation</source>
-        <translation>Appliquer le brouillon comme transformation</translation>
-    </message>
-    <message>
-        <source>Commits all current draft adjustments into the ordered history. New adjustments then operate on that result, so stretches can be repeated. Undo restores the previous draft.</source>
-        <translation>Valide tous les réglages du brouillon dans l’historique ordonné. Les réglages suivants agissent sur ce résultat : les étirements peuvent se cumuler. Annuler restaure le brouillon précédent.</translation>
-    </message>
-    <message>
-        <source>Cancel transformation edit</source>
-        <translation>Annuler la modification</translation>
-    </message>
-    <message>
-        <source>Applied transformations · %1</source>
-        <translation>Transformations appliquées · %1</translation>
-    </message>
-    <message>
-        <source>Edit</source>
-        <translation>Modifier</translation>
-    </message>
-    <message>
-        <source>Remove transformation</source>
-        <translation>Supprimer la transformation</translation>
-    </message>
-    <message>
-        <source>The draft is applied after this history. Disable a transformation to compare its effect; downstream transformations are recalculated. Linear FITS still exports the original integration.</source>
-        <translation>Le brouillon s’applique après cette recette. Désactivez une transformation pour comparer ; les suivantes sont recalculées. Le FITS linéaire exporte toujours l’intégration source.</translation>
-    </message>
-    <message>
-        <source>Source image preview · linear display</source>
-        <translation>Aperçu de la source · affichage linéaire</translation>
-    </message>
-    <message>
-        <source>Background model · automatic display stretch</source>
-        <translation>Modèle du fond · étirement d’affichage automatique</translation>
-    </message>
-    <message>
-        <source>Color preview</source>
-        <translation>Aperçu couleur</translation>
-    </message>
-    <message>
-        <source>Debayer the preview when Bayer metadata is available. Calibration always uses the original sensor samples.</source>
-        <translation>Dématrice l’aperçu si le fichier indique une matrice Bayer. La calibration utilise toujours les données originales du capteur.</translation>
-    </message>
-    <message>
-        <source>Auto display stretch</source>
-        <translation>Étirement d’affichage auto</translation>
-    </message>
-    <message>
-        <source>Only changes the source preview. Disable to view linear pixel brightness.</source>
-        <translation>Modifie uniquement l’aperçu de la source. Désactivez pour voir la luminosité linéaire des pixels.</translation>
-    </message>
+        <message>
+            <source>Check the levels: white must exceed black and all values must be valid.</source>
+            <translation type="vanished">Vérifiez les niveaux : le blanc doit dépasser le noir et toutes les valeurs doivent être valides.</translation>
+        </message>
+        <message>
+            <source>Presets and history</source>
+            <translation type="vanished">Préréglages et historique</translation>
+        </message>
+        <message>
+            <source>Presets save finishing controls only. They do not change calibration, filters or channel composition. Absolute black and white levels depend on your data: check the histogram after loading. Each A/B version has its own undo history, limited to 100 changes.</source>
+            <translation type="vanished">Les préréglages conservent uniquement les réglages de finition. Ils ne modifient pas la calibration, les filtres ni la composition des canaux. Les niveaux absolus de noir et de blanc dépendent de vos données : vérifiez l’histogramme après chargement. Chaque version A/B possède son propre historique, limité à 100 modifications.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="650" />
+            <source>Your presets</source>
+            <translation>Vos préréglages</translation>
+        </message>
+        <message>
+            <source>Load</source>
+            <translation type="vanished">Charger</translation>
+        </message>
+        <message>
+            <source>Undo</source>
+            <translation type="vanished">Annuler</translation>
+        </message>
+        <message>
+            <source>Redo</source>
+            <translation type="vanished">Rétablir</translation>
+        </message>
+        <message>
+            <source>Versions A/B</source>
+            <translation type="vanished">Versions A/B</translation>
+        </message>
+        <message>
+            <source>A and B use the same linear stack and framing, with independent finishing controls and histories. Switch versions to compare; edits and final exports use the selected version. Copy duplicates the current settings into the other version. A new stack or channel composition starts a fresh pair.</source>
+            <translation type="vanished">A et B utilisent le même empilement linéaire et le même cadrage, avec des réglages de finition et des historiques indépendants. Basculez entre les versions pour comparer ; les modifications et les exports finaux utilisent la version sélectionnée. Copier duplique les réglages actuels dans l’autre version. Un nouvel empilement ou une nouvelle composition des canaux crée une nouvelle paire.</translation>
+        </message>
+        <message>
+            <source>Version A</source>
+            <translation type="vanished">Version A</translation>
+        </message>
+        <message>
+            <source>Version B</source>
+            <translation type="vanished">Version B</translation>
+        </message>
+        <message>
+            <source>Copy A to B</source>
+            <translation type="vanished">Copier A vers B</translation>
+        </message>
+        <message>
+            <source>Copy B to A</source>
+            <translation type="vanished">Copier B vers A</translation>
+        </message>
+        <message>
+            <source>Selected version %1</source>
+            <translation type="vanished">Version sélectionnée : %1</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="439" />
+            <source>Preview has unapplied settings. Apply them before final export.</source>
+            <translation>Des réglages ne sont pas encore appliqués à l’aperçu. Appliquez-les avant l’export final.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="645" />
+            <source>Deep-sky presets</source>
+            <translation>Préréglages de ciel profond</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="648" />
+            <source>Name this finish for your camera, filters or intent. Use a new name to duplicate it. Presets are kept locally across updates.</source>
+            <translation>Nommez cette finition selon votre caméra, vos filtres ou votre objectif. Utilisez un nouveau nom pour la dupliquer. Les préréglages sont conservés localement lors des mises à jour.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="653" />
+            <source>Preset name</source>
+            <translation>Nom du préréglage</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="654" />
+            <source>This name exists. Replace overwrites its settings.</source>
+            <translation>Ce nom existe déjà. Remplacer écrase ses réglages.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="658" />
+            <source>Delete</source>
+            <translation>Supprimer</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="660" />
+            <source>Replace</source>
+            <translation>Remplacer</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="660" />
+            <source>Save</source>
+            <translation>Enregistrer</translation>
+        </message>
+        <message>
+            <source>Manage presets…</source>
+            <translation type="vanished">Gérer les préréglages…</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="541" />
+            <source>Stacked result · pending adjustments</source>
+            <translation>Résultat empilé · réglages en attente</translation>
+        </message>
+        <message>
+            <source>Stacked result · version %1</source>
+            <translation type="vanished">Résultat empilé · version %1</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="543" />
+            <source>Show histograms</source>
+            <translation>Afficher les histogrammes</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="543" />
+            <source>Enlarge preview</source>
+            <translation>Agrandir l’aperçu</translation>
+        </message>
+        <message>
+            <source>Temporarily hide histograms and the image list to inspect A/B. Zoom and framing stay shared.</source>
+            <translation type="vanished">Masquez temporairement les histogrammes et la liste des images pour examiner A/B. Le zoom et le cadrage restent communs.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="323" />
+            <source>Normalization, stacking method and rejection threshold.</source>
+            <translation>Normalisation, méthode d’empilement et seuil de rejet.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="340" />
+            <source>Check the stars, FWHM and reference in the image list before stacking.</source>
+            <translation>Vérifiez les étoiles, la FWHM et la référence dans la liste des images avant l’empilement.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="480" />
+            <source>Asinh luminance</source>
+            <translation>Luminance asinh</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="480" />
+            <source>L is either max(R,G,B), (R+G+B)/3, or 0.2126R + 0.7152G + 0.0722B. This determines the shared asinh factor. Channel ratios are preserved by that factor, but earlier level clipping or later display/export clipping can change colors. Weighted and mean modes can produce values above 1.</source>
+            <translation>L vaut soit max(R,V,B), soit (R+V+B)/3, soit 0,2126R + 0,7152V + 0,0722B. Ce choix détermine le facteur commun de l’asinh. Ce facteur conserve les rapports entre canaux, mais l’écrêtage des niveaux ou de l’affichage/export peut modifier les couleurs. Les modes pondéré et moyen peuvent produire des valeurs supérieures à 1.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="481" />
+            <source>Maximum channel</source>
+            <translation>Couche maximale</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="481" />
+            <source>Human weighted</source>
+            <translation>Pondération visuelle</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="481" />
+            <source>RGB mean</source>
+            <translation>Moyenne RGB</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="482" />
+            <source>From normalized RGB, compute luminance L and apply the same factor to all channels: f(L)/L, with f(L) = asinh(kL)/asinh(k). Larger k reveals fainter detail and compresses bright regions. It also reveals noise. Asinh replaces the midtones curve in this draft; commit it to add a later stretch.</source>
+            <translation>À partir du RVB normalisé, on calcule une luminance L puis on multiplie les trois canaux par le même facteur f(L)/L, avec f(L) = asinh(kL)/asinh(k). Un k plus grand révèle les détails faibles et comprime les zones brillantes. Il révèle aussi le bruit. L’asinh remplace la courbe des tons moyens dans ce brouillon ; validez-le pour ajouter ensuite un autre étirement.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="88" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="346" />
+            <source>Stretch</source>
+            <translation>Étirement</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="88" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="346" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="465" />
+            <source>Orientation</source>
+            <translation>Orientation</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="136" />
+            <source>Apply or cancel the transformation edit before saving the project.</source>
+            <translation>Appliquez ou annulez la modification de la transformation avant d’enregistrer le projet.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="326" />
+            <source>Gradient before stacking</source>
+            <translation>Gradient avant empilement</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="326" />
+            <source>Optional degree-1 subtraction after calibration and debayering, before alignment. Each exposure gets its own automatic grid (20 samples per line, tolerance 1). Leave disabled for fields filled with nebulosity.</source>
+            <translation>Soustraction facultative d’ordre 1 après calibration et dématriçage, avant alignement. Chaque pose reçoit sa propre grille automatique : 20 échantillons par ligne, tolérance 1. À désactiver pour les champs remplis de nébulosités.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="327" />
+            <source>Correct each calibrated exposure</source>
+            <translation>Corriger chaque pose calibrée</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="359" />
+            <source>Input histogram and stretch curve</source>
+            <translation>Histogramme d’entrée et courbe d’étirement</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="418" />
+            <source>Shadow / highlight estimates at the level thresholds, after background correction and gains. These are channel samples, not the fraction of whole pixels lost. Later color operations may also clip.</source>
+            <translation>Estimation aux seuils noir et blanc, après correction du fond et gains couleur. Les pourcentages portent sur les échantillons des couches, pas sur les pixels entiers. Les traitements couleur suivants peuvent aussi écrêter.</translation>
+        </message>
+        <message>
+            <source>Versions A/B and presets</source>
+            <translation type="vanished">Versions A/B et préréglages</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="441" />
+            <source>Draft adjustments start from the output of applied transformations, or from the linear stack when history is empty. Live preview can be disabled. Automatic starting point is optional; Reset to linear restores un-stretched pixels and neutral gains.</source>
+            <translation>Le brouillon part du résultat des transformations appliquées, ou de l’empilement linéaire si l’historique est vide. L’aperçu direct peut être désactivé. Le point de départ automatique reste facultatif ; revenir au linéaire réinitialise la recette et les gains.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="448" />
+            <source>The optional correction fits a polynomial independently in each color channel. Bright grid samples are rejected using the tolerance. Compare with correction disabled to protect extended nebulosity. Enable sample editing to add or remove points directly on the image.</source>
+            <translation>La correction ajuste un polynôme séparément dans chaque couche. La tolérance écarte les zones trop lumineuses. Comparez sans correction pour protéger les nébulosités étendues. Activez l’édition des échantillons pour ajouter ou retirer des points sur l’image.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="450" />
+            <source>Show extracted background model</source>
+            <translation>Afficher le modèle du fond extrait</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="450" />
+            <source>Displays the fitted background with an automatic display stretch. Export always uses the processed image. Inspect the model for traces of real astronomical objects.</source>
+            <translation>Affiche le fond modélisé avec un étirement d’affichage automatique. L’export utilise le résultat traité. Vérifiez que le modèle ne contient pas de structures de l’objet.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="451" />
+            <source>Edit background samples on image</source>
+            <translation>Modifier les échantillons sur l’image</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="452" />
+            <source>Left click adds a sky sample. Right click removes one. Avoid stars and nebulosity. Rotate and mirror are temporarily unavailable while editing samples.</source>
+            <translation>Clic gauche : ajouter un échantillon de ciel. Clic droit : retirer un point. Évitez étoiles et nébulosités. Rotation et miroirs sont désactivés pendant cette édition.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="453" />
+            <source>Regenerate automatic samples</source>
+            <translation>Régénérer les échantillons automatiques</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="456" />
+            <source>Polynomial degree</source>
+            <translation>Ordre du polynôme</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="456" />
+            <source>Fit a surface P(x,y) independently in R, G and B from sky samples. Degree 1 is a plane; degree 2 adds curvature. Degrees 1–4 use 3, 6, 10 or 15 coefficients per channel. Correction is image − P + the sample median. Higher degrees can mistake extended nebulosity for background.</source>
+            <translation>On ajuste une surface P(x,y) séparément en R, V et B à partir des échantillons de ciel. Le degré 1 est un plan ; le degré 2 ajoute une courbure. Les degrés 1 à 4 utilisent 3, 6, 10 ou 15 coefficients par canal. La correction est image − P + la médiane des échantillons. Un degré élevé peut confondre une nébulosité étendue avec le fond.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="458" />
+            <source>Samples per line</source>
+            <translation>Échantillons par ligne</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="458" />
+            <source>An N by N grid proposes up to N² sky samples. Each sample measures local median brightness rather than a single pixel, reducing sensitivity to isolated stars. More points constrain the fit, but points on nebulae contaminate it. Remove those points on the image. This setting regenerates the automatic grid, not a manual selection.</source>
+            <translation>Une grille de N × N propose jusqu’à N² échantillons de ciel. Chaque échantillon mesure une médiane locale plutôt qu’un seul pixel, ce qui limite l’effet des étoiles isolées. Davantage de points contraignent le modèle, mais ceux sur les nébuleuses le faussent : retirez-les sur l’image. Ce réglage concerne la grille automatique, pas une sélection manuelle.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="460" />
+            <source>Grid tolerance</source>
+            <translation>Tolérance de la grille</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="460" />
+            <source>Automatic samples are excluded when their brightness exceeds median + tolerance × MAD in any channel. MAD is the median absolute distance from the median. Lower tolerance excludes more bright regions; higher tolerance retains more points, including possible objects. Manually selected samples bypass this automatic rejection.</source>
+            <translation>Les échantillons automatiques sont exclus si leur luminosité dépasse médiane + tolérance × MAD dans un canal. La MAD est la médiane des distances absolues à la médiane. Une tolérance faible exclut davantage de régions brillantes ; une valeur élevée conserve plus de points, y compris de possibles objets. Les échantillons manuels ne subissent pas ce rejet automatique.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="465" />
+            <source>Rotate clockwise, then mirror the finished image. The original linear integration remains unchanged. Orientation is saved with the project and can be undone.</source>
+            <translation>Rotation horaire, puis miroir de l’image finale. Le FITS linéaire conserve l’intégration source. Ces réglages sont enregistrés dans le projet et peuvent être annulés.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="466" />
+            <source>Original orientation</source>
+            <translation>Orientation d’origine</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="467" />
+            <source>Mirror horizontally</source>
+            <translation>Miroir horizontal</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="468" />
+            <source>Mirror vertically</source>
+            <translation>Miroir vertical</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="497" />
+            <source>Green noise reduction</source>
+            <translation>Suppression du bruit vert</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="497" />
+            <source>Optional SCNR on the stretched image, after background and color balance. Avoid for intentional green colors in comets, planetary nebulae or SHO palettes. This is not photometric calibration.</source>
+            <translation>SCNR facultatif sur l’image étirée, après correction du fond et équilibrage couleur. Préservez les verts intentionnels des comètes, nébuleuses planétaires et palettes SHO. Ce n’est pas un étalonnage photométrique.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="498" />
+            <source>Remove green noise</source>
+            <translation>Réduire le vert</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="500" />
+            <source>Average neutral protection</source>
+            <translation>Protection neutre moyenne</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="500" />
+            <source>Maximum neutral protection</source>
+            <translation>Protection neutre maximale</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="500" />
+            <source>Maximum mask protection</source>
+            <translation>Protection par masque maximal</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="500" />
+            <source>Additive mask protection</source>
+            <translation>Protection par masque additif</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="501" />
+            <source>Amount · %1</source>
+            <translation>Dosage · %1</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="501" />
+            <source>Neutral methods set G to min(G,(R+B)/2) or min(G,max(R,B)). Mask methods use G × [1 − amount × (1 − M)], where M is max(R,B) or min(1,R+B). Amount 0 is neutral; 1 applies full mask suppression. This targets green dominance, not all noise; genuine green objects can lose color.</source>
+            <translation>Les méthodes neutres ramènent V à min(V,(R+B)/2) ou min(V,max(R,B)). Les masques utilisent V × [1 − intensité × (1 − M)], où M vaut max(R,B) ou min(1,R+B). À 0, aucun effet ; à 1, suppression maximale du masque. Cela cible la dominance verte, pas tous les bruits ; les objets réellement verts peuvent perdre leur couleur.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="503" />
+            <source>Preserve CIE lightness</source>
+            <translation>Préserver la luminosité CIE</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="509" />
+            <source>Apply draft as a transformation</source>
+            <translation>Appliquer le brouillon comme transformation</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="509" />
+            <source>Commits all current draft adjustments into the ordered history. New adjustments then operate on that result, so stretches can be repeated. Undo restores the previous draft.</source>
+            <translation>Valide tous les réglages du brouillon dans l’historique ordonné. Les réglages suivants agissent sur ce résultat : les étirements peuvent se cumuler. Annuler restaure le brouillon précédent.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="510" />
+            <source>Cancel transformation edit</source>
+            <translation>Annuler la modification</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="511" />
+            <source>Applied transformations · %1</source>
+            <translation>Transformations appliquées · %1</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="516" />
+            <source>Edit</source>
+            <translation>Modifier</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="518" />
+            <source>Remove transformation</source>
+            <translation>Supprimer la transformation</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="521" />
+            <source>The draft is applied after this history. Disable a transformation to compare its effect; downstream transformations are recalculated. Linear FITS still exports the original integration.</source>
+            <translation>Le brouillon s’applique après cette recette. Désactivez une transformation pour comparer ; les suivantes sont recalculées. Le FITS linéaire exporte toujours l’intégration source.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="541" />
+            <source>Source image preview · linear display</source>
+            <translation>Aperçu de la source · affichage linéaire</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="541" />
+            <source>Background model · automatic display stretch</source>
+            <translation>Modèle du fond · étirement d’affichage automatique</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="541" />
+            <source>Mask · white applies, black protects</source>
+            <translation type="unfinished">Masque · blanc applique, noir protège</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="541" />
+            <source>Stacked result · current adjustments</source>
+            <translation>Résultat empilé · réglages actuels</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="543" />
+            <source>Temporarily hide histograms and the image list to inspect the result. Zoom and framing are preserved.</source>
+            <translation>Masque temporairement les histogrammes et la liste des images pour examiner le résultat. Le zoom et le cadrage sont conservés.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="549" />
+            <source>Color preview</source>
+            <translation>Aperçu couleur</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="549" />
+            <source>Debayer the preview when Bayer metadata is available. Calibration always uses the original sensor samples.</source>
+            <translation>Dématrice l’aperçu si le fichier indique une matrice Bayer. La calibration utilise toujours les données originales du capteur.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="550" />
+            <source>Auto display stretch</source>
+            <translation>Étirement d’affichage auto</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="550" />
+            <source>Only changes the source preview. Disable to view linear pixel brightness.</source>
+            <translation>Modifie uniquement l’aperçu de la source. Désactivez pour voir la luminosité linéaire des pixels.</translation>
+        </message>
+            <message>
+            <source>Presets</source>
+            <translation>Préréglages</translation>
+        </message>
+        <message>
+            <source>Open project</source>
+            <translation>Ouvrir un projet</translation>
+        </message>
+        <message>
+            <source>Save project</source>
+            <translation>Enregistrer le projet</translation>
+        </message>
+        <message>
+            <source>Add files</source>
+            <translation>Ajouter des fichiers</translation>
+        </message>
+        <message>
+            <source>Import folder</source>
+            <translation>Importer un dossier</translation>
+        </message>
+        <message>
+            <source>Switching families keeps all adjustments. Changes are applied automatically. Use Cmd+Z to undo.</source>
+            <translation>Changer de famille conserve tous les réglages. Les modifications s’appliquent automatiquement. Utilisez Cmd+Z pour annuler.</translation>
+        </message>
+        <message>
+            <source>Advanced transformations</source>
+            <translation>Transformations avancées</translation>
+        </message>
+        <message>
+            <source>Adjustments are applied automatically to the stacked image. Reset to linear restores un-stretched pixels and neutral gains.</source>
+            <translation>Les réglages s’appliquent automatiquement à l’image empilée. Revenir au linéaire restaure les pixels sans étirement et des gains neutres.</translation>
+        </message>
+        <message>
+            <source>From normalized RGB, compute luminance L and apply the same factor to all channels: f(L)/L, with f(L) = asinh(kL)/asinh(k). Larger k reveals fainter detail and compresses bright regions. It also reveals noise. Asinh replaces the midtones curve.</source>
+            <translation>À partir du RVB normalisé, calculez la luminance L puis appliquez le même facteur à tous les canaux : f(L)/L, avec f(L) = asinh(kL)/asinh(k). Un k plus grand révèle les détails faibles et comprime les zones brillantes. Il révèle aussi le bruit. Asinh remplace la courbe des tons moyens.</translation>
+        </message>
+        <message>
+            <source>Delete these adjustments</source>
+            <translation>Supprimer ces réglages</translation>
+        </message>
+        <message>
+            <source>Add light frames to begin\nThe preview is automatically stretched; source pixels stay linear.</source>
+            <translation>Ajoutez des poses pour commencer\nL’aperçu est étiré automatiquement ; les pixels source restent linéaires.</translation>
+        </message>
+        <message>
+            <source>A preset replaces the complete finishing recipe and all adjustment families, including advanced tools. It does not change the imported files or stacking settings. Cmd+Z restores the previous finish.</source>
+            <translation>Un préréglage remplace toute la finition et les réglages de toutes les familles, y compris les outils avancés. Les fichiers importés et les réglages d’empilement restent identiques. Cmd+Z restaure la finition précédente.</translation>
+        </message>
+        <message>
+            <source>Linear FITS preserves the original stack. Classic export lets you choose the image format and an optional caption.</source>
+            <translation>Le FITS linéaire conserve l’empilement original. L’export classique permet de choisir le format et d’ajouter une légende.</translation>
+        </message>
+        <message>
+            <source>Linear FITS</source>
+            <translation>FITS linéaire</translation>
+        </message>
+        <message>
+            <source>Classic export</source>
+            <translation>Export classique</translation>
+        </message>
+<message><source>1 image</source><translation>1 image</translation></message>
+<message><source>Export image</source><translation>Exporter l’image</translation></message>
+<message><source>Project and finishing presets</source><translation>Projet et préréglages de finition</translation></message>
+<message><source>Finishing presets</source><translation>Préréglages de finition</translation></message>
+<message><source>Finishing tools</source><translation>Outils de finition</translation></message>
+<message><source>Black level</source><translation>Niveau de noir</translation></message>
+<message><source>White level</source><translation>Niveau de blanc</translation></message>
+<message><source>Export the finished image to share it, or keep linear FITS for further processing.</source><translation>Exportez l’image finale pour la partager, ou conservez le FITS linéaire pour poursuivre le traitement.</translation></message>
+<message><source>PNG, TIFF or JPEG · optional caption</source><translation>PNG, TIFF ou JPEG · légende facultative</translation></message>
+<message><source>Original stack · 32-bit linear data</source><translation>Empilement original · données linéaires 32 bits</translation></message>
 </context>
     <context>
         <name>GlobalSettingsWorkspace</name>
@@ -1256,205 +2244,255 @@ L’aperçu est automatiquement éclairci ; les données restent linéaires.</tr
             <translation>Enregistrés localement et conservés lors des mises à jour.</translation>
         </message>
         <message>
-            <location filename="../qml/GlobalSettingsWorkspace.qml" line="55" />
+            <location filename="../qml/GlobalSettingsWorkspace.qml" line="60" />
             <source>Language</source>
             <translation>Langue</translation>
         </message>
         <message>
-            <location filename="../qml/GlobalSettingsWorkspace.qml" line="59" />
+            <location filename="../qml/GlobalSettingsWorkspace.qml" line="64" />
             <source>Applies immediately throughout the interface.</source>
             <translation>Le changement s’applique immédiatement à l’interface.</translation>
         </message>
         <message>
-            <location filename="../qml/GlobalSettingsWorkspace.qml" line="62" />
+            <location filename="../qml/GlobalSettingsWorkspace.qml" line="67" />
             <source>Processing layout</source>
             <translation>Présentation du traitement</translation>
         </message>
         <message>
-            <location filename="../qml/GlobalSettingsWorkspace.qml" line="64" />
+            <location filename="../qml/GlobalSettingsWorkspace.qml" line="69" />
             <source>Guided</source>
             <translation>Guidé</translation>
         </message>
         <message>
-            <location filename="../qml/GlobalSettingsWorkspace.qml" line="65" />
+            <location filename="../qml/GlobalSettingsWorkspace.qml" line="70" />
             <source>Compact</source>
             <translation>Compact</translation>
         </message>
         <message>
-            <location filename="../qml/GlobalSettingsWorkspace.qml" line="67" />
+            <location filename="../qml/GlobalSettingsWorkspace.qml" line="72" />
             <source>Compact mode hides explanations. Help buttons remain available. Drag the divider in Processing to resize its controls; your layout is remembered.</source>
             <translation>Le mode compact masque les explications et conserve les boutons d’aide. Déplacez la séparation dans Traitement pour redimensionner les réglages ; votre disposition est mémorisée.</translation>
         </message>
         <message>
-            <location filename="../qml/GlobalSettingsWorkspace.qml" line="70" />
+            <location filename="../qml/GlobalSettingsWorkspace.qml" line="75" />
             <source>Capture folder</source>
             <translation>Dossier de capture</translation>
         </message>
         <message>
-            <location filename="../qml/GlobalSettingsWorkspace.qml" line="71" />
+            <location filename="../qml/GlobalSettingsWorkspace.qml" line="76" />
             <source>Camera images and recorded videos. Camera controls and recording formats remain in Capture.</source>
             <translation>Images de la caméra et vidéos enregistrées. Les réglages de la caméra et les formats restent dans Capture.</translation>
         </message>
         <message>
-            <location filename="../qml/GlobalSettingsWorkspace.qml" line="74" />
+            <location filename="../qml/GlobalSettingsWorkspace.qml" line="79" />
             <source>Default: Pictures and Movies → AstroCapture</source>
             <translation>Par défaut : Images et Vidéos → AstroCapture</translation>
         </message>
         <message>
-            <location filename="../qml/GlobalSettingsWorkspace.qml" line="75" />
-            <location filename="../qml/GlobalSettingsWorkspace.qml" line="89" />
+            <location filename="../qml/GlobalSettingsWorkspace.qml" line="80" />
+            <location filename="../qml/GlobalSettingsWorkspace.qml" line="94" />
             <source>Choose folder…</source>
             <translation>Choisir un dossier…</translation>
         </message>
         <message>
-            <location filename="../qml/GlobalSettingsWorkspace.qml" line="77" />
+            <location filename="../qml/GlobalSettingsWorkspace.qml" line="82" />
             <source>A custom folder contains two subfolders: Images and Videos.</source>
             <translation>Un dossier personnalisé contient deux sous-dossiers : Images et Videos.</translation>
         </message>
         <message>
-            <location filename="../qml/GlobalSettingsWorkspace.qml" line="79" />
+            <location filename="../qml/GlobalSettingsWorkspace.qml" line="84" />
             <source>Open folder</source>
             <translation>Ouvrir le dossier</translation>
         </message>
         <message>
-            <location filename="../qml/GlobalSettingsWorkspace.qml" line="80" />
+            <location filename="../qml/GlobalSettingsWorkspace.qml" line="85" />
             <source>Use default folders</source>
             <translation>Dossiers par défaut</translation>
         </message>
         <message>
-            <location filename="../qml/GlobalSettingsWorkspace.qml" line="84" />
+            <location filename="../qml/GlobalSettingsWorkspace.qml" line="89" />
             <source>Processing export folder</source>
             <translation>Dossier d’export du traitement</translation>
         </message>
         <message>
-            <location filename="../qml/GlobalSettingsWorkspace.qml" line="85" />
+            <location filename="../qml/GlobalSettingsWorkspace.qml" line="90" />
             <source>Processed TIFF images, after stacking and adjustments.</source>
             <translation>Images TIFF traitées, après empilement et réglages.</translation>
         </message>
         <message>
-            <location filename="../qml/GlobalSettingsWorkspace.qml" line="88" />
+            <location filename="../qml/GlobalSettingsWorkspace.qml" line="93" />
             <source>Source video's folder until you choose a location</source>
             <translation>Dossier de la vidéo source, en attendant votre choix</translation>
         </message>
         <message>
-            <location filename="../qml/GlobalSettingsWorkspace.qml" line="91" />
+            <location filename="../qml/GlobalSettingsWorkspace.qml" line="96" />
             <source>Also remembers the folder used for your last successful export.</source>
             <translation>Mémorise aussi le dossier utilisé pour le dernier export réussi.</translation>
         </message>
         <message>
-            <location filename="../qml/GlobalSettingsWorkspace.qml" line="96" />
             <location filename="../qml/GlobalSettingsWorkspace.qml" line="101" />
+            <location filename="../qml/GlobalSettingsWorkspace.qml" line="106" />
             <source>Remember exported images</source>
             <translation>Mémoriser les images exportées</translation>
         </message>
         <message>
-            <location filename="../qml/GlobalSettingsWorkspace.qml" line="118" />
+            <location filename="../qml/GlobalSettingsWorkspace.qml" line="123" />
             <source>Keeps up to 500 image paths locally. Images stay in their original folders. Turning this off keeps existing entries and still allows manual imports.</source>
             <translation>Conserve jusqu’à 500 chemins d’images localement. Les fichiers restent dans leur dossier d’origine. Désactiver cette option conserve les entrées existantes et permet toujours l’ajout manuel.</translation>
         </message>
-    <message><source>Report a problem by email. You can review the message before sending it.</source><translation>Signalez un problème par e-mail. Vous pouvez relire le message avant de l’envoyer.</translation></message>
-<message><source>Report a bug</source><translation>Signaler un bug</translation></message>
+        <message>
+            <location filename="../qml/GlobalSettingsWorkspace.qml" line="54" />
+            <source>Report a problem by email. You can review the message before sending it.</source>
+            <translation>Signalez un problème par e-mail. Vous pouvez relire le message avant de l’envoyer.</translation>
+        </message>
+        <message>
+            <location filename="../qml/GlobalSettingsWorkspace.qml" line="55" />
+            <source>Report a bug</source>
+            <translation>Signaler un bug</translation>
+        </message>
+    <message><source>Choose folder</source><translation>Choisir un dossier</translation></message>
+<message><source>Export folder</source><translation>Dossier d’export</translation></message>
+<message><source>Finished PNG and TIFF images, with your current adjustments.</source><translation>Images finales PNG et TIFF, avec vos réglages actuels.</translation></message>
 </context>
     <context>
         <name>GuideWorkspace</name>
-<message><source>Studio navigation</source><translation>Navigation Studio</translation></message>
-<message><source>One workspace for each task</source><translation>Un espace pour chaque tâche</translation></message>
-<message><source>Home offers Capture, Processing and Deep sky, recent saved projects and SER videos, and work still open in this session.</source><translation>L’accueil donne accès à Capture, Traitement et Ciel profond, aux projets enregistrés et vidéos SER récents, ainsi qu’au travail encore ouvert dans cette session.</translation></message>
-<message><source>Move between workspaces</source><translation>Passer d’un espace à l’autre</translation></message>
-<message><source>The top tabs stay visible. Switching tabs preserves loaded images, framing and controls, and calculations continue in the background. Click the activity label to return to a running task. During recording, Home, Capture and Guide remain available; other workspaces are locked.</source><translation>Les onglets supérieurs restent visibles. Changer d’onglet conserve les images chargées, le cadrage et les réglages ; les calculs continuent en arrière-plan. Cliquez sur l’activité pour revenir à la tâche en cours. Pendant une capture, Accueil, Capture et Guide restent disponibles ; les autres espaces sont verrouillés.</translation></message>
-<message><source>Return to a project</source><translation>Reprendre un projet</translation></message>
-<message><source>Resume returns to the current session without loading files again. Open reloads a saved deep-sky project; recreate its stack to restore the saved finish. Keep its source files in place. The gear at the top right opens application settings; the deep-sky gear manages the current project.</source><translation>Reprendre revient à la session actuelle sans recharger les fichiers. Ouvrir recharge un projet de ciel profond enregistré ; recréez son empilement pour retrouver la finition sauvegardée. Gardez ses fichiers sources en place. Le rouage supérieur droit ouvre les réglages de l’application ; celui du ciel profond gère le projet actuel.</translation></message>
-<message><source>Deep-sky tools on the right</source><translation>Outils de ciel profond à droite</translation></message>
-<message><source>Images, Stack and Finish are in the right inspector. Stack contains calibration and integration settings. Finish unlocks after stacking and contains the editable linear histogram, finishing controls, presets and export. The image and displayed histogram stay on the left. Source files toggles the source list, which starts collapsed in Finish.</source><translation>Images, Empilement et Finition se trouvent dans l’inspecteur de droite. Empilement regroupe les réglages de calibration et d’intégration. Finition devient accessible après l’empilement et contient l’histogramme linéaire interactif, les réglages de finition, les préréglages et l’export. L’image et son histogramme d’affichage restent à gauche. Fichiers sources affiche ou replie la liste, repliée par défaut en Finition.</translation></message>
-<message><source>Go to Home</source><translation>Aller à l’accueil</translation></message>
-
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="68" />
+            <location filename="../qml/GuideWorkspace.qml" line="80" />
+            <source>Studio navigation</source>
+            <translation>Navigation Studio</translation>
+        </message>
+        <message>
+            <location filename="../qml/GuideWorkspace.qml" line="80" />
+            <source>One workspace for each task</source>
+            <translation>Un espace pour chaque tâche</translation>
+        </message>
+        <message>
+            <location filename="../qml/GuideWorkspace.qml" line="81" />
+            <source>Home offers Capture, Processing and Deep sky, recent saved projects and SER videos, and work still open in this session.</source>
+            <translation>L’accueil donne accès à Capture, Traitement et Ciel profond, aux projets enregistrés et vidéos SER récents, ainsi qu’au travail encore ouvert dans cette session.</translation>
+        </message>
+        <message>
+            <location filename="../qml/GuideWorkspace.qml" line="83" />
+            <source>Move between workspaces</source>
+            <translation>Passer d’un espace à l’autre</translation>
+        </message>
+        <message>
+            <location filename="../qml/GuideWorkspace.qml" line="83" />
+            <source>The top tabs stay visible. Switching tabs preserves loaded images, framing and controls, and calculations continue in the background. Click the activity label to return to a running task. During recording, Home, Capture and Guide remain available; other workspaces are locked.</source>
+            <translation>Les onglets supérieurs restent visibles. Changer d’onglet conserve les images chargées, le cadrage et les réglages ; les calculs continuent en arrière-plan. Cliquez sur l’activité pour revenir à la tâche en cours. Pendant une capture, Accueil, Capture et Guide restent disponibles ; les autres espaces sont verrouillés.</translation>
+        </message>
+        <message>
+            <location filename="../qml/GuideWorkspace.qml" line="84" />
+            <source>Return to a project</source>
+            <translation>Reprendre un projet</translation>
+        </message>
+        <message>
+            <location filename="../qml/GuideWorkspace.qml" line="84" />
+            <source>Resume returns to the current session without loading files again. Open reloads a saved deep-sky project; recreate its stack to restore the saved finish. Keep its source files in place. The gear at the top right opens application settings; the deep-sky gear manages the current project.</source>
+            <translation>Reprendre revient à la session actuelle sans recharger les fichiers. Ouvrir recharge un projet de ciel profond enregistré ; recréez son empilement pour retrouver la finition sauvegardée. Gardez ses fichiers sources en place. Le rouage supérieur droit ouvre les réglages de l’application ; celui du ciel profond gère le projet actuel.</translation>
+        </message>
+        <message>
+            <location filename="../qml/GuideWorkspace.qml" line="85" />
+            <source>Deep-sky tools on the right</source>
+            <translation>Outils de ciel profond à droite</translation>
+        </message>
+        <message>
+            <location filename="../qml/GuideWorkspace.qml" line="85" />
+            <source>Images, Stack and Finish are in the right inspector. Stack contains calibration and integration settings. Finish unlocks after stacking and contains the editable linear histogram, finishing controls, presets and export. The image and displayed histogram stay on the left. Source files toggles the source list, which starts collapsed in Finish.</source>
+            <translation>Images, Empilement et Finition se trouvent dans l’inspecteur de droite. Empilement regroupe les réglages de calibration et d’intégration. Finition devient accessible après l’empilement et contient l’histogramme linéaire interactif, les réglages de finition, les préréglages et l’export. L’image et son histogramme d’affichage restent à gauche. Fichiers sources affiche ou replie la liste, repliée par défaut en Finition.</translation>
+        </message>
+        <message>
+            <location filename="../qml/GuideWorkspace.qml" line="86" />
+            <source>Go to Home</source>
+            <translation>Aller à l’accueil</translation>
+        </message>
+        <message>
+            <location filename="../qml/GuideWorkspace.qml" line="91" />
             <source>Guide</source>
             <translation>Guide</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="69" />
+            <location filename="../qml/GuideWorkspace.qml" line="92" />
             <source>From the first recording to the finished image, at your own pace.</source>
             <translation>Du premier enregistrement à l’image finale, à votre rythme.</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="12" />
+            <location filename="../qml/GuideWorkspace.qml" line="13" />
             <source>Start here</source>
             <translation>Bien démarrer</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="12" />
+            <location filename="../qml/GuideWorkspace.qml" line="13" />
             <source>One observation, three steps</source>
             <translation>Une observation, trois étapes</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="13" />
+            <location filename="../qml/GuideWorkspace.qml" line="14" />
             <source>Capture a video, combine its sharpest frames, then finish the image. For the Moon, Sun and planets, this gives you more useful material than a single snapshot.</source>
             <translation>Enregistrez une vidéo, combinez ses images les plus nettes, puis travaillez le résultat. Pour la Lune, le Soleil et les planètes, vous disposez ainsi de plus de matière qu’avec une photo unique.</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="15" />
+            <location filename="../qml/GuideWorkspace.qml" line="16" />
             <source>1 · Capture in SER</source>
             <translation>1 · Filmer en SER</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="15" />
+            <location filename="../qml/GuideWorkspace.qml" line="16" />
             <source>Focus carefully, keep exposures short and avoid clipping the bright areas. Record a SER video. Atmospheric turbulence changes from frame to frame; a video gives you a choice of sharper moments.</source>
             <translation>Soignez la mise au point, utilisez des poses courtes et évitez de saturer les zones lumineuses. Enregistrez une vidéo SER. La turbulence atmosphérique varie d’une image à l’autre : la vidéo permet de choisir les instants les plus nets.</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="16" />
+            <location filename="../qml/GuideWorkspace.qml" line="17" />
             <source>2 · Analyze, select, stack</source>
             <translation>2 · Analyser, sélectionner, empiler</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="16" />
+            <location filename="../qml/GuideWorkspace.qml" line="17" />
             <source>Open the SER in Processing. Analyze ranks the frames by sharpness. Start by retaining 25–50%, then compare results. Align and stack combines the selected information into one image.</source>
             <translation>Ouvrez le SER dans Traitement. L’analyse classe les images par netteté. Commencez par en conserver 25 à 50 %, puis comparez les résultats. Aligner et empiler combine les informations retenues en une seule image.</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="17" />
+            <location filename="../qml/GuideWorkspace.qml" line="18" />
             <source>3 · Finish and export</source>
             <translation>3 · Retoucher et exporter</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="17" />
+            <location filename="../qml/GuideWorkspace.qml" line="18" />
             <source>Increase wavelets gradually, adjust color and compare before / after. Export a 16-bit TIFF. Keep the original SER so you can try a different selection later.</source>
             <translation>Augmentez les ondelettes progressivement, ajustez la couleur et comparez avant / après. Exportez en TIFF 16 bits. Conservez le SER original pour pouvoir essayer une autre sélection plus tard.</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="18" />
+            <location filename="../qml/GuideWorkspace.qml" line="19" />
             <source>Observing the Sun</source>
             <translation>Observer le Soleil</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="18" />
+            <location filename="../qml/GuideWorkspace.qml" line="19" />
             <source>Use a solar filter designed for your telescope and observation method before pointing at the Sun. Software and exposure settings do not provide eye or equipment protection.</source>
             <translation>Avant de pointer le Soleil, utilisez un filtre solaire adapté à votre instrument et à votre méthode d’observation. Le logiciel et les réglages d’exposition ne protègent ni les yeux ni le matériel.</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="19" />
+            <location filename="../qml/GuideWorkspace.qml" line="20" />
             <source>Go to Capture</source>
             <translation>Aller à Capture</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="20" />
+            <location filename="../qml/GuideWorkspace.qml" line="21" />
             <source>File formats</source>
             <translation>Formats de fichiers</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="20" />
+            <location filename="../qml/GuideWorkspace.qml" line="21" />
             <source>Choose a format for each stage</source>
             <translation>Un format pour chaque étape</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="21" />
+            <location filename="../qml/GuideWorkspace.qml" line="22" />
             <source>A video contains many frames. A finished image contains the result of your work. Keep both when you want to be able to start again.</source>
             <translation>Une vidéo contient de nombreuses images. Une image finale contient le résultat de votre travail. Conservez les deux pour pouvoir recommencer.</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="23" />
+            <location filename="../qml/GuideWorkspace.qml" line="24" />
             <source>SER · the recording</source>
             <translation>SER · l’enregistrement</translation>
         </message>
@@ -1463,32 +2501,32 @@ L’aperçu est automatiquement éclairci ; les données restent linéaires.</tr
             <translation type="vanished">Une vidéo astronomique non compressée. Utilisez ce format pour la capture, l’analyse de netteté et l’empilement. AstroCapture ouvre directement les SER ; Traitement n’importe pas les AVI ni les ACRAW.</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="23" />
+            <location filename="../qml/GuideWorkspace.qml" line="24" />
             <source>An uncompressed astronomy video. Use it for capture, sharpness analysis and stacking. AstroCapture opens SER directly; it also opens ACRAW sequences, but does not import AVI.</source>
             <translation>Une vidéo astronomique non compressée, adaptée à la capture, à l’analyse de netteté et à l’empilement. AstroCapture ouvre directement les SER et les séquences ACRAW, mais pas les AVI.</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="24" />
+            <location filename="../qml/GuideWorkspace.qml" line="25" />
             <source>PNG / TIFF · an image to adjust</source>
             <translation>PNG / TIFF · une image à retoucher</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="24" />
+            <location filename="../qml/GuideWorkspace.qml" line="25" />
             <source>Open a PNG or TIFF directly in Processing, or drop it there. Wavelets, color, comparison and captions are available immediately. There is no frame selection or stacking for a single image. Imports accept single-image files up to 32 MP; transparency is placed on black.</source>
             <translation>Ouvrez un PNG ou TIFF directement dans Traitement, ou déposez-le dans cet onglet. Les ondelettes, la couleur, la comparaison et les légendes sont immédiatement disponibles. Une image unique ne nécessite ni sélection de prises ni empilement. L’import accepte les fichiers contenant une seule image, jusqu’à 32 MP ; la transparence est placée sur fond noir.</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="25" />
+            <location filename="../qml/GuideWorkspace.qml" line="26" />
             <source>TIFF 16-bit · the finished result</source>
             <translation>TIFF 16 bits · le résultat final</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="25" />
+            <location filename="../qml/GuideWorkspace.qml" line="26" />
             <source>Processing and Mosaic export 16-bit RGB TIFF files, preserving the precision of the result. A 16-bit file cannot recover information absent from an 8-bit original. JPEG is accepted in Mosaic, but is not a direct Processing input.</source>
             <translation>Traitement et Mosaïque exportent des TIFF RVB 16 bits pour préserver la précision du résultat. Un fichier 16 bits ne peut pas retrouver les informations absentes d’un original 8 bits. Le JPEG est accepté dans Mosaïque, mais ne s’ouvre pas directement dans Traitement.</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="26" />
+            <location filename="../qml/GuideWorkspace.qml" line="27" />
             <source>A snapshot in Capture</source>
             <translation>Une photo unique dans Capture</translation>
         </message>
@@ -1497,85 +2535,85 @@ L’aperçu est automatiquement éclairci ; les données restent linéaires.</tr
             <translation type="vanished">Le bouton photo enregistre un PNG, TIFF16 ou FITS, selon le réglage de Capture. Il sauvegarde une seule image de l’aperçu. Actuellement, le TIFF16 de capture provient d’un aperçu 8 bits ; privilégiez l’enregistrement SER pour un empilement ultérieur. Le FITS n’est pas importé dans Traitement ni Mosaïque.</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="26" />
+            <location filename="../qml/GuideWorkspace.qml" line="27" />
             <source>The photo button saves a PNG preview, a 16-bit TIFF or a raw sensor FITS according to the Capture setting. FITS opens in Deep sky. Record SER for planetary stacking or a FITS sequence for deep-sky exposures.</source>
             <translation>Le bouton photo enregistre un aperçu PNG, un TIFF 16 bits ou un FITS du capteur selon le réglage Capture. Les FITS s’ouvrent dans Ciel profond. Enregistrez un SER pour le planétaire ou une série FITS pour le ciel profond.</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="27" />
-            <location filename="../qml/GuideWorkspace.qml" line="35" />
+            <location filename="../qml/GuideWorkspace.qml" line="28" />
+            <location filename="../qml/GuideWorkspace.qml" line="36" />
+            <location filename="../qml/GuideWorkspace.qml" line="63" />
             <source>Go to Processing</source>
             <translation>Aller à Traitement</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="28" />
+            <location filename="../qml/GuideWorkspace.qml" line="29" />
             <source>Processing</source>
             <translation>Traitement</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="28" />
+            <location filename="../qml/GuideWorkspace.qml" line="29" />
             <source>Read the controls, judge the image</source>
             <translation>Comprendre les réglages, juger l’image</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="29" />
+            <location filename="../qml/GuideWorkspace.qml" line="30" />
             <source>For a video, select and stack first. For a PNG, TIFF or transferred mosaic, start directly with detail and color adjustments.</source>
             <translation>Pour une vidéo, commencez par sélectionner et empiler. Pour un PNG, TIFF ou une mosaïque transférée, passez directement aux réglages de détails et de couleur.</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="31" />
+            <location filename="../qml/GuideWorkspace.qml" line="32" />
             <source>The quality graph</source>
             <translation>La courbe de qualité</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="31" />
+            <location filename="../qml/GuideWorkspace.qml" line="32" />
             <source>Frames are sorted from sharpest to softest, not by time. The best frame is shown at 100%. Move the blue boundary to change how many are retained. A smaller selection favors sharpness; more frames can reduce noise. The score is a guide, not a guarantee.</source>
             <translation>Les images sont classées de la plus nette à la plus floue, et non dans l’ordre chronologique. La meilleure est à 100 %. Déplacez la limite bleue pour choisir le nombre d’images conservées. Une sélection réduite privilégie la netteté ; davantage d’images peut réduire le bruit. Le score est une aide, pas une garantie.</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="32" />
+            <location filename="../qml/GuideWorkspace.qml" line="33" />
             <source>Moon / Sun and turbulence</source>
             <translation>Lune / Soleil et turbulence</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="32" />
+            <location filename="../qml/GuideWorkspace.qml" line="33" />
             <source>Choose Moon / Sun for local alignment. Start with 96 px areas; use 64 px for fine contrasted detail or 160 px for softer, noisier surfaces. Best frames per area can use different frames for each region. It takes longer and cannot restore detail missing from every frame.</source>
             <translation>Choisissez Lune / Soleil pour le recalage local. Commencez avec des zones de 96 px ; essayez 64 px sur des détails fins et contrastés, ou 160 px sur des surfaces plus douces ou bruitées. Meilleures images par zone peut utiliser des prises différentes pour chaque région. Ce traitement est plus long et ne restitue pas les détails absents de toutes les prises.</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="33" />
+            <location filename="../qml/GuideWorkspace.qml" line="34" />
             <source>Wavelet levels</source>
             <translation>Les niveaux d’ondelettes</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="33" />
+            <location filename="../qml/GuideWorkspace.qml" line="34" />
             <source>Levels 1–3 affect finer details; levels 4–6 affect broader structures. Start gently with levels 1 and 2, and watch for noise or bright halos. Maximum gains are 50, 20, 20, 10, 10 and 10. These values are specific to AstroCapture.</source>
             <translation>Les niveaux 1 à 3 agissent sur les détails plus fins ; les niveaux 4 à 6 sur des structures plus larges. Commencez doucement avec les niveaux 1 et 2, en surveillant le bruit et les halos lumineux. Les gains maximaux sont 50, 20, 20, 10, 10 et 10. Ces valeurs sont propres à AstroCapture.</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="34" />
+            <location filename="../qml/GuideWorkspace.qml" line="35" />
             <source>Before, after and playback</source>
             <translation>Avant, après et lecture vidéo</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="34" />
+            <location filename="../qml/GuideWorkspace.qml" line="35" />
             <source>Hold Before or use Compare to judge your adjustments. In video mode, Play always shows the original recording, not the stack. An image or mosaic has no video playback. Export saves the finished result.</source>
             <translation>Maintenez Avant ou utilisez Comparer pour juger vos réglages. En mode vidéo, Lire affiche toujours l’enregistrement original, pas l’image empilée. Une image ou une mosaïque n’a pas de lecture vidéo. L’export sauvegarde le résultat final.</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="36" />
+            <location filename="../qml/GuideWorkspace.qml" line="37" />
             <source>Deep sky</source>
             <translation>Ciel profond</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="36" />
+            <location filename="../qml/GuideWorkspace.qml" line="37" />
             <source>From individual exposures to faint detail</source>
             <translation>Des poses individuelles aux détails faibles</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="37" />
             <source>Use the Deep sky workspace for FITS or Bayer RAW sequences. The source samples remain linear; an automatic display stretch makes faint data visible without changing the originals.</source>
-            <translation>Utilisez Ciel profond pour les séries FITS ou RAW Bayer. Les données restent linéaires ; un étirement automatique permet de voir les détails faibles sans modifier les originaux.</translation>
+            <translation type="vanished">Utilisez Ciel profond pour les séries FITS ou RAW Bayer. Les données restent linéaires ; un étirement automatique permet de voir les détails faibles sans modifier les originaux.</translation>
         </message>
         <message>
             <source>1 · Add lights and inspect</source>
@@ -1610,7 +2648,7 @@ L’aperçu est automatiquement éclairci ; les données restent linéaires.</tr
             <translation type="vanished">Chaque filtre est empilé séparément. Attribuez les couches R/G/B ou une palette en bande étroite, ajoutez éventuellement la luminance, puis combinez. Réglez le noir, le blanc et les tons moyens. Exportez un FITS linéaire 32 bits ou un TIFF final 16 bits. Détails et légende transfère le résultat affiché vers Traitement.</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="39" />
+            <location filename="../qml/GuideWorkspace.qml" line="40" />
             <source>Images and calibration</source>
             <translation>Images et calibration</translation>
         </message>
@@ -1619,59 +2657,59 @@ L’aperçu est automatiquement éclairci ; les données restent linéaires.</tr
             <translation type="vanished">Ajoutez les poses, puis les darks, flats et darks de flats si les données sont brutes. Le mode brut est sélectionné par défaut. Cochez Poses déjà calibrées uniquement pour des fichiers prétraités, comme les FITS calibrés d’iTelescope. Dans le tutoriel Siril, importez Offsets_3s comme Darks de flats, pas comme Bias. Conservez les originaux.</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="40" />
+            <location filename="../qml/GuideWorkspace.qml" line="41" />
             <source>Stack settings</source>
             <translation>Réglages d’empilement</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="40" />
+            <location filename="../qml/GuideWorkspace.qml" line="41" />
             <source>Inspect star counts, FWHM and source previews; uncheck poor frames and choose a reference per filter. Normalization and rejection are configurable in Advanced stack settings. Start Create the stacked image from Stack settings after checking calibration, reference and advanced options. It runs calibration, alignment, normalization and integration together. Finish and export becomes available when a result exists. Hover parameter labels for help.</source>
             <translation>Inspectez le nombre d’étoiles, la FWHM et les aperçus ; décochez les mauvaises poses et choisissez une référence par filtre. La normalisation et le rejet se règlent dans Réglages avancés. Lancez Créer l’image empilée depuis Réglages d’empilement après vérification de la calibration, de la référence et des réglages avancés. La calibration, l’alignement, la normalisation et l’intégration sont exécutés ensemble. Finition et export devient accessible lorsqu’un résultat existe. Survolez les libellés des paramètres pour afficher l’aide.</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="41" />
+            <location filename="../qml/GuideWorkspace.qml" line="42" />
             <source>Source or stacked result?</source>
             <translation>Source ou résultat empilé ?</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="41" />
+            <location filename="../qml/GuideWorkspace.qml" line="42" />
             <source>The image label tells you whether you are viewing a source or the stacked result. Clicking a file name previews that source without replacing the export result. Use Show stacked result to return. Stacking primarily improves noise; finishing reveals faint detail.</source>
             <translation>Le libellé de l’image distingue une source du résultat empilé. Un clic sur un nom de fichier affiche cette source sans remplacer le résultat exporté. Afficher le résultat empilé permet de revenir. L’empilement améliore surtout le bruit ; la finition révèle les détails faibles.</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="42" />
+            <location filename="../qml/GuideWorkspace.qml" line="43" />
             <source>Histogram and manual stretch</source>
             <translation>Histogramme et étirement manuel</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="42" />
+            <location filename="../qml/GuideWorkspace.qml" line="43" />
             <source>In Finish and export, the linear histogram shows data with the current color gains and the stretch curve. Select Black, Midtones or White, then drag in the graph, or edit numeric levels and the midtones slider. Zoom only changes the graph view. Watch the sampled clipping estimates; moving white can clip bright stars. Asinh offers a different stretch that preserves color ratios.</source>
             <translation>Dans Finition et export, l’histogramme linéaire montre les données avec les gains couleur courants et la courbe d’étirement. Choisissez Noir, Tons moyens ou Blanc, puis glissez dans le graphique ; vous pouvez aussi modifier les niveaux numériques et le curseur des tons moyens. Le zoom change seulement la vue du graphique. Surveillez les estimations de coupure ; déplacer le blanc peut couper les étoiles brillantes. Asinh propose un autre étirement qui préserve les rapports de couleur.</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="43" />
+            <location filename="../qml/GuideWorkspace.qml" line="44" />
             <source>Live preview and before / after</source>
             <translation>Aperçu en direct et avant / après</translation>
         </message>
         <message>
-            <source>Live adjustment preview updates after you move a control and keeps the latest request. Disable it to use Apply adjustments instead. After an applied change, hold Compare to view the previous finishing settings; release to return. This compares consecutive finishes, not a raw exposure against the stack. Automatic starting point and Reset to linear remain available. Every finish starts from the linear integration, without accumulating stretches.</source>
+            <source>Live adjustment preview updates after you move a control and keeps the latest request. Disable it to use Apply adjustments instead. After an applied change, hold Compare to view the previous finishing settings; release to return. This compares consecutive finishes, not a raw exposure against the stack. Automatic starting point and Reset to linear remain available. The recipe is replayed from the linear integration. Applied transformations accumulate in their saved order; the current draft follows them.</source>
             <translation type="vanished">Aperçu des réglages en direct actualise l’image après un changement et conserve la dernière demande. Désactivez-le pour utiliser Appliquer les réglages. Après une modification appliquée, maintenez Comparer pour voir la finition précédente ; relâchez pour revenir. Cela compare deux finitions successives, pas une brute et l’empilement. Proposition automatique et Revenir au linéaire restent disponibles. Chaque finition repart de l’intégration linéaire, sans cumuler les étirements.</translation>
         </message>
         <message>
-            <source>Live adjustment preview updates after you move a control and keeps the latest request. Disable it to use Apply adjustments instead. After an applied change, hold Compare to view the previous finishing settings; release to return. This compares consecutive finishes. Choose a light frame in the comparison list and hold Raw exposure to compare that original against the finished stack. The raw preview has its own automatic stretch and original framing; exports still use the finished result. Automatic starting point and Reset to linear remain available. Every finish starts from the linear integration, without accumulating stretches.</source>
+            <source>Live adjustment preview updates after you move a control and keeps the latest request. Disable it to use Apply adjustments instead. After an applied change, hold Compare to view the previous finishing settings; release to return. This compares consecutive finishes. Choose a light frame in the comparison list and hold Raw exposure to compare that original against the finished stack. The raw preview has its own automatic stretch and original framing; exports still use the finished result. Automatic starting point and Reset to linear remain available. The recipe is replayed from the linear integration. Applied transformations accumulate in their saved order; the current draft follows them.</source>
             <translation type="vanished">Aperçu des réglages en direct actualise l’image après un changement et conserve la dernière demande. Désactivez-le pour utiliser Appliquer les réglages. Après une modification appliquée, maintenez Comparer pour voir la finition précédente ; relâchez pour revenir. Pour comparer une brute au résultat, choisissez une pose dans la liste et maintenez Pose brute. Son aperçu utilise son propre étirement automatique et son cadrage original ; l’export reste celui du résultat finalisé. Proposition automatique et Revenir au linéaire restent disponibles. Chaque finition repart de l’intégration linéaire, sans cumuler les étirements.</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="44" />
+            <location filename="../qml/GuideWorkspace.qml" line="46" />
             <source>Color, background and export</source>
             <translation>Couleur, fond et export</translation>
         </message>
         <message>
-            <source>Combine multiple filters as RGB, LRGB, SHO or HOO. Adjust color gains, saturation and smoothing manually. The initial gains estimate a neutral background; they are not photometric calibration. Planar gradient correction is optional and may affect extended nebulosity. Photometric calibration, GHS and deconvolution are not available yet. Export linear 32-bit FITS for further work, or the finished 16-bit TIFF or JPEG. Details and caption transfers the finished result to Processing.</source>
+            <source>Combine multiple filters as RGB, LRGB, SHO or HOO. Adjust color gains, saturation and smoothing manually. The initial gains estimate a neutral background; they are not photometric calibration. Planar gradient correction is optional and may affect extended nebulosity. Advanced transformations provides GHS, circular-PSF Richardson-Lucy, multiscale wavelet denoising, generated masks and local matched-reference photometric colors. Automatic astrometry, online catalogues and spectrophotometric calibration are not available. Export linear 32-bit FITS for further work, or the finished 16-bit TIFF or JPEG. Details and caption transfers the finished result to Processing.</source>
             <translation type="vanished">Combinez plusieurs filtres en RGB, LRGB, SHO ou HOO. Réglez manuellement les gains couleur, la saturation et le lissage. Les gains initiaux estiment un fond neutre ; ce n’est pas une calibration photométrique. La correction planaire du gradient est optionnelle et peut affecter les nébulosités étendues. La calibration photométrique, GHS et la déconvolution ne sont pas encore disponibles. Exportez un FITS linéaire 32 bits pour poursuivre le travail, ou un TIFF 16 bits ou JPEG finalisé. Détails et légende transfère le résultat finalisé vers Traitement.</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="46" />
+            <location filename="../qml/GuideWorkspace.qml" line="53" />
             <source>Capture and projects</source>
             <translation>Capture et projets</translation>
         </message>
@@ -1680,187 +2718,340 @@ L’aperçu est automatiquement éclairci ; les données restent linéaires.</tr
             <translation type="vanished">Dans Capture, choisissez Ciel profond · Série FITS, réglez la pose et le nombre d’images, puis lancez. Les données du capteur et les métadonnées sont enregistrées dans des FITS individuels. Le suivi de la monture et le guidage sont externes. Enregistrez un projet pour conserver les références et la sélection ; gardez les fichiers sources à leur emplacement.</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="39" />
+            <location filename="../qml/GuideWorkspace.qml" line="40" />
             <source>Choose the image type and Add files, or Import folder for a folder and its subfolders. Auto detects roles from metadata and names; verify and edit each role and filter in the image list. Add lights, darks, flats and dark flats for raw data. Raw mode is the default. Enable Lights already calibrated only for preprocessed files, such as calibrated iTelescope FITS. In the Siril tutorial, import Offsets_3s as Dark flats, not Bias. Keep the originals.</source>
             <translation>Choisissez le type d’image puis « Ajouter des fichiers », ou « Importer un dossier » pour inclure ses sous-dossiers. Auto détecte les types à partir des métadonnées et des noms ; vérifiez et corrigez chaque type et filtre dans la liste. Ajoutez brutes, darks, flats et darks de flats pour les données brutes. Le mode brut est activé par défaut. Activez « Brutes déjà calibrées » uniquement pour des fichiers prétraités, comme les FITS calibrés d’iTelescope. Dans le tutoriel Siril, importez Offsets_3s en darks de flats, pas en offsets. Conservez les originaux.</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="43" />
-            <source>Live adjustment preview updates after you move a control and keeps the latest request. Disable it to use Apply adjustments instead. Choose a light frame in the comparison list and hold Raw exposure to compare that original against the finished stack. The raw preview has its own automatic stretch and original framing; exports still use the finished result. Automatic starting point and Reset to linear remain available. Every finish starts from the linear integration, without accumulating stretches.</source>
+            <location filename="../qml/GuideWorkspace.qml" line="44" />
+            <source>Live adjustment preview updates after you move a control and keeps the latest request. Disable it to use Apply adjustments instead. Choose a light frame in the comparison list and hold Raw exposure to compare that original against the finished stack. The raw preview has its own automatic stretch and original framing; exports still use the finished result. Automatic starting point and Reset to linear remain available. The recipe is replayed from the linear integration. Applied transformations accumulate in their saved order; the current draft follows them.</source>
             <translation>L’aperçu automatique se met à jour après chaque réglage et conserve la dernière demande. Désactivez-le pour utiliser « Appliquer les réglages ». Choisissez une brute dans la liste de comparaison et maintenez « Pose brute » pour la comparer à l’empilement final. Elle garde son cadrage et son propre étirement automatique ; les exports utilisent toujours le résultat final. Le point de départ automatique et le retour au linéaire restent disponibles. Chaque ajustement repart de l’empilement linéaire, sans cumuler les étirements.</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="44" />
-            <source>Combine multiple filters as RGB, LRGB, SHO or HOO. Adjust color gains, saturation and smoothing manually. The initial gains estimate a neutral background; they are not photometric calibration. Planar gradient correction is optional and may affect extended nebulosity. Photometric calibration, GHS and deconvolution are not available yet. Export linear 32-bit FITS for further work, or the finished 16-bit TIFF or JPEG. Image finale offers TIFF or JPEG. Details and caption transfers the finished result to Processing with the accepted exposure count, total exposure time and filters for the technical caption.</source>
-            <translation>Composez plusieurs filtres en RGB, LRGB, SHO ou HOO. Ajustez les gains de couleur, la saturation et le lissage. Les gains initiaux estiment un fond neutre sans calibration photométrique. La correction de gradient plane est facultative et peut affecter les nébulosités étendues. La calibration photométrique, le GHS et la déconvolution ne sont pas encore disponibles. Exportez un FITS linéaire 32 bits pour poursuivre le travail, ou utilisez « Image finale » pour un TIFF 16 bits ou un JPEG. « Détails et légende » transmet le résultat à Traitement avec le nombre de poses acceptées, le temps de pose total et les filtres pour la légende technique.</translation>
+            <source>Combine multiple filters as RGB, LRGB, SHO or HOO. Adjust color gains, saturation and smoothing manually. The initial gains estimate a neutral background; they are not photometric calibration. Planar gradient correction is optional and may affect extended nebulosity. Advanced transformations provides GHS, circular-PSF Richardson-Lucy, multiscale wavelet denoising, generated masks and local matched-reference photometric colors. Automatic astrometry, online catalogues and spectrophotometric calibration are not available. Export linear 32-bit FITS for further work, or the finished 32-bit FITS, 16-bit TIFF or JPEG. Final FITS retains processed floating-point values; Linear FITS exports the original integration. Details and caption transfers the finished result to Processing with the accepted exposure count, total exposure time and filters for the technical caption.</source>
+            <translation type="vanished">Composez plusieurs filtres en RGB, LRGB, SHO ou HOO. Ajustez les gains de couleur, la saturation et le lissage. Les gains initiaux estiment un fond neutre sans calibration photométrique. La correction de gradient plane est facultative et peut affecter les nébulosités étendues. Transformations avancées propose GHS, Richardson–Lucy avec PSF circulaire, réduction du bruit multiéchelle, masques et couleurs photométriques par références locales. Astrométrie automatique, catalogues en ligne et calibration spectrophotométrique restent absents. Exportez un FITS linéaire 32 bits pour poursuivre le travail, ou utilisez « Image finale » pour un TIFF 16 bits ou un JPEG. « Détails et légende » transmet le résultat à Traitement avec le nombre de poses acceptées, le temps de pose total et les filtres pour la légende technique.</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="45" />
+            <location filename="../qml/GuideWorkspace.qml" line="52" />
             <source>Apple Silicon acceleration</source>
             <translation>Accélération Apple Silicon</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="45" />
+            <location filename="../qml/GuideWorkspace.qml" line="52" />
             <source>Large images use automatic GPU acceleration for stretch, color, smoothing and wavelets. Smaller images and unsupported operations keep the CPU. Original data and export precision stay unchanged. No extra setting is required.</source>
             <translation>Les grandes images utilisent automatiquement le processeur graphique pour l’étirement, les couleurs, le lissage et les ondelettes. Les petites images et les opérations non prises en charge restent sur le processeur central. Les originaux et la précision des exports sont préservés. Aucun réglage supplémentaire n’est nécessaire.</translation>
         </message>
-        <message><source>In Capture, choose Deep sky · FITS sequence, set the camera exposure and frame count, and start. Raw sensor samples and acquisition metadata are saved in individual FITS. Mount tracking and guiding remain external. Use the gear menu to open, save or clear a project. Saving preserves file references, frame selection, stack settings and finishing controls. Reopen the project and recreate the stack to reapply the saved finish, even with live preview disabled. Keep the source files in place.</source><translation>Dans Capture, choisissez Ciel profond · Séquence FITS, réglez l’exposition et le nombre de poses, puis lancez la capture. Les données brutes du capteur et les métadonnées sont enregistrées dans des FITS individuels. Le suivi et l’autoguidage restent externes. Le rouage permet d’ouvrir, enregistrer ou vider un projet. La sauvegarde conserve les références aux fichiers, la sélection, les paramètres d’empilement et de finition. Rouvrez le projet et recréez l’empilement pour réappliquer la finition sauvegardée, même sans aperçu automatique. Gardez les fichiers sources à leur emplacement.</translation></message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="47" />
+            <location filename="../qml/GuideWorkspace.qml" line="53" />
+            <source>In Capture, choose Deep sky · FITS sequence, set the camera exposure and frame count, and start. Raw sensor samples and acquisition metadata are saved in individual FITS. Mount tracking and guiding remain external. Use the gear menu to open, save or clear a project. Saving preserves file references, frame selection, stack settings and finishing controls. Reopen the project and recreate the stack to reapply the saved finish, even with live preview disabled. Keep the source files in place.</source>
+            <translation>Dans Capture, choisissez Ciel profond · Séquence FITS, réglez l’exposition et le nombre de poses, puis lancez la capture. Les données brutes du capteur et les métadonnées sont enregistrées dans des FITS individuels. Le suivi et l’autoguidage restent externes. Le rouage permet d’ouvrir, enregistrer ou vider un projet. La sauvegarde conserve les références aux fichiers, la sélection, les paramètres d’empilement et de finition. Rouvrez le projet et recréez l’empilement pour réappliquer la finition sauvegardée, même sans aperçu automatique. Gardez les fichiers sources à leur emplacement.</translation>
+        </message>
+        <message>
+            <location filename="../qml/GuideWorkspace.qml" line="54" />
             <source>Go to Deep sky</source>
             <translation>Aller à Ciel profond</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="48" />
+            <location filename="../qml/GuideWorkspace.qml" line="64" />
             <source>Mosaics</source>
             <translation>Mosaïques</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="48" />
+            <location filename="../qml/GuideWorkspace.qml" line="64" />
             <source>Build a wider view of the Moon or Sun</source>
             <translation>Reconstituer une vue plus large de la Lune ou du Soleil</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="49" />
+            <location filename="../qml/GuideWorkspace.qml" line="65" />
             <source>Photograph overlapping portions using the same setup and a consistent exposure. Aim for 25–40% overlap, with recognizable details shared between neighboring views.</source>
             <translation>Photographiez des portions qui se chevauchent, avec le même matériel et une exposition cohérente. Visez 25 à 40 % de recouvrement, avec des détails reconnaissables communs aux vues voisines.</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="51" />
+            <location filename="../qml/GuideWorkspace.qml" line="67" />
             <source>Prepare each portion</source>
             <translation>Préparer chaque portion</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="51" />
+            <location filename="../qml/GuideWorkspace.qml" line="67" />
             <source>For best results, record one SER per portion and stack each one. Export the portions as TIFF without captions and with similar, moderate sharpening. Add these TIFFs to Mosaic; PNG and JPEG also work.</source>
             <translation>Pour de meilleurs résultats, enregistrez un SER par portion et empilez chaque vidéo. Exportez les portions en TIFF sans légende, avec une accentuation similaire et modérée. Ajoutez ces TIFF dans Mosaïque ; les PNG et JPEG conviennent aussi.</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="52" />
+            <location filename="../qml/GuideWorkspace.qml" line="68" />
             <source>Select and assemble</source>
             <translation>Sélectionner et assembler</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="52" />
+            <location filename="../qml/GuideWorkspace.qml" line="68" />
             <source>Use the checkboxes to include or leave out images. Automatic exclusion retains the largest connected group and leaves other views visible, unchecked. At least two compatible views are needed. A smooth solar edge alone may not provide enough distinctive detail.</source>
             <translation>Cochez les images à utiliser et décochez celles à écarter. L’exclusion automatique conserve le plus grand groupe raccordable et laisse les autres vues visibles, décochées. Il faut au moins deux vues compatibles. Le contour lisse du Soleil peut ne pas fournir assez de détails distinctifs.</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="53" />
+            <location filename="../qml/GuideWorkspace.qml" line="69" />
             <source>Brightness and edges</source>
             <translation>Luminosité et contours</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="53" />
+            <location filename="../qml/GuideWorkspace.qml" line="69" />
             <source>Assembly options can balance exposure and soften the outer coverage boundary. Edge softening darkens a narrow strip and protects it from sharpening when sent to Processing. It does not fill missing areas or remove every internal seam.</source>
             <translation>Les options d’assemblage peuvent harmoniser l’exposition et adoucir la limite extérieure de la mosaïque. L’adoucissement assombrit une fine bande et la protège de l’accentuation lors du transfert dans Traitement. Il ne comble pas les zones manquantes et ne supprime pas tous les raccords internes.</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="54" />
+            <location filename="../qml/GuideWorkspace.qml" line="70" />
             <source>Finish once the mosaic is assembled</source>
             <translation>Retoucher après l’assemblage</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="54" />
+            <location filename="../qml/GuideWorkspace.qml" line="70" />
             <source>Send the result to Processing for the final wavelets and color adjustments. Add a caption and title at the end. The number of assembled images follows the mosaic into Processing. Exporting and reopening a TIFF does not restore the assembly settings or edge-protection mask.</source>
             <translation>Envoyez le résultat dans Traitement pour les derniers réglages d’ondelettes et de couleur. Ajoutez la légende et le titre à la fin. Le nombre d’images assemblées suit la mosaïque dans Traitement. Exporter puis rouvrir un TIFF ne restaure ni les réglages d’assemblage ni le masque de protection des bords.</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="55" />
+            <location filename="../qml/GuideWorkspace.qml" line="71" />
             <source>Go to Mosaic</source>
             <translation>Aller à Mosaïque</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="56" />
+            <location filename="../qml/GuideWorkspace.qml" line="72" />
             <source>Export and History</source>
             <translation>Export et historique</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="56" />
+            <location filename="../qml/GuideWorkspace.qml" line="72" />
             <source>Keep your originals and find your results</source>
             <translation>Conserver ses originaux et retrouver ses résultats</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="57" />
+            <location filename="../qml/GuideWorkspace.qml" line="73" />
             <source>Capture files and processed exports have separate destination folders in Settings. These choices are saved locally across application updates.</source>
             <translation>Les captures et les exports traités disposent de dossiers de destination distincts dans Paramètres. Ces choix sont conservés localement entre les mises à jour.</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="59" />
+            <location filename="../qml/GuideWorkspace.qml" line="75" />
             <source>Save a result</source>
             <translation>Enregistrer un résultat</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="59" />
+            <location filename="../qml/GuideWorkspace.qml" line="75" />
             <source>Export from Processing or Mosaic creates a TIFF. An imported source image is protected from overwriting; choose a different file name. Captions are optional, and their title appears above the caption text. Once exported, the caption is part of the image.</source>
             <translation>L’export depuis Traitement ou Mosaïque crée un TIFF. Une image source importée est protégée contre l’écrasement : choisissez un autre nom de fichier. La légende est facultative et son titre apparaît au-dessus du texte. Après l’export, la légende fait partie de l’image.</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="60" />
+            <location filename="../qml/GuideWorkspace.qml" line="76" />
             <source>What appears in History?</source>
             <translation>Qu’est-ce qui apparaît dans Historique ?</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="60" />
+            <location filename="../qml/GuideWorkspace.qml" line="76" />
             <source>With automatic history enabled, successful exports from Mosaic and Processing are added, including a mosaic finished in Processing. Capture snapshots are also remembered. Moving between tabs alone does not save an image.</source>
             <translation>Lorsque l’historique automatique est activé, les exports réussis de Mosaïque et Traitement y sont ajoutés, y compris une mosaïque retouchée dans Traitement. Les photos uniques de Capture sont aussi mémorisées. Changer d’onglet ne sauvegarde pas d’image.</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="61" />
+            <location filename="../qml/GuideWorkspace.qml" line="77" />
             <source>Paths, not duplicate files</source>
             <translation>Des chemins, sans copie des fichiers</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="61" />
+            <location filename="../qml/GuideWorkspace.qml" line="77" />
             <source>History remembers file locations. Saving again to the same path updates one entry; a new path creates another. You can import existing images, open them or reveal them in Finder. Removing an entry does not delete the image; missing paths are cleaned automatically.</source>
             <translation>L’historique mémorise l’emplacement des fichiers. Réenregistrer au même endroit actualise une entrée ; un nouveau chemin en crée une autre. Vous pouvez importer des images existantes, les ouvrir ou les afficher dans le Finder. Retirer une entrée ne supprime pas l’image ; les chemins introuvables sont nettoyés automatiquement.</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="62" />
+            <location filename="../qml/GuideWorkspace.qml" line="78" />
             <source>Keep enough to start again</source>
             <translation>Garder de quoi recommencer</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="62" />
+            <location filename="../qml/GuideWorkspace.qml" line="78" />
             <source>Keep the SER recordings and the uncaptioned image portions separately from your final exports. A TIFF preserves the image, not an editable project with its frame selection, wavelet settings or assembly history.</source>
             <translation>Conservez les SER et les portions sans légende séparément de vos exports finaux. Un TIFF conserve l’image, pas un projet modifiable contenant la sélection des prises, les réglages d’ondelettes ou l’historique d’assemblage.</translation>
         </message>
         <message>
-            <location filename="../qml/GuideWorkspace.qml" line="63" />
+            <location filename="../qml/GuideWorkspace.qml" line="79" />
             <source>Go to History</source>
             <translation>Aller à Historique</translation>
         </message>
-    <message><source>Judge your result</source><translation>Évaluer son résultat</translation></message>
-<message><source>Reveal detail while preserving the image</source><translation>Révéler les détails en préservant l’image</translation></message>
-<message><source>There is no universal ideal setting. Judge the whole image, then inspect it at 100%. The histogram and comparisons help you spot lost information and processing artifacts.</source><translation>Il n’existe pas de réglage idéal universel. Examinez l’image entière, puis à 100 %. L’histogramme et les comparaisons aident à repérer les informations perdues et les artefacts du traitement.</translation></message>
-<message><source>Background and faint detail</source><translation>Fond du ciel et détails faibles</translation></message>
-<message><source>Keep smooth transitions and faint structures. Some fine noise is acceptable. A completely black background can hide nebulosity; heavy smoothing can erase detail or create a plastic appearance. A real nebula may extend across the field: do not force the entire background to be uniform.</source><translation>Conservez les transitions douces et les structures faibles. Un léger grain est acceptable. Un fond totalement noir peut masquer des nébulosités ; un lissage excessif peut effacer des détails ou donner un aspect plastique. Une nébuleuse peut occuper tout le champ : ne cherchez pas à uniformiser tout le fond.</translation></message>
-<message><source>Highlights and histogram</source><translation>Hautes lumières et histogramme</translation></message>
-<message><source>Watch the clipping estimates as you adjust black and white. Avoid removing faint data or turning bright stars and object cores into featureless white areas. The histogram shape depends on the object and framing; there is no universal target shape. Detail already saturated during capture cannot be recovered by lowering brightness.</source><translation>Surveillez les estimations d’écrêtage en réglant le noir et le blanc. Évitez de supprimer le signal faible ou de transformer les étoiles brillantes et les cœurs en zones blanches sans nuances. La forme de l’histogramme dépend de l’objet et du cadrage : aucune forme idéale ne convient à toutes les images. Diminuer la luminosité ne restaure pas un détail déjà saturé à la capture.</translation></message>
-<message><source>Sharpness and color</source><translation>Netteté et couleurs</translation></message>
-<message><source>Increase wavelets gradually. At 100%, check for amplified grain, bright or dark halos, rings and doubled edges around stars, planets and craters. Check that saturation preserves color differences. RGB and narrowband palettes have different goals: SHO or HOO colors do not need to resemble natural RGB colors.</source><translation>Augmentez progressivement les ondelettes. À 100 %, recherchez le grain amplifié, les halos clairs ou sombres, les anneaux et les contours doubles autour des étoiles, des planètes et des cratères. Vérifiez que la saturation conserve les nuances de couleur. Le RVB et les palettes à bande étroite ont des objectifs différents : les couleurs SHO ou HOO n’ont pas à ressembler aux couleurs naturelles RVB.</translation></message>
-<message><source>A practical comparison</source><translation>Une comparaison pratique</translation></message>
-<message><source>Change one control at a time. Compare with a less processed version at similar brightness. Inspect a faint area, a bright area and a detailed area at 100%, then return to the whole image. Reduce the last adjustment slightly: if artifacts disappear while useful detail remains, keep the gentler setting. The deep-sky raw comparison uses independent stretching and original framing; it is a visual reference, not a numerical noise measurement.</source><translation>Modifiez un seul réglage à la fois. Comparez avec une version moins traitée à luminosité similaire. Examinez à 100 % une zone faible, une zone lumineuse et une zone riche en détails, puis revenez à l’image entière. Diminuez légèrement le dernier réglage : si les artefacts disparaissent et que les détails utiles restent, gardez la valeur plus douce. La comparaison avec une brute du ciel profond utilise un étirement indépendant et le cadrage original : c’est un repère visuel, pas une mesure numérique du bruit.</translation></message>
-<message><source>More contrast is not more signal</source><translation>Le contraste ne crée pas de signal</translation></message>
-<message><source>Stacking can improve signal-to-noise ratio. Stretching makes existing signal visible, and sharpening can amplify both detail and noise. No single sharpness score proves that a finished image is good. Keep the originals and the linear FITS so you can revisit your choices.</source><translation>L’empilement peut améliorer le rapport signal/bruit. L’étirement rend visible le signal existant, et l’accentuation peut amplifier les détails comme le bruit. Aucun score de netteté ne prouve à lui seul la qualité d’une image finale. Conservez les originaux et le FITS linéaire pour pouvoir reprendre vos choix.</translation></message>
-<message><source>Presets, undo and versions A/B</source><translation>Préréglages, annulation et versions A/B</translation></message>
-<message><source>In Finish and export, load or manage your named finishing presets. Save with a new name to duplicate a preset; Replace updates an existing name. Presets contain stretch, levels, color, background and smoothing, but no calibration files or channel composition. Check the histogram because absolute levels depend on the data. Undo and Redo operate separately in A and B; a slider drag is one change. Switch versions to compare two finishes on the same linear stack and framing. Enlarge preview temporarily hides histograms and the image list; Show histograms restores them. Copy duplicates settings into the other version. The final export uses the selected, applied version. With live preview off, apply pending settings before export. Projects save both versions and the selected version, but not undo histories. A new stack or channel composition resets both versions and their histories.</source><translation>Dans Finition et export, chargez ou gérez vos préréglages de finition nommés. Un nouveau nom duplique un préréglage ; Remplacer met à jour un nom existant. Les préréglages conservent l’étirement, les niveaux, les couleurs, le fond et le lissage, sans fichiers de calibration ni composition des canaux. Vérifiez l’histogramme : les niveaux absolus dépendent des données. Annuler et Rétablir fonctionnent séparément dans A et B ; un déplacement de curseur compte comme une modification. Basculez entre les versions pour comparer deux finitions du même empilement linéaire et du même cadrage. Agrandir l’aperçu masque temporairement les histogrammes et la liste ; Afficher les histogrammes les rétablit. Copier duplique les réglages dans l’autre version. L’export final utilise la version sélectionnée et appliquée. Sans aperçu automatique, appliquez les réglages en attente avant l’export. Les projets conservent les deux versions et la version sélectionnée, mais pas les historiques d’annulation. Un nouvel empilement ou une nouvelle composition des canaux réinitialise les deux versions et leurs historiques.</translation></message>
-    <message>
-        <source>Use the Deep sky workspace for FITS or Bayer RAW sequences. The source samples remain linear. Color preview debayers Bayer sensor data; Auto display stretch only changes their visibility. Disable these options to inspect the raw mosaic or linear brightness. Calibration always reads the original file.</source>
-        <translation>Utilisez Ciel profond pour les séquences FITS ou RAW Bayer. Les données sources restent linéaires. Aperçu couleur dématrice le capteur ; l’étirement d’affichage ne change que leur visibilité. Désactivez ces options pour inspecter la mosaïque brute ou la luminosité linéaire. La calibration lit toujours le fichier original.</translation>
-    </message>
-    <message>
-        <source>Transformation workshop</source>
-        <translation>Atelier de transformations</translation>
-    </message>
-    <message>
-        <source>Select Stretch, Background, Color and noise, or Orientation. Controls preview a draft. Apply draft as a transformation commits the complete draft, then resets controls so further adjustments operate on its output. Repeat stretches if needed. The ordered list lets you edit, disable, move up or remove transformations. During editing, Apply replaces the selected transformation and recalculates later ones; Cancel restores the complete previous recipe. Undo and redo also restore operations. Projects and presets retain recipes, not full image copies for each history step. Linear FITS always exports the original integration.</source>
-        <translation>Choisissez Étirement, Fond de ciel, Couleur et bruit, ou Orientation. Les réglages prévisualisent un brouillon. Appliquer le brouillon comme transformation le valide et réinitialise les commandes ; les réglages suivants agissent sur son résultat. Vous pouvez cumuler les étirements. La liste permet de modifier, désactiver, remonter ou supprimer une transformation. Pendant l’édition, Appliquer remplace la transformation puis recalcule les suivantes ; Annuler restaure la recette précédente. Les projets et préréglages conservent les recettes ; l’historique n’accumule pas les copies d’images. Le FITS linéaire exporte l’intégration source.</translation>
-    </message>
-    <message>
-        <source>Combine multiple filters as RGB, LRGB, SHO or HOO. Adjust color gains, saturation and smoothing manually. The initial gains estimate a neutral background; they are not photometric calibration. Gradient extraction uses independent color-channel polynomials (degrees 1 to 4), a configurable grid and manually editable sky samples. Optional degree-1 extraction can run on each calibrated, debayered exposure before stacking. Avoid fitting real nebulosity. Green noise reduction offers four SCNR protection methods and optional CIE lightness preservation. Use it after stretching and color balance; intentional green colors should be preserved. Photometric calibration, GHS and deconvolution are not available yet. Export linear 32-bit FITS for further work, or the finished 16-bit TIFF or JPEG. Image finale offers TIFF or JPEG. Details and caption transfers the finished result to Processing with the accepted exposure count, total exposure time and filters for the technical caption.</source>
-        <translation>Composez les filtres en RGB, LRGB, SHO ou HOO. Réglez les gains, la saturation et le lissage. Les gains initiaux estiment un fond neutre : ce n’est pas un étalonnage photométrique. Le gradient utilise des polynômes par couche, d’ordre 1 à 4, une grille réglable et des échantillons modifiables. Une correction facultative d’ordre 1 peut traiter chaque pose calibrée et dématricée avant empilement. Protégez les vraies nébulosités. Le SCNR offre quatre protections et la préservation CIE de luminosité ; utilisez-le après étirement et équilibrage, en préservant les verts intentionnels. Photométrie, GHS et déconvolution restent à ajouter. Exportez le FITS linéaire 32 bits, ou l’image finale en TIFF 16 bits ou JPEG. Détails et légende transmet les poses retenues, leur durée totale et les filtres au traitement.</translation>
-    </message>
+        <message>
+            <location filename="../qml/GuideWorkspace.qml" line="55" />
+            <source>Judge your result</source>
+            <translation>Évaluer son résultat</translation>
+        </message>
+        <message>
+            <location filename="../qml/GuideWorkspace.qml" line="46" />
+            <source>Combine multiple filters as RGB, LRGB, SHO or HOO. Adjust color gains, saturation and smoothing manually. The initial gains estimate a neutral background; they are not photometric calibration. Gradient extraction uses independent color-channel polynomials (degrees 1 to 4), a configurable grid and manually editable sky samples. Optional degree-1 extraction can run on each calibrated, debayered exposure before stacking. Avoid fitting real nebulosity. Green noise reduction offers four SCNR protection methods and optional CIE lightness preservation. Use it after stretching and color balance; intentional green colors should be preserved. Advanced transformations provides GHS, circular-PSF Richardson-Lucy, multiscale wavelet denoising, generated masks and local matched-reference photometric colors. Automatic astrometry, online catalogues and spectrophotometric calibration are not available. Export linear 32-bit FITS for further work, or the finished 32-bit FITS, 16-bit TIFF or JPEG. Final FITS retains processed floating-point values; Linear FITS exports the original integration. Details and caption opens the shared editor directly, with a preview and TIFF export. The technical caption includes the accepted exposure count, total exposure time and filters. Deep-sky caption settings are saved in the project.</source>
+            <translation>Combinez les filtres en RGB, LRGB, SHO ou HOO. Réglez les gains, la saturation et le lissage manuellement. Les gains initiaux neutralisent approximativement le fond ; ce n’est pas une calibration photométrique. Le gradient est ajusté par couche, avec polynôme de degré 1 à 4, grille et échantillons manuels. Une extraction de degré 1 peut être appliquée à chaque pose calibrée et dématricée avant empilement ; évitez de modéliser la nébulosité réelle. SCNR réduit la dominance verte après étirement ; préservez les couleurs vertes intentionnelles. Les outils avancés proposent GHS, Richardson–Lucy avec PSF circulaire, réduction du bruit multiéchelle, masques générés et calibration couleur par références locales associées. Astrométrie automatique, catalogues en ligne et calibration spectrophotométrique restent absents. Exportez l’intégration originale en FITS linéaire 32 bits, ou le résultat traité en FITS 32 bits, TIFF 16 bits ou JPEG. Détails et légende ouvre directement l’éditeur commun avec aperçu et export TIFF. La légende technique inclut les poses acceptées, le temps total et les filtres. Les réglages de légende sont enregistrés dans le projet.</translation>
+        </message>
+        <message>
+            <location filename="../qml/GuideWorkspace.qml" line="47" />
+            <source>GHS: controlled contrast</source>
+            <translation type="unfinished">GHS : contrôler le contraste</translation>
+        </message>
+        <message>
+            <location filename="../qml/GuideWorkspace.qml" line="47" />
+            <source>Enable GHS in Advanced transformations; it enables stretch and replaces midtones/asinh. Start with low strength, place SP near the intensity of interest, then adjust local intensity b. LP ≤ SP ≤ HP controls tangent extensions for shadows and highlights. The curve shows normalized input versus output; gray is identity. Independent RGB and shared-luminance RGB blending have different color behavior. Inverse reverses the scalar curve, not clipping, masks or color blending. Commit small successive transformations.</source>
+            <translation type="unfinished">Activez le GHS dans Transformations avancées : il active l’étirement et remplace tons moyens/asinh. Commencez avec une faible force, placez SP près de l’intensité visée puis ajustez b. LP ≤ SP ≤ HP contrôle les tangentes des ombres et hautes lumières. La courbe montre entrée et sortie normalisées ; le gris est neutre. RVB indépendant et luminance commune avec mélange RVB modifient différemment les couleurs. L’inverse renverse la courbe scalaire, pas l’écrêtage, les masques ou le mélange des couleurs. Ajustez progressivement la force.</translation>
+        </message>
+        <message>
+            <location filename="../qml/GuideWorkspace.qml" line="48" />
+            <source>PSF and restoration</source>
+            <translation type="unfinished">PSF et restauration</translation>
+        </message>
+        <message>
+            <location filename="../qml/GuideWorkspace.qml" line="48" />
+            <source>Work on an unstretched, unrotated recipe input. Measure central stars, review the FWHM and scatter, then explicitly use the Gaussian estimate; Moffat beta remains manual. PSF preview is display-scaled, while its linear kernel sums to 1. Richardson-Lucy restores weighted luminance with a shared RGB factor. Start with 10 iterations, damping 0.001 and stopping 0.0001 in normalized image units. Compare at 100%; rings and amplified noise mean the correction is too strong. Negative input is rejected. An explicit pedestal is available and remains in the result. It is residual-damped restoration, not blind or spatially varying deconvolution.</source>
+            <translation type="unfinished">Travaillez sur une entrée de recette non étirée et non tournée. Mesurez les étoiles centrales, contrôlez FWHM et dispersion puis utilisez explicitement l’estimation gaussienne ; le β Moffat reste manuel. L’aperçu de PSF est réétalonné pour l’affichage ; le noyau linéaire a une somme de 1. Richardson–Lucy restaure la luminance pondérée avec un facteur RVB commun. Commencez à 10 itérations, amortissement 0,001 et arrêt 0,0001 en unités normalisées. Comparez à 100 % : anneaux et bruit amplifié indiquent un traitement trop fort. Les valeurs négatives sont refusées. Un piédestal explicite est disponible et reste dans le résultat. Ce n’est pas une déconvolution aveugle ni variable dans le champ.</translation>
+        </message>
+        <message>
+            <location filename="../qml/GuideWorkspace.qml" line="49" />
+            <source>Denoising and masks</source>
+            <translation type="unfinished">Bruit et masques</translation>
+        </message>
+        <message>
+            <location filename="../qml/GuideWorkspace.qml" line="49" />
+            <source>Multiscale denoising uses a B3-spline à trous decomposition and soft thresholds from per-scale MAD, with separate luminance and chroma strengths. Start with 3 scales, threshold 3, and strengths 0.5. The noise estimate is a diagnostic, not a quality score. Prefer it before stretch and restoration. Luminance, radial and detected-star masks select where the complete draft applies: white processes, black protects, gray blends. Inspect the mask; inverted star masks protect only detected stars. Masks are regenerated from each operation input, applied after processing, and saved as parameters. They are not brush masks or imported bitmap masks.</source>
+            <translation type="unfinished">La réduction multiéchelle utilise une décomposition à trous par B3-spline et des seuils doux issus de la MAD à chaque échelle, avec intensités séparées pour luminance et chrominance. Commencez avec 3 échelles, seuil 3 et intensités 0,5. L’estimation du bruit est un diagnostic, pas un score de qualité. Préférez-la avant étirement et restauration. Les masques de luminance, circulaires et stellaires sélectionnent où appliquer tout le brouillon : blanc traite, noir protège, gris mélange. Inspectez le masque ; les masques stellaires inversés ne protègent que les étoiles détectées. Chaque masque est régénéré sur l’entrée de son opération, appliqué après calcul et sauvegardé par paramètres. Ce ne sont pas des masques au pinceau ni des images importées.</translation>
+        </message>
+        <message>
+            <location filename="../qml/GuideWorkspace.qml" line="50" />
+            <source>Local photometric references</source>
+            <translation type="unfinished">Références photométriques locales</translation>
+        </message>
+        <message>
+            <location filename="../qml/GuideWorkspace.qml" line="50" />
+            <source>Use linear broadband RGB and a CSV with header x,y,red,green,blue. Supply at least three already-matched stars, zero-based pixel coordinates from the top left, and positive reference fluxes for the intended filters. This does not identify stars or download a catalogue. Aperture photometry subtracts local annulus medians; saturated, edge and inconsistent references are rejected. Median log color ratios produce R/B gains relative to green. Inspect the accepted count, gains and residual scatter. Aperture/annulus defaults are 5/8/12 pixels and saturation 1; adapt them to your stars and data scale. This is relative color calibration, not absolute or spectrophotometric calibration. References are image-specific even when saved in a preset.</source>
+            <translation type="unfinished">Utilisez un RVB linéaire à bande large et un CSV avec l’en-tête x,y,red,green,blue. Fournissez au moins trois étoiles déjà associées, des coordonnées en pixels partant de zéro en haut à gauche et des flux de référence positifs pour les filtres visés. Aucun catalogue n’est téléchargé et aucune étoile n’est identifiée automatiquement. La photométrie d’ouverture retire la médiane locale de l’anneau ; références saturées, proches des bords ou incohérentes sont rejetées. La médiane des rapports logarithmiques donne les gains R/B relatifs au vert. Contrôlez nombre accepté, gains et dispersion. Ouverture/anneau : 5/8/12 pixels par défaut, saturation 1 ; adaptez-les aux étoiles et à l’échelle. Ce n’est ni une calibration absolue ni spectrophotométrique. Les références restent propres à une image, même dans un préréglage.</translation>
+        </message>
+        <message>
+            <location filename="../qml/GuideWorkspace.qml" line="51" />
+            <source>Presets and undo</source>
+            <translation>Préréglages et annulation</translation>
+        </message>
+        <message>
+            <location filename="../qml/GuideWorkspace.qml" line="51" />
+            <source>In Finish, choose an adjustment family from the dropdown. Reset this family changes only its draft controls; Undo last change restores the previous state, and Restore undone change repeats an undone action. Presets opens a single window to save, replace, delete or restore the complete finishing recipe, including every family and advanced tools. Imported files and stacking settings are excluded. Check absolute histogram levels after loading. Export is available beside the project gear: Final image includes finishing; Linear FITS preserves the integration before finishing. An individual source preview never replaces the exported stack. With live preview off, apply pending settings before final export.</source>
+            <translation>Dans Finition, choisissez une famille dans le menu déroulant. « Réinitialiser cette famille » remet uniquement ses réglages de brouillon à zéro. « Annuler la dernière modification » revient en arrière ; « Rétablir la modification annulée » répète l’action annulée. Préréglages ouvre une seule fenêtre pour enregistrer, remplacer, supprimer ou restaurer toute la recette de finition, avec toutes les familles et les outils avancés. Les fichiers importés et les réglages d’empilement sont exclus. Vérifiez les niveaux de l’histogramme après restauration. Exporter se trouve à côté du rouage : Image finale inclut les retouches ; FITS linéaire conserve l’empilement avant finition. L’aperçu d’une pose source ne remplace jamais le résultat exporté. Sans aperçu automatique, appliquez les réglages en attente avant l’export final.</translation>
+        </message>
+        <message>
+            <location filename="../qml/GuideWorkspace.qml" line="55" />
+            <source>Reveal detail while preserving the image</source>
+            <translation>Révéler les détails en préservant l’image</translation>
+        </message>
+        <message>
+            <location filename="../qml/GuideWorkspace.qml" line="56" />
+            <source>There is no universal ideal setting. Judge the whole image, then inspect it at 100%. The histogram and comparisons help you spot lost information and processing artifacts.</source>
+            <translation>Il n’existe pas de réglage idéal universel. Examinez l’image entière, puis à 100 %. L’histogramme et les comparaisons aident à repérer les informations perdues et les artefacts du traitement.</translation>
+        </message>
+        <message>
+            <location filename="../qml/GuideWorkspace.qml" line="58" />
+            <source>Background and faint detail</source>
+            <translation>Fond du ciel et détails faibles</translation>
+        </message>
+        <message>
+            <location filename="../qml/GuideWorkspace.qml" line="58" />
+            <source>Keep smooth transitions and faint structures. Some fine noise is acceptable. A completely black background can hide nebulosity; heavy smoothing can erase detail or create a plastic appearance. A real nebula may extend across the field: do not force the entire background to be uniform.</source>
+            <translation>Conservez les transitions douces et les structures faibles. Un léger grain est acceptable. Un fond totalement noir peut masquer des nébulosités ; un lissage excessif peut effacer des détails ou donner un aspect plastique. Une nébuleuse peut occuper tout le champ : ne cherchez pas à uniformiser tout le fond.</translation>
+        </message>
+        <message>
+            <location filename="../qml/GuideWorkspace.qml" line="59" />
+            <source>Highlights and histogram</source>
+            <translation>Hautes lumières et histogramme</translation>
+        </message>
+        <message>
+            <location filename="../qml/GuideWorkspace.qml" line="59" />
+            <source>Watch the clipping estimates as you adjust black and white. Avoid removing faint data or turning bright stars and object cores into featureless white areas. The histogram shape depends on the object and framing; there is no universal target shape. Detail already saturated during capture cannot be recovered by lowering brightness.</source>
+            <translation>Surveillez les estimations d’écrêtage en réglant le noir et le blanc. Évitez de supprimer le signal faible ou de transformer les étoiles brillantes et les cœurs en zones blanches sans nuances. La forme de l’histogramme dépend de l’objet et du cadrage : aucune forme idéale ne convient à toutes les images. Diminuer la luminosité ne restaure pas un détail déjà saturé à la capture.</translation>
+        </message>
+        <message>
+            <location filename="../qml/GuideWorkspace.qml" line="60" />
+            <source>Sharpness and color</source>
+            <translation>Netteté et couleurs</translation>
+        </message>
+        <message>
+            <location filename="../qml/GuideWorkspace.qml" line="60" />
+            <source>Increase wavelets gradually. At 100%, check for amplified grain, bright or dark halos, rings and doubled edges around stars, planets and craters. Check that saturation preserves color differences. RGB and narrowband palettes have different goals: SHO or HOO colors do not need to resemble natural RGB colors.</source>
+            <translation>Augmentez progressivement les ondelettes. À 100 %, recherchez le grain amplifié, les halos clairs ou sombres, les anneaux et les contours doubles autour des étoiles, des planètes et des cratères. Vérifiez que la saturation conserve les nuances de couleur. Le RVB et les palettes à bande étroite ont des objectifs différents : les couleurs SHO ou HOO n’ont pas à ressembler aux couleurs naturelles RVB.</translation>
+        </message>
+        <message>
+            <location filename="../qml/GuideWorkspace.qml" line="61" />
+            <source>A practical comparison</source>
+            <translation>Une comparaison pratique</translation>
+        </message>
+        <message>
+            <location filename="../qml/GuideWorkspace.qml" line="61" />
+            <source>Change one control at a time. Compare with a less processed version at similar brightness. Inspect a faint area, a bright area and a detailed area at 100%, then return to the whole image. Reduce the last adjustment slightly: if artifacts disappear while useful detail remains, keep the gentler setting. The deep-sky raw comparison uses independent stretching and original framing; it is a visual reference, not a numerical noise measurement.</source>
+            <translation>Modifiez un seul réglage à la fois. Comparez avec une version moins traitée à luminosité similaire. Examinez à 100 % une zone faible, une zone lumineuse et une zone riche en détails, puis revenez à l’image entière. Diminuez légèrement le dernier réglage : si les artefacts disparaissent et que les détails utiles restent, gardez la valeur plus douce. La comparaison avec une brute du ciel profond utilise un étirement indépendant et le cadrage original : c’est un repère visuel, pas une mesure numérique du bruit.</translation>
+        </message>
+        <message>
+            <location filename="../qml/GuideWorkspace.qml" line="62" />
+            <source>More contrast is not more signal</source>
+            <translation>Le contraste ne crée pas de signal</translation>
+        </message>
+        <message>
+            <location filename="../qml/GuideWorkspace.qml" line="62" />
+            <source>Stacking can improve signal-to-noise ratio. Stretching makes existing signal visible, and sharpening can amplify both detail and noise. No single sharpness score proves that a finished image is good. Keep the originals and the linear FITS so you can revisit your choices.</source>
+            <translation>L’empilement peut améliorer le rapport signal/bruit. L’étirement rend visible le signal existant, et l’accentuation peut amplifier les détails comme le bruit. Aucun score de netteté ne prouve à lui seul la qualité d’une image finale. Conservez les originaux et le FITS linéaire pour pouvoir reprendre vos choix.</translation>
+        </message>
+        <message>
+            <source>Presets, undo and versions A/B</source>
+            <translation type="vanished">Préréglages, annulation et versions A/B</translation>
+        </message>
+        <message>
+            <source>In Finish and export, load or manage your named finishing presets. Save with a new name to duplicate a preset; Replace updates an existing name. Presets contain stretch, levels, color, background and smoothing, but no calibration files or channel composition. Check the histogram because absolute levels depend on the data. Undo and Redo operate separately in A and B; a slider drag is one change. Switch versions to compare two finishes on the same linear stack and framing. Enlarge preview temporarily hides histograms and the image list; Show histograms restores them. Copy duplicates settings into the other version. The final export uses the selected, applied version. With live preview off, apply pending settings before export. Projects save both versions and the selected version, but not undo histories. A new stack or channel composition resets both versions and their histories.</source>
+            <translation type="vanished">Dans Finition et export, chargez ou gérez vos préréglages de finition nommés. Un nouveau nom duplique un préréglage ; Remplacer met à jour un nom existant. Les préréglages conservent l’étirement, les niveaux, les couleurs, le fond et le lissage, sans fichiers de calibration ni composition des canaux. Vérifiez l’histogramme : les niveaux absolus dépendent des données. Annuler et Rétablir fonctionnent séparément dans A et B ; un déplacement de curseur compte comme une modification. Basculez entre les versions pour comparer deux finitions du même empilement linéaire et du même cadrage. Agrandir l’aperçu masque temporairement les histogrammes et la liste ; Afficher les histogrammes les rétablit. Copier duplique les réglages dans l’autre version. L’export final utilise la version sélectionnée et appliquée. Sans aperçu automatique, appliquez les réglages en attente avant l’export. Les projets conservent les deux versions et la version sélectionnée, mais pas les historiques d’annulation. Un nouvel empilement ou une nouvelle composition des canaux réinitialise les deux versions et leurs historiques.</translation>
+        </message>
+        <message>
+            <location filename="../qml/GuideWorkspace.qml" line="38" />
+            <source>Use the Deep sky workspace for FITS or Bayer RAW sequences. The source samples remain linear. Color preview debayers Bayer sensor data; Auto display stretch only changes their visibility. Disable these options to inspect the raw mosaic or linear brightness. Calibration always reads the original file.</source>
+            <translation>Utilisez Ciel profond pour les séquences FITS ou RAW Bayer. Les données sources restent linéaires. Aperçu couleur dématrice le capteur ; l’étirement d’affichage ne change que leur visibilité. Désactivez ces options pour inspecter la mosaïque brute ou la luminosité linéaire. La calibration lit toujours le fichier original.</translation>
+        </message>
+        <message>
+            <location filename="../qml/GuideWorkspace.qml" line="45" />
+            <source>Transformation workshop</source>
+            <translation>Atelier de transformations</translation>
+        </message>
+        <message>
+            <location filename="../qml/GuideWorkspace.qml" line="45" />
+            <source>Select Stretch, Background, Color and noise, or Orientation. Controls preview a draft. Apply draft as a transformation commits the complete draft, then resets controls so further adjustments operate on its output. Repeat stretches if needed. The ordered list lets you edit, disable, move up or remove transformations. During editing, Apply replaces the selected transformation and recalculates later ones; Cancel restores the complete previous recipe. Undo and redo also restore operations. Projects and presets retain recipes, not full image copies for each history step. Linear FITS always exports the original integration.</source>
+            <translation>Choisissez Étirement, Fond de ciel, Couleur et bruit, ou Orientation. Les réglages prévisualisent un brouillon. Appliquer le brouillon comme transformation le valide et réinitialise les commandes ; les réglages suivants agissent sur son résultat. Vous pouvez cumuler les étirements. La liste permet de modifier, désactiver, remonter ou supprimer une transformation. Pendant l’édition, Appliquer remplace la transformation puis recalcule les suivantes ; Annuler restaure la recette précédente. Les projets et préréglages conservent les recettes ; l’historique n’accumule pas les copies d’images. Le FITS linéaire exporte l’intégration source.</translation>
+        </message>
+        <message>
+            <source>Combine multiple filters as RGB, LRGB, SHO or HOO. Adjust color gains, saturation and smoothing manually. The initial gains estimate a neutral background; they are not photometric calibration. Gradient extraction uses independent color-channel polynomials (degrees 1 to 4), a configurable grid and manually editable sky samples. Optional degree-1 extraction can run on each calibrated, debayered exposure before stacking. Avoid fitting real nebulosity. Green noise reduction offers four SCNR protection methods and optional CIE lightness preservation. Use it after stretching and color balance; intentional green colors should be preserved. Advanced transformations provides GHS, circular-PSF Richardson-Lucy, multiscale wavelet denoising, generated masks and local matched-reference photometric colors. Automatic astrometry, online catalogues and spectrophotometric calibration are not available. Export linear 32-bit FITS for further work, or the finished 32-bit FITS, 16-bit TIFF or JPEG. Final FITS retains processed floating-point values; Linear FITS exports the original integration. Details and caption transfers the finished result to Processing with the accepted exposure count, total exposure time and filters for the technical caption.</source>
+            <translation type="vanished">Composez les filtres en RVB, LRGB, SHO ou HOO. Ajustez gains, saturation et lissage ; les gains initiaux neutralisent le fond sans calibration photométrique. Le gradient ajuste chaque canal par un polynôme de degré 1 à 4, avec grille réglable et échantillons de ciel éditables. Une correction de degré 1 peut agir sur chaque pose calibrée et dématricée avant empilement. Évitez de modéliser la nébulosité réelle. La suppression du vert propose quatre protections SCNR et la préservation de luminosité CIE ; utilisez-la après étirement et balance, en conservant les couleurs vertes intentionnelles. Transformations avancées propose GHS, Richardson–Lucy à PSF circulaire, bruit multiéchelle, masques générés et calibration couleur par références locales associées. Astrométrie automatique, catalogues en ligne et calibration spectrophotométrique restent absents. Exportez l’intégration originale en FITS linéaire 32 bits, ou le résultat traité en FITS 32 bits, TIFF 16 bits ou JPEG. Détails et légende transmet le résultat avec poses acceptées, temps total et filtres.</translation>
+        </message>
+            <message>
+            <source>Adjustments update automatically after you move a control. Choose a light in the comparison list and hold Raw exposure to compare it with the finished stack. Exports use the finished stack.</source>
+            <translation>Les réglages s’actualisent automatiquement après chaque modification. Choisissez une pose dans la liste de comparaison et maintenez Pose brute pour la comparer à l’empilement finalisé. Les exports utilisent l’empilement finalisé.</translation>
+        </message>
+        <message>
+            <source>Finishing adjustments</source>
+            <translation>Réglages de finition</translation>
+        </message>
+        <message>
+            <source>Choose Stretch, Background, Color and noise, Orientation or Advanced transformations. Changes apply automatically. Delete these adjustments resets only the selected family. Use Cmd+Z to undo. Projects preserve all finishing settings.</source>
+            <translation>Choisissez Étirement, Fond de ciel, Couleur et bruit, Orientation ou Transformations avancées. Les modifications s’appliquent automatiquement. Supprimer ces réglages réinitialise uniquement la famille sélectionnée. Utilisez Cmd+Z pour annuler. Les projets conservent tous les réglages de finition.</translation>
+        </message>
+        <message>
+            <source>Enable GHS in Advanced transformations; it enables stretch and replaces midtones/asinh. Start with low strength, place SP near the intensity of interest, then adjust local intensity b. LP ≤ SP ≤ HP controls tangent extensions for shadows and highlights. The curve shows normalized input versus output; gray is identity. Independent RGB and shared-luminance RGB blending have different color behavior. Inverse reverses the scalar curve, not clipping, masks or color blending. Adjust the strength gradually.</source>
+            <translation>Activez le GHS dans Transformations avancées : il active l’étirement et remplace tons moyens/asinh. Commencez avec une faible force, placez SP près de l’intensité visée puis ajustez b. LP ≤ SP ≤ HP contrôle les tangentes des ombres et hautes lumières. La courbe montre entrée et sortie normalisées ; le gris est neutre. RVB indépendant et luminance commune avec mélange RVB modifient différemment les couleurs. L’inverse renverse la courbe scalaire, pas l’écrêtage, les masques ou le mélange des couleurs. Ajustez progressivement la force.</translation>
+        </message>
+        <message>
+            <source>Multiscale denoising uses a B3-spline à trous decomposition and soft thresholds from per-scale MAD, with separate luminance and chroma strengths. Start with 3 scales, threshold 3, and strengths 0.5. The noise estimate is a diagnostic, not a quality score. Prefer it before stretch and restoration. Luminance, radial and detected-star masks select where the adjustments applies: white processes, black protects, gray blends. Inspect the mask; inverted star masks protect only detected stars. Masks are regenerated from each operation input, applied after processing, and saved as parameters. They are not brush masks or imported bitmap masks.</source>
+            <translation>La réduction multiéchelle utilise une décomposition à trous par B3-spline et des seuils doux issus de la MAD à chaque échelle, avec intensités séparées pour luminance et chrominance. Commencez avec 3 échelles, seuil 3 et intensités 0,5. L’estimation du bruit est un diagnostic, pas un score de qualité. Préférez-la avant étirement et restauration. Les masques de luminance, circulaires et stellaires sélectionnent où appliquer les réglages : blanc traite, noir protège, gris mélange. Inspectez le masque ; les masques stellaires inversés ne protègent que les étoiles détectées. Chaque masque est régénéré sur l’entrée de son opération, appliqué après calcul et sauvegardé par paramètres. Ce ne sont pas des masques au pinceau ni des images importées.</translation>
+        </message>
+        <message>
+            <source>Presets at the top of Finish save or restore all finishing families. Use Cmd+Z to undo. Export offers Linear FITS for the original integration and Classic export for PNG, TIFF or JPEG with an optional caption. PNG and TIFF preserve 16-bit detail without lossy compression.</source>
+            <translation>Préréglages, en haut de Finition, enregistre ou restaure toutes les familles de finition. Utilisez Cmd+Z pour annuler. Exporter propose FITS linéaire pour l’intégration originale et Export classique pour un PNG, TIFF ou JPEG avec une légende facultative. PNG et TIFF conservent les détails en 16 bits sans compression destructive.</translation>
+        </message>
+<message><source>Combine multiple filters as RGB, LRGB, SHO or HOO. Adjust color gains, saturation and smoothing manually. The initial gains estimate a neutral background; they are not photometric calibration. Gradient extraction uses independent color-channel polynomials (degrees 1 to 4), a configurable grid and manually editable sky samples. Optional degree-1 extraction can run on each calibrated, debayered exposure before stacking. Avoid fitting real nebulosity. Green noise reduction offers four SCNR protection methods and optional CIE lightness preservation. Use it after stretching and color balance; intentional green colors should be preserved. Advanced transformations provides GHS, circular-PSF Richardson-Lucy, multiscale wavelet denoising, generated masks and local matched-reference photometric colors. Automatic astrometry, online catalogues and spectrophotometric calibration are not available. Export linear 32-bit FITS for further work. Classic export opens the shared editor with a choice of PNG, TIFF or JPEG and an optional caption. PNG and TIFF preserve 16-bit detail without lossy compression. The technical caption includes the accepted exposure count, total exposure time and filters. Deep-sky caption settings are saved in the project.</source><translation>Combinez les filtres en RGB, LRGB, SHO ou HOO. Réglez les gains, la saturation et le lissage manuellement. Les gains initiaux neutralisent approximativement le fond ; ce n’est pas une calibration photométrique. Le gradient est ajusté par couche, avec polynôme de degré 1 à 4, grille et échantillons manuels. Une extraction de degré 1 peut être appliquée à chaque pose calibrée et dématricée avant empilement ; évitez de modéliser la nébulosité réelle. SCNR réduit la dominance verte après étirement ; préservez les couleurs vertes intentionnelles. Les outils avancés proposent GHS, Richardson–Lucy avec PSF circulaire, réduction du bruit multiéchelle, masques générés et calibration couleur par références locales associées. Astrométrie automatique, catalogues en ligne et calibration spectrophotométrique restent absents. Exportez le FITS linéaire 32 bits pour poursuivre le travail. Export classique ouvre l’éditeur commun avec choix du PNG, TIFF ou JPEG et une légende facultative. PNG et TIFF conservent les détails en 16 bits sans compression destructive. La légende technique inclut les poses acceptées, le temps total et les filtres. Les réglages de légende sont enregistrés dans le projet.</translation></message>
+<message><source>Multiscale denoising uses a B3-spline à trous decomposition and soft thresholds from per-scale MAD, with separate luminance and chroma strengths. Start with 3 scales, threshold 3, and strengths 0.5. The noise estimate is a diagnostic, not a quality score. Prefer it before stretch and restoration. Luminance, radial and detected-star masks select where the adjustments apply: white processes, black protects, gray blends. Inspect the mask; inverted star masks protect only detected stars. Masks are regenerated from each operation input, applied after processing, and saved as parameters. They are not brush masks or imported bitmap masks.</source><translation>La réduction multiéchelle utilise une décomposition à trous par B3-spline et des seuils doux issus de la MAD à chaque échelle, avec intensités séparées pour luminance et chrominance. Commencez avec 3 échelles, seuil 3 et intensités 0,5. L’estimation du bruit est un diagnostic, pas un score de qualité. Préférez-la avant étirement et restauration. Les masques de luminance, circulaires et stellaires sélectionnent où appliquer tous les réglages : blanc traite, noir protège, gris mélange. Inspectez le masque ; les masques stellaires inversés ne protègent que les étoiles détectées. Chaque masque est régénéré sur l’entrée de son opération, appliqué après calcul et sauvegardé par paramètres. Ce ne sont pas des masques au pinceau ni des images importées.</translation></message>
+<message><source>Increase wavelets gradually, adjust color and compare before / after. Export a 16-bit PNG or TIFF. Keep the original SER so you can try a different selection later.</source><translation>Augmentez les ondelettes progressivement, ajustez la couleur et comparez avant / après. Exportez en PNG ou TIFF 16 bits. Conservez le SER original pour pouvoir essayer une autre sélection plus tard.</translation></message>
+<message><source>Finishing presets in the project gear save or restore all finishing families. Use Cmd+Z to undo. Export offers Linear FITS for the original integration and Classic export for PNG, TIFF or JPEG with an optional caption. PNG and TIFF preserve 16-bit detail without lossy compression.</source><translation>Préréglages de finition, dans le rouage du projet, enregistre ou restaure toutes les familles. Utilisez Cmd+Z pour annuler. Exporter propose FITS linéaire pour l’intégration originale et Export classique pour un PNG, TIFF ou JPEG avec une légende facultative. PNG et TIFF conservent les détails en 16 bits sans compression destructive.</translation></message>
+<message><source>Resume returns to the current session without loading files again. Open reloads a saved deep-sky project; recreate its stack to restore the saved finish. Keep its source files in place. Settings is a workspace in the top navigation. The deep-sky gear manages the project and finishing presets.</source><translation>Reprendre revient à la session en cours sans recharger les fichiers. Ouvrir recharge un projet ciel profond enregistré ; recréez son empilement pour retrouver sa finition. Conservez les fichiers source à leur emplacement. Paramètres est un espace de la navigation principale. Le rouage de Ciel profond regroupe le projet et ses préréglages de finition.</translation></message>
+<message><source>PNG / TIFF 16-bit · the finished result</source><translation>PNG / TIFF 16 bits · le résultat final</translation></message>
+<message><source>Processing exports 16-bit RGB PNG or TIFF files, preserving the precision of the result. Mosaic exports TIFF. A 16-bit file cannot recover information absent from an 8-bit original. JPEG is accepted in Mosaic, but is not a direct Processing input.</source><translation>Traitement exporte des fichiers PNG ou TIFF RVB 16 bits, en conservant la précision du résultat. Mosaïque exporte en TIFF. Un fichier 16 bits ne peut pas récupérer des informations absentes d’un original 8 bits. JPEG est accepté dans Mosaïque, mais pas directement dans Traitement.</translation></message>
+<message><source>In Capture, choose Deep sky · FITS sequence, set the camera exposure and frame count, and start. Raw sensor samples and acquisition metadata are saved in individual FITS. Mount tracking and guiding remain external. Use the gear menu to open, save or clear a project. Saving preserves file references, frame selection, stack settings and finishing controls. Reopen the project and recreate the stack to reapply the saved finish. Keep the source files in place.</source><translation>Dans Capture, choisissez Ciel profond · séquence FITS, réglez la pose et le nombre d’images, puis démarrez. Les données brutes du capteur et les métadonnées sont enregistrées dans chaque FITS. Le suivi et le guidage restent externes. Le rouage permet d’ouvrir, d’enregistrer ou de vider un projet. Celui-ci conserve les références aux fichiers, la sélection des images, les réglages d’empilement et de finition. Rouvrez le projet et recréez son empilement pour retrouver sa finition. Conservez les fichiers source à leur emplacement.</translation></message>
+<message><source>Processing exports PNG or TIFF; Mosaic exports TIFF. An imported source image is protected from overwriting; choose a different file name. Captions are optional, and their title appears above the caption text. Once exported, the caption is part of the image.</source><translation>Traitement exporte en PNG ou TIFF ; Mosaïque exporte en TIFF. Une image source importée est protégée contre l’écrasement ; choisissez un autre nom de fichier. La légende est facultative et son titre apparaît au-dessus du texte. Après l’export, la légende fait partie de l’image.</translation></message>
+<message><source>Images, Stack and Finish are in the right inspector. Stack contains calibration and integration settings. Finish unlocks after stacking and contains the editable linear histogram and finishing controls. The floppy icon exports the image; the gear manages projects and finishing presets. The image and displayed histogram stay on the left. Source files toggles the source list, which starts collapsed in Finish.</source><translation>Images, Empilement et Finition sont dans le panneau de droite. Empilement contient les réglages de calibration et d’intégration. Finition devient disponible après l’empilement et propose l’histogramme linéaire modifiable et les réglages de finition. La disquette exporte l’image ; le rouage regroupe les projets et les préréglages de finition. L’image et son histogramme restent à gauche. Fichiers sources affiche ou masque la liste, initialement repliée dans Finition.</translation></message>
 </context>
     <context>
         <name>HistoryWorkspace</name>
@@ -1900,412 +3091,615 @@ L’aperçu est automatiquement éclairci ; les données restent linéaires.</tr
             <translation>Retirer</translation>
         </message>
         <message>
-            <location filename="../qml/HistoryWorkspace.qml" line="90" />
+            <location filename="../qml/HistoryWorkspace.qml" line="89" />
             <source>Remove from History only. The image file stays on disk.</source>
             <translation>Retirer de l’historique uniquement. Le fichier image reste sur le disque.</translation>
         </message>
         <message>
-            <location filename="../qml/HistoryWorkspace.qml" line="94" />
+            <location filename="../qml/HistoryWorkspace.qml" line="93" />
             <source>Drop TIFF, PNG or JPEG images here. Files stay in their original folders.</source>
             <translation>Déposez des images TIFF, PNG ou JPEG ici. Les fichiers restent dans leur dossier d’origine.</translation>
         </message>
         <message>
-            <location filename="../qml/HistoryWorkspace.qml" line="123" />
+            <location filename="../qml/HistoryWorkspace.qml" line="122" />
             <source>Added </source>
             <translation>Ajoutée le </translation>
         </message>
         <message>
-            <location filename="../qml/HistoryWorkspace.qml" line="123" />
+            <location filename="../qml/HistoryWorkspace.qml" line="122" />
             <source>File moved or missing</source>
             <translation>Fichier déplacé ou introuvable</translation>
         </message>
         <message>
-            <location filename="../qml/HistoryWorkspace.qml" line="127" />
+            <location filename="../qml/HistoryWorkspace.qml" line="126" />
             <source>Drop processed images here, or choose Add images.</source>
             <translation>Déposez des images traitées ici, ou cliquez sur Ajouter des images.</translation>
         </message>
         <message>
-            <location filename="../qml/HistoryWorkspace.qml" line="153" />
+            <location filename="../qml/HistoryWorkspace.qml" line="152" />
             <source>Select an image</source>
             <translation>Sélectionnez une image</translation>
         </message>
         <message>
-            <location filename="../qml/HistoryWorkspace.qml" line="153" />
+            <location filename="../qml/HistoryWorkspace.qml" line="152" />
             <source>This file has been moved or deleted.
 Add it again from its new location.</source>
             <translation>Ce fichier a été déplacé ou supprimé.
 Ajoutez-le depuis son nouvel emplacement.</translation>
         </message>
         <message>
-            <location filename="../qml/HistoryWorkspace.qml" line="153" />
+            <location filename="../qml/HistoryWorkspace.qml" line="152" />
             <source>Preview unavailable. You can open the image in your image viewer.</source>
             <translation>Aperçu indisponible. Vous pouvez ouvrir l’image dans votre visionneuse.</translation>
         </message>
         <message>
-            <location filename="../qml/HistoryWorkspace.qml" line="161" />
+            <location filename="../qml/HistoryWorkspace.qml" line="160" />
             <source>Open image</source>
             <translation>Ouvrir l’image</translation>
         </message>
         <message>
-            <location filename="../qml/HistoryWorkspace.qml" line="162" />
+            <location filename="../qml/HistoryWorkspace.qml" line="161" />
             <source>Show in Finder</source>
             <translation>Afficher dans le Finder</translation>
         </message>
         <message>
-            <location filename="../qml/HistoryWorkspace.qml" line="162" />
+            <location filename="../qml/HistoryWorkspace.qml" line="161" />
             <source>Show in folder</source>
             <translation>Afficher dans le dossier</translation>
         </message>
-    </context>
+        <message>
+            <source>Advanced transformations…</source>
+            <translation type="vanished">Transformations avancées…</translation>
+        </message>
+        <message>
+            <source>Mask · white applies, black protects</source>
+            <translation type="vanished">Masque · blanc applique, noir protège</translation>
+        </message>
+        <message>
+            <source>Photometric colors</source>
+            <translation type="vanished">Couleurs photométriques</translation>
+        </message>
+        <message>
+            <source>PSF and deconvolution</source>
+            <translation type="vanished">PSF et déconvolution</translation>
+        </message>
+        <message>
+            <source>Multiscale denoising</source>
+            <translation type="vanished">Réduction du bruit multiéchelle</translation>
+        </message>
+        <message>
+            <source>GHS stretch</source>
+            <translation type="vanished">Étirement GHS</translation>
+        </message>
+        <message>
+            <source>Check parameters and operation order: white must exceed black; photometry and deconvolution require linear, unrotated input; photometry cannot be masked.</source>
+            <translation type="vanished">Vérifiez les paramètres et l’ordre : blanc supérieur au noir ; photométrie et déconvolution sur une entrée linéaire non tournée ; photométrie sans masque.</translation>
+        </message>
+        <message>
+            <source>GHS: controlled contrast</source>
+            <translation type="vanished">GHS : contrôler le contraste</translation>
+        </message>
+        <message>
+            <source>Enable GHS in Advanced transformations; it enables stretch and replaces midtones/asinh. Start with low strength, place SP near the intensity of interest, then adjust local intensity b. LP ≤ SP ≤ HP controls tangent extensions for shadows and highlights. The curve shows normalized input versus output; gray is identity. Independent RGB and shared-luminance RGB blending have different color behavior. Inverse reverses the scalar curve, not clipping, masks or color blending. Commit small successive transformations.</source>
+            <translation type="vanished">Activez le GHS dans Transformations avancées : il active l’étirement et remplace tons moyens/asinh. Commencez avec une faible force, placez SP près de l’intensité visée puis ajustez b. LP ≤ SP ≤ HP contrôle les tangentes des ombres et hautes lumières. La courbe montre entrée et sortie normalisées ; le gris est neutre. RVB indépendant et luminance commune avec mélange RVB modifient différemment les couleurs. L’inverse renverse la courbe scalaire, pas l’écrêtage, les masques ou le mélange des couleurs. Ajustez progressivement la force.</translation>
+        </message>
+        <message>
+            <source>PSF and restoration</source>
+            <translation type="vanished">PSF et restauration</translation>
+        </message>
+        <message>
+            <source>Work on an unstretched, unrotated recipe input. Measure central stars, review the FWHM and scatter, then explicitly use the Gaussian estimate; Moffat beta remains manual. PSF preview is display-scaled, while its linear kernel sums to 1. Richardson-Lucy restores weighted luminance with a shared RGB factor. Start with 10 iterations, damping 0.001 and stopping 0.0001 in normalized image units. Compare at 100%; rings and amplified noise mean the correction is too strong. Negative input is rejected. An explicit pedestal is available and remains in the result. It is residual-damped restoration, not blind or spatially varying deconvolution.</source>
+            <translation type="vanished">Travaillez sur une entrée de recette non étirée et non tournée. Mesurez les étoiles centrales, contrôlez FWHM et dispersion puis utilisez explicitement l’estimation gaussienne ; le β Moffat reste manuel. L’aperçu de PSF est réétalonné pour l’affichage ; le noyau linéaire a une somme de 1. Richardson–Lucy restaure la luminance pondérée avec un facteur RVB commun. Commencez à 10 itérations, amortissement 0,001 et arrêt 0,0001 en unités normalisées. Comparez à 100 % : anneaux et bruit amplifié indiquent un traitement trop fort. Les valeurs négatives sont refusées. Un piédestal explicite est disponible et reste dans le résultat. Ce n’est pas une déconvolution aveugle ni variable dans le champ.</translation>
+        </message>
+        <message>
+            <source>Denoising and masks</source>
+            <translation type="vanished">Bruit et masques</translation>
+        </message>
+        <message>
+            <source>Multiscale denoising uses a B3-spline à trous decomposition and soft thresholds from per-scale MAD, with separate luminance and chroma strengths. Start with 3 scales, threshold 3, and strengths 0.5. The noise estimate is a diagnostic, not a quality score. Prefer it before stretch and restoration. Luminance, radial and detected-star masks select where the complete draft applies: white processes, black protects, gray blends. Inspect the mask; inverted star masks protect only detected stars. Masks are regenerated from each operation input, applied after processing, and saved as parameters. They are not brush masks or imported bitmap masks.</source>
+            <translation type="vanished">La réduction multiéchelle utilise une décomposition à trous par B3-spline et des seuils doux issus de la MAD à chaque échelle, avec intensités séparées pour luminance et chrominance. Commencez avec 3 échelles, seuil 3 et intensités 0,5. L’estimation du bruit est un diagnostic, pas un score de qualité. Préférez-la avant étirement et restauration. Les masques de luminance, circulaires et stellaires sélectionnent où appliquer tout le brouillon : blanc traite, noir protège, gris mélange. Inspectez le masque ; les masques stellaires inversés ne protègent que les étoiles détectées. Chaque masque est régénéré sur l’entrée de son opération, appliqué après calcul et sauvegardé par paramètres. Ce ne sont pas des masques au pinceau ni des images importées.</translation>
+        </message>
+        <message>
+            <source>Local photometric references</source>
+            <translation type="vanished">Références photométriques locales</translation>
+        </message>
+        <message>
+            <source>Use linear broadband RGB and a CSV with header x,y,red,green,blue. Supply at least three already-matched stars, zero-based pixel coordinates from the top left, and positive reference fluxes for the intended filters. This does not identify stars or download a catalogue. Aperture photometry subtracts local annulus medians; saturated, edge and inconsistent references are rejected. Median log color ratios produce R/B gains relative to green. Inspect the accepted count, gains and residual scatter. Aperture/annulus defaults are 5/8/12 pixels and saturation 1; adapt them to your stars and data scale. This is relative color calibration, not absolute or spectrophotometric calibration. References are image-specific even when saved in a preset.</source>
+            <translation type="vanished">Utilisez un RVB linéaire à bande large et un CSV avec l’en-tête x,y,red,green,blue. Fournissez au moins trois étoiles déjà associées, des coordonnées en pixels partant de zéro en haut à gauche et des flux de référence positifs pour les filtres visés. Aucun catalogue n’est téléchargé et aucune étoile n’est identifiée automatiquement. La photométrie d’ouverture retire la médiane locale de l’anneau ; références saturées, proches des bords ou incohérentes sont rejetées. La médiane des rapports logarithmiques donne les gains R/B relatifs au vert. Contrôlez nombre accepté, gains et dispersion. Ouverture/anneau : 5/8/12 pixels par défaut, saturation 1 ; adaptez-les aux étoiles et à l’échelle. Ce n’est ni une calibration absolue ni spectrophotométrique. Les références restent propres à une image, même dans un préréglage.</translation>
+        </message>
+    <message><source>Add images</source><translation>Ajouter des images</translation></message>
+</context>
+    <context>
+        <name>HomeWorkspace</name>
+        <message>
+            <location filename="../qml/HomeWorkspace.qml" line="53" />
+            <source>Your next image starts here.</source>
+            <translation>Votre prochaine image commence ici.</translation>
+        </message>
+        <message>
+            <location filename="../qml/HomeWorkspace.qml" line="54" />
+            <source>Capture, process or return to a project.</source>
+            <translation>Capturer, traiter ou reprendre un projet.</translation>
+        </message>
+        <message>
+            <location filename="../qml/HomeWorkspace.qml" line="56" />
+            <source>Open a project…</source>
+            <translation>Ouvrir un projet…</translation>
+        </message>
+        <message>
+            <location filename="../qml/HomeWorkspace.qml" line="60" />
+            <source>Capture the sky</source>
+            <translation>Capturer le ciel</translation>
+        </message>
+        <message>
+            <location filename="../qml/HomeWorkspace.qml" line="60" />
+            <source>Camera · SER video · FITS exposures</source>
+            <translation>Caméra · Vidéo SER · Poses FITS</translation>
+        </message>
+        <message>
+            <location filename="../qml/HomeWorkspace.qml" line="61" />
+            <source>Process an image</source>
+            <translation>Traiter une image</translation>
+        </message>
+        <message>
+            <location filename="../qml/HomeWorkspace.qml" line="61" />
+            <source>Planets, Moon and Sun · Still images</source>
+            <translation>Planètes, Lune et Soleil · Images fixes</translation>
+        </message>
+        <message>
+            <location filename="../qml/HomeWorkspace.qml" line="62" />
+            <source>Explore deep sky</source>
+            <translation>Explorer le ciel profond</translation>
+        </message>
+        <message>
+            <location filename="../qml/HomeWorkspace.qml" line="62" />
+            <source>Calibration · Stacking · Finishing</source>
+            <translation>Calibration · Empilement · Finition</translation>
+        </message>
+        <message>
+            <location filename="../qml/HomeWorkspace.qml" line="66" />
+            <source>Continue your work</source>
+            <translation>Reprendre votre travail</translation>
+        </message>
+        <message>
+            <location filename="../qml/HomeWorkspace.qml" line="70" />
+            <source>Current deep-sky project</source>
+            <translation>Projet de ciel profond en cours</translation>
+        </message>
+        <message>
+            <location filename="../qml/HomeWorkspace.qml" line="71" />
+            <source>%1 images · current session</source>
+            <translation>%1 images · session actuelle</translation>
+        </message>
+        <message>
+            <location filename="../qml/HomeWorkspace.qml" line="74" />
+            <location filename="../qml/HomeWorkspace.qml" line="83" />
+            <source>Resume</source>
+            <translation>Reprendre</translation>
+        </message>
+        <message>
+            <location filename="../qml/HomeWorkspace.qml" line="80" />
+            <source>Processing · current session</source>
+            <translation>Traitement · session actuelle</translation>
+        </message>
+        <message>
+            <location filename="../qml/HomeWorkspace.qml" line="95" />
+            <source>Saved deep-sky project</source>
+            <translation>Projet de ciel profond enregistré</translation>
+        </message>
+        <message>
+            <location filename="../qml/HomeWorkspace.qml" line="95" />
+            <location filename="../qml/HomeWorkspace.qml" line="112" />
+            <source>File unavailable</source>
+            <translation>Fichier indisponible</translation>
+        </message>
+        <message>
+            <location filename="../qml/HomeWorkspace.qml" line="97" />
+            <location filename="../qml/HomeWorkspace.qml" line="114" />
+            <source>Open</source>
+            <translation>Ouvrir</translation>
+        </message>
+        <message>
+            <location filename="../qml/HomeWorkspace.qml" line="98" />
+            <source>Remove from recent projects</source>
+            <translation>Retirer des projets récents</translation>
+        </message>
+        <message>
+            <location filename="../qml/HomeWorkspace.qml" line="112" />
+            <source>Recent SER video</source>
+            <translation>Vidéo SER récente</translation>
+        </message>
+        <message>
+            <location filename="../qml/HomeWorkspace.qml" line="115" />
+            <source>Remove from recent videos</source>
+            <translation>Retirer des vidéos récentes</translation>
+        </message>
+        <message>
+            <location filename="../qml/HomeWorkspace.qml" line="119" />
+            <source>Your recent projects and videos will appear here.</source>
+            <translation>Vos projets et vidéos récents apparaîtront ici.</translation>
+        </message>
+        <message>
+            <location filename="../qml/HomeWorkspace.qml" line="125" />
+            <source>First session?</source>
+            <translation>Première session ?</translation>
+        </message>
+        <message>
+            <location filename="../qml/HomeWorkspace.qml" line="126" />
+            <source>Learn acquisition, calibration and finishing at your own pace.</source>
+            <translation>Découvrez l’acquisition, la calibration et la finition à votre rythme.</translation>
+        </message>
+        <message>
+            <location filename="../qml/HomeWorkspace.qml" line="128" />
+            <source>Open the guide</source>
+            <translation>Ouvrir le guide</translation>
+        </message>
+    <message><source>Open a project</source><translation>Ouvrir un projet</translation></message>
+</context>
     <context>
         <name>ImageViewport</name>
         <message>
-            <location filename="../qml/ImageViewport.qml" line="103" />
+            <location filename="../qml/ImageViewport.qml" line="104" />
             <source>Zoom out</source>
             <translation>Réduire le zoom</translation>
         </message>
         <message>
-            <location filename="../qml/ImageViewport.qml" line="104" />
+            <location filename="../qml/ImageViewport.qml" line="105" />
             <source>Zoom in</source>
             <translation>Agrandir</translation>
         </message>
         <message>
-            <location filename="../qml/ImageViewport.qml" line="106" />
+            <location filename="../qml/ImageViewport.qml" line="107" />
             <source>One image pixel per screen pixel</source>
             <translation>Un pixel de l’image par pixel de l’écran</translation>
         </message>
         <message>
-            <location filename="../qml/ImageViewport.qml" line="107" />
+            <location filename="../qml/ImageViewport.qml" line="108" />
             <source>Fit</source>
             <translation>Adapter</translation>
         </message>
         <message>
-            <location filename="../qml/ImageViewport.qml" line="107" />
+            <location filename="../qml/ImageViewport.qml" line="108" />
             <source>Fit to window. Double-click the image to switch between Fit and 100%.</source>
             <translation>Adapter à la fenêtre. Double-cliquez sur l’image pour basculer entre Adapter et 100 %.</translation>
         </message>
     </context>
     <context>
         <name>Main</name>
-<message><source>Deep sky · %1%</source><translation>Ciel profond · %1 %</translation></message>
-<message><source>Mosaic · processing…</source><translation>Mosaïque · traitement…</translation></message>
-<message><source>Processing · %1%</source><translation>Traitement · %1 %</translation></message>
-<message><source>Ready</source><translation>Prêt</translation></message>
-<message><source>Camera not connected</source><translation>Caméra non connectée</translation></message>
-
         <message>
-            <location filename="../qml/Main.qml" line="34" />
-            <location filename="../qml/Main.qml" line="487" />
-            <location filename="../qml/Main.qml" line="534" />
+            <location filename="../qml/Main.qml" line="47" />
+            <source>Deep sky · %1%</source>
+            <translation>Ciel profond · %1 %</translation>
+        </message>
+        <message>
+            <location filename="../qml/Main.qml" line="47" />
+            <source>Mosaic · processing…</source>
+            <translation>Mosaïque · traitement…</translation>
+        </message>
+        <message>
+            <location filename="../qml/Main.qml" line="47" />
+            <source>Processing · %1%</source>
+            <translation>Traitement · %1 %</translation>
+        </message>
+        <message>
+            <location filename="../qml/Main.qml" line="64" />
+            <source>Ready</source>
+            <translation>Prêt</translation>
+        </message>
+        <message>
+            <location filename="../qml/Main.qml" line="65" />
+            <source>Camera not connected</source>
+            <translation>Caméra non connectée</translation>
+        </message>
+        <message>
+            <location filename="../qml/Main.qml" line="521" />
+            <location filename="../qml/Main.qml" line="568" />
             <source>Capture</source>
             <translation>Capture</translation>
         </message>
         <message>
-            <location filename="../qml/Main.qml" line="35" />
             <source>Processing</source>
-            <translation>Traitement</translation>
+            <translation type="vanished">Traitement</translation>
         </message>
         <message>
-            <location filename="../qml/Main.qml" line="36" />
             <source>Deep sky</source>
-            <translation>Ciel profond</translation>
+            <translation type="vanished">Ciel profond</translation>
         </message>
         <message>
-            <location filename="../qml/Main.qml" line="38" />
             <source>History</source>
-            <translation>Historique</translation>
+            <translation type="vanished">Historique</translation>
         </message>
         <message>
-            <location filename="../qml/Main.qml" line="40" />
             <source>Settings</source>
-            <translation>Paramètres</translation>
+            <translation type="vanished">Paramètres</translation>
         </message>
         <message>
-            <location filename="../qml/Main.qml" line="43" />
+            <location filename="../qml/Main.qml" line="47" />
             <source>Recording…</source>
             <translation>Enregistrement…</translation>
         </message>
         <message>
-            <location filename="../qml/Main.qml" line="43" />
             <source>Processing…</source>
-            <translation>Traitement…</translation>
+            <translation type="vanished">Traitement…</translation>
         </message>
         <message>
             <source>Drop to open SER video</source>
             <translation type="vanished">Déposer pour ouvrir la vidéo SER</translation>
         </message>
         <message>
-            <location filename="../qml/Main.qml" line="380" />
+            <location filename="../qml/Main.qml" line="418" />
             <source>min </source>
             <translation>min </translation>
         </message>
         <message>
-            <location filename="../qml/Main.qml" line="380" />
+            <location filename="../qml/Main.qml" line="418" />
             <source>  max </source>
             <translation>  max </translation>
         </message>
         <message>
-            <location filename="../qml/Main.qml" line="380" />
+            <location filename="../qml/Main.qml" line="418" />
             <source>  mean </source>
             <translation>  moyenne </translation>
         </message>
         <message>
-            <location filename="../qml/Main.qml" line="437" />
-            <location filename="../qml/Main.qml" line="955" />
             <source>Capture settings and presets</source>
-            <translation>Réglages de capture et préréglages</translation>
+            <translation type="vanished">Réglages de capture et préréglages</translation>
         </message>
         <message>
-            <location filename="../qml/Main.qml" line="446" />
+            <location filename="../qml/Main.qml" line="482" />
             <source> frames</source>
             <translation> images</translation>
         </message>
         <message>
-            <location filename="../qml/Main.qml" line="452" />
+            <location filename="../qml/Main.qml" line="488" />
             <source> fps</source>
             <translation> im/s</translation>
         </message>
         <message>
-            <location filename="../qml/Main.qml" line="458" />
+            <location filename="../qml/Main.qml" line="494" />
             <source>This is acquisition, not recording: frames received from the camera since </source>
             <translation>Images reçues depuis la connexion de la caméra. </translation>
         </message>
         <message>
-            <location filename="../qml/Main.qml" line="459" />
+            <location filename="../qml/Main.qml" line="495" />
             <source>connecting. Nothing is written to disk unless you press Record — this can run </source>
             <translation>Aucun fichier n’est créé tant que vous ne cliquez pas sur Enregistrer. </translation>
         </message>
         <message>
-            <location filename="../qml/Main.qml" line="460" />
+            <location filename="../qml/Main.qml" line="496" />
             <source>for hours with no files created and constant memory use (only the latest </source>
             <translation>L’aperçu peut fonctionner pendant des heures avec une mémoire constante : </translation>
         </message>
         <message>
-            <location filename="../qml/Main.qml" line="461" />
+            <location filename="../qml/Main.qml" line="497" />
             <source>frame is ever kept).</source>
             <translation>seule la dernière image est conservée.</translation>
         </message>
         <message>
-            <location filename="../qml/Main.qml" line="467" />
+            <location filename="../qml/Main.qml" line="503" />
             <source>skipped </source>
             <translation>ignorées </translation>
         </message>
         <message>
-            <location filename="../qml/Main.qml" line="475" />
+            <location filename="../qml/Main.qml" line="511" />
             <source>Disconnect</source>
             <translation>Déconnecter</translation>
         </message>
         <message>
-            <location filename="../qml/Main.qml" line="481" />
+            <location filename="../qml/Main.qml" line="515" />
             <source>Disconnect this camera so Rescan can pick a different one.</source>
             <translation>Déconnecter cette caméra pour en choisir une autre lors de la recherche.</translation>
         </message>
         <message>
-            <location filename="../qml/Main.qml" line="492" />
+            <location filename="../qml/Main.qml" line="526" />
             <source>Target (optional)</source>
             <translation>Cible (facultatif)</translation>
         </message>
         <message>
-            <location filename="../qml/Main.qml" line="511" />
+            <location filename="../qml/Main.qml" line="545" />
             <source>Planetary · SER</source>
             <translation>Planétaire · SER</translation>
         </message>
         <message>
-            <location filename="../qml/Main.qml" line="511" />
+            <location filename="../qml/Main.qml" line="545" />
             <source>Deep sky · FITS sequence</source>
             <translation>Ciel profond · Série FITS</translation>
         </message>
         <message>
-            <location filename="../qml/Main.qml" line="511" />
+            <location filename="../qml/Main.qml" line="545" />
             <source>Raw sequence · ACRAW</source>
             <translation>Séquence brute · ACRAW</translation>
         </message>
         <message>
-            <location filename="../qml/Main.qml" line="524" />
+            <location filename="../qml/Main.qml" line="558" />
             <source>Set exposure and frame count, then start. Raw pixels are saved before demosaicing. Camera limits still apply; mount guiding is external.</source>
             <translation>Réglez l’exposition et le nombre de poses puis lancez la capture. Les pixels bruts sont enregistrés avant dématriçage. Les limites de la caméra s’appliquent ; le guidage de la monture reste externe.</translation>
         </message>
         <message>
-            <location filename="../qml/Main.qml" line="539" />
+            <location filename="../qml/Main.qml" line="571" />
             <source>Shortcut: C</source>
             <translation>Raccourci : C</translation>
         </message>
         <message>
-            <location filename="../qml/Main.qml" line="545" />
+            <location filename="../qml/Main.qml" line="577" />
             <source>Stop</source>
             <translation>Arrêter</translation>
         </message>
         <message>
-            <location filename="../qml/Main.qml" line="545" />
+            <location filename="../qml/Main.qml" line="577" />
             <source>Record</source>
             <translation>Enregistrer</translation>
         </message>
         <message>
-            <location filename="../qml/Main.qml" line="554" />
+            <location filename="../qml/Main.qml" line="584" />
             <source>Shortcut: R</source>
             <translation>Raccourci : R</translation>
         </message>
         <message>
-            <location filename="../qml/Main.qml" line="571" />
+            <location filename="../qml/Main.qml" line="601" />
             <source>Recording</source>
             <translation>Enregistrement</translation>
         </message>
         <message>
-            <location filename="../qml/Main.qml" line="581" />
+            <location filename="../qml/Main.qml" line="611" />
             <source>Stop recording after</source>
             <translation>Arrêter après</translation>
         </message>
         <message>
-            <location filename="../qml/Main.qml" line="602" />
+            <location filename="../qml/Main.qml" line="632" />
             <source>frames</source>
             <translation>images</translation>
         </message>
         <message>
-            <location filename="../qml/Main.qml" line="605" />
+            <location filename="../qml/Main.qml" line="635" />
             <source>or</source>
             <translation>ou</translation>
         </message>
         <message>
-            <location filename="../qml/Main.qml" line="618" />
+            <location filename="../qml/Main.qml" line="648" />
             <source>sec</source>
             <translation>s</translation>
         </message>
         <message>
-            <location filename="../qml/Main.qml" line="622" />
+            <location filename="../qml/Main.qml" line="652" />
             <source>0 = unlimited</source>
             <translation>0 = illimité</translation>
         </message>
         <message>
-            <location filename="../qml/Main.qml" line="637" />
+            <location filename="../qml/Main.qml" line="667" />
             <source> s</source>
             <translation> s</translation>
         </message>
         <message>
-            <location filename="../qml/Main.qml" line="645" />
+            <location filename="../qml/Main.qml" line="675" />
             <source>Recorded: </source>
             <translation>Enregistrées : </translation>
         </message>
         <message>
-            <location filename="../qml/Main.qml" line="655" />
+            <location filename="../qml/Main.qml" line="685" />
             <source>Dropped: </source>
             <translation>Perdues : </translation>
         </message>
         <message>
-            <location filename="../qml/Main.qml" line="669" />
+            <location filename="../qml/Main.qml" line="699" />
             <source>Write: </source>
             <translation>Écriture : </translation>
         </message>
         <message>
-            <location filename="../qml/Main.qml" line="669" />
+            <location filename="../qml/Main.qml" line="699" />
             <source> fps  (capture: </source>
             <translation> im/s  (capture : </translation>
         </message>
         <message>
-            <location filename="../qml/Main.qml" line="698" />
+            <location filename="../qml/Main.qml" line="728" />
             <source>Camera Controls</source>
             <translation>Réglages de la caméra</translation>
         </message>
         <message>
-            <location filename="../qml/Main.qml" line="709" />
+            <location filename="../qml/Main.qml" line="739" />
             <source>Exposure</source>
             <translation>Exposition</translation>
         </message>
         <message>
-            <location filename="../qml/Main.qml" line="711" />
+            <location filename="../qml/Main.qml" line="741" />
             <source> ms</source>
             <translation> ms</translation>
         </message>
         <message>
-            <location filename="../qml/Main.qml" line="744" />
+            <location filename="../qml/Main.qml" line="774" />
             <source>Gain</source>
             <translation>Gain</translation>
         </message>
         <message>
-            <location filename="../qml/Main.qml" line="828" />
+            <location filename="../qml/Main.qml" line="858" />
             <source>Sensor ROI</source>
             <translation>Zone du capteur</translation>
         </message>
         <message>
-            <location filename="../qml/Main.qml" line="838" />
+            <location filename="../qml/Main.qml" line="868" />
             <source> of </source>
             <translation> sur </translation>
         </message>
         <message>
-            <location filename="../qml/Main.qml" line="847" />
+            <location filename="../qml/Main.qml" line="877" />
             <source>Full frame</source>
             <translation>Tout le capteur</translation>
         </message>
         <message>
-            <location filename="../qml/Main.qml" line="877" />
+            <location filename="../qml/Main.qml" line="907" />
             <source>No camera connected</source>
             <translation>Aucune caméra connectée</translation>
         </message>
         <message>
-            <location filename="../qml/Main.qml" line="888" />
+            <location filename="../qml/Main.qml" line="918" />
             <source>Connect a supported planetary camera to start a live preview.</source>
             <translation>Connectez une caméra planétaire compatible pour démarrer l’aperçu.</translation>
         </message>
         <message>
-            <location filename="../qml/Main.qml" line="899" />
+            <location filename="../qml/Main.qml" line="929" />
             <source>Rescan for cameras</source>
             <translation>Rechercher une caméra</translation>
         </message>
         <message>
-            <location filename="../qml/Main.qml" line="904" />
+            <location filename="../qml/Main.qml" line="932" />
             <source>Looks for a connected camera. Offers the mock test camera if none is found.</source>
             <translation>Recherche une caméra connectée. Propose la caméra de test si aucune n’est trouvée.</translation>
         </message>
         <message>
-            <location filename="../qml/Main.qml" line="917" />
+            <location filename="../qml/Main.qml" line="945" />
             <source>Multiple cameras found — choose one:</source>
             <translation>Plusieurs caméras trouvées — choisissez-en une :</translation>
         </message>
         <message>
-            <location filename="../qml/Main.qml" line="938" />
+            <location filename="../qml/Main.qml" line="966" />
             <source>Development build</source>
             <translation>Version de développement</translation>
         </message>
         <message>
-            <location filename="../qml/Main.qml" line="1004" />
+            <location filename="../qml/Main.qml" line="1030" />
             <source>No real camera found.</source>
             <translation>Aucune caméra détectée.</translation>
         </message>
         <message>
-            <location filename="../qml/Main.qml" line="1013" />
+            <location filename="../qml/Main.qml" line="1039" />
             <source>Use the mock test camera instead?</source>
             <translation>Utiliser la caméra de test simulée ?</translation>
         </message>
         <message>
-            <location filename="../qml/Main.qml" line="1027" />
+            <location filename="../qml/Main.qml" line="1053" />
             <source>Cancel</source>
             <translation>Annuler</translation>
         </message>
         <message>
-            <location filename="../qml/Main.qml" line="1032" />
+            <location filename="../qml/Main.qml" line="1058" />
             <source>Use mock camera</source>
             <translation>Utiliser la caméra de test</translation>
         </message>
         <message>
-            <location filename="../qml/Main.qml" line="37" />
             <source>Mosaic</source>
-            <translation>Mosaïque</translation>
+            <translation type="vanished">Mosaïque</translation>
         </message>
         <message>
-            <location filename="../qml/Main.qml" line="39" />
             <source>Guide</source>
-            <translation>Guide</translation>
+            <translation type="vanished">Guide</translation>
         </message>
         <message>
-            <location filename="../qml/Main.qml" line="120" />
+            <location filename="../qml/Main.qml" line="158" />
             <source>Drop to open in Deep sky</source>
             <translation>Déposer pour ouvrir dans Ciel profond</translation>
         </message>
         <message>
-            <location filename="../qml/Main.qml" line="151" />
+            <location filename="../qml/Main.qml" line="189" />
             <source>Drop to open in Processing</source>
             <translation>Déposer pour ouvrir dans Traitement</translation>
         </message>
-    </context>
+    <message><source>Save project before quitting</source><translation>Sauvegarder le projet avant de quitter</translation></message>
+<message><source>AstroCapture project (*.astroproject)</source><translation>Projet AstroCapture (*.astroproject)</translation></message>
+<message><source>Save finished TIFF before quitting</source><translation>Sauvegarder le TIFF avant de quitter</translation></message>
+<message><source>16-bit TIFF image (*.tif *.tiff)</source><translation>Image TIFF 16 bits (*.tif *.tiff)</translation></message>
+<message><source>Cannot prepare this image for captioned export. Return to Deep sky to export the image.</source><translation>Impossible de préparer cette image pour un export avec légende. Revenez à Ciel profond pour exporter l’image.</translation></message>
+<message><source>Capture settings</source><translation>Réglages de capture</translation></message>
+</context>
     <context>
         <name>MosaicWorkspace</name>
         <message>
@@ -2313,7 +3707,7 @@ Ajoutez-le depuis son nouvel emplacement.</translation>
             <translation type="vanished">Tous les fichiers (*)</translation>
         </message>
         <message>
-            <location filename="../qml/MosaicWorkspace.qml" line="91" />
+            <location filename="../qml/MosaicWorkspace.qml" line="93" />
             <source>Mosaic</source>
             <translation>Mosaïque</translation>
         </message>
@@ -2338,12 +3732,12 @@ Ajoutez-le depuis son nouvel emplacement.</translation>
             <translation>Image TIFF 16 bits (*.tif *.tiff)</translation>
         </message>
         <message>
-            <location filename="../qml/MosaicWorkspace.qml" line="92" />
+            <location filename="../qml/MosaicWorkspace.qml" line="94" />
             <source>Add images…</source>
             <translation>Ajouter des images…</translation>
         </message>
         <message>
-            <location filename="../qml/MosaicWorkspace.qml" line="93" />
+            <location filename="../qml/MosaicWorkspace.qml" line="95" />
             <source>Clear</source>
             <translation>Vider</translation>
         </message>
@@ -2356,37 +3750,37 @@ Ajoutez-le depuis son nouvel emplacement.</translation>
             <translation type="vanished">%1 images</translation>
         </message>
         <message>
-            <location filename="../qml/MosaicWorkspace.qml" line="96" />
+            <location filename="../qml/MosaicWorkspace.qml" line="98" />
             <source>Reassemble the Moon or Sun from overlapping views. Use images from the same session and setup, preferably already stacked, with 25–40% overlap and no captions.</source>
             <translation>Reconstituez la Lune ou le Soleil à partir de vues qui se chevauchent. Utilisez des images d’une même séance et du même matériel, de préférence déjà empilées, avec 25 à 40 % de recouvrement et sans légende.</translation>
         </message>
         <message>
-            <location filename="../qml/MosaicWorkspace.qml" line="45" />
+            <location filename="../qml/MosaicWorkspace.qml" line="47" />
             <source>Match brightness</source>
             <translation>Harmoniser la luminosité</translation>
         </message>
         <message>
-            <location filename="../qml/MosaicWorkspace.qml" line="167" />
+            <location filename="../qml/MosaicWorkspace.qml" line="169" />
             <source>Working…</source>
             <translation>Traitement…</translation>
         </message>
         <message>
-            <location filename="../qml/MosaicWorkspace.qml" line="167" />
+            <location filename="../qml/MosaicWorkspace.qml" line="169" />
             <source>Assemble automatically</source>
             <translation>Assembler automatiquement</translation>
         </message>
         <message>
-            <location filename="../qml/MosaicWorkspace.qml" line="183" />
+            <location filename="../qml/MosaicWorkspace.qml" line="185" />
             <source>Export TIFF…</source>
             <translation>Exporter en TIFF…</translation>
         </message>
         <message>
-            <location filename="../qml/MosaicWorkspace.qml" line="202" />
+            <location filename="../qml/MosaicWorkspace.qml" line="204" />
             <source>Building your mosaic…</source>
             <translation>Assemblage de votre mosaïque…</translation>
         </message>
         <message>
-            <location filename="../qml/MosaicWorkspace.qml" line="202" />
+            <location filename="../qml/MosaicWorkspace.qml" line="204" />
             <source>Drop your images here
 
 Shared details connect the views. Missing areas remain black; no surface detail is invented.</source>
@@ -2395,82 +3789,82 @@ Shared details connect the views. Missing areas remain black; no surface detail 
 Les détails communs relient les vues. Les zones manquantes restent noires ; aucun détail de surface n’est inventé.</translation>
         </message>
         <message>
-            <location filename="../qml/MosaicWorkspace.qml" line="211" />
+            <location filename="../qml/MosaicWorkspace.qml" line="213" />
             <source>TIFF, PNG or JPEG · up to 100 images · 32 MP output · originals stay unchanged</source>
             <translation>TIFF, PNG ou JPEG · jusqu’à 100 images · résultat limité à 32 MP · originaux préservés</translation>
         </message>
         <message>
-            <location filename="../qml/MosaicWorkspace.qml" line="218" />
+            <location filename="../qml/MosaicWorkspace.qml" line="220" />
             <source>Cancel</source>
             <translation>Annuler</translation>
         </message>
         <message>
-            <location filename="../qml/MosaicWorkspace.qml" line="232" />
+            <location filename="../qml/MosaicWorkspace.qml" line="234" />
             <source>Drop to add mosaic images</source>
             <translation>Déposez les images de votre mosaïque</translation>
         </message>
         <message>
-            <location filename="../qml/MosaicWorkspace.qml" line="133" />
+            <location filename="../qml/MosaicWorkspace.qml" line="135" />
             <source>Preview unavailable</source>
             <translation>Aperçu indisponible</translation>
         </message>
         <message>
-            <location filename="../qml/MosaicWorkspace.qml" line="174" />
+            <location filename="../qml/MosaicWorkspace.qml" line="176" />
             <source>Image caption</source>
             <translation>Légende de l’image</translation>
         </message>
         <message>
-            <location filename="../qml/MosaicWorkspace.qml" line="175" />
+            <location filename="../qml/MosaicWorkspace.qml" line="177" />
             <source>Edit…</source>
             <translation>Modifier…</translation>
         </message>
         <message>
-            <location filename="../qml/MosaicWorkspace.qml" line="178" />
+            <location filename="../qml/MosaicWorkspace.qml" line="180" />
             <source>Edit in Processing…</source>
             <translation>Retoucher dans Traitement…</translation>
         </message>
         <message>
-            <location filename="../qml/MosaicWorkspace.qml" line="158" />
+            <location filename="../qml/MosaicWorkspace.qml" line="160" />
             <source>Assembly options…</source>
             <translation>Options d’assemblage…</translation>
         </message>
         <message>
-            <location filename="../qml/MosaicWorkspace.qml" line="44" />
+            <location filename="../qml/MosaicWorkspace.qml" line="46" />
             <source>Assembly options</source>
             <translation>Options d’assemblage</translation>
         </message>
         <message>
-            <location filename="../qml/MosaicWorkspace.qml" line="46" />
+            <location filename="../qml/MosaicWorkspace.qml" line="48" />
             <source>Automatically exclude unmatched images</source>
             <translation>Écarter les images sans raccord fiable</translation>
         </message>
         <message>
-            <location filename="../qml/MosaicWorkspace.qml" line="47" />
+            <location filename="../qml/MosaicWorkspace.qml" line="49" />
             <source>Keeps the largest connected group. Excluded images can be restored; files are never deleted. At least two matching views are needed.</source>
             <translation>Conserve le plus grand groupe raccordable. Les images écartées peuvent être réintégrées ; les fichiers ne sont jamais supprimés. Il faut au moins deux vues compatibles.</translation>
         </message>
         <message>
-            <location filename="../qml/MosaicWorkspace.qml" line="48" />
+            <location filename="../qml/MosaicWorkspace.qml" line="50" />
             <source>Soften mosaic edges</source>
             <translation>Adoucir les bords de la mosaïque</translation>
         </message>
         <message>
-            <location filename="../qml/MosaicWorkspace.qml" line="49" />
+            <location filename="../qml/MosaicWorkspace.qml" line="51" />
             <source>Fades the outer coverage boundary into black and protects it from sharpening in Processing. A narrow strip at the edge is darkened; missing areas are not reconstructed.</source>
             <translation>Adoucit la limite extérieure vers le noir et la protège des ondelettes dans Traitement. Une fine bande au bord est assombrie ; les zones manquantes ne sont pas reconstituées.</translation>
         </message>
         <message>
-            <location filename="../qml/MosaicWorkspace.qml" line="50" />
+            <location filename="../qml/MosaicWorkspace.qml" line="52" />
             <source>Changes apply to the next assembly.</source>
             <translation>Les changements s’appliquent au prochain assemblage.</translation>
         </message>
         <message>
-            <location filename="../qml/MosaicWorkspace.qml" line="162" />
+            <location filename="../qml/MosaicWorkspace.qml" line="164" />
             <source>%1 excluded images…</source>
             <translation>%1 images écartées…</translation>
         </message>
         <message>
-            <location filename="../qml/MosaicWorkspace.qml" line="60" />
+            <location filename="../qml/MosaicWorkspace.qml" line="62" />
             <source>Excluded images</source>
             <translation>Images écartées</translation>
         </message>
@@ -2479,17 +3873,17 @@ Les détails communs relient les vues. Les zones manquantes restent noires ; auc
             <translation type="vanished">Ces vues n’ont pas pu être raccordées de façon fiable au groupe conservé. Les fichiers d’origine sont inchangés.</translation>
         </message>
         <message>
-            <location filename="../qml/MosaicWorkspace.qml" line="68" />
+            <location filename="../qml/MosaicWorkspace.qml" line="70" />
             <source>Restore to selection</source>
             <translation>Réintégrer à la sélection</translation>
         </message>
         <message>
-            <location filename="../qml/MosaicWorkspace.qml" line="70" />
+            <location filename="../qml/MosaicWorkspace.qml" line="72" />
             <source>Close</source>
             <translation>Fermer</translation>
         </message>
         <message>
-            <location filename="../qml/MosaicWorkspace.qml" line="51" />
+            <location filename="../qml/MosaicWorkspace.qml" line="53" />
             <source>Done</source>
             <translation>Terminé</translation>
         </message>
@@ -2506,22 +3900,22 @@ Les détails communs relient les vues. Les zones manquantes restent noires ; auc
             <translation type="vanished"> · %1 écartées : aucun raccord fiable au groupe principal</translation>
         </message>
         <message>
-            <location filename="../qml/MosaicWorkspace.qml" line="105" />
+            <location filename="../qml/MosaicWorkspace.qml" line="107" />
             <source>%1 / %2 images selected</source>
             <translation>%1 / %2 images sélectionnées</translation>
         </message>
         <message>
-            <location filename="../qml/MosaicWorkspace.qml" line="141" />
+            <location filename="../qml/MosaicWorkspace.qml" line="143" />
             <source>Use this image</source>
             <translation>Utiliser cette image</translation>
         </message>
         <message>
-            <location filename="../qml/MosaicWorkspace.qml" line="143" />
+            <location filename="../qml/MosaicWorkspace.qml" line="145" />
             <source>Use %1</source>
             <translation>Utiliser %1</translation>
         </message>
         <message>
-            <location filename="../qml/MosaicWorkspace.qml" line="61" />
+            <location filename="../qml/MosaicWorkspace.qml" line="63" />
             <source>These views could not be connected reliably to the retained group. They remain in the grid, unchecked. Original files are unchanged.</source>
             <translation>Ces vues n’ont pas pu être raccordées de façon fiable au groupe conservé. Elles restent visibles dans la grille, décochées. Les fichiers d’origine sont inchangés.</translation>
         </message>
@@ -2529,11 +3923,21 @@ Les détails communs relient les vues. Les zones manquantes restent noires ; auc
             <source>%1 of %2 images selected.</source>
             <translation type="vanished">%1 images sélectionnées sur %2.</translation>
         </message>
-    </context>
+    <message><source>Add images</source><translation>Ajouter des images</translation></message>
+<message><source>Edit caption</source><translation>Modifier la légende</translation></message>
+<message><source>Edit in Processing</source><translation>Retoucher dans Traitement</translation></message>
+<message><source>Export TIFF</source><translation>Exporter en TIFF</translation></message>
+<message><source>Build your mosaic</source><translation>Créez votre mosaïque</translation></message>
+<message><source>Add overlapping Moon or Sun images, then assemble them.</source><translation>Ajoutez des vues de la Lune ou du Soleil qui se chevauchent, puis assemblez-les.</translation></message>
+<message><source>%1 excluded images</source><translation>%1 images écartées</translation></message>
+</context>
     <context>
         <name>ProcessingWorkspace</name>
-<message><source>Processing</source><translation>Traitement</translation></message>
-
+        <message>
+            <location filename="../qml/ProcessingWorkspace.qml" line="279" />
+            <source>Processing</source>
+            <translation>Traitement</translation>
+        </message>
         <message>
             <source>Open a planetary video</source>
             <translation type="vanished">Ouvrir une vidéo planétaire</translation>
@@ -2554,7 +3958,7 @@ Les détails communs relient les vues. Les zones manquantes restent noires ; auc
         </message>
         <message>
             <location filename="../qml/ProcessingWorkspace.qml" line="155" />
-            <location filename="../qml/ProcessingWorkspace.qml" line="679" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="682" />
             <source>Processing presets</source>
             <translation>Préréglages de traitement</translation>
         </message>
@@ -2593,7 +3997,7 @@ Les détails communs relient les vues. Les zones manquantes restent noires ; auc
             <translation type="vanished">Ouvrir un SER…</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="285" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="288" />
             <source>Last recording</source>
             <translation>Dernier enregistrement</translation>
         </message>
@@ -2602,17 +4006,17 @@ Les détails communs relient les vues. Les zones manquantes restent noires ; auc
             <translation type="vanished">Récents</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="300" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="303" />
             <source> · unavailable</source>
             <translation> · indisponible</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="325" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="328" />
             <source>Selected: </source>
             <translation>Sélection : </translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="325" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="328" />
             <source> frames (</source>
             <translation> images (</translation>
         </message>
@@ -2633,69 +4037,69 @@ Les détails communs relient les vues. Les zones manquantes restent noires ; auc
             <translation type="vanished">Votre vidéo d’origine reste intacte.</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="397" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="401" />
             <source>Show stacked result</source>
             <translation>Afficher le résultat empilé</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="408" />
             <location filename="../qml/ProcessingWorkspace.qml" line="412" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="416" />
             <source>Pause source</source>
             <translation>Pause vidéo</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="408" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="412" />
             <source>Play source</source>
             <translation>Lire la vidéo</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="416" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="419" />
             <source>Original SER video, up to 10 frames/s. The stack is a single still image.</source>
             <translation>Vidéo SER d’origine, jusqu’à 10 images/s. L’empilement produit une seule image fixe.</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="484" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="487" />
             <source>Processing controls</source>
             <translation>Réglages de traitement</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="485" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="488" />
             <source>Guided</source>
             <translation>Guidé</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="485" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="488" />
             <source>Compact</source>
             <translation>Compact</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="490" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="493" />
             <source>1   Select the best frames</source>
             <translation>1   Sélectionner les meilleures images</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="491" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="494" />
             <source>Sharpness ranking helps reject blurred frames. Inspect the result: noise and clouds can also affect the score.</source>
             <translation>Le classement par netteté aide à écarter les images floues. Vérifiez le résultat : le bruit et les nuages influencent aussi le score.</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="493" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="496" />
             <source>Analyze again</source>
             <translation>Analyser à nouveau</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="493" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="496" />
             <source>Analyze video</source>
             <translation>Analyser la vidéo</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="540" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="543" />
             <source>Left → right: sharpest → softest (sorted, not time). Height: relative sharpness, best = 100%. Shaded area: frames kept.</source>
             <translation>Gauche → droite : de la plus nette à la plus floue (pas l’ordre de la vidéo). Hauteur : netteté relative, meilleure = 100 %. Zone colorée : images conservées.</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="534" />
-            <location filename="../qml/ProcessingWorkspace.qml" line="544" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="537" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="547" />
             <source>Frames to keep</source>
             <translation>Images à conserver</translation>
         </message>
@@ -2705,147 +4109,147 @@ Les détails communs relient les vues. Les zones manquantes restent noires ; auc
             <translation>Vidéos et images (*.ser *.acraw *.SER *.png *.PNG *.tif *.TIF *.tiff *.TIFF)</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="570" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="573" />
             <source>Keeping </source>
             <translation>Conservation de </translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="570" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="573" />
             <source>% of the video. Start at 25–50%: fewer frames favor sharpness; more frames reduce noise but can soften detail.</source>
             <translation>% de la vidéo. Commencez à 25–50 % : moins d’images favorisent la netteté ; davantage réduisent le bruit mais peuvent atténuer les détails.</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="570" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="573" />
             <source>Analyze first to rank the frames by sharpness.</source>
             <translation>Analysez d’abord pour classer les images par netteté.</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="572" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="575" />
             <source>2   Align and stack</source>
             <translation>2   Aligner et empiler</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="608" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="611" />
             <source>Aligns the selected frames and averages them into ONE still image. Unreliable matches are skipped; shared borders are cropped. Play source always shows the original video.</source>
             <translation>Aligne les images sélectionnées et calcule leur moyenne pour produire UNE image fixe. Les alignements incertains sont écartés et les bords communs sont recadrés. Lire la vidéo affiche toujours la vidéo d’origine.</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="610" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="613" />
             <source>Align &amp; stack </source>
             <translation>Aligner et empiler </translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="610" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="613" />
             <source> frames</source>
             <translation> images</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="617" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="620" />
             <source>3   Reveal detail</source>
             <translation>3   Révéler les détails</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="618" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="621" />
             <source>Adjustments update automatically after a short pause. Levels 1–2: fine details · 3–4: medium structures · 5–6: broad contrast. Each scale doubles in size. Hover the help icon for an explanation.</source>
             <translation>L’aperçu s’actualise après une courte pause. Niveaux 1–2 : détails fins · 3–4 : structures moyennes · 5–6 : contraste large. Chaque échelle double de taille. Cliquez sur ? pour l’aide.</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="628" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="631" />
             <source>Level </source>
             <translation>Niveau </translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="630" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="633" />
             <source>Finest detail: very small edges and texture. Also amplifies fine noise; use gently.</source>
             <translation>Détails les plus fins : petits contours et textures. Amplifie aussi le bruit fin ; à utiliser avec modération.</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="631" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="634" />
             <source>Fine detail: narrow edges and small structures, at a broader scale than Level 1.</source>
             <translation>Détails fins : contours étroits et petites structures, à une échelle plus large que le niveau 1.</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="632" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="635" />
             <source>Medium detail: intermediate structures and transitions.</source>
             <translation>Détails moyens : structures et transitions intermédiaires.</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="633" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="636" />
             <source>Broader detail: larger structures and contrast transitions.</source>
             <translation>Détails plus larges : grandes structures et transitions de contraste.</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="634" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="637" />
             <source>Large-scale detail: broad bands and large features.</source>
             <translation>Grande échelle : bandes larges et grandes formes.</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="635" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="638" />
             <source>Coarsest detail: the broadest structures and contrast variations. Large gains can create halos.</source>
             <translation>Échelle la plus large : grandes structures et variations de contraste. Des valeurs élevées peuvent créer des halos.</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="636" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="639" />
             <source> Each level is about twice as broad as the previous one. These are overlapping detail scales, not fixed astronomical features. Zero adds no detail at this level.</source>
             <translation> Chaque niveau couvre environ deux fois l’échelle du précédent. Ces échelles se chevauchent et ne correspondent pas à des objets astronomiques précis. À zéro, aucun détail n’est ajouté à ce niveau.</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="640" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="643" />
             <source>Denoise</source>
             <translation>Débruitage</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="641" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="644" />
             <source>Red</source>
             <translation>Rouge</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="642" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="645" />
             <source>Green</source>
             <translation>Vert</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="643" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="646" />
             <source>Blue</source>
             <translation>Bleu</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="644" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="647" />
             <source>Gamma</source>
             <translation>Gamma</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="646" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="649" />
             <source>Updating preview…</source>
             <translation>Mise à jour de l’aperçu…</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="646" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="649" />
             <source>Preview paused · adjust a slider to resume</source>
             <translation>Aperçu en pause · déplacez un curseur pour reprendre</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="646" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="649" />
             <source>Automatic preview</source>
             <translation>Aperçu automatique</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="647" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="650" />
             <source>Reset</source>
             <translation>Réinitialiser</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="650" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="653" />
             <source>Undo</source>
             <translation>Annuler</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="651" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="654" />
             <source>Redo</source>
             <translation>Rétablir</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="656" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="659" />
             <source>Hold for before</source>
             <translation>Maintenir : avant</translation>
         </message>
@@ -2854,7 +4258,7 @@ Les détails communs relient les vues. Les zones manquantes restent noires ; auc
             <translation type="vanished">Maintenez pour voir l’empilement avant les ondelettes et les couleurs. Relâchez pour revenir au résultat.</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="663" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="666" />
             <source>Compare</source>
             <translation>Comparer</translation>
         </message>
@@ -2863,32 +4267,32 @@ Les détails communs relient les vues. Les zones manquantes restent noires ; auc
             <translation type="vanished">Déplacez la séparation : avant à gauche, après à droite.</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="720" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="723" />
             <source>Load</source>
             <translation>Charger</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="722" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="725" />
             <source>Manage presets…</source>
             <translation>Gérer les préréglages…</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="725" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="728" />
             <source>4   Export</source>
             <translation>4   Exporter</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="726" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="729" />
             <source>Waiting for the latest adjustments before export.</source>
             <translation>En attente des derniers réglages avant l’export.</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="726" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="729" />
             <source>16-bit RGB TIFF preserves the precision gained from stacking.</source>
             <translation>Le TIFF RVB 16 bits conserve la précision gagnée par l’empilement.</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="740" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="743" />
             <source>Save image…</source>
             <translation>Enregistrer l’image…</translation>
         </message>
@@ -2898,22 +4302,22 @@ Les détails communs relient les vues. Les zones manquantes restent noires ; auc
         </message>
         <message>
             <location filename="../qml/ProcessingWorkspace.qml" line="161" />
-            <location filename="../qml/ProcessingWorkspace.qml" line="770" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="773" />
             <source>Cancel</source>
             <translation>Annuler</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="730" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="733" />
             <source>Image caption</source>
             <translation>Légende de l’image</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="734" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="737" />
             <source>Add a caption to the exported image</source>
             <translation>Ajouter une légende à l’image exportée</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="737" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="740" />
             <source>Edit…</source>
             <translation>Modifier…</translation>
         </message>
@@ -2974,73 +4378,73 @@ Télescope · caméra · accessoires</translation>
             <translation type="vanished">Terminé</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="575" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="578" />
             <source>Planet</source>
             <translation>Planète</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="576" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="579" />
             <source>Moon / Sun</source>
             <translation>Lune / Soleil</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="578" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="581" />
             <source>Local alignment follows surface details to reduce turbulence distortions. Unreliable areas use global alignment. It cannot recover detail lost to blur.</source>
             <translation>L’alignement local suit les détails de la surface pour atténuer les déformations dues à la turbulence. Les zones incertaines utilisent l’alignement global. Les détails perdus dans le flou ne sont pas récupérables.</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="593" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="596" />
             <source>Alignment areas: 64 px for fine, contrasted detail; 96 px to start; 160 px for softer or noisier surfaces. Use short, well-exposed recordings with steady focus.</source>
             <translation>Zones d’alignement : 64 px pour des détails fins et contrastés ; 96 px pour commencer ; 160 px pour une surface plus floue ou bruitée. Privilégiez des séquences courtes, bien exposées et une mise au point stable.</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="542" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="545" />
             <source>Drag the blue boundary to choose how many of the best frames to keep.</source>
             <translation>Déplacez la limite bleue pour choisir combien des meilleures images conserver.</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="325" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="328" />
             <source>Still image · adjust details, color and caption</source>
             <translation>Image fixe · détails, couleur et légende</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="325" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="328" />
             <source>Per area: </source>
             <translation>Par zone : </translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="596" />
             <location filename="../qml/ProcessingWorkspace.qml" line="599" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="602" />
             <source>Best frames per area</source>
             <translation>Meilleures images par zone</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="605" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="608" />
             <source>Each area chooses its best frames from the entire video. The blue boundary sets the count per area; the curve remains a global overview. This takes longer than global selection.</source>
             <translation>Chaque zone choisit ses meilleures images dans toute la vidéo. La limite bleue règle le nombre par zone ; la courbe reste un aperçu global. Le calcul est plus long qu’une sélection globale.</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="610" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="613" />
             <source>Stack up to %1 frames per area</source>
             <translation>Empiler jusqu’à %1 images par zone</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="617" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="620" />
             <source>Reveal detail</source>
             <translation>Révéler les détails</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="725" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="728" />
             <source>Export</source>
             <translation>Exporter</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="397" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="401" />
             <source>Show result</source>
             <translation>Voir le résultat</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="540" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="543" />
             <source>Global sharpness ranking, best = 100%. The blue boundary sets a count per area; each area selects its own frames.</source>
             <translation>Classement global de netteté, meilleure image = 100 %. La limite bleue règle le nombre par zone ; chaque zone choisit ses propres images.</translation>
         </message>
@@ -3058,37 +4462,37 @@ Télescope · caméra · accessoires</translation>
             <translation type="vanished">Images PNG et TIFF (*.png *.PNG *.tif *.TIF *.tiff *.TIFF)</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="280" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="283" />
             <source>Open…</source>
             <translation>Ouvrir…</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="389" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="393" />
             <source>Open or drop a SER, PNG or TIFF here. Analyze and stack a video, or adjust an image directly.</source>
             <translation>Ouvrez ou déposez un SER, PNG ou TIFF ici. Analysez et empilez une vidéo, ou retouchez directement une image.</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="759" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="762" />
             <source>Open a SER video or a PNG / TIFF image to begin.</source>
             <translation>Ouvrez une vidéo SER ou une image PNG / TIFF pour commencer.</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="325" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="328" />
             <source>Open a video to stack, or an image to adjust.</source>
             <translation>Ouvrez une vidéo à empiler ou une image à retoucher.</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="388" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="392" />
             <source>From capture to final image</source>
             <translation>De la capture à l’image finale</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="390" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="394" />
             <source>Your original files stay untouched.</source>
             <translation>Vos fichiers originaux restent intacts.</translation>
         </message>
         <message>
-            <location filename="../qml/ProcessingWorkspace.qml" line="290" />
+            <location filename="../qml/ProcessingWorkspace.qml" line="293" />
             <source>Recent videos</source>
             <translation>Vidéos récentes</translation>
         </message>
@@ -3097,7 +4501,19 @@ Télescope · caméra · accessoires</translation>
             <source>Drop to adjust this image</source>
             <translation>Déposer pour retoucher cette image</translation>
         </message>
-    </context>
+    <message><source>16-bit PNG image (*.png)</source><translation>Image PNG 16 bits (*.png)</translation></message>
+<message><source>PNG and TIFF preserve 16-bit detail without lossy compression.</source><translation>PNG et TIFF conservent les détails en 16 bits sans compression destructive.</translation></message>
+<message><source>PNG · 16-bit, lossless</source><translation>PNG · 16 bits, sans perte</translation></message>
+<message><source>TIFF · 16-bit, lossless</source><translation>TIFF · 16 bits, sans perte</translation></message>
+<message><source>Save image</source><translation>Enregistrer l’image</translation></message>
+<message><source>Open image or video</source><translation>Ouvrir une image ou une vidéo</translation></message>
+<message><source>Show explanations</source><translation>Afficher les aides</translation></message>
+<message><source>Hide explanations</source><translation>Masquer les aides</translation></message>
+<message><source>Manage presets</source><translation>Gérer les préréglages</translation></message>
+<message><source>Edit caption</source><translation>Modifier la légende</translation></message>
+<message><source>Export image</source><translation>Exporter l’image</translation></message>
+<message><source>Recent files</source><translation>Fichiers récents</translation></message>
+</context>
     <context>
         <name>QObject</name>
         <message>
@@ -3186,300 +4602,405 @@ Télescope · caméra · accessoires</translation>
             <translation>ACRAW : ancien format provisoire d’AstroCapture, antérieur au SER. Conservé comme solution de secours.</translation>
         </message>
         <message>
-            <location filename="../qml/SettingsPanel.qml" line="267" />
+            <location filename="../qml/SettingsPanel.qml" line="265" />
             <source>Standard planetary video format (AutoStakkert, PIPP, Registax, FireCapture)</source>
             <translation>Format standard de vidéo planétaire (AutoStakkert, PIPP, Registax, FireCapture)</translation>
         </message>
         <message>
-            <location filename="../qml/SettingsPanel.qml" line="268" />
+            <location filename="../qml/SettingsPanel.qml" line="266" />
             <source>AstroCapture's own interim format</source>
             <translation>Ancien format provisoire d’AstroCapture</translation>
         </message>
         <message>
-            <location filename="../qml/SettingsPanel.qml" line="268" />
+            <location filename="../qml/SettingsPanel.qml" line="266" />
             <source>Individual linear FITS frames for deep-sky imaging</source>
             <translation>Poses FITS linéaires individuelles pour le ciel profond</translation>
         </message>
         <message>
-            <location filename="../qml/SettingsPanel.qml" line="286" />
+            <location filename="../qml/SettingsPanel.qml" line="284" />
             <source>Presets — </source>
             <translation>Préréglages — </translation>
         </message>
         <message>
-            <location filename="../qml/SettingsPanel.qml" line="300" />
+            <location filename="../qml/SettingsPanel.qml" line="298" />
             <source>Preset name</source>
             <translation>Nom du préréglage</translation>
         </message>
         <message>
-            <location filename="../qml/SettingsPanel.qml" line="326" />
+            <location filename="../qml/SettingsPanel.qml" line="324" />
             <source>“%1” saved.</source>
             <translation>« %1 » enregistré.</translation>
         </message>
         <message>
-            <location filename="../qml/SettingsPanel.qml" line="365" />
+            <location filename="../qml/SettingsPanel.qml" line="363" />
             <source>“%1” applied.</source>
             <translation>« %1 » appliqué.</translation>
         </message>
         <message>
-            <location filename="../qml/SettingsPanel.qml" line="378" />
+            <location filename="../qml/SettingsPanel.qml" line="376" />
             <source>No presets yet.</source>
             <translation>Aucun préréglage pour le moment.</translation>
         </message>
     </context>
     <context>
+        <name>StudioNavigation</name>
+        <message>
+            <location filename="../qml/StudioNavigation.qml" line="13" />
+            <source>Home</source>
+            <translation>Accueil</translation>
+        </message>
+        <message>
+            <location filename="../qml/StudioNavigation.qml" line="14" />
+            <source>Capture</source>
+            <translation>Capture</translation>
+        </message>
+        <message>
+            <location filename="../qml/StudioNavigation.qml" line="15" />
+            <source>Processing</source>
+            <translation>Traitement</translation>
+        </message>
+        <message>
+            <location filename="../qml/StudioNavigation.qml" line="16" />
+            <source>Deep sky</source>
+            <translation>Ciel profond</translation>
+        </message>
+        <message>
+            <location filename="../qml/StudioNavigation.qml" line="17" />
+            <source>Mosaic</source>
+            <translation>Mosaïque</translation>
+        </message>
+        <message>
+            <location filename="../qml/StudioNavigation.qml" line="18" />
+            <source>History</source>
+            <translation>Historique</translation>
+        </message>
+        <message>
+            <location filename="../qml/StudioNavigation.qml" line="19" />
+            <source>Guide</source>
+            <translation>Guide</translation>
+        </message>
+        <message>
+            <location filename="../qml/StudioNavigation.qml" line="20" />
+            <source>Settings</source>
+            <translation>Paramètres</translation>
+        </message>
+        <message>
+            <location filename="../qml/StudioNavigation.qml" line="54" />
+            <source>Current workspace</source>
+            <translation>Espace actif</translation>
+        </message>
+    </context>
+    <context>
         <name>astro::app::AppLibrary</name>
         <message>
-            <location filename="../src/AppLibrary.cpp" line="74" />
+            <location filename="../src/AppLibrary.cpp" line="100" />
             <source>Could not save application preferences.</source>
             <translation>Impossible d’enregistrer les préférences de l’application.</translation>
         </message>
         <message>
-            <location filename="../src/AppLibrary.cpp" line="121" />
+            <location filename="../src/AppLibrary.cpp" line="184" />
             <source>Processing preset saved.</source>
             <translation>Préréglage de traitement enregistré.</translation>
         </message>
         <message>
-            <location filename="../src/AppLibrary.cpp" line="130" />
+            <location filename="../src/AppLibrary.cpp" line="193" />
             <source>Processing preset removed.</source>
             <translation>Préréglage de traitement supprimé.</translation>
         </message>
         <message>
-            <location filename="../src/AppLibrary.cpp" line="147" />
+            <location filename="../src/AppLibrary.cpp" line="210" />
             <source>Choose an existing local folder.</source>
             <translation>Choisissez un dossier local existant.</translation>
         </message>
         <message>
-            <location filename="../src/AppLibrary.cpp" line="152" />
+            <location filename="../src/AppLibrary.cpp" line="215" />
             <source>Export folder saved.</source>
             <translation>Dossier d’export mémorisé.</translation>
         </message>
         <message>
-            <location filename="../src/AppLibrary.cpp" line="187" />
+            <location filename="../src/AppLibrary.cpp" line="250" />
             <source>%1 image(s) added to History.</source>
             <translation>%1 image(s) ajoutée(s) à l’historique.</translation>
         </message>
         <message>
-            <location filename="../src/AppLibrary.cpp" line="209" />
+            <location filename="../src/AppLibrary.cpp" line="272" />
             <source>Removed from History. The image file was kept.</source>
             <translation>Retirée de l’historique. Le fichier image a été conservé.</translation>
         </message>
         <message>
-            <location filename="../src/AppLibrary.cpp" line="214" />
-            <location filename="../src/AppLibrary.cpp" line="223" />
+            <location filename="../src/AppLibrary.cpp" line="277" />
+            <location filename="../src/AppLibrary.cpp" line="286" />
             <source>Image not found. It may have been moved or deleted.</source>
             <translation>Image introuvable. Elle a peut-être été déplacée ou supprimée.</translation>
         </message>
         <message>
-            <location filename="../src/AppLibrary.cpp" line="217" />
+            <location filename="../src/AppLibrary.cpp" line="280" />
             <source>Could not open the image in your image viewer.</source>
             <translation>Impossible d’ouvrir l’image dans votre visionneuse.</translation>
         </message>
         <message>
-            <location filename="../src/AppLibrary.cpp" line="234" />
+            <location filename="../src/AppLibrary.cpp" line="297" />
             <source>Could not open the image folder.</source>
             <translation>Impossible d’ouvrir le dossier de l’image.</translation>
         </message>
-    <message><source>Version: %1
+        <message>
+            <location filename="../src/AppLibrary.cpp" line="30" />
+            <source>Version: %1
 
 Steps to reproduce:
 
 Expected result:
 
 Actual result:
-</source><translation>Version : %1
+</source>
+            <translation>Version : %1
 
 Étapes pour reproduire :
 
 Résultat attendu :
 
 Résultat obtenu :
-</translation></message>
-<message><source>Could not open your email application. Contact antoninlefevre45@gmail.com.</source><translation>Impossible d’ouvrir votre application de messagerie. Contactez antoninlefevre45@gmail.com.</translation></message>
-<message><source>Deep-sky preset saved.</source><translation>Préréglage de ciel profond enregistré.</translation></message>
-<message><source>Deep-sky preset removed.</source><translation>Préréglage de ciel profond supprimé.</translation></message>
-</context>
+</translation>
+        </message>
+        <message>
+            <location filename="../src/AppLibrary.cpp" line="36" />
+            <source>Could not open your email application. Contact antoninlefevre45@gmail.com.</source>
+            <translation>Impossible d’ouvrir votre application de messagerie. Contactez antoninlefevre45@gmail.com.</translation>
+        </message>
+        <message>
+            <location filename="../src/AppLibrary.cpp" line="174" />
+            <source>Deep-sky preset saved.</source>
+            <translation>Préréglage de ciel profond enregistré.</translation>
+        </message>
+        <message>
+            <location filename="../src/AppLibrary.cpp" line="177" />
+            <source>Deep-sky preset removed.</source>
+            <translation>Préréglage de ciel profond supprimé.</translation>
+        </message>
+    </context>
     <context>
         <name>astro::app::DeepSkyController</name>
         <message>
-            <location filename="../src/DeepSkyController.cpp" line="107" />
+            <location filename="../src/DeepSkyController.cpp" line="172" />
             <source>Cancelled. Previous results are preserved.</source>
             <translation>Annulé. Les résultats précédents sont conservés.</translation>
         </message>
         <message>
-            <location filename="../src/DeepSkyController.cpp" line="128" />
+            <location filename="../src/DeepSkyController.cpp" line="206" />
             <source>Invalid import settings.</source>
             <translation>Réglages d’import invalides.</translation>
         </message>
         <message>
-            <location filename="../src/DeepSkyController.cpp" line="123" />
-            <location filename="../src/DeepSkyController.cpp" line="129" />
+            <location filename="../src/DeepSkyController.cpp" line="201" />
+            <location filename="../src/DeepSkyController.cpp" line="207" />
             <source>Projects are limited to 2000 files.</source>
             <translation>Un projet accepte au maximum 2000 fichiers.</translation>
         </message>
         <message>
-            <location filename="../src/DeepSkyController.cpp" line="131" />
+            <location filename="../src/DeepSkyController.cpp" line="188" />
+            <source>Loaded %1 photometric references.</source>
+            <translation type="unfinished">%1 références photométriques chargées.</translation>
+        </message>
+        <message>
+            <location filename="../src/DeepSkyController.cpp" line="192" />
+            <source>PSF estimation requires a linear, unrotated recipe input. Remove earlier stretches or use a new version.</source>
+            <translation type="unfinished">La mesure de PSF exige une entrée linéaire non tournée. Retirez les étirements précédents ou utilisez une nouvelle version.</translation>
+        </message>
+        <message>
+            <location filename="../src/DeepSkyController.cpp" line="193" />
+            <source>Measuring stellar PSF…</source>
+            <translation type="unfinished">Mesure de la PSF stellaire…</translation>
+        </message>
+        <message>
+            <location filename="../src/DeepSkyController.cpp" line="193" />
+            <source>PSF measured from %1 stars. Review the estimate before using it.</source>
+            <translation type="unfinished">PSF mesurée sur %1 étoiles. Vérifiez l’estimation avant de l’utiliser.</translation>
+        </message>
+        <message>
+            <location filename="../src/DeepSkyController.cpp" line="209" />
             <source>Reading images and detecting stars…</source>
             <translation>Lecture des images et détection des étoiles…</translation>
         </message>
         <message>
-            <location filename="../src/DeepSkyController.cpp" line="139" />
+            <location filename="../src/DeepSkyController.cpp" line="217" />
             <source>File not found: %1</source>
             <translation>Fichier introuvable : %1</translation>
         </message>
         <message>
-            <location filename="../src/DeepSkyController.cpp" line="171" />
+            <location filename="../src/DeepSkyController.cpp" line="249" />
             <source>%1 images imported.</source>
             <translation>%1 images importées.</translation>
         </message>
         <message>
-            <location filename="../src/DeepSkyController.cpp" line="187" />
+            <location filename="../src/DeepSkyController.cpp" line="265" />
             <source>Preparing raw comparison…</source>
             <translation>Préparation de la comparaison avec une brute…</translation>
         </message>
         <message>
-            <location filename="../src/DeepSkyController.cpp" line="193" />
+            <location filename="../src/DeepSkyController.cpp" line="271" />
             <source>Showing the stacked result.</source>
             <translation>Affichage du résultat empilé.</translation>
         </message>
         <message>
-            <location filename="../src/DeepSkyController.cpp" line="194" />
+            <location filename="../src/DeepSkyController.cpp" line="282" />
             <source>Opening frame…</source>
             <translation>Ouverture de la pose…</translation>
         </message>
         <message>
-            <location filename="../src/DeepSkyController.cpp" line="194" />
             <source>Source preview: %1. Export still uses the integrated result.</source>
-            <translation>Aperçu de la source : %1. L’export utilise le résultat empilé.</translation>
+            <translation type="vanished">Aperçu de la source : %1. L’export utilise le résultat empilé.</translation>
         </message>
         <message>
-            <location filename="../src/DeepSkyController.cpp" line="197" />
+            <location filename="../src/DeepSkyController.cpp" line="286" />
             <source>Calibrating and integrating…</source>
             <translation>Calibration et empilement…</translation>
         </message>
         <message>
-            <location filename="../src/DeepSkyController.cpp" line="225" />
+            <location filename="../src/DeepSkyController.cpp" line="315" />
             <source>%1: %2/%3 frames, %4 s, %5 rejected samples</source>
             <translation>%1 : %2/%3 poses, %4 s, %5 valeurs rejetées</translation>
         </message>
         <message>
-            <location filename="../src/DeepSkyController.cpp" line="226" />
+            <location filename="../src/DeepSkyController.cpp" line="316" />
             <source>Only one usable light in %1: no multi-frame noise reduction was possible.</source>
             <translation>Une seule pose utilisable dans %1 : aucune réduction du bruit par empilement n’a été possible.</translation>
         </message>
         <message>
-            <location filename="../src/DeepSkyController.cpp" line="234" />
+            <location filename="../src/DeepSkyController.cpp" line="324" />
             <source>Complete</source>
             <translation>Terminé</translation>
         </message>
         <message>
-            <location filename="../src/DeepSkyController.cpp" line="237" />
+            <location filename="../src/DeepSkyController.cpp" line="327" />
             <source>Displaying integration…</source>
             <translation>Affichage de l’empilement…</translation>
         </message>
         <message>
-            <location filename="../src/DeepSkyController.cpp" line="240" />
+            <location filename="../src/DeepSkyController.cpp" line="330" />
             <source>Select integrated groups for each color channel.</source>
             <translation>Choisissez les groupes empilés pour chaque couche couleur.</translation>
         </message>
         <message>
-            <location filename="../src/DeepSkyController.cpp" line="243" />
+            <location filename="../src/DeepSkyController.cpp" line="333" />
             <source>Aligning and combining channels…</source>
             <translation>Alignement et combinaison des couches…</translation>
         </message>
         <message>
-            <location filename="../src/DeepSkyController.cpp" line="243" />
+            <location filename="../src/DeepSkyController.cpp" line="333" />
             <source>Channels combined. Adjust the stretch, then export.</source>
             <translation>Couches combinées. Réglez l’étirement puis exportez.</translation>
         </message>
         <message>
-            <location filename="../src/DeepSkyController.cpp" line="250" />
             <source>Adjustment values must be finite.</source>
-            <translation>Les valeurs des réglages doivent être des nombres finis.</translation>
+            <translation type="vanished">Les valeurs des réglages doivent être des nombres finis.</translation>
         </message>
         <message>
-            <location filename="../src/DeepSkyController.cpp" line="252" />
+            <location filename="../src/DeepSkyController.cpp" line="282" />
+            <source>Source preview: %1. This individual exposure is for inspection only. Final image exports the stack with your finishing adjustments; Linear FITS exports the stack before finishing.</source>
+            <translation>Aperçu de la source : %1. Cette pose individuelle sert uniquement à l’inspection. « Image finale » exporte l’image empilée avec vos retouches ; « FITS linéaire » exporte l’image empilée avant la finition.</translation>
+        </message>
+        <message>
+            <location filename="../src/DeepSkyController.cpp" line="346" />
             <source>Adjusting background, colors and stretch…</source>
             <translation>Réglage du fond de ciel, des couleurs et de l’étirement…</translation>
         </message>
         <message>
-            <location filename="../src/DeepSkyController.cpp" line="252" />
+            <location filename="../src/DeepSkyController.cpp" line="397" />
             <source>Adjustments applied. Linear FITS retains the original integration.</source>
             <translation>Réglages appliqués. Le FITS linéaire conserve l’empilement original.</translation>
         </message>
         <message>
-            <location filename="../src/DeepSkyController.cpp" line="257" />
-            <location filename="../src/DeepSkyController.cpp" line="282" />
+            <location filename="../src/DeepSkyController.cpp" line="405" />
+            <location filename="../src/DeepSkyController.cpp" line="430" />
             <source>An original image cannot be overwritten.</source>
             <translation>Une image originale ne peut pas être écrasée.</translation>
         </message>
         <message>
-            <location filename="../src/DeepSkyController.cpp" line="259" />
+            <location filename="../src/DeepSkyController.cpp" line="407" />
             <source>Exporting image…</source>
             <translation>Export de l’image…</translation>
         </message>
         <message>
-            <location filename="../src/DeepSkyController.cpp" line="277" />
+            <location filename="../src/DeepSkyController.cpp" line="425" />
             <source>Saved %1</source>
             <translation>Enregistré : %1</translation>
         </message>
         <message>
-            <location filename="../src/DeepSkyController.cpp" line="285" />
+            <location filename="../src/DeepSkyController.cpp" line="433" />
+            <source>Project exceeds 4 MiB. Reduce saved sample or reference lists before saving.</source>
+            <translation type="unfinished">Le projet dépasse 4 Mio. Réduisez les listes d’échantillons ou de références avant de sauvegarder.</translation>
+        </message>
+        <message>
+            <location filename="../src/DeepSkyController.cpp" line="434" />
             <source>Cannot save project.</source>
             <translation>Impossible d’enregistrer le projet.</translation>
         </message>
         <message>
-            <location filename="../src/DeepSkyController.cpp" line="285" />
+            <location filename="../src/DeepSkyController.cpp" line="434" />
             <source>Project saved. Original files are referenced, not copied.</source>
             <translation>Projet enregistré. Il référence les originaux sans les copier.</translation>
         </message>
         <message>
-            <location filename="../src/DeepSkyController.cpp" line="290" />
+            <location filename="../src/DeepSkyController.cpp" line="439" />
             <source>Cannot read project.</source>
             <translation>Impossible de lire le projet.</translation>
         </message>
         <message>
-            <location filename="../src/DeepSkyController.cpp" line="292" />
+            <location filename="../src/DeepSkyController.cpp" line="441" />
+            <location filename="../src/DeepSkyController.cpp" line="449" />
+            <location filename="../src/DeepSkyController.cpp" line="454" />
             <source>Invalid AstroCapture project.</source>
             <translation>Projet AstroCapture invalide.</translation>
         </message>
         <message>
-            <location filename="../src/DeepSkyController.cpp" line="294" />
+            <location filename="../src/DeepSkyController.cpp" line="443" />
             <source>Project contains missing files or invalid roles.</source>
             <translation>Le projet contient des fichiers manquants ou des rôles invalides.</translation>
         </message>
         <message>
-            <location filename="../src/DeepSkyController.cpp" line="295" />
+            <location filename="../src/DeepSkyController.cpp" line="458" />
             <source>Project loaded. Integrate to recreate the result.</source>
             <translation>Projet chargé. Relancez l’empilement pour recréer le résultat.</translation>
         </message>
         <message>
-            <location filename="../src/DeepSkyController.cpp" line="300" />
+            <location filename="../src/DeepSkyController.cpp" line="463" />
             <source>Deep-sky result</source>
             <translation>Résultat ciel profond</translation>
         </message>
         <message>
-            <location filename="../src/DeepSkyController.cpp" line="302" />
+            <location filename="../src/DeepSkyController.cpp" line="465" />
             <source>Deep sky · %1 exposures · %2 s total · filters: %3</source>
             <translation>Ciel profond · %1 poses · %2 s au total · filtres : %3</translation>
         </message>
-    <message><source>Invalid finishing settings. Check levels and parameter ranges.</source><translation>Réglages de finition invalides. Vérifiez les niveaux et les plages des paramètres.</translation></message>
-    <message>
-        <source>RGB source · three channels</source>
-        <translation>Source RGB · trois couches</translation>
-    </message>
-    <message>
-        <source>Bayer %1 source · color preview is debayered</source>
-        <translation>Source Bayer %1 · aperçu couleur dématricé</translation>
-    </message>
-    <message>
-        <source>Monochrome source · one channel</source>
-        <translation>Source monochrome · une couche</translation>
-    </message>
-    <message>
-        <source>Bayer %1 source · raw mosaic preview</source>
-        <translation>Source Bayer %1 · aperçu de la mosaïque brute</translation>
-    </message>
-</context>
+        <message>
+            <location filename="../src/DeepSkyController.cpp" line="341" />
+            <source>Invalid finishing settings. Check levels and parameter ranges.</source>
+            <translation>Réglages de finition invalides. Vérifiez les niveaux et les plages des paramètres.</translation>
+        </message>
+        <message>
+            <location filename="../src/DeepSkyController.cpp" line="249" />
+            <location filename="../src/DeepSkyController.cpp" line="282" />
+            <source>RGB source · three channels</source>
+            <translation>Source RGB · trois couches</translation>
+        </message>
+        <message>
+            <location filename="../src/DeepSkyController.cpp" line="249" />
+            <location filename="../src/DeepSkyController.cpp" line="282" />
+            <source>Bayer %1 source · color preview is debayered</source>
+            <translation>Source Bayer %1 · aperçu couleur dématricé</translation>
+        </message>
+        <message>
+            <location filename="../src/DeepSkyController.cpp" line="249" />
+            <location filename="../src/DeepSkyController.cpp" line="282" />
+            <source>Monochrome source · one channel</source>
+            <translation>Source monochrome · une couche</translation>
+        </message>
+        <message>
+            <location filename="../src/DeepSkyController.cpp" line="282" />
+            <source>Bayer %1 source · raw mosaic preview</source>
+            <translation>Source Bayer %1 · aperçu de la mosaïque brute</translation>
+        </message>
+    </context>
     <context>
         <name>astro::app::MosaicController</name>
         <message>
@@ -3749,6 +5270,146 @@ Résultat obtenu :
             <location filename="../src/MosaicController.cpp" line="139" />
             <source>%1 of %2 images selected.</source>
             <translation>%1 images sélectionnées sur %2.</translation>
+        </message>
+        <message>
+            <source>Loaded %1 photometric references.</source>
+            <translation type="vanished">%1 références photométriques chargées.</translation>
+        </message>
+        <message>
+            <source>PSF estimation requires a linear, unrotated recipe input. Remove earlier stretches or use a new version.</source>
+            <translation type="vanished">La mesure de PSF exige une entrée linéaire non tournée. Retirez les étirements précédents ou utilisez une nouvelle version.</translation>
+        </message>
+        <message>
+            <source>Measuring stellar PSF…</source>
+            <translation type="vanished">Mesure de la PSF stellaire…</translation>
+        </message>
+        <message>
+            <source>PSF measured from %1 stars. Review the estimate before using it.</source>
+            <translation type="vanished">PSF mesurée sur %1 étoiles. Vérifiez l’estimation avant de l’utiliser.</translation>
+        </message>
+        <message>
+            <source>Project exceeds 4 MiB. Reduce saved sample or reference lists before saving.</source>
+            <translation type="vanished">Le projet dépasse 4 Mio. Réduisez les listes d’échantillons ou de références avant de sauvegarder.</translation>
+        </message>
+        <message>
+            <source>Invalid advanced processing image.</source>
+            <translation type="vanished">Image invalide pour les traitements avancés.</translation>
+        </message>
+        <message>
+            <source>Invalid GHS parameters.</source>
+            <translation type="vanished">Paramètres GHS invalides.</translation>
+        </message>
+        <message>
+            <source>GHS requires 0 ≤ shadows ≤ symmetry ≤ highlights ≤ 1.</source>
+            <translation type="vanished">Le GHS exige 0 ≤ ombres ≤ symétrie ≤ hautes lumières ≤ 1.</translation>
+        </message>
+        <message>
+            <source>Degenerate GHS curve.</source>
+            <translation type="vanished">La courbe GHS est dégénérée ; réduisez sa force ou modifiez les protections.</translation>
+        </message>
+        <message>
+            <source>Invalid mask parameters.</source>
+            <translation type="vanished">Paramètres de masque invalides.</translation>
+        </message>
+        <message>
+            <source>Invalid mask ranges.</source>
+            <translation type="vanished">Plages de masque invalides.</translation>
+        </message>
+        <message>
+            <source>No stars found for the mask.</source>
+            <translation type="vanished">Aucune étoile détectée pour le masque.</translation>
+        </message>
+        <message>
+            <source>Mask dimensions do not match.</source>
+            <translation type="vanished">Les dimensions du masque ne correspondent pas à l’image.</translation>
+        </message>
+        <message>
+            <source>Invalid mask values.</source>
+            <translation type="vanished">Valeurs de masque invalides.</translation>
+        </message>
+        <message>
+            <source>At least three unsaturated central stars are required to estimate a circular Gaussian PSF.</source>
+            <translation type="vanished">Il faut au moins trois étoiles centrales non saturées pour estimer une PSF gaussienne circulaire.</translation>
+        </message>
+        <message>
+            <source>Invalid PSF parameters.</source>
+            <translation type="vanished">Paramètres de PSF invalides.</translation>
+        </message>
+        <message>
+            <source>Invalid deconvolution settings.</source>
+            <translation type="vanished">Réglages de déconvolution invalides.</translation>
+        </message>
+        <message>
+            <source>Richardson-Lucy requires finite non-negative input. Adjust the pedestal before deconvolution.</source>
+            <translation type="vanished">Richardson–Lucy exige des valeurs finies non négatives. Ajustez le piédestal avant la déconvolution.</translation>
+        </message>
+        <message>
+            <source>Deconvolution diverged; reduce iterations or increase damping.</source>
+            <translation type="vanished">La déconvolution diverge ; réduisez les itérations ou augmentez l’amortissement.</translation>
+        </message>
+        <message>
+            <source>Invalid multiscale denoising settings.</source>
+            <translation type="vanished">Réglages de réduction du bruit multiéchelle invalides.</translation>
+        </message>
+        <message>
+            <source>Denoising requires finite pixels.</source>
+            <translation type="vanished">La réduction du bruit exige des pixels de valeur finie.</translation>
+        </message>
+        <message>
+            <source>Photometry requires at least three references and aperture &lt; inner annulus &lt; outer annulus.</source>
+            <translation type="vanished">La photométrie exige au moins trois références et ouverture &lt; rayon intérieur &lt; rayon extérieur.</translation>
+        </message>
+        <message>
+            <source>Photometry requires finite pixels.</source>
+            <translation type="vanished">La photométrie exige des pixels de valeur finie.</translation>
+        </message>
+        <message>
+            <source>Relative color calibration requires RGB color data, not a duplicated monochrome channel.</source>
+            <translation type="vanished">La calibration relative des couleurs exige des données RVB couleur, pas un canal monochrome dupliqué.</translation>
+        </message>
+        <message>
+            <source>Invalid photometric reference.</source>
+            <translation type="vanished">Référence photométrique invalide.</translation>
+        </message>
+        <message>
+            <source>Fewer than three usable unsaturated reference stars.</source>
+            <translation type="vanished">Il reste moins de trois étoiles de référence utilisables et non saturées.</translation>
+        </message>
+        <message>
+            <source>Photometric references disagree; fewer than three remain after rejection.</source>
+            <translation type="vanished">Les références photométriques sont incohérentes ; il en reste moins de trois après rejet.</translation>
+        </message>
+        <message>
+            <source>Photometric gains are implausible; verify reference fluxes and coordinates.</source>
+            <translation type="vanished">Les gains photométriques sont invraisemblables ; vérifiez les flux et coordonnées de référence.</translation>
+        </message>
+        <message>
+            <source>Cannot read photometry CSV (maximum 256 KiB).</source>
+            <translation type="vanished">Impossible de lire le CSV photométrique (256 Kio maximum).</translation>
+        </message>
+        <message>
+            <source>CSV header must be x,y,red,green,blue. Coordinates are zero-based pixels; values are positive reference fluxes, not magnitudes.</source>
+            <translation type="vanished">L’en-tête CSV doit être x,y,red,green,blue. Coordonnées en pixels depuis zéro ; valeurs en flux positifs, pas en magnitudes.</translation>
+        </message>
+        <message>
+            <source>Each photometry row must have five numeric values.</source>
+            <translation type="vanished">Chaque ligne photométrique doit avoir cinq valeurs numériques.</translation>
+        </message>
+        <message>
+            <source>Invalid photometry coordinate or flux.</source>
+            <translation type="vanished">Coordonnée ou flux photométrique invalide.</translation>
+        </message>
+        <message>
+            <source>Photometry is limited to 500 references.</source>
+            <translation type="vanished">La photométrie est limitée à 500 références.</translation>
+        </message>
+        <message>
+            <source>At least three reference stars are required.</source>
+            <translation type="vanished">Il faut au moins trois étoiles de référence.</translation>
+        </message>
+        <message>
+            <source>Processing produced a non-finite sample; previous result is preserved.</source>
+            <translation type="vanished">Le traitement a produit une valeur non finie ; le résultat précédent est conservé.</translation>
         </message>
     </context>
     <context>
@@ -4079,40 +5740,30 @@ Résultat obtenu :
             <source>Image · before adjustments</source>
             <translation>Image · avant retouches</translation>
         </message>
-    </context>
-<context><name>HomeWorkspace</name>
-<message><source>Your next image starts here.</source><translation>Votre prochaine image commence ici.</translation></message>
-<message><source>Capture, process or return to a project.</source><translation>Capturer, traiter ou reprendre un projet.</translation></message>
-<message><source>Open a project…</source><translation>Ouvrir un projet…</translation></message>
-<message><source>Capture the sky</source><translation>Capturer le ciel</translation></message>
-<message><source>Camera · SER video · FITS exposures</source><translation>Caméra · Vidéo SER · Poses FITS</translation></message>
-<message><source>Process an image</source><translation>Traiter une image</translation></message>
-<message><source>Planets, Moon and Sun · Still images</source><translation>Planètes, Lune et Soleil · Images fixes</translation></message>
-<message><source>Explore deep sky</source><translation>Explorer le ciel profond</translation></message>
-<message><source>Calibration · Stacking · Finishing</source><translation>Calibration · Empilement · Finition</translation></message>
-<message><source>Continue your work</source><translation>Reprendre votre travail</translation></message>
-<message><source>Current deep-sky project</source><translation>Projet de ciel profond en cours</translation></message>
-<message><source>%1 images · current session</source><translation>%1 images · session actuelle</translation></message>
-<message><source>Resume</source><translation>Reprendre</translation></message>
-<message><source>Processing · current session</source><translation>Traitement · session actuelle</translation></message>
-<message><source>Saved deep-sky project</source><translation>Projet de ciel profond enregistré</translation></message>
-<message><source>File unavailable</source><translation>Fichier indisponible</translation></message>
-<message><source>Open</source><translation>Ouvrir</translation></message>
-<message><source>Recent SER video</source><translation>Vidéo SER récente</translation></message>
-<message><source>Your recent projects and videos will appear here.</source><translation>Vos projets et vidéos récents apparaîtront ici.</translation></message>
-<message><source>First session?</source><translation>Première session ?</translation></message>
-<message><source>Learn acquisition, calibration and finishing at your own pace.</source><translation>Découvrez l’acquisition, la calibration et la finition à votre rythme.</translation></message>
-<message><source>Open the guide</source><translation>Ouvrir le guide</translation></message>
+    <message><source>Saved image: </source><translation>Image enregistrée : </translation></message>
+<message><source>Exporting image…</source><translation>Export de l’image…</translation></message>
 </context>
-<context><name>StudioNavigation</name>
-<message><source>Home</source><translation>Accueil</translation></message>
-<message><source>Capture</source><translation>Capture</translation></message>
-<message><source>Processing</source><translation>Traitement</translation></message>
-<message><source>Deep sky</source><translation>Ciel profond</translation></message>
-<message><source>Mosaic</source><translation>Mosaïque</translation></message>
-<message><source>History</source><translation>Historique</translation></message>
-<message><source>Guide</source><translation>Guide</translation></message>
-<message><source>Settings</source><translation>Réglages</translation></message>
-<message><source>Current workspace</source><translation>Espace actif</translation></message>
+<context><name>QuitConfirmation</name><message><source>Save before quitting?</source><translation>Sauvegarder avant de quitter ?</translation></message>
+<message><source>Your current work will close. Save the project, the finished image or your settings before leaving.</source><translation>Votre travail en cours va se fermer. Sauvegardez le projet, l’image finale ou vos réglages avant de quitter.</translation></message>
+<message><source>The deep-sky project keeps source references, stacking options, finishing settings and the caption. A TIFF keeps the finished image.</source><translation>Le projet ciel profond conserve les références des fichiers source, les options d’empilement, les réglages de finition et la légende. Un TIFF conserve l’image finale.</translation></message>
+<message><source>Recording is in progress. Stop it before quitting.</source><translation>Un enregistrement est en cours. Arrêtez-le avant de quitter.</translation></message>
+<message><source>A task is in progress. Wait for it to finish, or return to the workspace to cancel it.</source><translation>Un traitement est en cours. Attendez sa fin ou revenez à l’espace de travail pour l’annuler.</translation></message>
+<message><source>Save project and settings</source><translation>Sauvegarder le projet et les réglages</translation></message>
+<message><source>Save finished TIFF</source><translation>Sauvegarder l’image en TIFF</translation></message>
+<message><source>Save processing settings</source><translation>Enregistrer les réglages de traitement</translation></message>
+<message><source>Keep working</source><translation>Continuer à travailler</translation></message>
+<message><source>Quit anyway</source><translation>Quitter quand même</translation></message>
+</context>
+<context>
+<name>ExportSizeHint</name>
+<message><source>%1 MB</source><translation>%1 Mo</translation></message>
+<message><source>%1 kB</source><translation>%1 ko</translation></message>
+<message><source>%1 bytes</source><translation>%1 octets</translation></message>
+<message><source>Estimated file size: %1</source><translation>Poids estimé : %1</translation></message>
+<message><source>Updating size estimate…</source><translation>Actualisation du poids estimé…</translation></message>
+<message><source>Estimating file size…</source><translation>Estimation du poids…</translation></message>
+<message><source>File size estimate unavailable</source><translation>Estimation indisponible</translation></message>
+<message><source>Calculated for the selected export format.</source><translation>Calculé pour le format d’export choisi.</translation></message>
+<message><source>Estimated from native-resolution image samples, including the caption. Compression depends on image content; the final file size may vary.</source><translation>Estimation à partir de portions de l’image à pleine résolution, légende incluse. La compression dépend du contenu ; le poids final peut varier.</translation></message>
 </context>
 </TS>

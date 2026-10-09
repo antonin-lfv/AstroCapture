@@ -37,5 +37,14 @@ int main(int argc,char** argv){
     invalid=initial;invalid["backgroundDegree"]=2.5;ASTRO_TEST_CHECK(!checkedDeepSkySettings(invalid));
     invalid=initial;invalid["backgroundPoints"]=QVariantList{QVariantList{1.1,.2}};ASTRO_TEST_CHECK(!checkedDeepSkySettings(invalid));
     node["operations"]=QVariantList{};recipe["operations"]=QVariantList{QVariantMap{{"name",QString("Nested")},{"enabled",true},{"settings",node}}};ASTRO_TEST_CHECK(!checkedDeepSkySettings(recipe));
+    auto advanced=initial;advanced["ghs"]=true;advanced["ghsStrength"]=2.;advanced["maskType"]=2;advanced["advancedDenoise"]=true;
+    ASTRO_TEST_CHECK(edits.applyValues(advanced));const auto advancedSnapshot=edits.snapshot();ASTRO_TEST_CHECK(restored.restoreSession(advancedSnapshot)&&restored.values()==advanced);
+    invalid=advanced;invalid["ghsSymmetry"]=.4;invalid["ghsShadows"]=.6;ASTRO_TEST_CHECK(!checkedDeepSkySettings(invalid));
+    invalid=advanced;invalid["rlIterations"]=2.5;ASTRO_TEST_CHECK(!checkedDeepSkySettings(invalid));
+    auto prior=initial;prior.remove("operations");prior["stretch"]=true;
+    invalid=initial;invalid["deconvolution"]=true;invalid["operations"]=QVariantList{QVariantMap{{"name",QString("Stretch")},{"enabled",true},{"settings",prior}}};ASTRO_TEST_CHECK(!checkedDeepSkySettings(invalid));
+    invalid["deconvolution"]=false;invalid["photometry"]=true;ASTRO_TEST_CHECK(!checkedDeepSkySettings(invalid));
+    invalid=initial;invalid["photometry"]=true;invalid["maskType"]=2;ASTRO_TEST_CHECK(!checkedDeepSkySettings(invalid));
+    invalid=initial;invalid["photometryReferences"]=QVariantList{QVariantList{1.,2.,0.,1.,1.}};ASTRO_TEST_CHECK(!checkedDeepSkySettings(invalid));
     std::cout<<"OK\n";
 }

@@ -261,9 +261,7 @@ Popup {
                         activeBorderColor: "#6e93ff"
                         onClicked: controller.videoFormat = modelData
 
-                        ToolTip.visible: hovered
-                        ToolTip.delay: 400
-                        ToolTip.text: modelData === "SER"
+                        helpText: modelData === "SER"
                                       ? qsTr("Standard planetary video format (AutoStakkert, PIPP, Registax, FireCapture)")
                                       : modelData === "FITS" ? qsTr("Individual linear FITS frames for deep-sky imaging") : qsTr("AstroCapture's own interim format")
                     }

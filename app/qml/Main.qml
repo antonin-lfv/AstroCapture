@@ -5,6 +5,7 @@ import QtQuick
 // always-dark background. Basic is a non-native style that fully honors it.
 import QtQuick.Controls.Basic
 import QtQuick.Layouts
+import QtQuick.Dialogs
 
 ApplicationWindow {
     id: window
@@ -26,16 +27,112 @@ ApplicationWindow {
     palette.highlight: "#6ca5f8"
     palette.highlightedText: "#0b0d10"
 
+    property bool quitApproved: false
+    property bool quitSavePending: false
+    property string quitExportTarget: ""
+    property bool quitExportUsesCaption: false
+    readonly property bool quitBusy: previewController.recording || deepSkyController.busy || processingController.busy || mosaicController.busy || captionController.busy
+    readonly property bool hasOpenWork: previewController.recording || deepSkyController.frames.length>0 || processingController.loaded || mosaicController.files.length>0 || quitBusy
+    onClosing: close => {
+        if(quitApproved || !hasOpenWork)return;
+        close.accepted=false;
+        quitConfirmation.open();
+    }
+    QuitConfirmation {
+        id:quitConfirmation
+        hasProject:deepSkyController.frames.length>0
+        hasProcessing:processingController.hasResult
+        busy:window.quitBusy
+        recording:previewController.recording
+        preferredTarget:window.currentTab
+        exportTargets: {
+            let targets=[];
+            if(deepSkyController.hasResult)targets.push({id:"deepSky",name:qsTr("Deep sky"),ready:!deepSkyWorkspace.finishDirty});
+            if(processingController.hasResult)targets.push({id:"processing",name:qsTr("Processing"),ready:!processingWorkspace.adjustmentsDirty});
+            if(mosaicController.hasResult)targets.push({id:"mosaic",name:qsTr("Mosaic"),ready:true});
+            return targets;
+        }
+        onQuitRequested:{window.quitApproved=true;close();window.close();}
+        onSaveProjectRequested: {
+            if(!deepSkyWorkspace.saveOptions()){saveStatus=deepSkyWorkspace.editError;return;}
+            saveStatus="";close();quitProjectSave.open();
+        }
+        onExportRequested: target => {
+            window.quitExportTarget=target;
+            const controller=target==="deepSky"?deepSkyController:target==="processing"?processingController:mosaicController;
+            const suggestion=appLibrary.suggestedExport(controller.exportUrl);
+            quitTiffSave.currentFolder=appLibrary.exportFolderFor(suggestion);
+            quitTiffSave.selectedFile=suggestion.toString().replace(/\.[^/.]+$/, ".tif");
+            saveStatus="";close();quitTiffSave.open();
+        }
+        onSaveSettingsRequested: {
+            window.quitExportTarget="";saveStatus="";close();window.currentTab="processing";
+            window.quitSavePending=true;processingWorkspace.saveCurrentPreset();
+        }
+    }
+    FileDialog {
+        id:quitProjectSave;title:qsTr("Save project before quitting")
+        fileMode:FileDialog.SaveFile;nameFilters:[qsTr("AstroCapture project (*.astroproject)")];defaultSuffix:"astroproject"
+        onAccepted: {
+            let path=selectedFile.toString();if(!path.endsWith(".astroproject"))path+=".astroproject";
+            deepSkyController.saveProject(path);quitConfirmation.saveStatus=deepSkyController.status;quitConfirmation.open();
+        }
+        onRejected:quitConfirmation.open()
+    }
+    FileDialog {
+        id:quitTiffSave;title:qsTr("Save finished TIFF before quitting")
+        fileMode:FileDialog.SaveFile;nameFilters:[qsTr("16-bit TIFF image (*.tif *.tiff)")];defaultSuffix:"tif"
+        onAccepted: {
+            let path=selectedFile.toString();if(!/\.tiff?$/i.test(path))path+=".tif";
+            window.quitSavePending=true;
+            window.quitExportUsesCaption=false;
+            if(window.quitExportTarget==="deepSky") {
+                const caption=deepSkyWorkspace.captionOptions;
+                if(caption.enabled) {
+                    if(!captionController.openDocument(deepSkyController.processingDocument())) {
+                        window.quitSavePending=false;
+                        quitConfirmation.saveStatus=qsTr("Cannot prepare this image for captioned export. Return to Deep sky to export the image.");
+                        quitConfirmation.open();return;
+                    }
+                    window.quitExportUsesCaption=true;captionController.exportAnnotation=caption;captionController.exportImage(path);
+                } else deepSkyController.exportImage(path,false);
+            }
+            else if(window.quitExportTarget==="processing")processingController.exportImage(path);
+            else mosaicController.exportImage(path);
+        }
+        onRejected:quitConfirmation.open()
+    }
+    Timer {
+        interval:150;repeat:true;running:window.quitSavePending
+        onTriggered: {
+            if(window.quitBusy || processingWorkspace.dialogOpen || deepSkyWorkspace.dialogOpen || mosaicWorkspace.dialogOpen || sharedCaptionEditor.dialogOpen || quitTiffSave.visible || quitProjectSave.visible)return;
+            window.quitSavePending=false;
+            if(window.quitExportTarget.length>0)quitConfirmation.saveStatus=window.quitExportTarget==="deepSky"?(window.quitExportUsesCaption?captionController.status:deepSkyController.status):window.quitExportTarget==="processing"?processingController.status:mosaicController.status;
+            window.quitExportTarget="";quitConfirmation.open();
+        }
+    }
+
     property string currentTab: "home"
     readonly property bool textEditing: activeFocusItem instanceof TextInput || activeFocusItem instanceof TextEdit
     readonly property bool processingMode: currentTab === "processing"
     AppLibrary { id: appLibrary; objectName: "appLibrary" }
     ProcessingController { id: processingController }
+    ProcessingController { id: captionController }
+    CaptionEditor {
+        id:sharedCaptionEditor;controller:captionController;library:appLibrary
+        previewContent:Component {ProcessingImageItem {controller:captionController}}
+        hostWidth:deepSkyWorkspace.width;hostHeight:deepSkyWorkspace.height
+    }
+    Connections {target:captionController
+        function onAnnotationChanged(){deepSkyWorkspace.captionOptions=captionController.exportAnnotation;}
+        function onImageExported(url){appLibrary.recordExport(url);}
+    }
     MosaicController { id: mosaicController }
     DeepSkyController { id: deepSkyController }
     readonly property string activityTab: previewController.recording?"capture":deepSkyController.busy?"deepSky":mosaicController.busy?"mosaic":processingController.busy && !processingController.seeking?"processing":""
     readonly property string activityText: previewController.recording?qsTr("Recording…"):deepSkyController.busy?qsTr("Deep sky · %1%").arg(deepSkyController.progress):mosaicController.busy?qsTr("Mosaic · processing…"):processingController.busy && !processingController.seeking?qsTr("Processing · %1%").arg(processingController.progress):""
     function navigate(tab) {
+        if(sharedCaptionEditor.dialogOpen)return;
         if(previewController.recording && ["home","capture","guide"].indexOf(tab)<0)return;
         currentTab=tab;
     }
@@ -87,10 +184,16 @@ ApplicationWindow {
         shortcutsAllowed: !window.textEditing && !settingsPanel.opened
         controller: deepSkyController
         library: appLibrary
-        canEditResult: !processingController.busy && !processingWorkspace.adjustmentsDirty && !processingWorkspace.playing
-        onEditResult: { if (processingController.openDocument(deepSkyController.processingDocument())) window.currentTab = "processing"; }
+        canEditResult: !captionController.busy
+        onEditResult: {
+            const caption=deepSkyWorkspace.captionOptions;
+            if(captionController.openDocument(deepSkyController.processingDocument())) {
+                captionController.exportAnnotation=caption;
+                sharedCaptionEditor.open();
+            }
+        }
     }
-    Connections { target: deepSkyController; function onImageExported(url) { if (/\.(tiff?|jpe?g)$/i.test(url.toString())) appLibrary.recordExport(url); } }
+    Connections { target: deepSkyController; function onImageExported(url) { if (/\.(png|tiff?|jpe?g)$/i.test(url.toString())) appLibrary.recordExport(url); } }
 
     MosaicWorkspace {
         id: mosaicWorkspace
@@ -133,7 +236,7 @@ ApplicationWindow {
     DropArea {
         id: deepSkyDrop
         anchors.fill:parent;z:99
-        enabled:window.currentTab !== "deepSky" && !previewController.recording && !deepSkyController.busy && !deepSkyWorkspace.dialogOpen && !processingWorkspace.dialogOpen && !mosaicWorkspace.dialogOpen
+        enabled:window.currentTab !== "deepSky" && !previewController.recording && !deepSkyController.busy && !deepSkyWorkspace.dialogOpen && !sharedCaptionEditor.dialogOpen && !processingWorkspace.dialogOpen && !mosaicWorkspace.dialogOpen
         function accepts(event) {return event.hasUrls && event.urls.length>0 && event.urls.every(url => /^file:/i.test(url.toString()) && /\.(fits?|fts|fz|cr2|cr3|nef|nrw|arw|dng|orf|raf|rw2|pef)$/i.test(url.toString()));}
         onEntered:drag=>{drag.accepted=accepts(drag);}
         onDropped:drop=>{if(!accepts(drop))return;window.currentTab="deepSky";deepSkyController.addFiles(drop.urls);drop.acceptProposedAction();}
@@ -146,7 +249,7 @@ ApplicationWindow {
         id: serDrop
         anchors.fill: parent
         z: 100
-        enabled: !previewController.recording && !processingController.busy && !processingWorkspace.dialogOpen && !mosaicWorkspace.dialogOpen && !deepSkyWorkspace.dialogOpen
+        enabled: !previewController.recording && !processingController.busy && !processingWorkspace.dialogOpen && !mosaicWorkspace.dialogOpen && !deepSkyWorkspace.dialogOpen && !sharedCaptionEditor.dialogOpen
         function accepts(event) {
             return event.hasUrls && event.urls.length === 1
                 && event.urls[0].toString().startsWith("file:")
@@ -178,7 +281,7 @@ ApplicationWindow {
 
     Shortcut {
         sequence: StandardKey.Open
-        enabled: !previewController.recording && !processingController.busy && !window.textEditing && !settingsPanel.opened && !processingWorkspace.dialogOpen && !mosaicWorkspace.dialogOpen && !deepSkyWorkspace.dialogOpen
+        enabled: !previewController.recording && !processingController.busy && !window.textEditing && !settingsPanel.opened && !processingWorkspace.dialogOpen && !mosaicWorkspace.dialogOpen && !deepSkyWorkspace.dialogOpen && !sharedCaptionEditor.dialogOpen
         onActivated: { window.currentTab = "processing"; processingWorkspace.chooseSource(); }
     }
     Repeater {
@@ -188,7 +291,7 @@ ApplicationWindow {
             required property int index
             Shortcut {
                 sequence: "Ctrl+" + (index + 1)
-                enabled: !previewController.recording && !window.textEditing && !settingsPanel.opened && !processingWorkspace.dialogOpen && !mosaicWorkspace.dialogOpen && !deepSkyWorkspace.dialogOpen
+                enabled: !previewController.recording && !window.textEditing && !settingsPanel.opened && !processingWorkspace.dialogOpen && !mosaicWorkspace.dialogOpen && !deepSkyWorkspace.dialogOpen && !sharedCaptionEditor.dialogOpen
                 onActivated: window.navigate(modelData)
             }
         }
@@ -449,13 +552,12 @@ ApplicationWindow {
                         }
 
                         IconButton {
-                            iconName: "settings"
+                            iconName: "gear"
+                            text:qsTr("Capture settings")
                             borderColor: "#242830"
                             onClicked: settingsPanel.open()
 
-                            ToolTip.visible: hovered
-                            ToolTip.delay: 400
-                            ToolTip.text: qsTr("Capture settings and presets")
+
                         }
                     }
 
@@ -497,9 +599,7 @@ ApplicationWindow {
                         borderColor: "#242830"
                         onClicked: previewController.disconnectCamera()
 
-                        ToolTip.visible: hovered
-                        ToolTip.delay: 400
-                        ToolTip.text: qsTr("Disconnect this camera so Rescan can pick a different one.")
+                        helpText: qsTr("Disconnect this camera so Rescan can pick a different one.")
                     }
 
                     Rectangle { Layout.fillWidth: true; height: 1; color: "#242830" }
@@ -527,7 +627,7 @@ ApplicationWindow {
                             }
                         }
 
-                        ComboBox {
+                        DarkComboBox {
                             Layout.fillWidth: true
                             model: [qsTr("Planetary · SER"), qsTr("Deep sky · FITS sequence"), qsTr("Raw sequence · ACRAW")]
                             currentIndex: previewController.videoFormat === "FITS" ? 1 : previewController.videoFormat === "ACRAW" ? 2 : 0
@@ -537,8 +637,8 @@ ApplicationWindow {
                         RowLayout {
                             visible: previewController.videoFormat === "FITS"
                             Layout.fillWidth: true
-                            ComboBox {Layout.fillWidth: true; model:["Light","Dark","Flat","Bias","DarkFlat"]; enabled:!previewController.recording; onActivated:previewController.captureType=currentText}
-                            ComboBox {Layout.fillWidth: true;model:["", "R", "G", "B", "L", "HA", "OIII", "SII"];enabled:!previewController.recording;onActivated:previewController.captureFilter=currentText}
+                            DarkComboBox {Layout.fillWidth: true; model:["Light","Dark","Flat","Bias","DarkFlat"]; enabled:!previewController.recording; onActivated:previewController.captureType=currentText}
+                            DarkComboBox {Layout.fillWidth: true;model:["", "R", "G", "B", "L", "HA", "OIII", "SII"];enabled:!previewController.recording;onActivated:previewController.captureFilter=currentText}
                         }
                         Text {
                             visible: previewController.videoFormat === "FITS"
@@ -555,9 +655,7 @@ ApplicationWindow {
                                 text: qsTr("Capture")
                                 onClicked: previewController.captureStillImage()
 
-                                ToolTip.visible: hovered
-                                ToolTip.delay: 400
-                                ToolTip.text: qsTr("Shortcut: C")
+                                helpText: qsTr("Shortcut: C")
                             }
 
                             IconButton {
@@ -570,9 +668,7 @@ ApplicationWindow {
                                 onClicked: previewController.recording ? previewController.stopRecording()
                                                                          : previewController.startRecording()
 
-                                ToolTip.visible: hovered
-                                ToolTip.delay: 400
-                                ToolTip.text: qsTr("Shortcut: R")
+                                helpText: qsTr("Shortcut: R")
                             }
                         }
 
@@ -920,9 +1016,7 @@ ApplicationWindow {
             text: qsTr("Rescan for cameras")
             onClicked: previewController.rescan()
 
-            ToolTip.visible: hovered
-            ToolTip.delay: 400
-            ToolTip.text: qsTr("Looks for a connected camera. Offers the mock test camera if none is found.")
+            helpText: qsTr("Looks for a connected camera. Offers the mock test camera if none is found.")
         }
 
         // Only populated when Rescan finds more than one real camera —
@@ -967,13 +1061,12 @@ ApplicationWindow {
         anchors.right: parent.right
         anchors.margins: 12
         visible: !previewController.connected && window.currentTab === "capture"
-        iconName: "settings"
+        iconName: "gear"
+        text:qsTr("Capture settings")
         borderColor: "#242830"
         onClicked: settingsPanel.open()
 
-        ToolTip.visible: hovered
-        ToolTip.delay: 400
-        ToolTip.text: qsTr("Capture settings and presets")
+
     }
 
     SettingsPanel {

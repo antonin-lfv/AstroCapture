@@ -20,6 +20,7 @@
 #include "MosaicController.hpp"
 #include "MosaicImageItem.hpp"
 #include "Check.hpp"
+#include "ExportSizeEstimator.hpp"
 
 int main(int argc, char** argv) {
     QGuiApplication application(argc, argv);
@@ -30,6 +31,7 @@ int main(int argc, char** argv) {
     QSettings::setDefaultFormat(QSettings::IniFormat);
     QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, temp.path());
     qmlRegisterType<astro::app::AppLibrary>("AstroCapture", 1, 0, "AppLibrary");
+    qmlRegisterType<astro::app::ExportSizeEstimator>("AstroCapture",1,0,"ExportSizeEstimator");
     qmlRegisterType<astro::app::MosaicController>("AstroCapture", 1, 0, "MosaicController");
     qmlRegisterType<astro::app::MosaicImageItem>("AstroCapture", 1, 0, "MosaicImageItem");
     astro::app::MosaicController controller;

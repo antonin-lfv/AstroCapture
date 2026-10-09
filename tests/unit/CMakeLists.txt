@@ -163,6 +163,11 @@ astro_add_unit_test(astro_processing_deep_sky_test
     LIBS astro::processing
 )
 set_tests_properties(astro_processing_deep_sky_test PROPERTIES TIMEOUT 120)
+astro_add_unit_test(astro_processing_deep_sky_advanced_test
+    SOURCES processing/DeepSkyAdvancedTest.cpp
+    LIBS astro::processing
+)
+set_tests_properties(astro_processing_deep_sky_advanced_test PROPERTIES TIMEOUT 120)
 astro_add_unit_test(astro_app_deep_sky_workspace_test
     SOURCES app/DeepSkyWorkspaceTest.cpp
         ../../app/src/DeepSkyEdits.cpp ../../app/src/DeepSkyEdits.hpp
@@ -199,3 +204,14 @@ set_target_properties(astro_app_studio_workspace_test PROPERTIES AUTOMOC ON)
 target_include_directories(astro_app_studio_workspace_test PRIVATE ../../app/src)
 target_compile_definitions(astro_app_studio_workspace_test PRIVATE ASTRO_SOURCE_DIR="${PROJECT_SOURCE_DIR}")
 set_tests_properties(astro_app_studio_workspace_test PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_BACKEND=software" TIMEOUT 30)
+
+foreach(workspace_test IN ITEMS astro_app_processing_workspace_test astro_app_deep_sky_workspace_test astro_app_mosaic_drop_test)
+    target_sources(${workspace_test} PRIVATE ../../app/src/ExportSizeEstimator.cpp ../../app/src/ExportSizeEstimator.hpp)
+endforeach()
+astro_add_unit_test(astro_app_export_size_estimator_test
+    SOURCES app/ExportSizeEstimatorTest.cpp ../../app/src/ExportSizeEstimator.cpp ../../app/src/ExportSizeEstimator.hpp
+    LIBS Qt6::Quick Qt6::Gui astro::processing
+)
+set_target_properties(astro_app_export_size_estimator_test PROPERTIES AUTOMOC ON)
+target_include_directories(astro_app_export_size_estimator_test PRIVATE ../../app/src)
+set_tests_properties(astro_app_export_size_estimator_test PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen" TIMEOUT 30)

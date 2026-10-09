@@ -38,22 +38,18 @@ Rectangle {
         ToolTip.text: text
     }
     ScrollView {
-        anchors.fill: parent
-        anchors.margins: 24
+        id:settingsScroll
+        anchors.top:parent.top;anchors.bottom:parent.bottom;anchors.horizontalCenter:parent.horizontalCenter
+        anchors.topMargin:20;anchors.bottomMargin:20;width:Math.min(1040,parent.width-40)
         contentWidth: availableWidth
         clip: true
-        ScrollBar.vertical.policy: ScrollBar.AlwaysOff
+        ScrollBar.vertical.policy: ScrollBar.AsNeeded
         ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
         ColumnLayout {
-            width: parent.width
+            width: settingsScroll.availableWidth
             spacing: 16
-            Label { text: qsTr("Application settings"); color: "#eef3fa"; font.pixelSize: 24 }
+            Label { text: qsTr("Application settings"); color: "#eef3fa"; font.pixelSize: 22; font.weight:Font.Medium }
             Description { text: qsTr("Saved locally and kept when you update the application.") }
-            Card {
-                Heading { text: "AstroCapture · " + Qt.application.version }
-                Description { text: qsTr("Report a problem by email. You can review the message before sending it.") }
-                IconButton { text: qsTr("Report a bug"); onClicked: root.library.reportBug() }
-            }
             Card {
                 RowLayout {
                     Layout.fillWidth: true
@@ -77,7 +73,7 @@ Rectangle {
                 RowLayout {
                     Layout.fillWidth: true
                     FolderPath { text: root.captureController.saveDirectory || qsTr("Default: Pictures and Movies → AstroCapture") }
-                    IconButton { text: qsTr("Choose folder…"); onClicked: captureFolderDialog.open() }
+                    IconButton { text: qsTr("Choose folder"); onClicked: captureFolderDialog.open() }
                 }
                 Description { text: qsTr("A custom folder contains two subfolders: Images and Videos.") }
                 RowLayout {
@@ -86,12 +82,12 @@ Rectangle {
                 }
             }
             Card {
-                Heading { text: qsTr("Processing export folder") }
-                Description { text: qsTr("Processed TIFF images, after stacking and adjustments.") }
+                Heading { text: qsTr("Export folder") }
+                Description { text: qsTr("Finished PNG and TIFF images, with your current adjustments.") }
                 RowLayout {
                     Layout.fillWidth: true
                     FolderPath { text: root.library.exportDirectory || qsTr("Source video's folder until you choose a location") }
-                    IconButton { text: qsTr("Choose folder…"); onClicked: exportFolderDialog.open() }
+                    IconButton { text: qsTr("Choose folder"); onClicked: exportFolderDialog.open() }
                 }
                 Description { text: qsTr("Also remembers the folder used for your last successful export.") }
             }
@@ -121,6 +117,11 @@ Rectangle {
                     }
                 }
                 Description { text: qsTr("Keeps up to 500 image paths locally. Images stay in their original folders. Turning this off keeps existing entries and still allows manual imports.") }
+            }
+            Card {
+                Heading { text: "AstroCapture · " + Qt.application.version }
+                Description { text: qsTr("Report a problem by email. You can review the message before sending it.") }
+                IconButton { text: qsTr("Report a bug"); onClicked: root.library.reportBug() }
             }
             Description { text: root.library.status; visible: text.length > 0 }
         }

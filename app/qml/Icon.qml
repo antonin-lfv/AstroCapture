@@ -15,14 +15,15 @@ Item {
 
     Canvas {
         id:studioIcon;anchors.fill:parent
-        visible:["home","processing","stars","mosaic","history","book"].indexOf(root.name)>=0
+        visible:["home","processing","stars","mosaic","history","book","export"].indexOf(root.name)>=0
         onWidthChanged:requestPaint();onHeightChanged:requestPaint()
         Connections {target:root;function onColorChanged(){studioIcon.requestPaint();}function onNameChanged(){studioIcon.requestPaint();}}
         onPaint: {
             const c=getContext("2d");c.reset();c.scale(width/24,height/24);
             c.strokeStyle=root.color;c.fillStyle=root.color;c.lineWidth=1.6;c.lineCap="round";c.lineJoin="round";
             c.beginPath();
-            if(root.name==="home") {c.moveTo(3,11);c.lineTo(12,3);c.lineTo(21,11);c.moveTo(6,10);c.lineTo(6,21);c.lineTo(10,21);c.lineTo(10,15);c.lineTo(14,15);c.lineTo(14,21);c.lineTo(18,21);c.lineTo(18,10);}
+            if(root.name==="export") {c.moveTo(3,3);c.lineTo(17,3);c.lineTo(21,7);c.lineTo(21,21);c.lineTo(3,21);c.closePath();c.rect(7,3,9,6);c.moveTo(13,5);c.lineTo(13,7);c.rect(7,13,10,8);}
+            else if(root.name==="home") {c.moveTo(3,11);c.lineTo(12,3);c.lineTo(21,11);c.moveTo(6,10);c.lineTo(6,21);c.lineTo(10,21);c.lineTo(10,15);c.lineTo(14,15);c.lineTo(14,21);c.lineTo(18,21);c.lineTo(18,10);}
             else if(root.name==="processing") {c.arc(12,12,9,0,Math.PI*2);c.moveTo(17,12);c.arc(12,12,5,0,Math.PI*2);c.moveTo(3,12);c.lineTo(7,12);c.moveTo(17,12);c.lineTo(21,12);c.moveTo(12,3);c.lineTo(12,7);c.moveTo(12,17);c.lineTo(12,21);}
             else if(root.name==="stars") {c.moveTo(10,2);c.lineTo(12,8);c.lineTo(18,10);c.lineTo(12,12);c.lineTo(10,18);c.lineTo(8,12);c.lineTo(2,10);c.lineTo(8,8);c.closePath();c.moveTo(19,15);c.lineTo(19,22);c.moveTo(15.5,18.5);c.lineTo(22.5,18.5);}
             else if(root.name==="mosaic") {for(let y=4;y<20;y+=9)for(let x=4;x<20;x+=9)c.rect(x,y,6,6);}
@@ -111,7 +112,7 @@ Item {
         onWidthChanged:requestPaint();onHeightChanged:requestPaint()
         Connections {target:root;function onColorChanged(){gearCanvas.requestPaint();}}
         onPaint: {
-            const ctx=getContext("2d");ctx.reset();ctx.fillStyle=root.color;
+            const ctx=getContext("2d");ctx.reset();ctx.strokeStyle=root.color;ctx.lineWidth=Math.max(1.2,Math.min(width,height)/15);ctx.lineJoin="round";
             const cx=width/2,cy=height/2,r=Math.min(width,height);
             ctx.beginPath();
             for(let i=0;i<32;i++) {
@@ -119,7 +120,7 @@ Item {
                 const x=cx+Math.cos(angle)*radius,y=cy+Math.sin(angle)*radius;
                 if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
             }
-            ctx.closePath();ctx.moveTo(cx+r*.15,cy);ctx.arc(cx,cy,r*.15,0,-Math.PI*2,true);ctx.fill();
+            ctx.closePath();ctx.stroke();ctx.beginPath();ctx.arc(cx,cy,r*.15,0,Math.PI*2);ctx.stroke();
         }
         Component.onCompleted:requestPaint()
     }

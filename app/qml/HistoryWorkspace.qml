@@ -78,17 +78,16 @@ Rectangle {
         spacing: 12
         RowLayout {
             Layout.fillWidth: true
-            Label { text: qsTr("History"); color: "#eef3fa"; font.pixelSize: 24; Layout.fillWidth: true }
-            IconButton { text: qsTr("Add images…"); onClicked: importDialog.open() }
+            Label { text: qsTr("History"); color: "#eef3fa"; font.pixelSize: 22; font.weight:Font.Medium; Layout.fillWidth: true }
+            IconButton { text: qsTr("Add images"); onClicked: importDialog.open() }
             IconButton { text: qsTr("Refresh"); onClicked: root.library.refresh() }
             IconButton {
                 objectName: "removeHistoryEntry"
                 text: qsTr("Remove")
                 enabled: root.selected !== null
                 onClicked: root.removeSelected()
-                ToolTip.visible: hovered
-                ToolTip.text: qsTr("Remove from History only. The image file stays on disk.")
-                Accessible.description: ToolTip.text
+                helpText: qsTr("Remove from History only. The image file stays on disk.")
+                Accessible.description: helpText
             }
         }
         Label { text: qsTr("Drop TIFF, PNG or JPEG images here. Files stay in their original folders."); color: "#9aa7b8"; wrapMode: Text.WordWrap; Layout.fillWidth: true }

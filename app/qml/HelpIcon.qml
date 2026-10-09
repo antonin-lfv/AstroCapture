@@ -3,12 +3,14 @@ import QtQuick.Controls.Basic
 
 Item {
     id: root
+    objectName: "helpIcon"
     property string text: ""
     property int maxWidth: 260
-    implicitWidth: 16
-    implicitHeight: 16
+    implicitWidth: 20
+    implicitHeight: 20
     Accessible.name: text
-    Text {anchors.centerIn:parent;text:"i";font.italic:true;font.pixelSize:14;color:hover.hovered?"#eef3fa":"#9aa7b8"}
+    Rectangle {anchors.fill:parent;radius:10;color:"transparent";border.color:hover.hovered?"#8dbaff":"#56657a"}
+    Text {anchors.centerIn:parent;text:"?";font.bold:true;font.pixelSize:14;color:hover.hovered?"#eef3fa":"#9aa7b8"}
     HoverHandler {id:hover}
     DarkToolTip {parent:root;width:Math.min(root.maxWidth,380);text:root.text;visible:hover.hovered && text.length>0}
 }

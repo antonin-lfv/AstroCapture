@@ -4,6 +4,7 @@
 #include <QSettings>
 #include <QTranslator>
 #include "src/AppLibrary.hpp"
+#include "src/QuitGuard.hpp"
 
 int main(int argc, char* argv[]) {
     QGuiApplication app(argc, argv);
@@ -31,6 +32,9 @@ int main(int argc, char* argv[]) {
         &engine, &QQmlApplicationEngine::objectCreationFailed, &app,
         []() { QCoreApplication::exit(-1); }, Qt::QueuedConnection);
     engine.loadFromModule("AstroCapture", "Main");
+
+    astro::app::QuitGuard quitGuard(engine.rootObjects().isEmpty()?nullptr:qobject_cast<QWindow*>(engine.rootObjects().first()));
+    app.installEventFilter(&quitGuard);
 
     if (!engine.rootObjects().isEmpty()) {
         auto* library = engine.rootObjects().first()->findChild<astro::app::AppLibrary*>("appLibrary");

@@ -8,9 +8,12 @@
 #include <QSettings>
 #include <QTemporaryDir>
 #include <QFile>
+#include <QFileInfo>
 #include <QTranslator>
 #include "AppLibrary.hpp"
 #include "Check.hpp"
+#include "QuitGuard.hpp"
+#include <QEvent>
 
 static QQuickItem* item(QQuickItem* root,const QString& name) {
     if(root->objectName()==name)return root;
@@ -25,6 +28,16 @@ static std::unique_ptr<QObject> create(QQmlEngine& engine,const QString& name,co
     auto result=std::unique_ptr<QObject>(component.createWithInitialProperties(properties));
     if(!result)qWarning()<<component.errors();ASTRO_TEST_CHECK(result);return result;
 }
+class GuardedWindow : public QWindow {
+public:
+    bool permitClose=false;
+    int closeAttempts=0;
+protected:
+    bool event(QEvent* event) override {
+        if(event->type()==QEvent::Close){++closeAttempts;if(!permitClose){event->ignore();return true;}}
+        return QWindow::event(event);
+    }
+};
 int main(int argc,char** argv) {
     QGuiApplication app(argc,argv);QTemporaryDir directory;ASTRO_TEST_CHECK(directory.isValid());
     QCoreApplication::setOrganizationName("AstroCaptureTest");QCoreApplication::setApplicationName("StudioWorkspaceTest");
@@ -32,13 +45,46 @@ int main(int argc,char** argv) {
     QSettings::setDefaultFormat(QSettings::IniFormat);QSettings::setPath(QSettings::IniFormat,QSettings::UserScope,directory.path());
     QTranslator translator;if(translator.load(qEnvironmentVariable("ASTRO_UI_TRANSLATION_PATH")))app.installTranslator(&translator);
     qmlRegisterType<astro::app::AppLibrary>("AstroCapture",1,0,"AppLibrary");
+    // Native Quit must respect a rejected close, then allow a confirmed close.
+    GuardedWindow nativeWindow;nativeWindow.show();
+    astro::app::QuitGuard quitGuard(&nativeWindow);
+    QObject quitSource;quitSource.installEventFilter(&quitGuard);
+    QEvent firstQuit(QEvent::Quit);QCoreApplication::sendEvent(&quitSource,&firstQuit);
+    ASTRO_TEST_CHECK(nativeWindow.isVisible() && nativeWindow.closeAttempts==1);
+    nativeWindow.permitClose=true;
+    QEvent confirmedQuit(QEvent::Quit);QCoreApplication::sendEvent(&quitSource,&confirmedQuit);
+    ASTRO_TEST_CHECK(!nativeWindow.isVisible() && nativeWindow.closeAttempts==2);
     astro::app::AppLibrary library;QQmlEngine engine;
     QQuickWindow window;window.resize(1280,820);window.show();
+    auto quitDialog=create(engine,"QuitConfirmation",{{"hasProject",true},{"hasProcessing",true},{"exportTargets",QVariantList{QVariantMap{{"id","deepSky"},{"name","Deep sky"},{"ready",true}}}}});
+    quitDialog->setProperty("parent",QVariant::fromValue(window.contentItem()));
+    QQmlExpression quitHook(engine.rootContext(),quitDialog.get(),"saveProjectRequested.connect(function(){saveStatus='project';});saveSettingsRequested.connect(function(){saveStatus='settings';});exportRequested.connect(function(target){saveStatus=target;});quitRequested.connect(function(){saveStatus='quit';})");
+    quitHook.evaluate();ASTRO_TEST_CHECK(!quitHook.hasError());
+    ASTRO_TEST_CHECK(QMetaObject::invokeMethod(quitDialog.get(),"open"));QCoreApplication::processEvents();
+    auto* quitSave=quitDialog->findChild<QObject*>("quitSaveProject");
+    auto* quitExport=quitDialog->findChild<QObject*>("quitExportTiff");
+    auto* quitSettings=quitDialog->findChild<QObject*>("quitSaveSettings");
+    auto* quitDiscard=quitDialog->findChild<QObject*>("quitDiscard");
+    ASTRO_TEST_CHECK(quitSave && quitExport && quitSettings && quitDiscard);
+    ASTRO_TEST_CHECK(QMetaObject::invokeMethod(quitSave,"clicked"));ASTRO_TEST_CHECK(quitDialog->property("saveStatus").toString()=="project");
+    ASTRO_TEST_CHECK(QMetaObject::invokeMethod(quitExport,"clicked"));ASTRO_TEST_CHECK(quitDialog->property("saveStatus").toString()=="deepSky");
+    ASTRO_TEST_CHECK(QMetaObject::invokeMethod(quitSettings,"clicked"));ASTRO_TEST_CHECK(quitDialog->property("saveStatus").toString()=="settings");
+    quitDialog->setProperty("busy",true);QCoreApplication::processEvents();
+    ASTRO_TEST_CHECK(!quitDiscard->property("enabled").toBool() && !quitSave->property("enabled").toBool());
+    quitDialog->setProperty("busy",false);quitDialog->setProperty("recording",true);QCoreApplication::processEvents();
+    ASTRO_TEST_CHECK(!quitDiscard->property("enabled").toBool());
+    quitDialog->setProperty("recording",false);
+    if(!qEnvironmentVariableIsEmpty("ASTRO_QUIT_SCREENSHOT")){QThread::msleep(200);QCoreApplication::processEvents();window.grabWindow().save(qEnvironmentVariable("ASTRO_QUIT_SCREENSHOT"));}
+    ASTRO_TEST_CHECK(QMetaObject::invokeMethod(quitDialog->findChild<QObject*>("quitCancel"),"clicked"));QCoreApplication::processEvents();
+    ASTRO_TEST_CHECK(!quitDialog->property("visible").toBool() && quitDialog->property("saveStatus").toString()!="quit");
+    ASTRO_TEST_CHECK(QMetaObject::invokeMethod(quitDiscard,"clicked"));ASTRO_TEST_CHECK(quitDialog->property("saveStatus").toString()=="quit");
     auto navigation=create(engine,"StudioNavigation");auto* nav=qobject_cast<QQuickItem*>(navigation.get());
     nav->setParentItem(window.contentItem());nav->setSize({1280,104});QCoreApplication::processEvents();
     QQmlExpression navigationHook(engine.rootContext(),nav,"navigate.connect(function(tab){currentTab=tab;})");navigationHook.evaluate();ASTRO_TEST_CHECK(!navigationHook.hasError());
     ASTRO_TEST_CHECK(QMetaObject::invokeMethod(item(nav,"studioTab_capture"),"clicked"));
     ASTRO_TEST_CHECK(nav->property("currentTab").toString()=="capture");
+    ASTRO_TEST_CHECK(QMetaObject::invokeMethod(item(nav,"studioSettings"),"clicked"));
+    ASTRO_TEST_CHECK(nav->property("currentTab").toString()=="settings");
     nav->setProperty("currentTab","home");
     ASTRO_TEST_CHECK(item(nav,"studioTab_home"));
     ASTRO_TEST_CHECK(item(nav,"studioTab_home")->property("selected").toBool());
@@ -75,7 +121,21 @@ int main(int argc,char** argv) {
     library.recordProject(project);library.recordProject(project);ASTRO_TEST_CHECK(library.recentProjects().size()==1);
     astro::app::AppLibrary reopened;ASTRO_TEST_CHECK(reopened.recentProjects().size()==1);
     ASTRO_TEST_CHECK(reopened.recentProjects()[0].toMap()["exists"].toBool());
-    ASTRO_TEST_CHECK(projectFile.remove());ASTRO_TEST_CHECK(!reopened.recentProjects()[0].toMap()["exists"].toBool());
+    QCoreApplication::processEvents();
+    ASTRO_TEST_CHECK(item(content,"homeRemoveProject"));
+    ASTRO_TEST_CHECK(QMetaObject::invokeMethod(item(content,"homeRemoveProject"),"clicked"));
+    ASTRO_TEST_CHECK(library.recentProjects().isEmpty() && QFileInfo::exists(project.toLocalFile()));
+    astro::app::AppLibrary removed;ASTRO_TEST_CHECK(removed.recentProjects().isEmpty());
+    library.recordProject(project);
+    const auto video=QUrl::fromLocalFile(directory.filePath("recent.ser"));QFile videoFile(video.toLocalFile());ASTRO_TEST_CHECK(videoFile.open(QIODevice::WriteOnly));videoFile.write("test");videoFile.close();
+    library.recordVideo(video);QCoreApplication::processEvents();
+    ASTRO_TEST_CHECK(item(content,"homeRemoveVideo"));
+    ASTRO_TEST_CHECK(QMetaObject::invokeMethod(item(content,"homeRemoveVideo"),"clicked"));
+    ASTRO_TEST_CHECK(library.recentVideos().isEmpty() && QFileInfo::exists(video.toLocalFile()));
+    library.recordVideo(video);
+    ASTRO_TEST_CHECK(projectFile.remove() && videoFile.remove());library.pruneUnavailableRecents();
+    ASTRO_TEST_CHECK(library.recentProjects().isEmpty() && library.recentVideos().isEmpty());
+    astro::app::AppLibrary pruned;ASTRO_TEST_CHECK(pruned.recentProjects().isEmpty() && pruned.recentVideos().isEmpty());
     nav->setProperty("currentTab","home");
     for(const auto size:{QSize(1280,820),QSize(900,640)}) {
         window.resize(size);nav->setSize({double(size.width()),104});content->setSize({double(size.width()),double(size.height()-104)});QCoreApplication::processEvents();QThread::msleep(100);QCoreApplication::processEvents();

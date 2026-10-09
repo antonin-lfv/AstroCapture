@@ -7,7 +7,7 @@ Rectangle {
     id: root
     required property MosaicController controller
     required property AppLibrary library
-    readonly property bool dialogOpen: openDialog.visible || saveDialog.visible || annotationPopup.opened || optionsPopup.opened || excludedPopup.opened
+    readonly property bool dialogOpen: openDialog.visible || saveDialog.visible || annotationPopup.dialogOpen || optionsPopup.opened || excludedPopup.opened
     signal editResult()
     property bool canEditResult: true
     property bool balanceExposure: true
@@ -31,7 +31,10 @@ Rectangle {
     }
     CaptionEditor {
         id: annotationPopup
+        compressedFormats: false
         controller: root.controller
+        library:root.library
+        previewContent:Component {MosaicImageItem {controller:root.controller}}
         hostWidth: root.width; hostHeight: root.height
     }
     Popup {
@@ -88,8 +91,8 @@ Rectangle {
         anchors.fill: parent; anchors.margins: 20; spacing: 14
         RowLayout {
             Layout.fillWidth: true
-            Label { text: qsTr("Mosaic"); color: "#eef3fa"; font.pixelSize: 24; Layout.fillWidth: true }
-            IconButton { text: qsTr("Add images…"); enabled: !root.controller.busy; onClicked: openDialog.open() }
+            Label { text: qsTr("Mosaic"); color: "#eef3fa"; font.pixelSize: 22; font.weight:Font.Medium; Layout.fillWidth: true }
+            IconButton { text: qsTr("Add images"); enabled: !root.controller.busy; onClicked: openDialog.open() }
             IconButton { text: qsTr("Clear"); enabled: !root.controller.busy && root.controller.files.length>0; onClicked: root.controller.clear() }
         }
         Label {
@@ -99,6 +102,7 @@ Rectangle {
         RowLayout {
             Layout.fillWidth: true; Layout.fillHeight: true; spacing: 16
             ColumnLayout {
+                visible:root.controller.files.length>0
                 Layout.preferredWidth: Math.min(340, root.width * .38)
                 Layout.maximumWidth: Math.min(340, root.width * .38)
                 Layout.minimumWidth: 220; Layout.fillHeight: true
@@ -155,11 +159,11 @@ Rectangle {
                     }
                 }
                 IconButton {
-                    text: qsTr("Assembly options…"); Layout.fillWidth: true; enabled: !root.controller.busy
+                    text: qsTr("Assembly options"); Layout.fillWidth: true; enabled: !root.controller.busy
                     onClicked: optionsPopup.open()
                 }
                 IconButton {
-                    text: qsTr("%1 excluded images…").arg(root.controller.excludedFiles.length)
+                    text: qsTr("%1 excluded images").arg(root.controller.excludedFiles.length)
                     Layout.fillWidth: true; visible: root.controller.excludedFiles.length > 0
                     onClicked: excludedPopup.open()
                 }
@@ -172,15 +176,16 @@ Rectangle {
                 RowLayout {
                     Layout.fillWidth: true; enabled: root.controller.hasResult && !root.controller.busy
                     Label { text: qsTr("Image caption"); color: "#c5cfdd"; Layout.fillWidth: true }
-                    IconButton { text: qsTr("Edit…"); onClicked: annotationPopup.open() }
+                    IconButton { text: qsTr("Edit caption");enabled:root.controller.hasResult && !root.controller.busy; onClicked: annotationPopup.open() }
                 }
                 IconButton {
-                    text: qsTr("Edit in Processing…"); Layout.fillWidth: true
+                    text: qsTr("Edit in Processing"); Layout.fillWidth: true
                     enabled: root.controller.hasResult && !root.controller.busy && root.canEditResult
                     onClicked: root.editResult()
                 }
+                ExportSizeHint {controller:root.controller;format:"tif";ready:!root.controller.busy;visible:root.controller.hasResult;Layout.fillWidth:true}
                 IconButton {
-                    text: qsTr("Export TIFF…"); Layout.fillWidth: true
+                    text: qsTr("Export TIFF"); Layout.fillWidth: true
                     enabled: root.controller.hasResult && !root.controller.busy
                     onClicked: {
                         saveDialog.currentFolder=root.library.exportFolderFor(root.controller.exportUrl);
@@ -196,11 +201,13 @@ Rectangle {
                 Layout.fillWidth: true; Layout.fillHeight: true
                 sourceWidth: root.controller.imageWidth; sourceHeight: root.controller.imageHeight
                 MosaicImageItem { parent: viewport.imageContainer; anchors.fill: parent; controller: root.controller }
-                Label {
-                    anchors.centerIn: parent; width: parent.width-50
-                    visible: !root.controller.hasResult
-                    text: root.controller.busy ? qsTr("Building your mosaic…") : qsTr("Drop your images here\n\nShared details connect the views. Missing areas remain black; no surface detail is invented.")
-                    color: "#9aa7b8"; horizontalAlignment: Text.AlignHCenter; wrapMode: Text.WordWrap
+                ColumnLayout {
+                    anchors.centerIn:parent;width:Math.min(420,parent.width-50);spacing:12
+                    visible:!root.controller.hasResult
+                    Icon {name:"mosaic";color:"#91b8ff";Layout.preferredWidth:32;Layout.preferredHeight:32;Layout.alignment:Qt.AlignHCenter}
+                    Label {text:root.controller.busy?qsTr("Building your mosaic…"):qsTr("Build your mosaic");font.pixelSize:22;color:"#eef3fa";wrapMode:Text.Wrap;horizontalAlignment:Text.AlignHCenter;Layout.fillWidth:true}
+                    Label {text:qsTr("Add overlapping Moon or Sun images, then assemble them.");color:"#9aa7b8";wrapMode:Text.Wrap;horizontalAlignment:Text.AlignHCenter;Layout.fillWidth:true}
+                    IconButton {text:qsTr("Add images");iconName:"folder";enabled:!root.controller.busy;visible:root.controller.files.length===0;Layout.alignment:Qt.AlignHCenter;onClicked:openDialog.open()}
                 }
             }
         }

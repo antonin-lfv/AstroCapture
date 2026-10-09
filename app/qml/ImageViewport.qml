@@ -97,14 +97,14 @@ Rectangle {
     }
     RowLayout {
         id: toolbar
-        anchors { left: parent.left; right: parent.right; bottom: parent.bottom; margins: 8 }
-        height: 28
-        spacing: 4
+        anchors { left: parent.left; right: parent.right; bottom: parent.bottom; margins: 12 }
+        height: implicitHeight
+        spacing: 6
         enabled: root.hasImage
-        IconButton { text: "−"; onClicked: root.zoomAt(root.effectiveZoom / 1.25, surface.width / 2, surface.height / 2); Accessible.name: qsTr("Zoom out") }
-        IconButton { text: "+"; onClicked: root.zoomAt(root.effectiveZoom * 1.25, surface.width / 2, surface.height / 2); Accessible.name: qsTr("Zoom in") }
+        IconButton { text: "−"; Layout.preferredWidth: 34; onClicked: root.zoomAt(root.effectiveZoom / 1.25, surface.width / 2, surface.height / 2); Accessible.name: qsTr("Zoom out") }
+        IconButton { text: "+"; Layout.preferredWidth: 34; onClicked: root.zoomAt(root.effectiveZoom * 1.25, surface.width / 2, surface.height / 2); Accessible.name: qsTr("Zoom in") }
         Label { text: Math.round(root.effectiveZoom * 100) + "%"; color: "#a8b5c6"; font.pixelSize: 11; Layout.fillWidth: true; horizontalAlignment: Text.AlignHCenter; elide: Text.ElideRight }
-        IconButton { text: "100%"; onClicked: root.actualSize(); ToolTip.visible: hovered; ToolTip.text: qsTr("One image pixel per screen pixel") }
-        IconButton { text: qsTr("Fit"); borderColor: root.fitMode ? "#6ca5f8" : "#3a4048"; onClicked: root.fit(); ToolTip.visible: hovered; ToolTip.text: qsTr("Fit to window. Double-click the image to switch between Fit and 100%.") }
+        IconButton { text: "100%"; onClicked: root.actualSize();  helpText: qsTr("One image pixel per screen pixel") }
+        IconButton { text: qsTr("Fit"); borderColor: root.fitMode ? "#6ca5f8" : "#3a4048"; onClicked: root.fit();  helpText: qsTr("Fit to window. Double-click the image to switch between Fit and 100%.") }
     }
 }

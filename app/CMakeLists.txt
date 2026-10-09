@@ -60,6 +60,7 @@ qt_add_qml_module(AstroCapture
         qml/Main.qml
         qml/ProcessingWorkspace.qml
         qml/DeepSkyWorkspace.qml
+        qml/DeepSkyAdvancedTools.qml
         qml/MosaicWorkspace.qml
         qml/CaptionEditor.qml
         qml/ImageViewport.qml
@@ -68,12 +69,16 @@ qt_add_qml_module(AstroCapture
         qml/GuideWorkspace.qml
         qml/Icon.qml
         qml/IconButton.qml
+        qml/IconAction.qml
+        qml/ExportSizeHint.qml
         qml/SettingsPanel.qml
+        qml/DarkComboBox.qml
         qml/DarkSpinBox.qml
         qml/SidebarSection.qml
         qml/HelpIcon.qml
         qml/DarkToolTip.qml
         qml/DarkDialog.qml
+        qml/QuitConfirmation.qml
     RESOURCES
         qml/assets/logo.png
     SOURCES
@@ -90,6 +95,8 @@ qt_add_qml_module(AstroCapture
         src/ProcessingEdits.cpp
         src/ProcessingSettings.hpp
         src/ExportAnnotation.hpp
+        src/ExportSizeEstimator.hpp
+        src/ExportSizeEstimator.cpp
         src/ProcessingController.hpp
         src/AppLibrary.hpp
         src/AppLibrary.cpp

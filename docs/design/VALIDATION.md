@@ -172,7 +172,7 @@ Le parcours natif en français utilise Orion 6 244 × 4 170. Il sauvegarde un
 portable, le déplace, retire la copie source, puis le recharge : les empreintes
 des buffers linéaire et fini, les réglages, la légende corrigée et A/B sont
 identiques ; les contrôles de Finition sont synchronisés avec les pixels.
-Le fichier complet mesure 880 934 480 octets, pour une estimation conservative
+Le fichier complet mesure 880 934 480 octets, pour une estimation prudente
 de 1 017 870 000 octets environ. Les dialogues de sauvegarde/réassociation et
 le panneau de cache sont contrôlés à 1440 × 960, 1100 × 800 et 900 × 700 ; les
 boutons restent dans leurs panneaux, sans chevauchement ni libellé coupé.
@@ -183,3 +183,8 @@ cours ne sont pas enregistrés ; les caches internes des étapes de recette
 sont reconstruits lors d'une modification. Les anciens masques sans empreinte
 se rechargent depuis l'outil Masques. Le format, les limites et la gestion du
 cache sont décrits dans ADR-014.
+
+Les 36 tests passent aussi en suite complète Debug (142,19 s, en parallèle
+avec la construction et le parcours natif) et Release (23,37 s). Le code a été
+commité avant la reconstruction de l’installateur : `b515323`, puis `8fec824`
+pour la traduction française des erreurs du stockage partagé.

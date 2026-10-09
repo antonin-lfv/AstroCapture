@@ -4,6 +4,7 @@
 #include "DeepSkyController.hpp"
 #include "MosaicController.hpp"
 #include <QPointer>
+#include <QSet>
 #include <QTimer>
 #include <QtQml/qqmlregistration.h>
 #include <thread>
@@ -21,6 +22,8 @@ class SessionController : public QObject {
     Q_PROPERTY(bool recoveryAvailable READ recoveryAvailable NOTIFY changed)
     Q_PROPERTY(QString savedAt READ savedAt NOTIFY changed)
     Q_PROPERTY(QString status READ status NOTIFY changed)
+    Q_PROPERTY(QVariantMap cacheInfo READ cacheInfo NOTIFY changed)
+    Q_PROPERTY(bool cacheCleaning READ cacheCleaning NOTIFY changed)
 public:
     explicit SessionController(QObject* parent=nullptr);
     ~SessionController() override;
@@ -38,6 +41,10 @@ public:
     bool recoveryAvailable() const{return available_;}
     QString savedAt() const{return savedAt_;}
     QString status() const{return status_;}
+    QVariantMap cacheInfo() const{return cacheInfo_;}
+    bool cacheCleaning() const{return cacheCleaning_;}
+    Q_INVOKABLE void refreshCache();
+    Q_INVOKABLE void clearUnusedProjectCache();
     Q_INVOKABLE bool saveNow();
     Q_INVOKABLE bool restoreLast();
     Q_INVOKABLE void discardRecovery();
@@ -49,6 +56,9 @@ signals:
     void saveFinished(bool success);
     void sessionRestored(const QVariantMap& uiState);
 private:
+    QSet<QString> protectedCachePaths() const;
+    QVariantMap cacheInfo_;
+    bool cacheCleaning_{};
     bool workOpen() const;
     bool processingBusy() const;
     QPointer<ProcessingController> processing_;

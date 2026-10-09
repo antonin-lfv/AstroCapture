@@ -34,7 +34,7 @@ ApplicationWindow {
     property string quitExportTarget: ""
     property bool quitExportUsesCaption: false
     property bool quitAfterSessionSave:false
-    readonly property bool workBusy: previewController.recording || deepSkyController.busy || processingController.busy || mosaicController.busy || captionController.busy
+    readonly property bool workBusy: sessionController.cacheCleaning || previewController.recording || deepSkyController.busy || processingController.busy || mosaicController.busy || captionController.busy
     readonly property bool quitBusy:workBusy || sessionController.busy
     readonly property bool hasOpenWork: previewController.recording || (deepSkyController.frames.length>0 || deepSkyController.hasResult) || processingController.loaded || processingController.stillImage || processingController.hasResult || (mosaicController.files.length>0 || mosaicController.hasResult) || quitBusy
     onClosing: close => {
@@ -65,7 +65,7 @@ ApplicationWindow {
         }
         onSaveProjectRequested: {
             if(!deepSkyWorkspace.saveOptions()){saveStatus=deepSkyWorkspace.editError;return;}
-            saveStatus="";close();quitProjectSave.open();
+            saveStatus="";close();window.quitSavePending=true;window.quitExportTarget="project";window.currentTab="deepSky";deepSkyWorkspace.saveCurrentProject();
         }
         onExportRequested: target => {
             window.quitExportTarget=target;
@@ -117,7 +117,7 @@ ApplicationWindow {
         onTriggered: {
             if(window.quitBusy || processingWorkspace.dialogOpen || deepSkyWorkspace.dialogOpen || mosaicWorkspace.dialogOpen || sharedCaptionEditor.dialogOpen || quitTiffSave.visible || quitProjectSave.visible)return;
             window.quitSavePending=false;
-            if(window.quitExportTarget.length>0)quitConfirmation.saveStatus=window.quitExportTarget==="deepSky"?(window.quitExportUsesCaption?captionController.status:deepSkyController.status):window.quitExportTarget==="processing"?processingController.status:mosaicController.status;
+            if(window.quitExportTarget.length>0)quitConfirmation.saveStatus=window.quitExportTarget==="project"?deepSkyController.status:window.quitExportTarget==="deepSky"?(window.quitExportUsesCaption?captionController.status:deepSkyController.status):window.quitExportTarget==="processing"?processingController.status:mosaicController.status;
             window.quitExportTarget="";quitConfirmation.open();
         }
     }
@@ -179,6 +179,7 @@ ApplicationWindow {
         }
     }
     HomeWorkspace {
+        enabled:!sessionController.cacheCleaning
         id:homeWorkspace;anchors.fill:parent;visible:window.currentTab==="home"
         session:sessionController;recoveryEnabled:!window.hasOpenWork
         library:appLibrary;recording:previewController.recording
@@ -196,20 +197,22 @@ ApplicationWindow {
         function onProjectSaved(url){appLibrary.recordProject(url);}
     }
     ProcessingWorkspace {
+        enabled:!sessionController.cacheCleaning
         id: processingWorkspace
         anchors.fill: parent
         visible: window.processingMode
         controller: processingController
         library: appLibrary
         lastRecording: previewController.recordingPath
-        shortcutsAllowed: !window.textEditing && !settingsPanel.opened
+        shortcutsAllowed: !sessionController.cacheCleaning && !window.textEditing && !settingsPanel.opened
     }
 
     DeepSkyWorkspace {
+        enabled:!sessionController.cacheCleaning
         id: deepSkyWorkspace
         anchors.fill: parent
         visible: window.currentTab === "deepSky"
-        shortcutsAllowed: !window.textEditing && !settingsPanel.opened
+        shortcutsAllowed: !sessionController.cacheCleaning && !window.textEditing && !settingsPanel.opened
         controller: deepSkyController
         library: appLibrary
         canEditResult: !captionController.busy
@@ -224,6 +227,7 @@ ApplicationWindow {
     Connections { target: deepSkyController; function onImageExported(url) { if (/\.(png|tiff?|jpe?g)$/i.test(url.toString())) appLibrary.recordExport(url); } }
 
     MosaicWorkspace {
+        enabled:!sessionController.cacheCleaning
         id: mosaicWorkspace
         anchors.fill: parent
         visible: window.currentTab === "mosaic"
@@ -242,12 +246,14 @@ ApplicationWindow {
         onNavigate: tab => { window.currentTab = tab; }
     }
     GlobalSettingsWorkspace {
+        session:sessionController
         anchors.fill: parent
         visible: window.currentTab === "settings"
         library: appLibrary
         captureController: previewController
     }
     HistoryWorkspace {
+        enabled:!sessionController.cacheCleaning
         anchors.fill: parent
         visible: window.currentTab === "history"
         library: appLibrary
@@ -309,7 +315,7 @@ ApplicationWindow {
 
     Shortcut {
         sequence: StandardKey.Open
-        enabled: !previewController.recording && !processingController.busy && !window.textEditing && !settingsPanel.opened && !processingWorkspace.dialogOpen && !mosaicWorkspace.dialogOpen && !deepSkyWorkspace.dialogOpen && !sharedCaptionEditor.dialogOpen
+        enabled: !sessionController.cacheCleaning && !previewController.recording && !processingController.busy && !window.textEditing && !settingsPanel.opened && !processingWorkspace.dialogOpen && !mosaicWorkspace.dialogOpen && !deepSkyWorkspace.dialogOpen && !sharedCaptionEditor.dialogOpen
         onActivated: { window.currentTab = "processing"; processingWorkspace.chooseSource(); }
     }
     Repeater {

@@ -142,3 +142,44 @@ construit. Le volume de vérification a été démonté après contrôle.
 
 SHA-256 du DMG :
 `6dad40782d7fa2a327bce0487dbf16800cb6897a07d7020a536fd4155e928ef2`.
+
+## Lot 1.6.0 — projets portables et sources déplacées
+
+Le menu du projet propose une sauvegarde **Portable** ou **Liée**, avec taille
+estimée et aide pratique. Le portable conserve les fichiers originaux et de
+calibration, les masques importés, les empilements terminés par filtre, les
+résultats flottants, la légende, A/B et le cadrage. Les projets JSON précédents
+restent lisibles. La recherche des sources déplacées vérifie les empreintes ;
+les anciens projets sans empreinte exigent une comparaison explicite des
+métadonnées, et les cas ambigus restent manquants.
+
+Les paramètres affichent les caches et la reprise automatique. Le nettoyage
+préserve les chemins de tous les workspaces et du manifeste de reprise, y
+compris les alias canoniques ; une reprise corrompue bloque le nettoyage.
+Les exports protègent aussi le fichier de projet ouvert. Les sources modifiées
+depuis l'import bloquent la sauvegarde portable.
+
+Le test dédié vérifie les Float32 exacts négatifs/HDR, les buffers partagés,
+masques peints/importés, A/B, légende, références, réapplication, composition et
+FITS linéaire ; corruption, traversée de chemins, doublons, bornes, annulation
+pendant l'écriture, source modifiée, homonymes, anciens projets, caches protégés
+et liens externes. Le test QML couvre aussi un portable enregistré avant
+l'intégration avec une recette sans A/B : les contrôles sont restaurés et la
+recette s'applique après l'empilement. Les cinq tests concernés passent en
+Debug (5,22 s).
+
+Le parcours natif en français utilise Orion 6 244 × 4 170. Il sauvegarde un
+portable, le déplace, retire la copie source, puis le recharge : les empreintes
+des buffers linéaire et fini, les réglages, la légende corrigée et A/B sont
+identiques ; les contrôles de Finition sont synchronisés avec les pixels.
+Le fichier complet mesure 880 934 480 octets, pour une estimation conservative
+de 1 017 870 000 octets environ. Les dialogues de sauvegarde/réassociation et
+le panneau de cache sont contrôlés à 1440 × 960, 1100 × 800 et 900 × 700 ; les
+boutons restent dans leurs panneaux, sans chevauchement ni libellé coupé.
+Les captures `previews/native/1.6.0-*` documentent ce parcours.
+
+La portabilité concerne Ciel profond. La pile d'annulation et les calculs en
+cours ne sont pas enregistrés ; les caches internes des étapes de recette
+sont reconstruits lors d'une modification. Les anciens masques sans empreinte
+se rechargent depuis l'outil Masques. Le format, les limites et la gestion du
+cache sont décrits dans ADR-014.

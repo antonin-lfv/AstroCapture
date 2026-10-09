@@ -2635,7 +2635,146 @@ L’aperçu est automatiquement éclairci ; les données restent linéaires.</tr
         <source>Name used to save this complete set of adjustments locally. A new name creates a separate preset; saving an existing name replaces its settings. The source image files are not included.</source>
         <translation>Nom utilisé pour sauvegarder localement cet ensemble de réglages. Un nouveau nom crée un préréglage distinct ; un nom existant remplace ses réglages. Les fichiers image source ne sont pas inclus.</translation>
     </message>
-</context>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="730" />
+            <source>Project type</source>
+            <translation>Type de projet</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="730" />
+            <source>Portable includes original images, calibration files, imported masks, filter stacks and exact floating-point results. Linked stores paths and settings; sources must remain available and results need to be calculated again.</source>
+            <translation>Le projet portable inclut les images originales, les fichiers de calibration, les masques importés, les empilements par filtre et les résultats flottants exacts. Le projet lié conserve les chemins et les réglages ; les sources doivent rester accessibles et les résultats sont à recalculer.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="731" />
+            <source>Portable · sources and results</source>
+            <translation>Portable · sources et résultats</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="731" />
+            <source>Linked · settings and file paths</source>
+            <translation>Lié · réglages et chemins des fichiers</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="732" />
+            <source>One file to move or share. Your result opens immediately, with its masks, caption and A/B versions.</source>
+            <translation>Un seul fichier à déplacer ou à partager. Le résultat s’ouvre immédiatement, avec ses masques, sa légende et ses versions A/B.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="732" />
+            <source>A small file that refers to your original images. Move it with its sources, or find their new folder when reopening.</source>
+            <translation>Un petit fichier qui référence vos images originales. Déplacez-le avec ses sources ou retrouvez leur nouveau dossier à la réouverture.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="733" />
+            <source>Estimated size: %1</source>
+            <translation>Taille estimée : %1</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="733" />
+            <source>Small settings file · results are recalculated</source>
+            <translation>Petit fichier de réglages · résultats à recalculer</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="734" />
+            <source>Saved without reducing pixel precision. Temporary disk space is needed during saving; opening creates a managed cache.</source>
+            <translation>La précision des pixels est conservée. La sauvegarde utilise de l’espace disque temporaire ; l’ouverture crée un cache géré par l’application.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="739" />
+            <source>Choose location</source>
+            <translation>Choisir l’emplacement</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="743" />
+            <source>Find the new source folder</source>
+            <translation>Retrouver le nouveau dossier des sources</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="749" />
+            <source>Choose the folder containing the moved images and masks. Subfolders are searched; matching content is verified before linking.</source>
+            <translation>Choisissez le dossier des images et masques déplacés. Les sous-dossiers sont parcourus ; le contenu est vérifié avant la réassociation.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="750" />
+            <source>%1 missing sources</source>
+            <translation>%1 sources manquantes</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="762" />
+            <source>No folder selected</source>
+            <translation>Aucun dossier choisi</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="763" />
+            <source>Choose folder</source>
+            <translation>Choisir un dossier</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="765" />
+            <source>Older projects: allow metadata matching</source>
+            <translation>Anciens projets : comparer les métadonnées</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="765" />
+            <source>Older projects have no content fingerprint. This explicitly accepts only one file with the same name, dimensions, channels, depth, exposure, filter and recorded camera metadata. Identical metadata cannot prove identical pixels. Ambiguous matches and old imported masks remain unlinked.</source>
+            <translation>Les anciens projets n’ont pas d’empreinte du contenu. Cette option accepte uniquement un fichier unique de même nom, dimensions, canaux, profondeur, pose, filtre et métadonnées caméra enregistrées. Des métadonnées identiques ne prouvent pas l’égalité des pixels. Les cas ambigus et les anciens masques importés restent à réassocier manuellement.</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="770" />
+            <source>Cancel search</source>
+            <translation>Annuler la recherche</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="770" />
+            <source>Close</source>
+            <translation>Fermer</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="772" />
+            <source>Find and link</source>
+            <translation>Rechercher et réassocier</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="15" />
+            <source>Unavailable while sources are missing</source>
+            <translation>Indisponible : des sources manquent</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="15" />
+            <source>≈ %1 GB</source>
+            <translation>≈ %1 Go</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="15" />
+            <source>≈ %1 MB</source>
+            <translation>≈ %1 Mo</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="264" />
+            <location filename="../qml/DeepSkyWorkspace.qml" line="746" />
+            <source>Find moved sources</source>
+            <translation>Retrouver les sources déplacées</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="289" />
+            <source>%1 sources are missing</source>
+            <translation>%1 sources sont manquantes</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="290" />
+            <source>Find sources</source>
+            <translation>Retrouver les sources</translation>
+        </message>
+        <message>
+            <source>1 source is missing</source>
+            <translation>1 source est manquante</translation>
+        </message>
+        <message>
+            <source>1 missing source</source>
+            <translation>1 source manquante</translation>
+        </message>
+    </context>
     <context>
         <name>GlobalSettingsWorkspace</name>
         <message>
@@ -2797,7 +2936,56 @@ L’aperçu est automatiquement éclairci ; les données restent linéaires.</tr
         <source>Adds successful exports to local History, up to 500 paths. Turning it off stops new entries but preserves existing ones and manual imports; image files stay where you saved them.</source>
         <translation>Ajoute les exports réussis à l’Historique local, jusqu’à 500 chemins. Désactiver arrête les nouvelles entrées mais conserve les anciennes et les imports manuels ; les images restent là où vous les avez enregistrées.</translation>
     </message>
-</context>
+        <message>
+            <location filename="../qml/GlobalSettingsWorkspace.qml" line="127" />
+            <source>Storage and recovery</source>
+            <translation>Stockage et reprise</translation>
+        </message>
+        <message>
+            <location filename="../qml/GlobalSettingsWorkspace.qml" line="127" />
+            <source>Portable projects are opened in a local cache. Cleanup removes only unused project caches; it preserves every cache referenced by open work or the saved recovery session. The portable project files and original images are unchanged.</source>
+            <translation>Les projets portables s’ouvrent dans un cache local. Le nettoyage retire uniquement les caches inutilisés et conserve ceux du travail ouvert ou de la session de reprise. Les fichiers des projets portables et les images originales sont préservés.</translation>
+        </message>
+        <message>
+            <location filename="../qml/GlobalSettingsWorkspace.qml" line="128" />
+            <source>Project caches: %1 · unused: %2</source>
+            <translation>Caches des projets : %1 · inutilisés : %2</translation>
+        </message>
+        <message>
+            <location filename="../qml/GlobalSettingsWorkspace.qml" line="129" />
+            <source>Automatic recovery: %1</source>
+            <translation>Reprise automatique : %1</translation>
+        </message>
+        <message>
+            <location filename="../qml/GlobalSettingsWorkspace.qml" line="130" />
+            <source>Open projects and automatic recovery are kept. After closing a project, refresh to see the space that can be freed.</source>
+            <translation>Les projets ouverts et la reprise automatique sont conservés. Après la fermeture d’un projet, actualisez pour connaître l’espace libérable.</translation>
+        </message>
+        <message>
+            <location filename="../qml/GlobalSettingsWorkspace.qml" line="132" />
+            <source>Refresh</source>
+            <translation>Actualiser</translation>
+        </message>
+        <message>
+            <location filename="../qml/GlobalSettingsWorkspace.qml" line="133" />
+            <source>Free unused space</source>
+            <translation>Libérer l’espace inutilisé</translation>
+        </message>
+        <message>
+            <location filename="../qml/GlobalSettingsWorkspace.qml" line="12" />
+            <source>%1 GB</source>
+            <translation>%1 Go</translation>
+        </message>
+        <message>
+            <location filename="../qml/GlobalSettingsWorkspace.qml" line="12" />
+            <source>%1 MB</source>
+            <translation>%1 Mo</translation>
+        </message>
+        <message>
+            <source>Not measured</source>
+            <translation>Non mesuré</translation>
+        </message>
+    </context>
     <context>
         <name>GuideWorkspace</name>
         <message>
@@ -3581,6 +3769,14 @@ L’aperçu est automatiquement éclairci ; les données restent linéaires.</tr
         <message>
             <source>GHS, PSF, Richardson–Lucy, multiscale denoising and SCNR expose their parameters and help. Values and algorithms are not interchangeable with every Siril tool. Photometry currently uses a CSV of identified reference stars; automatic plate solving and catalog-based PCC/SPCC are still to come.</source>
             <translation>GHS, PSF, Richardson–Lucy, débruitage multiscale et SCNR exposent leurs paramètres et leur aide. Les valeurs et algorithmes ne sont pas interchangeables avec tous les outils de Siril. La photométrie utilise actuellement un CSV d’étoiles de référence identifiées ; l’astrométrie automatique et PCC/SPCC sur catalogue restent à venir.</translation>
+        </message>
+        <message>
+            <source>In Capture, choose Deep sky · FITS sequence, set exposure and frame count, and start. Raw sensor samples and acquisition metadata are saved in individual FITS. Mount tracking and guiding remain external. The project gear opens and saves projects. Portable includes sources, masks and floating-point results in one file. Linked saves paths and settings; recreate the stack after reopening. Find moved sources searches a new folder and verifies matching content.</source>
+            <translation>Dans Capture, choisissez Ciel profond · Séquence FITS, définissez la pose et le nombre d’images, puis démarrez. Les pixels bruts du capteur et les métadonnées sont enregistrés dans chaque FITS. Le suivi et l’autoguidage restent externes. Le rouage gère les projets. Portable rassemble sources, masques et résultats flottants dans un seul fichier. Lié conserve chemins et réglages ; recalculez l’empilement à la réouverture. Retrouver les sources déplacées parcourt le nouveau dossier et vérifie le contenu.</translation>
+        </message>
+        <message>
+            <source>Resume returns to the current session. Open reloads a saved deep-sky project: a portable project restores its calculated results immediately; a linked project requires its sources and a new integration. The deep-sky gear offers both save modes and Find moved sources. Settings shows cache and automatic recovery sizes and can free unused project caches.</source>
+            <translation>Reprendre revient à la session courante. Ouvrir charge un projet Ciel profond sauvegardé : un projet portable restaure immédiatement ses résultats calculés ; un projet lié nécessite ses sources et un nouvel empilement. Le rouage propose les deux modes de sauvegarde et la recherche des sources déplacées. Les paramètres affichent le poids des caches et de la reprise automatique et permettent de libérer les caches inutilisés.</translation>
         </message>
     </context>
     <context>
@@ -5851,6 +6047,179 @@ Résultat obtenu :
             <source>Choose a FITS, PNG or TIFF mask.</source>
             <translation>Choisissez un masque FITS, PNG ou TIFF.</translation>
         </message>
+        <message>
+            <location filename="../src/DeepSkyController.cpp" line="472" />
+            <source>A project file cannot be overwritten by an image.</source>
+            <translation>Une image ne peut pas écraser un fichier de projet.</translation>
+        </message>
+        <message>
+            <location filename="../src/DeepSkyController.cpp" line="513" />
+            <source>Opening portable project…</source>
+            <translation>Ouverture du projet portable…</translation>
+        </message>
+        <message>
+            <location filename="../src/DeepSkyController.cpp" line="515" />
+            <source>Portable project opened. Sources, masks and results are ready.</source>
+            <translation>Projet portable ouvert. Les sources, masques et résultats sont prêts.</translation>
+        </message>
+        <message>
+            <location filename="../src/DeepSkyController.cpp" line="537" />
+            <source>Project loaded. Find the moved sources before integrating.</source>
+            <translation>Projet chargé. Retrouvez les sources déplacées avant l’empilement.</translation>
+        </message>
+        <message>
+            <location filename="../src/DeepSkyController.cpp" line="582" />
+            <source>Invalid portable project settings or results.</source>
+            <translation>Réglages ou résultats du projet portable invalides.</translation>
+        </message>
+        <message>
+            <location filename="../src/DeepSkyController.cpp" line="583" />
+            <source>Saving portable project…</source>
+            <translation>Sauvegarde du projet portable…</translation>
+        </message>
+        <message>
+            <location filename="../src/DeepSkyController.cpp" line="585" />
+            <source>Portable project saved with sources, masks and floating-point results.</source>
+            <translation>Projet portable sauvegardé avec ses sources, masques et résultats flottants.</translation>
+        </message>
+        <message>
+            <location filename="../src/DeepSkyController.cpp" line="599" />
+            <source>Finding moved sources…</source>
+            <translation>Recherche des sources déplacées…</translation>
+        </message>
+        <message>
+            <location filename="../src/DeepSkyController.cpp" line="632" />
+            <source>%1 sources linked; %2 still missing. Cached results and adjustments are preserved.</source>
+            <translation>%1 sources réassociées ; %2 encore manquantes. Les résultats en cache et les réglages sont conservés.</translation>
+        </message>
+        <message>
+            <source>A project source file is missing or unreadable.</source>
+            <translation>Une source du projet manque ou ne peut pas être lue.</translation>
+        </message>
+        <message>
+            <source>Cannot read a project source file.</source>
+            <translation>Impossible de lire une source du projet.</translation>
+        </message>
+        <message>
+            <source>Invalid portable project file size.</source>
+            <translation>Taille de fichier invalide dans le projet portable.</translation>
+        </message>
+        <message>
+            <source>Not enough free space for this portable project.</source>
+            <translation>L’espace disque disponible est insuffisant pour ce projet portable.</translation>
+        </message>
+        <message>
+            <source>A source file changed while saving. Try again.</source>
+            <translation>Une source a changé pendant la sauvegarde. Réessayez.</translation>
+        </message>
+        <message>
+            <source>Too many source files in this project.</source>
+            <translation>Ce projet contient trop de fichiers sources.</translation>
+        </message>
+        <message>
+            <source>Cannot create temporary project files.</source>
+            <translation>Impossible de créer les fichiers temporaires du projet.</translation>
+        </message>
+        <message>
+            <source>Invalid portable project asset.</source>
+            <translation>Fichier invalide dans le projet portable.</translation>
+        </message>
+        <message>
+            <source>Portable project exceeds 128 GiB.</source>
+            <translation>Le projet portable dépasse la limite de 128 Gio.</translation>
+        </message>
+        <message>
+            <source>Portable project manifest is too large.</source>
+            <translation>Le descriptif du projet portable est trop volumineux.</translation>
+        </message>
+        <message>
+            <source>Cannot save portable project. Check disk space.</source>
+            <translation>Impossible de sauvegarder le projet portable. Vérifiez l’espace disque.</translation>
+        </message>
+        <message>
+            <source>Cannot finish saving portable project.</source>
+            <translation>Impossible de terminer la sauvegarde du projet portable.</translation>
+        </message>
+        <message>
+            <source>Invalid portable project.</source>
+            <translation>Projet portable invalide.</translation>
+        </message>
+        <message>
+            <source>Incomplete portable project.</source>
+            <translation>Projet portable incomplet.</translation>
+        </message>
+        <message>
+            <source>Invalid portable project manifest size.</source>
+            <translation>Taille du descriptif du projet portable invalide.</translation>
+        </message>
+        <message>
+            <source>Portable project manifest is damaged.</source>
+            <translation>Le descriptif du projet portable est endommagé.</translation>
+        </message>
+        <message>
+            <source>Invalid portable project manifest.</source>
+            <translation>Descriptif du projet portable invalide.</translation>
+        </message>
+        <message>
+            <source>Too many portable project assets.</source>
+            <translation>Le projet portable contient trop de fichiers.</translation>
+        </message>
+        <message>
+            <source>Portable project results exceed 4 GiB.</source>
+            <translation>Les résultats du projet portable dépassent la limite de 4 Gio.</translation>
+        </message>
+        <message>
+            <source>Invalid portable project source list.</source>
+            <translation>Liste des sources du projet portable invalide.</translation>
+        </message>
+        <message>
+            <source>Cannot create the project cache.</source>
+            <translation>Impossible de créer le cache du projet.</translation>
+        </message>
+        <message>
+            <source>Cannot open portable project. Check cache disk space.</source>
+            <translation>Impossible d’ouvrir le projet portable. Vérifiez l’espace disque du cache.</translation>
+        </message>
+        <message>
+            <source>Portable project data is damaged.</source>
+            <translation>Les données du projet portable sont endommagées.</translation>
+        </message>
+        <message>
+            <source>Invalid portable project workspace.</source>
+            <translation>Espace de travail du projet portable invalide.</translation>
+        </message>
+        <message>
+            <source>Invalid portable project source reference.</source>
+            <translation>Référence de source invalide dans le projet portable.</translation>
+        </message>
+        <message>
+            <source>Cannot finish opening the portable project.</source>
+            <translation>Impossible de terminer l’ouverture du projet portable.</translation>
+        </message>
+        <message>
+            <source>Search is limited to 50000 files. Choose a more specific source folder.</source>
+            <translation>La recherche est limitée à 50 000 fichiers. Choisissez un dossier de sources plus précis.</translation>
+        </message>
+        <message>
+            <source>No matching sources found. Choose their new folder; older projects require explicit metadata matching. Ambiguous files are never linked.</source>
+            <translation>Aucune source correspondante. Choisissez leur nouveau dossier ; pour un ancien projet, activez la comparaison des métadonnées. Les fichiers ambigus ne sont jamais réassociés.</translation>
+        </message>
+        <message>
+            <source>Cannot inspect the saved session. Cache cleanup is unavailable.</source>
+            <translation>Impossible de vérifier la session sauvegardée. Le nettoyage du cache est indisponible.</translation>
+        </message>
+        <message>
+            <source>Cannot remove an unused project cache.</source>
+            <translation>Impossible de supprimer un cache de projet inutilisé.</translation>
+        </message>
+        <message>
+            <source>Cache cleanup cancelled.</source>
+            <translation>Nettoyage du cache annulé.</translation>
+        </message>
+        <message>
+            <source>A source file changed since import. Reimport it before saving a portable project.</source>
+            <translation>Une source a changé depuis l’import. Importez-la à nouveau avant de sauvegarder un projet portable.</translation>
+        </message>
     </context>
     <context>
         <name>astro::app::MosaicController</name>
@@ -6902,6 +7271,28 @@ Résultat obtenu :
         <message>
             <source>A saved session preview is damaged.</source>
             <translation>Un aperçu de session est endommagé.</translation>
+        </message>
+        <message>
+            <location filename="../src/SessionController.cpp" line="91" />
+            <source>Cleaning unused project caches…</source>
+            <translation>Nettoyage des caches inutilisés…</translation>
+        </message>
+        <message>
+            <location filename="../src/SessionController.cpp" line="93" />
+            <source>Unused project caches removed. Open work and recovery are preserved.</source>
+            <translation>Caches inutilisés supprimés. Le travail ouvert et la reprise sont conservés.</translation>
+        </message>
+        <message>
+            <source>Cannot inspect the saved session. Cache cleanup is unavailable.</source>
+            <translation>Impossible de vérifier la session sauvegardée. Le nettoyage du cache est indisponible.</translation>
+        </message>
+        <message>
+            <source>Cannot remove an unused project cache.</source>
+            <translation>Impossible de supprimer un cache de projet inutilisé.</translation>
+        </message>
+        <message>
+            <source>Cache cleanup cancelled.</source>
+            <translation>Nettoyage du cache annulé.</translation>
         </message>
     </context>
     <context>

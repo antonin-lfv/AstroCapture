@@ -7,6 +7,9 @@ import QtQuick.Dialogs
 Rectangle {
     id: root
     required property AppLibrary library
+    property var session: null
+    onVisibleChanged:if(visible&&session)session.refreshCache()
+    function sizeText(bytes) {return bytes===undefined?qsTr("Not measured"):bytes>=1000000000?qsTr("%1 GB").arg(Number(bytes/1000000000).toLocaleString(Qt.locale(),"f",1)):qsTr("%1 MB").arg(Number((bytes||0)/1000000).toLocaleString(Qt.locale(),"f",1));}
     required property PreviewController captureController
     color: Atelier.canvas
     FolderDialog {
@@ -39,7 +42,7 @@ Rectangle {
         ToolTip.text: text
     }
     ScrollView {
-        id:settingsScroll
+        id:settingsScroll;objectName:"globalSettingsScroll"
         anchors.top:parent.top;anchors.bottom:parent.bottom;anchors.horizontalCenter:parent.horizontalCenter
         anchors.topMargin:20;anchors.bottomMargin:20;width:Math.min(1040,parent.width-40)
         contentWidth: availableWidth
@@ -118,6 +121,18 @@ Rectangle {
                     }
                 }
                 Description { text: qsTr("Keeps up to 500 image paths locally. Images stay in their original folders. Turning this off keeps existing entries and still allows manual imports.") }
+            }
+            Card {
+                id:cacheCard;objectName:"projectCacheCard";visible:root.session!==null
+                Heading {text:qsTr("Storage and recovery");explanation:qsTr("Portable projects are opened in a local cache. Cleanup removes only unused project caches; it preserves every cache referenced by open work or the saved recovery session. The portable project files and original images are unchanged.")}
+                Description {text:root.session?qsTr("Project caches: %1 · unused: %2").arg(root.sizeText(root.session.cacheInfo.bytes)).arg(root.sizeText(root.session.cacheInfo.unusedBytes)):""}
+                Description {text:root.session?qsTr("Automatic recovery: %1").arg(root.sizeText(root.session.cacheInfo.sessionBytes)):""}
+                Description {text:qsTr("Open projects and automatic recovery are kept. After closing a project, refresh to see the space that can be freed.")}
+                RowLayout {
+                    IconButton {text:qsTr("Refresh");enabled:root.session&&!root.session.busy;onClicked:root.session.refreshCache()}
+                    IconButton {objectName:"clearUnusedProjectCache";text:qsTr("Free unused space");enabled:root.session&&!root.session.busy&&root.session.cacheInfo.unusedBytes>0;onClicked:root.session.clearUnusedProjectCache()}
+                }
+                Description {text:root.session?root.session.status:"";visible:text.length>0}
             }
             Card {
                 Heading { text: "AstroCapture · " + Qt.application.version }

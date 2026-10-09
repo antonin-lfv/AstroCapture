@@ -29,6 +29,10 @@ class DeepSkyController : public QObject {
     Q_PROPERTY(bool sourceAutoStretch READ sourceAutoStretch WRITE setSourceAutoStretch NOTIFY changed)
     Q_PROPERTY(QVariantList backgroundSamples READ backgroundSamples NOTIFY changed)
     Q_PROPERTY(bool busy READ busy NOTIFY changed)
+    Q_PROPERTY(bool restoringProject READ restoringProject NOTIFY changed)
+    Q_PROPERTY(QVariantList missingSources READ missingSources NOTIFY changed)
+    Q_PROPERTY(double portableProjectBytes READ portableProjectBytes NOTIFY changed)
+    Q_PROPERTY(QString projectCacheDirectory READ projectCacheDirectory WRITE setProjectCacheDirectory NOTIFY changed)
     Q_PROPERTY(bool adjusting READ adjusting NOTIFY changed)
     Q_PROPERTY(bool hasRawComparison READ hasRawComparison NOTIFY changed)
     Q_PROPERTY(bool comparingRaw READ comparingRaw NOTIFY changed)
@@ -68,6 +72,11 @@ public:
     void setSourceAutoStretch(bool);
     QVariantList backgroundSamples() const{return backgroundSamples_;}
     bool busy() const{return busy_;}
+    bool restoringProject() const{return restoringProject_;}
+    QVariantList missingSources() const;
+    double portableProjectBytes() const;
+    QString projectCacheDirectory() const;
+    void setProjectCacheDirectory(const QString& path){if(!busy_){projectCacheDirectory_=path;emit changed();}}
     bool adjusting() const{return adjusting_;}
     bool hasRawComparison() const{return !rawPreview_.isNull();}
     bool comparingRaw() const{return comparingRaw_;}
@@ -119,10 +128,13 @@ public:
     QUrl exportUrl() const;
     Q_INVOKABLE void exportImage(const QUrl&,bool linear=true);
     Q_INVOKABLE void saveProject(const QUrl&);
+    Q_INVOKABLE void savePortableProject(const QUrl&);
+    Q_INVOKABLE void relinkSources(const QUrl& folder, bool allowMetadataMatch=false);
     Q_INVOKABLE void loadProject(const QUrl&);
     Q_INVOKABLE QVariant processingDocument() const;
     WorkspaceSnapshot sessionSnapshot() const;
     bool canRestoreSession(const WorkspaceSnapshot&) const;
+    static bool validSession(const WorkspaceSnapshot&);
     void restoreSession(const WorkspaceSnapshot&);
     Q_INVOKABLE void cancel(){pendingAdjustments_.reset();worker_.request_stop();}
 signals:
@@ -135,8 +147,14 @@ signals:
     void projectOptionsChanged();
     void imageExported(const QUrl&);
     void projectOpened(const QUrl&);
+    void projectRestored(const QVariantMap& viewState);
     void projectSaved(const QUrl&);
 private:
+    QUrl projectUrl_;
+    QString projectCacheDirectory_;
+    QVariantMap sourceFingerprints_;
+    bool restoringProject_{};
+    void restoreProject(const WorkspaceSnapshot&, const QUrl&, const QString&);
     void run(const QString&,std::function<void(std::stop_token)>);
     void post(std::function<void()>);
     void show(std::shared_ptr<const processing::FloatImage>,bool result, QImage preview, std::shared_ptr<const processing::FloatImage> displayed, QVariantMap stretch, QImage before = {});

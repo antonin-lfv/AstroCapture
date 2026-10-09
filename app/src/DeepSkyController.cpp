@@ -1,4 +1,5 @@
 #include "FileProtection.hpp"
+#include "ProjectStorage.hpp"
 #include "MaskSettings.hpp"
 #include "ImageGeometry.hpp"
 #include "DeepSkyController.hpp"
@@ -267,6 +268,7 @@ void DeepSkyController::addFiles(const QList<QUrl>& urls,const QString& role,con
             try {
                 QVariantMap row{{"path",path},{"name",QFileInfo(path).fileName()},{"role",role},{"selected",true},{"scale",scale}};
                 auto data=readFrame(row);
+                row["sourceFingerprint"]=ProjectStorage::fingerprint(path,[stop]{check(stop);});
                 if(role=="Auto") {
                     const auto hint=(QFileInfo(path).fileName()+" "+QFileInfo(path).dir().dirName()+" "+QString::fromStdString(data.imageType)).toLower();
                     QString detected="Light";
@@ -306,7 +308,7 @@ void DeepSkyController::setReference(int index) {
     emit changed();
 }
 void DeepSkyController::remove(int index){if(busy_||index<0||index>=frames_.size())return;frames_.removeAt(index);emit changed();}
-void DeepSkyController::clear(){if(busy_)return;maskImportPreview_={};maskImportPath_.clear();geometryPreview_={};maskSourcePreview_={};advancedReport_.clear();psfKernel_.clear();maskPreview_={};showingMask_=false;projectOptions_.clear();sourceRow_.clear();sourceInterpretation_.clear();sourceDebayer_=sourceAutoStretch_=true;finishSettings_.clear();rawPreview_={};backgroundPreview_={};showingBackgroundModel_=false;rawName_.clear();comparingRaw_=false;histogram_.clear();pendingAdjustments_.reset();displayingResult_=false;stage_.clear();frames_.clear();backgroundSamples_.clear();references_.clear();stacks_.clear();groupExposure_.clear();groupCounts_.clear();exposureCount_=0;resultFilters_.clear();groups_.clear();linear_.reset();finished_.reset();pipelineCache_.reset();pipelineSource_.reset();pipelineCacheKey_.clear();preview_={};resultPreview_={};linearPreview_={};comparisonPreview_={};comparisonOrientationKey_.clear();status_.clear();emit projectOptionsChanged();emit changed();emit imageChanged();}
+void DeepSkyController::clear(){if(busy_)return;projectUrl_=QUrl();sourceFingerprints_.clear();maskImportPreview_={};maskImportPath_.clear();geometryPreview_={};maskSourcePreview_={};advancedReport_.clear();psfKernel_.clear();maskPreview_={};showingMask_=false;projectOptions_.clear();sourceRow_.clear();sourceInterpretation_.clear();sourceDebayer_=sourceAutoStretch_=true;finishSettings_.clear();rawPreview_={};backgroundPreview_={};showingBackgroundModel_=false;rawName_.clear();comparingRaw_=false;histogram_.clear();pendingAdjustments_.reset();displayingResult_=false;stage_.clear();frames_.clear();backgroundSamples_.clear();references_.clear();stacks_.clear();groupExposure_.clear();groupCounts_.clear();exposureCount_=0;resultFilters_.clear();groups_.clear();linear_.reset();finished_.reset();pipelineCache_.reset();pipelineSource_.reset();pipelineCacheKey_.clear();preview_={};resultPreview_={};linearPreview_={};comparisonPreview_={};comparisonOrientationKey_.clear();status_.clear();emit projectOptionsChanged();emit changed();emit imageChanged();}
 void DeepSkyController::chooseRawComparison(int index){
     if(busy_||index<0||index>=frames_.size()||frames_[index].toMap()["role"]!="Light")return;
     const auto row=frames_[index].toMap();
@@ -461,12 +463,13 @@ void DeepSkyController::apply(const QVariantMap& options) {
 }
 QUrl DeepSkyController::exportUrl() const {
     if(frames_.isEmpty())return {};
-    const QFileInfo source(frames_.front().toMap()["path"].toString());
+    const QFileInfo source(projectUrl_.isLocalFile()?projectUrl_.toLocalFile():frames_.front().toMap()["path"].toString());
     return QUrl::fromLocalFile(source.dir().filePath(source.completeBaseName()+"-stacked.tif"));
 }
 void DeepSkyController::exportImage(const QUrl& url,bool linear) {
     if(!linear_||!url.isLocalFile())return;
     const auto path=url.toLocalFile();
+    if(projectUrl_.isLocalFile()&&sameFile(projectUrl_.toLocalFile(),path)){status_=tr("A project file cannot be overwritten by an image.");emit changed();return;}
     for(const auto& value:frames_)if(sameFile(value.toMap()["path"].toString(),path)){status_=tr("An original image cannot be overwritten.");emit changed();return;}
     const auto masks=referencedMasks(finishSettings_,projectOptions_);for(const auto& mask:masks)if(sameFile(mask,path)){status_=tr("An original image cannot be overwritten.");emit changed();return;}
     const auto image=linear?linear_:finished_;const auto exposure=totalExposure_;
@@ -495,19 +498,28 @@ void DeepSkyController::saveProject(const QUrl& url) {
     if(busy_||!url.isLocalFile())return;
     for(const auto& value:frames_)if(sameFile(url.toLocalFile(),value.toMap()["path"].toString())){status_=tr("An original image cannot be overwritten.");emit changed();return;}
     for(const auto& path:referencedMasks(finishSettings_,projectOptions_))if(sameFile(url.toLocalFile(),path)){status_=tr("An original image cannot be overwritten.");emit changed();return;}
-    const QJsonObject project{{"version",1},{"frames",QJsonArray::fromVariantList(frames_)},{"options",QJsonObject::fromVariantMap(projectOptions_)}};
+    auto sources=sourceFingerprints_;for(const auto& value:frames_){const auto row=value.toMap();if(row.contains("sourceFingerprint"))sources[row["path"].toString()]=row["sourceFingerprint"];}
+    const QJsonObject project{{"sources",QJsonObject::fromVariantMap(sources)},{"version",1},{"frames",QJsonArray::fromVariantList(frames_)},{"options",QJsonObject::fromVariantMap(projectOptions_)}};
     QSaveFile file(url.toLocalFile());const auto bytes=QJsonDocument(project).toJson();
     if(bytes.size()>4*1024*1024){status_=tr("Project exceeds 4 MiB. Reduce saved sample or reference lists before saving.");emit changed();return;}
-    if(!file.open(QIODevice::WriteOnly)||file.write(bytes)!=bytes.size()||!file.commit())status_=tr("Cannot save project.");else {status_=tr("Project saved. Original files are referenced, not copied.");emit projectSaved(url);}emit changed();
+    if(!file.open(QIODevice::WriteOnly)||file.write(bytes)!=bytes.size()||!file.commit())status_=tr("Cannot save project.");else {status_=tr("Project saved. Original files are referenced, not copied.");projectUrl_=url;emit projectSaved(url);}emit changed();
 }
 void DeepSkyController::loadProject(const QUrl& url) {
     if(busy_||!url.isLocalFile())return;
     QFile file(url.toLocalFile());
-    if(!file.open(QIODevice::ReadOnly)||file.size()>4*1024*1024){status_=tr("Cannot read project.");emit changed();return;}
+    if(!file.open(QIODevice::ReadOnly)){status_=tr("Cannot read project.");emit changed();return;}
+    if(file.peek(8)==ProjectStorage::magic()) {
+        const auto cache=projectCacheDirectory();file.close();
+        run(tr("Opening portable project…"),[this,url,cache](std::stop_token stop){
+            const auto snapshot=ProjectStorage::load(url.toLocalFile(),cache,[stop]{check(stop);},[this](int p){post([this,p]{progress_=p;emit changed();});},&DeepSkyController::validSession);
+            check(stop);post([this,url,snapshot,stop]{if(stop.stop_requested())return;restoreProject(snapshot,url,tr("Portable project opened. Sources, masks and results are ready."));});
+        });return;
+    }
+    if(file.size()>4*1024*1024){status_=tr("Cannot read project.");emit changed();return;}
     QJsonParseError error;const auto object=QJsonDocument::fromJson(file.readAll(),&error).object();
     if(error.error!=QJsonParseError::NoError||object["version"].toInt()!=1||!object["frames"].isArray()||object["frames"].toArray().size()>2000){status_=tr("Invalid AstroCapture project.");emit changed();return;}
     auto frames=object["frames"].toArray().toVariantList();
-    for(const auto& value:frames){const auto row=value.toMap();if(!QFileInfo(row["path"].toString()).isFile()||!QStringList{"Light","Dark","Flat","Bias","DarkFlat","BadPixels"}.contains(row["role"].toString())){status_=tr("Project contains missing files or invalid roles.");emit changed();return;}}
+    for(const auto& value:frames){const auto row=value.toMap();if(row["path"].toString().isEmpty()||!QStringList{"Light","Dark","Flat","Bias","DarkFlat","BadPixels"}.contains(row["role"].toString())){status_=tr("Project contains missing files or invalid roles.");emit changed();return;}}
     auto options=object["options"].toObject().toVariantMap();
     if(options.contains("finish")) {
         auto finish=defaultDeepSkySettings();const auto saved=options["finish"].toMap();
@@ -522,11 +534,11 @@ void DeepSkyController::loadProject(const QUrl& url) {
         options["versions"]=*checked;
         options["finish"]=(*checked)[(*checked)["active"].toString()];
     }
-    clear();projectOptions_=std::move(options);emit projectOptionsChanged();frames_=std::move(frames);for(const auto& value:frames_){const auto row=value.toMap();if(row["reference"].toBool())references_[row["group"].toString()]=row["path"].toString();}status_=tr("Project loaded. Integrate to recreate the result.");emit projectOpened(url);emit changed();
+    clear();projectUrl_=url;sourceFingerprints_=object["sources"].toObject().toVariantMap();projectOptions_=std::move(options);emit projectOptionsChanged();frames_=std::move(frames);for(const auto& value:frames_){const auto row=value.toMap();if(row["reference"].toBool())references_[row["group"].toString()]=row["path"].toString();}status_=missingSources().isEmpty()?tr("Project loaded. Integrate to recreate the result."):tr("Project loaded. Find the moved sources before integrating.");emit projectOpened(url);emit changed();
 }
 QVariant DeepSkyController::processingDocument() const {
     if(!finished_)return {};
-    QStringList protectedPaths;for(const auto& value:frames_)protectedPaths<<value.toMap()["path"].toString();protectedPaths<<referencedMasks(finishSettings_,projectOptions_);
+    QStringList protectedPaths;for(const auto& value:frames_)protectedPaths<<value.toMap()["path"].toString();protectedPaths<<referencedMasks(finishSettings_,projectOptions_);if(projectUrl_.isLocalFile())protectedPaths<<projectUrl_.toLocalFile();
     ImageDocument document{finished_,resultPreview_,{},tr("Deep-sky result"),exportUrl(),protectedPaths};
     document.exposureCount=exposureCount_;document.totalExposure=totalExposure_;document.filters=resultFilters_;
     document.processingSummary=tr("Deep sky · %1 exposures · %2 s total · filters: %3").arg(exposureCount_).arg(totalExposure_,0,'f',1).arg(resultFilters_.join(", "));
@@ -537,15 +549,88 @@ QVariant DeepSkyController::processingDocument() const {
 namespace astro::app {
 void DeepSkyController::loadMaskFile(const QUrl& url) {
     if(busy_||!linear_||!url.isLocalFile())return;
-    const auto source=pipelineCache_?pipelineCache_:linear_;const auto path=url.toLocalFile();
-    run(tr("Reading mask image…"),[this,source,path](std::stop_token stop){
-        const auto image=readMaskFrame(path);check(stop);
+    const auto source=pipelineCache_?pipelineCache_:linear_;const auto path=url.toLocalFile();const auto originalName=sourceFingerprints_[path].toMap()["name"].toString();
+    run(tr("Reading mask image…"),[this,source,path,originalName](std::stop_token stop){
+        const auto image=readMaskFrame(path);auto fingerprint=ProjectStorage::fingerprint(path,[stop]{check(stop);});if(!originalName.isEmpty())fingerprint["name"]=originalName;check(stop);
         if(image.width!=source->width||image.height!=source->height)throw std::runtime_error("The imported mask must match the image dimensions.");
         for(float v:image.samples){if(!std::isfinite(v)||v<0||v>1)throw std::runtime_error("Mask values must be between zero and one.");}
         const int w=std::min(1024,image.width),h=std::max(1,int(std::lround(double(image.height)*w/image.width)));
         QImage preview(w,h,QImage::Format_Grayscale8);if(preview.isNull())throw std::runtime_error("Cannot allocate mask preview.");
         for(int y=0;y<h;++y){check(stop);auto* row=preview.scanLine(y);for(int x=0;x<w;++x){const auto p=std::size_t(y*image.height/h)*image.width+x*image.width/w;const double value=image.channels==1?image.samples[p]:.2126*image.samples[p*image.channels]+.7152*image.samples[p*image.channels+1]+.0722*image.samples[p*image.channels+2];row[x]=uchar(std::lround(value*255));}}
-        post([this,path,preview,stop]{if(stop.stop_requested())return;maskImportPath_=path;maskImportPreview_=preview;pipelineCache_.reset();pipelineSource_.reset();status_=tr("Mask image loaded. White applies; black protects.");emit maskFileChanged();emit maskFileReady(path);});
+        post([this,path,preview,fingerprint,stop]{if(stop.stop_requested())return;sourceFingerprints_[path]=fingerprint;maskImportPath_=path;maskImportPreview_=preview;pipelineCache_.reset();pipelineSource_.reset();status_=tr("Mask image loaded. White applies; black protects.");emit maskFileChanged();emit maskFileReady(path);});
+    });
+}
+}
+
+namespace astro::app {
+QString DeepSkyController::projectCacheDirectory() const { return projectCacheDirectory_.isEmpty()?ProjectStorage::defaultCacheDirectory():projectCacheDirectory_; }
+double DeepSkyController::portableProjectBytes() const { return ProjectStorage::estimatedBytes(sessionSnapshot()); }
+QVariantList DeepSkyController::missingSources() const {
+    QVariantList missing;
+    const auto snapshot=sessionSnapshot();
+    for(const auto& path:ProjectStorage::sourcePaths(snapshot))if(!QFileInfo(path).isFile()) {
+        auto fingerprint=sourceFingerprints_[path].toMap();QString name=fingerprint["name"].toString();
+        for(const auto& value:frames_) {const auto row=value.toMap();if(row["path"].toString()==path){name=row["name"].toString();fingerprint=row.value("sourceFingerprint",fingerprint).toMap();break;}}
+        missing<<QVariantMap{{"path",path},{"name",name.isEmpty()?QFileInfo(path).fileName():name},{"verified",!fingerprint["sha256"].toString().isEmpty()}};
+    }
+    return missing;
+}
+void DeepSkyController::savePortableProject(const QUrl& url) {
+    if(busy_||!url.isLocalFile()||frames_.isEmpty())return;
+    const auto snapshot=sessionSnapshot();
+    for(const auto& path:ProjectStorage::sourcePaths(snapshot))if(sameFile(url.toLocalFile(),path)){status_=tr("An original image cannot be overwritten.");emit changed();return;}
+    if(!validSession(snapshot)){status_=tr("Invalid portable project settings or results.");emit changed();return;}
+    run(tr("Saving portable project…"),[this,url,snapshot](std::stop_token stop){
+        ProjectStorage::save(url.toLocalFile(),snapshot,[stop]{check(stop);},[this](int p){post([this,p]{progress_=p;emit changed();});});
+        post([this,url]{projectUrl_=url;status_=tr("Portable project saved with sources, masks and floating-point results.");progress_=100;emit projectSaved(url);emit changed();});
+    });
+}
+void DeepSkyController::restoreProject(const WorkspaceSnapshot& snapshot,const QUrl& url,const QString& message) {
+    // A completed worker publishes one validated snapshot. QML must restore A/B
+    // and view settings rather than treating this as a newly computed integration.
+    busy_=false;restoringProject_=true;restoreSession(snapshot);projectUrl_=url;
+    status_=message;emit projectRestored(snapshot.state["options"].toMap()["view"].toMap());
+    restoringProject_=false;busy_=true;if(url.isLocalFile())emit projectOpened(url);
+}
+void DeepSkyController::relinkSources(const QUrl& folder,bool allowMetadataMatch) {
+    if(busy_||!folder.isLocalFile()||!QFileInfo(folder.toLocalFile()).isDir())return;
+    const auto snapshot=sessionSnapshot();const auto missing=missingSources();const auto url=projectUrl_;
+    if(missing.isEmpty())return;
+    run(tr("Finding moved sources…"),[this,folder,snapshot,missing,url,allowMetadataMatch](std::stop_token stop){
+        QMap<QString,QStringList> candidates;QDirIterator it(folder.toLocalFile(),QDir::Files|QDir::NoSymLinks,QDirIterator::Subdirectories);int count=0;
+        while(it.hasNext()){check(stop);const auto path=it.next();if(++count>50000)throw std::runtime_error("Search is limited to 50000 files. Choose a more specific source folder.");candidates[QFileInfo(path).fileName()]<<path;}
+        QMap<QString,QString> paths;QVariantMap fingerprints=snapshot.state["sourceFingerprints"].toMap();QMap<QString,QVariantMap> newlyVerified;
+        int unverified=0,ambiguous=0;
+        for(int i=0;i<missing.size();++i){
+            check(stop);const auto item=missing[i].toMap();const auto original=item["path"].toString();auto fingerprint=fingerprints[original].toMap();QVariantMap sourceRow;
+            for(const auto& value:snapshot.state["frames"].toList()){const auto row=value.toMap();if(row["path"].toString()==original){sourceRow=row;fingerprint=row.value("sourceFingerprint",fingerprint).toMap();break;}}
+            auto list=candidates[item["name"].toString()];std::sort(list.begin(),list.end());QStringList matches;QVariantMap matchedFingerprint;
+            const auto expected=fingerprint["sha256"].toString();
+            if(expected.isEmpty()&&(!allowMetadataMatch||sourceRow.isEmpty())){++unverified;continue;}
+            for(const auto& candidate:list){
+                check(stop);
+                if(!expected.isEmpty()&&QString::number(QFileInfo(candidate).size())!=fingerprint["bytes"].toString())continue;
+                if(expected.isEmpty()){
+                    // Old projects have no content fingerprint. Only a unique file
+                    // with all recorded sensor metadata may be accepted, explicitly.
+                    if(sourceRow["width"].toInt()<=0||sourceRow["height"].toInt()<=0)continue;
+                    try{auto row=sourceRow;row["path"]=candidate;const auto data=readFrame(row);
+                        if(data.width!=sourceRow["width"].toInt()||data.height!=sourceRow["height"].toInt()||data.channels!=sourceRow["channels"].toInt()||data.bits!=sourceRow["bits"].toInt()||std::abs(data.exposure-sourceRow["exposure"].toDouble())>1e-6||QString::fromStdString(data.filter)!=sourceRow["filter"].toString()||QString::fromUtf8(domain::to_string(data.bayer).data())!=sourceRow["bayer"].toString()||(sourceRow.contains("gain")&&(!data.hasGain||std::abs(data.gain-sourceRow["gain"].toDouble())>1e-6))||(sourceRow.contains("temperature")&&(!data.hasTemperature||std::abs(data.temperature-sourceRow["temperature"].toDouble())>1e-6)))continue;
+                    }catch(const std::exception&){continue;}
+                }
+                const auto actual=ProjectStorage::fingerprint(candidate,[stop]{check(stop);});
+                if(!expected.isEmpty()&&actual["sha256"].toString()!=expected)continue;
+                matches<<candidate;matchedFingerprint=actual;if(!expected.isEmpty())break;
+            }
+            if(matches.size()==1){paths[original]=QFileInfo(matches.front()).canonicalFilePath();newlyVerified[original]=matchedFingerprint;}
+            else if(matches.size()>1)++ambiguous;
+            post([this,i,total=missing.size()]{progress_=int((i+1)*100/total);emit changed();});
+        }
+        if(paths.isEmpty())throw std::runtime_error("No matching sources found. Choose their new folder; older projects require explicit metadata matching. Ambiguous files are never linked.");
+        auto restored=snapshot;auto rows=restored.state["frames"].toList();for(auto& value:rows){auto row=value.toMap();const auto original=row["path"].toString();if(newlyVerified.contains(original))row["sourceFingerprint"]=newlyVerified[original];value=row;}restored.state["frames"]=rows;
+        for(auto i=newlyVerified.cbegin();i!=newlyVerified.cend();++i)fingerprints[i.key()]=i.value();restored.state["sourceFingerprints"]=fingerprints;restored.state=ProjectStorage::remap(restored.state,paths).toMap();
+        check(stop);const auto message=tr("%1 sources linked; %2 still missing. Cached results and adjustments are preserved.").arg(paths.size()).arg(missing.size()-paths.size());
+        post([this,restored,url,message,stop]{if(stop.stop_requested())return;restoreProject(restored,url,message);});
     });
 }
 }

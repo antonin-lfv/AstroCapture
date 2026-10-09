@@ -102,6 +102,8 @@ qt_add_qml_module(AstroCapture
         src/WorkspaceSessions.cpp
         src/SessionStorage.hpp
         src/SessionStorage.cpp
+        src/ProjectStorage.cpp src/ProjectStorage.hpp
+        src/DeepSkySession.cpp
         src/SessionController.hpp
         src/SessionController.cpp
         src/DeepSkyController.hpp

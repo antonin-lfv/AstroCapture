@@ -246,3 +246,20 @@ target_include_directories(astro_app_scientific_editing_test PRIVATE ../../app/s
 set_tests_properties(astro_app_scientific_editing_test PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_BACKEND=software" TIMEOUT 45)
 
 target_link_libraries(astro_app_scientific_editing_test PRIVATE astro_cfitsio)
+
+foreach(project_test IN ITEMS astro_app_deep_sky_workspace_test astro_app_session_test astro_app_scientific_editing_test)
+    target_sources(${project_test} PRIVATE ../../app/src/DeepSkySession.cpp ../../app/src/ProjectStorage.cpp ../../app/src/SessionStorage.cpp)
+endforeach()
+astro_add_unit_test(astro_app_portable_project_test
+    SOURCES app/PortableProjectTest.cpp
+        ../../app/src/ProjectStorage.cpp ../../app/src/SessionStorage.cpp
+        ../../app/src/DeepSkySession.cpp ../../app/src/WorkspaceSessions.cpp
+        ../../app/src/DeepSkyController.cpp ../../app/src/DeepSkyController.hpp
+        ../../app/src/ProcessingController.cpp ../../app/src/ProcessingController.hpp
+        ../../app/src/MosaicController.cpp ../../app/src/MosaicController.hpp
+        ../../app/src/SessionController.cpp ../../app/src/SessionController.hpp
+    LIBS Qt6::Quick Qt6::Gui astro::processing astro::recording
+)
+set_target_properties(astro_app_portable_project_test PROPERTIES AUTOMOC ON)
+target_include_directories(astro_app_portable_project_test PRIVATE ../../app/src)
+set_tests_properties(astro_app_portable_project_test PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_BACKEND=software" TIMEOUT 60)

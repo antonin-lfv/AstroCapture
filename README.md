@@ -128,9 +128,20 @@ cochez **Poses déjà calibrées** uniquement pour des données déjà prétrait
   sans compression destructive. La légende est sauvegardée dans le projet.
 - Le **rouage** regroupe ouvrir, enregistrer et vider le projet. Les
   paramètres avancés se déplient et les aides au survol expliquent les réglages.
-- Les projets **.astroproject** conservent les références des fichiers,
-  leurs rôles, groupes, sélections, références et les options. Les fichiers
-  sources doivent rester accessibles ; les intégrations sont recalculées.
+- Les projets **.astroproject** proposent deux modes. **Portable** rassemble les
+  sources, calibrations, masques importés, empilements par filtre, résultats
+  flottants, réglages, légende et versions A/B dans un seul fichier, avec une
+  estimation de taille. **Lié** conserve les chemins et réglages dans un petit
+  fichier ; l’intégration est à recalculer. Les anciens projets restent lisibles.
+- **Retrouver les sources déplacées** recherche dans le dossier choisi et ses
+  sous-dossiers et vérifie l’empreinte SHA-256 du contenu. Les anciens projets
+  sans empreinte peuvent utiliser une comparaison explicite des métadonnées ;
+  les correspondances ambiguës et les anciens masques restent à traiter manuellement.
+- **Paramètres → Stockage et reprise** affiche le poids des caches et de la session.
+  Le nettoyage protège le travail ouvert et les caches utilisés par la reprise.
+  Une sauvegarde portable vérifie aussi les sources modifiées depuis l’import.
+  Les archives sont limitées à 128 Gio, dont 4 Gio de résultats et aperçus ;
+  la sauvegarde utilise de l’espace temporaire et l’ouverture crée un cache local.
 
 Les données originales restent linéaires et ne sont jamais écrasées. Le premier
 aperçu et la première finition utilisent un étirement adaptatif et des gains

@@ -1,9 +1,9 @@
 # AstroCapture — prochaines étapes
 
-État après le lot 1.5.0 du 9 octobre 2026. Cette liste distingue ce qui est livré
+État après le lot 1.6.0 du 9 octobre 2026. Cette liste distingue ce qui est livré
 et les prochains travaux ; elle ne promet pas une équivalence complète avec Siril.
 
-## Livré dans ce lot
+## Déjà livré
 
 - [x] Sauvegarde automatique et reprise de Traitement, Ciel profond et Mosaïque,
   avec résultats calculés en flottants, réglages, légendes, versions A/B et vue.
@@ -17,35 +17,43 @@ et les prochains travaux ; elle ne promet pas une équivalence complète avec Si
   recettes, projets, préréglages, versions A/B et sessions.
 - [x] Page « Repères Siril » dans le guide et installateur 1.5.0.
 
+- [x] Projets Ciel profond portables : sources et calibrations, masques importés,
+  empilements par filtre et résultats flottants exacts, légende, réglages et A/B.
+  Taille estimée, progression, annulation et publication atomique.
+- [x] Réassociation des sources déplacées par contenu ; comparaison explicite
+  des métadonnées pour les anciens projets, refus des cas ambigus.
+- [x] Poids des caches et de la reprise automatique ; nettoyage des caches
+  inutilisés avec protection du travail ouvert et de la session sur disque.
+
 La session conserve les résultats terminés. Elle ne reprend pas un calcul
 interrompu ni une acquisition caméra ; la pile d’annulation ne traverse pas le
-redémarrage. Les masques importés restent référencés par leur chemin.
+redémarrage. Hors projet portable, les masques importés restent référencés par leur chemin.
+Le projet portable ne sauvegarde pas la pile d’annulation ni un calcul en cours.
+Il conserve les empilements terminés par filtre ; les caches internes des étapes
+de recette sont reconstruits à la prochaine modification.
 
 ## Priorités suivantes
 
-1. **Projets portables et sources déplacées.** Réassocier un dossier de sources,
-   inclure les masques importés et les résultats intermédiaires dans un projet
-   transportable, exposer la gestion et le poids du cache.
-2. **Astrométrie et calibration des couleurs sur catalogue.** Résolution WCS,
+1. **Astrométrie et calibration des couleurs sur catalogue.** Résolution WCS,
    correspondance des étoiles et calibration PCC/SPCC avec bilans, filtres et
    références explicites. La photométrie actuelle utilise un CSV d’étoiles
    déjà identifiées et des gains relatifs ; elle n’est pas une SPCC.
-3. **Bibliothèque de calibration.** Masters dark/flat/bias/dark-flat réutilisables,
+2. **Bibliothèque de calibration.** Masters dark/flat/bias/dark-flat réutilisables,
    regroupement par caméra, gain, binning, température et exposition ; bilan des
    incompatibilités et contrôle de qualité des masters.
-4. **Traitement séparé des étoiles et du fond.** Extraction/recombinaison,
+3. **Traitement séparé des étoiles et du fond.** Extraction/recombinaison,
    réduction contrôlée des étoiles et comparaison de l’effet sur les structures.
    Choisir et valider le moteur avant d’exposer une commande de production.
-5. **Performance et séries.** Aperçu sur région d’intérêt, caches ciblés,
+4. **Performance et séries.** Aperçu sur région d’intérêt, caches ciblés,
    comparaison de performances, accélération des outils avancés, traitements
    et exports de plusieurs images avec état et annulation par tâche.
-6. **Intégration avancée.** Drizzle, pondération plus fine des poses et diagnostics
+5. **Intégration avancée.** Drizzle, pondération plus fine des poses et diagnostics
    FWHM/excentricité/SNR ; définir les unités et valider sur jeux synthétiques
    connus puis brutes réelles.
-7. **Compositions scientifiques.** HDR multi-expositions, mosaïques linéaires et
+6. **Compositions scientifiques.** HDR multi-expositions, mosaïques linéaires et
    correction des distorsions, avec propagation cohérente de la couverture
    et de l’astrométrie.
-8. **Acquisition et diffusion.** Validation sur les vraies caméras, longues
+7. **Acquisition et diffusion.** Validation sur les vraies caméras, longues
    sessions, reconnexions et captures interrompues ; signature et notarisation
    Apple de l’installateur.
 

@@ -1,4 +1,7 @@
 #include "SessionController.hpp"
+#include "ProjectStorage.hpp"
+#include <QDirIterator>
+#include <QJsonDocument>
 #include "DeepSkySettings.hpp"
 #include <QStandardPaths>
 #include <QDir>
@@ -59,4 +62,36 @@ bool SessionController::restoreLast() {
     });return true;
 }
 void SessionController::discardRecovery(){if(busy_)return;try{storage_->discard();available_=false;savedAt_.clear();status_=tr("Saved session removed. Original files are unchanged.");}catch(const std::exception& e){status_=tr("Cannot remove the saved session: %1").arg(tr(e.what()));}emit changed();}
+QSet<QString> SessionController::protectedCachePaths() const {
+    auto paths=ProjectStorage::strings(uiState_);
+    if(processing_)paths.unite(ProjectStorage::strings(processing_->sessionSnapshot().state));
+    if(deepSky_)paths.unite(ProjectStorage::strings(deepSky_->sessionSnapshot().state));
+    if(mosaic_)paths.unite(ProjectStorage::strings(mosaic_->sessionSnapshot().state));
+    QFile manifest(QDir(directory_).filePath("session.json"));
+    if(manifest.exists()){
+        if(!manifest.open(QIODevice::ReadOnly)||manifest.size()>64*1024*1024)throw std::runtime_error("Cannot inspect the saved session. Cache cleanup is unavailable.");
+        QJsonParseError error;const auto document=QJsonDocument::fromJson(manifest.readAll(),&error);
+        if(error.error!=QJsonParseError::NoError||!document.isObject())throw std::runtime_error("Cannot inspect the saved session. Cache cleanup is unavailable.");
+        paths.unite(ProjectStorage::strings(document.toVariant()));
+    }
+    return paths;
+}
+void SessionController::refreshCache() {
+    if(busy_)return;
+    try{
+        cacheInfo_=ProjectStorage::cacheUsage(deepSky_?deepSky_->projectCacheDirectory():ProjectStorage::defaultCacheDirectory(),protectedCachePaths());
+        qint64 bytes=0;QDirIterator it(directory_,QDir::Files|QDir::Hidden|QDir::NoSymLinks,QDirIterator::Subdirectories);while(it.hasNext()){it.next();bytes+=it.fileInfo().size();}cacheInfo_["sessionBytes"]=double(bytes);
+    }catch(const std::exception& e){status_=tr(e.what());cacheInfo_.clear();}
+    emit changed();
+}
+void SessionController::clearUnusedProjectCache() {
+    if(busy_||processingBusy())return;
+    QSet<QString> paths;try{paths=protectedCachePaths();}catch(const std::exception& e){status_=tr(e.what());emit changed();return;}
+    const auto folder=deepSky_?deepSky_->projectCacheDirectory():ProjectStorage::defaultCacheDirectory();
+    timer_.stop();busy_=cacheCleaning_=true;status_=tr("Cleaning unused project caches…");emit changed();
+    worker_=std::jthread([this,folder,paths](std::stop_token stop){QString error;try{ProjectStorage::clearUnusedCache(folder,paths,[stop]{if(stop.stop_requested())throw std::runtime_error("Cache cleanup cancelled.");});}catch(const std::exception& e){error=tr(e.what());}
+        QMetaObject::invokeMethod(this,[this,error]{busy_=cacheCleaning_=false;status_=error.isEmpty()?tr("Unused project caches removed. Open work and recovery are preserved."):error;refreshCache();scheduleSave();},Qt::QueuedConnection);
+    });
+}
+
 }

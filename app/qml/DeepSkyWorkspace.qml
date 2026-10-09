@@ -10,6 +10,10 @@ Control {
     required property AppLibrary library
     signal editResult()
     property bool canEditResult: true
+    property bool portableSave: true
+    property url relinkFolder: ""
+    function sizeText(bytes) {return bytes<0?qsTr("Unavailable while sources are missing"):bytes>=1000000000?qsTr("≈ %1 GB").arg(Number(bytes/1000000000).toLocaleString(Qt.locale(),"f",1)):qsTr("≈ %1 MB").arg(Number(bytes/1000000).toLocaleString(Qt.locale(),"f",1));}
+    function saveCurrentProject() {if(!saveOptions())return;if(finishDirty&&!controller.busy)applyStoredFinish();projectSaveChoice.open();}
     property var captionOptions:({})
     property bool shortcutsAllowed: true
     property string editError: ""
@@ -96,10 +100,10 @@ Control {
     function redoFinish() {adjustmentTimer.stop();edits.redo();applyStoredFinish();}
     function switchVersion(version) {adjustmentTimer.stop();edits.selectVersion(version);applyStoredFinish();}
     Shortcut {sequences:[StandardKey.Undo];enabled:root.visible && root.shortcutsAllowed && !root.dialogOpen && root.finishEditable && edits.canUndo;onActivated:root.undoFinish()}
-    Shortcut {sequence:StandardKey.Save;enabled:root.visible && root.shortcutsAllowed && !root.dialogOpen && !controller.busy && controller.frames.length>0;onActivated:if(root.saveOptions())projectSave.open()}
+    Shortcut {sequence:StandardKey.Save;enabled:root.visible && root.shortcutsAllowed && !root.dialogOpen && !controller.busy && controller.frames.length>0;onActivated:root.saveCurrentProject()}
     Shortcut {sequences:[StandardKey.Redo];enabled:root.visible && root.shortcutsAllowed && !root.dialogOpen && root.finishEditable && edits.canRedo;onActivated:root.redoFinish()}
     Timer {id:adjustmentTimer;interval:200;onTriggered:controller.apply(root.options())}
-    readonly property bool dialogOpen: inputDialog.visible || folderDialog.visible || exportDialog.visible || projectOpen.visible || projectSave.visible || presetDialog.visible || projectMenu.visible || exportPanel.visible || geometryEditor.visible || advancedTools.catalogOpen
+    readonly property bool dialogOpen: inputDialog.visible || folderDialog.visible || exportDialog.visible || projectOpen.visible || projectSave.visible || projectSaveChoice.visible || relinkDialog.visible || relinkFolderDialog.visible || presetDialog.visible || projectMenu.visible || exportPanel.visible || geometryEditor.visible || advancedTools.catalogOpen
     background: Rectangle {color:Atelier.canvas}
     palette.window: Atelier.canvas
     palette.windowText: Atelier.text
@@ -117,7 +121,8 @@ Control {
     function saveOptions() {
         if(!edits.applyValues(options())){editError=qsTr("Check parameters and operation order: white must exceed black; photometry and deconvolution require linear, unrotated input; photometry cannot be masked.");return false;}
         edits.endEdit();
-        controller.projectOptions={calibrated:calibrated.checked,normalize:normalize.checked,badPixels:badPixels.checked,sequenceBackground:sequenceBackground.checked,sigma:sigma.value,method:integrationMethod.currentIndex,finish:edits.values,caption:root.captionOptions,versions:edits.snapshot()};return true;
+        const view=root.sessionState;delete view.options;
+        controller.projectOptions={view:view,calibrated:calibrated.checked,normalize:normalize.checked,badPixels:badPixels.checked,sequenceBackground:sequenceBackground.checked,sigma:sigma.value,method:integrationMethod.currentIndex,finish:edits.values,caption:root.captionOptions,versions:edits.snapshot()};return true;
     }
     readonly property var sessionState: {
         edits.values; edits.version; edits.canUndo; edits.canRedo;
@@ -129,9 +134,21 @@ Control {
         adjustmentTimer.stop();pendingProjectFinish=null;
         controller.projectOptions=state.options || controller.projectOptions;
         updatingControls=true;
-        if(state.options && state.options.versions)edits.restoreSession(state.options.versions);
-        else if(controller.hasResult)edits.resetSession(controller.finishSettings);
+        const restored=state.options||controller.projectOptions;
+        captionOptions=restored.caption||{};
+        if(restored.calibrated!==undefined)calibrated.checked=restored.calibrated;
+        if(restored.normalize!==undefined)normalize.checked=restored.normalize;
+        if(restored.badPixels!==undefined)badPixels.checked=restored.badPixels;
+        sequenceBackground.checked=restored.sequenceBackground||false;
+        if(restored.sigma!==undefined)sigma.value=restored.sigma;
+        if(restored.method!==undefined)integrationMethod.currentIndex=restored.method;
+        if(restored.versions)edits.restoreSession(restored.versions);
+        else {
+            const initial={background:false,stretch:true,black:0,white:1,midtones:.15,red:1,green:1,blue:1,denoise:0,asinh:false,asinhStrength:20,saturation:1};
+            edits.resetSession(Object.assign(initial,controller.hasResult?controller.finishSettings:{},restored.finish||{}));
+        }
         workflowStep=controller.hasResult?6:(state.step || 0);finishingTool=state.tool || 0;advancedTools.toolIndex=state.advancedTool||0;comparisonMode=state.comparison || "result";comparisonSplit=state.split===undefined?.5:state.split;viewport.fitMode=state.fit!==false;viewport.zoom=state.zoom||1;viewport.panX=state.panX||0;viewport.panY=state.panY||0;viewport.constrainPan();
+        pendingProjectFinish=!controller.hasResult&&restored.finish?edits.values:null;
         editError="";updatingControls=false;
     }
     function options() {return Object.assign({},root.advancedOptions,{geometry:root.geometry,operations:root.operations,scnr:scnr.checked,scnrMethod:scnrMethod.currentIndex,scnrAmount:scnrAmount.value,scnrPreserve:scnrPreserve.checked,backgroundPoints:root.backgroundPoints,backgroundDegree:backgroundDegree.currentIndex+1,backgroundSamples:backgroundSamples.value,backgroundTolerance:backgroundTolerance.value,rotation:rotation.currentIndex,mirrorHorizontal:mirrorHorizontal.checked,mirrorVertical:mirrorVertical.checked,background: background.checked, stretch: stretch.checked, black:Number(black.text),white:Number(white.text),midtones:midtones.value,red:redGain.value,green:greenGain.value,blue:blueGain.value,denoise:denoise.value,asinh:asinh.checked,asinhStrength:asinhStrength.value,asinhLuminance:asinhLuminance.currentIndex,saturation:saturation.value});}
@@ -144,6 +161,8 @@ Control {
             completionToast.open();toastTimer.restart();
         }
         function onChanged() {
+            if(controller.restoringProject)return;
+            if(relinkDialog.visible&&!controller.busy&&controller.missingSources.length===0)relinkDialog.close();
             if(controller.busy)completionToast.close();
             if(!controller.hasResult && root.workflowStep===6)root.workflowStep=0;
             if (!controller.busy && controller.hasResult && root.pendingProjectFinish) {
@@ -152,7 +171,9 @@ Control {
                 controller.apply(finish);
             }
             if(!controller.busy && controller.rawComparisonName){const index=rawComparisonChoice.lightRows.findIndex(row=>row.name===controller.rawComparisonName);if(index>=0)rawComparisonChoice.currentIndex=index;}}
+        function onProjectRestored(state) {root.restoreSessionState(Object.assign({},state,{options:controller.projectOptions}));}
         function onProjectOptionsChanged() {
+            if(controller.restoringProject)return;
             root.updatingControls=true;
             const settings=controller.projectOptions;
             root.captionOptions=settings.caption||{};
@@ -174,6 +195,7 @@ Control {
             root.updatingControls=false;
         }
         function onResultChanged() {
+            if(controller.restoringProject)return;
             if(controller.hasResult)root.workflowStep=6;
             if(controller.hasResult && !root.pendingProjectFinish && controller.suggestedStretch.black !== undefined) {
                 root.updatingControls=true;
@@ -241,8 +263,9 @@ Control {
     AtelierMenu {
         id:projectMenu;objectName:"deepSkyProjectOptions";parent:root;x:Math.max(12,root.width-width-16);y:60
         AtelierMenuItem {text:qsTr("Open project");enabled:!controller.busy;onTriggered:projectOpen.open()}
-        AtelierMenuItem {text:qsTr("Save project");enabled:!controller.busy&&controller.frames.length>0;onTriggered:if(root.saveOptions())projectSave.open()}
+        AtelierMenuItem {text:qsTr("Save project");enabled:!controller.busy&&controller.frames.length>0;onTriggered:root.saveCurrentProject()}
         MenuSeparator {}
+        AtelierMenuItem {text:qsTr("Find moved sources");enabled:!controller.busy&&controller.missingSources.length>0;onTriggered:relinkDialog.open()}
         AtelierMenuItem {objectName:"deepSkyPresets";text:qsTr("Finishing presets");description:qsTr("All adjustment families");enabled:root.finishEditable;onTriggered:presetDialog.open()}
         AtelierMenuItem {objectName:"deepSkyImageFocus";text:root.imageFocus?qsTr("Show adjustment panel"):qsTr("Enlarge preview");onTriggered:root.imageFocus=!root.imageFocus}
         MenuSeparator {}
@@ -265,6 +288,11 @@ DropArea {
         spacing:0
         ColumnLayout {
             Layout.fillWidth:true;Layout.fillHeight:true;Layout.minimumWidth:0;spacing:0
+            RowLayout {
+                visible:controller.missingSources.length>0;Layout.fillWidth:true;Layout.margins:12;spacing:12
+                Label {text:(controller.missingSources.length===1?qsTr("1 source is missing"):qsTr("%1 sources are missing").arg(controller.missingSources.length));color:Atelier.secondary;Layout.fillWidth:true;wrapMode:Text.Wrap}
+                IconButton {objectName:"findMovedSources";text:qsTr("Find sources");enabled:!controller.busy;onClicked:relinkDialog.open()}
+            }
             RowLayout {
                 visible:!controller.displayingResult && !controller.comparingRaw && controller.imageWidth>0;Layout.fillWidth:true
                 Label {text:controller.sourceInterpretation;color:Atelier.secondary;Layout.fillWidth:true;elide:Text.ElideRight}
@@ -697,7 +725,58 @@ ParameterControl {id:black;label:qsTr("Black level");textIsValue:true;text:"0";f
     FileDialog {id:inputDialog;title:qsTr("Add deep-sky images");fileMode:FileDialog.OpenFiles;nameFilters:["Astro images (*.fits *.fit *.fts *.fz *.tif *.tiff *.png *.cr2 *.cr3 *.nef *.nrw *.arw *.dng *.orf *.raf *.rw2 *.pef)"];onAccepted:controller.addFiles(selectedFiles,root.importRole,group.currentText,Number(aduScale.text))}
     FileDialog {id:exportDialog;fileMode:FileDialog.SaveFile;onAccepted:{let path=selectedFile.toString();if(!/\.(fits?|fts|tiff?|jpe?g)$/i.test(path))path+=root.linearExport?".fits":(selectedNameFilter.index===1?".jpg":selectedNameFilter.index===2?".fits":".tif");controller.exportImage(path,root.linearExport);}}
     FileDialog {id:projectOpen;fileMode:FileDialog.OpenFile;nameFilters:["AstroCapture project (*.astroproject)"];onAccepted:controller.loadProject(selectedFile)}
-    FileDialog {id:projectSave;fileMode:FileDialog.SaveFile;nameFilters:["AstroCapture project (*.astroproject)"];onAccepted:controller.saveProject(selectedFile.toString().endsWith(".astroproject")?selectedFile:selectedFile.toString()+".astroproject")}
+    FileDialog {id:projectSave;fileMode:FileDialog.SaveFile;nameFilters:["AstroCapture project (*.astroproject)"];onAccepted:{const target=selectedFile.toString().endsWith(".astroproject")?selectedFile:selectedFile.toString()+".astroproject";if(root.portableSave)controller.savePortableProject(target);else controller.saveProject(target);}}
+    DarkDialog {
+        id:projectSaveChoice;objectName:"projectSaveChoice";parent:Overlay.overlay;anchors.centerIn:parent;modal:true
+        title:qsTr("Save project");width:Math.min(460,parent.width-40)
+        ColumnLayout {
+            width:parent.width;spacing:12
+            SettingLabel {text:qsTr("Project type");explanation:qsTr("Portable includes original images, calibration files, imported masks, filter stacks and exact floating-point results. Linked stores paths and settings; sources must remain available and results need to be calculated again.")}
+            DarkComboBox {objectName:"projectSaveType";Layout.fillWidth:true;model:[qsTr("Portable · sources and results"),qsTr("Linked · settings and file paths")];currentIndex:root.portableSave?0:1;onActivated:root.portableSave=currentIndex===0}
+            Label {Layout.fillWidth:true;wrapMode:Text.Wrap;color:Atelier.secondary;text:root.portableSave?qsTr("One file to move or share. Your result opens immediately, with its masks, caption and A/B versions."):qsTr("A small file that refers to your original images. Move it with its sources, or find their new folder when reopening.")}
+            Label {objectName:"portableProjectSize";Layout.fillWidth:true;wrapMode:Text.Wrap;color:Atelier.secondary;text:root.portableSave?qsTr("Estimated size: %1").arg(root.sizeText(controller.portableProjectBytes)):qsTr("Small settings file · results are recalculated")}
+            Label {visible:root.portableSave;Layout.fillWidth:true;wrapMode:Text.Wrap;color:Atelier.muted;font.pixelSize:12;text:qsTr("Saved without reducing pixel precision. Temporary disk space is needed during saving; opening creates a managed cache.")}
+            RowLayout {
+                Layout.fillWidth:true
+                IconButton {text:qsTr("Cancel");onClicked:projectSaveChoice.close()}
+                Item {Layout.fillWidth:true}
+                IconButton {objectName:"chooseProjectDestination";text:qsTr("Choose location");enabled:!controller.busy&&(!root.portableSave||(!root.finishDirty&&controller.missingSources.length===0));onClicked:{projectSaveChoice.close();projectSave.open();}}
+            }
+        }
+    }
+    FolderDialog {id:relinkFolderDialog;title:qsTr("Find the new source folder");onAccepted:root.relinkFolder=selectedFolder}
+    DarkDialog {
+        id:relinkDialog;objectName:"relinkSourcesDialog";parent:Overlay.overlay;anchors.centerIn:parent;modal:true
+        title:qsTr("Find moved sources");width:Math.min(500,parent.width-40);closePolicy:controller.busy?Popup.NoAutoClose:Popup.CloseOnEscape
+        ColumnLayout {
+            width:parent.width;spacing:12
+            Label {Layout.fillWidth:true;wrapMode:Text.Wrap;color:Atelier.secondary;text:qsTr("Choose the folder containing the moved images and masks. Subfolders are searched; matching content is verified before linking.")}
+            Label {Layout.fillWidth:true;color:Atelier.text;text:(controller.missingSources.length===1?qsTr("1 missing source"):qsTr("%1 missing sources").arg(controller.missingSources.length))}
+            ScrollView {
+                Layout.fillWidth:true;Layout.preferredHeight:Math.min(140,controller.missingSources.length*26);clip:true;contentWidth:availableWidth
+                ScrollBar.vertical.policy:ScrollBar.AlwaysOff;ScrollBar.horizontal.policy:ScrollBar.AlwaysOff
+                Column {width:parent.width;spacing:4
+                    Repeater {model:controller.missingSources
+                        Label {required property var modelData;width:parent.width;height:22;text:modelData.name;color:Atelier.secondary;elide:Text.ElideMiddle;HoverHandler {id:missingHover} DarkToolTip {visible:missingHover.hovered;text:modelData.path}}
+                    }
+                }
+            }
+            RowLayout {
+                Layout.fillWidth:true
+                Label {Layout.fillWidth:true;text:root.relinkFolder.toString()||qsTr("No folder selected");color:Atelier.secondary;elide:Text.ElideMiddle}
+                IconButton {text:qsTr("Choose folder");enabled:!controller.busy;onClicked:relinkFolderDialog.open()}
+            }
+            HelpCheckBox {id:allowMetadata;objectName:"allowMetadataMatch";visible:controller.missingSources.some(row=>!row.verified);Layout.fillWidth:true;text:qsTr("Older projects: allow metadata matching");enabled:!controller.busy;explanation:qsTr("Older projects have no content fingerprint. This explicitly accepts only one file with the same name, dimensions, channels, depth, exposure, filter and recorded camera metadata. Identical metadata cannot prove identical pixels. Ambiguous matches and old imported masks remain unlinked.")}
+            Label {Layout.fillWidth:true;wrapMode:Text.Wrap;color:Atelier.secondary;visible:controller.busy||controller.status.length>0;text:controller.status}
+            ProgressBar {visible:controller.busy;Layout.fillWidth:true;from:0;to:100;value:controller.progress}
+            RowLayout {
+                Layout.fillWidth:true
+                IconButton {text:controller.busy?qsTr("Cancel search"):qsTr("Close");onClicked:{if(controller.busy)controller.cancel();else relinkDialog.close();}}
+                Item {Layout.fillWidth:true}
+                IconButton {objectName:"searchMovedSources";text:qsTr("Find and link");enabled:!controller.busy&&root.relinkFolder.toString().length>0&&controller.missingSources.length>0;onClicked:controller.relinkSources(root.relinkFolder,allowMetadata.checked)}
+            }
+        }
+    }
     DarkDialog {id:clearConfirm;parent:Overlay.overlay;anchors.centerIn:parent;modal:true;title:qsTr("Clear this project?");standardButtons:Dialog.Ok|Dialog.Cancel;Label {text:qsTr("Export results or save the project first. Original files remain unchanged.");width:300;wrapMode:Text.Wrap}
         onAccepted:controller.clear()}
 }

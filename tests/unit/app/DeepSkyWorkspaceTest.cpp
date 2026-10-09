@@ -299,6 +299,18 @@ int main(int argc,char** argv){
     auto hdrSettings=app::defaultDeepSkySettings();hdrSettings["stretch"]=false;hdrSettings["pedestal"]=1.;controller.apply(hdrSettings);wait(controller);
     const auto hdrPixels=controller.processingDocument().value<app::ImageDocument>().pixels;ASTRO_TEST_CHECK(*std::max_element(hdrPixels->rgb.begin(),hdrPixels->rgb.end())>1);
     const auto hdrPath=directory.filePath("processed-float.fits");controller.exportImage(QUrl::fromLocalFile(hdrPath),false);wait(controller);const auto hdrRead=recording::readAstroImage(hdrPath.toStdString());ASTRO_TEST_CHECK(hdrRead.samples==hdrPixels->rgb);
+    {
+    // A portable project saved before integration may have finishing settings
+    // without A/B (legacy/API). Restore those controls and apply after stacking.
+    controller.clear();controller.setProjectCacheDirectory(directory.filePath("project-cache"));controller.addFiles({urls[0]});wait(controller);
+    auto pending=controller.sessionSnapshot();auto pendingFinish=app::defaultDeepSkySettings();pendingFinish["stretch"]=false;pendingFinish["red"]=1.37;
+    pending.state["options"]=QVariantMap{{"finish",pendingFinish}};controller.restoreSession(pending);
+    const auto pendingProject=QUrl::fromLocalFile(directory.filePath("before-integration.astroproject"));controller.savePortableProject(pendingProject);wait(controller);controller.clear();
+    controller.loadProject(pendingProject);wait(controller);ASTRO_TEST_CHECK(!controller.hasResult());
+    QVariant pendingValues;ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root,"options",Q_RETURN_ARG(QVariant,pendingValues)));
+    ASTRO_TEST_CHECK(pendingValues.toMap()["red"].toDouble()==1.37&&!pendingValues.toMap()["stretch"].toBool());
+    controller.integrate(true);wait(controller);ASTRO_TEST_CHECK(controller.hasResult()&&controller.finishSettings()["red"].toDouble()==1.37&&!controller.finishSettings()["stretch"].toBool()&&!root->property("finishDirty").toBool());
+    }
     if(qEnvironmentVariableIsSet("ASTRO_UI_FITS_PATH")) {
         screenshotController=std::make_unique<app::DeepSkyController>();root->setProperty("controller",QVariant::fromValue(screenshotController.get()));
         screenshotController->addFiles({QUrl::fromLocalFile(qEnvironmentVariable("ASTRO_UI_FITS_PATH"))});wait(*screenshotController);ASTRO_TEST_CHECK(screenshotController->frames().size()==1);

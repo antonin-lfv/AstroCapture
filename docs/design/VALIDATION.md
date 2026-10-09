@@ -188,3 +188,16 @@ Les 36 tests passent aussi en suite complète Debug (142,19 s, en parallèle
 avec la construction et le parcours natif) et Release (23,37 s). Le code a été
 commité avant la reconstruction de l’installateur : `b515323`, puis `8fec824`
 pour la traduction française des erreurs du stockage partagé.
+
+### Vérification de livraison 1.6.0
+
+Le DMG mesure 87 384 841 octets (83,3 Mio). `hdiutil verify` valide
+ses sommes de contrôle. Monté en lecture seule, il contient la version 1.6.0 ;
+l'empreinte de son exécutable est identique à celle de l'application construite
+et sa signature locale passe la vérification profonde et stricte. Le montage
+de contrôle a été démonté sans toucher aux autres volumes. La signature reste
+locale ad hoc ; la signature Developer ID et la notarisation Apple demeurent
+dans la feuille de route.
+
+SHA-256 du DMG : `14af7483d9e463952a102e55789863af555fb5071c518c2826339236a0da9201`.
+SHA-256 de l'exécutable : `59ad87cf5e8dae41865a72414425a331fbbf13c11653393b22d83fbe061d8c67`.

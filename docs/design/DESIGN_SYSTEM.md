@@ -103,6 +103,14 @@ Les poids sans légende viennent de l'estimateur natif sur l'image complète
 FITS 312,5 Mo. Le PNG/JPEG avec une nouvelle légende reste indiqué comme
 à estimer dans cette maquette. Le TIFF non compressé conserve le même poids.
 
+## Tâches à venir
+
+- [ ] **Légendes : rendre modifiables les informations préremplies.** Permettre de
+  corriger les informations proposées automatiquement avant l'export : objet, date,
+  matériel, poses, durée d'exposition, filtres et autres champs de la légende.
+  Conserver les corrections manuelles lors d'une actualisation et les sauvegarder
+  avec le projet. L'aperçu et l'export doivent reprendre ces valeurs corrigées.
+
 ## Livrables et état
 
 - `atelier-finition.html` : maquette interactive, image et données incluses.

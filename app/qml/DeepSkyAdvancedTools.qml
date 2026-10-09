@@ -425,12 +425,12 @@ Control {
                     visible: tools.toolIndex === 3
                     Layout.fillWidth: true
                     DarkComboBox {
-                        objectName: "deepSkyMaskType"
+                        id:maskTypeChoice;objectName: "deepSkyMaskType"
                         Layout.fillWidth: true
                         model: [qsTr("No mask"), qsTr("Luminance range"), qsTr("Radial region"), qsTr("Detected stars"),qsTr("Painted mask"),qsTr("Imported mask")]
                         currentIndex: tools.values.maskType || 0
                         enabled: tools.editable && !tools.values.photometry
-                        onActivated:{if(currentIndex===5&&!tools.values.maskFile)maskImport.open();else tools.change("maskType",currentIndex);}
+                        onActivated:{if(currentIndex===5&&!tools.values.maskFile){currentIndex=Qt.binding(()=>tools.values.maskType||0);maskImport.open();}else tools.change("maskType",currentIndex);}
                     }
                     Explanation {
                         text: qsTr("White applies the adjustments, black preserves its input, gray blends them: output = input + mask × (processed − input). The mask uses the recipe input before geometry and is applied once after the selected treatment. Photometric calibration is global and cannot be masked.")

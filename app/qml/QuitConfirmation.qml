@@ -18,6 +18,7 @@ DarkDialog {
     property bool busy: false
     property bool recording: false
     property bool canSaveSession:false
+    property bool sessionSaving:false
     property var exportTargets: []
     property string saveStatus: ""
     property string preferredTarget: ""
@@ -34,7 +35,7 @@ DarkDialog {
         width: parent.width
         spacing: 14
         Label {
-            text: qsTr("Your current work will close. Save the project, the finished image or your settings before leaving.")
+            text: qsTr("Save the session to resume your work, or save the project, finished image or settings before leaving.")
             color: Atelier.text; wrapMode: Text.Wrap; Layout.fillWidth: true
         }
         Label {
@@ -47,6 +48,7 @@ DarkDialog {
             text: dialog.recording ? qsTr("Recording is in progress. Stop it before quitting.") : qsTr("A task is in progress. Wait for it to finish, or return to the workspace to cancel it.")
             color: "#edb06c"; wrapMode: Text.Wrap; Layout.fillWidth: true
         }
+        Label {visible:dialog.sessionSaving;text:qsTr("The automatic save is in progress. Saving the session before quitting waits for the latest changes.");color:Atelier.secondary;wrapMode:Text.Wrap;Layout.fillWidth:true}
         Label {text:dialog.saveStatus;visible:text.length>0;color:Atelier.secondary;wrapMode:Text.Wrap;Layout.fillWidth:true}
         IconButton {
             objectName:"quitSaveSession";text:qsTr("Save session and quit");primary:true

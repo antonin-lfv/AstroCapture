@@ -3358,6 +3358,50 @@ L’aperçu est automatiquement éclairci ; les données restent linéaires.</tr
             <source>Images, Stack and Finish form the bar above the image. Stack contains calibration and integration settings. Finish unlocks after stacking. Its right inspector contains the input histogram and adjustment families; the image stays on the left with zoom below it. The floppy button opens final-image or linear FITS export. The project gear manages projects and finishing presets. In Images and Stack, the folder button toggles the source list.</source>
             <translation>Images, Empilement et Finition forment la barre au-dessus de l’image. Empilement contient la calibration et l’intégration. Finition devient disponible après l’empilement. Son inspecteur à droite contient l’histogramme d’entrée et les familles de réglages ; l’image reste à gauche, avec le zoom en dessous. Le bouton disquette ouvre l’export de l’image finale ou du FITS linéaire. Le rouage du projet gère les projets et les préréglages de finition. Dans Images et Empilement, le bouton dossier affiche ou masque les fichiers sources.</translation>
         </message>
+        <message>
+            <source>From Siril</source>
+            <translation>Repères Siril</translation>
+        </message>
+        <message>
+            <source>Familiar controls, explicit parameters</source>
+            <translation>Des repères familiers, des paramètres explicites</translation>
+        </message>
+        <message>
+            <source>Keep the same workflow: calibrate, register, stack, then finish. The linear FITS keeps the integration; the final image contains your finishing adjustments.</source>
+            <translation>Gardez le même parcours : calibrer, aligner, empiler, puis terminer l’image. Le FITS linéaire conserve l’intégration ; l’image finale contient vos réglages de finition.</translation>
+        </message>
+        <message>
+            <source>Resume the calculated results</source>
+            <translation>Reprendre les résultats calculés</translation>
+        </message>
+        <message>
+            <source>Home offers Restore session after restarting. It restores calculated images, settings, captions and A/B versions. Saving the session before quitting waits for the latest changes. Keep your source files and project as well.</source>
+            <translation>Après un redémarrage, Accueil propose Reprendre la session : images calculées, réglages, légendes et versions A/B sont retrouvés. Sauvegarder la session et quitter attend les dernières modifications. Gardez aussi vos fichiers sources et votre projet.</translation>
+        </message>
+        <message>
+            <source>Crop and geometry</source>
+            <translation>Recadrage et géométrie</translation>
+        </message>
+        <message>
+            <source>In Finish, choose Geometry. In Processing, choose Crop, rotate and resize. Draw a rectangle, move it or adjust its handles. X and Y start at zero in the top-left corner. Crop and quarter-turns keep pixel values; free rotation and scaling use the selected interpolation.</source>
+            <translation>Dans Finition, choisissez Géométrie. Dans Traitement, choisissez Recadrer, pivoter et redimensionner. Tracez un rectangle, déplacez-le ou ajustez ses poignées. X et Y partent de zéro en haut à gauche. Le recadrage et les quarts de tour conservent les pixels ; la rotation libre et l’échelle utilisent l’interpolation choisie.</translation>
+        </message>
+        <message>
+            <source>Local masks</source>
+            <translation>Masques locaux</translation>
+        </message>
+        <message>
+            <source>Advanced transformations offers automatic, painted and imported masks. White applies the treatment, black protects the input, gray blends. Red shows protected areas. Choose the mask scope. Cmd+Z removes a brush stroke while the editor is open. Imported masks must match the recipe input dimensions.</source>
+            <translation>Transformations avancées propose des masques automatiques, peints et importés. Le blanc applique le traitement, le noir protège l’entrée et le gris mélange. Le rouge montre les zones protégées. Choisissez la portée du masque. Cmd+Z annule un trait dans l’éditeur. Un masque importé doit avoir les dimensions de l’entrée de la recette.</translation>
+        </message>
+        <message>
+            <source>Check the parameter units</source>
+            <translation>Vérifier les unités des paramètres</translation>
+        </message>
+        <message>
+            <source>GHS, PSF, Richardson–Lucy, multiscale denoising and SCNR expose their parameters and help. Values and algorithms are not interchangeable with every Siril tool. Photometry currently uses a CSV of identified reference stars; automatic plate solving and catalog-based PCC/SPCC are still to come.</source>
+            <translation>GHS, PSF, Richardson–Lucy, débruitage multiscale et SCNR exposent leurs paramètres et leur aide. Les valeurs et algorithmes ne sont pas interchangeables avec tous les outils de Siril. La photométrie utilise actuellement un CSV d’étoiles de référence identifiées ; l’astrométrie automatique et PCC/SPCC sur catalogue restent à venir.</translation>
+        </message>
     </context>
     <context>
         <name>HistoryWorkspace</name>
@@ -5479,6 +5523,10 @@ Résultat obtenu :
             <source>Cannot allocate mask preview.</source>
             <translation>Impossible de créer l’aperçu du masque.</translation>
         </message>
+        <message>
+            <source>Choose a FITS, PNG or TIFF mask.</source>
+            <translation>Choisissez un masque FITS, PNG ou TIFF.</translation>
+        </message>
     </context>
     <context>
         <name>astro::app::MosaicController</name>
@@ -6302,6 +6350,14 @@ Résultat obtenu :
             <source>Save session and quit</source>
             <translation>Sauvegarder la session et quitter</translation>
         </message>
+        <message>
+            <source>Save the session to resume your work, or save the project, finished image or settings before leaving.</source>
+            <translation>Sauvegardez la session pour reprendre votre travail, ou enregistrez le projet, l’image finale ou les réglages avant de quitter.</translation>
+        </message>
+        <message>
+            <source>The automatic save is in progress. Saving the session before quitting waits for the latest changes.</source>
+            <translation>La sauvegarde automatique est en cours. Sauvegarder la session et quitter attend l’enregistrement des dernières modifications.</translation>
+        </message>
     </context>
     <context>
         <name>ExportSizeHint</name>
@@ -6394,6 +6450,130 @@ Résultat obtenu :
         <message>
             <source>Cannot remove the saved session: %1</source>
             <translation>Impossible de supprimer la session sauvegardée : %1</translation>
+        </message>
+        <message>
+            <source>Cannot read the saved session.</source>
+            <translation>Impossible de lire la session sauvegardée.</translation>
+        </message>
+        <message>
+            <source>Invalid saved session.</source>
+            <translation>Session sauvegardée invalide.</translation>
+        </message>
+        <message>
+            <source>A saved session file is missing.</source>
+            <translation>Un fichier de la session sauvegardée est introuvable.</translation>
+        </message>
+        <message>
+            <source>Cannot read a saved session file.</source>
+            <translation>Impossible de lire un fichier de la session.</translation>
+        </message>
+        <message>
+            <source>Invalid saved session file name.</source>
+            <translation>Nom de fichier de session invalide.</translation>
+        </message>
+        <message>
+            <source>Invalid saved session image.</source>
+            <translation>Image sauvegardée invalide.</translation>
+        </message>
+        <message>
+            <source>Cannot save the session. Check free disk space.</source>
+            <translation>Impossible de sauvegarder la session. Vérifiez l’espace disque disponible.</translation>
+        </message>
+        <message>
+            <source>Cannot finish saving the session.</source>
+            <translation>Impossible de terminer la sauvegarde.</translation>
+        </message>
+        <message>
+            <source>A saved session image is missing.</source>
+            <translation>Une image sauvegardée est introuvable.</translation>
+        </message>
+        <message>
+            <source>Incomplete saved session image.</source>
+            <translation>Image sauvegardée incomplète.</translation>
+        </message>
+        <message>
+            <source>Invalid values in a saved session image.</source>
+            <translation>L’image sauvegardée contient des valeurs invalides.</translation>
+        </message>
+        <message>
+            <source>Cannot create the session folder.</source>
+            <translation>Impossible de créer le dossier de session.</translation>
+        </message>
+        <message>
+            <source>Invalid saved mask.</source>
+            <translation>Masque sauvegardé invalide.</translation>
+        </message>
+        <message>
+            <source>Invalid saved mask size.</source>
+            <translation>Dimensions du masque sauvegardé invalides.</translation>
+        </message>
+        <message>
+            <source>Cannot save the session preview.</source>
+            <translation>Impossible de sauvegarder l’aperçu.</translation>
+        </message>
+        <message>
+            <source>The saved session settings are too large.</source>
+            <translation>Les réglages de session sont trop volumineux.</translation>
+        </message>
+        <message>
+            <source>Cannot save the session settings.</source>
+            <translation>Impossible de sauvegarder les réglages.</translation>
+        </message>
+        <message>
+            <source>Invalid session workspaces.</source>
+            <translation>Espaces de travail sauvegardés invalides.</translation>
+        </message>
+        <message>
+            <source>Invalid session workspace.</source>
+            <translation>Espace de travail sauvegardé invalide.</translation>
+        </message>
+        <message>
+            <source>Too many saved session images.</source>
+            <translation>La session contient trop d’images.</translation>
+        </message>
+        <message>
+            <source>Too many saved session masks.</source>
+            <translation>La session contient trop de masques.</translation>
+        </message>
+        <message>
+            <source>Too many session previews.</source>
+            <translation>La session contient trop d’aperçus.</translation>
+        </message>
+        <message>
+            <source>Invalid session preview dimensions.</source>
+            <translation>Dimensions de l’aperçu sauvegardé invalides.</translation>
+        </message>
+        <message>
+            <source>Cannot read the session preview.</source>
+            <translation>Impossible de lire l’aperçu sauvegardé.</translation>
+        </message>
+        <message>
+            <source>Cannot remove the saved session.</source>
+            <translation>Impossible de supprimer la session sauvegardée.</translation>
+        </message>
+        <message>
+            <source>Invalid saved session checksum.</source>
+            <translation>Contrôle d’intégrité de session invalide.</translation>
+        </message>
+        <message>
+            <source>The saved session exceeds the 4 GiB recovery limit.</source>
+            <translation>La session dépasse la limite de reprise de 4 Gio.</translation>
+        </message>
+        <message>
+            <source>A saved session file is damaged.</source>
+            <translation>Un fichier de la session sauvegardée est endommagé.</translation>
+        </message>
+        <message>
+            <source>A saved session image is damaged.</source>
+            <translation>Une image de session est endommagée.</translation>
+        </message>
+        <message>
+            <source>A saved session mask is damaged.</source>
+            <translation>Un masque de session est endommagé.</translation>
+        </message>
+        <message>
+            <source>A saved session preview is damaged.</source>
+            <translation>Un aperçu de session est endommagé.</translation>
         </message>
     </context>
     <context>
@@ -6576,6 +6756,10 @@ Résultat obtenu :
         <message>
             <source>Apply mask</source>
             <translation>Appliquer le masque</translation>
+        </message>
+        <message>
+            <source>The preview stretch reveals faint detail without changing pixels. Red protects the image. Cmd+Z removes the last stroke.</source>
+            <translation>L’aperçu étiré révèle les détails faibles sans modifier les pixels. Le rouge protège l’image. Cmd+Z annule le dernier trait.</translation>
         </message>
     </context>
 </TS>

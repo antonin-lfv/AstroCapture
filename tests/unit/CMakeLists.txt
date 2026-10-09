@@ -244,3 +244,5 @@ astro_add_unit_test(astro_app_scientific_editing_test
 set_target_properties(astro_app_scientific_editing_test PROPERTIES AUTOMOC ON)
 target_include_directories(astro_app_scientific_editing_test PRIVATE ../../app/src)
 set_tests_properties(astro_app_scientific_editing_test PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_BACKEND=software" TIMEOUT 45)
+
+target_link_libraries(astro_app_scientific_editing_test PRIVATE astro_cfitsio)

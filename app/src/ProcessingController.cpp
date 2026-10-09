@@ -1,3 +1,4 @@
+#include "FileProtection.hpp"
 #include "ImageGeometry.hpp"
 #include "ProcessingController.hpp"
 #include "ImagePreview.hpp"
@@ -239,7 +240,7 @@ void ProcessingController::open(const QUrl &url) {
       // Captions describe an observation. Never carry one to a different SER.
       annotation_ = cleanAnnotation({});
       updateAnnotation();
-      beforePreview_ = {};
+      beforePreview_ = {};geometryPreview_={};
       afterPreview_ = {};
       index_ = 0;
       progress_ = 100;
@@ -495,13 +496,12 @@ void ProcessingController::exportImage(const QUrl &url) {
       !path.endsWith(".jpg", Qt::CaseInsensitive) &&
       !path.endsWith(".jpeg", Qt::CaseInsensitive))
     path += ".tif";
-  if (source_ && QFileInfo(path).canonicalFilePath() ==
-                     QFileInfo(source_->path).canonicalFilePath()) {
+  if (source_ && sameFile(path,source_->path)) {
     status_ = tr("The source video cannot be overwritten.");
     emit changed();
     return;
   }
-  if(stillImage() && document_.protectedPaths.contains(QFileInfo(path).canonicalFilePath())) {
+  if(stillImage() && std::any_of(document_.protectedPaths.begin(),document_.protectedPaths.end(),[&](const auto& original){return sameFile(original,path);})) {
     status_=tr("An original image cannot be overwritten."); emit changed(); return;
   }
   const auto result = result_;

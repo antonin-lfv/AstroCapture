@@ -56,7 +56,7 @@ AstroImage readFits(const std::filesystem::path& path,double inputScale) {
     const int channels=dim==2?1:int(axes[2]);
     validate(int(axes[0]),int(axes[1]),channels);
     AstroImage image; image.width=int(axes[0]); image.height=int(axes[1]); image.channels=channels;
-    image.bits=std::abs(bitpix); image.bayer=pattern(stringKey(f.file,"BAYERPAT"));
+    image.fitsBitpix=bitpix; image.bits=std::abs(bitpix); image.bayer=pattern(stringKey(f.file,"BAYERPAT"));
     if(channels!=1)image.bayer=domain::BayerPattern::None;
     image.exposure=numberKey(f.file,"EXPTIME",numberKey(f.file,"EXPOSURE"));
     image.gain=numberKey(f.file,"GAIN",std::numeric_limits<double>::quiet_NaN()); image.hasGain=std::isfinite(image.gain);

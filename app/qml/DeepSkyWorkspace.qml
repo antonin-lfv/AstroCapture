@@ -123,7 +123,7 @@ Control {
         edits.values; edits.version; edits.canUndo; edits.canRedo;
         return {options:{calibrated:calibrated.checked,normalize:normalize.checked,badPixels:badPixels.checked,sequenceBackground:sequenceBackground.checked,
             sigma:sigma.value,method:integrationMethod.currentIndex,finish:edits.values,caption:root.captionOptions,versions:edits.snapshot()},
-            step:workflowStep,tool:finishingTool,comparison:comparisonMode};
+            step:workflowStep,tool:finishingTool,advancedTool:advancedTools.toolIndex,comparison:comparisonMode,split:comparisonSplit,fit:viewport.fitMode,zoom:viewport.zoom,panX:viewport.panX,panY:viewport.panY};
     }
     function restoreSessionState(state) {
         adjustmentTimer.stop();pendingProjectFinish=null;
@@ -131,7 +131,7 @@ Control {
         updatingControls=true;
         if(state.options && state.options.versions)edits.restoreSession(state.options.versions);
         else if(controller.hasResult)edits.resetSession(controller.finishSettings);
-        workflowStep=controller.hasResult?6:(state.step || 0);finishingTool=state.tool || 0;comparisonMode=state.comparison || "result";
+        workflowStep=controller.hasResult?6:(state.step || 0);finishingTool=state.tool || 0;advancedTools.toolIndex=state.advancedTool||0;comparisonMode=state.comparison || "result";comparisonSplit=state.split===undefined?.5:state.split;viewport.fitMode=state.fit!==false;viewport.zoom=state.zoom||1;viewport.panX=state.panX||0;viewport.panY=state.panY||0;viewport.constrainPan();
         editError="";updatingControls=false;
     }
     function options() {return Object.assign({},root.advancedOptions,{geometry:root.geometry,operations:root.operations,scnr:scnr.checked,scnrMethod:scnrMethod.currentIndex,scnrAmount:scnrAmount.value,scnrPreserve:scnrPreserve.checked,backgroundPoints:root.backgroundPoints,backgroundDegree:backgroundDegree.currentIndex+1,backgroundSamples:backgroundSamples.value,backgroundTolerance:backgroundTolerance.value,rotation:rotation.currentIndex,mirrorHorizontal:mirrorHorizontal.checked,mirrorVertical:mirrorVertical.checked,background: background.checked, stretch: stretch.checked, black:Number(black.text),white:Number(white.text),midtones:midtones.value,red:redGain.value,green:greenGain.value,blue:blueGain.value,denoise:denoise.value,asinh:asinh.checked,asinhStrength:asinhStrength.value,asinhLuminance:asinhLuminance.currentIndex,saturation:saturation.value});}
@@ -286,7 +286,7 @@ DropArea {
                 }
                 Canvas {
                     id:sampleOverlay;objectName:"deepSkySampleOverlay";z:10;parent:viewport.imageContainer;anchors.fill:parent
-                    visible:root.workflowStep===6 && root.finishingTool===1 && root.editingBackgroundSamples && background.checked && controller.displayingResult && !controller.comparingRaw && rotation.currentIndex===0 && !mirrorHorizontal.checked && !mirrorVertical.checked
+                    visible:root.workflowStep===6 && root.finishingTool===1 && root.editingBackgroundSamples && background.checked && controller.displayingResult && !controller.comparingRaw && !root.geometry.crop && !root.geometry.angle && root.geometry.scale===1 && rotation.currentIndex===0 && !mirrorHorizontal.checked && !mirrorVertical.checked
                     property real sampleZoom:viewport.effectiveZoom
                     onSampleZoomChanged:requestPaint()
                     onVisibleChanged:if(visible)requestPaint()
@@ -566,8 +566,8 @@ ParameterControl {id:black;label:qsTr("Black level");textIsValue:true;text:"0";f
                 ColumnLayout {visible:root.finishingTool===1;Layout.fillWidth:true
                 SectionTitle {label:qsTr("Background");explanation:qsTr("The optional correction fits a polynomial independently in each color channel. Bright grid samples are rejected using the tolerance. Compare with correction disabled to protect extended nebulosity. Enable sample editing to add or remove points directly on the image.")}
                 CheckBox {Layout.fillWidth:true;Layout.minimumWidth:0;implicitWidth:settingsScroll.availableWidth;contentItem:Text {text:parent.text;font:parent.font;color:Atelier.text;wrapMode:Text.Wrap;leftPadding:parent.indicator.width+parent.spacing;verticalAlignment:Text.AlignVCenter} id:background;onClicked:root.previewAdjustments();text:qsTr("Correct background gradient");enabled:root.finishEditable}
-                RowLayout {Layout.fillWidth:true;CheckBox {text:qsTr("Show extracted background model");checked:controller.showingBackgroundModel;enabled:!controller.busy && controller.hasBackgroundModel && rotation.currentIndex===0 && !mirrorHorizontal.checked && !mirrorVertical.checked;onClicked:controller.showingBackgroundModel=checked;Layout.fillWidth:true} HelpIcon {text:qsTr("Displays the fitted background with an automatic display stretch. Export always uses the processed image. Inspect the model for traces of real astronomical objects.")}}
-                CheckBox {text:qsTr("Edit background samples on image");checked:root.editingBackgroundSamples;enabled:root.finishEditable && background.checked;onClicked:{root.editingBackgroundSamples=checked;if(checked){rotation.currentIndex=0;mirrorHorizontal.checked=false;mirrorVertical.checked=false;root.previewAdjustments();}}}
+                RowLayout {Layout.fillWidth:true;CheckBox {text:qsTr("Show extracted background model");checked:controller.showingBackgroundModel;enabled:!controller.busy && controller.hasBackgroundModel && !root.geometry.crop && !root.geometry.angle && root.geometry.scale===1 && rotation.currentIndex===0 && !mirrorHorizontal.checked && !mirrorVertical.checked;onClicked:controller.showingBackgroundModel=checked;Layout.fillWidth:true} HelpIcon {text:qsTr("Displays the fitted background with an automatic display stretch. Export always uses the processed image. Inspect the model for traces of real astronomical objects.")}}
+                CheckBox {text:qsTr("Edit background samples on image");checked:root.editingBackgroundSamples;enabled:root.finishEditable && background.checked && !root.geometry.crop && !root.geometry.angle && root.geometry.scale===1;onClicked:{root.editingBackgroundSamples=checked;if(checked){rotation.currentIndex=0;mirrorHorizontal.checked=false;mirrorVertical.checked=false;root.previewAdjustments();}}}
                 Label {visible:root.editingBackgroundSamples;text:qsTr("Left click adds a sky sample. Right click removes one. Avoid stars and nebulosity. Rotate and mirror are temporarily unavailable while editing samples.");color:Atelier.secondary;wrapMode:Text.Wrap;Layout.fillWidth:true}
                 IconButton {visible:background.checked;text:qsTr("Regenerate automatic samples");Layout.fillWidth:true;onClicked:{root.backgroundPoints=[];root.previewAdjustments()}}
                 GridLayout {

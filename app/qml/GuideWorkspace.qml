@@ -85,6 +85,14 @@ Rectangle {
             {title:qsTr("Return to a project"),body:qsTr("Resume returns to the current session without loading files again. Open reloads a saved deep-sky project; recreate its stack to restore the saved finish. Keep its source files in place. Settings is a workspace in the top navigation. The deep-sky gear manages the project and finishing presets.")},
             {title:qsTr("Deep-sky tools on the right"),body:qsTr("Images, Stack and Finish form the bar above the image. Stack contains calibration and integration settings. Finish unlocks after stacking. Its right inspector contains the input histogram and adjustment families; the image stays on the left with zoom below it. The floppy button opens final-image or linear FITS export. The project gear manages projects and finishing presets. In Images and Stack, the folder button toggles the source list.")}
           ],action:qsTr("Go to Home"),tab:"home"}
+        ,{title:qsTr("From Siril"),lead:qsTr("Familiar controls, explicit parameters"),
+          intro:qsTr("Keep the same workflow: calibrate, register, stack, then finish. The linear FITS keeps the integration; the final image contains your finishing adjustments."),
+          cards:[
+            {title:qsTr("Resume the calculated results"),body:qsTr("Home offers Restore session after restarting. It restores calculated images, settings, captions and A/B versions. Saving the session before quitting waits for the latest changes. Keep your source files and project as well.")},
+            {title:qsTr("Crop and geometry"),body:qsTr("In Finish, choose Geometry. In Processing, choose Crop, rotate and resize. Draw a rectangle, move it or adjust its handles. X and Y start at zero in the top-left corner. Crop and quarter-turns keep pixel values; free rotation and scaling use the selected interpolation.")},
+            {title:qsTr("Local masks"),body:qsTr("Advanced transformations offers automatic, painted and imported masks. White applies the treatment, black protects the input, gray blends. Red shows protected areas. Choose the mask scope. Cmd+Z removes a brush stroke while the editor is open. Imported masks must match the recipe input dimensions.")},
+            {title:qsTr("Check the parameter units"),body:qsTr("GHS, PSF, Richardson–Lucy, multiscale denoising and SCNR expose their parameters and help. Values and algorithms are not interchangeable with every Siril tool. Photometry currently uses a CSV of identified reference stars; automatic plate solving and catalog-based PCC/SPCC are still to come.")}
+          ],action:qsTr("Go to Deep sky"),tab:"deepSky"}
     ]
     readonly property var lesson: lessons[topic]
     ColumnLayout {

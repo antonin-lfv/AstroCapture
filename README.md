@@ -194,9 +194,16 @@ appliqué, pas les paramètres encore en attente.
   masque est indépendante de l’export. Blanc = traitement complet,
   noir = entrée intacte, gris = mélange pondéré. Le masque est calculé sur
   l’entrée de chaque opération, appliqué une fois après traitement, puis
-  l’orientation transforme l’ensemble. Il porte sur **tous les réglages**.
-  Il ne s’agit pas encore de masques peints, importés ou variables pendant
-  les itérations de déconvolution.
+  l’orientation transforme l’ensemble. La portée se choisit : toute la finition, débruitage multiéchelle,
+  déconvolution, ou étirement et couleur. Les masques **peints** permettent
+  de protéger ou révéler une zone au pinceau avec rayon en pixels, dureté,
+  opacité et annulation des traits. Les masques **importés** acceptent
+  FITS, PNG et TIFF aux dimensions exactes de l’entrée, avec valeurs entre
+  0 et 1. Les images couleur sont converties en luminance pondérée.
+  Le flou du bord est un sigma gaussien en pixels ; zéro le désactive.
+  Les fichiers importés restent des références externes : conservez-les
+  avec le projet. Le masque agit après le traitement choisi, pas pendant
+  chaque itération de déconvolution.
 - **Couleurs photométriques par références locales** : CSV strict
   `x,y,red,green,blue`, avec au moins 3 étoiles déjà identifiées dans l’image,
   coordonnées en pixels depuis zéro en haut à gauche et flux de référence
@@ -213,7 +220,7 @@ appliqué, pas les paramètres encore en attente.
 
 L’ordre des traitements est : gradient → piédestal → photométrie →
 réduction du bruit multiéchelle → déconvolution → gains et étirement →
-saturation et lissage → SCNR → mélange du masque → orientation. Les mesures photométriques
+saturation et lissage → SCNR → mélange du masque → orientation → recadrage → rotation libre → redimensionnement. Les mesures photométriques
 et la déconvolution sont bloquées après une transformation étirée ou orientée ;
 la photométrie est globale et refuse un masque. Les fichiers d’entrée doivent
 réellement être linéaires : le logiciel ne peut pas déduire un étirement externe
@@ -351,7 +358,7 @@ Les paramètres globaux centralisent :
 - **Le dossier d’export du traitement** : TIFF produits après empilement et finition, ainsi que les mosaïques.
 - **L’ajout automatique à l’historique**, activable indépendamment de l’ajout manuel.
 
-Les commandes propres à la caméra restent dans **Capture**. Les préférences et les préréglages persistent après un redémarrage ou une mise à jour ; le traitement en cours et sa pile d’annulation ne constituent pas une session sauvegardée.
+Les commandes propres à la caméra restent dans **Capture**. Les préférences et les préréglages persistent après un redémarrage ou une mise à jour. La session de Traitement, Ciel profond et Mosaïque est sauvegardée automatiquement deux secondes après une modification stable. Elle conserve les sources référencées, les résultats en flottants, les réglages et les légendes. **Accueil → Reprendre la session** restaure le travail ; les résultats restent exportables si une source a été déplacée. **Sauvegarder la session et quitter** attend la fin de la sauvegarde avant la fermeture. Une session existante n’est pas chargée par-dessus un travail ouvert. La pile des annulations n’est pas conservée après redémarrage ; les versions A/B le sont. Les acquisitions de caméra restent des fichiers de capture, sans relance automatique de la caméra.
 
 ## Navigation
 
@@ -372,7 +379,7 @@ Les commandes propres à la caméra restent dans **Capture**. Les préférences 
 
 ## Périmètre actuel
 
-AstroCapture propose un alignement global par translation et une correction locale des surfaces lunaires et solaires. Le mode Lune / Soleil peut sélectionner les meilleures prises indépendamment pour chaque zone. La qualité dépend du contraste, du bruit, du recouvrement entre prises et de l’intensité de la turbulence ; les zones sans détail fiable ne bénéficient pas d’un recalage local. La dérotation planétaire n’est pas disponible. Le ciel profond utilise son propre onglet avec les limites décrites plus haut. L’import AVI et la restauration complète d’une session de traitement ne sont pas disponibles.
+AstroCapture propose un alignement global par translation et une correction locale des surfaces lunaires et solaires. Le mode Lune / Soleil peut sélectionner les meilleures prises indépendamment pour chaque zone. La qualité dépend du contraste, du bruit, du recouvrement entre prises et de l’intensité de la turbulence ; les zones sans détail fiable ne bénéficient pas d’un recalage local. La dérotation planétaire n’est pas disponible. Le ciel profond utilise son propre onglet avec les limites décrites plus haut. L’import AVI n’est pas disponible. La reprise de session restaure les résultats calculés, les réglages et les légendes ; elle ne relance pas une acquisition ou un calcul interrompu.
 
 Les captures d’écran présentent l’application réelle, avec une caméra simulée et des images synthétiques pour illustrer les commandes. Elles ne constituent pas une mesure de performance sur une observation astronomique.
 
@@ -423,3 +430,11 @@ d’enregistrer les réglages de Traitement dans un préréglage. Si plusieurs r
 sont ouverts, choisissez celui à exporter. La confirmation revient après chaque
 sauvegarde pour permettre de conserver plusieurs éléments avant de quitter.
 Une sauvegarde annulée ou échouée ne ferme pas l’application.
+
+## Géométrie et masques locaux — 1.5.0
+
+**Ciel profond → Finition → Géométrie** et **Traitement → Recadrer, pivoter et redimensionner** ouvrent un éditeur commun. Tracez un rectangle ou saisissez X, Y, largeur et hauteur en pixels depuis le coin supérieur gauche. Les proportions peuvent être libres ou verrouillées. Le recadrage copie exactement les pixels ; la rotation libre (sens horaire positif) et le changement d’échelle utilisent l’interpolation choisie : plus proche voisin, bilinéaire, bicubique, moyenne de zone ou Lanczos-4. La moyenne de zone est destinée au redimensionnement ; la rotation utilise alors l’interpolation linéaire d’OpenCV. La limitation des dépassements borne les valeurs à l’étendue de chaque canal d’entrée, en incluant les marges noires de rotation ; elle n’est pas le clamping local de Siril. La sortie reste limitée à 32 MP. La comparaison suit la même géométrie, et le FITS linéaire garde l’intégration initiale.
+
+**Transformations avancées → Masques** rassemble les masques automatiques, peints et importés. Le rouge montre les zones protégées ; la vue du masque seul expose ses poids. Un trait applique son opacité une fois, même lorsque ses segments se chevauchent ; les traits successifs se cumulent. Cmd+Z annule un trait dans l’éditeur, puis un réglage de finition lorsque l’éditeur est fermé. L’éditeur n’engage ses modifications qu’avec **Appliquer le masque**. Les paramètres sont conservés dans le projet, les préréglages et les versions A/B. Limites : 200 traits et 10 000 points par masque. L’aperçu du pinceau est réduit ; le calcul utilise les dimensions complètes. L’image de l’éditeur reçoit un étirement d’affichage pour révéler les structures faibles, sans modifier les données ni les poids du masque.
+
+La sauvegarde automatique utilise un manifeste atomique, des contrôles SHA-256 et un cache de pixels en flottants 32 bits. Les images inchangées ne sont pas réécrites à chaque déplacement de curseur. Une sauvegarde interrompue conserve la précédente. Une session endommagée est refusée avant la restauration des espaces de travail. La reprise est limitée à 4 Gio de données sauvegardées, et le cache occupe de l’espace disque selon la taille des résultats. Une session est locale à ce Mac ; le projet reste le document à garder ou partager.

@@ -15,6 +15,7 @@ struct AstroImage {
     double scale{1}; // original ADU units per normalized sample
     std::string filter, object, date, imageType;
     std::vector<float> samples;
+    int fitsBitpix{}; // Original FITS storage type; negative means floating point.
 };
 AstroImage readAstroImage(const std::filesystem::path& path, double inputScale = 0);
 void writeAstroFits(const std::filesystem::path& path, const AstroImage& image);

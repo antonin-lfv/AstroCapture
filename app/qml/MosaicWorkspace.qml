@@ -14,9 +14,9 @@ Rectangle {
     property bool balanceExposure: true
     property bool skipUnmatched: true
     property bool softenEdges: true
-    readonly property var sessionState: ({balanceExposure:balanceExposure, skipUnmatched:skipUnmatched, softenEdges:softenEdges})
+    readonly property var sessionState: ({balanceExposure:balanceExposure, skipUnmatched:skipUnmatched, softenEdges:softenEdges,fit:viewport.fitMode,zoom:viewport.zoom,panX:viewport.panX,panY:viewport.panY})
     function restoreSessionState(state) {
-        balanceExposure=state.balanceExposure!==false;skipUnmatched=state.skipUnmatched!==false;softenEdges=state.softenEdges!==false;
+        balanceExposure=state.balanceExposure!==false;skipUnmatched=state.skipUnmatched!==false;softenEdges=state.softenEdges!==false;viewport.fitMode=state.fit!==false;viewport.zoom=state.zoom||1;viewport.panX=state.panX||0;viewport.panY=state.panY||0;viewport.constrainPan();
     }
     color: Atelier.canvas
     FileDialog {

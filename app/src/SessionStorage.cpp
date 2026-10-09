@@ -81,10 +81,12 @@ void SessionStorage::save(const SavedSession& session,const std::function<void()
         }
         spaces[it.key()]=QJsonObject{{"state",QJsonObject::fromVariantMap(s.state)},{"images",imageRefs},{"planes",planeRefs},{"previews",previewRefs}};
     }
+    qint64 totalBytes=0;for(const auto& file:retained)totalBytes+=QFileInfo(QDir(directory_).filePath(file)).size();require(totalBytes<=qint64(4)*1024*1024*1024,"The saved session exceeds the 4 GiB recovery limit.");
     if(check)check();const auto bytes=QJsonDocument(QJsonObject{{"version",1},{"savedAt",QDateTime::currentDateTimeUtc().toString(Qt::ISODate)},{"ui",QJsonObject::fromVariantMap(session.ui)},{"workspaces",spaces}}).toJson(QJsonDocument::Compact);
     require(bytes.size()<=64*1024*1024,"The saved session settings are too large.");QSaveFile manifest(QDir(directory_).filePath("session.json"));require(manifest.open(QIODevice::WriteOnly)&&manifest.write(bytes)==bytes.size()&&manifest.commit(),"Cannot save the session settings.");
     // Only collect our own obsolete cache files after the manifest commits.
     for(const auto& file:QDir(directory_).entryList({"*.pixels","*.plane","*.png"},QDir::Files))if(!retained.contains(file)&&QRegularExpression("^[0-9a-f-]{36}\\.").match(file).hasMatch())QFile::remove(QDir(directory_).filePath(file));
+    for(auto i=previews_.begin();i!=previews_.end();)i=!retained.contains(i->second.file)?previews_.erase(i):std::next(i);
     for(auto i=images_.begin();i!=images_.end();)i=i->second.image.expired()?images_.erase(i):std::next(i);
     for(auto i=planes_.begin();i!=planes_.end();)i=i->second.plane.expired()?planes_.erase(i):std::next(i);
 }
@@ -95,15 +97,15 @@ SavedSession SessionStorage::load(const std::function<void()>& check) {
     QMap<QString,std::shared_ptr<const processing::FloatImage>> loadedImages;QMap<QString,std::shared_ptr<const std::vector<float>>> loadedPlanes;QMap<QString,QImage> loadedPreviews;
     for(auto it=spaces.begin();it!=spaces.end();++it){require(QStringList{"processing","deepSky","mosaic"}.contains(it.key()),"Invalid session workspace.");const auto space=it.value().toObject();WorkspaceSnapshot s;s.state=space["state"].toObject().toVariantMap();
         auto refs=space["images"].toObject();require(refs.size()<=64,"Too many saved session images.");for(auto p=refs.begin();p!=refs.end();++p){const auto ref=p.value().toObject();const auto file=ref["file"].toString();const auto path=verify(file,ref);
-            if(!loadedImages.contains(file)){require(fileHash(path,check).toHex()==ref["sha256"].toString().toLatin1(),"A saved session image is damaged.");auto data=readPixels(path,3,check);auto image=std::make_shared<processing::FloatImage>(processing::FloatImage{data.width,data.height,std::move(data.samples)});loadedImages[file]=image;images_[image.get()]={image,{file,QByteArray::fromHex(ref["sha256"].toString().toLatin1())}};}
+            if(!loadedImages.contains(file)){auto data=readPixels(path,3,check);auto image=std::make_shared<processing::FloatImage>(processing::FloatImage{data.width,data.height,std::move(data.samples)});loadedImages[file]=image;images_[image.get()]={image,{file,QByteArray::fromHex(ref["sha256"].toString().toLatin1())}};}
             s.images[p.key()]=loadedImages[file];
         }
         refs=space["planes"].toObject();require(refs.size()<=8,"Too many saved session masks.");for(auto p=refs.begin();p!=refs.end();++p){const auto ref=p.value().toObject();const auto file=ref["file"].toString();const auto path=verify(file,ref);
-            if(!loadedPlanes.contains(file)){require(fileHash(path,check).toHex()==ref["sha256"].toString().toLatin1(),"A saved session mask is damaged.");auto data=readPixels(path,1,check);auto values=std::make_shared<std::vector<float>>(std::move(data.samples));loadedPlanes[file]=values;planes_[values.get()]={values,{file,QByteArray::fromHex(ref["sha256"].toString().toLatin1())}};}
+            if(!loadedPlanes.contains(file)){auto data=readPixels(path,1,check);auto values=std::make_shared<std::vector<float>>(std::move(data.samples));loadedPlanes[file]=values;planes_[values.get()]={values,{file,QByteArray::fromHex(ref["sha256"].toString().toLatin1())}};}
             s.planes[p.key()]=loadedPlanes[file];
         }
         refs=space["previews"].toObject();require(refs.size()<=16,"Too many session previews.");for(auto p=refs.begin();p!=refs.end();++p){const auto ref=p.value().toObject();const auto file=ref["file"].toString();const auto path=verify(file,ref);
-            if(!loadedPreviews.contains(file)){require(fileHash(path,check).toHex()==ref["sha256"].toString().toLatin1(),"A saved session preview is damaged.");QImageReader reader(path);const auto size=reader.size();require(size.width()>0&&size.height()>0&&std::uint64_t(size.width())*size.height()<=32000000,"Invalid session preview dimensions.");auto image=reader.read();require(!image.isNull(),"Cannot read the session preview.");loadedPreviews[file]=image;previews_[image.cacheKey()]={file,QByteArray::fromHex(ref["sha256"].toString().toLatin1())};}
+            if(!loadedPreviews.contains(file)){QImageReader reader(path);const auto size=reader.size();require(size.width()>0&&size.height()>0&&std::uint64_t(size.width())*size.height()<=32000000,"Invalid session preview dimensions.");auto image=reader.read();require(!image.isNull(),"Cannot read the session preview.");loadedPreviews[file]=image;previews_[image.cacheKey()]={file,QByteArray::fromHex(ref["sha256"].toString().toLatin1())};}
             s.previews[p.key()]=loadedPreviews[file];
         }
         session.workspaces[it.key()]=std::move(s);

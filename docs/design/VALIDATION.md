@@ -69,6 +69,40 @@ ont été réexécutés après les derniers ajustements. Ils couvrent notamment 
 
 ## Paquet macOS
 
-Le script `scripts/package_macos.sh` reconstruit le paquet autonome et le DMG 1.4.0.
+Le script `scripts/package_macos.sh` reconstruit le paquet autonome et le DMG 1.5.0.
 La vérification de signature du paquet et celle de l'intégrité du DMG sont effectuées
 avant livraison. La signature reste locale (ad hoc), comme pour le paquet précédent.
+
+## Lot 1.5.0 — sessions, géométrie et masques
+
+35 tests passent en développement. Les nouveaux contrôles couvrent :
+
+- Sauvegarde atomique, réutilisation des assets inchangés, annulation avant
+  engagement, contrôles SHA-256, session endommagée refusée avant restauration,
+  conservation exacte des flottants négatifs et HDR et du masque de bord.
+- Reprise et export sans la source, avec protection de son chemin original.
+- Copie exacte des pixels recadrés, rotations de ±90° comparées à l’orientation
+  sans interpolation, les cinq interpolations, dimensions et annulation.
+- Opacité appliquée une fois par trait, accumulation entre traits, inversion,
+  flou du bord, import 16 bits et FITS flottant 32 bits, refus des mauvaises valeurs.
+- Masque limité au débruitage ou à Richardson–Lucy : réglages de couleur encore
+  actifs ; masque noir de finition : pixels conservés à l’identique.
+- Comparaison suivant le recadrage, géométrie précédente conservée pour l’éditeur,
+  et FITS linéaire exporté avec ses dimensions et valeurs d’origine.
+
+L’application complète a été ouverte en français avec le TIFF réel d’Orion
+6 244 × 4 170. Le parcours natif couvre une sélection de recadrage à la souris,
+son application, la peinture d’un trait, Cmd+Z / Cmd+Maj+Z, l’application du masque,
+la sauvegarde, la destruction puis la recréation de l’interface et la reprise.
+Les pixels terminés et les paramètres sont comparés à l’identique après reprise.
+La boîte de fermeture et « Sauvegarder la session et quitter » ont été contrôlées.
+
+Les captures `previews/native/1.5.0-*` documentent les éditeurs et la reprise aux
+formats 1440 × 960, 1100 × 800 et 900 × 700. Le contour de recadrage, les poignées,
+les zones protégées en rouge et la barre de zoom sont visibles. La géométrie
+et les masques suivent la direction Atelier approuvée.
+
+Cette vérification ne relance pas l’intégration M8/M20 ni une comparaison de
+qualité avec Siril ; elle ne valide pas l’astrométrie, SPCC ou de nouveau matériel.
+La sauvegarde locale est limitée à 4 Gio ; les acquisitions et calculs interrompus
+ne sont pas repris, et les masques importés restent des fichiers externes.

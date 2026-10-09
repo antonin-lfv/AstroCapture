@@ -21,6 +21,7 @@ int main(int argc,char** argv) {
     for(std::size_t i=0;i<image->rgb.size();++i)image->rgb[i]=float(i)*.0091f-.13f; // Preserve negative and HDR float samples.
     ImageDocument doc;doc.pixels=image;doc.preview=QImage(12,8,QImage::Format_RGB32);doc.preview.fill(Qt::gray);doc.name="Missing source";doc.protectedPaths={temp.filePath("gone.tif")};doc.annotation={{"technicalText","Custom metadata"}};doc.edgeMask=std::make_shared<const std::vector<float>>(96,.75f);
     ASTRO_TEST_CHECK(processing.openDocument(QVariant::fromValue(doc)));
+    auto incomplete=processing.sessionSnapshot();incomplete.previews.remove("after");ASTRO_TEST_CHECK(!processing.canRestoreSession(incomplete));
     session.setUiState({{"tab","processing"},{"custom",.12345}});
     ASTRO_TEST_CHECK(session.saveNow());wait(session);ASTRO_TEST_CHECK(session.recoveryAvailable());
     SessionStorage storage(temp.filePath("recovery"));auto saved=storage.load();

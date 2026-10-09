@@ -17,6 +17,7 @@ Popup {
     signal accepted(var values)
     function edit(image,values){sourceImage=image;draft=Object.assign({},values);panMode=false;aspect=0;open();view.fit();}
     function update(key,value){const next=Object.assign({},draft);next[key]=value;draft=next;}
+    function nativePoint(item,mouse){const p=item.mapToItem(view.imageContainer,mouse.x,mouse.y);return {x:Math.round(p.x/view.imageContainer.width*pixels.sourceWidth),y:Math.round(p.y/view.imageContainer.height*pixels.sourceHeight)};}
     function fullImage(){draft=Object.assign({},draft,{crop:false,x:0,y:0,width:pixels.sourceWidth,height:pixels.sourceHeight});}
     readonly property bool valid:!draft.crop||(draft.x>=0&&draft.y>=0&&draft.width>0&&draft.height>0&&draft.x+draft.width<=pixels.sourceWidth&&draft.y+draft.height<=pixels.sourceHeight)
     readonly property int outputWidth:Math.max(1,Math.round((draft.keepSize?baseWidth:Math.ceil(baseWidth*Math.abs(Math.cos(draft.angle*Math.PI/180))+baseHeight*Math.abs(Math.sin(draft.angle*Math.PI/180))-1e-10))*draft.scale))
@@ -42,13 +43,34 @@ Popup {
         ImageViewport {
             id:view;Layout.fillWidth:true;Layout.fillHeight:true;Layout.minimumHeight:180
             sourceWidth:pixels.sourceWidth;sourceHeight:pixels.sourceHeight
-            ImagePixelsItem {id:pixels;parent:view.imageContainer;anchors.fill:parent}
+            ImagePixelsItem {id:pixels;z:0;parent:view.imageContainer;anchors.fill:parent}
             Binding {target:pixels;property:"image";value:root.sourceImage;when:root.sourceImage!==null}
             Item {
-                parent:view.imageContainer;anchors.fill:parent
-                Rectangle {visible:root.draft.crop;x:root.draft.x/pixels.sourceWidth*parent.width;y:root.draft.y/pixels.sourceHeight*parent.height;width:root.draft.width/pixels.sourceWidth*parent.width;height:root.draft.height/pixels.sourceHeight*parent.height;color:"transparent";border.color:Atelier.accent;border.width:2/view.effectiveZoom}
+                parent:view.imageContainer;anchors.fill:parent;z:2
+                readonly property real sx:root.draft.x/pixels.sourceWidth*width
+                readonly property real sy:root.draft.y/pixels.sourceHeight*height
+                readonly property real sw:root.draft.width/pixels.sourceWidth*width
+                readonly property real sh:root.draft.height/pixels.sourceHeight*height
+                Rectangle {visible:root.draft.crop&&root.valid;x:0;y:0;width:parent.width;height:parent.sy;color:"#88000000"}
+                Rectangle {visible:root.draft.crop&&root.valid;x:0;y:parent.sy;width:parent.sx;height:parent.sh;color:"#88000000"}
+                Rectangle {visible:root.draft.crop&&root.valid;x:parent.sx+parent.sw;y:parent.sy;width:Math.max(0,parent.width-x);height:parent.sh;color:"#88000000"}
+                Rectangle {visible:root.draft.crop&&root.valid;x:0;y:parent.sy+parent.sh;width:parent.width;height:Math.max(0,parent.height-y);color:"#88000000"}
+                Rectangle {objectName:"cropSelection";visible:root.draft.crop;x:root.draft.x/pixels.sourceWidth*parent.width;y:root.draft.y/pixels.sourceHeight*parent.height;width:root.draft.width/pixels.sourceWidth*parent.width;height:root.draft.height/pixels.sourceHeight*parent.height;color:"transparent";border.color:Atelier.accent;border.width:2/view.effectiveZoom
+                    MouseArea {anchors.fill:parent;enabled:!root.panMode;cursorShape:pressed?Qt.ClosedHandCursor:Qt.OpenHandCursor;preventStealing:true;property var initial;property var start
+                        onPressed:(mouse)=>{initial=Object.assign({},root.draft);start=root.nativePoint(this,mouse);}
+                        onPositionChanged:(mouse)=>{if(!pressed)return;const p=root.nativePoint(this,mouse);root.draft=Object.assign({},root.draft,{x:Math.max(0,Math.min(pixels.sourceWidth-initial.width,initial.x+p.x-start.x)),y:Math.max(0,Math.min(pixels.sourceHeight-initial.height,initial.y+p.y-start.y))});}
+                    }
+                    Repeater {model:9
+                        Rectangle {required property int index;property int hx:index%3;property int hy:Math.floor(index/3);visible:index!==4;z:4;width:10/view.effectiveZoom;height:width;x:parent.width*hx/2-width/2;y:parent.height*hy/2-height/2;color:Atelier.accent;border.color:Atelier.canvas;border.width:1/view.effectiveZoom
+                            MouseArea {anchors.fill:parent;enabled:!root.panMode;preventStealing:true;cursorShape:parent.hx===1?Qt.SizeVerCursor:parent.hy===1?Qt.SizeHorCursor:parent.hx===parent.hy?Qt.SizeFDiagCursor:Qt.SizeBDiagCursor;property var initial
+                                onPressed:(mouse)=>initial=Object.assign({},root.draft)
+                                onPositionChanged:(mouse)=>{if(!pressed)return;const p=root.nativePoint(this,mouse);let x=initial.x,y=initial.y,w=initial.width,h=initial.height;if(parent.hx===0){x=Math.max(0,Math.min(initial.x+initial.width-1,p.x));w=initial.x+initial.width-x;}else if(parent.hx===2)w=Math.max(1,Math.min(pixels.sourceWidth-x,p.x-x));if(parent.hy===0){y=Math.max(0,Math.min(initial.y+initial.height-1,p.y));h=initial.y+initial.height-y;}else if(parent.hy===2)h=Math.max(1,Math.min(pixels.sourceHeight-y,p.y-y));if(root.ratio>0){if(parent.hx===1)w=Math.max(1,Math.round(h*root.ratio));else h=Math.max(1,Math.round(w/root.ratio));w=Math.min(w,pixels.sourceWidth-x);h=Math.min(h,pixels.sourceHeight-y);if(parent.hx===0)x=initial.x+initial.width-w;if(parent.hy===0)y=initial.y+initial.height-h;}root.draft=Object.assign({},root.draft,{x:x,y:y,width:w,height:h});}
+                            }
+                        }
+                    }
+                }
                 MouseArea {
-                    anchors.fill:parent;enabled:!root.panMode;cursorShape:Qt.CrossCursor;preventStealing:true
+                    objectName:"cropDrawSurface";anchors.fill:parent;enabled:!root.panMode;cursorShape:Qt.CrossCursor;z:-1;preventStealing:true
                     property int startX;property int startY
                     onPressed:(mouse)=>{startX=Math.max(0,Math.min(pixels.sourceWidth-1,Math.floor(mouse.x/width*pixels.sourceWidth)));startY=Math.max(0,Math.min(pixels.sourceHeight-1,Math.floor(mouse.y/height*pixels.sourceHeight)));}
                     onPositionChanged:(mouse)=>{if(!pressed)return;let endX=Math.max(0,Math.min(pixels.sourceWidth,Math.round(mouse.x/width*pixels.sourceWidth)));let endY=Math.max(0,Math.min(pixels.sourceHeight,Math.round(mouse.y/height*pixels.sourceHeight)));let w=Math.max(1,Math.abs(endX-startX)),h=Math.max(1,Math.abs(endY-startY));if(root.ratio>0){h=Math.max(1,Math.round(w/root.ratio));if(h>pixels.sourceHeight){h=pixels.sourceHeight;w=Math.round(h*root.ratio);}}let x=Math.max(0,Math.min(pixels.sourceWidth-w,endX<startX?startX-w:startX)),y=Math.max(0,Math.min(pixels.sourceHeight-h,endY<startY?startY-h:startY));root.draft=Object.assign({},root.draft,{crop:true,x:x,y:y,width:w,height:h});}

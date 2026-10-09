@@ -1,3 +1,4 @@
+#include "FileProtection.hpp"
 #include "MosaicController.hpp"
 #include "ImagePreview.hpp"
 #include <QDir>
@@ -180,8 +181,8 @@ void MosaicController::assemble(bool balanceExposure,bool skipUnmatched,bool sof
 void MosaicController::exportImage(const QUrl& url) {
     if(busy_ || !result_ || !url.isLocalFile()) return;
     QString path=url.toLocalFile(); if(!path.endsWith(".tif",Qt::CaseInsensitive)&&!path.endsWith(".tiff",Qt::CaseInsensitive)) path+=".tif";
-    for(const auto& input:inputs_) if(QFileInfo(path).canonicalFilePath()==input.path) {status_=tr("An original image cannot be overwritten.");emit changed();return;}
-    for(const auto& input:excluded_) if(QFileInfo(path).canonicalFilePath()==input.path) {status_=tr("An original image cannot be overwritten.");emit changed();return;}
+    for(const auto& input:inputs_) if(sameFile(path,input.path)) {status_=tr("An original image cannot be overwritten.");emit changed();return;}
+    for(const auto& input:excluded_) if(sameFile(path,input.path)) {status_=tr("An original image cannot be overwritten.");emit changed();return;}
     const auto result=result_; const auto overlay=annotationImage_; status_=tr("Exporting 16-bit TIFF…");
     run([this,result,path,overlay](std::stop_token stop){
         std::vector<std::uint16_t> samples(result->rgb.size());

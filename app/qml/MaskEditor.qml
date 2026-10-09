@@ -33,16 +33,16 @@ Popup {
             Label {text:qsTr("Paint the mask");font.pixelSize:20;color:Atelier.text;Layout.fillWidth:true}
             IconButton {text:qsTr("Close");ghost:true;onClicked:root.close()}
         }
-        Label {text:qsTr("Red protects the image. White applies the treatment; black protects it. Cmd+Z removes the last stroke.");color:Atelier.secondary;wrapMode:Text.Wrap;Layout.fillWidth:true}
+        Label {text:qsTr("The preview stretch reveals faint detail without changing pixels. Red protects the image. Cmd+Z removes the last stroke.");color:Atelier.secondary;wrapMode:Text.Wrap;Layout.fillWidth:true}
         ImageViewport {
-            id:view;Layout.fillWidth:true;Layout.fillHeight:true;Layout.minimumHeight:180
+            id:view;Layout.fillWidth:true;Layout.fillHeight:true;Layout.minimumHeight:120
             sourceWidth:pixels.sourceWidth;sourceHeight:pixels.sourceHeight
-            ImagePixelsItem {id:pixels;parent:view.imageContainer;anchors.fill:parent}
+            ImagePixelsItem {id:pixels;z:0;parent:view.imageContainer;anchors.fill:parent}
             Binding {target:pixels;property:"image";value:root.sourceImage;when:root.sourceImage!==null}
-            MaskOverlayItem {id:overlay;parent:view.imageContainer;anchors.fill:parent;settings:root.draft;sourceWidth:pixels.sourceWidth;sourceHeight:pixels.sourceHeight;maskOnly:root.maskOnly}
+            MaskOverlayItem {id:overlay;z:1;parent:view.imageContainer;anchors.fill:parent;settings:root.draft;sourceWidth:pixels.sourceWidth;sourceHeight:pixels.sourceHeight;maskOnly:root.maskOnly}
             Binding {target:overlay;property:"raster";value:root.rasterImage;when:root.rasterImage!==null}
             MouseArea {
-                objectName:"maskPaintSurface";parent:view.imageContainer;anchors.fill:parent;enabled:!root.panMode;cursorShape:Qt.CrossCursor;preventStealing:true;hoverEnabled:true
+                objectName:"maskPaintSurface";z:2;parent:view.imageContainer;anchors.fill:parent;enabled:!root.panMode;cursorShape:Qt.CrossCursor;preventStealing:true;hoverEnabled:true
                 property real cursorX:0
                 property real cursorY:0
                 Rectangle {visible:parent.containsMouse;x:parent.cursorX-width/2;y:parent.cursorY-height/2;width:root.brushRadius*2/pixels.sourceWidth*parent.width;height:width;color:"transparent";border.color:"#eeeeee";border.width:1/view.effectiveZoom;radius:width/2}

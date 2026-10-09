@@ -34,8 +34,9 @@ ApplicationWindow {
     property string quitExportTarget: ""
     property bool quitExportUsesCaption: false
     property bool quitAfterSessionSave:false
-    readonly property bool quitBusy: previewController.recording || deepSkyController.busy || processingController.busy || mosaicController.busy || captionController.busy || sessionController.busy
-    readonly property bool hasOpenWork: previewController.recording || deepSkyController.frames.length>0 || processingController.loaded || processingController.stillImage || processingController.hasResult || mosaicController.files.length>0 || quitBusy
+    readonly property bool workBusy: previewController.recording || deepSkyController.busy || processingController.busy || mosaicController.busy || captionController.busy
+    readonly property bool quitBusy:workBusy || sessionController.busy
+    readonly property bool hasOpenWork: previewController.recording || (deepSkyController.frames.length>0 || deepSkyController.hasResult) || processingController.loaded || processingController.stillImage || processingController.hasResult || (mosaicController.files.length>0 || mosaicController.hasResult) || quitBusy
     onClosing: close => {
         if(quitApproved || !hasOpenWork)return;
         close.accepted=false;
@@ -45,7 +46,8 @@ ApplicationWindow {
         id:quitConfirmation
         hasProject:deepSkyController.frames.length>0
         hasProcessing:processingController.hasResult
-        busy:window.quitBusy
+        busy:window.workBusy
+        sessionSaving:sessionController.busy
         recording:previewController.recording
         canSaveSession:window.hasOpenWork
         preferredTarget:window.currentTab

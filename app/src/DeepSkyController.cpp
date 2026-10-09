@@ -1,3 +1,4 @@
+#include "FileProtection.hpp"
 #include "MaskSettings.hpp"
 #include "ImageGeometry.hpp"
 #include "DeepSkyController.hpp"
@@ -9,6 +10,7 @@
 #include <astro/recording/AstroImage.hpp>
 #include <astro/recording/TiffWriter.hpp>
 #include <QFileInfo>
+#include <QDateTime>
 #include <QDir>
 #include <QDirIterator>
 #include <QImageReader>
@@ -50,6 +52,17 @@ recording::AstroImage readFrame(const QVariantMap& row) {
         return out;
     }
     return recording::readAstroImage(nativePath(path),row["scale"].toDouble());
+}
+recording::AstroImage readMaskFrame(const QString& path){
+    if(!QStringList{"fits","fit","fts","png","tif","tiff"}.contains(QFileInfo(path).suffix().toLower()))throw std::runtime_error("Choose a FITS, PNG or TIFF mask.");
+    auto image=readFrame({{"path",path},{"scale",1.0}});
+    if(image.fitsBitpix>0){const double maximum=std::pow(2.,image.fitsBitpix)-1;for(auto& v:image.samples)v=float(v/maximum);}
+    for(float v:image.samples)if(!std::isfinite(v)||v<0||v>1)throw std::runtime_error("Mask values must be between zero and one.");
+    return image;
+}
+QStringList referencedMasks(const QVariantMap& finish,const QVariantMap& project){
+    QStringList paths;auto append=[&](const QVariantMap& parameters){const auto file=parameters["maskFile"].toString();if(!file.isEmpty())paths<<file;for(const auto& operation:parameters["operations"].toList()){const auto path=operation.toMap()["settings"].toMap()["maskFile"].toString();if(!path.isEmpty())paths<<path;}};
+    append(finish);append(project["finish"].toMap());const auto versions=project["versions"].toMap();append(versions["A"].toMap());append(versions["B"].toMap());paths.removeDuplicates();return paths;
 }
 QVariantMap suggested(const processing::FloatImage& image) {
     std::array<std::vector<float>,3> channels;
@@ -142,7 +155,7 @@ processing::Finish finishFromSettings(const QVariantMap& s) {
 }
 processing::MaskOptions maskFromSettings(const QVariantMap& s,const processing::FloatImage& input) {
     auto options=maskOptions(s);
-    if(options.type==5){const auto path=s["maskFile"].toString();if(path.isEmpty())throw std::runtime_error("Choose a mask image first.");const auto image=readFrame({{"path",path},{"scale",1.0}});if(image.width!=input.width||image.height!=input.height)throw std::runtime_error("The imported mask must match the image dimensions.");options.raster.resize(std::size_t(input.width)*input.height);for(std::size_t p=0;p<options.raster.size();++p){double v=image.channels==1?image.samples[p]:.2126*image.samples[p*image.channels]+.7152*image.samples[p*image.channels+1]+.0722*image.samples[p*image.channels+2];if(!std::isfinite(v)||v<0||v>1)throw std::runtime_error("Mask values must be between zero and one.");options.raster[p]=float(v);}}
+    if(options.type==5){const auto path=s["maskFile"].toString();if(path.isEmpty())throw std::runtime_error("Choose a mask image first.");const auto image=readMaskFrame(path);if(image.width!=input.width||image.height!=input.height)throw std::runtime_error("The imported mask must match the image dimensions.");options.raster.resize(std::size_t(input.width)*input.height);for(std::size_t p=0;p<options.raster.size();++p){double v=image.channels==1?image.samples[p]:.2126*image.samples[p*image.channels]+.7152*image.samples[p*image.channels+1]+.0722*image.samples[p*image.channels+2];if(!std::isfinite(v)||v<0||v>1)throw std::runtime_error("Mask values must be between zero and one.");options.raster[p]=float(v);}}
     return options;
 }
 processing::FloatImage scientificPreparation(const processing::FloatImage& source,const QVariantMap& s,const processing::CheckCancel& check,QVariantMap* report=nullptr,const processing::Progress& progress={},const std::vector<float>* mask=nullptr) {
@@ -212,7 +225,7 @@ void DeepSkyController::run(const QString& status,std::function<void(std::stop_t
 void DeepSkyController::show(std::shared_ptr<const processing::FloatImage> image,bool result,QImage preview,std::shared_ptr<const processing::FloatImage> displayed,QVariantMap stretch,QImage before) {
     showingMask_=false;maskPreview_={};advancedReport_.clear();psfKernel_.clear();showingBackgroundModel_=false;backgroundPreview_={};comparingRaw_=false;displayingResult_=result;
     if(result){finishSettings_=defaultDeepSkySettings();for(auto it=finishSettings_.begin();it!=finishSettings_.end();++it)if(stretch.contains(it.key()))it.value()=stretch[it.key()];if(auto validated=checkedDeepSkySettings(finishSettings_))finishSettings_=*validated;linear_=image;linearPreview_=before;comparisonPreview_=before;comparisonOrientationKey_=QJsonDocument(QJsonArray{}).toJson(QJsonDocument::Compact);finished_=displayed;resultPreview_=preview;stretch_=stretch;histogram_=stretch.value("histogram").toMap();emit resultChanged();}
-    geometryPreview_=preview;maskSourcePreview_=preview;preview_=std::move(preview);emit imageChanged();emit changed();
+    if(result){geometryPreview_=preview;maskSourcePreview_=preview;}preview_=std::move(preview);emit imageChanged();emit changed();
 }
 void DeepSkyController::setShowingMask(bool enabled){if(busy_||!linear_)return;showingMask_=enabled&&!maskPreview_.isNull();showingBackgroundModel_=false;comparingRaw_=false;preview_=showingMask_?maskPreview_:resultPreview_;emit imageChanged();emit changed();}
 QVariantList DeepSkyController::ghsCurve(const QVariantMap& parameters) const {
@@ -375,7 +388,8 @@ void DeepSkyController::apply(const QVariantMap& options) {
     const auto validated=checkedDeepSkySettings(settings);
     if(!validated){status_=tr("Invalid finishing settings. Check levels and parameter ranges.");emit changed();return;}
     const auto image=linear_;
-    const auto cacheKey=QJsonDocument(QJsonArray::fromVariantList((*validated)["operations"].toList())).toJson(QJsonDocument::Compact);
+    auto cacheKey=QJsonDocument(QJsonArray::fromVariantList((*validated)["operations"].toList())).toJson(QJsonDocument::Compact);
+    for(const auto& operation:(*validated)["operations"].toList()){const auto parameters=operation.toMap()["settings"].toMap();if(parameters["maskType"].toInt()==5){const QFileInfo file(parameters["maskFile"].toString());cacheKey+=QByteArray::number(file.size())+":"+QByteArray::number(file.lastModified().toMSecsSinceEpoch());}}
     const auto cache=(pipelineSource_==image&&pipelineCacheKey_==cacheKey)?pipelineCache_:nullptr;
     const auto orientations=comparisonOrientations(*validated);
     const auto orientationKey=QJsonDocument(QJsonArray::fromVariantList(orientations)).toJson(QJsonDocument::Compact);
@@ -425,7 +439,7 @@ void DeepSkyController::apply(const QVariantMap& options) {
         if(extras){if(settings["scnr"].toBool())*result=processing::removeGreen(*result,settings["scnrMethod"].toInt(),settings["scnrAmount"].toFloat(),settings["scnrPreserve"].toBool(),checkpoint);if(!mask.empty()&&settings["maskScope"].toInt()==0)processing::blendMask(operationInput,*result,mask,checkpoint);if(!mask.empty()&&settings["maskScope"].toInt()==3)processing::blendMask(source,*result,mask,checkpoint);if(settings["rotation"].toInt()||settings["mirrorHorizontal"].toBool()||settings["mirrorVertical"].toBool())*result=processing::orientImage(*result,settings["rotation"].toInt(),settings["mirrorHorizontal"].toBool(),settings["mirrorVertical"].toBool(),checkpoint);preview=makeImagePreview(*result,checkpoint);}
         if(!maskPreview.isNull()&&(settings["rotation"].toInt()||settings["mirrorHorizontal"].toBool()||settings["mirrorVertical"].toBool())){maskPreview=maskPreview.transformed(QTransform().rotate(settings["rotation"].toInt()*90));maskPreview=maskPreview.transformed(QTransform().scale(settings["mirrorHorizontal"].toBool()?-1:1,settings["mirrorVertical"].toBool()?-1:1));}
         const auto geometryPreview=preview;
-        const auto maskSourcePreview=maskSourceCache.isNull()?makeImagePreview(operationInput,checkpoint):maskSourceCache;
+        const auto maskSourcePreview=maskSourceCache.isNull()?previewImage(operationInput,true,checkpoint):maskSourceCache;
         if(geometryActive(settings["geometry"].toMap())){*result=processing::transformGeometry(*result,geometryFrom(settings["geometry"].toMap()),checkpoint);preview=makeImagePreview(*result,checkpoint);if(!maskPreview.isNull())maskPreview=imageGeometry(maskPreview,settings["geometry"].toMap());}
         double low=std::numeric_limits<double>::infinity(),high=-low;std::uint64_t below=0,above=0;
         for(std::size_t i=0;i<result->rgb.size();++i){if(i%65536==0)checkpoint();const double value=result->rgb[i];if(!std::isfinite(value))throw std::runtime_error("Processing produced a non-finite sample; previous result is preserved.");low=std::min(low,value);high=std::max(high,value);below+=value<0;above+=value>1;}
@@ -453,8 +467,8 @@ QUrl DeepSkyController::exportUrl() const {
 void DeepSkyController::exportImage(const QUrl& url,bool linear) {
     if(!linear_||!url.isLocalFile())return;
     const auto path=url.toLocalFile();
-    for(const auto& value:frames_)if(QFileInfo(value.toMap()["path"].toString()).canonicalFilePath()==QFileInfo(path).canonicalFilePath()){status_=tr("An original image cannot be overwritten.");emit changed();return;}
-    QStringList masks{finishSettings_["maskFile"].toString()};for(const auto& op:finishSettings_["operations"].toList())masks<<op.toMap()["settings"].toMap()["maskFile"].toString();for(const auto& mask:masks)if(!mask.isEmpty()&&(QFileInfo(mask).absoluteFilePath()==QFileInfo(path).absoluteFilePath()||(!QFileInfo(mask).canonicalFilePath().isEmpty()&&QFileInfo(mask).canonicalFilePath()==QFileInfo(path).canonicalFilePath()))){status_=tr("An original image cannot be overwritten.");emit changed();return;}
+    for(const auto& value:frames_)if(sameFile(value.toMap()["path"].toString(),path)){status_=tr("An original image cannot be overwritten.");emit changed();return;}
+    const auto masks=referencedMasks(finishSettings_,projectOptions_);for(const auto& mask:masks)if(sameFile(mask,path)){status_=tr("An original image cannot be overwritten.");emit changed();return;}
     const auto image=linear?linear_:finished_;const auto exposure=totalExposure_;
     run(tr("Exporting image…"),[this,image,path,linear,exposure](std::stop_token stop){
         QTemporaryDir directory(QFileInfo(path).dir().filePath(".astrocapture-XXXXXX"));if(!directory.isValid())throw std::runtime_error("Cannot create temporary export files.");
@@ -479,7 +493,8 @@ void DeepSkyController::exportImage(const QUrl& url,bool linear) {
 }
 void DeepSkyController::saveProject(const QUrl& url) {
     if(busy_||!url.isLocalFile())return;
-    for(const auto& value:frames_)if(QFileInfo(url.toLocalFile()).canonicalFilePath()==QFileInfo(value.toMap()["path"].toString()).canonicalFilePath()){status_=tr("An original image cannot be overwritten.");emit changed();return;}
+    for(const auto& value:frames_)if(sameFile(url.toLocalFile(),value.toMap()["path"].toString())){status_=tr("An original image cannot be overwritten.");emit changed();return;}
+    for(const auto& path:referencedMasks(finishSettings_,projectOptions_))if(sameFile(url.toLocalFile(),path)){status_=tr("An original image cannot be overwritten.");emit changed();return;}
     const QJsonObject project{{"version",1},{"frames",QJsonArray::fromVariantList(frames_)},{"options",QJsonObject::fromVariantMap(projectOptions_)}};
     QSaveFile file(url.toLocalFile());const auto bytes=QJsonDocument(project).toJson();
     if(bytes.size()>4*1024*1024){status_=tr("Project exceeds 4 MiB. Reduce saved sample or reference lists before saving.");emit changed();return;}
@@ -511,7 +526,7 @@ void DeepSkyController::loadProject(const QUrl& url) {
 }
 QVariant DeepSkyController::processingDocument() const {
     if(!finished_)return {};
-    QStringList protectedPaths;for(const auto& value:frames_)protectedPaths<<value.toMap()["path"].toString();if(!finishSettings_["maskFile"].toString().isEmpty())protectedPaths<<finishSettings_["maskFile"].toString();for(const auto& op:finishSettings_["operations"].toList()){const auto path=op.toMap()["settings"].toMap()["maskFile"].toString();if(!path.isEmpty())protectedPaths<<path;}
+    QStringList protectedPaths;for(const auto& value:frames_)protectedPaths<<value.toMap()["path"].toString();protectedPaths<<referencedMasks(finishSettings_,projectOptions_);
     ImageDocument document{finished_,resultPreview_,{},tr("Deep-sky result"),exportUrl(),protectedPaths};
     document.exposureCount=exposureCount_;document.totalExposure=totalExposure_;document.filters=resultFilters_;
     document.processingSummary=tr("Deep sky · %1 exposures · %2 s total · filters: %3").arg(exposureCount_).arg(totalExposure_,0,'f',1).arg(resultFilters_.join(", "));
@@ -524,7 +539,7 @@ void DeepSkyController::loadMaskFile(const QUrl& url) {
     if(busy_||!linear_||!url.isLocalFile())return;
     const auto source=pipelineCache_?pipelineCache_:linear_;const auto path=url.toLocalFile();
     run(tr("Reading mask image…"),[this,source,path](std::stop_token stop){
-        const auto image=readFrame({{"path",path},{"scale",1.0}});check(stop);
+        const auto image=readMaskFrame(path);check(stop);
         if(image.width!=source->width||image.height!=source->height)throw std::runtime_error("The imported mask must match the image dimensions.");
         for(float v:image.samples){if(!std::isfinite(v)||v<0||v>1)throw std::runtime_error("Mask values must be between zero and one.");}
         const int w=std::min(1024,image.width),h=std::max(1,int(std::lround(double(image.height)*w/image.width)));

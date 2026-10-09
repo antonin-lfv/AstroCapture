@@ -4,10 +4,12 @@ import QtQuick.Controls.Basic
 
 ComboBox {
     id:control
+    property string explanation: ""
+    Accessible.description: explanation
     implicitHeight:36
-    implicitWidth:Math.max(100,contentItem.implicitWidth+48)
+    implicitWidth:Math.max(100,contentItem.implicitWidth+48+(explanation.length?26:0))
     leftPadding:12
-    rightPadding:32
+    rightPadding:explanation.length ? 58 : 32
     font.pixelSize:12
     palette.text:Atelier.text
     palette.buttonText:Atelier.text
@@ -23,6 +25,12 @@ ComboBox {
     indicator:Text {
         x:control.width-width-12;y:(control.height-height)/2
         text:"▾";font.pixelSize:16;color:control.enabled?"#a9c4e6":Atelier.muted
+    }
+    HelpIcon {
+        text: control.explanation
+        visible: text.length > 0
+        x: control.width - width - 32
+        anchors.verticalCenter: parent.verticalCenter
     }
     background:Rectangle {
         radius:6

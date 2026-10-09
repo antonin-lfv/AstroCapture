@@ -63,6 +63,8 @@ qt_add_qml_module(AstroCapture
         qml/AtelierSlider.qml
         qml/InspectorFamily.qml
         qml/ParameterControl.qml
+        qml/SettingLabel.qml
+        qml/HelpCheckBox.qml
         qml/AtelierMenu.qml
         qml/AtelierMenuItem.qml
         qml/StudioNavigation.qml

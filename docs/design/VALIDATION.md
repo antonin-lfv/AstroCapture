@@ -117,3 +117,20 @@ vérification a ensuite été démonté.
 
 SHA-256 du DMG :
 `6b616089bd84beae658af67314b1f93841efc5db0d02ada18c6a17b245331cd0`.
+
+## Lot 1.5.1 — aide pratique des réglages
+
+Les aides couvrent les réglages numériques, sélecteurs et options de capture,
+empilement, finition, géométrie, masques, mosaïque, légendes, export et application.
+Les 106 nouveaux textes d’aide ou libellés sont vérifiés dans le catalogue français.
+Leur rédaction distingue les effets pratiques des conventions scientifiques.
+Les explications numériques existantes des outils avancés sont conservées.
+
+Les quatre tests d’interface concernés passent en développement. La vérification
+native avec Orion couvre Traitement en mode Compact, le recadrage, le pinceau et
+l’export aux tailles 1440 × 960, 1100 × 800 et 900 × 700. Les options de mosaïque,
+la capture simulée et les paramètres de l’application sont aussi inspectés.
+Le survol réel, l’aide au focus clavier, les limites de fenêtre, la proximité du
+contrôle après défilement et la disparition au changement d’onglet sont contrôlés.
+Consulter ces aides ne modifie ni les pixels ni les réglages de traitement.
+Les captures sont enregistrées sous `previews/native/1.5.1-*`.

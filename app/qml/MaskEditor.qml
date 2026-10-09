@@ -55,19 +55,19 @@ Popup {
             }
         }
         RowLayout {Layout.fillWidth:true
-            DarkComboBox {Layout.fillWidth:true;model:[qsTr("Protect · black brush"),qsTr("Reveal · white brush")];currentIndex:root.brushValue;Accessible.name:qsTr("Brush action");onActivated:root.brushValue=currentIndex}
-            CheckBox {text:qsTr("Pan image");checked:root.panMode;onClicked:root.panMode=checked}
-            CheckBox {text:qsTr("View mask only");checked:root.maskOnly;onClicked:root.maskOnly=checked}
+            DarkComboBox {explanation: qsTr("Black protects the painted region from the selected treatment; white lets it act. Gray applies only part of the effect. The red overlay shows protection."); Layout.fillWidth:true;model:[qsTr("Protect · black brush"),qsTr("Reveal · white brush")];currentIndex:root.brushValue;Accessible.name:qsTr("Brush action");onActivated:root.brushValue=currentIndex}
+            HelpCheckBox {explanation: qsTr("Drag to move the preview without painting. Turn this off to resume brush strokes. Zoom and pan do not alter the mask."); text:qsTr("Pan image");checked:root.panMode;onClicked:root.panMode=checked}
+            HelpCheckBox {explanation: qsTr("Shows mask weights instead of the photograph: white applies, black protects, gray blends. This display choice does not change the finished image or the exported mask effect."); text:qsTr("View mask only");checked:root.maskOnly;onClicked:root.maskOnly=checked}
         }
         RowLayout {Layout.fillWidth:true;spacing:16
-            ParameterControl {label:qsTr("Brush radius (px)");Layout.fillWidth:true;from:1;to:Math.max(1,Math.min(1000,Math.min(pixels.sourceWidth,pixels.sourceHeight)/2));decimals:0;value:root.brushRadius;onMoved:root.brushRadius=value}
-            ParameterControl {label:qsTr("Hardness (%)");Layout.fillWidth:true;from:0;to:100;decimals:0;value:root.hardness*100;onMoved:root.hardness=value/100}
-            ParameterControl {label:qsTr("Opacity (%)");Layout.fillWidth:true;from:0;to:100;decimals:0;value:root.brushOpacity*100;onMoved:root.brushOpacity=value/100}
+            ParameterControl {explanation: qsTr("Radius in original image pixels, independent of zoom. A radius of 30 px paints a 60 px-wide stroke. Increase for large areas; decrease for precise edges."); label:qsTr("Brush radius (px)");Layout.fillWidth:true;from:1;to:Math.max(1,Math.min(1000,Math.min(pixels.sourceWidth,pixels.sourceHeight)/2));decimals:0;value:root.brushRadius;onMoved:root.brushRadius=value}
+            ParameterControl {explanation: qsTr("100% gives a solid brush with a sharp edge. Lower values soften the transition near the edge to hide seams between protected and processed regions."); label:qsTr("Hardness (%)");Layout.fillWidth:true;from:0;to:100;decimals:0;value:root.hardness*100;onMoved:root.hardness=value/100}
+            ParameterControl {explanation: qsTr("Strength of each stroke. 100% fully paints its center; 50% moves the mask halfway toward black or white. Separate overlapping strokes accumulate; 0% has no effect."); label:qsTr("Opacity (%)");Layout.fillWidth:true;from:0;to:100;decimals:0;value:root.brushOpacity*100;onMoved:root.brushOpacity=value/100}
         }
         RowLayout {Layout.fillWidth:true
-            DarkComboBox {Layout.fillWidth:true;visible:root.draft.maskType===4;model:[qsTr("White background · apply everywhere"),qsTr("Black background · protect everywhere")];currentIndex:root.draft.maskBaseWhite===false?1:0;onActivated:root.update("maskBaseWhite",currentIndex===0)}
-            ParameterControl {label:qsTr("Edge blur σ (px)");Layout.fillWidth:true;from:0;to:100;decimals:1;value:root.draft.maskBlurRadius||0;onMoved:{root.update("maskBlurRadius",value);value=Qt.binding(()=>root.draft.maskBlurRadius||0)}}
-            CheckBox {text:qsTr("Invert mask");checked:root.draft.maskInvert||false;onClicked:root.update("maskInvert",checked)}
+            DarkComboBox {explanation: qsTr("White starts with the treatment active everywhere: paint black to protect areas. Black starts with everything protected: paint white to target only chosen regions. Existing strokes are kept."); Layout.fillWidth:true;visible:root.draft.maskType===4;model:[qsTr("White background · apply everywhere"),qsTr("Black background · protect everywhere")];currentIndex:root.draft.maskBaseWhite===false?1:0;onActivated:root.update("maskBaseWhite",currentIndex===0)}
+            ParameterControl {explanation: qsTr("Gaussian smoothing of the complete mask, in original pixels. 0 keeps the painted edges. Increase to blend the treatment gradually into nearby areas; large values spread the selection."); label:qsTr("Edge blur σ (px)");Layout.fillWidth:true;from:0;to:100;decimals:1;value:root.draft.maskBlurRadius||0;onMoved:{root.update("maskBlurRadius",value);value=Qt.binding(()=>root.draft.maskBlurRadius||0)}}
+            HelpCheckBox {explanation: qsTr("Swaps protected and affected areas: black becomes white and white becomes black. Gray is inverted too. Useful for protecting an object while treating its surroundings."); text:qsTr("Invert mask");checked:root.draft.maskInvert||false;onClicked:root.update("maskInvert",checked)}
         }
         Label {visible:root.limitError.length>0||overlay.error.length>0;text:root.limitError||overlay.error;color:Atelier.danger;wrapMode:Text.Wrap;Layout.fillWidth:true}
         RowLayout {Layout.fillWidth:true

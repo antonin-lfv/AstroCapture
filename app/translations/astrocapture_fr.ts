@@ -238,7 +238,39 @@ Télescope · caméra · accessoires</translation>
             <source>Restore suggested information</source>
             <translation>Revenir aux informations proposées</translation>
         </message>
-    </context>
+        <message>
+        <source>PNG and TIFF export 16-bit channels without loss; PNG is compressed and TIFF is uncompressed. JPEG uses lossy 8-bit compression for sharing. These formats clip values outside 0–1; use floating FITS to retain scientific range.</source>
+        <translation>PNG et TIFF exportent les canaux en 16 bits sans perte ; PNG est compressé et TIFF non compressé. JPEG utilise une compression avec perte en 8 bits pour partager. Ces formats écrêtent hors de 0–1 ; le FITS flottant conserve la plage scientifique.</translation>
+    </message>
+    <message>
+        <source>Adds your text to the exported image pixels. Turning it off preserves your caption settings. It cannot remove a caption already present in an imported photograph.</source>
+        <translation>Ajoute votre texte aux pixels de l’image exportée. Désactiver conserve vos réglages de légende. Cela ne retire pas une légende déjà présente dans une photo importée.</translation>
+    </message>
+    <message>
+        <source>Includes the prefilled dimensions and processing information in the caption. Edit the text to correct it; disabling inclusion keeps your edits. Restore suggested information returns to the automatic text.</source>
+        <translation>Inclut les dimensions et informations de traitement préremplies dans la légende. Modifiez le texte pour le corriger ; désactiver conserve vos corrections. Rétablir les informations proposées revient au texte automatique.</translation>
+    </message>
+    <message>
+        <source>Short title placed above the other caption lines. Leave it empty to omit it. Check the preview for long titles and placement.</source>
+        <translation>Titre court placé au-dessus des autres lignes de légende. Laissez vide pour l’omettre. Vérifiez l’aperçu pour les titres longs et leur placement.</translation>
+    </message>
+    <message>
+        <source>Your object, observation date and notes at the upper left. Line breaks are kept. Empty text adds nothing; it does not edit any text already baked into the source image.</source>
+        <translation>Objet, date d’observation et notes en haut à gauche. Les retours à la ligne sont conservés. Un texte vide n’ajoute rien ; il ne modifie pas un texte déjà intégré aux pixels source.</translation>
+    </message>
+    <message>
+        <source>Observer, location and equipment at the lower left. Line breaks are kept. Review the preview before exporting so important details remain unobstructed.</source>
+        <translation>Observateur, lieu et matériel en bas à gauche. Les retours à la ligne sont conservés. Vérifiez l’aperçu avant export pour ne pas masquer les détails importants.</translation>
+    </message>
+    <message>
+        <source>Sets the added caption to white or gold. Choose the more readable color against your image; this does not change the photograph colors.</source>
+        <translation>Affiche la légende ajoutée en blanc ou doré. Choisissez la couleur la plus lisible sur votre image ; cela ne change pas les couleurs de la photo.</translation>
+    </message>
+    <message>
+        <source>Scales the added text relative to the image dimensions. Larger values improve readability but cover more of the image. Preview at the intended viewing size.</source>
+        <translation>Adapte la taille du texte ajouté aux dimensions de l’image. Une valeur élevée améliore la lisibilité mais couvre davantage l’image. Vérifiez l’aperçu à la taille de consultation prévue.</translation>
+    </message>
+</context>
     <context>
         <name>DeepSkyAdvancedTools</name>
         <message>
@@ -876,7 +908,55 @@ Télescope · caméra · accessoires</translation>
             <source>Gaussian edge smoothing in image pixels. Zero keeps the painted or imported edges.</source>
             <translation>Lissage gaussien du bord, en pixels de l’image. Zéro conserve les bords peints ou importés.</translation>
         </message>
-    </context>
+        <message>
+        <source>Replaces the midtones or asinh curve with GHS when stretch is enabled. Start with small strength changes to reveal faint detail; the histogram previews the same curve. Zero strength is neutral.</source>
+        <translation>Remplace la courbe des tons moyens ou asinh par GHS quand l’étirement est activé. Faites de petits changements de force pour révéler les détails faibles ; l’histogramme montre la même courbe. Une force nulle est neutre.</translation>
+    </message>
+    <message>
+        <source>Reverses the scalar GHS curve. It cannot restore clipped signal or undo mask blending or shared-luminance color blending. Use Cmd+Z to restore the previous settings exactly.</source>
+        <translation>Inverse la courbe scalaire GHS. Ne restaure pas le signal écrêté et n’annule pas les mélanges du masque ou de luminance partagée. Cmd+Z restaure exactement les réglages précédents.</translation>
+    </message>
+    <message>
+        <source>Attempts to reduce blur using the chosen PSF on linear data. Can sharpen stars and fine detail, but can amplify noise or create rings. Inspect at 100% and reduce amount or iterations if artifacts appear.</source>
+        <translation>Tente de réduire le flou avec la PSF choisie sur des données linéaires. Peut affiner les étoiles et les détails, mais amplifier le bruit ou créer des anneaux. Vérifiez à 100 % et réduisez le dosage ou les itérations en cas d’artefacts.</translation>
+    </message>
+    <message>
+        <source>Reduces small wavelet details identified as noise, with separate luminance and color strengths. Start low and compare at 100%; excessive reduction can flatten stars and faint structures.</source>
+        <translation>Réduit les petits détails d’ondelettes identifiés comme du bruit, avec des dosages distincts pour luminance et couleur. Commencez bas et comparez à 100 % ; un dosage excessif peut aplatir les étoiles et structures faibles.</translation>
+    </message>
+    <message>
+        <source>Swaps where the mask applies and protects. Invert a star mask to protect detected stars while processing the sky and nebulosity.</source>
+        <translation>Échange les zones où le masque applique et protège. Inversez un masque d’étoiles pour protéger les étoiles détectées pendant le traitement du ciel et des nébulosités.</translation>
+    </message>
+    <message>
+        <source>Balances RGB using at least three matched reference stars from the imported CSV. Requires linear, unrotated data and no mask. This is relative color calibration; automatic catalogue-based PCC/SPCC is not available.</source>
+        <translation>Équilibre RVB avec au moins trois étoiles de référence correspondantes du CSV importé. Nécessite des données linéaires, non tournées et sans masque. Il s’agit d’une calibration relative des couleurs ; PCC/SPCC automatique sur catalogue n’est pas disponible.</translation>
+    </message>
+    <message>
+        <source>Choose which advanced tool to edit. Switching this list only reveals controls; it does not enable the tool or reset its parameters.</source>
+        <translation>Choisissez l’outil avancé à régler. Changer cette liste affiche ses commandes ; cela ne l’active pas et ne réinitialise pas ses paramètres.</translation>
+    </message>
+    <message>
+        <source>Independent RGB stretches each channel separately and may change color balance. Shared luminance uses one factor for RGB to retain color ratios, with blending near highlights to stay bounded.</source>
+        <translation>RVB indépendant étire chaque canal séparément et peut modifier la balance des couleurs. Luminance partagée utilise un facteur commun pour conserver les rapports RVB, avec un mélange près des hautes lumières pour limiter les valeurs.</translation>
+    </message>
+    <message>
+        <source>Gaussian describes compact blur; Moffat allows broader star wings controlled by beta. Match the profile and FWHM to unsaturated stars; a mismatched PSF can produce halos or rings.</source>
+        <translation>Gaussienne décrit un flou compact ; Moffat permet des ailes d’étoiles plus étendues réglées par bêta. Adaptez le profil et la FWHM aux étoiles non saturées ; une PSF inadaptée peut produire halos ou anneaux.</translation>
+    </message>
+    <message>
+        <source>None applies treatments everywhere. Luminance selects a brightness range; Radial selects a circular region; Stars selects detected stars. Painted uses your strokes; Imported uses a matching FITS, PNG or TIFF mask.</source>
+        <translation>Aucun applique les traitements partout. Luminance sélectionne une plage de luminosité ; Radial une région circulaire ; Étoiles les étoiles détectées. Peint utilise vos traits ; Importé un masque FITS, PNG ou TIFF aux mêmes dimensions.</translation>
+    </message>
+    <message>
+        <source>Limits mask blending to the chosen treatment. For example, mask deconvolution only to protect stars from sharpening while color and stretch still affect the whole image. Photometric calibration remains global.</source>
+        <translation>Limite l’effet du masque au traitement choisi. Par exemple, masquez seulement la déconvolution pour protéger des étoiles de l’accentuation tout en appliquant couleurs et étirement à toute l’image. La calibration photométrique reste globale.</translation>
+    </message>
+    <message>
+        <source>Shows the mask in grayscale to inspect the affected area: white applies, black protects, gray blends. Export still saves the processed image, not this diagnostic view.</source>
+        <translation>Affiche le masque en niveaux de gris pour inspecter la zone d’effet : blanc applique, noir protège, gris mélange. L’export conserve l’image traitée, pas cette vue de contrôle.</translation>
+    </message>
+</context>
     <context>
         <name>DeepSkyWorkspace</name>
         <message>
@@ -2475,7 +2555,87 @@ L’aperçu est automatiquement éclairci ; les données restent linéaires.</tr
             <source>Crop, rotate and resize</source>
             <translation>Recadrer, pivoter et redimensionner</translation>
         </message>
-    </context>
+        <message>
+        <source>Turns linear brightness into a visible finished image using levels and the selected curve. Disable to keep linear brightness; the preview may look dark. The Linear FITS export always keeps the original integration.</source>
+        <translation>Transforme la luminosité linéaire en image visible avec les niveaux et la courbe choisie. Désactivez pour garder une luminosité linéaire ; l’aperçu peut paraître sombre. L’export FITS linéaire conserve toujours l’intégration d’origine.</translation>
+    </message>
+    <message>
+        <source>Fits and subtracts uneven sky brightness while retaining the sampled sky median. Useful for light pollution or illumination gradients. Avoid samples on nebulae: the fit could remove real signal.</source>
+        <translation>Ajuste puis soustrait les variations de luminosité du ciel en conservant la médiane des échantillons. Utile pour la pollution lumineuse ou l’illumination inégale. Évitez les points sur les nébuleuses : le modèle pourrait retirer du signal réel.</translation>
+    </message>
+    <message>
+        <source>Left click adds a sample; right click removes one. Choose empty sky, avoiding stars and nebulosity. Manual samples replace the automatic grid and bypass its brightness rejection.</source>
+        <translation>Le clic gauche ajoute un échantillon ; le clic droit le retire. Choisissez du ciel vide, sans étoile ni nébulosité. Les points manuels remplacent la grille automatique et ignorent son rejet selon la luminosité.</translation>
+    </message>
+    <message>
+        <source>SCNR reduces green dominance after stretching. Compare stellar colors and the background; leave it off for intentional green signal such as SHO palettes, comets or some planetary nebulae.</source>
+        <translation>SCNR réduit la dominance verte après étirement. Comparez les couleurs des étoiles et le fond ; désactivez pour les signaux verts voulus, comme les palettes SHO, les comètes ou certaines nébuleuses planétaires.</translation>
+    </message>
+    <message>
+        <source>Restores the original CIE lightness after green reduction to reduce brightness changes. Color can still change; inspect bright stars and strongly colored regions.</source>
+        <translation>Rétablit la clarté CIE d’origine après réduction du vert pour limiter les changements de luminosité. La couleur peut encore changer ; vérifiez les étoiles brillantes et les régions très colorées.</translation>
+    </message>
+    <message>
+        <source>Swaps left and right after rotation. Useful for matching the orientation of an optical setup. It only changes the finished image; the original linear integration remains unchanged.</source>
+        <translation>Échange gauche et droite après la rotation. Utile pour retrouver l’orientation d’un montage optique. Seul le résultat fini change ; l’intégration linéaire d’origine est conservée.</translation>
+    </message>
+    <message>
+        <source>Swaps top and bottom after rotation. It only changes the finished image and can be undone with Cmd+Z.</source>
+        <translation>Échange haut et bas après la rotation. Seul le résultat fini change ; Cmd+Z permet de l’annuler.</translation>
+    </message>
+    <message>
+        <source>Rotates the finished image clockwise in 90° steps without interpolating the pixel values. Mirrors are applied after this rotation; crop and free geometry come afterwards.</source>
+        <translation>Tourne le résultat fini dans le sens horaire par pas de 90°, sans interpoler les valeurs des pixels. Les miroirs sont appliqués après cette rotation ; le recadrage et la géométrie libre viennent ensuite.</translation>
+    </message>
+    <message>
+        <source>Average neutral caps green at the mean of red and blue; Maximum neutral caps it at their maximum. Mask methods suppress green according to red/blue brightness and expose an Amount setting. Check intentional green objects.</source>
+        <translation>Protection neutre moyenne limite le vert à la moyenne rouge/bleu ; protection neutre maximale à leur maximum. Les méthodes avec masque réduisent le vert selon la luminosité rouge/bleu et proposent un dosage. Vérifiez les objets volontairement verts.</translation>
+    </message>
+    <message>
+        <source>Chooses the level moved when you click or drag on the histogram: black, midtones or white. This changes processing, unlike histogram zoom. The midtones handle is inactive with Asinh or GHS.</source>
+        <translation>Choisit le niveau déplacé par un clic ou un glissement dans l’histogramme : noir, tons moyens ou blanc. Cela modifie le traitement, contrairement au zoom de l’histogramme. La poignée des tons moyens est inactive avec Asinh ou GHS.</translation>
+    </message>
+    <message>
+        <source>Magnifies the low-brightness part of the histogram to place levels precisely. It changes only the graph, not image brightness, geometry or export.</source>
+        <translation>Agrandit la partie sombre de l’histogramme pour placer les niveaux précisément. Change seulement le graphique, sans modifier luminosité, géométrie ni export.</translation>
+    </message>
+    <message>
+        <source>MTF uses the midtones control to brighten or darken intermediate brightness. Asinh reveals faint signal with a shared RGB factor. GHS is selected in Advanced transformations. Compare the same image area when choosing.</source>
+        <translation>MTF utilise le réglage des tons moyens pour éclaircir ou assombrir les luminosités intermédiaires. Asinh révèle le signal faible avec un facteur RVB commun. GHS se choisit dans Transformations avancées. Comparez la même zone pour choisir.</translation>
+    </message>
+    <message>
+        <source>Chooses which integrated filter supplies the red output channel. RGB uses R; SHO uses SII; HOO uses HA. Assigning a filter changes the palette, not its original integration.</source>
+        <translation>Choisit le filtre intégré qui alimente le rouge du résultat. RVB utilise R ; SHO utilise SII ; HOO utilise HA. L’affectation change la palette, pas l’intégration d’origine.</translation>
+    </message>
+    <message>
+        <source>Chooses which integrated filter supplies green. RGB uses G; SHO uses HA; HOO uses OIII. The same filter may feed more than one channel.</source>
+        <translation>Choisit le filtre intégré qui alimente le vert. RVB utilise G ; SHO utilise HA ; HOO utilise OIII. Le même filtre peut alimenter plusieurs canaux.</translation>
+    </message>
+    <message>
+        <source>Chooses which integrated filter supplies blue. RGB uses B; SHO and HOO use OIII. Combine channels to calculate the chosen palette.</source>
+        <translation>Choisit le filtre intégré qui alimente le bleu. RVB utilise B ; SHO et HOO utilisent OIII. Combinez les canaux pour calculer la palette choisie.</translation>
+    </message>
+    <message>
+        <source>Optional integrated luminance adds detail to the RGB composition. None keeps the RGB-only result. Use a compatible filter and aligned field; inspect star brightness and color afterwards.</source>
+        <translation>Une luminance intégrée facultative apporte des détails à la composition RVB. Aucun conserve le résultat RVB seul. Utilisez un filtre compatible et un champ aligné ; vérifiez ensuite luminosité et couleur des étoiles.</translation>
+    </message>
+    <message>
+        <source>Chooses which integrated filter result to finish or use in a composition. Check the filter name before adjusting colors or exporting.</source>
+        <translation>Choisit le résultat de filtre intégré à finir ou utiliser dans une composition. Vérifiez le nom du filtre avant de modifier les couleurs ou d’exporter.</translation>
+    </message>
+    <message>
+        <source>Light contains the object; Dark corrects thermal signal; Flat corrects dust and illumination. Bias or Dark flat calibrates flats. A wrong role changes calibration: check automatic classifications.</source>
+        <translation>Light contient l’objet ; Dark corrige le signal thermique ; Flat corrige poussières et illumination. Bias ou Dark flat calibre les flats. Un rôle incorrect change la calibration : vérifiez les classifications automatiques.</translation>
+    </message>
+    <message>
+        <source>Assigns a filter group for separate integration. RGB is for color-camera data; R/G/B/L and HA/OIII/SII represent separate filters. A wrong group can mix incompatible exposures.</source>
+        <translation>Affecte un groupe de filtre pour une intégration séparée. RGB correspond aux caméras couleur ; R/G/B/L et HA/OIII/SII aux filtres séparés. Un mauvais groupe peut mélanger des poses incompatibles.</translation>
+    </message>
+    <message>
+        <source>Name used to save this complete set of adjustments locally. A new name creates a separate preset; saving an existing name replaces its settings. The source image files are not included.</source>
+        <translation>Nom utilisé pour sauvegarder localement cet ensemble de réglages. Un nouveau nom crée un préréglage distinct ; un nom existant remplace ses réglages. Les fichiers image source ne sont pas inclus.</translation>
+    </message>
+</context>
     <context>
         <name>GlobalSettingsWorkspace</name>
         <message>
@@ -2617,7 +2777,27 @@ L’aperçu est automatiquement éclairci ; les données restent linéaires.</tr
             <source>Finished PNG and TIFF images, with your current adjustments.</source>
             <translation>Images finales PNG et TIFF, avec vos réglages actuels.</translation>
         </message>
-    </context>
+        <message>
+        <source>Changes interface labels and help immediately. Saved locally; processing parameters and image pixels are unaffected.</source>
+        <translation>Change immédiatement les libellés et l’aide de l’interface. Conservé localement ; paramètres de traitement et pixels restent identiques.</translation>
+    </message>
+    <message>
+        <source>Guided shows explanations between controls; Compact hides them to save space. Question-mark help remains available in both modes. This changes the interface, not processing.</source>
+        <translation>Guidé affiche des explications entre les commandes ; Compact les masque pour gagner de la place. L’aide « ? » reste disponible dans les deux modes. Cela change l’interface, pas le traitement.</translation>
+    </message>
+    <message>
+        <source>Destination for new camera images and recordings. A custom folder contains Images and Videos. Changing it does not move existing files.</source>
+        <translation>Destination des nouvelles images caméra et acquisitions. Un dossier personnalisé contient Images et Videos. Le changer ne déplace pas les fichiers existants.</translation>
+    </message>
+    <message>
+        <source>Default destination for finished images. The last successful export folder is remembered. Originals and already exported files are not moved.</source>
+        <translation>Destination proposée pour les images finales. Le dossier du dernier export réussi est mémorisé. Les originaux et fichiers déjà exportés ne sont pas déplacés.</translation>
+    </message>
+    <message>
+        <source>Adds successful exports to local History, up to 500 paths. Turning it off stops new entries but preserves existing ones and manual imports; image files stay where you saved them.</source>
+        <translation>Ajoute les exports réussis à l’Historique local, jusqu’à 500 chemins. Désactiver arrête les nouvelles entrées mais conserve les anciennes et les imports manuels ; les images restent là où vous les avez enregistrées.</translation>
+    </message>
+</context>
     <context>
         <name>GuideWorkspace</name>
         <message>
@@ -3739,7 +3919,11 @@ Ajoutez-le depuis son nouvel emplacement.</translation>
             <source>Fit to window</source>
             <translation>Adapter à la fenêtre</translation>
         </message>
-    </context>
+        <message>
+        <source>Zoom only changes the preview. 100% shows one image pixel per screen pixel; Fit shows the complete image. Use 100% to inspect noise, sharpness and halos. Export dimensions stay unchanged.</source>
+        <translation>Le zoom change seulement l’aperçu. 100 % affiche un pixel image par pixel écran ; Adapter montre l’image entière. Vérifiez à 100 % le bruit, la netteté et les halos. Les dimensions exportées restent identiques.</translation>
+    </message>
+</context>
     <context>
         <name>Main</name>
         <message>
@@ -4093,7 +4277,75 @@ Ajoutez-le depuis son nouvel emplacement.</translation>
             <source>Capture settings</source>
             <translation>Réglages de capture</translation>
         </message>
-    </context>
+        <message>
+        <source>Time collected by each frame, displayed in milliseconds. Longer exposures collect more signal but lower possible frame rate and can blur moving or turbulent detail. Watch the histogram to avoid saturation.</source>
+        <translation>Durée de collecte de chaque image, affichée en millisecondes. Une pose plus longue reçoit plus de signal mais réduit la cadence possible et peut flouter les mouvements ou la turbulence. Surveillez l’histogramme pour éviter la saturation.</translation>
+    </message>
+    <message>
+        <source>Camera amplification in the units reported by this device. Raising it makes the preview brighter but can reduce highlight headroom; it does not collect more light. Choose it together with exposure.</source>
+        <translation>Amplification caméra dans les unités annoncées par ce matériel. L’augmenter éclaircit l’aperçu mais peut réduire la marge dans les hautes lumières ; cela ne collecte pas plus de lumière. Réglez-le avec l’exposition.</translation>
+    </message>
+    <message>
+        <source>Optional object name used in capture filenames and FITS metadata. It does not point the mount or identify the sky automatically.</source>
+        <translation>Nom d’objet facultatif utilisé dans les noms de capture et les métadonnées FITS. Il ne pointe pas la monture et n’identifie pas automatiquement le ciel.</translation>
+    </message>
+    <message>
+        <source>Target</source>
+        <translation>Cible</translation>
+    </message>
+    <message>
+        <source>SER records an uncompressed planetary video for stacking. FITS records individual sensor frames for deep-sky calibration. ACRAW is the native raw-sequence fallback. Choose before recording.</source>
+        <translation>SER enregistre une vidéo planétaire non compressée à empiler. FITS enregistre les images individuelles du capteur pour la calibration ciel profond. ACRAW est le format de séquence brute de repli. Choisissez avant l’acquisition.</translation>
+    </message>
+    <message>
+        <source>Writes the image type into FITS metadata for later calibration. Light contains the object; Dark measures thermal signal; Flat measures dust/illumination; Bias or DarkFlat calibrates flats. It does not automate covers or illumination.</source>
+        <translation>Inscrit le type d’image dans les métadonnées FITS pour la calibration. Light contient l’objet ; Dark mesure le signal thermique ; Flat mesure poussières/illumination ; Bias ou DarkFlat calibre les flats. Cela ne commande pas un cache ni un éclairage.</translation>
+    </message>
+    <message>
+        <source>Records the filter name in FITS metadata. Select the filter actually used; blank leaves it unspecified. This setting does not move a filter wheel or transform RGB pixels.</source>
+        <translation>Inscrit le filtre dans les métadonnées FITS. Choisissez le filtre réellement utilisé ; vide ne précise rien. Ce réglage ne déplace pas de roue à filtres et ne transforme pas les pixels RVB.</translation>
+    </message>
+    <message>
+        <source>Stops after this many frames have been recorded. 0 disables the frame-count limit. If duration is also set, the first limit reached stops recording.</source>
+        <translation>Arrête après ce nombre d’images enregistrées. 0 désactive la limite de nombre d’images. Si une durée est aussi définie, la première limite atteinte arrête l’acquisition.</translation>
+    </message>
+    <message>
+        <source>Stops after this elapsed recording duration, in seconds. 0 disables the time limit. A frame-count limit can stop earlier; both at 0 means manual stop only.</source>
+        <translation>Arrête après cette durée d’enregistrement écoulée, en secondes. 0 désactive la limite de durée. Le nombre d’images peut arrêter plus tôt ; les deux à 0 imposent un arrêt manuel.</translation>
+    </message>
+    <message>
+        <source>Changes the camera response in midtones. The neutral value and direction depend on the device. For scientific linear frames, keep the manufacturer’s neutral value and adjust brightness later in Finition.</source>
+        <translation>Change la réponse de la caméra dans les tons moyens. La valeur neutre et le sens dépendent du matériel. Pour des images scientifiques linéaires, gardez la valeur neutre du fabricant et ajustez la luminosité plus tard en Finition.</translation>
+    </message>
+    <message>
+        <source>Sets the camera red white-balance control. Increase or decrease to correct a red/cyan cast in the preview. Device behavior can differ between color and raw modes; keep acquisition settings consistent.</source>
+        <translation>Règle la balance des blancs rouge de la caméra. Ajustez pour corriger une dominante rouge/cyan dans l’aperçu. Le comportement peut différer entre modes couleur et brut ; gardez des réglages d’acquisition cohérents.</translation>
+    </message>
+    <message>
+        <source>Sets the camera blue white-balance control. Adjust to correct a blue/yellow cast in the preview. Device behavior can differ between color and raw modes; keep acquisition settings consistent.</source>
+        <translation>Règle la balance des blancs bleue de la caméra. Ajustez pour corriger une dominante bleue/jaune dans l’aperçu. Le comportement peut différer entre modes couleur et brut ; gardez des réglages d’acquisition cohérents.</translation>
+    </message>
+    <message>
+        <source>Sets the camera brightness control, not exposure time. Depending on the device it can offset dark values and affect clipping. Use the histogram and keep calibration and light frames consistent.</source>
+        <translation>Règle la luminosité caméra, pas le temps de pose. Selon le matériel, cela peut décaler les valeurs sombres et modifier l’écrêtage. Surveillez l’histogramme et gardez la calibration cohérente avec les lights.</translation>
+    </message>
+    <message>
+        <source>Caps the camera frame rate in frames per second. Lowering it can reduce data throughput. The actual rate can remain lower because of exposure, sensor readout or the connection.</source>
+        <translation>Limite la cadence caméra en images par seconde. La réduire peut diminuer le débit de données. La cadence réelle peut rester inférieure à cause de l’exposition, de la lecture du capteur ou de la connexion.</translation>
+    </message>
+    <message>
+        <source>Control reported by the connected camera, in its displayed units. Its neutral value and effect depend on the device; compare the live preview and consult the camera manual.</source>
+        <translation>Commande annoncée par la caméra connectée, dans les unités affichées. Sa valeur neutre et son effet dépendent du matériel ; comparez l’aperçu direct et consultez le manuel de la caméra.</translation>
+    </message>
+    <message>
+        <source>Automatically stops recording at the first count or duration limit reached. 0 disables that limit; set both to 0 to stop manually.</source>
+        <translation>Arrête automatiquement à la première limite atteinte, nombre d’images ou durée. 0 désactive la limite ; mettez les deux à 0 pour arrêter manuellement.</translation>
+    </message>
+    <message>
+        <source>Reads only a sensor region to reduce data and potentially raise frame rate. Drag on the preview to select it; drawing inside a region narrows it. Double-click or Full frame resets it. Pixels outside the region are not recorded.</source>
+        <translation>Lit seulement une région du capteur pour réduire les données et éventuellement augmenter la cadence. Tracez-la dans l’aperçu ; retracer à l’intérieur la réduit. Double-cliquez ou choisissez Plein capteur pour rétablir. Les pixels hors de la région ne sont pas enregistrés.</translation>
+    </message>
+</context>
     <context>
         <name>MosaicWorkspace</name>
         <message>
@@ -4345,7 +4597,19 @@ Les détails communs relient les vues. Les zones manquantes restent noires ; auc
             <source>%1 excluded images</source>
             <translation>%1 images écartées</translation>
         </message>
-    </context>
+        <message>
+        <source>Balances overlapping views before blending to reduce brightness seams. Useful when exposure or illumination varies between tiles; it does not correct every gradient or recover clipped regions.</source>
+        <translation>Équilibre les vues dans leurs recouvrements avant fusion pour réduire les raccords de luminosité. Utile si exposition ou illumination diffèrent ; cela ne corrige pas tous les gradients et ne restaure pas les zones écrêtées.</translation>
+    </message>
+    <message>
+        <source>Keeps the largest reliably connected group and unchecks unmatched tiles. Disable to require all selected views to connect. Excluded files are not deleted and can be selected again.</source>
+        <translation>Conserve le plus grand groupe relié de façon fiable et décoche les vues non raccordées. Désactivez pour exiger le raccordement de toutes les vues choisies. Les fichiers exclus ne sont pas supprimés et peuvent être resélectionnés.</translation>
+    </message>
+    <message>
+        <source>Fades the outer coverage boundary into black and protects it from sharpening in Processing. A narrow border becomes darker; missing areas are not reconstructed.</source>
+        <translation>Fond progressivement le bord extérieur de couverture dans le noir et le protège de l’accentuation dans Traitement. Une bande étroite s’assombrit ; les zones absentes ne sont pas reconstruites.</translation>
+    </message>
+</context>
     <context>
         <name>ProcessingWorkspace</name>
         <message>
@@ -4976,7 +5240,55 @@ Télescope · caméra · accessoires</translation>
             <source>Crop, rotate and resize</source>
             <translation>Recadrer, pivoter et redimensionner</translation>
         </message>
-    </context>
+        <message>
+        <source>Soft-thresholds wavelet detail before sharpening. 0 preserves it; increasing the threshold reduces fine noise but can erase faint texture. Inspect at 100% and start with a small value.</source>
+        <translation>Réduit les faibles détails des ondelettes avant leur accentuation. 0 les conserve ; augmenter le seuil réduit le bruit fin mais peut effacer les textures faibles. Vérifiez à 100 % et commencez bas.</translation>
+    </message>
+    <message>
+        <source>Multiplies the red channel after detail processing. 1 is neutral; above 1 makes the result redder, below 1 reduces red. Watch stellar colors and avoid clipping bright regions.</source>
+        <translation>Multiplie le canal rouge après le traitement des détails. 1 est neutre ; au-dessus l’image devient plus rouge, en dessous le rouge diminue. Surveillez les couleurs des étoiles et les zones brillantes.</translation>
+    </message>
+    <message>
+        <source>Multiplies the green channel after detail processing. 1 is neutral; above 1 adds green, below 1 reduces it. This is color balance, not selective green-noise removal.</source>
+        <translation>Multiplie le canal vert après le traitement des détails. 1 est neutre ; au-dessus le vert augmente, en dessous il diminue. C’est une balance des couleurs, pas une suppression sélective du bruit vert.</translation>
+    </message>
+    <message>
+        <source>Multiplies the blue channel after detail processing. 1 is neutral; above 1 makes the result bluer, below 1 reduces blue. Check the background as well as the object.</source>
+        <translation>Multiplie le canal bleu après le traitement des détails. 1 est neutre ; au-dessus l’image devient plus bleue, en dessous le bleu diminue. Vérifiez le fond de ciel autant que l’objet.</translation>
+    </message>
+    <message>
+        <source>Applies output = input^(1/gamma) after color gains. 1 is neutral; above 1 brightens midtones, below 1 darkens them. Brightening also reveals noise and does not recover clipped highlights.</source>
+        <translation>Applique sortie = entrée^(1/gamma) après les gains de couleur. 1 est neutre ; au-dessus les tons moyens s’éclaircissent, en dessous ils s’assombrissent. Éclaircir révèle aussi le bruit et ne restaure pas les hautes lumières écrêtées.</translation>
+    </message>
+    <message>
+        <source>Number of sharpest frames averaged after analysis. Fewer frames favor sharpness; more reduce noise but can soften detail. Start around 25–50%. With per-area selection, this count applies independently to each area.</source>
+        <translation>Nombre d’images les plus nettes moyennées après analyse. Moins d’images privilégie la netteté ; davantage réduit le bruit mais peut adoucir les détails. Commencez vers 25–50 %. En sélection locale, ce nombre s’applique séparément à chaque zone.</translation>
+    </message>
+    <message>
+        <source>Planet aligns the whole frame. Moon / Sun follows local surface details to reduce turbulence distortions. Choose the mode matching the subject; neither can restore detail lost to blur.</source>
+        <translation>Planète aligne l’image entière. Lune / Soleil suit les détails locaux de la surface pour réduire les déformations de turbulence. Choisissez le mode du sujet ; aucun ne restaure les détails perdus par flou.</translation>
+    </message>
+    <message>
+        <source>Each surface area chooses its sharpest frames from the entire video, rather than sharing one global list. Helps when turbulence varies across the disk, at the cost of longer processing.</source>
+        <translation>Chaque zone de surface choisit ses images les plus nettes dans toute la vidéo, au lieu d’utiliser une liste globale. Utile si la turbulence varie sur le disque, au prix d’un calcul plus long.</translation>
+    </message>
+    <message>
+        <source>Side length in pixels of each local alignment area. 64 px suits sharp contrasted detail; 96 px is a useful start; 160 px is more robust on soft or noisy surfaces but follows smaller distortions less precisely.</source>
+        <translation>Côté en pixels de chaque zone d’alignement local. 64 px convient aux détails nets et contrastés ; 96 px est un bon départ ; 160 px est plus robuste sur une surface floue ou bruitée, mais suit moins précisément les petites déformations.</translation>
+    </message>
+    <message>
+        <source>Alignment area size</source>
+        <translation>Taille des zones d’alignement</translation>
+    </message>
+    <message>
+        <source>Loads all detail, denoise, color, gamma and geometry settings together. It does not select or stack video frames. Cmd+Z restores the previous adjustments after loading.</source>
+        <translation>Charge ensemble les réglages de détails, débruitage, couleurs, gamma et géométrie. Ne sélectionne ni n’empile les images vidéo. Cmd+Z restaure les réglages précédents après chargement.</translation>
+    </message>
+    <message>
+        <source>Name used to save this complete set of adjustments locally. A new name creates a separate preset; saving an existing name replaces its settings. The source image files are not included.</source>
+        <translation>Nom utilisé pour sauvegarder localement cet ensemble de réglages. Un nouveau nom crée un préréglage distinct ; un nom existant remplace ses réglages. Les fichiers image source ne sont pas inclus.</translation>
+    </message>
+</context>
     <context>
         <name>QObject</name>
         <message>
@@ -5104,7 +5416,19 @@ Télescope · caméra · accessoires</translation>
             <source>No presets yet.</source>
             <translation>Aucun préréglage pour le moment.</translation>
         </message>
-    </context>
+        <message>
+        <source>PNG saves the displayed 8-bit preview for sharing. TIFF16 converts the sensor data to 16-bit RGB for image processing. FITS keeps sensor samples and acquisition metadata for scientific calibration. A larger format cannot add precision absent from the source.</source>
+        <translation>PNG sauvegarde l’aperçu affiché en 8 bits pour partager. TIFF16 convertit les données capteur en RVB 16 bits pour traiter l’image. FITS conserve les échantillons capteur et les métadonnées d’acquisition pour la calibration scientifique. Un format plus riche ne crée pas de précision absente de la source.</translation>
+    </message>
+    <message>
+        <source>SER is an uncompressed planetary video suitable for stacking. FITS saves individual sensor frames and metadata for deep-sky calibration. ACRAW is the native raw-sequence fallback. None of these formats improves detail missing from the capture.</source>
+        <translation>SER est une vidéo planétaire non compressée adaptée à l’empilement. FITS sauvegarde les images capteur individuelles et les métadonnées pour la calibration ciel profond. ACRAW est le format de séquence brute de repli. Aucun ne recrée les détails absents de la capture.</translation>
+    </message>
+    <message>
+        <source>Saves the current supported camera controls for this camera. Loading changes capture settings, not finishing adjustments. Use a new name to keep another configuration; replacing overwrites the existing preset.</source>
+        <translation>Sauvegarde les commandes caméra actuellement prises en charge pour cette caméra. Charger modifie les réglages de capture, pas la finition. Un nouveau nom conserve une autre configuration ; remplacer écrase le préréglage existant.</translation>
+    </message>
+</context>
     <context>
         <name>StudioNavigation</name>
         <message>
@@ -6358,7 +6682,11 @@ Résultat obtenu :
             <source>The automatic save is in progress. Saving the session before quitting waits for the latest changes.</source>
             <translation>La sauvegarde automatique est en cours. Sauvegarder la session et quitter attend l’enregistrement des dernières modifications.</translation>
         </message>
-    </context>
+        <message>
+        <source>Chooses which workspace result to save as TIFF before quitting. A TIFF preserves the finished image, not the source files, processing recipe or session. Save the project or session to continue editing later.</source>
+        <translation>Choisit le résultat de l’espace de travail à sauvegarder en TIFF avant de quitter. Le TIFF conserve l’image finale, pas les sources, la recette ni la session. Sauvegardez le projet ou la session pour reprendre les réglages plus tard.</translation>
+    </message>
+</context>
     <context>
         <name>ExportSizeHint</name>
         <message>
@@ -6674,7 +7002,51 @@ Résultat obtenu :
             <source>Apply geometry</source>
             <translation>Appliquer</translation>
         </message>
-    </context>
+        <message>
+        <source>Horizontal position of the crop in source pixels: 0 is the left edge. Increasing X moves the rectangle right without changing its width.</source>
+        <translation>Position horizontale du recadrage en pixels source : 0 est le bord gauche. Augmenter X déplace le rectangle à droite sans changer sa largeur.</translation>
+    </message>
+    <message>
+        <source>Vertical position of the crop in source pixels: 0 is the top edge. Increasing Y moves the rectangle down without changing its height.</source>
+        <translation>Position verticale du recadrage en pixels source : 0 est le bord supérieur. Augmenter Y déplace le rectangle vers le bas sans changer sa hauteur.</translation>
+    </message>
+    <message>
+        <source>Width of the region kept, in source pixels, before rotation and resizing. Pixels outside the rectangle are removed from the final image; the original stack is preserved.</source>
+        <translation>Largeur conservée en pixels source, avant rotation et redimensionnement. Les pixels hors du rectangle sont retirés du résultat ; l’empilement d’origine reste conservé.</translation>
+    </message>
+    <message>
+        <source>Height of the region kept, in source pixels, before rotation and resizing. Use it to remove unwanted borders; keep the rectangle inside the image.</source>
+        <translation>Hauteur conservée en pixels source, avant rotation et redimensionnement. Elle permet de retirer les bords indésirables ; le rectangle doit rester dans l’image.</translation>
+    </message>
+    <message>
+        <source>Constrains the proportions while drawing or resizing the crop. Free allows any rectangle; Original keeps the source proportions. Numerical width and height can still be entered independently.</source>
+        <translation>Contraint les proportions lors du tracé ou du redimensionnement du recadrage. Libre autorise tout rectangle ; Original conserve les proportions de la source. La largeur et la hauteur numériques restent saisissables séparément.</translation>
+    </message>
+    <message>
+        <source>Drag to move the preview instead of drawing a crop. Pan and zoom only change the view, never the exported pixels.</source>
+        <translation>Glissez pour déplacer l’aperçu au lieu de tracer un recadrage. Le déplacement et le zoom changent uniquement la vue, jamais les pixels exportés.</translation>
+    </message>
+    <message>
+        <source>Positive angles rotate clockwise; negative angles rotate counterclockwise. 0 leaves orientation unchanged. Free rotation interpolates pixels and can add black corners.</source>
+        <translation>Un angle positif tourne dans le sens horaire ; un angle négatif dans le sens inverse. 0 conserve l’orientation. La rotation libre interpole les pixels et peut ajouter des coins noirs.</translation>
+    </message>
+    <message>
+        <source>100% keeps the pixel scale. 50% halves each dimension; 200% doubles each dimension and quadruples the pixel count. Enlarging does not recover missing detail.</source>
+        <translation>100 % conserve l’échelle des pixels. 50 % divise chaque dimension par deux ; 200 % les double et quadruple le nombre de pixels. Agrandir ne recrée pas les détails absents.</translation>
+    </message>
+    <message>
+        <source>Nearest neighbour keeps sample values but produces jagged edges. Bilinear is smoother; bicubic and Lanczos preserve sharper detail but can create rings. Area is useful for reducing an image; rotation uses linear interpolation with Area.</source>
+        <translation>Au plus proche conserve les valeurs des échantillons mais crée des contours crénelés. Bilinéaire adoucit ; bicubique et Lanczos gardent davantage de netteté mais peuvent créer des anneaux. Aire convient à la réduction ; lors d’une rotation, ce mode utilise une interpolation linéaire.</translation>
+    </message>
+    <message>
+        <source>Keeps the cropped width and height during rotation, before scaling. Rotated corners can be cut off. Disable to enlarge the canvas enough to contain the whole rotated image.</source>
+        <translation>Conserve la largeur et la hauteur recadrées pendant la rotation, avant la mise à l’échelle. Les coins tournés peuvent être coupés. Désactivez pour agrandir le cadre et conserver toute l’image tournée.</translation>
+    </message>
+    <message>
+        <source>Limits interpolation to the minimum and maximum of each input channel, including black rotation margins. This prevents new extreme values, but does not remove every ringing artifact.</source>
+        <translation>Limite l’interpolation au minimum et au maximum de chaque canal d’entrée, en incluant les marges noires de rotation. Cela évite de nouvelles valeurs extrêmes, mais ne supprime pas tous les anneaux.</translation>
+    </message>
+</context>
     <context>
         <name>MaskEditor</name>
         <message>
@@ -6761,5 +7133,48 @@ Résultat obtenu :
             <source>The preview stretch reveals faint detail without changing pixels. Red protects the image. Cmd+Z removes the last stroke.</source>
             <translation>L’aperçu étiré révèle les détails faibles sans modifier les pixels. Le rouge protège l’image. Cmd+Z annule le dernier trait.</translation>
         </message>
-    </context>
+        <message>
+        <source>Black protects the painted region from the selected treatment; white lets it act. Gray applies only part of the effect. The red overlay shows protection.</source>
+        <translation>Le noir protège la zone peinte du traitement sélectionné ; le blanc le laisse agir. Le gris applique une partie de l’effet. Le rouge indique la protection.</translation>
+    </message>
+    <message>
+        <source>Drag to move the preview without painting. Turn this off to resume brush strokes. Zoom and pan do not alter the mask.</source>
+        <translation>Glissez pour déplacer l’aperçu sans peindre. Désactivez pour reprendre les traits. Le zoom et le déplacement ne modifient pas le masque.</translation>
+    </message>
+    <message>
+        <source>Shows mask weights instead of the photograph: white applies, black protects, gray blends. This display choice does not change the finished image or the exported mask effect.</source>
+        <translation>Affiche les valeurs du masque à la place de la photo : blanc applique, noir protège, gris mélange. Ce choix d’affichage ne modifie ni le résultat ni l’effet exporté du masque.</translation>
+    </message>
+    <message>
+        <source>Radius in original image pixels, independent of zoom. A radius of 30 px paints a 60 px-wide stroke. Increase for large areas; decrease for precise edges.</source>
+        <translation>Rayon en pixels de l’image d’origine, indépendant du zoom. Un rayon de 30 px produit un trait de 60 px de large. Augmentez pour les grandes zones ; réduisez pour les contours précis.</translation>
+    </message>
+    <message>
+        <source>100% gives a solid brush with a sharp edge. Lower values soften the transition near the edge to hide seams between protected and processed regions.</source>
+        <translation>100 % donne un pinceau plein au bord net. Réduire la dureté adoucit la transition au bord pour éviter les raccords visibles entre zones protégées et traitées.</translation>
+    </message>
+    <message>
+        <source>Strength of each stroke. 100% fully paints its center; 50% moves the mask halfway toward black or white. Separate overlapping strokes accumulate; 0% has no effect.</source>
+        <translation>Force de chaque trait. 100 % peint entièrement son centre ; 50 % rapproche le masque à mi-chemin du noir ou du blanc. Des traits distincts superposés cumulent leur effet ; 0 % ne change rien.</translation>
+    </message>
+    <message>
+        <source>White starts with the treatment active everywhere: paint black to protect areas. Black starts with everything protected: paint white to target only chosen regions. Existing strokes are kept.</source>
+        <translation>Le fond blanc active le traitement partout : peignez en noir pour protéger des zones. Le fond noir protège tout : peignez en blanc pour cibler seulement certaines régions. Les traits existants sont conservés.</translation>
+    </message>
+    <message>
+        <source>Gaussian smoothing of the complete mask, in original pixels. 0 keeps the painted edges. Increase to blend the treatment gradually into nearby areas; large values spread the selection.</source>
+        <translation>Lissage gaussien de tout le masque en pixels d’origine. 0 conserve les bords peints. Augmentez pour raccorder progressivement le traitement aux zones voisines ; une valeur élevée étale la sélection.</translation>
+    </message>
+    <message>
+        <source>Swaps protected and affected areas: black becomes white and white becomes black. Gray is inverted too. Useful for protecting an object while treating its surroundings.</source>
+        <translation>Échange les zones protégées et traitées : le noir devient blanc et inversement. Le gris est également inversé. Utile pour protéger un objet tout en traitant son environnement.</translation>
+    </message>
+</context>
+<context>
+    <name>HelpIcon</name>
+    <message>
+        <source>Help</source>
+        <translation>Aide</translation>
+    </message>
+</context>
 </TS>

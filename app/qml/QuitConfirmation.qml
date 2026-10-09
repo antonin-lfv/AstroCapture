@@ -60,7 +60,7 @@ DarkDialog {
             visible:dialog.hasProject;enabled:!dialog.busy && !dialog.recording;Layout.fillWidth:true
             onClicked:dialog.saveProjectRequested()
         }
-        DarkComboBox {
+        DarkComboBox {explanation: qsTr("Chooses which workspace result to save as TIFF before quitting. A TIFF preserves the finished image, not the source files, processing recipe or session. Save the project or session to continue editing later.");
             id:exportChoice;objectName:"quitExportTarget"
             visible:dialog.exportTargets.length>1;Layout.fillWidth:true
             model:dialog.exportTargets.map(target=>target.name)

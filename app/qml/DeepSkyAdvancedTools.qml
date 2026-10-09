@@ -100,7 +100,7 @@ Control {
             }
         }
     }
-    component Toggle: CheckBox {
+    component Toggle: HelpCheckBox {
         id: toggle
         required property string key
         checked: tools.values[key] || false
@@ -108,11 +108,6 @@ Control {
         onClicked: tools.change(key, checked)
         Layout.fillWidth: true
         Layout.minimumWidth: 0
-        contentItem: Text {
-            text: toggle.text; font: toggle.font; color: toggle.enabled ? Atelier.text : Atelier.muted
-            leftPadding: toggle.indicator.width + toggle.spacing
-            wrapMode: Text.Wrap; verticalAlignment: Text.AlignVCenter
-        }
     }
     contentItem: ColumnLayout {
         spacing: 12
@@ -132,7 +127,7 @@ Control {
                 Accessible.name: qsTr("Close")
             }
         }
-        DarkComboBox {
+        DarkComboBox {explanation: qsTr("Choose which advanced tool to edit. Switching this list only reveals controls; it does not enable the tool or reset its parameters.");
             objectName: "deepSkyAdvancedToolChooser"
             Layout.fillWidth: true
             model: [qsTr("GHS stretch"), qsTr("PSF and deconvolution"), qsTr("Multiscale denoising"), qsTr("Masks"), qsTr("Photometric colors")]
@@ -163,13 +158,10 @@ Control {
                     Layout.fillWidth: true
                     RowLayout {
                     Layout.fillWidth: true
-                    Toggle {
+                    Toggle {explanation: qsTr("Replaces the midtones or asinh curve with GHS when stretch is enabled. Start with small strength changes to reveal faint detail; the histogram previews the same curve. Zero strength is neutral.");
                         objectName: "deepSkyGhsEnabled"
                         key: "ghs"
                         text: qsTr("Use generalized hyperbolic stretch")
-                    }
-                    HelpIcon {
-                        text: qsTr("GHS replaces the midtones or asinh curve when stretching is enabled. Zero strength is neutral. Work in small increments; the histogram curve uses the same calculation as the image.")
                     }
                     }
                     RowLayout {
@@ -239,7 +231,7 @@ Control {
                         minimum: Number(tools.values.ghsSymmetry || 0)
                         explanation: qsTr("Above HP the curve follows a tangent line to reserve contrast for highlights and star cores. It does not reconstruct saturated cores. HP must be at or above SP.")
                     }
-                    DarkComboBox {
+                    DarkComboBox {explanation: qsTr("Independent RGB stretches each channel separately and may change color balance. Shared luminance uses one factor for RGB to retain color ratios, with blending near highlights to stay bounded.");
                         Layout.fillWidth: true
                         model: [qsTr("Independent RGB channels"), qsTr("Shared luminance · RGB blend protection")]
                         currentIndex: tools.values.ghsMode || 0
@@ -249,7 +241,7 @@ Control {
                     Explanation {
                         text: qsTr("Shared luminance multiplies RGB by one factor. If a channel would exceed 1, RGB blending mixes in the independent-channel result to stay bounded. This can change color ratios near highlights.")
                     }
-                    Toggle {
+                    Toggle {explanation: qsTr("Reverses the scalar GHS curve. It cannot restore clipped signal or undo mask blending or shared-luminance color blending. Use Cmd+Z to restore the previous settings exactly.");
                         key: "ghsInverse"
                         text: qsTr("Inverse curve")
                     }
@@ -264,7 +256,7 @@ Control {
                         text: tools.linearInput ? qsTr("Use on linear data before stretching. The circular PSF describes a spatially constant blur; inspect stars at 100% for dark rings or amplified noise.") : qsTr("Earlier transformations changed brightness or orientation. Deconvolution and stellar PSF measurement are blocked; return to a linear, unrotated recipe input.")
                         color: tools.linearInput ? Atelier.secondary : "#edb06c"
                     }
-                    Toggle {
+                    Toggle {explanation: qsTr("Attempts to reduce blur using the chosen PSF on linear data. Can sharpen stars and fine detail, but can amplify noise or create rings. Inspect at 100% and reduce amount or iterations if artifacts appear.");
                         objectName: "deepSkyDeconvolutionEnabled"
                         key: "deconvolution"
                         text: qsTr("Richardson–Lucy deconvolution")
@@ -294,7 +286,7 @@ Control {
                     Explanation {
                         text: tools.controller.advancedReport.estimatedFwhm === undefined ? qsTr("Estimation uses at least three central, unsaturated stars and Gaussian second moments. It is not a Moffat fit or blind PSF estimation.") : qsTr("Estimated FWHM %1 px · scatter %2 px · %3 stars").arg(Number(tools.controller.advancedReport.estimatedFwhm).toFixed(3)).arg(Number(tools.controller.advancedReport.estimatedScatter).toFixed(3)).arg(tools.controller.advancedReport.estimatedStars)
                     }
-                    DarkComboBox {
+                    DarkComboBox {explanation: qsTr("Gaussian describes compact blur; Moffat allows broader star wings controlled by beta. Match the profile and FWHM to unsaturated stars; a mismatched PSF can produce halos or rings.");
                         Layout.fillWidth: true
                         model: [qsTr("Circular Gaussian PSF"), qsTr("Circular Moffat PSF")]
                         currentIndex: tools.values.psfProfile || 0
@@ -384,7 +376,7 @@ Control {
                 ColumnLayout {
                     visible: tools.toolIndex === 2
                     Layout.fillWidth: true
-                    Toggle {
+                    Toggle {explanation: qsTr("Reduces small wavelet details identified as noise, with separate luminance and color strengths. Start low and compare at 100%; excessive reduction can flatten stars and faint structures.");
                         objectName: "deepSkyAdvancedDenoiseEnabled"
                         key: "advancedDenoise"
                         text: qsTr("Multiscale wavelet denoising")
@@ -424,7 +416,7 @@ Control {
                 ColumnLayout {
                     visible: tools.toolIndex === 3
                     Layout.fillWidth: true
-                    DarkComboBox {
+                    DarkComboBox {explanation: qsTr("None applies treatments everywhere. Luminance selects a brightness range; Radial selects a circular region; Stars selects detected stars. Painted uses your strokes; Imported uses a matching FITS, PNG or TIFF mask.");
                         id:maskTypeChoice;objectName: "deepSkyMaskType"
                         Layout.fillWidth: true
                         model: [qsTr("No mask"), qsTr("Luminance range"), qsTr("Radial region"), qsTr("Detected stars"),qsTr("Painted mask"),qsTr("Imported mask")]
@@ -440,7 +432,7 @@ Control {
                         IconButton {text:qsTr("Import mask");enabled:tools.editable&&!tools.controller.busy;onClicked:maskImport.open()}
                     }
                     Label {visible:tools.values.maskType===5;text:tools.values.maskFile||qsTr("Choose a mask image first.");color:Atelier.secondary;elide:Text.ElideMiddle;Layout.fillWidth:true}
-                    DarkComboBox {visible:tools.values.maskType!==0;Layout.fillWidth:true;model:[qsTr("Mask all finishing adjustments"),qsTr("Mask multiscale denoising only"),qsTr("Mask deconvolution only"),qsTr("Mask stretch and color only")];currentIndex:tools.values.maskScope||0;Accessible.name:qsTr("Mask scope");onActivated:tools.change("maskScope",currentIndex)}
+                    DarkComboBox {explanation: qsTr("Limits mask blending to the chosen treatment. For example, mask deconvolution only to protect stars from sharpening while color and stretch still affect the whole image. Photometric calibration remains global."); visible:tools.values.maskType!==0;Layout.fillWidth:true;model:[qsTr("Mask all finishing adjustments"),qsTr("Mask multiscale denoising only"),qsTr("Mask deconvolution only"),qsTr("Mask stretch and color only")];currentIndex:tools.values.maskScope||0;Accessible.name:qsTr("Mask scope");onActivated:tools.change("maskScope",currentIndex)}
                     ColumnLayout {
                         visible: tools.values.maskType === 1
                         Layout.fillWidth: true
@@ -494,12 +486,12 @@ Control {
                         explanation: qsTr("Smoothstep t²(3 − 2t) softens mask edges. For luminance it is an intensity width; for radial regions a fraction of the shorter side; for stars a fraction of each star radius.")
                     }
                     NumberSetting {visible:tools.values.maskType>=4;key:"maskBlurRadius";label:qsTr("Edge blur σ (px)");maximum:100;explanation:qsTr("Gaussian edge smoothing in image pixels. Zero keeps the painted or imported edges.")}
-                    Toggle {
+                    Toggle {explanation: qsTr("Swaps where the mask applies and protects. Invert a star mask to protect detected stars while processing the sky and nebulosity.");
                         visible: tools.values.maskType !== 0
                         key: "maskInvert"
                         text: qsTr("Invert mask")
                     }
-                    CheckBox {
+                    HelpCheckBox {explanation: qsTr("Shows the mask in grayscale to inspect the affected area: white applies, black protects, gray blends. Export still saves the processed image, not this diagnostic view.");
                         objectName: "deepSkyShowMask"
                         text: qsTr("Show mask on the image")
                         checked: tools.controller.showingMask
@@ -517,7 +509,7 @@ Control {
                     Explanation {
                         text: qsTr("Local matched-reference color calibration, for linear broadband RGB. No plate solving or automatic catalogue lookup is performed. Reference positions must match this image; reference RGB fluxes must represent the intended filter response. Magnitudes cannot be entered directly.")
                     }
-                    Toggle {
+                    Toggle {explanation: qsTr("Balances RGB using at least three matched reference stars from the imported CSV. Requires linear, unrotated data and no mask. This is relative color calibration; automatic catalogue-based PCC/SPCC is not available.");
                         objectName: "deepSkyPhotometryEnabled"
                         key: "photometry"
                         text: qsTr("Calibrate colors from reference stars")

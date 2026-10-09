@@ -160,8 +160,9 @@ Rectangle {
             spacing: 12
             Label { text: qsTr("Processing presets"); color: Atelier.text; font.pixelSize: 18 }
             Label { text: qsTr("Save your wavelets, denoise, color and gamma settings. Loading a preset can be undone."); color: Atelier.secondary; wrapMode: Text.WordWrap; Layout.fillWidth: true }
-            DarkComboBox {id:presetChooser;objectName:"processingPresetChooser";Layout.fillWidth:true;model:root.library.processingPresetNames;displayText:currentIndex>=0?currentText:qsTr("Processing presets");onActivated:presetName.text=currentText}
+            DarkComboBox {explanation: qsTr("Loads all detail, denoise, color, gamma and geometry settings together. It does not select or stack video frames. Cmd+Z restores the previous adjustments after loading."); id:presetChooser;objectName:"processingPresetChooser";Layout.fillWidth:true;model:root.library.processingPresetNames;displayText:currentIndex>=0?currentText:qsTr("Processing presets");onActivated:presetName.text=currentText}
             IconButton {text:qsTr("Load");Layout.fillWidth:true;enabled:presetChooser.currentIndex>=0 && root.canEdit;onClicked:{edits.applyValues(root.library.processingPreset(presetChooser.currentText));presetPopup.close()}}
+            SettingLabel {text:qsTr("Preset name");explanation:qsTr("Name used to save this complete set of adjustments locally. A new name creates a separate preset; saving an existing name replaces its settings. The source image files are not included.")}
             TextField { id: presetName; objectName: "processingPresetName"; Layout.fillWidth: true; placeholderText: qsTr("Preset name"); maximumLength: 80; color: Atelier.text; background: Rectangle { color: Atelier.field; radius: 4; border.color: Atelier.border } }
             Label { visible: root.library.processingPresetNames.indexOf(presetName.text.trim()) >= 0; text: qsTr("This name already exists. Replace will overwrite its saved settings."); color: "#edb06c"; wrapMode: Text.WordWrap; Layout.fillWidth: true }
             RowLayout {
@@ -585,7 +586,7 @@ Rectangle {
                     }
                     Caption { visible: root.controller.ranked; text: qsTr("Drag the blue boundary to choose how many of the best frames to keep.") }
                     RowLayout {
-                        Caption { text: qsTr("Frames to keep") }
+                        SettingLabel {explanation: qsTr("Number of sharpest frames averaged after analysis. Fewer frames favor sharpness; more reduce noise but can soften detail. Start around 25–50%. With per-area selection, this count applies independently to each area.");  text: qsTr("Frames to keep") }
                         DarkSpinBox {
                             id: keep
                             objectName: "framesToKeep"
@@ -613,13 +614,14 @@ Rectangle {
                         visible: !root.library.compactProcessing && !(root.surfaceMode && root.localSelection)
                         text: root.controller.loaded ? qsTr("Keeping ") + Math.round(100 * keep.value / root.controller.frameCount) + qsTr("% of the video. Start at 25–50%: fewer frames favor sharpness; more frames reduce noise but can soften detail.") : qsTr("Analyze first to rank the frames by sharpness.")
                     }
-                    SectionTitle { text: qsTr("2   Align and stack") }
+                    SettingLabel {font.pixelSize:13;font.weight:Font.DemiBold;explanation: qsTr("Planet aligns the whole frame. Moon / Sun follows local surface details to reduce turbulence distortions. Choose the mode matching the subject; neither can restore detail lost to blur.");  text: qsTr("2   Align and stack") }
                     RowLayout {
                         enabled: !root.controlsBusy
                         IconButton { text: qsTr("Planet"); Layout.fillWidth: true; borderColor: !root.surfaceMode ? Atelier.accent : Atelier.border; onClicked: root.surfaceMode = false }
                         IconButton { text: qsTr("Moon / Sun"); Layout.fillWidth: true; borderColor: root.surfaceMode ? Atelier.accent : Atelier.border; onClicked: root.surfaceMode = true }
                     }
                     Caption { visible: root.surfaceMode; text: qsTr("Local alignment follows surface details to reduce turbulence distortions. Unreliable areas use global alignment. It cannot recover detail lost to blur.") }
+                    SettingLabel {visible:root.surfaceMode;text:qsTr("Alignment area size");explanation:qsTr("Side length in pixels of each local alignment area. 64 px suits sharp contrasted detail; 96 px is a useful start; 160 px is more robust on soft or noisy surfaces but follows smaller distortions less precisely.")}
                     RowLayout {
                         visible: root.surfaceMode
                         enabled: !root.controlsBusy
@@ -637,7 +639,7 @@ Rectangle {
                     Caption { visible: root.surfaceMode; text: qsTr("Alignment areas: 64 px for fine, contrasted detail; 96 px to start; 160 px for softer or noisier surfaces. Use short, well-exposed recordings with steady focus.") }
                     RowLayout {
                         visible: root.surfaceMode; enabled: !root.controlsBusy
-                        Caption { text: qsTr("Best frames per area") }
+                        SettingLabel {explanation: qsTr("Each surface area chooses its sharpest frames from the entire video, rather than sharing one global list. Helps when turbulence varies across the disk, at the cost of longer processing.");  text: qsTr("Best frames per area") }
                         CaptionSwitch {
                             checked: root.localSelection
                             Accessible.name: qsTr("Best frames per area")
@@ -681,11 +683,11 @@ Rectangle {
                                 minimum: 0; maximum: index === 0 ? 50 : index < 3 ? 20 : 10
                             }
                         }
-                        Adjustment { settingKey: "denoise"; label: qsTr("Denoise"); minimum: 0; maximum: 0.05 }
-                        Adjustment { settingKey: "red"; label: qsTr("Red") }
-                        Adjustment { settingKey: "green"; label: qsTr("Green") }
-                        Adjustment { settingKey: "blue"; label: qsTr("Blue") }
-                        Adjustment { settingKey: "gamma"; label: qsTr("Gamma") }
+                        Adjustment {help: qsTr("Soft-thresholds wavelet detail before sharpening. 0 preserves it; increasing the threshold reduces fine noise but can erase faint texture. Inspect at 100% and start with a small value.");  settingKey: "denoise"; label: qsTr("Denoise"); minimum: 0; maximum: 0.05 }
+                        Adjustment {help: qsTr("Multiplies the red channel after detail processing. 1 is neutral; above 1 makes the result redder, below 1 reduces red. Watch stellar colors and avoid clipping bright regions.");  settingKey: "red"; label: qsTr("Red") }
+                        Adjustment {help: qsTr("Multiplies the green channel after detail processing. 1 is neutral; above 1 adds green, below 1 reduces it. This is color balance, not selective green-noise removal.");  settingKey: "green"; label: qsTr("Green") }
+                        Adjustment {help: qsTr("Multiplies the blue channel after detail processing. 1 is neutral; above 1 makes the result bluer, below 1 reduces blue. Check the background as well as the object.");  settingKey: "blue"; label: qsTr("Blue") }
+                        Adjustment {help: qsTr("Applies output = input^(1/gamma) after color gains. 1 is neutral; above 1 brightens midtones, below 1 darkens them. Brightening also reveals noise and does not recover clipped highlights.");  settingKey: "gamma"; label: qsTr("Gamma") }
                         RowLayout {
                             Caption { text: root.adjustmentsDirty ? ((adjustmentTimer.running || root.controller.adjusting) ? qsTr("Updating preview…") : qsTr("Preview paused · adjust a slider to resume")) : qsTr("Automatic preview") }
                             Label {text:"⌘ Z";color:Atelier.muted;font.pixelSize:11}

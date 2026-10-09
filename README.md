@@ -342,6 +342,13 @@ Les chemins devenus introuvables sont retirés automatiquement au démarrage, à
 
 ## Guide intégré
 
+Les réglages disposent d’une aide « ? » au survol, également accessible au clavier.
+Elle explique l’effet pratique, les unités, la valeur neutre lorsqu’elle existe et
+les artefacts à surveiller. Ces aides restent présentes en mode Compact et couvrent
+la capture, l’empilement, la finition, la géométrie, les masques, la mosaïque,
+les légendes et les formats d’export. Les bulles suivent les contrôles lors du
+défilement, restent dans la fenêtre et se ferment quand leur écran est masqué.
+
 ![Guide pratique dans AstroCapture](assets/screenshots/guide.png)
 
 L’onglet **Guide**, disponible hors connexion en français et en anglais, explique les étapes d’une prise de vue, les formats de fichiers, la courbe de qualité, les ondelettes, le recalage local, la préparation d’une mosaïque et le fonctionnement des exports et de l’historique. Chaque sujet propose un accès à l’onglet correspondant.

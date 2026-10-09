@@ -111,6 +111,7 @@ Rectangle {
             IconButton {text:"−";ghost:true;Layout.preferredWidth:32;onClicked:root.zoomAt(root.effectiveZoom/1.25,surface.width/2,surface.height/2);Accessible.name:qsTr("Zoom out")}
             IconButton {text:"+";ghost:true;Layout.preferredWidth:32;onClicked:root.zoomAt(root.effectiveZoom*1.25,surface.width/2,surface.height/2);Accessible.name:qsTr("Zoom in")}
             Label {text:Math.round(root.effectiveZoom*100)+" %";color:Atelier.secondary;font.pixelSize:12;Layout.leftMargin:4;Layout.preferredWidth:56}
+            HelpIcon {text:qsTr("Zoom only changes the preview. 100% shows one image pixel per screen pixel; Fit shows the complete image. Use 100% to inspect noise, sharpness and halos. Export dimensions stay unchanged.")}
             Item {Layout.fillWidth:true}
             IconButton {text:"100 %";ghost:true;onClicked:root.actualSize();Accessible.name:qsTr("One image pixel per screen pixel")}
             IconButton {text:qsTr("Fit");onClicked:root.fit();Accessible.name:qsTr("Fit to window")}

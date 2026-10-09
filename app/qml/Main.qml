@@ -324,9 +324,15 @@ ApplicationWindow {
             }
         }
     }
-    // Frame counters can run into the tens of thousands during long
-    // sequences; abbreviate past 1000 (1k, 10.1k, 1.2M) so the sidebar
-    // stays readable instead of growing a wide raw integer.
+    function cameraControlHelp(key) {
+        if (key === "gamma") return qsTr("Changes the camera response in midtones. The neutral value and direction depend on the device. For scientific linear frames, keep the manufacturer’s neutral value and adjust brightness later in Finition.");
+        if (key === "whiteBalanceRed") return qsTr("Sets the camera red white-balance control. Increase or decrease to correct a red/cyan cast in the preview. Device behavior can differ between color and raw modes; keep acquisition settings consistent.");
+        if (key === "whiteBalanceBlue") return qsTr("Sets the camera blue white-balance control. Adjust to correct a blue/yellow cast in the preview. Device behavior can differ between color and raw modes; keep acquisition settings consistent.");
+        if (key === "brightness") return qsTr("Sets the camera brightness control, not exposure time. Depending on the device it can offset dark values and affect clipping. Use the histogram and keep calibration and light frames consistent.");
+        if (key === "frameRateLimit") return qsTr("Caps the camera frame rate in frames per second. Lowering it can reduce data throughput. The actual rate can remain lower because of exposure, sensor readout or the connection.");
+        return qsTr("Control reported by the connected camera, in its displayed units. Its neutral value and effect depend on the device; compare the live preview and consult the camera manual.");
+    }
+    // Keep large frame counters readable in the capture sidebar.
     function formatCount(n) {
         if (n >= 1000000) {
             const v = n / 1000000;
@@ -634,6 +640,7 @@ ApplicationWindow {
                     SidebarSection {
                         title: qsTr("Capture")
 
+                        SettingLabel {text:qsTr("Target");explanation:qsTr("Optional object name used in capture filenames and FITS metadata. It does not point the mount or identify the sky automatically.")}
                         TextField {
                             id: targetNameField
                             Layout.fillWidth: true
@@ -654,7 +661,7 @@ ApplicationWindow {
                             }
                         }
 
-                        DarkComboBox {
+                        DarkComboBox {explanation: qsTr("SER records an uncompressed planetary video for stacking. FITS records individual sensor frames for deep-sky calibration. ACRAW is the native raw-sequence fallback. Choose before recording.");
                             Layout.fillWidth: true
                             model: [qsTr("Planetary · SER"), qsTr("Deep sky · FITS sequence"), qsTr("Raw sequence · ACRAW")]
                             currentIndex: previewController.videoFormat === "FITS" ? 1 : previewController.videoFormat === "ACRAW" ? 2 : 0
@@ -664,8 +671,8 @@ ApplicationWindow {
                         RowLayout {
                             visible: previewController.videoFormat === "FITS"
                             Layout.fillWidth: true
-                            DarkComboBox {Layout.fillWidth: true; model:["Light","Dark","Flat","Bias","DarkFlat"]; enabled:!previewController.recording; onActivated:previewController.captureType=currentText}
-                            DarkComboBox {Layout.fillWidth: true;model:["", "R", "G", "B", "L", "HA", "OIII", "SII"];enabled:!previewController.recording;onActivated:previewController.captureFilter=currentText}
+                            DarkComboBox {explanation: qsTr("Writes the image type into FITS metadata for later calibration. Light contains the object; Dark measures thermal signal; Flat measures dust/illumination; Bias or DarkFlat calibrates flats. It does not automate covers or illumination."); Layout.fillWidth: true; model:["Light","Dark","Flat","Bias","DarkFlat"]; enabled:!previewController.recording; onActivated:previewController.captureType=currentText}
+                            DarkComboBox {explanation: qsTr("Records the filter name in FITS metadata. Select the filter actually used; blank leaves it unspecified. This setting does not move a filter wheel or transform RGB pixels."); Layout.fillWidth: true;model:["", "R", "G", "B", "L", "HA", "OIII", "SII"];enabled:!previewController.recording;onActivated:previewController.captureFilter=currentText}
                         }
                         Text {
                             visible: previewController.videoFormat === "FITS"
@@ -713,8 +720,7 @@ ApplicationWindow {
 
                     SidebarSection {
                         title: qsTr("Recording")
-                        helpText: "Auto-stops recording once either target is reached (whichever comes first). " +
-                                  "0 means unlimited/disabled for that field — set both to 0 to only stop manually."
+                        helpText: qsTr("Automatically stops recording at the first count or duration limit reached. 0 disables that limit; set both to 0 to stop manually.")
 
                         ColumnLayout {
                             Layout.fillWidth: true
@@ -744,6 +750,7 @@ ApplicationWindow {
                                     onValueModified: previewController.recordingTargetFrameCount = value
                                 }
                                 Text { text: qsTr("frames"); color: Atelier.muted; font.pixelSize: 11 }
+                                HelpIcon {text:qsTr("Stops after this many frames have been recorded. 0 disables the frame-count limit. If duration is also set, the first limit reached stops recording.")}
                             }
 
                             Text { text: qsTr("or"); color: Atelier.muted; font.pixelSize: 11 }
@@ -760,6 +767,7 @@ ApplicationWindow {
                                     onValueModified: previewController.recordingTargetDurationSeconds = value
                                 }
                                 Text { text: qsTr("sec"); color: Atelier.muted; font.pixelSize: 11 }
+                                HelpIcon {text:qsTr("Stops after this elapsed recording duration, in seconds. 0 disables the time limit. A frame-count limit can stop earlier; both at 0 means manual stop only.")}
                             }
 
                             Text {
@@ -850,7 +858,7 @@ ApplicationWindow {
 
                             RowLayout {
                                 Layout.fillWidth: true
-                                Text { text: qsTr("Exposure"); color: Atelier.muted; font.pixelSize: 12; Layout.fillWidth: true }
+                                SettingLabel {explanation: qsTr("Time collected by each frame, displayed in milliseconds. Longer exposures collect more signal but lower possible frame rate and can blur moving or turbulent detail. Watch the histogram to avoid saturation.");  text: qsTr("Exposure"); color: Atelier.muted; font.pixelSize: 12; Layout.fillWidth: true }
                                 Text {
                                     text: (previewController.exposureMicroseconds / 1000).toFixed(1) + qsTr(" ms")
                                     color: Atelier.text
@@ -885,7 +893,7 @@ ApplicationWindow {
 
                             RowLayout {
                                 Layout.fillWidth: true
-                                Text { text: qsTr("Gain"); color: Atelier.muted; font.pixelSize: 12; Layout.fillWidth: true }
+                                SettingLabel {explanation: qsTr("Camera amplification in the units reported by this device. Raising it makes the preview brighter but can reduce highlight headroom; it does not collect more light. Choose it together with exposure.");  text: qsTr("Gain"); color: Atelier.muted; font.pixelSize: 12; Layout.fillWidth: true }
                                 Text {
                                     text: previewController.gainValue
                                     color: Atelier.text
@@ -922,6 +930,7 @@ ApplicationWindow {
                                         font.pixelSize: 12
                                         Layout.fillWidth: true
                                     }
+                                    HelpIcon {text:window.cameraControlHelp(modelData.key)}
                                     Text {
                                         // extraSlider.value, not
                                         // modelData.value: the controller
@@ -970,10 +979,7 @@ ApplicationWindow {
                     // "draw a box around what I want" action.
                     SidebarSection {
                         title: qsTr("Sensor ROI")
-                        helpText: "Reads out only a sub-rectangle of the sensor instead of the full frame, which " +
-                                  "can raise achievable fps. Click and drag on the preview to select the region " +
-                                  "— dragging again inside an existing selection narrows it further. " +
-                                  "Double-click, or \"Full frame\", resets it."
+                        helpText: qsTr("Reads only a sensor region to reduce data and potentially raise frame rate. Drag on the preview to select it; drawing inside a region narrows it. Double-click or Full frame resets it. Pixels outside the region are not recorded.")
                         visible: previewController.roiSupported
                         enabled: !previewController.recording
 

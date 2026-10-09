@@ -58,6 +58,10 @@ au menu du projet. Une icône seule possède un nom accessible et une infobulle.
 **Réglage** : libellé à gauche, valeur numérique à droite, puis curseur sur la largeur
 disponible. La saisie numérique expose les limites et l'unité. Les valeurs utilisent
 des chiffres tabulaires. Les deux modes d'étirement exclusifs ont un sélecteur explicite.
+Chaque réglage dispose d’un « ? » discret au survol et accessible au clavier,
+y compris les sélecteurs et options. L’aide commence par son effet pratique,
+explique le sens des valeurs, les unités et les limites utiles. Elle reste disponible
+en mode Compact, suit les contrôles défilants et disparaît avec son écran.
 
 **Section** : titre, état actif si pertinent, chevron de disclosure. L'aide de la famille
 est disponible depuis son en-tête ; les explications complètes ne prennent pas la

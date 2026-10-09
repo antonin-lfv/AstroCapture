@@ -30,7 +30,7 @@ Rectangle {
         default property alias contents: content.data
         ColumnLayout { id: content; anchors.fill: parent; anchors.margins: 16; spacing: 12 }
     }
-    component Heading: Label { color: Atelier.text; font.pixelSize: 16; Layout.fillWidth: true }
+    component Heading: SettingLabel { color: Atelier.text; font.pixelSize: 16; Layout.fillWidth: true }
     component Description: Label { color: Atelier.muted; wrapMode: Text.WordWrap; Layout.fillWidth: true }
     component FolderPath: Label {
         color: Atelier.secondary; elide: Text.ElideMiddle; Layout.fillWidth: true
@@ -54,14 +54,14 @@ Rectangle {
             Card {
                 RowLayout {
                     Layout.fillWidth: true
-                    Heading { text: qsTr("Language") }
+                    Heading {explanation: qsTr("Changes interface labels and help immediately. Saved locally; processing parameters and image pixels are unaffected.");  text: qsTr("Language") }
                     IconButton { text: "English"; borderColor: root.library.language === "en" ? Atelier.accent : Atelier.border; onClicked: root.library.language = "en" }
                     IconButton { text: "Français"; borderColor: root.library.language === "fr" ? Atelier.accent : Atelier.border; onClicked: root.library.language = "fr" }
                 }
                 Description { text: qsTr("Applies immediately throughout the interface.") }
             }
             Card {
-                Heading { text: qsTr("Processing layout") }
+                Heading {explanation: qsTr("Guided shows explanations between controls; Compact hides them to save space. Question-mark help remains available in both modes. This changes the interface, not processing.");  text: qsTr("Processing layout") }
                 RowLayout {
                     IconButton { text: qsTr("Guided"); borderColor: !root.library.compactProcessing ? Atelier.accent : Atelier.border; onClicked: root.library.compactProcessing = false }
                     IconButton { text: qsTr("Compact"); borderColor: root.library.compactProcessing ? Atelier.accent : Atelier.border; onClicked: root.library.compactProcessing = true }
@@ -69,7 +69,7 @@ Rectangle {
                 Description { text: qsTr("Compact mode hides explanations. Help buttons remain available. Drag the divider in Processing to resize its controls; your layout is remembered.") }
             }
             Card {
-                Heading { text: qsTr("Capture folder") }
+                Heading {explanation: qsTr("Destination for new camera images and recordings. A custom folder contains Images and Videos. Changing it does not move existing files.");  text: qsTr("Capture folder") }
                 Description { text: qsTr("Camera images and recorded videos. Camera controls and recording formats remain in Capture.") }
                 RowLayout {
                     Layout.fillWidth: true
@@ -83,7 +83,7 @@ Rectangle {
                 }
             }
             Card {
-                Heading { text: qsTr("Export folder") }
+                Heading {explanation: qsTr("Default destination for finished images. The last successful export folder is remembered. Originals and already exported files are not moved.");  text: qsTr("Export folder") }
                 Description { text: qsTr("Finished PNG and TIFF images, with your current adjustments.") }
                 RowLayout {
                     Layout.fillWidth: true
@@ -95,7 +95,7 @@ Rectangle {
             Card {
                 RowLayout {
                     Layout.fillWidth: true
-                    Heading { text: qsTr("Remember exported images") }
+                    Heading {explanation: qsTr("Adds successful exports to local History, up to 500 paths. Turning it off stops new entries but preserves existing ones and manual imports; image files stay where you saved them.");  text: qsTr("Remember exported images") }
                     Switch {
                         id: historySwitch
                         checked: root.library.historyEnabled

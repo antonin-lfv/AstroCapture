@@ -43,17 +43,17 @@ Rectangle {
         hostWidth: root.width; hostHeight: root.height
     }
     Popup {
-        id: optionsPopup
+        id: optionsPopup; objectName:"mosaicOptionsPopup"
         parent: Overlay.overlay; anchors.centerIn: parent; width: Math.min(480, root.width - 32)
         padding: 20; modal: true; focus: true
         background: Rectangle { color: Atelier.surface; radius: 10; border.color: Atelier.border }
         contentItem: ColumnLayout {
             spacing: 14
             Label { text: qsTr("Assembly options"); color: Atelier.text; font.pixelSize: 18 }
-            OptionSwitch { text: qsTr("Match brightness"); checked: root.balanceExposure; onCheckedChanged: root.balanceExposure = checked }
-            OptionSwitch { text: qsTr("Automatically exclude unmatched images"); checked: root.skipUnmatched; onCheckedChanged: root.skipUnmatched = checked }
+            OptionSwitch {explanation: qsTr("Balances overlapping views before blending to reduce brightness seams. Useful when exposure or illumination varies between tiles; it does not correct every gradient or recover clipped regions.");  text: qsTr("Match brightness"); checked: root.balanceExposure; onCheckedChanged: root.balanceExposure = checked }
+            OptionSwitch {explanation: qsTr("Keeps the largest reliably connected group and unchecks unmatched tiles. Disable to require all selected views to connect. Excluded files are not deleted and can be selected again.");  text: qsTr("Automatically exclude unmatched images"); checked: root.skipUnmatched; onCheckedChanged: root.skipUnmatched = checked }
             Label { text: qsTr("Keeps the largest connected group. Excluded images can be restored; files are never deleted. At least two matching views are needed."); color: Atelier.muted; wrapMode: Text.WordWrap; Layout.fillWidth: true }
-            OptionSwitch { objectName: "mosaicSoftenEdges"; text: qsTr("Soften mosaic edges"); checked: root.softenEdges; onCheckedChanged: root.softenEdges = checked }
+            OptionSwitch {explanation: qsTr("Fades the outer coverage boundary into black and protects it from sharpening in Processing. A narrow border becomes darker; missing areas are not reconstructed.");  objectName: "mosaicSoftenEdges"; text: qsTr("Soften mosaic edges"); checked: root.softenEdges; onCheckedChanged: root.softenEdges = checked }
             Label { text: qsTr("Fades the outer coverage boundary into black and protects it from sharpening in Processing. A narrow strip at the edge is darkened; missing areas are not reconstructed."); color: Atelier.muted; wrapMode: Text.WordWrap; Layout.fillWidth: true }
             Label { text: qsTr("Changes apply to the next assembly."); color: Atelier.muted; Layout.fillWidth: true }
             IconButton { text: qsTr("Done"); Layout.alignment: Qt.AlignRight; onClicked: optionsPopup.close() }
@@ -81,9 +81,12 @@ Rectangle {
     }
     component OptionSwitch: Switch {
         id: option
+        property string explanation: ""
+        Accessible.description: explanation
         Layout.fillWidth: true
         Accessible.name: text
-        contentItem: Label { text: option.text; color: "#dbe5f2"; wrapMode: Text.WordWrap; rightPadding: 50; verticalAlignment: Text.AlignVCenter }
+        contentItem: Label { text: option.text; color: "#dbe5f2"; wrapMode: Text.WordWrap; rightPadding: 78; verticalAlignment: Text.AlignVCenter }
+        HelpIcon {text:option.explanation;visible:text.length>0;x:option.width-66;anchors.verticalCenter:parent.verticalCenter}
         indicator: Rectangle {
             implicitWidth: 38; implicitHeight: 22; x: option.width-width; y: (option.height-height)/2; radius: 11
             color: option.checked ? Atelier.accent : Atelier.border

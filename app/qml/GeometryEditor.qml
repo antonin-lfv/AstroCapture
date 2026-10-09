@@ -28,9 +28,10 @@ Popup {
     component NumberField:ColumnLayout {
         property string label
         property string key
+        property string explanation
         property int maximum:32000000
         Layout.fillWidth:true;spacing:3
-        Label {text:parent.label;color:Atelier.secondary;font.pixelSize:12}
+        SettingLabel {text:parent.label;explanation:parent.explanation;color:Atelier.secondary;font.pixelSize:12}
         DarkSpinBox {Layout.fillWidth:true;from:parent.key==="x"||parent.key==="y"?0:1;to:parent.maximum;value:root.draft[parent.key]||0;editable:true;Accessible.name:parent.label;onValueModified:{root.update(parent.key,value);root.update("crop",true);}}
     }
     contentItem:ColumnLayout {
@@ -78,24 +79,24 @@ Popup {
             }
         }
         RowLayout {Layout.fillWidth:true;spacing:12
-            DarkComboBox {Layout.fillWidth:true;model:[qsTr("Free aspect ratio"),qsTr("Original aspect ratio"),"1:1","3:2","4:3","16:9"];currentIndex:root.aspect;onActivated:root.aspect=currentIndex}
-            CheckBox {text:qsTr("Pan image");checked:root.panMode;onClicked:root.panMode=checked}
+            DarkComboBox {explanation: qsTr("Constrains the proportions while drawing or resizing the crop. Free allows any rectangle; Original keeps the source proportions. Numerical width and height can still be entered independently."); Layout.fillWidth:true;model:[qsTr("Free aspect ratio"),qsTr("Original aspect ratio"),"1:1","3:2","4:3","16:9"];currentIndex:root.aspect;onActivated:root.aspect=currentIndex}
+            HelpCheckBox {explanation: qsTr("Drag to move the preview instead of drawing a crop. Pan and zoom only change the view, never the exported pixels."); text:qsTr("Pan image");checked:root.panMode;onClicked:root.panMode=checked}
             IconButton {text:qsTr("Full image");onClicked:root.fullImage()}
         }
         RowLayout {Layout.fillWidth:true;spacing:12
-            NumberField {label:qsTr("X (px)");key:"x";maximum:Math.max(0,pixels.sourceWidth-1)}
-            NumberField {label:qsTr("Y (px)");key:"y";maximum:Math.max(0,pixels.sourceHeight-1)}
-            NumberField {label:qsTr("Width (px)");key:"width";maximum:pixels.sourceWidth}
-            NumberField {label:qsTr("Height (px)");key:"height";maximum:pixels.sourceHeight}
+            NumberField {explanation: qsTr("Horizontal position of the crop in source pixels: 0 is the left edge. Increasing X moves the rectangle right without changing its width."); label:qsTr("X (px)");key:"x";maximum:Math.max(0,pixels.sourceWidth-1)}
+            NumberField {explanation: qsTr("Vertical position of the crop in source pixels: 0 is the top edge. Increasing Y moves the rectangle down without changing its height."); label:qsTr("Y (px)");key:"y";maximum:Math.max(0,pixels.sourceHeight-1)}
+            NumberField {explanation: qsTr("Width of the region kept, in source pixels, before rotation and resizing. Pixels outside the rectangle are removed from the final image; the original stack is preserved."); label:qsTr("Width (px)");key:"width";maximum:pixels.sourceWidth}
+            NumberField {explanation: qsTr("Height of the region kept, in source pixels, before rotation and resizing. Use it to remove unwanted borders; keep the rectangle inside the image."); label:qsTr("Height (px)");key:"height";maximum:pixels.sourceHeight}
         }
         RowLayout {Layout.fillWidth:true;spacing:12
-            ParameterControl {label:qsTr("Angle (°)");Layout.fillWidth:true;from:-180;to:180;decimals:2;value:root.draft.angle;onMoved:{root.update("angle",value);value=Qt.binding(()=>root.draft.angle)}}
-            ParameterControl {label:qsTr("Scale (%)");Layout.fillWidth:true;from:10;to:400;decimals:1;value:root.draft.scale*100;onMoved:{root.update("scale",value/100);value=Qt.binding(()=>root.draft.scale*100)}}
-            DarkComboBox {Layout.preferredWidth:150;model:[qsTr("Nearest neighbour"),qsTr("Bilinear"),qsTr("Bicubic"),qsTr("Area"),"Lanczos-4"];currentIndex:root.draft.interpolation;Accessible.name:qsTr("Interpolation");onActivated:root.update("interpolation",currentIndex)}
+            ParameterControl {explanation: qsTr("Positive angles rotate clockwise; negative angles rotate counterclockwise. 0 leaves orientation unchanged. Free rotation interpolates pixels and can add black corners."); label:qsTr("Angle (°)");Layout.fillWidth:true;from:-180;to:180;decimals:2;value:root.draft.angle;onMoved:{root.update("angle",value);value=Qt.binding(()=>root.draft.angle)}}
+            ParameterControl {explanation: qsTr("100% keeps the pixel scale. 50% halves each dimension; 200% doubles each dimension and quadruples the pixel count. Enlarging does not recover missing detail."); label:qsTr("Scale (%)");Layout.fillWidth:true;from:10;to:400;decimals:1;value:root.draft.scale*100;onMoved:{root.update("scale",value/100);value=Qt.binding(()=>root.draft.scale*100)}}
+            DarkComboBox {explanation: qsTr("Nearest neighbour keeps sample values but produces jagged edges. Bilinear is smoother; bicubic and Lanczos preserve sharper detail but can create rings. Area is useful for reducing an image; rotation uses linear interpolation with Area."); Layout.preferredWidth:180;model:[qsTr("Nearest neighbour"),qsTr("Bilinear"),qsTr("Bicubic"),qsTr("Area"),"Lanczos-4"];currentIndex:root.draft.interpolation;Accessible.name:qsTr("Interpolation");onActivated:root.update("interpolation",currentIndex)}
         }
         RowLayout {Layout.fillWidth:true
-            CheckBox {text:qsTr("Keep canvas size");checked:root.draft.keepSize;onClicked:root.update("keepSize",checked)}
-            CheckBox {text:qsTr("Limit interpolation overshoot");checked:root.draft.clamp;onClicked:root.update("clamp",checked)}
+            HelpCheckBox {explanation: qsTr("Keeps the cropped width and height during rotation, before scaling. Rotated corners can be cut off. Disable to enlarge the canvas enough to contain the whole rotated image."); text:qsTr("Keep canvas size");checked:root.draft.keepSize;onClicked:root.update("keepSize",checked)}
+            HelpCheckBox {explanation: qsTr("Limits interpolation to the minimum and maximum of each input channel, including black rotation margins. This prevents new extreme values, but does not remove every ringing artifact."); text:qsTr("Limit interpolation overshoot");checked:root.draft.clamp;onClicked:root.update("clamp",checked)}
         }
         RowLayout {Layout.fillWidth:true
             Label {text:root.valid?qsTr("Output: %1 × %2 px").arg(root.outputWidth).arg(root.outputHeight):qsTr("The crop rectangle exceeds the image boundaries.");color:root.valid?Atelier.secondary:Atelier.danger;Layout.fillWidth:true;wrapMode:Text.Wrap}

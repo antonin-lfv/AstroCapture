@@ -185,10 +185,7 @@ Popup {
                 }
 
                 HelpIcon {
-                    text: qsTr("PNG: lossless, opens everywhere — good default.\n\n") +
-                          qsTr("TIFF16: 16-bit per channel, for processing pipelines that expect more precision than 8-bit ") +
-                          qsTr("(the source is still 8-bit today; this stores it losslessly at 16-bit).\n\n") +
-                          qsTr("FITS: the astronomy-standard format, for tools that expect it (PixInsight, DSS, etc).")
+                    text: qsTr("PNG saves the displayed 8-bit preview for sharing. TIFF16 converts the sensor data to 16-bit RGB for image processing. FITS keeps sensor samples and acquisition metadata for scientific calibration. A larger format cannot add precision absent from the source.")
                 }
             }
 
@@ -238,8 +235,7 @@ Popup {
                 }
 
                 HelpIcon {
-                    text: qsTr("SER: standard, uncompressed planetary video (AutoStakkert, PIPP, Registax, FireCapture) — use this for real capture sessions you'll stack.\n\n") +
-                          qsTr("ACRAW: AstroCapture's own interim format from before SER support existed. Kept only as a fallback.")
+                    text: qsTr("SER is an uncompressed planetary video suitable for stacking. FITS saves individual sensor frames and metadata for deep-sky calibration. ACRAW is the native raw-sequence fallback. None of these formats improves detail missing from the capture.")
                 }
             }
 
@@ -289,6 +285,7 @@ Popup {
                 Layout.fillWidth: true
             }
 
+            SettingLabel {text:qsTr("Preset name");explanation:qsTr("Saves the current supported camera controls for this camera. Loading changes capture settings, not finishing adjustments. Use a new name to keep another configuration; replacing overwrites the existing preset.")}
             RowLayout {
                 Layout.fillWidth: true
                 spacing: 8

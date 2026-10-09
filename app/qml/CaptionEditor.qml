@@ -51,11 +51,11 @@ Popup {
                 IconAction {iconName:"close";text:qsTr("Close");enabled:!editor.controller.busy;onClicked:editor.close()}
             }
             Label {text:qsTr("Format");color:Atelier.secondary}
-            DarkComboBox {id:exportFormat;objectName:"captionExportFormat";Layout.fillWidth:true;model:editor.compressedFormats?[qsTr("PNG · 16-bit, lossless"),qsTr("TIFF · 16-bit, lossless"),qsTr("JPEG · compressed")]:[qsTr("TIFF · 16-bit, lossless")];property string suffix:editor.compressedFormats?["png","tif","jpg"][currentIndex]:"tif"}
+            DarkComboBox {explanation: qsTr("PNG and TIFF export 16-bit channels without loss; PNG is compressed and TIFF is uncompressed. JPEG uses lossy 8-bit compression for sharing. These formats clip values outside 0–1; use floating FITS to retain scientific range."); id:exportFormat;objectName:"captionExportFormat";Layout.fillWidth:true;model:editor.compressedFormats?[qsTr("PNG · 16-bit, lossless"),qsTr("TIFF · 16-bit, lossless"),qsTr("JPEG · compressed")]:[qsTr("TIFF · 16-bit, lossless")];property string suffix:editor.compressedFormats?["png","tif","jpg"][currentIndex]:"tif"}
             Label {text:exportFormat.suffix==="jpg"?qsTr("Lossy compression · 8-bit · for sharing"):qsTr("Lossless · preserves detail and precision");color:Atelier.secondary;font.pixelSize:12;Layout.fillWidth:true;wrapMode:Text.Wrap}
             Label {text:editor.controller.imageWidth+" × "+editor.controller.imageHeight+" px";color:Atelier.text;font.pixelSize:13}
             RowLayout {Layout.fillWidth:true
-                CheckBox {objectName:"annotationEnabled";text:qsTr("Add a caption");checked:editor.controller.exportAnnotation.enabled;enabled:!editor.controller.busy;onClicked:{editor.setAnnotation("enabled",checked);editor.previewRequested()}}
+                HelpCheckBox {explanation: qsTr("Adds your text to the exported image pixels. Turning it off preserves your caption settings. It cannot remove a caption already present in an imported photograph."); objectName:"annotationEnabled";text:qsTr("Add a caption");checked:editor.controller.exportAnnotation.enabled;enabled:!editor.controller.busy;onClicked:{editor.setAnnotation("enabled",checked);editor.previewRequested()}}
                 Item {Layout.fillWidth:true}
                 IconButton {text:editor.previewOpen?qsTr("Hide preview"):qsTr("Preview");ghost:true;onClicked:editor.previewOpen=!editor.previewOpen}
             }
@@ -83,7 +83,7 @@ Popup {
                     enabled:!editor.controller.busy
                     RowLayout {
                         Layout.fillWidth: true
-                        Label { text: qsTr("Image and processing information"); color: Atelier.secondary; wrapMode: Text.Wrap; Layout.fillWidth: true }
+                        SettingLabel {explanation: qsTr("Includes the prefilled dimensions and processing information in the caption. Edit the text to correct it; disabling inclusion keeps your edits. Restore suggested information returns to the automatic text.");  text: qsTr("Image and processing information"); color: Atelier.secondary; wrapMode: Text.Wrap; Layout.fillWidth: true }
                         CaptionSwitch {
                             objectName: "annotationTechnicalEnabled"
                             checked: editor.controller.exportAnnotation.technical
@@ -114,7 +114,7 @@ Popup {
                             onClicked: editor.restoreTechnicalText()
                         }
                     }
-                    Label { text: qsTr("Title · above the caption"); color: Atelier.secondary }
+                    SettingLabel {explanation: qsTr("Short title placed above the other caption lines. Leave it empty to omit it. Check the preview for long titles and placement.");  text: qsTr("Title · above the caption"); color: Atelier.secondary }
                     TextField {
                         objectName: "annotationTitle"
                         Layout.fillWidth: true
@@ -125,7 +125,7 @@ Popup {
                         background: Rectangle { color: Atelier.field; radius: 6; border.color: parent.activeFocus ? Atelier.accent : Atelier.border }
                         onTextChanged: editor.setAnnotation("title", text)
                     }
-                    Label { text: qsTr("Top left · object, date, notes"); color: Atelier.secondary }
+                    SettingLabel {explanation: qsTr("Your object, observation date and notes at the upper left. Line breaks are kept. Empty text adds nothing; it does not edit any text already baked into the source image.");  text: qsTr("Top left · object, date, notes"); color: Atelier.secondary }
                     TextArea {
                         objectName: "annotationTop"
                         Layout.fillWidth: true; Layout.preferredHeight: 95
@@ -136,7 +136,7 @@ Popup {
                         background: Rectangle { color: Atelier.field; radius: 6; border.color: parent.activeFocus ? Atelier.accent : Atelier.border }
                         onTextChanged: editor.setAnnotation("top", text)
                     }
-                    Label { text: qsTr("Bottom left · observer and equipment"); color: Atelier.secondary }
+                    SettingLabel {explanation: qsTr("Observer, location and equipment at the lower left. Line breaks are kept. Review the preview before exporting so important details remain unobstructed.");  text: qsTr("Bottom left · observer and equipment"); color: Atelier.secondary }
                     TextArea {
                         objectName: "annotationBottom"
                         Layout.fillWidth: true; Layout.preferredHeight: 75
@@ -148,12 +148,12 @@ Popup {
                         onTextChanged: editor.setAnnotation("bottom", text)
                     }
                     RowLayout {
-                        Caption { text: qsTr("Text color") }
+                        SettingLabel {explanation: qsTr("Sets the added caption to white or gold. Choose the more readable color against your image; this does not change the photograph colors.");  text: qsTr("Text color") }
                         IconButton { text: qsTr("White"); borderColor: !editor.controller.exportAnnotation.gold ? Atelier.accent : Atelier.border; onClicked: editor.setAnnotation("gold", false) }
                         IconButton { text: qsTr("Gold"); borderColor: editor.controller.exportAnnotation.gold ? Atelier.accent : Atelier.border; onClicked: editor.setAnnotation("gold", true) }
                     }
                     RowLayout {
-                        Caption { text: qsTr("Text size") }
+                        SettingLabel {explanation: qsTr("Scales the added text relative to the image dimensions. Larger values improve readability but cover more of the image. Preview at the intended viewing size.");  text: qsTr("Text size") }
                         DarkSlider { Layout.fillWidth: true; from: 0.8; to: 3; stepSize: 0.1; value: editor.controller.exportAnnotation.size; onMoved: editor.setAnnotation("size", value) }
                     }
 

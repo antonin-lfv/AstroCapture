@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.25)
 
-project(AstroCapture VERSION 1.6.1 LANGUAGES C CXX)
+project(AstroCapture VERSION 1.7.0 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -46,6 +46,16 @@ endif()
 
 add_subdirectory(core/domain)
 include(AstroVision)
+if(NOT TARGET ZLIB::ZLIB)
+    if(TARGET zlib)
+        foreach(zlib_include IN LISTS ZLIB_INCLUDE_DIR)
+            target_include_directories(zlib INTERFACE "$<BUILD_INTERFACE:${zlib_include}>")
+        endforeach()
+        add_library(ZLIB::ZLIB ALIAS zlib)
+    else()
+        find_package(ZLIB REQUIRED)
+    endif()
+endif()
 add_subdirectory(core/recording)
 add_subdirectory(core/processing)
 

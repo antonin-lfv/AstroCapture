@@ -82,6 +82,7 @@ struct PhotometryResult {
   std::array<double, 3> gains{1, 1, 1};
   int accepted{}, rejected{};
   double scatter{};
+  int edgeRejected{},saturatedRejected{},signalRejected{},outlierRejected{};
 };
 PhotometryResult calibratePhotometry(const FloatImage &,
                                      const std::vector<PhotometricReference> &,

@@ -1,5 +1,6 @@
 #pragma once
 #include <astro/domain/Frame.hpp>
+#include <astro/recording/CelestialWcs.hpp>
 #include <filesystem>
 #include <map>
 #include <string>
@@ -16,6 +17,8 @@ struct AstroImage {
     std::string filter, object, date, imageType;
     std::vector<float> samples;
     int fitsBitpix{}; // Original FITS storage type; negative means floating point.
+    std::optional<CelestialWcs> wcs;
+    std::optional<double> centerRa,centerDec,pixelScale;
 };
 AstroImage readAstroImage(const std::filesystem::path& path, double inputScale = 0);
 void writeAstroFits(const std::filesystem::path& path, const AstroImage& image);

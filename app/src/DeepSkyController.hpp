@@ -18,6 +18,7 @@ class DeepSkyController : public QObject {
     Q_PROPERTY(QString importedMaskPath READ importedMaskPath NOTIFY maskFileChanged)
     QML_ELEMENT
     Q_PROPERTY(bool hasFinishComparison READ hasFinishComparison NOTIFY imageChanged)
+    Q_PROPERTY(QVariantMap astrometry READ astrometry NOTIFY changed)
     Q_PROPERTY(QVariantMap advancedReport READ advancedReport NOTIFY changed)
     Q_PROPERTY(bool showingMask READ showingMask WRITE setShowingMask NOTIFY changed)
     Q_PROPERTY(bool hasMask READ hasMask NOTIFY changed)
@@ -56,6 +57,11 @@ public:
     explicit DeepSkyController(QObject* parent=nullptr):QObject(parent){}
     ~DeepSkyController() override;
     QVariantMap advancedReport() const{return advancedReport_;}
+    QVariantMap astrometry() const{return astrometry_;}
+    Q_INVOKABLE void solveAstrometry(const QVariantMap& options);
+    Q_INVOKABLE void prepareCatalogCalibration(int method,const QVariantMap& options);
+    Q_INVOKABLE void importAstrometryCatalog(const QUrl&);
+    Q_INVOKABLE void importColorResponse(const QUrl&);
     QVariantList psfKernel() const{return psfKernel_;}
     bool showingMask() const{return showingMask_;}
     bool hasMask() const{return !maskPreview_.isNull();}
@@ -141,6 +147,7 @@ public:
     Q_INVOKABLE void cancel(){pendingAdjustments_.reset();worker_.request_stop();}
 signals:
     void maskFileChanged();
+    void catalogCalibrationReady(const QVariantMap& settings);
     void maskFileReady(const QString& path);
     void operationFinished(bool success, const QString& message);
     void changed();
@@ -170,6 +177,8 @@ private:
     bool busy_{},adjusting_{},exporting_{};
     std::optional<QVariantMap> pendingAdjustments_;
     QVariantMap histogram_,advancedReport_;
+    QVariantMap astrometry_;
+    std::map<QString,QVariantMap> stackAstrometry_;
     QVariantList psfKernel_;
     QImage maskPreview_;
     bool showingMask_{};

@@ -7,6 +7,7 @@
 #include <limits>
 #include <memory>
 #include <stdexcept>
+#include <sstream>
 
 namespace astro::recording {
 namespace {
@@ -28,6 +29,13 @@ double numberKey(fitsfile* f,const char* key,double fallback=0) {
     double value=fallback; int status=0;
     fits_read_key(f,TDOUBLE,key,&value,nullptr,&status);
     return status || !std::isfinite(value) ? fallback : value;
+}
+double angleKey(fitsfile* f,const char* key,bool hours) {
+    auto text=stringKey(f,key);if(text.empty())return NAN;
+    std::replace(text.begin(),text.end(),':',' ');std::istringstream input(text);
+    double a=0,b=0,c=0;std::string excess;if(!(input>>a))return NAN;
+    if(input>>b){if(!(input>>c)||(input>>excess)||b<0||b>=60||c<0||c>=60)return NAN;const double sign=text.find('-')!=std::string::npos?-1:1;return sign*(std::abs(a)+b/60+c/3600)*(hours?15:1);}
+    return a;
 }
 domain::BayerPattern pattern(std::string text) {
     if(text=="RGGB")return domain::BayerPattern::RGGB;
@@ -62,6 +70,25 @@ AstroImage readFits(const std::filesystem::path& path,double inputScale) {
     image.gain=numberKey(f.file,"GAIN",std::numeric_limits<double>::quiet_NaN()); image.hasGain=std::isfinite(image.gain);
     image.temperature=numberKey(f.file,"CCD-TEMP",std::numeric_limits<double>::quiet_NaN()); image.hasTemperature=std::isfinite(image.temperature);
     image.imageType=stringKey(f.file,"IMAGETYP"); image.filter=stringKey(f.file,"FILTER"); image.object=stringKey(f.file,"OBJECT"); image.date=stringKey(f.file,"DATE-OBS");
+    // Distorted/SIP, non-equatorial and non-ICRS headers must not be silently
+    // interpreted as a plain TAN solution. They can be solved anew in the app.
+    const auto system=stringKey(f.file,"RADESYS"),unit1=stringKey(f.file,"CUNIT1"),unit2=stringKey(f.file,"CUNIT2");
+    bool distorted=false;int keyCount=0;fits_get_hdrspace(f.file,&keyCount,nullptr,&status);fail(status);
+    for(int n=1;n<=keyCount;++n){char name[FLEN_KEYWORD]{},value[FLEN_VALUE]{},comment[FLEN_COMMENT]{};fits_read_keyn(f.file,n,name,value,comment,&status);fail(status);const std::string key=name;if(key.starts_with("PV1_")||key.starts_with("PV2_")||key=="A_ORDER"||key=="B_ORDER"||key=="AP_ORDER"||key=="BP_ORDER")distorted=true;}
+    if(stringKey(f.file,"CTYPE1")=="RA---TAN"&&stringKey(f.file,"CTYPE2")=="DEC--TAN"&&(system=="ICRS"||(system.empty()&&numberKey(f.file,"EQUINOX",2000)==2000))&&(unit1.empty()||unit1=="deg")&&(unit2.empty()||unit2=="deg")&&!distorted) {
+        CelestialWcs w;w.crval={numberKey(f.file,"CRVAL1",NAN),numberKey(f.file,"CRVAL2",NAN)};w.crpix={numberKey(f.file,"CRPIX1",NAN),numberKey(f.file,"CRPIX2",NAN)};
+        const double a=numberKey(f.file,"CDELT1",NAN),b=numberKey(f.file,"CDELT2",NAN);
+        std::array<double,4> cd{numberKey(f.file,"CD1_1",NAN),numberKey(f.file,"CD1_2",NAN),numberKey(f.file,"CD2_1",NAN),numberKey(f.file,"CD2_2",NAN)};
+        if(std::any_of(cd.begin(),cd.end(),[](double v){return std::isfinite(v);})){for(auto& v:cd)if(!std::isfinite(v))v=0;w.cd=cd;}
+        else w.cd={a*numberKey(f.file,"PC1_1",1),a*numberKey(f.file,"PC1_2",0),b*numberKey(f.file,"PC2_1",0),b*numberKey(f.file,"PC2_2",1)};
+        if(w.valid())image.wcs=w;
+    }
+    double ra=angleKey(f.file,"RA",true),dec=angleKey(f.file,"DEC",false);if(!std::isfinite(ra))ra=angleKey(f.file,"OBJCTRA",true);if(!std::isfinite(dec))dec=angleKey(f.file,"OBJCTDEC",false);
+    if(std::isfinite(ra)&&ra>=0&&ra<360)image.centerRa=ra;
+    if(std::isfinite(dec)&&std::abs(dec)<=90)image.centerDec=dec;
+    const double focal=numberKey(f.file,"FOCALLEN"),pixel=numberKey(f.file,"XPIXSZ");
+    const double sampling=numberKey(f.file,"PIXSCALE",focal>0?206.264806*pixel/focal:0);
+    if(sampling>0&&sampling<=100)image.pixelScale=sampling;
     const auto pixels=std::size_t(image.width)*image.height;
     std::vector<float> planar(pixels*channels);
     float nullValue=std::numeric_limits<float>::quiet_NaN(); int anyNull=0;
@@ -131,6 +158,11 @@ void writeAstroFits(const std::filesystem::path& path,const AstroImage& image) {
     if(image.hasTemperature)key("CCD-TEMP",image.temperature);
     text("BAYERPAT",image.bayer==domain::BayerPattern::None?"":std::string(domain::to_string(image.bayer)));
     text("IMAGETYP",image.imageType); text("FILTER",image.filter); text("OBJECT",image.object); text("DATE-OBS",image.date);
+    if(image.wcs&&image.wcs->valid()) {
+        const auto& w=*image.wcs;text("CTYPE1","RA---TAN");text("CTYPE2","DEC--TAN");text("CUNIT1","deg");text("CUNIT2","deg");text("RADESYS","ICRS");
+        key("CRVAL1",w.crval[0]);key("CRVAL2",w.crval[1]);key("CRPIX1",w.crpix[0]);key("CRPIX2",w.crpix[1]);key("CD1_1",w.cd[0]);key("CD1_2",w.cd[1]);key("CD2_1",w.cd[2]);key("CD2_2",w.cd[3]);
+    }
+    if(image.centerRa)key("RA",*image.centerRa);if(image.centerDec)key("DEC",*image.centerDec);if(image.pixelScale)key("PIXSCALE",*image.pixelScale);
     std::vector<float> planar(image.samples.size());
     for(std::size_t p=0;p<pixels;++p)for(int c=0;c<image.channels;++c)planar[p+c*pixels]=image.samples[p*image.channels+c];
     fits_write_img(f.file,TFLOAT,1,LONGLONG(planar.size()),planar.data(),&status);

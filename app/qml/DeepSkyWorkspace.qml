@@ -20,7 +20,7 @@ Control {
     property string editError: ""
     property bool imageFocus: false
     property var advancedOptions: ({})
-    readonly property var advancedKeys:["maskStrokes","maskBaseWhite","maskFile","maskBlurRadius","maskScope","pedestal","ghs", "ghsStrength", "ghsLocal", "ghsSymmetry", "ghsShadows", "ghsHighlights", "ghsInverse", "ghsMode", "maskType", "maskLow", "maskHigh", "maskFeather", "maskX", "maskY", "maskRadius", "maskStarRadius", "maskInvert", "deconvolution", "psfProfile", "psfFwhm", "psfBeta", "rlIterations", "rlDamping", "rlBlend", "rlStopping", "advancedDenoise", "noiseScales", "noiseThreshold", "noiseAmount", "noiseChroma", "photometry", "photometryReferences", "photometryAperture", "photometryInner", "photometryOuter", "photometrySaturation"]
+    readonly property var advancedKeys:["photometryMethod","photometryProfile","photometryWhite","photometryImageKey","maskStrokes","maskBaseWhite","maskFile","maskBlurRadius","maskScope","pedestal","ghs", "ghsStrength", "ghsLocal", "ghsSymmetry", "ghsShadows", "ghsHighlights", "ghsInverse", "ghsMode", "maskType", "maskLow", "maskHigh", "maskFeather", "maskX", "maskY", "maskRadius", "maskStarRadius", "maskInvert", "deconvolution", "psfProfile", "psfFwhm", "psfBeta", "rlIterations", "rlDamping", "rlBlend", "rlStopping", "advancedDenoise", "noiseScales", "noiseThreshold", "noiseAmount", "noiseChroma", "photometry", "photometryReferences", "photometryAperture", "photometryInner", "photometryOuter", "photometrySaturation"]
     readonly property bool linearRecipeInput:!operations.some(op=>op.enabled && (op.settings.stretch || op.settings.scnr || op.settings.saturation!==1 || op.settings.rotation || op.settings.mirrorHorizontal || op.settings.mirrorVertical || (op.settings.geometry && (op.settings.geometry.crop || op.settings.geometry.angle || op.settings.geometry.scale!==1))))
     property int finishingTool:0
     property var expandedFamilies: [0]
@@ -90,14 +90,15 @@ Control {
         asinhLuminance.currentIndex=finish.asinhLuminance||0;denoise.value=finish.denoise;asinh.checked=finish.asinh;asinhStrength.value=finish.asinhStrength;saturation.value=finish.saturation;
         updatingControls=previous;
     }
+    AstrometryDialog {id:astrometryDialog;controller:root.controller;values:root.options();hostWidth:root.Window.width;hostHeight:root.Window.height;onCalibrationRequested:settings=>root.setFinish(settings)}
     GeometryEditor {id:geometryEditor;onAccepted:(values)=>root.setFinish(Object.assign({},root.options(),{geometry:values}))}
     function resetFamily() {
         const families=[{stretch:false,black:0,white:1,midtones:.15,asinh:false,asinhStrength:20,asinhLuminance:0,ghs:false,ghsStrength:0,ghsLocal:0,ghsSymmetry:0,ghsShadows:0,ghsHighlights:1,ghsInverse:false,ghsMode:0},
             {background:false,backgroundDegree:1,backgroundSamples:20,backgroundTolerance:1,backgroundPoints:[]},
-            {red:1,green:1,blue:1,saturation:1,denoise:0,scnr:false,scnrMethod:0,scnrAmount:1,scnrPreserve:true},
+            {photometry:false,photometryMethod:"",photometryProfile:"",photometryWhite:"",photometryImageKey:"",photometryReferences:[],red:1,green:1,blue:1,saturation:1,denoise:0,scnr:false,scnrMethod:0,scnrAmount:1,scnrPreserve:true},
             {rotation:0,mirrorHorizontal:false,mirrorVertical:false,geometry:{crop:false,x:0,y:0,width:1,height:1,angle:0,scale:1,interpolation:4,clamp:true,keepSize:false}}];
         if(root.finishingTool===4) {
-            const defaults={maskStrokes:[],maskBaseWhite:true,maskFile:"",maskBlurRadius:0,maskScope:0,pedestal:0,ghs:false,ghsStrength:0,ghsLocal:0,ghsSymmetry:0,ghsShadows:0,ghsHighlights:1,ghsInverse:false,ghsMode:0,maskType:0,maskLow:0,maskHigh:1,maskFeather:0.05,maskX:0.5,maskY:0.5,maskRadius:0.25,maskStarRadius:2,maskInvert:false,deconvolution:false,psfProfile:0,psfFwhm:3,psfBeta:3,rlIterations:10,rlDamping:0.001,rlBlend:1,rlStopping:0.0001,advancedDenoise:false,noiseScales:3,noiseThreshold:3,noiseAmount:0.5,noiseChroma:0.5,photometry:false,photometryReferences:[],photometryAperture:5,photometryInner:8,photometryOuter:12,photometrySaturation:1};
+            const defaults={maskStrokes:[],maskBaseWhite:true,maskFile:"",maskBlurRadius:0,maskScope:0,pedestal:0,ghs:false,ghsStrength:0,ghsLocal:0,ghsSymmetry:0,ghsShadows:0,ghsHighlights:1,ghsInverse:false,ghsMode:0,maskType:0,maskLow:0,maskHigh:1,maskFeather:0.05,maskX:0.5,maskY:0.5,maskRadius:0.25,maskStarRadius:2,maskInvert:false,deconvolution:false,psfProfile:0,psfFwhm:3,psfBeta:3,rlIterations:10,rlDamping:0.001,rlBlend:1,rlStopping:0.0001,advancedDenoise:false,noiseScales:3,noiseThreshold:3,noiseAmount:0.5,noiseChroma:0.5,photometryMethod:"",photometryProfile:"",photometryWhite:"",photometryImageKey:"",photometry:false,photometryReferences:[],photometryAperture:5,photometryInner:8,photometryOuter:12,photometrySaturation:1};
             root.setFinish(Object.assign({},options(),defaults));
         } else root.setFinish(Object.assign({},options(),families[root.finishingTool]));
     }
@@ -117,7 +118,7 @@ Control {
     Shortcut {sequence:StandardKey.Save;enabled:root.visible && root.shortcutsAllowed && !root.dialogOpen && !controller.busy && controller.frames.length>0;onActivated:root.saveCurrentProject()}
     Shortcut {sequences:[StandardKey.Redo];enabled:root.visible && root.shortcutsAllowed && !root.dialogOpen && root.finishEditable && edits.canRedo;onActivated:root.redoFinish()}
     Timer {id:adjustmentTimer;interval:200;onTriggered:controller.apply(root.options())}
-    readonly property bool dialogOpen: inputDialog.visible || folderDialog.visible || exportDialog.visible || projectOpen.visible || projectSave.visible || projectSaveChoice.visible || relinkDialog.visible || relinkFolderDialog.visible || presetDialog.visible || projectMenu.visible || exportPanel.visible || geometryEditor.visible || advancedTools.catalogOpen
+    readonly property bool dialogOpen: inputDialog.visible || folderDialog.visible || exportDialog.visible || projectOpen.visible || projectSave.visible || projectSaveChoice.visible || relinkDialog.visible || relinkFolderDialog.visible || presetDialog.visible || projectMenu.visible || exportPanel.visible || geometryEditor.visible || astrometryDialog.dialogOpen || advancedTools.catalogOpen
     background: Rectangle {color:Atelier.canvas}
     palette.window: Atelier.canvas
     palette.windowText: Atelier.text
@@ -331,6 +332,14 @@ DropArea {
                         Rectangle {anchors.centerIn:parent;width:24;height:32;color:Atelier.surface;radius:4;border.color:Atelier.border;Label {anchors.centerIn:parent;text:"↔";color:Atelier.text}}
                         MouseArea {anchors.top:parent.top;anchors.bottom:parent.bottom;anchors.horizontalCenter:parent.horizontalCenter;width:28;cursorShape:Qt.SplitHCursor;onPositionChanged:mouse=>{if(pressed){const point=mapToItem(viewport.viewingSurface,mouse.x,mouse.y);root.comparisonSplit=Math.max(.05,Math.min(.95,point.x/viewport.viewingSurface.width));}}}
                     }
+                }
+                Canvas {
+                    id:catalogOverlay;objectName:"catalogStarOverlay";z:9;parent:viewport.imageContainer;anchors.fill:parent
+                    visible:astrometryDialog.showMatches&&controller.astrometry.verified===true&&controller.displayingResult&&!controller.comparingRaw&&!controller.showingMask&&!controller.showingBackgroundModel&&root.comparisonMode==="result"&&root.linearRecipeInput&&!root.geometry.crop&&!root.geometry.angle&&root.geometry.scale===1&&rotation.currentIndex===0&&!mirrorHorizontal.checked&&!mirrorVertical.checked
+                    property var points:controller.astrometry.positions||[]
+                    property real markerZoom:viewport.effectiveZoom
+                    onPointsChanged:requestPaint();onMarkerZoomChanged:requestPaint();onWidthChanged:requestPaint();onHeightChanged:requestPaint();onVisibleChanged:if(visible)requestPaint()
+                    onPaint:{const ctx=getContext("2d");ctx.clearRect(0,0,width,height);ctx.strokeStyle=Atelier.accent;ctx.lineWidth=1/viewport.effectiveZoom;const r=6/viewport.effectiveZoom;for(const p of points){ctx.beginPath();ctx.arc(p[0]*width,p[1]*height,r,0,2*Math.PI);ctx.stroke();}}
                 }
                 Canvas {
                     id:sampleOverlay;objectName:"deepSkySampleOverlay";z:10;parent:viewport.imageContainer;anchors.fill:parent
@@ -622,6 +631,8 @@ ParameterControl {id:black;label:qsTr("Black level");textIsValue:true;text:"0";f
                 }
                 InspectorFamily {id:family2;objectName:"deepSkyFamily2";title:root.familyNames[2];expanded:root.familyOpen(2);current:root.finishingTool===2;onActivated:root.toggleFamily(2);onInteracted:root.finishingTool=2
                 SectionTitle {label:qsTr("Color and noise")}
+                IconButton {objectName:"openAstrometry";text:qsTr("Astrometry · PCC / SPCC");Layout.fillWidth:true;enabled:root.finishEditable&&root.linearRecipeInput;onClicked:astrometryDialog.open()}
+                Label {visible:!!root.advancedOptions.photometryMethod;text:root.advancedOptions.photometryMethod||"";color:Atelier.accent;wrapMode:Text.Wrap;Layout.fillWidth:true;font.pixelSize:12}
 
                 ParameterControl {id:redGain;label:qsTr("Red gain");decimals:3;explanation:qsTr("Multiply the red channel before stretching. Initial gains estimate a neutral background; adjust manually for your intended colors.");onMoved:root.previewAdjustments();onGestureStarted:edits.beginEdit();onGestureEnded:edits.endEdit();Layout.fillWidth:true;Layout.minimumWidth:0;from:.1;to:3;value:1;enabled:root.finishEditable}
 

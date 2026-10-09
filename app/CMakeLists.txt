@@ -1,4 +1,4 @@
-find_package(Qt6 6.5 REQUIRED COMPONENTS Quick Gui LinguistTools)
+find_package(Qt6 6.5 REQUIRED COMPONENTS Quick Gui Network LinguistTools)
 find_package(Threads REQUIRED)
 
 qt_standard_project_setup(REQUIRES 6.5)
@@ -73,6 +73,7 @@ qt_add_qml_module(AstroCapture
         qml/ProcessingWorkspace.qml
         qml/DeepSkyWorkspace.qml
         qml/DeepSkyAdvancedTools.qml
+        qml/AstrometryDialog.qml
         qml/MosaicWorkspace.qml
         qml/CaptionEditor.qml
         qml/ImageViewport.qml
@@ -104,6 +105,8 @@ qt_add_qml_module(AstroCapture
         src/SessionStorage.cpp
         src/ProjectStorage.cpp src/ProjectStorage.hpp
         src/DeepSkySession.cpp
+        src/DeepSkyAstrometry.cpp
+        src/GaiaCatalog.cpp
         src/SessionController.hpp
         src/SessionController.cpp
         src/DeepSkyController.hpp
@@ -148,7 +151,7 @@ if(ASTRO_ENABLE_DEVTOOLS)
     target_compile_definitions(AstroCapture PRIVATE ASTRO_ENABLE_DEVTOOLS)
 endif()
 
-target_link_libraries(AstroCapture PRIVATE Qt6::Quick Qt6::Gui astro::processing astro::recording Threads::Threads)
+target_link_libraries(AstroCapture PRIVATE Qt6::Quick Qt6::Gui Qt6::Network astro::processing astro::recording Threads::Threads ZLIB::ZLIB)
 
 if(APPLE)
     find_library(AVFOUNDATION_FRAMEWORK AVFoundation REQUIRED)

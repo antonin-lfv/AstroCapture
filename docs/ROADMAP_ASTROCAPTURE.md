@@ -1,9 +1,15 @@
 # AstroCapture — prochaines étapes
 
-État après le lot 1.6.1 du 10 octobre 2026. Cette liste distingue ce qui est livré
+État après le lot 1.7.0 du 10 octobre 2026. Cette liste distingue ce qui est livré
 et les prochains travaux ; elle ne promet pas une équivalence complète avec Siril.
 
 ## Déjà livré
+
+- [x] WCS TAN/ICRS guidé avec Gaia DR3 et catalogue CSV local, vérification des
+  associations, repères et RMS ; WCS FITS propagé avec les transformations.
+- [x] PCC par modèle de températures Gaia et SPCC par spectres XP mesurés,
+  réponse de l’équipement importable, blancs CALSPEC/AB, diagnostics et
+  références liées à l’image ; projets, session, versions A/B et Cmd+Z.
 
 - [x] Aperçu de légende affiché dès l’ouverture, indicateur animé d’export,
   familles de Finition indépendantes et état conservé après réouverture.
@@ -39,10 +45,10 @@ de recette sont reconstruits à la prochaine modification.
 
 ## Priorités suivantes
 
-1. **Astrométrie et calibration des couleurs sur catalogue.** Résolution WCS,
-   correspondance des étoiles et calibration PCC/SPCC avec bilans, filtres et
-   références explicites. La photométrie actuelle utilise un CSV d’étoiles
-   déjà identifiées et des gains relatifs ; elle n’est pas une SPCC.
+1. **Approfondir l’astrométrie et les profils spectraux.** Résolution aveugle,
+   distorsions SIP, recherche du nom de cible, bibliothèque de réponses mesurées
+   caméra/filtres et sélection instrumentale guidée. Comparaison scientifique
+   avec des étalons et Siril ; modes bande étroite distincts.
 2. **Bibliothèque de calibration.** Masters dark/flat/bias/dark-flat réutilisables,
    regroupement par caméra, gain, binning, température et exposition ; bilan des
    incompatibilités et contrôle de qualité des masters.
@@ -74,7 +80,7 @@ de recette sont reconstruits à la prochaine modification.
 | Masque | Transformations avancées → Masques | Blanc applique, noir protège ; dimensions de l’entrée de recette et portée du traitement |
 | Géométrie | Finition → Géométrie | Coordonnées depuis zéro en haut à gauche, dimensions, interpolation et limite de 32 MP |
 | Conservation du linéaire | Exporter → FITS linéaire | Intégration d’origine ; Image finale → FITS conserve le résultat traité flottant |
-| PCC / SPCC automatique | À implémenter | Le CSV actuel est une calibration relative sans résolution WCS ni catalogue automatique |
+| WCS / PCC / SPCC | Finition → Couleur → Astrométrie | Centre et échantillonnage, Gaia DR3 ou CSV ; PCC continuum, SPCC XP avec réponse mesurée ; inspecter RMS, références et gains |
 
 Les noms et paramètres servent de repères. Les moteurs, valeurs et conventions
 ne sont pas tous interchangeables ; la validation numérique compare chaque

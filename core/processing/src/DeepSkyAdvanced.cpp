@@ -533,7 +533,7 @@ calibratePhotometry(const FloatImage &image,
       throw std::runtime_error("Invalid photometric reference.");
     if (star.x - o.outer < 0 || star.y - o.outer < 0 ||
         star.x + o.outer >= image.width || star.y + o.outer >= image.height) {
-      ++result.rejected;
+      ++result.rejected;++result.edgeRejected;
       continue;
     }
     std::array<std::vector<double>, 3> sky;
@@ -564,13 +564,17 @@ calibratePhotometry(const FloatImage &image,
       }
     if (saturated || pixels < 3 || sky[0].size() < 10 || sky[1].size() < 10 ||
         sky[2].size() < 10) {
-      ++result.rejected;
+      ++result.rejected;if(saturated)++result.saturatedRejected;else ++result.signalRejected;
       continue;
     }
-    for (int c = 0; c < 3; ++c)
+    bool weak=false;
+    for (int c = 0; c < 3; ++c){
       sum[c] -= pixels * median(sky[c]);
-    if (*std::min_element(sum.begin(), sum.end()) <= 0) {
-      ++result.rejected;
+      const double noise=std::max(1e-9,1.4826*mad(sky[c]));
+      weak|=sum[c]<=5*noise*std::sqrt(double(pixels)*(1+double(pixels)/sky[c].size()));
+    }
+    if (weak || *std::min_element(sum.begin(), sum.end()) <= 0) {
+      ++result.rejected;++result.signalRejected;
       continue;
     }
     measured.push_back(
@@ -592,7 +596,7 @@ calibratePhotometry(const FloatImage &image,
   blue.clear();
   for (auto m : measured) {
     if (std::abs(m.r - mr) > 3 * sr || std::abs(m.b - mb) > 3 * sb) {
-      ++result.rejected;
+      ++result.rejected;++result.outlierRejected;
       continue;
     }
     red.push_back(m.r);

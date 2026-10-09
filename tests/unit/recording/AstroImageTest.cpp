@@ -48,6 +48,19 @@ int main(){
     const auto unsignedPath=directory/"unsigned.fits";
     fits_create_diskfile(&f,unsignedPath.string().c_str(),&status);fits_create_img(f,USHORT_IMG,2,axes,&status);fits_write_img(f,TUSHORT,1,20,adu.data(),&status);fits_close_file(f,&status);ASTRO_TEST_CHECK(!status);
     read=recording::readAstroImage(unsignedPath);for(int i=0;i<20;++i)ASTRO_TEST_CHECK(std::abs(read.samples[i]-adu[i]/65535.f)<1e-7);
+    // Real iTelescope-style sexagesimal hints, including negative-zero degrees.
+    status=0;fits_open_diskfile(&f,unsignedPath.string().c_str(),READWRITE,&status);
+    auto textKey=[&](const char* key,const char* value){fits_update_key(f,TSTRING,key,const_cast<char*>(value),nullptr,&status);};
+    auto numberKey=[&](const char* key,double value){fits_update_key(f,TDOUBLE,key,&value,nullptr,&status);};
+    textKey("RA","05 35 17.00");textKey("DEC","-00 23 24.0");numberKey("XPIXSZ",3.76);numberKey("FOCALLEN",635);
+    textKey("CTYPE1","RA---TAN");textKey("CTYPE2","DEC--TAN");textKey("RADESYS","ICRS");numberKey("CRVAL1",83.82);numberKey("CRVAL2",-.39);numberKey("CRPIX1",3);numberKey("CRPIX2",2.5);numberKey("CDELT1",-.001);numberKey("CDELT2",.001);
+    fits_close_file(f,&status);ASTRO_TEST_CHECK(!status);read=recording::readAstroImage(unsignedPath);
+    ASTRO_TEST_CHECK(read.centerRa&&std::abs(*read.centerRa-(5+35./60+17./3600)*15)<1e-12&&read.centerDec&&std::abs(*read.centerDec+.39)<1e-12);
+    ASTRO_TEST_CHECK(read.pixelScale&&std::abs(*read.pixelScale-206.264806*3.76/635)<1e-12&&read.wcs&&read.wcs->crpix[0]==3&&read.wcs->cd[0]==-.001);
+    status=0;fits_open_diskfile(&f,unsignedPath.string().c_str(),READWRITE,&status);numberKey("CD1_1",-.0005);numberKey("CD2_2",.0005);fits_close_file(f,&status);ASTRO_TEST_CHECK(!status);read=recording::readAstroImage(unsignedPath);ASTRO_TEST_CHECK((read.wcs&&read.wcs->cd==std::array<double,4>{-.0005,0,0,.0005}));
+    status=0;fits_open_diskfile(&f,unsignedPath.string().c_str(),READWRITE,&status);textKey("CTYPE1","RA---TAN-SIP");fits_close_file(f,&status);ASTRO_TEST_CHECK(!status);read=recording::readAstroImage(unsignedPath);ASTRO_TEST_CHECK(!read.wcs);
+    status=0;fits_open_diskfile(&f,unsignedPath.string().c_str(),READWRITE,&status);textKey("CTYPE1","RA---TAN");textKey("CUNIT1","rad");fits_close_file(f,&status);ASTRO_TEST_CHECK(!status);read=recording::readAstroImage(unsignedPath);ASTRO_TEST_CHECK(!read.wcs);
+    status=0;fits_open_diskfile(&f,unsignedPath.string().c_str(),READWRITE,&status);textKey("CUNIT1","deg");numberKey("PV2_1",1);fits_close_file(f,&status);ASTRO_TEST_CHECK(!status);read=recording::readAstroImage(unsignedPath);ASTRO_TEST_CHECK(!read.wcs);
     // Compressed image extension with an empty primary HDU.
     const auto compressedPath=directory/"compressed.fits.fz";
     status=0;fits_create_diskfile(&f,compressedPath.string().c_str(),&status);fits_create_img(f,BYTE_IMG,0,nullptr,&status);fits_set_compression_type(f,RICE_1,&status);fits_create_img(f,USHORT_IMG,2,axes,&status);fits_write_img(f,TUSHORT,1,20,adu.data(),&status);fits_close_file(f,&status);ASTRO_TEST_CHECK(!status);

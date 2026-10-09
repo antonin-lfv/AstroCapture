@@ -8,6 +8,9 @@
 #include <QTransform>
 #include "ImagePreview.hpp"
 #include "DeepSkySettings.hpp"
+#include "AstrometrySettings.hpp"
+#include "GaiaCatalog.hpp"
+#include "WcsGeometry.hpp"
 #include <astro/recording/AstroImage.hpp>
 #include <astro/recording/TiffWriter.hpp>
 #include <QFileInfo>
@@ -166,7 +169,8 @@ processing::FloatImage scientificPreparation(const processing::FloatImage& sourc
         std::vector<processing::PhotometricReference> references;
         for(const auto& value:s["photometryReferences"].toList()){const auto row=value.toList();references.push_back({row[0].toDouble(),row[1].toDouble(),{row[2].toDouble(),row[3].toDouble(),row[4].toDouble()}});}
         auto measured=processing::calibratePhotometry(image,references,{s["photometryAperture"].toDouble(),s["photometryInner"].toDouble(),s["photometryOuter"].toDouble(),s["photometrySaturation"].toDouble()},check);
-        if(report){(*report)["photometryAccepted"]=measured.accepted;(*report)["photometryRejected"]=measured.rejected;(*report)["photometryScatter"]=measured.scatter;(*report)["photometryGains"]=QVariantList{measured.gains[0],measured.gains[1],measured.gains[2]};}
+        if(!s["photometryMethod"].toString().isEmpty()&&measured.accepted<8)throw std::runtime_error("Catalogue calibration requires at least eight accepted reference stars. Adjust aperture, sky ring and saturation after checking the field.");
+        if(report){(*report)["photometryEdgeRejected"]=measured.edgeRejected;(*report)["photometrySaturatedRejected"]=measured.saturatedRejected;(*report)["photometrySignalRejected"]=measured.signalRejected;(*report)["photometryOutlierRejected"]=measured.outlierRejected;(*report)["photometryAccepted"]=measured.accepted;(*report)["photometryRejected"]=measured.rejected;(*report)["photometryScatter"]=measured.scatter;(*report)["photometryGains"]=QVariantList{measured.gains[0],measured.gains[1],measured.gains[2]};}
         image=std::move(measured.image);
     }
     if(s["advancedDenoise"].toBool()) {
@@ -225,7 +229,7 @@ void DeepSkyController::run(const QString& status,std::function<void(std::stop_t
 }
 void DeepSkyController::show(std::shared_ptr<const processing::FloatImage> image,bool result,QImage preview,std::shared_ptr<const processing::FloatImage> displayed,QVariantMap stretch,QImage before) {
     showingMask_=false;maskPreview_={};advancedReport_.clear();psfKernel_.clear();showingBackgroundModel_=false;backgroundPreview_={};comparingRaw_=false;displayingResult_=result;
-    if(result){finishSettings_=defaultDeepSkySettings();for(auto it=finishSettings_.begin();it!=finishSettings_.end();++it)if(stretch.contains(it.key()))it.value()=stretch[it.key()];if(auto validated=checkedDeepSkySettings(finishSettings_))finishSettings_=*validated;linear_=image;linearPreview_=before;comparisonPreview_=before;comparisonOrientationKey_=QJsonDocument(QJsonArray{}).toJson(QJsonDocument::Compact);finished_=displayed;resultPreview_=preview;stretch_=stretch;histogram_=stretch.value("histogram").toMap();emit resultChanged();}
+    if(result){astrometry_.clear();finishSettings_=defaultDeepSkySettings();for(auto it=finishSettings_.begin();it!=finishSettings_.end();++it)if(stretch.contains(it.key()))it.value()=stretch[it.key()];if(auto validated=checkedDeepSkySettings(finishSettings_))finishSettings_=*validated;linear_=image;linearPreview_=before;comparisonPreview_=before;comparisonOrientationKey_=QJsonDocument(QJsonArray{}).toJson(QJsonDocument::Compact);finished_=displayed;resultPreview_=preview;stretch_=stretch;histogram_=stretch.value("histogram").toMap();emit resultChanged();}
     if(result){geometryPreview_=preview;maskSourcePreview_=preview;}preview_=std::move(preview);emit imageChanged();emit changed();
 }
 void DeepSkyController::setShowingMask(bool enabled){if(busy_||!linear_)return;showingMask_=enabled&&!maskPreview_.isNull();showingBackgroundModel_=false;comparingRaw_=false;preview_=showingMask_?maskPreview_:resultPreview_;emit imageChanged();emit changed();}
@@ -308,7 +312,7 @@ void DeepSkyController::setReference(int index) {
     emit changed();
 }
 void DeepSkyController::remove(int index){if(busy_||index<0||index>=frames_.size())return;frames_.removeAt(index);emit changed();}
-void DeepSkyController::clear(){if(busy_)return;projectUrl_=QUrl();sourceFingerprints_.clear();maskImportPreview_={};maskImportPath_.clear();geometryPreview_={};maskSourcePreview_={};advancedReport_.clear();psfKernel_.clear();maskPreview_={};showingMask_=false;projectOptions_.clear();sourceRow_.clear();sourceInterpretation_.clear();sourceDebayer_=sourceAutoStretch_=true;finishSettings_.clear();rawPreview_={};backgroundPreview_={};showingBackgroundModel_=false;rawName_.clear();comparingRaw_=false;histogram_.clear();pendingAdjustments_.reset();displayingResult_=false;stage_.clear();frames_.clear();backgroundSamples_.clear();references_.clear();stacks_.clear();groupExposure_.clear();groupCounts_.clear();exposureCount_=0;resultFilters_.clear();groups_.clear();linear_.reset();finished_.reset();pipelineCache_.reset();pipelineSource_.reset();pipelineCacheKey_.clear();preview_={};resultPreview_={};linearPreview_={};comparisonPreview_={};comparisonOrientationKey_.clear();status_.clear();emit projectOptionsChanged();emit changed();emit imageChanged();}
+void DeepSkyController::clear(){if(busy_)return;projectUrl_=QUrl();sourceFingerprints_.clear();maskImportPreview_={};maskImportPath_.clear();geometryPreview_={};maskSourcePreview_={};advancedReport_.clear();psfKernel_.clear();maskPreview_={};showingMask_=false;projectOptions_.clear();sourceRow_.clear();sourceInterpretation_.clear();sourceDebayer_=sourceAutoStretch_=true;finishSettings_.clear();rawPreview_={};backgroundPreview_={};showingBackgroundModel_=false;rawName_.clear();comparingRaw_=false;histogram_.clear();pendingAdjustments_.reset();displayingResult_=false;stage_.clear();frames_.clear();backgroundSamples_.clear();references_.clear();stacks_.clear();astrometry_.clear();stackAstrometry_.clear();groupExposure_.clear();groupCounts_.clear();exposureCount_=0;resultFilters_.clear();groups_.clear();linear_.reset();finished_.reset();pipelineCache_.reset();pipelineSource_.reset();pipelineCacheKey_.clear();preview_={};resultPreview_={};linearPreview_={};comparisonPreview_={};comparisonOrientationKey_.clear();status_.clear();emit projectOptionsChanged();emit changed();emit imageChanged();}
 void DeepSkyController::chooseRawComparison(int index){
     if(busy_||index<0||index>=frames_.size()||frames_[index].toMap()["role"]!="Light")return;
     const auto row=frames_[index].toMap();
@@ -343,7 +347,7 @@ void DeepSkyController::integrate(bool calibrated,double sigma,bool normalize,bo
         auto master=[&](const QVariantList& rows,bool normalize=false){return processing::masterFrame(int(rows.size()),[&](int n){check(stop);return readFrame(rows[n].toMap());},normalize,checkpoint);};
         processing::Calibration calibration;
         if(!calibrated){if(!darks.empty())calibration.dark=master(darks);if(!biases.empty())calibration.bias=master(biases);if(!darkFlats.empty())calibration.darkFlat=master(darkFlats);if(correctBadPixels){if(!badPixels.empty())calibration.badPixels=master(badPixels);else if(calibration.dark)calibration.badPixels=processing::detectBadPixels(*calibration.dark);}}
-        std::map<QString,std::shared_ptr<const processing::FloatImage>> results;std::map<QString,double> exposures;std::map<QString,int> counts;QStringList summary;double exposure=0;
+        std::map<QString,std::shared_ptr<const processing::FloatImage>> results;std::map<QString,QVariantMap> astrometry;std::map<QString,double> exposures;std::map<QString,int> counts;QStringList summary;double exposure=0;
         for(auto& [group,rows]:lights) {
             if(references.contains(group)) {
                 for(int n=0;n<rows.size();++n)if(rows[n].toMap()["path"].toString()==references.at(group)){rows.swapItemsAt(0,n);break;}
@@ -361,6 +365,7 @@ void DeepSkyController::integrate(bool calibrated,double sigma,bool normalize,bo
             processing::BackgroundOptions sequenceGradient;
             auto result=processing::integrate(int(rows.size()),[&](int n){check(stop);return readFrame(rows[n].toMap());},groupCalibration,calibrated,sigma,checkpoint,
                 [this,group](int done,int total,const std::string& stage){post([this,group,done,total,stage]{progress_=done*100/std::max(1,total);stage_=QString::fromStdString(stage);status_=group+" · "+stage_;emit changed();});},normalize,sequenceBackground?&sequenceGradient:nullptr);
+            recording::AstroImage metadata;metadata.width=result.image.width;metadata.height=result.image.height;metadata.wcs=result.wcs;metadata.centerRa=result.centerRa;metadata.centerDec=result.centerDec;metadata.pixelScale=result.pixelScale;metadata.date=result.date;astrometry[group]=imageAstrometry(metadata);
             exposure+=result.totalExposure;exposures[group]=result.totalExposure;counts[group]=int(result.accepted.size());
             summary<<tr("%1: %2/%3 frames, %4 s, %5 rejected samples").arg(group).arg(result.accepted.size()).arg(rows.size()).arg(result.totalExposure,0,'f',1).arg(result.rejectedSamples);
             if(result.accepted.size()<2)summary<<tr("Only one usable light in %1: no multi-frame noise reduction was possible.").arg(group);
@@ -371,10 +376,10 @@ void DeepSkyController::integrate(bool calibrated,double sigma,bool normalize,bo
         const auto rawRow=lights.begin()->second[0].toMap();
         const auto rawPreview=previewImage(processing::linearRgb(readFrame(rawRow),checkpoint),true);
         check(stop);
-        post([this,results=std::move(results),exposures,counts,display,summary,exposure,rawRow,rawPreview,stop]()mutable{if(stop.stop_requested())return;rawPreview_=rawPreview;rawName_=rawRow["name"].toString();stacks_=std::move(results);groups_.clear();for(const auto& [group,image]:stacks_)groups_<<group;groupExposure_=exposures;groupCounts_=counts;exposureCount_=counts.begin()->second;resultFilters_={groups_.front()};totalExposure_=exposures.begin()->second;show(stacks_.begin()->second,true,display.preview,display.pixels,display.stretch,display.before);progress_=100;stage_=tr("Complete");status_=summary.join("\n");emit changed();});
+        post([this,results=std::move(results),astrometry,exposures,counts,display,summary,exposure,rawRow,rawPreview,stop]()mutable{if(stop.stop_requested())return;rawPreview_=rawPreview;rawName_=rawRow["name"].toString();stacks_=std::move(results);stackAstrometry_=astrometry;groups_.clear();for(const auto& [group,image]:stacks_)groups_<<group;groupExposure_=exposures;groupCounts_=counts;exposureCount_=counts.begin()->second;resultFilters_={groups_.front()};totalExposure_=exposures.begin()->second;show(stacks_.begin()->second,true,display.preview,display.pixels,display.stretch,display.before);astrometry_=stackAstrometry_.begin()->second;const auto saved=projectOptions_["astrometry"].toMap();if(validAstrometryState(saved)&&saved["imageKey"].toString()==QString::fromLatin1(linearImageKey(*linear_))&&readWcs(saved["wcs"]))astrometry_=saved;progress_=100;stage_=tr("Complete");status_=summary.join("\n");emit changed();});
     });
 }
-void DeepSkyController::selectResult(const QString& group){if(busy_)return;const auto found=stacks_.find(group);if(found==stacks_.end())return;const auto image=found->second;run(tr("Displaying integration…"),[this,image,group](std::stop_token stop){const auto display=prepare(*image,true,[stop]{check(stop);});check(stop);post([this,image,display,group,stop]{if(!stop.stop_requested()){totalExposure_=groupExposure_[group];exposureCount_=groupCounts_[group];resultFilters_={group};show(image,true,display.preview,display.pixels,display.stretch,display.before);}});});}
+void DeepSkyController::selectResult(const QString& group){if(busy_)return;const auto found=stacks_.find(group);if(found==stacks_.end())return;const auto image=found->second;run(tr("Displaying integration…"),[this,image,group](std::stop_token stop){const auto display=prepare(*image,true,[stop]{check(stop);});check(stop);post([this,image,display,group,stop]{if(!stop.stop_requested()){totalExposure_=groupExposure_[group];exposureCount_=groupCounts_[group];resultFilters_={group};show(image,true,display.preview,display.pixels,display.stretch,display.before);astrometry_=stackAstrometry_[group];emit changed();}});});}
 void DeepSkyController::compose(const QString& red,const QString& green,const QString& blue,const QString& luminance) {
     if(busy_)return;
     if(!stacks_.contains(red)||!stacks_.contains(green)||!stacks_.contains(blue)||(!luminance.isEmpty()&&!stacks_.contains(luminance))){status_=tr("Select integrated groups for each color channel.");emit changed();return;}
@@ -390,6 +395,10 @@ void DeepSkyController::apply(const QVariantMap& options) {
     const auto validated=checkedDeepSkySettings(settings);
     if(!validated){status_=tr("Invalid finishing settings. Check levels and parameter ranges.");emit changed();return;}
     const auto image=linear_;
+    const auto key=QString::fromLatin1(linearImageKey(*image));
+    auto bound=[&](const QVariantMap& v){return !v["photometry"].toBool()||v["photometryImageKey"].toString().isEmpty()||v["photometryImageKey"].toString()==key;};
+    bool validReferences=bound(*validated);for(const auto& op:(*validated)["operations"].toList())if(op.toMap()["enabled"].toBool())validReferences&=bound(op.toMap()["settings"].toMap());
+    if(!validReferences){status_=tr("Catalogue references belong to a different image. Prepare PCC/SPCC again for this image.");emit changed();return;}
     auto cacheKey=QJsonDocument(QJsonArray::fromVariantList((*validated)["operations"].toList())).toJson(QJsonDocument::Compact);
     for(const auto& operation:(*validated)["operations"].toList()){const auto parameters=operation.toMap()["settings"].toMap();if(parameters["maskType"].toInt()==5){const QFileInfo file(parameters["maskFile"].toString());cacheKey+=QByteArray::number(file.size())+":"+QByteArray::number(file.lastModified().toMSecsSinceEpoch());}}
     const auto cache=(pipelineSource_==image&&pipelineCacheKey_==cacheKey)?pipelineCache_:nullptr;
@@ -472,14 +481,15 @@ void DeepSkyController::exportImage(const QUrl& url,bool linear) {
     if(projectUrl_.isLocalFile()&&sameFile(projectUrl_.toLocalFile(),path)){status_=tr("A project file cannot be overwritten by an image.");emit changed();return;}
     for(const auto& value:frames_)if(sameFile(value.toMap()["path"].toString(),path)){status_=tr("An original image cannot be overwritten.");emit changed();return;}
     const auto masks=referencedMasks(finishSettings_,projectOptions_);for(const auto& mask:masks)if(sameFile(mask,path)){status_=tr("An original image cannot be overwritten.");emit changed();return;}
+    auto exportWcs=readWcs(astrometry_["wcs"]);if(exportWcs&&!linear)exportWcs=finishWcs(*exportWcs,linear_->width,linear_->height,finishSettings_);
     const auto image=linear?linear_:finished_;const auto exposure=totalExposure_;
     exporting_=true;
-    run(tr("Exporting image…"),[this,image,path,linear,exposure](std::stop_token stop){
+    run(tr("Exporting image…"),[this,image,path,linear,exposure,exportWcs](std::stop_token stop){
         QTemporaryDir directory(QFileInfo(path).dir().filePath(".astrocapture-XXXXXX"));if(!directory.isValid())throw std::runtime_error("Cannot create temporary export files.");
         const auto temp=directory.filePath("image");
         const auto suffix=QFileInfo(path).suffix().toLower();
         if(suffix=="fits"||suffix=="fit"||suffix=="fts") {
-            recording::AstroImage output;output.width=image->width;output.height=image->height;output.channels=3;output.bits=32;output.exposure=exposure;output.samples=image->rgb;
+            recording::AstroImage output;output.width=image->width;output.height=image->height;output.channels=3;output.bits=32;output.exposure=exposure;output.samples=image->rgb;output.wcs=exportWcs;
             recording::writeAstroFits(nativePath(temp),output);
         }else if(suffix=="tif"||suffix=="tiff") {
             if(linear)throw std::runtime_error("Use FITS to preserve linear floating-point data.");
@@ -500,7 +510,8 @@ void DeepSkyController::saveProject(const QUrl& url) {
     for(const auto& value:frames_)if(sameFile(url.toLocalFile(),value.toMap()["path"].toString())){status_=tr("An original image cannot be overwritten.");emit changed();return;}
     for(const auto& path:referencedMasks(finishSettings_,projectOptions_))if(sameFile(url.toLocalFile(),path)){status_=tr("An original image cannot be overwritten.");emit changed();return;}
     auto sources=sourceFingerprints_;for(const auto& value:frames_){const auto row=value.toMap();if(row.contains("sourceFingerprint"))sources[row["path"].toString()]=row["sourceFingerprint"];}
-    const QJsonObject project{{"sources",QJsonObject::fromVariantMap(sources)},{"version",1},{"frames",QJsonArray::fromVariantList(frames_)},{"options",QJsonObject::fromVariantMap(projectOptions_)}};
+    auto savedOptions=projectOptions_;savedOptions["astrometry"]=astrometry_;
+    const QJsonObject project{{"sources",QJsonObject::fromVariantMap(sources)},{"version",1},{"frames",QJsonArray::fromVariantList(frames_)},{"options",QJsonObject::fromVariantMap(savedOptions)}};
     QSaveFile file(url.toLocalFile());const auto bytes=QJsonDocument(project).toJson();
     if(bytes.size()>4*1024*1024){status_=tr("Project exceeds 4 MiB. Reduce saved sample or reference lists before saving.");emit changed();return;}
     if(!file.open(QIODevice::WriteOnly)||file.write(bytes)!=bytes.size()||!file.commit())status_=tr("Cannot save project.");else {status_=tr("Project saved. Original files are referenced, not copied.");projectUrl_=url;emit projectSaved(url);}emit changed();

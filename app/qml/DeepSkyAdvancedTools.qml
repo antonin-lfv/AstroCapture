@@ -509,7 +509,7 @@ Control {
                     Explanation {
                         text: qsTr("Local matched-reference color calibration, for linear broadband RGB. No plate solving or automatic catalogue lookup is performed. Reference positions must match this image; reference RGB fluxes must represent the intended filter response. Magnitudes cannot be entered directly.")
                     }
-                    Toggle {explanation: qsTr("Balances RGB using at least three matched reference stars from the imported CSV. Requires linear, unrotated data and no mask. This is relative color calibration; automatic catalogue-based PCC/SPCC is not available.");
+                    Toggle {explanation: qsTr("Balances RGB using at least three matched reference stars from the imported CSV. Requires linear, unrotated data and no mask. This imports already matched RGB references. Automatic WCS and PCC/SPCC are available in the Color family.");
                         objectName: "deepSkyPhotometryEnabled"
                         key: "photometry"
                         text: qsTr("Calibrate colors from reference stars")
@@ -617,7 +617,7 @@ Control {
         onAccepted: {
             const references = tools.controller.importPhotometryCatalog(selectedFile);
             if (references.length >= 3)
-                tools.change("photometryReferences", references);
+                tools.edited(Object.assign({},tools.values,{photometryReferences:references,photometryMethod:"",photometryProfile:"",photometryWhite:"",photometryImageKey:""}));
         }
     }
 }

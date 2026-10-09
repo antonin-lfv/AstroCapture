@@ -5,6 +5,7 @@ add_library(astro_processing STATIC
     src/Geometry.cpp
     src/DeepSky.cpp
     src/DeepSkyAdvanced.cpp
+    src/Astrometry.cpp
     src/Surface.cpp
     src/Mosaic.cpp
     src/Preview.cpp

@@ -960,6 +960,10 @@ Télescope · caméra · accessoires</translation>
         <source>Shows the mask in grayscale to inspect the affected area: white applies, black protects, gray blends. Export still saves the processed image, not this diagnostic view.</source>
         <translation>Affiche le masque en niveaux de gris pour inspecter la zone d’effet : blanc applique, noir protège, gris mélange. L’export conserve l’image traitée, pas cette vue de contrôle.</translation>
     </message>
+    <message>
+        <source>Balances RGB using at least three matched reference stars from the imported CSV. Requires linear, unrotated data and no mask. This imports already matched RGB references. Automatic WCS and PCC/SPCC are available in the Color family.</source>
+        <translation>Équilibre le RVB à partir d’au moins trois étoiles du CSV associées à l’image. Requiert des pixels linéaires, non tournés et sans masque. Le WCS et la PCC/SPCC automatiques sont accessibles dans la famille Couleur.</translation>
+    </message>
 </context>
     <context>
         <name>DeepSkyWorkspace</name>
@@ -2786,7 +2790,11 @@ L’aperçu est automatiquement éclairci ; les données restent linéaires.</tr
             <source>Delete adjustments: %1</source>
             <translation>Supprimer les réglages : %1</translation>
         </message>
-    </context>
+        <message>
+        <source>Astrometry · PCC / SPCC</source>
+        <translation>Astrométrie · PCC / SPCC</translation>
+    </message>
+</context>
     <context>
         <name>GlobalSettingsWorkspace</name>
         <message>
@@ -3790,7 +3798,23 @@ L’aperçu est automatiquement éclairci ; les données restent linéaires.</tr
             <source>Resume returns to the current session. Open reloads a saved deep-sky project: a portable project restores its calculated results immediately; a linked project requires its sources and a new integration. The deep-sky gear offers both save modes and Find moved sources. Settings shows cache and automatic recovery sizes and can free unused project caches.</source>
             <translation>Reprendre revient à la session courante. Ouvrir charge un projet Ciel profond sauvegardé : un projet portable restaure immédiatement ses résultats calculés ; un projet lié nécessite ses sources et un nouvel empilement. Le rouage propose les deux modes de sauvegarde et la recherche des sources déplacées. Les paramètres affichent le poids des caches et de la reprise automatique et permettent de libérer les caches inutilisés.</translation>
         </message>
-    </context>
+        <message>
+        <source>Astrometry and catalog colors</source>
+        <translation>Astrométrie et couleurs par catalogue</translation>
+    </message>
+    <message>
+        <source>Open Color → Astrometry · PCC / SPCC. Set ICRS RA/Dec in degrees and sampling in arcsec/pixel; FITS metadata pre-fills these when available. Solve with online Gaia DR3 or a local Gaia CSV. Check stars across the field, RMS in pixels and arcseconds, and coverage. Choose PCC for temperature-based continuum estimates, or SPCC for Gaia XP measured spectra. SPCC requires wavelength_nm,red,green,blue equipment photon response (QE × filters), increasing within 336–1020 nm and zero at both endpoints. The Sun CALSPEC or constant Fν reference defines the neutral white. Calibration runs before stretch and rejects saturated, edge, weak-signal and inconsistent stars. At least eight accepted stars are required. Inspect gains and residual scatter. References are bound to the exact linear image and saved with their provenance. Celestial WCS is exported in float FITS and follows crop, rotation, mirroring and resize.</source>
+        <translation>Ouvrez Couleur → Astrométrie · PCC / SPCC. Renseignez l’ascension droite et la déclinaison ICRS en degrés, puis l’échantillonnage en secondes d’arc par pixel ; les métadonnées FITS préremplissent ces valeurs lorsqu’elles sont disponibles. Résolvez avec Gaia DR3 en ligne ou un catalogue Gaia CSV local. Vérifiez les étoiles sur tout le champ, l’écart RMS en pixels et en secondes d’arc, ainsi que la couverture. Choisissez la PCC pour une estimation du continuum à partir des températures stellaires, ou la SPCC pour les spectres Gaia XP mesurés. La SPCC nécessite la réponse photonique du matériel (rendement quantique × filtres) au format wavelength_nm,red,green,blue, avec des longueurs d’onde croissantes entre 336 et 1 020 nm et des extrémités nulles. La référence Soleil CALSPEC ou Fν constant définit le blanc neutre. La calibration précède l’étirement et rejette les étoiles saturées, proches des bords, trop faibles ou incohérentes. Au moins huit étoiles acceptées sont nécessaires. Examinez les gains et la dispersion résiduelle. Les références sont liées à l’image linéaire exacte et sauvegardées avec leur provenance. Le WCS céleste est exporté dans le FITS flottant et suit le recadrage, la rotation, les symétries et le redimensionnement.</translation>
+    </message>
+    <message>
+        <source>GHS, PSF, Richardson–Lucy, multiscale denoising and SCNR expose their parameters and help. Values and algorithms are not interchangeable with every Siril tool. Color provides targeted TAN astrometry with Gaia DR3 and PCC/SPCC. Supply approximate centre and sampling; inspect RMS and matched stars. PCC uses a continuum temperature model, while SPCC requires Gaia XP spectra and the equipment response. Neither promises numerical equivalence with Siril.</source>
+        <translation>GHS, PSF, Richardson–Lucy, débruitage multi-échelle et SCNR exposent leurs paramètres et leurs aides. Les valeurs et algorithmes ne sont pas interchangeables avec tous les outils de Siril. Couleur propose l’astrométrie TAN ciblée avec Gaia DR3 et les calibrations PCC/SPCC. Fournissez un centre approximatif et un échantillonnage ; examinez le RMS et les étoiles identifiées. La PCC utilise un modèle de continuum à partir de la température ; la SPCC nécessite les spectres Gaia XP et la réponse du matériel. Aucune ne promet une équivalence numérique avec Siril.</translation>
+    </message>
+    <message>
+        <source>Combine multiple filters as RGB, LRGB, SHO or HOO. Adjust color gains, saturation and smoothing manually. The initial gains estimate a neutral background; they are not photometric calibration. Gradient extraction uses independent color-channel polynomials (degrees 1 to 4), a configurable grid and manually editable sky samples. Optional degree-1 extraction can run on each calibrated, debayered exposure before stacking. Avoid fitting real nebulosity. Green noise reduction offers four SCNR protection methods and optional CIE lightness preservation. Use it after stretching and color balance; intentional green colors should be preserved. Advanced transformations provides GHS, circular-PSF Richardson-Lucy, multiscale wavelet denoising, generated masks and local matched-reference photometric colors. The Color family provides targeted WCS with Gaia DR3, PCC from stellar temperature models and SPCC from measured Gaia XP spectra. SPCC requires the measured equipment response. Verify the astrometric markers and calibration diagnostics; a distorted or unknown full-sky field may need an external solver. Export linear 32-bit FITS for further work. Classic export opens the shared editor with a choice of PNG, TIFF or JPEG and an optional caption. PNG and TIFF preserve 16-bit detail without lossy compression. The technical caption includes the accepted exposure count, total exposure time and filters. Deep-sky caption settings are saved in the project.</source>
+        <translation>Combinez plusieurs filtres en RVB, LRGB, SHO ou HOO. Ajustez manuellement les gains de couleur, la saturation et le lissage. Les gains initiaux estiment un fond neutre ; ce n’est pas une calibration photométrique. L’extraction du gradient utilise des polynômes indépendants par canal (degrés 1 à 4), une grille configurable et des échantillons de ciel modifiables. Une extraction facultative de degré 1 peut précéder l’empilement de chaque pose calibrée et dématricée. Évitez de modéliser une vraie nébulosité. La réduction du bruit vert propose quatre méthodes de protection SCNR et la conservation facultative de la clarté CIE. Utilisez-la après l’étirement et l’équilibrage des couleurs ; préservez les couleurs vertes intentionnelles. Transformations avancées propose GHS, Richardson–Lucy avec PSF circulaire, débruitage par ondelettes, masques générés et couleurs photométriques par étoiles de référence locales. La famille Couleur propose le WCS ciblé avec Gaia DR3, la PCC à partir de températures stellaires et la SPCC à partir de spectres Gaia XP mesurés. La SPCC nécessite la réponse mesurée du matériel. Vérifiez les repères astrométriques et les diagnostics ; un champ déformé ou entièrement inconnu peut nécessiter une résolution externe. Exportez un FITS linéaire 32 bits pour poursuivre le travail. L’export classique ouvre l’éditeur commun avec PNG, TIFF ou JPEG et une légende facultative. PNG et TIFF conservent les détails en 16 bits sans compression avec perte. Les informations techniques comprennent le nombre de poses acceptées, la durée totale et les filtres. Les réglages de légende du ciel profond sont sauvegardés dans le projet.</translation>
+    </message>
+</context>
     <context>
         <name>HistoryWorkspace</name>
         <message>
@@ -6352,7 +6376,303 @@ Résultat obtenu :
             <source>A saved session file is damaged.</source>
             <translation>Un fichier de la session sauvegardée est endommagé.</translation>
         </message>
-    </context>
+        <message>
+        <source>Local Gaia catalogue imported: %1 stars.</source>
+        <translation>Catalogue Gaia local importé : %1 étoiles.</translation>
+    </message>
+    <message>
+        <source>Equipment response imported. Include sensor QE × RGB filters × any additional filter.</source>
+        <translation>Réponse de l’équipement importée. Incluez QE du capteur × filtres RVB × filtres supplémentaires.</translation>
+    </message>
+    <message>
+        <source>Enter RA in degrees (0–360), declination (−90–90), sampling (0.01–100 arcsec/pixel) and magnitude (5–20).</source>
+        <translation>Saisissez l’ascension droite en degrés (0–360), la déclinaison (−90–90), l’échantillonnage (0,01–100 ″/pixel) et la magnitude (5–20).</translation>
+    </message>
+    <message>
+        <source>Solving astrometry with Gaia DR3…</source>
+        <translation>Résolution astrométrique avec Gaia DR3…</translation>
+    </message>
+    <message>
+        <source>Matching stars and verifying WCS…</source>
+        <translation>Association des étoiles et vérification du WCS…</translation>
+    </message>
+    <message>
+        <source>WCS verified: %1 stars · RMS %2 px · %3 arcsec/pixel.</source>
+        <translation>WCS vérifié : %1 étoiles · RMS %2 px · %3 ″/pixel.</translation>
+    </message>
+    <message>
+        <source>Solve and verify WCS before calibrating colors.</source>
+        <translation>Résolvez et vérifiez le WCS avant de calibrer les couleurs.</translation>
+    </message>
+    <message>
+        <source>SPCC requires the measured RGB response of your equipment. Import its CSV first.</source>
+        <translation>La SPCC nécessite la réponse RVB mesurée de votre équipement. Importez son CSV.</translation>
+    </message>
+    <message>
+        <source>Preparing SPCC from Gaia XP spectra…</source>
+        <translation>Préparation de la SPCC à partir des spectres Gaia XP…</translation>
+    </message>
+    <message>
+        <source>Preparing PCC from Gaia stellar temperatures…</source>
+        <translation>Préparation de la PCC à partir des températures Gaia…</translation>
+    </message>
+    <message>
+        <source>Reference stars prepared: %1</source>
+        <translation>Étoiles de référence préparées : %1</translation>
+    </message>
+    <message>
+        <source>%1 color references prepared; %2 unavailable or unmatched. Apply on linear data before stretching.</source>
+        <translation>%1 références couleur préparées ; %2 indisponibles ou non associées. Calibration sur les pixels linéaires avant l’étirement.</translation>
+    </message>
+    <message>
+        <source>Catalogue references belong to a different image. Prepare PCC/SPCC again for this image.</source>
+        <translation>Ces références appartiennent à une autre image. Préparez à nouveau la PCC/SPCC pour cette image.</translation>
+    </message>
+    <message>
+        <source>Gaia is unavailable. Check the connection or import a local Gaia CSV. Previous results are preserved.</source>
+        <translation>Gaia est indisponible. Vérifiez la connexion ou importez un CSV Gaia local. Le résultat précédent est conservé.</translation>
+    </message>
+    <message>
+        <source>No reliable WCS found. Verify centre, scale, overlap and stellar quality.</source>
+        <translation>Aucun WCS fiable trouvé. Vérifiez le centre, l’échantillonnage et la qualité des étoiles.</translation>
+    </message>
+    <message>
+        <source>WCS verification failed: insufficient field coverage or excessive residuals. A distorted field may require a SIP solver.</source>
+        <translation>WCS non validé : couverture insuffisante ou résidus trop élevés. Un champ déformé peut nécessiter un solveur SIP.</translation>
+    </message>
+    <message>
+        <source>At least eight detected stars are required for WCS.</source>
+        <translation>Le WCS nécessite au moins huit étoiles détectées.</translation>
+    </message>
+    <message>
+        <source>Fewer than eight identified color references are usable. Check WCS, field, passbands and catalogue coverage.</source>
+        <translation>Moins de huit références couleur identifiées sont utilisables. Vérifiez WCS, champ, filtres et couverture du catalogue.</translation>
+    </message>
+    <message>
+        <source>Catalogue calibration requires at least eight accepted reference stars. Adjust aperture, sky ring and saturation after checking the field.</source>
+        <translation>La calibration sur catalogue nécessite au moins huit étoiles acceptées. Vérifiez le champ puis ajustez l’ouverture, l’anneau de ciel et le seuil de saturation.</translation>
+    </message>
+    <message>
+        <source>Response CSV header must be wavelength_nm,red,green,blue.</source>
+        <translation>L’en-tête du CSV doit être wavelength_nm,red,green,blue.</translation>
+    </message>
+    <message>
+        <source>RGB response endpoints must be zero; provide complete passbands.</source>
+        <translation>Les extrémités de la réponse RVB doivent être nulles. Fournissez les bandes de transmission complètes.</translation>
+    </message>
+    <message>
+        <source>The WCS belongs to a different linear image. Solve this image again.</source>
+        <translation>Ce WCS appartient à une autre image linéaire. Résolvez à nouveau ce champ.</translation>
+    </message>
+    <message>
+        <source>Gaia response exceeds 8 MiB. Reduce the search field.</source>
+        <translation>La réponse de Gaia dépasse 8 Mio. Réduisez le champ de recherche.</translation>
+    </message>
+    <message>
+        <source>Invalid Gaia response.</source>
+        <translation>Réponse Gaia invalide.</translation>
+    </message>
+    <message>
+        <source>Invalid saved RGB response.</source>
+        <translation>Réponse RVB sauvegardée invalide.</translation>
+    </message>
+    <message>
+        <source>Cannot read Gaia CSV (maximum 8 MiB).</source>
+        <translation>Impossible de lire le catalogue Gaia CSV (8 Mio maximum).</translation>
+    </message>
+    <message>
+        <source>Cannot read RGB response CSV (maximum 256 KiB).</source>
+        <translation>Impossible de lire la réponse RVB CSV (256 Kio maximum).</translation>
+    </message>
+    <message>
+        <source>Invalid RGB response CSV.</source>
+        <translation>Réponse RVB CSV invalide.</translation>
+    </message>
+    <message>
+        <source>Targeted WCS supports a search radius up to 8 degrees. Use a local catalogue or narrower field.</source>
+        <translation>La résolution ciblée accepte un rayon de recherche de 8° maximum. Utilisez un catalogue local ou un champ plus étroit.</translation>
+    </message>
+    <message>
+        <source>Invalid white reference.</source>
+        <translation>Référence de blanc invalide.</translation>
+    </message>
+    <message>
+        <source>Downloading Gaia XP spectra: %1 / %2</source>
+        <translation>Téléchargement des spectres Gaia XP : %1 / %2</translation>
+    </message>
+    <message>
+        <source>Invalid Gaia catalogue or observation epoch.</source>
+        <translation>Catalogue Gaia ou époque d’observation invalide.</translation>
+    </message>
+    <message>
+        <source>Gaia CSV requires source_id,ra,dec,phot_g_mean_mag. Optional: teff_gspphot,has_xp_sampled,pmra,pmdec,ref_epoch.</source>
+        <translation>Le CSV Gaia doit contenir source_id,ra,dec,phot_g_mean_mag. Colonnes facultatives : teff_gspphot,has_xp_sampled,pmra,pmdec,ref_epoch.</translation>
+    </message>
+    <message>
+        <source>Invalid Gaia CSV row.</source>
+        <translation>Ligne Gaia CSV invalide.</translation>
+    </message>
+    <message>
+        <source>Invalid Gaia star coordinates, identifier or photometry.</source>
+        <translation>Coordonnées, identifiant ou photométrie d’une étoile Gaia invalides.</translation>
+    </message>
+    <message>
+        <source>Invalid Gaia proper motion.</source>
+        <translation>Mouvement propre Gaia invalide.</translation>
+    </message>
+    <message>
+        <source>Gaia catalogues are limited to 5000 stars.</source>
+        <translation>Les catalogues Gaia sont limités à 5 000 étoiles.</translation>
+    </message>
+    <message>
+        <source>At least eight catalogue stars are required.</source>
+        <translation>Il faut au moins huit étoiles dans le catalogue.</translation>
+    </message>
+    <message>
+        <source>Duplicate Gaia source identifier.</source>
+        <translation>Identifiant Gaia présent plusieurs fois.</translation>
+    </message>
+    <message>
+        <source>Invalid saved Gaia catalogue.</source>
+        <translation>Catalogue Gaia sauvegardé invalide.</translation>
+    </message>
+    <message>
+        <source>Unsupported Gaia spectrum encoding.</source>
+        <translation>Encodage du spectre Gaia non pris en charge.</translation>
+    </message>
+    <message>
+        <source>Gaia XP spectrum identifier, units or schema did not validate.</source>
+        <translation>L’identifiant, les unités ou la structure du spectre Gaia XP n’ont pas pu être vérifiés.</translation>
+    </message>
+    <message>
+        <source>Invalid Gaia XP binary spectrum.</source>
+        <translation>Spectre binaire Gaia XP invalide.</translation>
+    </message>
+    <message>
+        <source>Gaia XP contains null spectral samples.</source>
+        <translation>Le spectre Gaia XP contient des échantillons manquants.</translation>
+    </message>
+    <message>
+        <source>Invalid Gaia XP spectral samples.</source>
+        <translation>Échantillons du spectre Gaia XP invalides.</translation>
+    </message>
+    <message>
+        <source>Gaia XP does not cover 336–1020 nm.</source>
+        <translation>Le spectre Gaia XP ne couvre pas 336–1020 nm.</translation>
+    </message>
+    <message>
+        <source>Invalid Gaia spectral archive size.</source>
+        <translation>Taille de l’archive spectrale Gaia invalide.</translation>
+    </message>
+    <message>
+        <source>Truncated Gaia ZIP.</source>
+        <translation>Archive Gaia ZIP incomplète.</translation>
+    </message>
+    <message>
+        <source>Unsupported Gaia ZIP directory.</source>
+        <translation>Répertoire de l’archive Gaia ZIP non pris en charge.</translation>
+    </message>
+    <message>
+        <source>Invalid Gaia ZIP bounds.</source>
+        <translation>Limites de l’archive Gaia ZIP invalides.</translation>
+    </message>
+    <message>
+        <source>Invalid Gaia ZIP central entry.</source>
+        <translation>Entrée du répertoire Gaia ZIP invalide.</translation>
+    </message>
+    <message>
+        <source>Unsupported or oversized Gaia ZIP entry.</source>
+        <translation>Entrée Gaia ZIP non prise en charge ou trop volumineuse.</translation>
+    </message>
+    <message>
+        <source>Invalid Gaia ZIP local entry.</source>
+        <translation>Entrée locale Gaia ZIP invalide.</translation>
+    </message>
+    <message>
+        <source>Invalid Gaia ZIP payload bounds.</source>
+        <translation>Limites des données Gaia ZIP invalides.</translation>
+    </message>
+    <message>
+        <source>Cannot decode Gaia ZIP.</source>
+        <translation>Impossible de décompresser l’archive Gaia ZIP.</translation>
+    </message>
+    <message>
+        <source>Invalid Gaia ZIP deflate stream.</source>
+        <translation>Données compressées Gaia ZIP invalides.</translation>
+    </message>
+    <message>
+        <source>Gaia ZIP checksum did not validate.</source>
+        <translation>L’intégrité de l’archive Gaia ZIP n’a pas pu être vérifiée.</translation>
+    </message>
+    <message>
+        <source>Unexpected or duplicate Gaia spectrum in ZIP.</source>
+        <translation>Spectre inattendu ou présent plusieurs fois dans l’archive Gaia ZIP.</translation>
+    </message>
+    <message>
+        <source>Gaia did not return every requested XP spectrum.</source>
+        <translation>Gaia n’a pas renvoyé tous les spectres XP demandés.</translation>
+    </message>
+    <message>
+        <source>Provide a field centre, pixel scale and at least eight catalogue stars.</source>
+        <translation>Renseignez le centre du champ, l’échantillonnage et un catalogue contenant au moins huit étoiles.</translation>
+    </message>
+    <message>
+        <source>Too few catalogue stars in the tangent field.</source>
+        <translation>Trop peu d’étoiles du catalogue dans le champ tangent.</translation>
+    </message>
+    <message>
+        <source>Too few consistent astrometric matches.</source>
+        <translation>Trop peu de correspondances astrométriques cohérentes.</translation>
+    </message>
+    <message>
+        <source>WCS refinement failed.</source>
+        <translation>L’affinement du WCS a échoué.</translation>
+    </message>
+    <message>
+        <source>The solved sampling or distortion is inconsistent with the input scale.</source>
+        <translation>L’échantillonnage résolu ou la distorsion est incompatible avec la valeur fournie.</translation>
+    </message>
+    <message>
+        <source>The solved field lies outside the seeded search region. Verify the target coordinates.</source>
+        <translation>Le champ résolu se trouve hors de la région de recherche. Vérifiez les coordonnées de la cible.</translation>
+    </message>
+    <message>
+        <source>Invalid spectrum or RGB response curve.</source>
+        <translation>Spectre ou courbe de réponse RVB invalide.</translation>
+    </message>
+    <message>
+        <source>Spectrum wavelengths must increase and samples must be finite.</source>
+        <translation>Les longueurs d’onde du spectre doivent être croissantes et les échantillons doivent être finis.</translation>
+    </message>
+    <message>
+        <source>Response wavelengths must increase within Gaia XP coverage: 336–1020 nm.</source>
+        <translation>Les longueurs d’onde de la réponse doivent être croissantes, entre 336 et 1 020 nm.</translation>
+    </message>
+    <message>
+        <source>Photon response values must be between zero and one.</source>
+        <translation>Les valeurs de réponse photonique doivent être comprises entre 0 et 1.</translation>
+    </message>
+    <message>
+        <source>The spectrum must cover the entire RGB response.</source>
+        <translation>Le spectre doit couvrir toute la réponse RVB.</translation>
+    </message>
+    <message>
+        <source>Synthetic RGB flux is non-positive. Verify spectrum and passbands.</source>
+        <translation>Le flux RVB synthétique n’est pas positif. Vérifiez le spectre et les bandes passantes.</translation>
+    </message>
+    <message>
+        <source>PCC requires a stellar temperature between 2500 and 50000 K.</source>
+        <translation>La PCC nécessite une température stellaire comprise entre 2 500 et 50 000 K.</translation>
+    </message>
+    <message>
+        <source>Gaia XP spectra are unavailable. Check the connection and retry. Previous results are preserved.</source>
+        <translation>Les spectres Gaia XP sont indisponibles. Vérifiez la connexion et réessayez. Le résultat précédent est conservé.</translation>
+    </message>
+    <message>
+        <source>Choose a reference limit between 8 and 150 stars.</source>
+        <translation>Choisissez une limite de références entre 8 et 150 étoiles.</translation>
+    </message>
+</context>
     <context>
         <name>astro::app::MosaicController</name>
         <message>
@@ -7706,6 +8026,249 @@ Résultat obtenu :
     <message>
         <source>Help</source>
         <translation>Aide</translation>
+    </message>
+</context>
+<context>
+    <name>AstrometryDialog</name>
+    <message>
+        <source>Astrometry and color calibration</source>
+        <translation>Astrométrie et calibration des couleurs</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>Fermer</translation>
+    </message>
+    <message>
+        <source>1 · Solve the field (WCS)</source>
+        <translation>1 · Résoudre le champ (WCS)</translation>
+    </message>
+    <message>
+        <source>Identify stars without changing pixels. The approximate centre and sampling constrain the search; rotation and mirroring are found automatically. This is a targeted TAN solver, not a blind full-sky solver.</source>
+        <translation>Identifie les étoiles sans modifier les pixels. Le centre approximatif et l’échantillonnage guident la recherche ; rotation et miroir sont détectés. Ce solveur TAN nécessite une position de départ.</translation>
+    </message>
+    <message>
+        <source>Right ascension · degrees</source>
+        <translation>Ascension droite · degrés</translation>
+    </message>
+    <message>
+        <source>Approximate ICRS field centre. Convert RA in hours to degrees by multiplying by 15. Example: M42 is near 83.82°. FITS hints are filled when available.</source>
+        <translation>Centre approximatif du champ en ICRS. Pour convertir les heures en degrés, multipliez par 15. M42 se trouve vers 83,82°. Les indications du FITS sont reprises si disponibles.</translation>
+    </message>
+    <message>
+        <source>Declination · degrees</source>
+        <translation>Déclinaison · degrés</translation>
+    </message>
+    <message>
+        <source>Approximate ICRS declination, with its sign. M42 is near −5.39°. Keep the target within the search field.</source>
+        <translation>Déclinaison ICRS approximative, avec son signe. M42 se trouve vers −5,39°. La cible doit rester dans le champ recherché.</translation>
+    </message>
+    <message>
+        <source>Sampling · arcsec/pixel</source>
+        <translation>Échantillonnage · ″/pixel</translation>
+    </message>
+    <message>
+        <source>Use 206.265 × pixel size in µm / effective focal length in mm. Include binning in pixel size. A seed between half and twice the actual sampling can be refined.</source>
+        <translation>Calculez 206,265 × taille du pixel en µm / focale effective en mm. Incluez le binning dans la taille du pixel. Une valeur comprise entre la moitié et le double de la valeur réelle peut être affinée.</translation>
+    </message>
+    <message>
+        <source>Limiting magnitude · Gaia G</source>
+        <translation>Magnitude limite · Gaia G</translation>
+    </message>
+    <message>
+        <source>Include stars brighter than this Gaia G magnitude. Increase for sparse fields, reduce for dense fields. The catalogue is capped at 5000 stars.</source>
+        <translation>Inclut les étoiles plus brillantes que cette magnitude Gaia G. Augmentez-la dans un champ pauvre, réduisez-la dans un champ dense. Le catalogue est limité à 5 000 étoiles.</translation>
+    </message>
+    <message>
+        <source>Gaia DR3 · online</source>
+        <translation>Gaia DR3 · en ligne</translation>
+    </message>
+    <message>
+        <source>Local Gaia CSV</source>
+        <translation>Gaia local · CSV</translation>
+    </message>
+    <message>
+        <source>Online queries send field coordinates and sampling to ESA, never your image. Catalogues and XP spectra are cached locally. CSV works without internet; export Gaia positions, magnitudes, temperatures and proper motions.</source>
+        <translation>La requête transmet les coordonnées du champ à l’ESA, sans envoyer votre image. Catalogues et spectres XP sont mis en cache. Le CSV fonctionne hors ligne : exportez positions Gaia, magnitudes, températures et mouvements propres.</translation>
+    </message>
+    <message>
+        <source>Import CSV</source>
+        <translation>Importer le CSV</translation>
+    </message>
+    <message>
+        <source>Import a Gaia catalogue before solving.</source>
+        <translation>Importez un catalogue Gaia avant la résolution.</translation>
+    </message>
+    <message>
+        <source>Solve and verify WCS</source>
+        <translation>Résoudre et vérifier le WCS</translation>
+    </message>
+    <message>
+        <source>Verified · %1 stars · RMS %2 px (%3″) · field coverage %4%</source>
+        <translation>Vérifié · %1 étoiles · RMS %2 px (%3″) · couverture %4 %</translation>
+    </message>
+    <message>
+        <source>Mark matched stars on the image</source>
+        <translation>Repérer les étoiles sur l’image</translation>
+    </message>
+    <message>
+        <source>Close this dialog to inspect the catalogue markers at 100%. Markers are hidden when geometry or comparison changes pixel coordinates. Verify stars across the whole field before trusting calibration.</source>
+        <translation>Fermez cette fenêtre pour vérifier les repères à 100 %. Ils sont masqués si la géométrie ou la comparaison change les coordonnées. Vérifiez leur accord dans tout le champ.</translation>
+    </message>
+    <message>
+        <source>2 · Calibrate broadband RGB</source>
+        <translation>2 · Calibrer les couleurs RVB</translation>
+    </message>
+    <message>
+        <source>Calibration measures identified stars on linear pixels before stretching. The final preview may remain stretched. Narrowband palettes and duplicated mono channels are unsuitable for this broadband calibration.</source>
+        <translation>La calibration mesure les étoiles identifiées sur les pixels linéaires, avant l’étirement. L’aperçu peut rester étiré. Les palettes à bande étroite et les canaux monochromes dupliqués ne conviennent pas.</translation>
+    </message>
+    <message>
+        <source>PCC · stellar temperature model</source>
+        <translation>PCC · températures stellaires</translation>
+    </message>
+    <message>
+        <source>SPCC · Gaia XP spectra</source>
+        <translation>SPCC · spectres Gaia XP</translation>
+    </message>
+    <message>
+        <source>PCC approximates stellar continua using Gaia temperatures; extinction and absorption lines limit its accuracy. SPCC integrates measured Gaia XP spectra through the actual equipment response. Both use robust aperture photometry and reject outliers.</source>
+        <translation>La PCC estime le continuum à partir des températures Gaia ; extinction et raies d’absorption limitent sa précision. La SPCC intègre les spectres XP mesurés avec la réponse de l’équipement. La photométrie robuste écarte les références incohérentes.</translation>
+    </message>
+    <message>
+        <source>My equipment · measured RGB response</source>
+        <translation>Mon équipement · réponse RVB mesurée</translation>
+    </message>
+    <message>
+        <source>Bessell R/V/B · PCC reference</source>
+        <translation>Bessell R/V/B · référence PCC</translation>
+    </message>
+    <message>
+        <source>For SPCC import photon response QE × RGB filter × any additional transmission, per channel. CSV: wavelength_nm,red,green,blue; increasing 336–1020 nm, values 0–1 and zero endpoints. Do not normalize channels independently. The Bessell reference is a model, not your camera.</source>
+        <translation>Pour la SPCC, importez la réponse photonique QE × filtres RVB × transmission des filtres supplémentaires. CSV : wavelength_nm,red,green,blue ; longueurs croissantes entre 336 et 1 020 nm, valeurs de 0 à 1 et extrémités nulles. Ne normalisez pas chaque canal séparément. Bessell est une référence, pas le profil de votre caméra.</translation>
+    </message>
+    <message>
+        <source>Import equipment response</source>
+        <translation>Importer la réponse de l’équipement</translation>
+    </message>
+    <message>
+        <source>White reference · Sun (CALSPEC)</source>
+        <translation>Blanc de référence · Soleil (CALSPEC)</translation>
+    </message>
+    <message>
+        <source>White reference · constant Fν (AB)</source>
+        <translation>Blanc de référence · Fν constant (AB)</translation>
+    </message>
+    <message>
+        <source>The Sun uses the measured CALSPEC solar spectrum as neutral white. Constant Fν uses an AB reference (Fλ proportional to 1/λ²). These choices define the desired white, not the sky background.</source>
+        <translation>Le Soleil utilise le spectre solaire CALSPEC mesuré comme blanc neutre. Fν constant correspond à la référence AB (Fλ proportionnel à 1/λ²). Ce choix définit le blanc souhaité, pas le fond de ciel.</translation>
+    </message>
+    <message>
+        <source>Aperture, sky annulus and saturation are shared with the reference-star tool in Advanced transformations. Correct gradients first. Calibration replaces the automatic RGB gains with 1; manual adjustments remain available.</source>
+        <translation>Ouverture, anneau de ciel et saturation sont partagés avec l’outil de photométrie des transformations avancées. Corrigez d’abord les gradients. La calibration remet les gains RVB automatiques à 1 ; les réglages manuels restent disponibles.</translation>
+    </message>
+    <message>
+        <source>Active calibration: %1 · %2</source>
+        <translation>Calibration active : %1 · %2</translation>
+    </message>
+    <message>
+        <source>Cancel calculation</source>
+        <translation>Annuler le calcul</translation>
+    </message>
+    <message>
+        <source>Calibrate with SPCC</source>
+        <translation>Calibrer avec la SPCC</translation>
+    </message>
+    <message>
+        <source>Calibrate with PCC</source>
+        <translation>Calibrer avec la PCC</translation>
+    </message>
+    <message>
+        <source>Gaia DR3 catalogue</source>
+        <translation>Catalogue Gaia DR3</translation>
+    </message>
+    <message>
+        <source>CSV catalogue (*.csv)</source>
+        <translation>Catalogue CSV (*.csv)</translation>
+    </message>
+    <message>
+        <source>Measured equipment response</source>
+        <translation>Réponse mesurée de l’équipement</translation>
+    </message>
+    <message>
+        <source>RGB response (*.csv)</source>
+        <translation>Réponse RVB (*.csv)</translation>
+    </message>
+    <message>
+        <source>1 · WCS</source>
+        <translation>1 · WCS</translation>
+    </message>
+    <message>
+        <source>2 · PCC / SPCC</source>
+        <translation>2 · PCC / SPCC</translation>
+    </message>
+    <message>
+        <source>Continue to colors</source>
+        <translation>Passer aux couleurs</translation>
+    </message>
+    <message>
+        <source>First solve the field in the WCS tab. Calibration requires identified stars.</source>
+        <translation>Résolvez d’abord le champ dans l’onglet WCS. La calibration nécessite des étoiles identifiées.</translation>
+    </message>
+    <message>
+        <source>Photometry settings</source>
+        <translation>Réglages de photométrie</translation>
+    </message>
+    <message>
+        <source>Aperture radius · pixels</source>
+        <translation>Rayon d’ouverture · pixels</translation>
+    </message>
+    <message>
+        <source>Include the stellar flux while avoiding neighbours. The sky annulus must start beyond this aperture. Default: 5 pixels.</source>
+        <translation>Inclut le flux de l’étoile en évitant ses voisines. L’anneau de ciel doit commencer au-delà. Valeur initiale : 5 pixels.</translation>
+    </message>
+    <message>
+        <source>Sky annulus · inner radius</source>
+        <translation>Anneau de ciel · rayon intérieur</translation>
+    </message>
+    <message>
+        <source>Start the sky ring beyond the stellar wings. Nebulosity and neighbours bias the local background estimate.</source>
+        <translation>Commencez l’anneau au-delà des ailes de l’étoile. Nébulosités et voisines faussent l’estimation locale du fond.</translation>
+    </message>
+    <message>
+        <source>Sky annulus · outer radius</source>
+        <translation>Anneau de ciel · rayon extérieur</translation>
+    </message>
+    <message>
+        <source>The whole sky ring must fit in the image. Increase for more sky samples, keeping it local to the star.</source>
+        <translation>L’anneau entier doit tenir dans l’image. Augmentez le rayon pour obtenir davantage d’échantillons, en restant près de l’étoile.</translation>
+    </message>
+    <message>
+        <source>Saturation · image units</source>
+        <translation>Saturation · unités de l’image</translation>
+    </message>
+    <message>
+        <source>Reject a star if any aperture channel reaches this threshold. Use the saturation value in the imported linear image units. Saturated sensor cores cannot be recovered.</source>
+        <translation>Écarte l’étoile si un canal atteint ce seuil dans l’ouverture. Utilisez le seuil correspondant aux unités de l’image linéaire importée. Une saturation du capteur ne peut pas être corrigée.</translation>
+    </message>
+    <message>
+        <source>Correct gradients first. Calibration replaces automatic RGB gains with 1; manual adjustments remain available. Photometry settings are shared with the reference-star tool.</source>
+        <translation>Corrigez d’abord les gradients. La calibration remet les gains RVB automatiques à 1 ; les ajustements manuels restent disponibles. La photométrie partage ses réglages avec l’outil de références.</translation>
+    </message>
+    <message>
+        <source>Used %1 · rejected %2 · scatter %3 mag
+RGB gains %4 / %5 / %6
+Rejections: edges %7 · saturation %8 · weak signal %9 · outliers %10</source>
+        <translation>Retenues : %1 · écartées : %2 · dispersion : %3 mag
+Gains RVB : %4 / %5 / %6
+Rejets : bords %7 · saturation %8 · signal faible %9 · incohérence %10</translation>
+    </message>
+    <message>
+        <source>Maximum reference stars</source>
+        <translation>Nombre maximal d’étoiles de référence</translation>
+    </message>
+    <message>
+        <source>More stars improve the robustness of the color fit but take longer to download. Default: 60 for SPCC, 150 for PCC. At least eight stars must remain after photometric rejection.</source>
+        <translation>Plus d’étoiles renforcent la robustesse des couleurs, mais allongent le téléchargement. Par défaut : 60 pour la SPCC, 150 pour la PCC. Au moins huit étoiles doivent rester après les rejets photométriques.</translation>
     </message>
 </context>
 </TS>

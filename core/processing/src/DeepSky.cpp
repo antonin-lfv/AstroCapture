@@ -288,6 +288,7 @@ Integration integrate(int count,const ImageLoader& load,const Calibration& maste
     if(!std::isfinite(sigma)||sigma<0||sigma>10)throw std::runtime_error("Sigma rejection must be between 0 and 10.");
     Integration result;
     auto raw=load(0);const auto pattern=raw.bayer;const int channels=raw.channels;
+    result.wcs=raw.wcs;result.centerRa=raw.centerRa;result.centerDec=raw.centerDec;result.pixelScale=raw.pixelScale;result.date=raw.date;
     if(!calibrated)raw=calibrate(std::move(raw),masters,check);
     auto reference=linearRgb(raw,check);
     if(backgroundOptions)reference=extractBackground(reference,*backgroundOptions,check).image;
@@ -317,6 +318,7 @@ Integration integrate(int count,const ImageLoader& load,const Calibration& maste
     }
     if(disk.empty())throw std::runtime_error("No usable light frames.");
     const auto crop=commonRectangle(coverage,reference.width,reference.height);
+    if(result.wcs){result.wcs->crpix[0]-=crop.x;result.wcs->crpix[1]-=crop.y;}
     result.image={crop.width,crop.height,std::vector<float>(std::size_t(crop.width)*crop.height*3)};
     // Disk-backed strips keep memory independent of the number of full images.
     const int rows=std::max(1,65536/(reference.width*3));

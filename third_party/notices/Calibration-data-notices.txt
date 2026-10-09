@@ -1,0 +1,24 @@
+AstroCapture scientific reference data
+
+Gaia DR3: ESA / Gaia / DPAC, Gaia Collaboration et al. (2023).
+https://www.cosmos.esa.int/web/gaia-users/credits
+https://www.cosmos.esa.int/web/gaia/earlydr3/access
+Online stellar positions, proper motions and temperatures are queried from the
+ESA Gaia Archive. SPCC uses Gaia DR3 XP sampled spectra (336-1020 nm).
+Only small frozen Gaia fixtures are included in the test suite.
+
+Solar white reference: STScI CALSPEC sun_reference_stis_002.fits.
+https://ssb.stsci.edu/cdbs/current_calspec/sun_reference_stis_002.fits
+Relative spectral shape is linearly resampled to the Gaia XP 2 nm grid.
+CALSPEC: https://www.stsci.edu/hst/instrumentation/reference-data-for-calibration-and-tools/astronomical-catalogs/calspec
+
+PCC reference passbands: SVO Filter Profile Service, Generic/Bessell.R, .V, .B.
+Bessell, M. S. (1990), PASP 102, 1181.
+https://svo2.cab.inta-csic.es/theory/fps/fps.php?ID=Generic/Bessell.R
+https://svo2.cab.inta-csic.es/theory/fps/fps.php?ID=Generic/Bessell.V
+https://svo2.cab.inta-csic.es/theory/fps/fps.php?ID=Generic/Bessell.B
+SVO FPS: Rodrigo et al. (2012), Rodrigo & Solano (2020).
+These generic passbands are an explicit PCC reference, not a camera profile.
+
+All processing algorithms are independently implemented. No Siril source code
+is included. This software does not claim numerical equivalence with Siril.

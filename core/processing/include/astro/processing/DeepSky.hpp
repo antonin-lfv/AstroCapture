@@ -40,6 +40,9 @@ struct Integration {
     std::vector<std::string> reasons;
     std::uint64_t rejectedSamples{};
     double totalExposure{};
+    std::optional<recording::CelestialWcs> wcs;
+    std::optional<double> centerRa,centerDec,pixelScale;
+    std::string date;
 };
 Integration integrate(int count,const ImageLoader&,const Calibration&,bool calibrated,double sigma,
                       const CheckCancel& = {},const Progress& = {},bool normalize=true,const BackgroundOptions* background=nullptr);

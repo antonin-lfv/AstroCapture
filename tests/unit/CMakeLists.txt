@@ -85,7 +85,7 @@ astro_add_unit_test(astro_processing_planetary_test
     SOURCES processing/PlanetaryTest.cpp
     LIBS astro::processing
 )
-find_package(Qt6 6.5 REQUIRED COMPONENTS Quick Gui)
+find_package(Qt6 6.5 REQUIRED COMPONENTS Quick Gui Network)
 astro_add_unit_test(astro_app_processing_lifecycle_test
     SOURCES app/ProcessingLifecycleTest.cpp
         ../../app/src/ProcessingController.cpp ../../app/src/ProcessingController.hpp
@@ -167,6 +167,8 @@ astro_add_unit_test(astro_processing_deep_sky_advanced_test
     SOURCES processing/DeepSkyAdvancedTest.cpp
     LIBS astro::processing
 )
+astro_add_unit_test(astro_processing_astrometry_test SOURCES processing/AstrometryTest.cpp LIBS astro::processing)
+set_tests_properties(astro_processing_astrometry_test PROPERTIES TIMEOUT 90)
 set_tests_properties(astro_processing_deep_sky_advanced_test PROPERTIES TIMEOUT 120)
 astro_add_unit_test(astro_app_deep_sky_workspace_test
     SOURCES app/DeepSkyWorkspaceTest.cpp
@@ -263,3 +265,12 @@ astro_add_unit_test(astro_app_portable_project_test
 set_target_properties(astro_app_portable_project_test PROPERTIES AUTOMOC ON)
 target_include_directories(astro_app_portable_project_test PRIVATE ../../app/src)
 set_tests_properties(astro_app_portable_project_test PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_BACKEND=software" TIMEOUT 60)
+
+foreach(astrometry_test IN ITEMS astro_app_deep_sky_workspace_test astro_app_session_test astro_app_scientific_editing_test astro_app_portable_project_test)
+    target_sources(${astrometry_test} PRIVATE ../../app/src/DeepSkyAstrometry.cpp ../../app/src/GaiaCatalog.cpp)
+    target_link_libraries(${astrometry_test} PRIVATE Qt6::Network ZLIB::ZLIB)
+endforeach()
+
+astro_add_unit_test(astro_app_gaia_catalog_test SOURCES app/GaiaCatalogTest.cpp ../../app/src/GaiaCatalog.cpp LIBS Qt6::Core astro::processing ZLIB::ZLIB)
+target_include_directories(astro_app_gaia_catalog_test PRIVATE ../../app/src)
+target_compile_definitions(astro_app_gaia_catalog_test PRIVATE ASTRO_SOURCE_DIR="${PROJECT_SOURCE_DIR}")

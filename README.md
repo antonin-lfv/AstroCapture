@@ -231,9 +231,34 @@ appliqué, pas les paramètres encore en attente.
   Ouverture/anneau par défaut : 5/8/12 pixels, seuil de saturation 1 à adapter
   à l’import. Le bilan expose références acceptées/rejetées, gains et
   dispersion robuste en magnitudes. C’est une calibration **relative** sur
-  RVB linéaire à bande large : pas de résolution astrométrique, de téléchargement
-  de catalogue, de calibration absolue ni de SPCC. Les références sont
+  RVB linéaire à bande large. Cet import manuel ne réalise pas de résolution
+  astrométrique ni de calibration spectrale ; les nouvelles commandes
+  **PCC / SPCC** ci-dessous utilisent le catalogue automatiquement. Les références sont
   spécifiques à une image, même lorsqu’un préréglage les conserve.
+
+**Astrométrie WCS et couleurs sur catalogue** — dans **Finition → Couleur →
+Astrométrie · PCC / SPCC** :
+
+- Résolution **TAN/ICRS** guidée par le centre et l’échantillonnage. Gaia DR3 en ligne
+  ou CSV local, prise en compte des mouvements propres, rotation et miroir.
+  Contrôles par étoiles associées, RMS en pixels/secondes d’arc et couverture du
+  champ ; repères sur l’image. La résolution ne modifie aucun pixel.
+- **PCC** : modèle de continuum fondé sur les températures Gaia, référence Bessell
+  R/V/B ou réponse importée. L’extinction et les raies stellaires limitent ce modèle.
+- **SPCC** : téléchargement des **spectres XP mesurés Gaia DR3** et intégration
+  photonique avec la **réponse réelle de l’équipement** (QE × filtres RVB × filtre
+  supplémentaire). Import CSV `wavelength_nm,red,green,blue`, valeurs de 0 à 1,
+  longueurs croissantes entre 336 et 1 020 nm et extrémités nulles. La réponse de
+  la caméra n’est pas devinée. Blanc Soleil CALSPEC ou Fν constant (AB).
+- Photométrie robuste avant étirement, au moins huit étoiles acceptées, bilan des
+  rejets et gains. Références liées à l’image linéaire exacte, intégrées aux
+  projets, préréglages et versions A/B ; annulation par Cmd+Z.
+- WCS conservé en FITS flottant et transformé avec la géométrie de la finition.
+  Catalogues et spectres mis en cache ; les requêtes transmettent les coordonnées,
+  jamais l’image. La recherche aveugle sur tout le ciel, les distorsions SIP et
+  une bibliothèque de profils caméra/filtres restent à développer.
+
+Voir [le guide des formats et des limites](docs/decisions/ADR-016-astrometry-colors.md).
 
 L’ordre des traitements est : gradient → piédestal → photométrie →
 réduction du bruit multiéchelle → déconvolution → gains et étirement →

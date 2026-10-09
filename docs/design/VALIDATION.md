@@ -18,6 +18,8 @@ montrent l'application, et non le prototype HTML.
 - Inspecteur de 360 px, réglable entre 320 et 480 px ; préférence conservée.
 - Sélecteur de familles en fenêtre étroite ; histogramme repliable sous 1000 px.
 - Réglages, histogramme et comparaison accessibles ; zone de zoom avec marges.
+- Progression en surimpression : hauteur de la vue conservée pendant et après un
+  calcul de finition sur Orion, sans déplacer l'image ni les commandes de zoom.
 - Familles Couleur et Transformations avancées inspectées avec les vrais contrôles.
 - Menus Projet et Exporter vérifiés ; préréglages de toute la finition dans Projet.
 - Export PNG, TIFF ou JPEG avec légende facultative ; FITS linéaire distinct.

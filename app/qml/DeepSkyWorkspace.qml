@@ -318,17 +318,29 @@ DropArea {
                     }
                 }
             }
-            RowLayout {
-                visible:controller.busy;Layout.fillWidth:true
-                Item {
-                    id: activitySpinner; objectName:"deepSkyActivitySpinner"
-                    Layout.preferredWidth:20;Layout.preferredHeight:20;Layout.alignment:Qt.AlignTop;Layout.topMargin:2
-                    opacity:controller.busy?1:0
-                    Canvas {anchors.fill:parent;onPaint:{const ctx=getContext("2d");ctx.reset();ctx.strokeStyle=Atelier.accent;ctx.lineWidth=2;ctx.lineCap="round";ctx.beginPath();ctx.arc(10,10,7,0,Math.PI*1.5);ctx.stroke();}}
-                    RotationAnimator {target:activitySpinner;from:0;to:360;duration:900;loops:Animation.Infinite;running:controller.busy && root.visible}
+            Rectangle {
+                parent:viewport.viewingSurface
+                anchors.horizontalCenter:parent.horizontalCenter
+                anchors.bottom:parent.bottom;anchors.bottomMargin:16
+                width:Math.min(540,parent.width-32);height:52
+                visible:controller.busy;color:Atelier.surface;radius:4;border.color:Atelier.border
+                RowLayout {
+                    anchors.fill:parent;anchors.margins:8;spacing:8
+                    Item {
+                        id: activitySpinner;objectName:"deepSkyActivitySpinner"
+                        Layout.preferredWidth:20;Layout.preferredHeight:20
+                        opacity:controller.busy?1:0
+                        Canvas {anchors.fill:parent;onPaint:{const ctx=getContext("2d");ctx.reset();ctx.strokeStyle=Atelier.accent;ctx.lineWidth=2;ctx.lineCap="round";ctx.beginPath();ctx.arc(10,10,7,0,Math.PI*1.5);ctx.stroke();}}
+                        RotationAnimator {target:activitySpinner;from:0;to:360;duration:900;loops:Animation.Infinite;running:controller.busy && root.visible}
+                    }
+                    Label {
+                        id:progressLabel
+                        text:controller.status;color:Atelier.secondary;Layout.fillWidth:true;elide:Text.ElideRight
+                        HoverHandler {id:progressHover}
+                        DarkToolTip {visible:progressHover.hovered && progressLabel.truncated;text:controller.status}
+                    }
+                    IconButton {text:qsTr("Cancel");enabled:controller.busy;onClicked:controller.cancel()}
                 }
-                ScrollView {Layout.alignment:Qt.AlignTop;Layout.fillWidth:true;Layout.preferredHeight:36;Layout.minimumHeight:36;Layout.maximumHeight:36;clip:true;Label {width:parent.width;text:controller.status;color:Atelier.secondary;wrapMode:Text.Wrap}}
-                IconButton {text:qsTr("Cancel");opacity:controller.busy?1:0;enabled:controller.busy;onClicked:controller.cancel()}
             }
         }
         Rectangle {

@@ -401,3 +401,17 @@ Le parcours réel du contrôleur repasse avec uniquement les helpers du paquet
 et les outils système dans PATH : résolution aveugle, 675 associations Gaia,
 RMS 0,523018 pixel, export SIP et vérification des pixels linéaires à l’identique.
 Une demande SIP invalide conserve ensuite le WCS vérifié et les résultats.
+
+### Livraison 1.9.0 vérifiée
+
+Le DMG final est reconstruit après `0cf560d`. Il mesure **119 036 790 octets**
+(113,52 Mio). Son contrôle d’intégrité est valide. Monté en lecture seule, il
+contient la version 1.9.0, les quatre helpers natifs et leurs sources ; la
+signature locale passe la vérification profonde et stricte. L’exécutable est
+identique à l’application Release construite. Les helpers se lancent aussi
+depuis le volume monté. Les **200 binaires Mach-O** inspectés ne conservent
+aucune dépendance Homebrew absolue. Le volume de contrôle est démonté.
+Developer ID et notarisation restent à fournir, comme pour les versions précédentes.
+
+SHA256 du DMG : `d29d0a6dd931eb87b6e64164d83d4032933b10819a2c7128c6a9ce35db359a0d`.
+SHA256 de l’exécutable : `38ee02d8fda67d8e31a8cb3312a459e8e9b9c5a673d1ff0c2c78b7d7654b98e8`.

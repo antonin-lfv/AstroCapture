@@ -163,11 +163,11 @@ Utilisez une échelle cohérente entre poses et calibrations. La correction
 automatique du gradient est un ajustement planaire : comparez avec l’option
 désactivée sur des nébulosités étendues.
 
-**Drizzle mono/RVB** — dans **Empilement → Réglages avancés** :
+**Drizzle mono/RVB et Bayer natif** — dans **Empilement → Réglages avancés** :
 
 - Projection directe des pixels calibrés par recouvrement de carrés, avant toute
   interpolation d’alignement, avec échelle **×1, ×1,5 ou ×2** et fraction de pixel
-  **0,5 à 1** (départ conseillé : **0,8**). Les sources Bayer sont dématricées.
+  **0,5 à 1** (départ conseillé : **0,8**). En mode mono/RVB, les sources Bayer sont dématricées.
 - Pertinent pour des poses sous-échantillonnées et décalées à des phases
   sous-pixel variées ; augmenter la taille ne garantit pas de nouveaux détails.
   Il faut au moins deux poses utilisables par filtre ; beaucoup de poses avec
@@ -184,12 +184,34 @@ désactivée sur des nébulosités étendues.
   échantillonnage suivent l’échelle et le recadrage. Réglages sauvegardés dans
   les projets et sessions ; FITS linéaire conserve le résultat drizzle Float32.
 
-Le [guide technique du drizzle](docs/decisions/ADR-021-drizzle.md) précise les
-unités, la couverture et les limites de cette première version.
+- **Bayer natif / CFA**, depuis **1.11.0**, reconstruit les trois canaux à partir
+  des échantillons calibrés réellement mesurés, sans dématriçage des pixels
+  projetés. RGGB, BGGR, GRBG et GBRG sont pris en charge. Une copie couleur
+  sert à estimer l’alignement et le modèle facultatif de gradient ; seuls les
+  échantillons de leur couleur d’origine passent à la projection.
+- Commencez en Bayer natif à **×1**, **fraction de pixel 1**, avec beaucoup de
+  poses et un dithering varié. La couverture et le rejet sont vérifiés par canal
+  couleur ; des poses identiques ne suffisent pas à reconstruire toutes les
+  couleurs. Un canal sans données bloque le calcul et conserve l’ancien résultat.
+- Gardez **Matrice Bayer des métadonnées** par défaut. Certains FITS indiquent
+  seulement `BAYERPAT=VALID` : choisissez explicitement la matrice vérifiée de
+  l’image enregistrée, en tenant compte du recadrage, des décalages et de l’ordre
+  des lignes. La déclaration complète uniquement les matrices manquantes des
+  poses et calibrations sélectionnées à un canal ; une matrice connue contradictoire
+  bloque l’empilement. Les fichiers originaux restent intacts. Les fichiers RVB
+  déjà dématricés ne conviennent pas au mode natif.
+- Le bilan indique la matrice retenue et les contributions par canal couleur,
+  avant rejet. Le mode et la déclaration sont conservés dans les projets et
+  sessions. Le stockage temporaire Bayer utilise **24 octets par pixel de sortie
+  et par pose**, contre 16 en mono/RVB, hors images et buffers en mémoire.
+
+Le [guide technique du drizzle mono/RVB](docs/decisions/ADR-021-drizzle.md) et
+son [extension Bayer native](docs/decisions/ADR-022-bayer-drizzle.md) précisent les
+unités, la couverture et les limites de ces modes.
 
 Limites actuelles : **32 MP par image**, **500 poses sélectionnées par groupe**,
 **2000 fichiers par projet**. Les RAW X-Trans et les autres matrices non Bayer
-ne sont pas pris en charge. Le drizzle Bayer natif, la correction optique dynamique, les
+ne sont pas pris en charge. Les cartes de poids exportables, la correction optique dynamique, les
 projections grand angle, la fusion HDR et les profils fabricant prévalidés
 caméra/filtres restent à développer.
 Le WCS guidé et les calibrations PCC/SPCC sont décrits ci-dessous. La précision de centroidage annoncée par APP

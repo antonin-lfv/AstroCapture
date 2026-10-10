@@ -42,27 +42,33 @@ std::array<int,2> drizzleDimensions(int width,int height,const DrizzleOptions& o
     if(w*h>32000000)throw std::runtime_error("The drizzle output exceeds 32 million pixels. Use a smaller scale or smaller source images.");
     return {int(w),int(h)};
 }
-DrizzleProjection drizzleProject(const FloatImage& input,const StarAlignment& alignment,int width,int height,const DrizzleOptions& options,const CheckCancel& check) {
+namespace {
+DrizzleProjection projectPixels(int inputWidth,int inputHeight,const std::vector<float>& samples,
+                                domain::BayerPattern pattern,const StarAlignment& alignment,int width,int height,
+                                const DrizzleOptions& options,const CheckCancel& check) {
+    const bool cfa=pattern!=domain::BayerPattern::None;
+    const int sourceChannels=cfa?1:3,weightChannels=cfa?3:1;
     const auto size=drizzleDimensions(width,height,options);
-    if(input.width<1||input.height<1||std::uint64_t(input.width)*input.height>32000000||input.rgb.size()!=std::size_t(input.width)*input.height*3)
+    if(inputWidth<1||inputHeight<1||std::uint64_t(inputWidth)*inputHeight>32000000||samples.size()!=std::size_t(inputWidth)*inputHeight*sourceChannels)
         throw std::runtime_error("Invalid drizzle input dimensions.");
     const auto& m=alignment.matrix;const double determinant=m[0]*m[4]-m[1]*m[3];
     if(std::any_of(m.begin(),m.end(),[](double v){return !std::isfinite(v);})||std::abs(determinant)<.1||std::abs(determinant)>10||
        std::abs(m[0])>4||std::abs(m[1])>4||std::abs(m[3])>4||std::abs(m[4])>4||
-       std::abs(m[2])>4.*(width+input.width)||std::abs(m[5])>4.*(height+input.height))
+       std::abs(m[2])>4.*(width+inputWidth)||std::abs(m[5])>4.*(height+inputHeight))
         throw std::runtime_error("Invalid drizzle registration transform.");
     if(check)check();
     const auto pixels=std::size_t(size[0])*size[1];
-    std::vector<double> sum(pixels*3),weight(pixels);
+    std::vector<double> sum(pixels*3),weight(pixels*weightChannels);
     const double scale=options.scale,half=options.pixelFraction*.5;
     const double dropArea=std::abs(determinant)*std::pow(scale*options.pixelFraction,2);
     const bool axisAligned=std::abs(m[1])<1e-12&&std::abs(m[3])<1e-12;
     auto project=[&](double x,double y){return Point{scale*(m[0]*x+m[1]*y+m[2]+.5)-.5,scale*(m[3]*x+m[4]*y+m[5]+.5)-.5};};
-    for(int y=0;y<input.height;++y) {
+    for(int y=0;y<inputHeight;++y) {
         if(check)check();
-        for(int x=0;x<input.width;++x) {
-            const auto source=(std::size_t(y)*input.width+x)*3;
-            if(!std::isfinite(input.rgb[source])||!std::isfinite(input.rgb[source+1])||!std::isfinite(input.rgb[source+2]))continue;
+        for(int x=0;x<inputWidth;++x) {
+            const auto source=(std::size_t(y)*inputWidth+x)*sourceChannels;
+            if(!std::isfinite(samples[source])||(!cfa&&(!std::isfinite(samples[source+1])||!std::isfinite(samples[source+2]))))continue;
+            const int channel=cfa?domain::bayerChannelAt(pattern,x,y):0;
             Polygon drop;drop.size=4;drop.points[0]=project(x-half,y-half);drop.points[1]=project(x+half,y-half);
             drop.points[2]=project(x+half,y+half);drop.points[3]=project(x-half,y+half);
             double left=drop.points[0].x,right=left,top=drop.points[0].y,bottom=top;
@@ -75,16 +81,25 @@ DrizzleProjection drizzleProject(const FloatImage& input,const StarAlignment& al
                 const double area=axisAligned?std::max(0.,std::min(right,xx+.5)-std::max(left,xx-.5))*std::max(0.,std::min(bottom,yy+.5)-std::max(top,yy-.5)):overlap(drop,xx,yy);
                 if(area<=1e-12*dropArea)continue;
                 const double w=area/dropArea;const auto target=std::size_t(yy)*size[0]+xx;
-                weight[target]+=w;for(int c=0;c<3;++c)sum[target*3+c]+=input.rgb[source+c]*w;
+                if(cfa){weight[target*3+channel]+=w;sum[target*3+channel]+=samples[source]*w;}
+                else {weight[target]+=w;for(int c=0;c<3;++c)sum[target*3+c]+=samples[source+c]*w;}
             }
         }
     }
-    DrizzleProjection output;output.image={size[0],size[1],std::vector<float>(pixels*3)};output.weights.resize(pixels);
+    DrizzleProjection output;output.image={size[0],size[1],std::vector<float>(pixels*3)};output.weights.resize(weight.size());output.weightChannels=weightChannels;
     for(std::size_t p=0;p<pixels;++p) {
         if(p%65536==0&&check)check();
-        output.weights[p]=float(weight[p]);
-        for(int c=0;c<3;++c)output.image.rgb[p*3+c]=weight[p]>0?float(sum[p*3+c]/weight[p]):std::numeric_limits<float>::quiet_NaN();
+        for(int c=0;c<3;++c){const auto at=p*weightChannels+(cfa?c:0);output.weights[at]=float(weight[at]);output.image.rgb[p*3+c]=weight[at]>0?float(sum[p*3+c]/weight[at]):std::numeric_limits<float>::quiet_NaN();}
     }
     return output;
+}
+}
+DrizzleProjection drizzleProject(const FloatImage& input,const StarAlignment& alignment,int width,int height,const DrizzleOptions& options,const CheckCancel& check) {
+    return projectPixels(input.width,input.height,input.rgb,domain::BayerPattern::None,alignment,width,height,options,check);
+}
+DrizzleProjection drizzleProjectBayer(const AstroImage& input,const StarAlignment& alignment,int width,int height,const DrizzleOptions& options,const CheckCancel& check) {
+    if(input.channels!=1||input.bayer==domain::BayerPattern::None||domain::bayerChannelAt(input.bayer,0,0)<0)
+        throw std::runtime_error("Native Bayer drizzle requires single-channel CFA sources with a recognized Bayer pattern.");
+    return projectPixels(input.width,input.height,input.samples,input.bayer,alignment,width,height,options,check);
 }
 }

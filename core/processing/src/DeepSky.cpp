@@ -37,6 +37,15 @@ float level(const FloatImage& image,int channel=0) {
     for(std::size_t i=0;i<pixels;i+=step)sample.push_back(image.rgb[i*3+channel]);
     return median(std::move(sample));
 }
+std::array<float,3> bayerLevels(const FloatImage& image,domain::BayerPattern pattern,const CheckCancel& check) {
+    // Sample each measured color independently; interpolated preview values
+    // must not determine the CFA normalization or double-weight green.
+    std::array<std::vector<float>,3> samples;
+    std::array<std::size_t,3> seen{};
+    const auto step=std::max(std::size_t(1),std::size_t(image.width)*image.height/120000);
+    for(int y=0;y<image.height;++y){checked(check);for(int x=0;x<image.width;++x){const int c=domain::bayerChannelAt(pattern,x,y);if(seen[c]++%step==0)samples[c].push_back(image.rgb[(std::size_t(y)*image.width+x)*3+c]);}}
+    return {median(std::move(samples[0])),median(std::move(samples[1])),median(std::move(samples[2]))};
+}
 struct StorageError : std::runtime_error { using std::runtime_error::runtime_error; };
 struct DiskImage {
     std::unique_ptr<FILE,decltype(&std::fclose)> file{std::tmpfile(),&std::fclose};
@@ -305,6 +314,10 @@ Integration integrate(int count,const ImageLoader& load,const Calibration& maste
     if(drizzle&&count<2)throw std::runtime_error("Drizzle requires at least two usable light frames per filter group.");
     Integration result;
     auto raw=load(0);if(drizzle)drizzleDimensions(raw.width,raw.height,*drizzle);const auto pattern=raw.bayer;const int channels=raw.channels;
+    const bool cfa=drizzle&&drizzle->nativeBayer;const int weightChannels=cfa?3:1;
+    if(cfa&&(channels!=1||domain::bayerChannelAt(pattern,0,0)<0))
+        throw std::runtime_error("Native Bayer drizzle requires single-channel CFA sources with a recognized Bayer pattern.");
+    result.nativeBayer=cfa;
     result.wcs=raw.wcs;result.centerRa=raw.centerRa;result.centerDec=raw.centerDec;result.pixelScale=raw.pixelScale;result.date=raw.date;
     if(!calibrated)raw=calibrate(std::move(raw),masters,check);
     auto reference=linearRgb(raw,check);
@@ -313,7 +326,7 @@ Integration integrate(int count,const ImageLoader& load,const Calibration& maste
     const int outputWidth=dimensions[0],outputHeight=dimensions[1];
     std::vector<unsigned char> coverage(std::size_t(outputWidth)*outputHeight,1);
     std::vector<DiskImage> disk;
-    std::array<float,3> background{level(reference,0),level(reference,1),level(reference,2)};
+    std::array<float,3> background=cfa?bayerLevels(reference,pattern,check):std::array<float,3>{level(reference,0),level(reference,1),level(reference,2)};
     for(int n=0;n<count;++n) {
         checked(check);if(progress)progress(n,count,"Calibration");
         try {
@@ -331,10 +344,14 @@ Integration integrate(int count,const ImageLoader& load,const Calibration& maste
                 if(!drizzle)image=warp(image,alignment,reference.width,reference.height);
             }
             if(progress)progress(n,count,"Normalization");
-            if(normalize)for(int c=0;c<3;++c){const auto offset=level(image,c)-background[c];for(std::size_t p=c;p<image.rgb.size();p+=3)if(std::isfinite(image.rgb[p]))image.rgb[p]-=offset;}
+            if(normalize){const auto levels=cfa?bayerLevels(image,pattern,check):std::array<float,3>{level(image,0),level(image,1),level(image,2)};for(int c=0;c<3;++c){const auto offset=levels[c]-background[c];for(std::size_t p=c;p<image.rgb.size();p+=3)if(std::isfinite(image.rgb[p]))image.rgb[p]-=offset;}}
             if(drizzle) {
                 if(progress)progress(n,count,"Drizzle projection");
-                auto projected=drizzleProject(image,alignment,reference.width,reference.height,*drizzle,check);
+                if(cfa)for(int y=0;y<data.height;++y){checked(check);for(int x=0;x<data.width;++x){const auto p=std::size_t(y)*data.width+x;data.samples[p]=image.rgb[p*3+domain::bayerChannelAt(pattern,x,y)];}}
+                // The RGB copy is for star registration/model estimation only.
+                // Its measured channel is still the calibrated CFA sample,
+                // with only the explicit background/gain/offset corrections.
+                auto projected=cfa?drizzleProjectBayer(data,alignment,reference.width,reference.height,*drizzle,check):drizzleProject(image,alignment,reference.width,reference.height,*drizzle,check);
                 DiskImage stored(projected.image,projected.weights);
                 const auto& m=alignment.matrix;const double det=m[0]*m[4]-m[1]*m[3];
                 // Crop geometrical borders only. Missing drops inside that area
@@ -350,7 +367,7 @@ Integration integrate(int count,const ImageLoader& load,const Calibration& maste
                 // Rotation/scale can provide different phases across the field.
                 for(const auto point:std::array<std::array<double,2>,3>{{{0,0},{reference.width*.5,reference.height*.5},{double(reference.width-1),double(reference.height-1)}}}) {
                     const double dx=(m[0]-1)*point[0]+m[1]*point[1]+m[2],dy=m[3]*point[0]+(m[4]-1)*point[1]+m[5];
-                    result.subpixelDiversity|=std::hypot(std::remainder(dx,1.),std::remainder(dy,1.))>.1;
+                    result.subpixelDiversity|=std::hypot(std::remainder(dx,cfa?2.:1.),std::remainder(dy,cfa?2.:1.))>.1;
                 }
                 disk.push_back(std::move(stored));
             } else {
@@ -387,27 +404,27 @@ Integration integrate(int count,const ImageLoader& load,const Calibration& maste
         const int h=std::min(rows,crop.height-y);
         const auto length=std::size_t(outputWidth)*h*3;
         std::vector<std::vector<float>> strips(disk.size(),std::vector<float>(length));
-        std::vector<std::vector<float>> weights(drizzle?disk.size():0,std::vector<float>(std::size_t(outputWidth)*h));
+        std::vector<std::vector<float>> weights(drizzle?disk.size():0,std::vector<float>(std::size_t(outputWidth)*h*weightChannels));
         for(std::size_t n=0;n<disk.size();++n) {
             checked(check);
             readStrip(disk[n],strips[n],std::uint64_t(crop.y+y)*outputWidth*3*sizeof(float));
-            if(drizzle)readStrip(disk[n],weights[n],(std::uint64_t(outputHeight)*outputWidth*3+std::uint64_t(crop.y+y)*outputWidth)*sizeof(float));
+            if(drizzle)readStrip(disk[n],weights[n],(std::uint64_t(outputHeight)*outputWidth*3+std::uint64_t(crop.y+y)*outputWidth*weightChannels)*sizeof(float));
         }
         for(int yy=0;yy<h;++yy)for(int x=0;x<crop.width;++x) {
             const auto pixel=std::size_t(yy)*outputWidth+crop.x+x;
-            int available=0;for(std::size_t n=0;n<disk.size();++n)if(!drizzle||weights[n][pixel]>0)++available;
-            if(!available)throw std::runtime_error("Drizzle left uncovered pixels. Increase pixel fraction or use more dithered exposures.");
-            contributors+=available;result.minimumContributors=std::min(result.minimumContributors,available);
             for(int c=0;c<3;++c) {
+                const auto weightAt=pixel*weightChannels+(cfa?c:0);
                 values.clear();
-                for(std::size_t n=0;n<disk.size();++n)if((!drizzle||weights[n][pixel]>0)&&std::isfinite(strips[n][pixel*3+c]))values.push_back(strips[n][pixel*3+c]);
+                for(std::size_t n=0;n<disk.size();++n)if((!drizzle||weights[n][weightAt]>0)&&std::isfinite(strips[n][pixel*3+c]))values.push_back(strips[n][pixel*3+c]);
+                if(drizzle&&values.empty())throw std::runtime_error(cfa?"Native Bayer drizzle left an uncovered color channel. Use more varied dither positions, scale 1 and pixel fraction 1.":"Drizzle left uncovered pixels. Increase pixel fraction or use more dithered exposures.");
                 if(values.empty())throw std::runtime_error("No finite image samples.");
+                contributors+=values.size();result.minimumContributors=std::min(result.minimumContributors,int(values.size()));
                 float center=0,limit=0;
                 const bool reject=sigma>0&&values.size()>=3;
                 if(reject){center=medianInPlace(values);deviations.clear();for(float v:values)deviations.push_back(std::abs(v-center));limit=float(sigma)*std::max(1e-7f,1.4826f*medianInPlace(deviations));}
                 double sum=0,totalWeight=0;
                 for(std::size_t n=0;n<disk.size();++n) {
-                    const float w=drizzle?weights[n][pixel]:1,v=strips[n][pixel*3+c];
+                    const float w=drizzle?weights[n][weightAt]:1,v=strips[n][pixel*3+c];
                     if(w<=0||!std::isfinite(v))continue;
                     if(reject&&std::abs(v-center)>limit){++result.rejectedSamples;continue;}
                     sum+=double(v)*w;totalWeight+=w;
@@ -416,7 +433,7 @@ Integration integrate(int count,const ImageLoader& load,const Calibration& maste
             }
         }
     }
-    result.meanContributors=double(contributors)/(std::size_t(crop.width)*crop.height);
+    result.meanContributors=double(contributors)/(std::size_t(crop.width)*crop.height*3);
     return result;
 }
 BackgroundResult extractBackground(const FloatImage& input,const BackgroundOptions& options,const CheckCancel& check) {

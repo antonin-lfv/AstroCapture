@@ -9600,4 +9600,85 @@ RMS normalisée moyenne %5</translation>
             <translation>Moins de trois contributions sur certains pixels : le rejet robuste n’y est pas possible.</translation>
         </message>
     </context>
+    <context>
+        <name>DeepSkyWorkspace</name>
+        <message>
+            <source>Drizzle</source>
+            <translation>Drizzle</translation>
+        </message>
+        <message>
+            <source>Projects calibrated pixel footprints directly onto the aligned output grid. Useful for undersampled images with varied dither positions. At least two usable lights per filter are required; many exposures improve coverage. Mono / RGB is the standard mode. Enable native Bayer below only for sources that still contain their CFA pattern.</source>
+            <translation>Projection directe des pixels calibrés sur la grille alignée. Utile pour des images sous-échantillonnées avec des positions de dithering variées. Au moins deux poses utilisables par filtre sont nécessaires ; beaucoup de poses améliorent la couverture. Mono / RVB est le mode standard. Activez Bayer natif ci-dessous uniquement si les sources conservent leur matrice CFA.</translation>
+        </message>
+        <message>
+            <source>Native Bayer / CFA</source>
+            <translation>Bayer natif / CFA</translation>
+        </message>
+        <message>
+            <source>Reconstructs RGB directly from calibrated Bayer samples, without interpolating missing colors first. Requires single-channel RGGB, BGGR, GRBG or GBRG sources; already debayered RGB files cannot use this mode. Start at scale ×1 and pixel fraction 1. Varied dithering is essential to cover every color. Uncovered channels stop stacking; no invented pixels fill the gaps. Registration uses a color copy only to locate stars. Temporary storage uses six floats per output pixel per exposure.</source>
+            <translation>Reconstruit le RVB directement à partir des échantillons Bayer calibrés, sans interpoler les couleurs manquantes au préalable. Nécessite des sources à un canal RGGB, BGGR, GRBG ou GBRG ; les fichiers RVB déjà dématricés ne conviennent pas. Commencez à ×1 avec une fraction de pixel de 1. Un dithering varié est indispensable pour couvrir chaque couleur. Une couleur sans données bloque l’empilement ; aucun pixel inventé ne comble les trous. Une copie couleur sert uniquement à repérer les étoiles pour l’alignement. Le stockage temporaire utilise six flottants par pixel de sortie et par pose.</translation>
+        </message>
+        <message>
+            <source>Bayer pattern from metadata</source>
+            <translation>Matrice Bayer des métadonnées</translation>
+        </message>
+        <message>
+            <source>Bayer pattern</source>
+            <translation>Matrice Bayer</translation>
+        </message>
+        <message>
+            <source>Keep metadata detection when the FITS or RAW contains RGGB, BGGR, GRBG or GBRG. Some FITS only say VALID: select the verified pattern of the stored image explicitly. This declaration applies to selected single-channel lights and calibrations during native Bayer stacking, without changing the files. Known conflicting metadata blocks stacking. A wrong pattern produces wrong colors; do not guess from camera name alone. Check sensor offsets, cropped origin and row order. Already RGB images cannot be converted back to CFA.</source>
+            <translation>Gardez la détection des métadonnées lorsque le FITS ou RAW indique RGGB, BGGR, GRBG ou GBRG. Certains FITS indiquent seulement VALID : choisissez explicitement la matrice vérifiée de l’image enregistrée. Cette déclaration s’applique aux poses et calibrations sélectionnées à un canal pendant l’empilement Bayer natif, sans modifier les fichiers. Une matrice connue contradictoire bloque le calcul. Une matrice erronée produit de fausses couleurs ; ne la devinez pas uniquement à partir du nom de caméra. Vérifiez les décalages du capteur, l’origine du recadrage et l’ordre des lignes. Une image RVB ne peut pas redevenir une matrice CFA.</translation>
+        </message>
+        <message>
+            <source>Native Bayer requires single-channel lights and a consistent pattern. Declare a verified missing pattern above; use mono / RGB for debayered files.</source>
+            <translation>Bayer natif exige des poses à un canal et une matrice cohérente. Déclarez une matrice manquante vérifiée ci-dessus ; utilisez mono / RVB pour des fichiers dématricés.</translation>
+        </message>
+        <message>
+            <source>Linear size of each square input-pixel drop, from 0.5 to 1. Smaller drops may retain finer detail but reduce coverage and increase noise. Start at 0.8 for mono / RGB, or 1 for native Bayer. Missing samples have zero weight; uncovered pixels or colors stop stacking. Brightness retains the source intensity convention.</source>
+            <translation>Taille linéaire du carré projeté depuis chaque pixel source, de 0,5 à 1. Des carrés plus petits peuvent préserver des détails plus fins, mais réduisent la couverture et augmentent le bruit. Commencez à 0,8 pour mono / RVB, ou 1 pour Bayer natif. Les échantillons manquants ont un poids nul ; un pixel ou une couleur sans données bloque l’empilement. La luminosité conserve la convention d’intensité des sources.</translation>
+        </message>
+        <message>
+            <source>Native Bayer %1 · contributors per color channel</source>
+            <translation>Bayer natif %1 · contributions par canal couleur</translation>
+        </message>
+    </context>
+    <context>
+        <name>GuideWorkspace</name>
+        <message>
+            <source>In Stack → Advanced stack settings, enable Drizzle. Mono / RGB projects calibrated pixel footprints with their stellar alignment; Bayer inputs are debayered in this standard mode. For undersampled mono / RGB data with varied subpixel shifts, try ×2 and pixel fraction 0.8. ×2 creates four times as many pixels, without guaranteeing finer detail. Review dimensions and contributor counts; the output is limited to 32 MP. Compare with ordinary stacking.</source>
+            <translation>Dans Empilement → Réglages avancés, activez Drizzle. Le mode mono / RVB projette les pixels calibrés avec leur alignement stellaire ; les sources Bayer sont dématricées dans ce mode standard. Pour des données mono / RVB sous-échantillonnées avec des décalages sous-pixel variés, essayez ×2 et une fraction de pixel de 0,8. ×2 produit quatre fois plus de pixels, sans garantir des détails plus fins. Vérifiez les dimensions et le nombre de contributions ; la sortie est limitée à 32 MP. Comparez avec l’empilement classique.</translation>
+        </message>
+        <message>
+            <source>Native Bayer drizzle</source>
+            <translation>Drizzle Bayer natif</translation>
+        </message>
+        <message>
+            <source>Enable Native Bayer / CFA only for single-channel sources that retain the sensor mosaic. Each calibrated pixel contributes only to its measured color; the color copy used for registration never supplies interpolated export pixels. Start at ×1 with pixel fraction 1, and use many poses with varied dither positions. Coverage and robust rejection are checked separately in R, G and B. Identical poses leave missing colors and stop stacking; the previous result is kept. This mode uses twice the temporary storage of RGB drizzle. Leave Bayer pattern from metadata selected when the pattern is known. If a FITS only says VALID, explicitly select its verified stored-image pattern, including offsets and row order. The declaration also applies to selected single-channel calibrations and is saved in the project. Conflicting known patterns block stacking. Already debayered RGB data cannot use native Bayer.</source>
+            <translation>Activez Bayer natif / CFA uniquement pour des sources à un canal conservant la matrice du capteur. Chaque pixel calibré contribue seulement à sa couleur mesurée ; la copie couleur servant à l’alignement ne fournit jamais de pixels interpolés à l’export. Commencez à ×1 avec une fraction de pixel de 1, et utilisez beaucoup de poses avec des positions de dithering variées. La couverture et le rejet robuste sont vérifiés séparément en R, V et B. Des poses identiques laissent des couleurs sans données et bloquent le calcul ; le résultat précédent est conservé. Ce mode utilise deux fois le stockage temporaire du drizzle RVB. Gardez Matrice Bayer des métadonnées lorsque la matrice est connue. Si un FITS indique seulement VALID, choisissez explicitement sa matrice vérifiée, en tenant compte des décalages et de l’ordre des lignes. La déclaration s’applique aussi aux calibrations sélectionnées à un canal et est sauvegardée dans le projet. Les matrices connues contradictoires bloquent l’empilement. Des données RVB déjà dématricées ne conviennent pas au mode Bayer natif.</translation>
+        </message>
+    </context>
+    <context>
+        <name>DeepSkyController</name>
+        <message>
+            <source>Native Bayer reconstruction · contributors counted separately for R, G and B.</source>
+            <translation>Reconstruction Bayer native · contributions comptées séparément en R, V et B.</translation>
+        </message>
+        <message>
+            <source>Native Bayer drizzle requires single-channel CFA sources with a recognized Bayer pattern.</source>
+            <translation>Le drizzle Bayer natif exige des sources CFA à un canal et une matrice Bayer reconnue.</translation>
+        </message>
+        <message>
+            <source>Native Bayer drizzle left an uncovered color channel. Use more varied dither positions, scale 1 and pixel fraction 1.</source>
+            <translation>Le drizzle Bayer natif laisse un canal couleur sans données. Utilisez des positions de dithering plus variées, une échelle de 1 et une fraction de pixel de 1.</translation>
+        </message>
+        <message>
+            <source>Invalid Bayer pattern selection.</source>
+            <translation>La matrice Bayer choisie est invalide.</translation>
+        </message>
+        <message>
+            <source>The declared Bayer pattern conflicts with the source metadata.</source>
+            <translation>La matrice Bayer déclarée contredit les métadonnées d’une source.</translation>
+        </message>
+    </context>
 </TS>

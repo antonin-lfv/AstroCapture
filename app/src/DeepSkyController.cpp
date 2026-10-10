@@ -367,18 +367,23 @@ void DeepSkyController::useCalibrationMaster(const QString& id,bool reviewed){
     const auto frames=frames_;run(tr("Checking calibration master…"),[this,id,frames,reviewed](std::stop_token stop){auto r=calibrationMaster(id,stop);const auto c=masterCompatibility(r,frames);if(c["compatibility"].toInt()==2)throw std::runtime_error((tr("Master incompatible: %1").arg(c["mismatch"].toString())).toStdString());if(c["compatibility"].toInt()==1&&!reviewed)throw std::runtime_error((tr("Check missing metadata before using this master: %1").arg(c["missing"].toString())).toStdString());r["masterHash"]=r["hash"];r["sourceFingerprint"]=ProjectStorage::fingerprint(r["path"].toString(),[stop]{check(stop);});r["selected"]=true;r["scale"]=0;check(stop);post([this,r]{for(int n=0;n<frames_.size();++n){auto old=frames_[n].toMap();if(old["role"]==r["role"]&&(r["role"]!="Flat"||old["group"]==r["group"])){old["selected"]=false;frames_[n]=old;}}bool found=false;for(auto& v:frames_)if(v.toMap()["path"]==r["path"]){v=r;found=true;}if(!found)frames_<<r;status_=tr("Master selected: %1. Other files in this calibration role are deselected.").arg(r["name"].toString());emit changed();});});
 }
 void DeepSkyController::removeCalibrationMasterEntry(const QString& id){if(busy_)return;try{removeCalibrationMaster(id);status_=tr("Master removed from the library. Its FITS file is retained for existing projects.");}catch(const std::exception& e){status_=tr(e.what());}emit changed();}
-void DeepSkyController::integrate(bool calibrated,double sigma,bool normalize,bool correctBadPixels,bool sequenceBackground,bool drizzle,double drizzleScale,double pixelFraction) {
+void DeepSkyController::integrate(bool calibrated,double sigma,bool normalize,bool correctBadPixels,bool sequenceBackground,bool drizzle,double drizzleScale,double pixelFraction,bool nativeBayer,QString bayerPattern) {
     const auto frames=frames_;const auto references=references_;
-    run(tr("Calibrating and integrating…"),[this,frames,calibrated,sigma,normalize,correctBadPixels,sequenceBackground,references,drizzle,drizzleScale,pixelFraction](std::stop_token stop){
+    run(tr("Calibrating and integrating…"),[this,frames,calibrated,sigma,normalize,correctBadPixels,sequenceBackground,references,drizzle,drizzleScale,pixelFraction,nativeBayer,bayerPattern](std::stop_token stop){
+        const QStringList patterns{"RGGB","BGGR","GRBG","GBRG"};
+        if(drizzle&&nativeBayer&&!bayerPattern.isEmpty()&&!patterns.contains(bayerPattern))throw std::runtime_error("Invalid Bayer pattern selection.");
+        const auto declaredPattern=drizzle&&nativeBayer&&!bayerPattern.isEmpty()?static_cast<domain::BayerPattern>(patterns.indexOf(bayerPattern)+1):domain::BayerPattern::None;
+        auto read=[&](const QVariantMap& row){auto image=readFrame(row);if(declaredPattern!=domain::BayerPattern::None&&image.channels==1){if(image.bayer!=domain::BayerPattern::None&&image.bayer!=declaredPattern)throw std::runtime_error("The declared Bayer pattern conflicts with the source metadata.");image.bayer=declaredPattern;}return image;};
         std::map<QString,QVariantList> lights,flats;QVariantList darks,biases,darkFlats,badPixels;
         for(const auto& value:frames){const auto row=value.toMap();if(!row["selected"].toBool())continue;const auto role=row["role"].toString(),group=row["group"].toString();if(role=="Light")lights[group]<<row;else if(role=="Flat")flats[group]<<row;else if(role=="Dark")darks<<row;else if(role=="Bias")biases<<row;else if(role=="DarkFlat")darkFlats<<row;else if(role=="BadPixels")badPixels<<row;}
         if(lights.empty())throw std::runtime_error("Add and select light frames first.");
+        if(drizzle&&nativeBayer)for(const auto& [group,rows]:lights)for(const auto& value:rows){const auto row=value.toMap();const auto pattern=row["bayer"].toString();if(row["channels"].toInt()!=1||(declaredPattern==domain::BayerPattern::None&&!patterns.contains(pattern)))throw std::runtime_error("Native Bayer drizzle requires single-channel CFA sources with a recognized Bayer pattern.");if(declaredPattern!=domain::BayerPattern::None&&patterns.contains(pattern)&&pattern!=bayerPattern)throw std::runtime_error("The declared Bayer pattern conflicts with the source metadata.");}
         if(calibrated&&(!darks.empty()||!flats.empty()||!biases.empty()||!darkFlats.empty()||!badPixels.empty()))
             throw std::runtime_error("Calibration files are selected but Lights already calibrated is enabled. Disable it to apply your calibration files, or deselect those files.");
         auto checkpoint=[stop]{check(stop);};
         auto master=[&](const QVariantList& rows,bool normalize=false){
-            for(const auto& v:rows)if(v.toMap()["master"].toBool()){if(rows.size()!=1)throw std::runtime_error("Select one master or its source frames, never both.");return readFrame(v.toMap());}
-            return processing::masterFrame(int(rows.size()),[&](int n){check(stop);return readFrame(rows[n].toMap());},normalize,checkpoint);};
+            for(const auto& v:rows)if(v.toMap()["master"].toBool()){if(rows.size()!=1)throw std::runtime_error("Select one master or its source frames, never both.");return read(v.toMap());}
+            return processing::masterFrame(int(rows.size()),[&](int n){check(stop);return read(rows[n].toMap());},normalize,checkpoint);};
         processing::Calibration calibration;
         if(!calibrated){if(!darks.empty())calibration.dark=master(darks);if(!biases.empty())calibration.bias=master(biases);if(!darkFlats.empty())calibration.darkFlat=master(darkFlats);if(correctBadPixels){if(!badPixels.empty())calibration.badPixels=master(badPixels);else if(calibration.dark)calibration.badPixels=processing::detectBadPixels(*calibration.dark);}}
         std::map<QString,std::shared_ptr<const processing::FloatImage>> results;std::map<QString,QVariantMap> astrometry;std::map<QString,double> exposures;std::map<QString,int> counts;QStringList summary;QVariantList integrationReport;double exposure=0;
@@ -392,23 +397,24 @@ void DeepSkyController::integrate(bool calibrated,double sigma,bool normalize,bo
                 if(found==flats.end()&&flats.size()==1&&lights.size()==1)found=flats.begin();
                 if(found!=flats.end()) {
                     bool stored=false;for(const auto& v:found->second)stored|=v.toMap()["master"].toBool();
-                    if(stored){if(found->second.size()!=1||!found->second.front().toMap()["masterFlat"].toBool())throw std::runtime_error("Select one calibrated normalized master flat, without raw flats.");groupCalibration.flat=readFrame(found->second.front().toMap());}
+                    if(stored){if(found->second.size()!=1||!found->second.front().toMap()["masterFlat"].toBool())throw std::runtime_error("Select one calibrated normalized master flat, without raw flats.");groupCalibration.flat=read(found->second.front().toMap());}
                     else {processing::Calibration flatCalibration;flatCalibration.dark=calibration.darkFlat;if(!flatCalibration.dark)flatCalibration.bias=calibration.bias;
-                    auto corrected=[&](int n){check(stop);return processing::calibrate(readFrame(found->second[n].toMap()),flatCalibration,checkpoint);};
+                    auto corrected=[&](int n){check(stop);return processing::calibrate(read(found->second[n].toMap()),flatCalibration,checkpoint);};
                     groupCalibration.flat=processing::masterFrame(int(found->second.size()),corrected,true,checkpoint);}
                 }
             }
             processing::BackgroundOptions sequenceGradient;
-            const processing::DrizzleOptions drizzleOptions{drizzleScale,pixelFraction};
-            auto result=processing::integrate(int(rows.size()),[&](int n){check(stop);return readFrame(rows[n].toMap());},groupCalibration,calibrated,sigma,checkpoint,
+            const processing::DrizzleOptions drizzleOptions{drizzleScale,pixelFraction,nativeBayer};
+            auto result=processing::integrate(int(rows.size()),[&](int n){check(stop);return read(rows[n].toMap());},groupCalibration,calibrated,sigma,checkpoint,
                 [this,group](int done,int total,const std::string& stage){post([this,group,done,total,stage]{progress_=done*100/std::max(1,total);stage_=tr(stage.c_str());status_=group+" · "+stage_;emit changed();});},normalize,sequenceBackground?&sequenceGradient:nullptr,drizzle?&drizzleOptions:nullptr);
             recording::AstroImage metadata;metadata.width=result.image.width;metadata.height=result.image.height;metadata.wcs=result.wcs;metadata.centerRa=result.centerRa;metadata.centerDec=result.centerDec;metadata.pixelScale=result.pixelScale;metadata.date=result.date;astrometry[group]=imageAstrometry(metadata);
             exposure+=result.totalExposure;exposures[group]=result.totalExposure;counts[group]=int(result.accepted.size());
             summary<<tr("%1: %2/%3 frames, %4 s, %5 rejected samples").arg(group).arg(result.accepted.size()).arg(rows.size()).arg(result.totalExposure,0,'f',1).arg(result.rejectedSamples);
             if(result.accepted.size()<2)summary<<tr("Only one usable light in %1: no multi-frame noise reduction was possible.").arg(group);
-            integrationReport<<QVariantMap{{"group",group},{"drizzle",drizzle},{"scale",drizzle?drizzleScale:1},{"pixelFraction",pixelFraction},{"width",result.image.width},{"height",result.image.height},{"accepted",int(result.accepted.size())},{"minimum",result.minimumContributors},{"mean",result.meanContributors},{"subpixelDiversity",result.subpixelDiversity}};
+            integrationReport<<QVariantMap{{"group",group},{"drizzle",drizzle},{"nativeBayer",result.nativeBayer},{"bayerPattern",result.nativeBayer?(declaredPattern==domain::BayerPattern::None?rows.front().toMap()["bayer"].toString():bayerPattern):QString()},{"scale",drizzle?drizzleScale:1},{"pixelFraction",pixelFraction},{"width",result.image.width},{"height",result.image.height},{"accepted",int(result.accepted.size())},{"minimum",result.minimumContributors},{"mean",result.meanContributors},{"subpixelDiversity",result.subpixelDiversity}};
             if(drizzle) {
                 summary<<tr("Drizzle ×%1 · pixel fraction %2 · %3 × %4 px · contributors: min %5, mean %6").arg(drizzleScale,0,'f',1).arg(pixelFraction,0,'f',2).arg(result.image.width).arg(result.image.height).arg(result.minimumContributors).arg(result.meanContributors,0,'f',1);
+                if(result.nativeBayer)summary<<tr("Native Bayer reconstruction · contributors counted separately for R, G and B.");
                 if(!result.subpixelDiversity)summary<<tr("Subpixel shifts are very similar: more output pixels do not guarantee finer detail.");
                 if(result.minimumContributors<3)summary<<tr("Some drizzle pixels have fewer than three contributing frames; robust rejection is unavailable there.");
             }
@@ -417,7 +423,7 @@ void DeepSkyController::integrate(bool calibrated,double sigma,bool normalize,bo
         }
         const auto display=prepare(*results.begin()->second,true,checkpoint);
         const auto rawRow=lights.begin()->second[0].toMap();
-        const auto rawPreview=previewImage(processing::linearRgb(readFrame(rawRow),checkpoint),true);
+        const auto rawPreview=previewImage(processing::linearRgb(read(rawRow),checkpoint),true);
         check(stop);
         post([this,results=std::move(results),astrometry,exposures,counts,display,summary,integrationReport,exposure,rawRow,rawPreview,stop]()mutable{if(stop.stop_requested())return;integrationReport_=integrationReport;rawPreview_=rawPreview;rawName_=rawRow["name"].toString();stacks_=std::move(results);stackAstrometry_=astrometry;groups_.clear();for(const auto& [group,image]:stacks_)groups_<<group;groupExposure_=exposures;groupCounts_=counts;exposureCount_=counts.begin()->second;resultFilters_={groups_.front()};totalExposure_=exposures.begin()->second;show(stacks_.begin()->second,true,display.preview,display.pixels,display.stretch,display.before);astrometry_=stackAstrometry_.begin()->second;const auto saved=projectOptions_["astrometry"].toMap();if(validAstrometryState(saved)&&saved["imageKey"].toString()==QString::fromLatin1(linearImageKey(*linear_))&&readWcs(saved["wcs"]))astrometry_=saved;progress_=100;stage_=tr("Complete");status_=summary.join("\n");emit changed();});
     });

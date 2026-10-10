@@ -459,5 +459,65 @@ Les **200 binaires Mach-O** du paquet n’ont aucune dépendance Homebrew
 absolue. La distribution conserve la signature ad-hoc existante ;
 Developer ID et notarisation restent à fournir.
 
+## Drizzle Bayer natif — 1.11.0, 10 octobre 2026
+
+Le mode **Bayer natif / CFA** de l’empilement projette seulement la couleur
+mesurée de chaque pixel calibré. La copie dématricée sert à l’alignement et,
+si demandé, à estimer le modèle de gradient ; elle ne fournit pas les couleurs
+interpolées au résultat. Couverture, poids et rejet sont séparés en R, V et B.
+Les valeurs nulles, négatives et HDR restent valides. WCS/SIP et Float32 sont
+conservés. Les réglages existants gardent leur mode mono/RVB par défaut.
+
+Une déclaration explicite peut compléter les matrices manquantes, notamment
+les FITS portant seulement `BAYERPAT=VALID`, sans réécrire les fichiers.
+Une matrice connue contradictoire et un fichier RVB incompatible bloquent
+le calcul. Guide intégré, README et aides des réglages sont à jour en français.
+
+Les **45 tests Release passent** (29,25 s, `build/bayer-final-tests.log`).
+Les tests couvrent les quatre matrices, la reconstruction analytique à ×1/×2
+avec phases contrôlées, la projection à 45°, la calibration bias/flat,
+la normalisation, le rejet d’un défaut, le WCS, les trous de couleur,
+l’annulation et la conservation du résultat précédent. Le parcours QML teste
+la déclaration d’une matrice absente, les conflits, les réglages et la
+restauration exacte des pixels et du bilan dans un projet portable.
+
+La composition native française a été vérifiée à **1440 × 960**, **1100 × 800**
+et **900 × 700** : réglages d’empilement, résultat, bilan et guide. En petite
+fenêtre, l’interprétation de la source occupe une ligne complète et les deux
+contrôles d’aperçu gardent leurs libellés lisibles. Les captures sont dans
+`previews/native/1.11.0-*.png`.
+
+La fixture visuelle construit huit mosaïques CFA depuis un extrait du vrai
+Orion, à quatre décalages entiers connus : **1021 × 765 px**, minimum
+**4 contributions par canal**, moyenne **6,664**, calcul **2,089 s**
+(`build/bayer-native.log`). Ce contrôle n’est pas une mesure de gain sur les
+poses originales de l’utilisateur ; elles ne sont pas modifiées.
+
+Les limites restent explicites : grille avant recadrage de **32 MP**,
+stockage temporaire de **24 octets par pixel et par pose**, nombreux décalages
+nécessaires pour une couverture CFA fiable. Une couleur sans données produit
+une erreur et conserve le résultat précédent. Les cartes de poids/rejet
+exportables et une comparaison quantitative sur de véritables acquisitions
+avec dithering documenté restent à développer. Voir l’ADR-022.
+
 SHA256 du DMG : `d36f491245e450dd4ab19b8d9a7ffd0b5653c7293389b1bf02e342eb333ebf1d`.
 SHA256 de l’exécutable : `9bf931f63836e442832642cb08d6e39d5df89074e8648a5bfb03b23539f95839`.
+
+
+### Livraison 1.11.0 vérifiée
+
+Le DMG a été reconstruit et vérifié (`build/bayer-package.log`,
+`build/bayer-dmg-verification.log`). Son volume monté en lecture seule contient
+la version 1.11.0 et un exécutable identique à celui contrôlé. La signature locale
+profonde/stricte est valide ; les quatre helpers Astrometry.net démarrent et les
+archives de sources requises sont présentes. Les **200 Mach-O** du bundle ne
+référencent aucune dépendance absolue Homebrew ni un dossier utilisateur.
+Le volume de vérification est démonté.
+
+- Taille : **118 406 354 octets** (112,92 Mio).
+- SHA-256 DMG : `a90542f0ed21772518e305a707ffe4b40fcf44f963d888b29cebe2137f64a109`.
+- SHA-256 exécutable : `8d0289f35207dd7b23069aae2b9ae0ad6ed5630ff884451a74181efd90751223`.
+- Les deux tests ciblés de livraison passent après la dernière correction des
+  messages de validation (5,13 s, `build/bayer-delivery-tests.log`).
+
+La signature Developer ID et la notarisation restent à fournir.

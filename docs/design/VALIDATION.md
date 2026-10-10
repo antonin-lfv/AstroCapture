@@ -426,7 +426,7 @@ drizzle décrit quand l’utiliser, ses paramètres et ses limites.
 
 Les **45 tests Release passent** (28,98 s, `build/drizzle-final-tests.log`).
 Les nouveaux contrôles portent sur les empreintes sous-pixel analytiques,
-rotations à 45°, valeurs signées/HDR et zéros, rejection d’aberrations,
+rotations à 45°, valeurs signées/HDR et zéros, rejet d’aberrations,
 WCS/SIP et échantillonnage relus en FITS, trous de couverture, limite 32 MP
 et annulation de la dernière pose. L’action QML réelle, la réouverture
 portable du résultat et de son bilan, et la conservation du résultat
@@ -446,3 +446,18 @@ Le résultat conserve sa convention d’intensité linéaire et ses données
 Float32. L’échelle ×2 reste impossible sur les sources de 26 MP tant que
 la finition est limitée à 32 MP ; ×1 est disponible. Le drizzle CFA/Bayer
 natif et les cartes de poids exportables restent à développer.
+
+
+### Livraison 1.10.0 vérifiée
+
+DMG reconstruit après `659b7ec` : **120 452 952 octets** (114,87 Mio).
+Le contrôle d’intégrité est valide. Montage en lecture seule : version
+1.10.0, signature locale profonde/stricte valide, exécutable identique
+au paquet Release, quatre helpers Astrometry.net exécutables et sources
+correspondantes présentes. Le volume de vérification est démonté.
+Les **200 binaires Mach-O** du paquet n’ont aucune dépendance Homebrew
+absolue. La distribution conserve la signature ad-hoc existante ;
+Developer ID et notarisation restent à fournir.
+
+SHA256 du DMG : `d36f491245e450dd4ab19b8d9a7ffd0b5653c7293389b1bf02e342eb333ebf1d`.
+SHA256 de l’exécutable : `9bf931f63836e442832642cb08d6e39d5df89074e8648a5bfb03b23539f95839`.

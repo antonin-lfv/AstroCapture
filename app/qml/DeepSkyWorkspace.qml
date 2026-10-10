@@ -29,6 +29,13 @@ Control {
     function openFamily(index) {
         if (!familyOpen(index)) expandedFamilies = expandedFamilies.concat([index]);
         finishingTool = index;
+        Qt.callLater(function() {
+            const family=[family0,family1,family2,family3,family4,family5][index];
+            const scroll=settingsScroll.contentItem;
+            if(!family||!scroll||!scroll.contentItem)return;
+            const top=family.mapToItem(scroll.contentItem,0,0).y;
+            scroll.contentY=Math.max(0,Math.min(top,scroll.contentHeight-scroll.height));
+        });
     }
     function toggleFamily(index) {
         if (!familyOpen(index)) { openFamily(index); return; }
@@ -724,7 +731,7 @@ ParameterControl {id:black;label:qsTr("Black level");textIsValue:true;text:"0";f
         onGestureEnded:edits.endEdit()
     }
                 }
-                InspectorFamily {objectName:"deepSkyFamily5";title:root.familyNames[5];expanded:root.familyOpen(5);current:root.finishingTool===5;onActivated:root.toggleFamily(5);onInteracted:root.finishingTool=5
+                InspectorFamily {id:family5;objectName:"deepSkyFamily5";title:root.familyNames[5];expanded:root.familyOpen(5);current:root.finishingTool===5;onActivated:root.toggleFamily(5);onInteracted:root.finishingTool=5
                     StarLayerTools {id:starTools;controller:root.controller;values:root.advancedOptions;editable:root.finishEditable;linearInput:root.linearRecipeInput
                         onEdited:settings=>{root.advancedOptions=settings;root.previewAdjustments();}
                         onGestureStarted:edits.beginEdit();onGestureEnded:edits.endEdit()
@@ -803,7 +810,7 @@ ParameterControl {id:black;label:qsTr("Black level");textIsValue:true;text:"0";f
     FileDialog {id:projectSave;fileMode:FileDialog.SaveFile;nameFilters:["AstroCapture project (*.astroproject)"];onAccepted:{const target=selectedFile.toString().endsWith(".astroproject")?selectedFile:selectedFile.toString()+".astroproject";if(root.portableSave)controller.savePortableProject(target);else controller.saveProject(target);}}
     DarkDialog {
         id:projectSaveChoice;objectName:"projectSaveChoice";parent:Overlay.overlay;anchors.centerIn:parent;modal:true
-        title:qsTr("Save project");width:Math.min(460,parent.width-40)
+        title:qsTr("Save project");width:Math.min(460,root.width-40)
         ColumnLayout {
             width:parent.width;spacing:12
             SettingLabel {text:qsTr("Project type");explanation:qsTr("Portable includes original images, calibration files, imported masks, filter stacks and exact floating-point results. Linked stores paths and settings; sources must remain available and results need to be calculated again.")}
@@ -822,7 +829,7 @@ ParameterControl {id:black;label:qsTr("Black level");textIsValue:true;text:"0";f
     FolderDialog {id:relinkFolderDialog;title:qsTr("Find the new source folder");onAccepted:root.relinkFolder=selectedFolder}
     DarkDialog {
         id:relinkDialog;objectName:"relinkSourcesDialog";parent:Overlay.overlay;anchors.centerIn:parent;modal:true
-        title:qsTr("Find moved sources");width:Math.min(500,parent.width-40);closePolicy:controller.busy?Popup.NoAutoClose:Popup.CloseOnEscape
+        title:qsTr("Find moved sources");width:Math.min(500,root.width-40);closePolicy:controller.busy?Popup.NoAutoClose:Popup.CloseOnEscape
         ColumnLayout {
             width:parent.width;spacing:12
             Label {Layout.fillWidth:true;wrapMode:Text.Wrap;color:Atelier.secondary;text:qsTr("Choose the folder containing the moved images and masks. Subfolders are searched; matching content is verified before linking.")}

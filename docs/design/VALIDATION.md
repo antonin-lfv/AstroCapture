@@ -340,3 +340,53 @@ Les 193 binaires Mach-O inspectés ne conservent aucune dépendance Homebrew abs
 Le montage de contrôle est démonté. Developer ID et notarisation restent à fournir.
 
 SHA256 du DMG : `80140f261bf1e40a60ae24b8de98d6607f7adb84086cbd123bedc4bcc4a76895`.
+
+
+## Lot 1.9.0 — résolution aveugle/SIP, masters et couches étoiles/fond
+
+Les phases sont sauvegardées séparément : `b8127e8` avant modification,
+`6e470b3` pour la résolution aveugle/SIP, `d165f08` pour la bibliothèque de
+masters et `a84514c` pour les couches étoiles/fond. Les réglages précédents
+et les projets sans ces nouvelles options restent compatibles.
+
+Les **44 tests Release passent** (20,41 s), dont les nouvelles suites SIP,
+résolution aveugle, bibliothèque et couches. Ils couvrent les inverses WCS,
+les transformations et les FITS Float32, le rejet robuste, les métadonnées
+manquantes/incompatibles, les contrôles d’empreintes et la non-répétition de
+la calibration des flats. La neutralité des couches est vérifiée à l’identique
+après étirement ; leurs exports et projets conservent les flottants signés,
+la géométrie et le SIP. L’annulation conserve les résultats précédents.
+
+Le FITS réel d’Orion, 6 244 × 4 170 pixels, est résolu sans coordonnées
+ni échelle préalables, avec SIP d’ordre 3. La vérification indépendante Gaia
+associe **675 étoiles**, avec une RMS de **0,523 pixel** et une échelle de
+**1,251 seconde d’arc/pixel**. Les indications volontairement erronées du
+contrôle ne changent pas la solution aveugle. Les pixels linéaires sont
+conservés à l’identique. Le moteur externe travaille localement ; les requêtes
+Gaia restent explicites et distinctes de la résolution.
+
+Les vrais panneaux Qt/QML sont contrôlés en français sur ce FITS, avec Cocoa
+et le rendu logiciel, à **1440 × 960, 1100 × 800 et 900 × 700**. Les captures
+`previews/native/1.9.0-*` montrent le mode aveugle, la bibliothèque, le résultat
+combiné et le fond estimé. Les éléments restent dans leurs panneaux et les
+réglages défilent sans barre apparente. Ouvrir une famille amène ses contrôles
+dans la zone visible. La bibliothèque de contrôle utilise un master synthétique
+incompatible de 64 × 64, sans écrire dans la bibliothèque personnelle.
+
+Sur Orion, l’ajustement accepte **1 672 profils parmi 1 819 candidates**,
+rejette 147 candidates et produit une RMS normalisée moyenne de **0,0679**.
+Il s’agit d’une estimation PSF gaussienne/Moffat, pas d’un retrait neuronal
+complet : les étoiles saturées, proches ou mal ajustées restent dans le fond.
+Le réglage de réduction diminue la luminosité des profils acceptés, pas leur
+rayon. Les structures diffuses ne sont pas classées automatiquement comme
+étoiles. L’export final utilise toujours l’image recombinée ; chaque couche
+peut être inspectée et exportée séparément en FITS flottant.
+
+Le solveur embarque uniquement les quatre helpers natifs nécessaires, exécutés
+dans des processus séparés. GSL et les helpers sont accompagnés des sources,
+recettes et licences. WCSLIB 8.10 est recompilé dans un dossier privé à partir
+de l’archive officielle contrôlée, car l’archive actuelle ne correspond plus
+à l’empreinte de la bouteille Homebrew installée. Ses tests amont passent.
+Le pré-inclusion de `stdio.h` dans les options de compilation corrige une
+déclaration manquante dans un test amont avec le compilateur macOS actuel.
+Aucune bibliothèque Homebrew installée n’est modifiée.

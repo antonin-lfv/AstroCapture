@@ -1,0 +1,22 @@
+AstroCapture includes Astrometry.net 0.97 as separate command-line processes
+for local blind solving. Astrometry.net and its linked GSL/WCSLIB libraries
+are distributed under GPL-3.0-or-later / LGPL-3.0-or-later respectively.
+See the accompanying license texts, including Astrometry.net-LICENSE.txt.
+
+Contents/Resources/ThirdPartySources contains the corresponding upstream source
+archives, their verified SHA256 and the installed Homebrew build recipes
+for Astrometry.net and GSL. WCSLIB 8.10 is built privately from the included
+archive by prepare_wcslib() in package_astrometry_sources.py. This avoids
+using a Homebrew bottle whose original tarball has since been repacked upstream. The recipes document dependencies, flags and
+patches. Rebuild with those recipes or the upstream build instructions. The included
+packaging scripts document the private WCSLIB build and dependency deployment.
+The helpers have no AstroCapture-specific source changes. Packaging copies the
+native executables, changes their Mach-O dependency paths to bundled libraries,
+adds @loader_path/../../Frameworks and applies ad-hoc codesigning. The public
+scripts/package_macos.sh documents these deployment operations.
+
+Images are solved locally; no index data is embedded. Index 4109 can be downloaded
+from https://data.astrometry.net/4100/index-4109.fits with the official checksum.
+Users can select any supported local index folder. Upstream documentation:
+https://astrometry.net/doc/readme.html
+https://github.com/dstndstn/astrometry.net/releases/tag/0.97

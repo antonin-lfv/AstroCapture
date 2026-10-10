@@ -59,8 +59,17 @@ Popup {
         IconButton {text:qsTr("Cancel calculation");visible:dialog.controller.busy;onClicked:dialog.controller.cancel()}
     }
     FileDialog {id:importFile;title:qsTr("Import a calibration master");nameFilters:[qsTr("FITS master (*.fits *.fit *.fts)")];onAccepted:dialog.controller.importCalibrationMaster(selectedFile,["Dark","Bias","Flat","DarkFlat"][role.currentIndex],masterName.text,correctedFlat.checked)}
-    DarkDialog {id:removeConfirm;parent:Overlay.overlay;anchors.centerIn:parent;modal:true;title:qsTr("Remove this library entry?");width:Math.min(460,dialog.hostWidth-48);standardButtons:Dialog.Cancel|Dialog.Ok
-        Label {width:removeConfirm.availableWidth;height:contentHeight;text:qsTr("Remove %1 from the list? Its FITS file stays on disk so existing projects remain usable.").arg(dialog.entry.name||"");wrapMode:Text.Wrap;color:Atelier.text}
-        onAccepted:dialog.controller.removeCalibrationMasterEntry(dialog.entry.id)
+    Popup {
+        id:removeConfirm;parent:Overlay.overlay;anchors.centerIn:parent;modal:true;focus:true
+        width:Math.min(460,dialog.hostWidth-48);height:removePanel.implicitHeight+40;padding:20
+        background:Rectangle {color:Atelier.surface;radius:Atelier.dialogRadius;border.color:Atelier.border}
+        ColumnLayout {id:removePanel;anchors.fill:parent;spacing:16
+            Label {Layout.fillWidth:true;text:qsTr("Remove this library entry?");wrapMode:Text.Wrap;color:Atelier.text;font.pixelSize:16;font.bold:true}
+            Note {text:qsTr("Remove %1 from the list? Its FITS file stays on disk so existing projects remain usable.").arg(dialog.entry.name||"")}
+            RowLayout {Layout.fillWidth:true
+                IconButton {text:qsTr("Close");Layout.fillWidth:true;onClicked:removeConfirm.close()}
+                IconButton {text:qsTr("Remove from library");Layout.fillWidth:true;enabled:!dialog.controller.busy;onClicked:{dialog.controller.removeCalibrationMasterEntry(dialog.entry.id);removeConfirm.close()}}
+            }
+        }
     }
 }

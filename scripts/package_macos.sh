@@ -64,6 +64,8 @@ if [[ ! -d "${QT_LIB_DIR}" ]]; then
 fi
 mkdir -p "${FRAMEWORKS_DIR}"
 
+WCSLIB_PRIVATE="$(python3 "${REPO_ROOT}/scripts/package_astrometry_sources.py" --prepare-wcslib)"
+
 declare -A bundled_framework
 declare -A bundled_flat
 
@@ -110,6 +112,10 @@ vendor_flat_dylib() {
     local name="$(basename "${dep}")"
     [[ -n "${bundled_flat[${name}]:-}" ]] && return
     local dest="${FRAMEWORKS_DIR}/${name}"
+    if [[ "${name}" == libwcs.8.dylib ]]; then
+        cp -L "${WCSLIB_PRIVATE}" "${dest}"
+        chmod u+w "${dest}"
+    fi
     if [[ ! -e "${dest}" ]]; then
         echo "    vendoring ${dep}"
         cp -L "${dep}" "${dest}"
@@ -169,8 +175,14 @@ vendor_binary() {
 ASTROMETRY_PREFIX="$(brew --prefix astrometry-net)"
 HELPERS_DIR="${APP_BUNDLE}/Contents/Helpers/astrometry"
 mkdir -p "${HELPERS_DIR}"
-for source_helper in "${ASTROMETRY_PREFIX}"/bin/*; do
+for helper_name in solve-field astrometry-engine augment-xylist image2xy; do
+    source_helper="${ASTROMETRY_PREFIX}/bin/${helper_name}"
+    [[ -f "${source_helper}" ]] || { echo "Missing astrometry helper: ${helper_name}" >&2; exit 1; }
     if file -b "${source_helper}" | grep -q "Mach-O"; then
+        if otool -L "${source_helper}" | awk '{print $1}' | grep 'libwcs' | grep -qv '/libwcs.8.dylib$'; then
+            echo "Unsupported WCSLIB ABI in ${source_helper}; update the private build and sources together." >&2
+            exit 1
+        fi
         helper="${HELPERS_DIR}/$(basename "${source_helper}")"
         cp -L "${source_helper}" "${helper}"
         chmod u+w "${helper}"
@@ -178,7 +190,7 @@ for source_helper in "${ASTROMETRY_PREFIX}"/bin/*; do
         install_name_tool -add_rpath "@loader_path/../../Frameworks" "${helper}" 2>/dev/null || true
     fi
 done
-cp -R "${REPO_ROOT}/third_party/notices" "${APP_BUNDLE}/Contents/Resources/ThirdPartyNotices"
+python3 "${REPO_ROOT}/scripts/package_astrometry_sources.py" "${APP_BUNDLE}"
 
 echo "  fixing ${EXECUTABLE}"
 vendor_binary "${EXECUTABLE}"

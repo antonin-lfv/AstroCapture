@@ -68,7 +68,7 @@ int main(int argc,char** argv){
         const auto folder=qEnvironmentVariable("ASTRO_UI_FEATURES_QA");QDir().mkpath(folder);
         auto capture=[&](const QString& path){for(int i=0;i<5;++i){QCoreApplication::processEvents();QThread::msleep(40);}ASTRO_TEST_CHECK(window.grabWindow().save(path));};
         for(const auto size:{QSize(1440,960),QSize(1100,800),QSize(900,700)}) {
-            window.resize(size);root->setSize(size);controller.setStarLayerView(0);const auto suffix=QString("-%1x%2.png").arg(size.width()).arg(size.height());capture(folder+"/stars"+suffix);
+            window.resize(size);root->setSize(size);QMetaObject::invokeMethod(root,"openFamily",Q_ARG(QVariant,QVariant(5)));QMetaObject::invokeMethod(root->findChild<QObject*>("deepSkyCompletionToast"),"close");controller.setStarLayerView(0);const auto suffix=QString("-%1x%2.png").arg(size.width()).arg(size.height());capture(folder+"/stars"+suffix);
             controller.setStarLayerView(2);capture(folder+"/residual"+suffix);controller.setStarLayerView(0);
             auto* masterDialog=root->findChild<QObject*>("masterLibraryDialog");ASTRO_TEST_CHECK(masterDialog);ASTRO_TEST_CHECK(QMetaObject::invokeMethod(masterDialog,"open"));capture(folder+"/masters"+suffix);ASTRO_TEST_CHECK(QMetaObject::invokeMethod(masterDialog,"close"));
             auto* astrometry=root->findChild<QObject*>("astrometryDialog");ASTRO_TEST_CHECK(astrometry);ASTRO_TEST_CHECK(QMetaObject::invokeMethod(astrometry,"open"));root->findChild<QObject*>("astrometrySolveMode")->setProperty("currentIndex",1);capture(folder+"/blind"+suffix);ASTRO_TEST_CHECK(QMetaObject::invokeMethod(astrometry,"close"));

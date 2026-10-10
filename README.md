@@ -497,7 +497,7 @@ Les captures d’écran présentent l’application réelle, avec une caméra si
 ## Développement
 
 La compilation utilise Qt 6, OpenCV, CFITSIO et LibRaw. Sur Mac, installez les
-dépendances astronomiques avec `brew install cfitsio libraw`, puis utilisez les
+dépendances astronomiques avec `brew install cfitsio libraw astrometry-net`, puis utilisez les
 préréglages CMake indiqués dans CONTRIBUTING.md. Les bibliothèques requises et
 leurs notices sont intégrées au paquet macOS ; elles ne doivent pas être
 installées séparément pour utiliser le DMG.
@@ -507,7 +507,7 @@ Le bouton **Signaler un bug** prépare un e-mail vers antoninlefevre45@gmail.com
 avec la version et les étapes de reproduction, à relire avant envoi.
 
 Dans **Ciel profond → Finition**, choisissez Étirement, Fond de ciel, Couleur et bruit,
-Orientation ou Transformations avancées. **Supprimer ces réglages**, en rouge après
+Orientation, Transformations avancées ou Étoiles et fond. **Supprimer ces réglages**, en rouge après
 la comparaison, réinitialise uniquement la famille sélectionnée. **Cmd+Z** annule
 la dernière modification ; un déplacement de curseur compte comme une action.
 

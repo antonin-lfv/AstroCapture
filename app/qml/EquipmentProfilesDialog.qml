@@ -100,8 +100,17 @@ Popup {
     FileDialog {id:importResponse;title:qsTr("Measured equipment response");nameFilters:[qsTr("RGB response (*.csv)")];onAccepted:{if(dialog.controller.importColorResponse(selectedFile)){dialog.refreshCurrent();dialog.responseSelected();}dialog.message=dialog.controller.status;}}
     FileDialog {id:importLibrary;title:qsTr("Import equipment library");nameFilters:[qsTr("Equipment library (*.json)")];onAccepted:{dialog.library.importEquipmentProfiles(selectedFile);dialog.message=dialog.library.status;}}
     FileDialog {id:exportLibrary;title:qsTr("Export equipment library");fileMode:FileDialog.SaveFile;defaultSuffix:"json";nameFilters:[qsTr("Equipment library (*.json)")];onAccepted:{dialog.library.exportEquipmentProfiles(selectedFile);dialog.message=dialog.library.status;}}
-    DarkDialog {id:removeProfile;anchors.centerIn:parent;parent:Overlay.overlay;modal:true;title:qsTr("Remove this equipment profile?");standardButtons:Dialog.Cancel|Dialog.Ok;width:Math.min(460,dialog.hostWidth-48)
-        Label {width:parent.width;text:qsTr("Remove %1 from the library? Existing projects and calibrations keep their own response data.").arg(profiles.currentText);wrapMode:Text.Wrap;color:Atelier.text}
-        onAccepted:{dialog.library.removeEquipmentProfile(profiles.currentText);dialog.message=dialog.library.status;}
+    Popup {
+        id:removeProfile;parent:Overlay.overlay;anchors.centerIn:parent;modal:true;focus:true
+        width:Math.min(460,dialog.hostWidth-48);height:removePanel.implicitHeight+40;padding:20
+        background:Rectangle {color:Atelier.surface;radius:Atelier.dialogRadius;border.color:Atelier.border}
+        ColumnLayout {id:removePanel;anchors.fill:parent;spacing:16
+            Label {Layout.fillWidth:true;text:qsTr("Remove this equipment profile?");wrapMode:Text.Wrap;color:Atelier.text;font.pixelSize:16;font.bold:true}
+            Note {text:qsTr("Remove %1 from the library? Existing projects and calibrations keep their own response data.").arg(profiles.currentText)}
+            RowLayout {Layout.fillWidth:true
+                IconButton {text:qsTr("Close");Layout.fillWidth:true;onClicked:removeProfile.close()}
+                IconButton {text:qsTr("Remove selected profile");Layout.fillWidth:true;enabled:!dialog.controller.busy;onClicked:{dialog.library.removeEquipmentProfile(profiles.currentText);dialog.message=dialog.library.status;removeProfile.close()}}
+            }
+        }
     }
 }

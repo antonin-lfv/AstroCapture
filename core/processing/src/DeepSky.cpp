@@ -1,4 +1,5 @@
 #include <astro/processing/DeepSky.hpp>
+#include <astro/processing/WcsProjection.hpp>
 #include "MetalProcessing.hpp"
 #include <astro/processing/DeepSkyAdvanced.hpp>
 #include <opencv2/core.hpp>
@@ -308,10 +309,11 @@ found:
     if(!ratios.empty())best.fluxScale=std::clamp(double(median(std::move(ratios))),.1,10.);
     return best;
 }
-Integration integrate(int count,const ImageLoader& load,const Calibration& masters,bool calibrated,double sigma,const CheckCancel& check,const Progress& progress,bool normalize,const BackgroundOptions* backgroundOptions,const DrizzleOptions* drizzle,bool diagnosticMaps) {
+Integration integrate(int count,const ImageLoader& load,const Calibration& masters,bool calibrated,double sigma,const CheckCancel& check,const Progress& progress,bool normalize,const BackgroundOptions* backgroundOptions,const DrizzleOptions* drizzle,bool diagnosticMaps,bool wcsProjection) {
     if(count<1||count>500)throw std::runtime_error("Select between 1 and 500 light frames per group.");
     if(!std::isfinite(sigma)||sigma<0||sigma>10)throw std::runtime_error("Sigma rejection must be between 0 and 10.");
     if(drizzle&&count<2)throw std::runtime_error("Drizzle requires at least two usable light frames per filter group.");
+    if(wcsProjection&&count<2)throw std::runtime_error("WCS projection requires at least two validated light frames per filter group.");
     Integration result;
     auto raw=load(0);if(drizzle)drizzleDimensions(raw.width,raw.height,*drizzle);const auto pattern=raw.bayer;const int channels=raw.channels;
     const bool cfa=drizzle&&drizzle->nativeBayer;const int weightChannels=cfa?3:1;
@@ -319,6 +321,10 @@ Integration integrate(int count,const ImageLoader& load,const Calibration& maste
         throw std::runtime_error("Native Bayer drizzle requires single-channel CFA sources with a recognized Bayer pattern.");
     result.nativeBayer=cfa;
     result.wcs=raw.wcs;result.centerRa=raw.centerRa;result.centerDec=raw.centerDec;result.pixelScale=raw.pixelScale;result.date=raw.date;
+    if(wcsProjection) {
+        if(!raw.wcs||!raw.wcs->valid())throw std::runtime_error("WCS projection requires valid TAN or TAN-SIP coordinates on every light, including the reference.");
+        result.wcs->sipOrder=0;result.wcs->sipA.fill(0);result.wcs->sipB.fill(0);result.pixelScale=result.wcs->scale();result.wcsProjection=true;
+    }
     if(!calibrated)raw=calibrate(std::move(raw),masters,check);
     auto reference=linearRgb(raw,check);
     if(backgroundOptions)reference=extractBackground(reference,*backgroundOptions,check).image;
@@ -337,7 +343,15 @@ Integration integrate(int count,const ImageLoader& load,const Calibration& maste
             auto image=n?linearRgb(data,check):reference;
             if(n&&backgroundOptions){if(progress)progress(n,count,"Background extraction");image=extractBackground(image,*backgroundOptions,check).image;}
             StarAlignment alignment;
-            if(n){
+            std::optional<WcsProjection> projection,relativeProjection;
+            if(wcsProjection) {
+                if(progress)progress(n,count,"WCS/SIP geometry and star verification");
+                if(!data.wcs||!data.wcs->valid())throw std::runtime_error("WCS projection requires valid TAN or TAN-SIP coordinates on every light, including the reference.");
+                relativeProjection.emplace(*data.wcs,*raw.wcs,data.width,data.height,check);
+                alignment=validateWcsRegistration(reference,image,*relativeProjection,check);
+                projection.emplace(*data.wcs,*result.wcs,data.width,data.height,check);
+                if(n&&normalize)for(auto& value:image.rgb)value*=float(alignment.fluxScale);
+            } else if(n){
                 if(progress)progress(n,count,"Star analysis and registration");
                 alignment=alignStars(reference,image,check);
                 if(normalize)for(auto& value:image.rgb)value*=float(alignment.fluxScale);
@@ -345,20 +359,23 @@ Integration integrate(int count,const ImageLoader& load,const Calibration& maste
             }
             if(progress)progress(n,count,"Normalization");
             if(normalize){const auto levels=cfa?bayerLevels(image,pattern,check):std::array<float,3>{level(image,0),level(image,1),level(image,2)};for(int c=0;c<3;++c){const auto offset=levels[c]-background[c];for(std::size_t p=c;p<image.rgb.size();p+=3)if(std::isfinite(image.rgb[p]))image.rgb[p]-=offset;}}
+            if(projection&&!drizzle){if(progress)progress(n,count,"WCS/SIP projection");image=reprojectWcs(image,*projection,reference.width,reference.height,check);}
             if(drizzle) {
                 if(progress)progress(n,count,"Drizzle projection");
                 if(cfa)for(int y=0;y<data.height;++y){checked(check);for(int x=0;x<data.width;++x){const auto p=std::size_t(y)*data.width+x;data.samples[p]=image.rgb[p*3+domain::bayerChannelAt(pattern,x,y)];}}
                 // The RGB copy is for star registration/model estimation only.
                 // Its measured channel is still the calibrated CFA sample,
                 // with only the explicit background/gain/offset corrections.
-                auto projected=cfa?drizzleProjectBayer(data,alignment,reference.width,reference.height,*drizzle,check):drizzleProject(image,alignment,reference.width,reference.height,*drizzle,check);
+                auto projected=cfa?drizzleProjectBayer(data,alignment,reference.width,reference.height,*drizzle,check,projection?&*projection:nullptr):drizzleProject(image,alignment,reference.width,reference.height,*drizzle,check,projection?&*projection:nullptr);
                 DiskImage stored(projected.image,projected.weights);
+                std::vector<unsigned char> projectedCoverage(projection?coverage.size():0);
                 const auto& m=alignment.matrix;const double det=m[0]*m[4]-m[1]*m[3];
                 // Crop geometrical borders only. Missing drops inside that area
                 // stay explicit and are handled using weights during integration.
                 for(int y=0;y<outputHeight;++y) {
                     checked(check);
                     for(int x=0;x<outputWidth;++x) {
+                        if(projection){const auto p=projection->inverse((x+.5)/drizzle->scale-.5,(y+.5)/drizzle->scale-.5);projectedCoverage[std::size_t(y)*outputWidth+x]=p[0]>=-.5&&p[1]>=-.5&&p[0]<data.width-.5&&p[1]<data.height-.5;continue;}
                         const double rx=(x+.5)/drizzle->scale-.5-m[2],ry=(y+.5)/drizzle->scale-.5-m[5];
                         const double sx=(m[4]*rx-m[1]*ry)/det,sy=(-m[3]*rx+m[0]*ry)/det;
                         coverage[std::size_t(y)*outputWidth+x]&=sx>=-.5&&sy>=-.5&&sx<image.width-.5&&sy<image.height-.5;
@@ -366,9 +383,11 @@ Integration integrate(int count,const ImageLoader& load,const Calibration& maste
                 }
                 // Rotation/scale can provide different phases across the field.
                 for(const auto point:std::array<std::array<double,2>,3>{{{0,0},{reference.width*.5,reference.height*.5},{double(reference.width-1),double(reference.height-1)}}}) {
-                    const double dx=(m[0]-1)*point[0]+m[1]*point[1]+m[2],dy=m[3]*point[0]+(m[4]-1)*point[1]+m[5];
+                    double dx=(m[0]-1)*point[0]+m[1]*point[1]+m[2],dy=m[3]*point[0]+(m[4]-1)*point[1]+m[5];
+                    if(relativeProjection){const auto p=relativeProjection->forward(point[0],point[1]);dx=p[0]-point[0];dy=p[1]-point[1];}
                     result.subpixelDiversity|=std::hypot(std::remainder(dx,cfa?2.:1.),std::remainder(dy,cfa?2.:1.))>.1;
                 }
+                if(projection)for(std::size_t p=0;p<coverage.size();++p)coverage[p]&=projectedCoverage[p];
                 disk.push_back(std::move(stored));
             } else {
                 DiskImage stored(image);
@@ -376,9 +395,11 @@ Integration integrate(int count,const ImageLoader& load,const Calibration& maste
                 disk.push_back(std::move(stored));
             }
             result.accepted.push_back(n);result.totalExposure+=data.exposure;
+            if(projection)result.wcsChecks.push_back({n,alignment.matches,data.wcs->sipOrder,alignment.residual});
         }catch(const StorageError&){throw;}catch(const std::runtime_error& e){checked(check);if(n==0)throw;result.rejected.push_back(n);result.reasons.emplace_back(e.what());}
     }
     if(disk.empty())throw std::runtime_error("No usable light frames.");
+    if(wcsProjection&&disk.size()<2)throw std::runtime_error(result.reasons.empty()?"WCS projection requires at least two validated light frames per filter group.":result.reasons.front());
     if(drizzle&&disk.size()<2)throw std::runtime_error("Drizzle requires at least two usable light frames per filter group.");
     const auto crop=commonRectangle(coverage,outputWidth,outputHeight);
     const double scale=drizzle?drizzle->scale:1;

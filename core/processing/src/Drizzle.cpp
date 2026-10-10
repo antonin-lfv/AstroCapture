@@ -1,4 +1,5 @@
 #include <astro/processing/DeepSky.hpp>
+#include <astro/processing/WcsProjection.hpp>
 #include <algorithm>
 #include <cmath>
 #include <limits>
@@ -33,6 +34,11 @@ double overlap(const Polygon& drop,int x,int y) {
     for(int i=0;i<p.size;++i){const auto a=p.points[i],b=p.points[(i+1)%p.size];area+=(a.x-x)*(b.y-y)-(b.x-x)*(a.y-y);}
     return std::abs(area)*.5;
 }
+double signedArea(const Polygon& p) {
+    const auto origin=p.points[0];double area=0;
+    for(int i=0;i<p.size;++i){const auto a=p.points[i],b=p.points[(i+1)%p.size];area+=(a.x-origin.x)*(b.y-origin.y)-(b.x-origin.x)*(a.y-origin.y);}
+    return area*.5;
+}
 }
 std::array<int,2> drizzleDimensions(int width,int height,const DrizzleOptions& options) {
     if(width<1||height<1||!std::isfinite(options.scale)||options.scale<1||options.scale>2||
@@ -45,7 +51,7 @@ std::array<int,2> drizzleDimensions(int width,int height,const DrizzleOptions& o
 namespace {
 DrizzleProjection projectPixels(int inputWidth,int inputHeight,const std::vector<float>& samples,
                                 domain::BayerPattern pattern,const StarAlignment& alignment,int width,int height,
-                                const DrizzleOptions& options,const CheckCancel& check) {
+                                const DrizzleOptions& options,const CheckCancel& check,const WcsProjection* wcs) {
     const bool cfa=pattern!=domain::BayerPattern::None;
     const int sourceChannels=cfa?1:3,weightChannels=cfa?3:1;
     const auto size=drizzleDimensions(width,height,options);
@@ -61,16 +67,33 @@ DrizzleProjection projectPixels(int inputWidth,int inputHeight,const std::vector
     std::vector<double> sum(pixels*3),weight(pixels*weightChannels);
     const double scale=options.scale,half=options.pixelFraction*.5;
     const double dropArea=std::abs(determinant)*std::pow(scale*options.pixelFraction,2);
-    const bool axisAligned=std::abs(m[1])<1e-12&&std::abs(m[3])<1e-12;
-    auto project=[&](double x,double y){return Point{scale*(m[0]*x+m[1]*y+m[2]+.5)-.5,scale*(m[3]*x+m[4]*y+m[5]+.5)-.5};};
+    const bool axisAligned=!wcs&&std::abs(m[1])<1e-12&&std::abs(m[3])<1e-12;
+    auto project=[&](double x,double y){if(wcs){const auto p=wcs->forward(x,y);return Point{scale*(p[0]+.5)-.5,scale*(p[1]+.5)-.5};}return Point{scale*(m[0]*x+m[1]*y+m[2]+.5)-.5,scale*(m[3]*x+m[4]*y+m[5]+.5)-.5};};
+    std::vector<Polygon> patches;patches.reserve(4);
+    // Curved SIP drops are adaptively split. Each leaf stays a convex quad,
+    // so clipping has at most eight vertices and fits the fixed buffer.
+    auto subdivide=[&](auto&& self,double x0,double y0,double x1,double y1,int depth)->void {
+        Polygon p;p.size=4;p.points[0]=project(x0,y0);p.points[1]=project(x1,y0);p.points[2]=project(x1,y1);p.points[3]=project(x0,y1);
+        const double mx=(x0+x1)*.5,my=(y0+y1)*.5;
+        const std::array<Point,5> actual{project(mx,y0),project(x1,my),project(mx,y1),project(x0,my),project(mx,my)};
+        double error=0;for(int n=0;n<5;++n){Point expected{};if(n<4){const auto a=p.points[n],b=p.points[(n+1)%4];expected={(a.x+b.x)*.5,(a.y+b.y)*.5};}else{for(int i=0;i<4;++i){expected.x+=p.points[i].x*.25;expected.y+=p.points[i].y*.25;}}error=std::max(error,std::hypot(actual[n].x-expected.x,actual[n].y-expected.y));}
+        if(error>.001){if(depth>=5)throw std::runtime_error("WCS/SIP pixel footprints exceed the supported curvature tolerance.");self(self,x0,y0,mx,my,depth+1);self(self,mx,y0,x1,my,depth+1);self(self,mx,my,x1,y1,depth+1);self(self,x0,my,mx,y1,depth+1);return;}
+        const double area=signedArea(p);if(!std::isfinite(area)||std::abs(area)<.1*scale*scale*(x1-x0)*(y1-y0)||std::abs(area)>10*scale*scale*(x1-x0)*(y1-y0))throw std::runtime_error("WCS/SIP projection is folded or outside the supported distortion range.");
+        for(int i=0;i<4;++i){const auto a=p.points[i],b=p.points[(i+1)%4],c=p.points[(i+2)%4];if(((b.x-a.x)*(c.y-b.y)-(b.y-a.y)*(c.x-b.x))*area<=0)throw std::runtime_error("WCS/SIP projection is folded or outside the supported distortion range.");}
+        patches.push_back(p);
+    };
     for(int y=0;y<inputHeight;++y) {
         if(check)check();
         for(int x=0;x<inputWidth;++x) {
             const auto source=(std::size_t(y)*inputWidth+x)*sourceChannels;
             if(!std::isfinite(samples[source])||(!cfa&&(!std::isfinite(samples[source+1])||!std::isfinite(samples[source+2]))))continue;
             const int channel=cfa?domain::bayerChannelAt(pattern,x,y):0;
+            patches.clear();
             Polygon drop;drop.size=4;drop.points[0]=project(x-half,y-half);drop.points[1]=project(x+half,y-half);
             drop.points[2]=project(x+half,y+half);drop.points[3]=project(x-half,y+half);
+            double pixelArea=dropArea;
+            if(wcs){subdivide(subdivide,x-half,y-half,x+half,y+half,0);pixelArea=0;for(const auto& p:patches)pixelArea+=std::abs(signedArea(p));}else patches.push_back(drop);
+            for(const auto& drop:patches) {
             double left=drop.points[0].x,right=left,top=drop.points[0].y,bottom=top;
             for(int i=1;i<4;++i){left=std::min(left,drop.points[i].x);right=std::max(right,drop.points[i].x);top=std::min(top,drop.points[i].y);bottom=std::max(bottom,drop.points[i].y);}
             // Bounding coordinates are clipped before integer conversion.
@@ -79,10 +102,11 @@ DrizzleProjection projectPixels(int inputWidth,int inputHeight,const std::vector
             const int y0=int(std::max(0.,std::floor(top+.5))),y1=int(std::min(double(size[1]-1),std::ceil(bottom+.5)-1));
             for(int yy=y0;yy<=y1;++yy)for(int xx=x0;xx<=x1;++xx) {
                 const double area=axisAligned?std::max(0.,std::min(right,xx+.5)-std::max(left,xx-.5))*std::max(0.,std::min(bottom,yy+.5)-std::max(top,yy-.5)):overlap(drop,xx,yy);
-                if(area<=1e-12*dropArea)continue;
-                const double w=area/dropArea;const auto target=std::size_t(yy)*size[0]+xx;
+                if(area<=1e-12*pixelArea)continue;
+                const double w=area/pixelArea;const auto target=std::size_t(yy)*size[0]+xx;
                 if(cfa){weight[target*3+channel]+=w;sum[target*3+channel]+=samples[source]*w;}
                 else {weight[target]+=w;for(int c=0;c<3;++c)sum[target*3+c]+=samples[source+c]*w;}
+            }
             }
         }
     }
@@ -94,12 +118,12 @@ DrizzleProjection projectPixels(int inputWidth,int inputHeight,const std::vector
     return output;
 }
 }
-DrizzleProjection drizzleProject(const FloatImage& input,const StarAlignment& alignment,int width,int height,const DrizzleOptions& options,const CheckCancel& check) {
-    return projectPixels(input.width,input.height,input.rgb,domain::BayerPattern::None,alignment,width,height,options,check);
+DrizzleProjection drizzleProject(const FloatImage& input,const StarAlignment& alignment,int width,int height,const DrizzleOptions& options,const CheckCancel& check,const WcsProjection* wcs) {
+    return projectPixels(input.width,input.height,input.rgb,domain::BayerPattern::None,alignment,width,height,options,check,wcs);
 }
-DrizzleProjection drizzleProjectBayer(const AstroImage& input,const StarAlignment& alignment,int width,int height,const DrizzleOptions& options,const CheckCancel& check) {
+DrizzleProjection drizzleProjectBayer(const AstroImage& input,const StarAlignment& alignment,int width,int height,const DrizzleOptions& options,const CheckCancel& check,const WcsProjection* wcs) {
     if(input.channels!=1||input.bayer==domain::BayerPattern::None||domain::bayerChannelAt(input.bayer,0,0)<0)
         throw std::runtime_error("Native Bayer drizzle requires single-channel CFA sources with a recognized Bayer pattern.");
-    return projectPixels(input.width,input.height,input.samples,input.bayer,alignment,width,height,options,check);
+    return projectPixels(input.width,input.height,input.samples,input.bayer,alignment,width,height,options,check,wcs);
 }
 }

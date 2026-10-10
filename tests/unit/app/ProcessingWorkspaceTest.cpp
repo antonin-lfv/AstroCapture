@@ -446,7 +446,7 @@ int main(int argc, char** argv) {
                     ASTRO_TEST_CHECK(window.grabWindow().save(folder+QString("/guide-%1-%2-%3x%4.png").arg(topic).arg(bottom?"bottom":"top").arg(size.width()).arg(size.height())));
                 }
                 if(topic==3) {
-                  for(const auto& prefix:QStringList{"Drizzle","Cartes de","HDR linéaire"}) {
+                  for(const auto& prefix:QStringList{"Drizzle","Cartes de","HDR linéaire","WCS / SIP"}) {
                     auto* scroll=guide->findChild<QObject*>("guideLessonScroll");auto* content=scroll->property("contentItem").value<QObject*>();
                     auto* canvas=qobject_cast<QQuickItem*>(content->property("contentItem").value<QObject*>());ASTRO_TEST_CHECK(canvas);
                     std::function<QQuickItem*(QQuickItem*)> findTitle=[&](QQuickItem* parent)->QQuickItem* {
@@ -457,7 +457,7 @@ int main(int argc, char** argv) {
                     auto* title=findTitle(guide);ASTRO_TEST_CHECK(title);
                     content->setProperty("contentY",title->mapToItem(canvas,QPointF()).y()-16);
                     for(int i=0;i<5;++i){QCoreApplication::processEvents();QThread::msleep(40);}
-                    ASTRO_TEST_CHECK(window.grabWindow().save(folder+QString("/guide-%1-%2x%3.png").arg(prefix=="Drizzle"?"drizzle":prefix=="Cartes de"?"maps":"hdr").arg(size.width()).arg(size.height())));
+                    ASTRO_TEST_CHECK(window.grabWindow().save(folder+QString("/guide-%1-%2x%3.png").arg(prefix=="Drizzle"?"drizzle":prefix=="Cartes de"?"maps":prefix=="WCS / SIP"?"wcs":"hdr").arg(size.width()).arg(size.height())));
                   }
                 }
             }

@@ -30,6 +30,7 @@ Control {
     readonly property string declaredBayer: ["","RGGB","BGGR","GRBG","GBRG"][bayerPattern.currentIndex]
     readonly property bool bayerDrizzleInvalid: nativeBayer.checked && controller.frames.some(row=>row.selected && row.role==="Light" && (row.channels!==1 || (!root.declaredBayer && ["RGGB","BGGR","GRBG","GBRG"].indexOf(row.bayer)<0) || (root.declaredBayer && ["RGGB","BGGR","GRBG","GBRG"].indexOf(row.bayer)>=0 && row.bayer!==root.declaredBayer)))
     readonly property bool drizzleInvalid: drizzle.checked && (bayerDrizzleInvalid || drizzlePlan.some(row=>row.width*row.height>32000000 || row.count<2))
+    readonly property bool wcsProjectionInvalid: wcsProjection.checked && drizzlePlan.some(row=>row.count<2)
     property bool imageFocus: false
     property var advancedOptions: ({})
     readonly property var advancedKeys:["starSeparation","starPsfProfile","starFwhm","starBeta","starLimit","starFitTolerance","starSaturationLimit","starsGain","starsSaturation","starsMidtones","starBackgroundGain","starBackgroundSaturation","starBackgroundDenoise","photometryMethod","photometryProfile","photometryWhite","photometryImageKey","maskStrokes","maskBaseWhite","maskFile","maskBlurRadius","maskScope","pedestal","ghs", "ghsStrength", "ghsLocal", "ghsSymmetry", "ghsShadows", "ghsHighlights", "ghsInverse", "ghsMode", "maskType", "maskLow", "maskHigh", "maskFeather", "maskX", "maskY", "maskRadius", "maskStarRadius", "maskInvert", "deconvolution", "psfProfile", "psfFwhm", "psfBeta", "rlIterations", "rlDamping", "rlBlend", "rlStopping", "advancedDenoise", "noiseScales", "noiseThreshold", "noiseAmount", "noiseChroma", "photometry", "photometryReferences", "photometryAperture", "photometryInner", "photometryOuter", "photometrySaturation"]
@@ -176,11 +177,11 @@ Control {
         if(!edits.applyValues(options())){editError=qsTr("Check parameters and operation order: white must exceed black; photometry and deconvolution require linear, unrotated input; photometry cannot be masked.");return false;}
         edits.endEdit();
         const view=root.sessionState;delete view.options;
-        controller.projectOptions={view:view,calibrated:calibrated.checked,normalize:normalize.checked,badPixels:badPixels.checked,sequenceBackground:sequenceBackground.checked,hdrOptions:controller.projectOptions.hdrOptions||{},diagnosticMaps:diagnosticMaps.checked,drizzle:drizzle.checked,nativeBayer:nativeBayer.checked,bayerPattern:root.declaredBayer,drizzleScale:drizzleScale.currentIndex,pixelFraction:pixelFraction.value,sigma:sigma.value,method:integrationMethod.currentIndex,finish:edits.values,caption:root.captionOptions,versions:edits.snapshot()};return true;
+        controller.projectOptions={view:view,calibrated:calibrated.checked,normalize:normalize.checked,badPixels:badPixels.checked,sequenceBackground:sequenceBackground.checked,hdrOptions:controller.projectOptions.hdrOptions||{},diagnosticMaps:diagnosticMaps.checked,wcsProjection:wcsProjection.checked,drizzle:drizzle.checked,nativeBayer:nativeBayer.checked,bayerPattern:root.declaredBayer,drizzleScale:drizzleScale.currentIndex,pixelFraction:pixelFraction.value,sigma:sigma.value,method:integrationMethod.currentIndex,finish:edits.values,caption:root.captionOptions,versions:edits.snapshot()};return true;
     }
     readonly property var sessionState: {
         edits.values; edits.version; edits.canUndo; edits.canRedo;
-        return {options:{calibrated:calibrated.checked,normalize:normalize.checked,badPixels:badPixels.checked,sequenceBackground:sequenceBackground.checked,hdrOptions:controller.projectOptions.hdrOptions||{},diagnosticMaps:diagnosticMaps.checked,drizzle:drizzle.checked,nativeBayer:nativeBayer.checked,bayerPattern:root.declaredBayer,drizzleScale:drizzleScale.currentIndex,pixelFraction:pixelFraction.value,
+        return {options:{calibrated:calibrated.checked,normalize:normalize.checked,badPixels:badPixels.checked,sequenceBackground:sequenceBackground.checked,hdrOptions:controller.projectOptions.hdrOptions||{},diagnosticMaps:diagnosticMaps.checked,wcsProjection:wcsProjection.checked,drizzle:drizzle.checked,nativeBayer:nativeBayer.checked,bayerPattern:root.declaredBayer,drizzleScale:drizzleScale.currentIndex,pixelFraction:pixelFraction.value,
             sigma:sigma.value,method:integrationMethod.currentIndex,finish:edits.values,caption:root.captionOptions,versions:edits.snapshot()},
             step:workflowStep,tool:finishingTool,expandedFamilies:expandedFamilies.slice(),advancedTool:advancedTools.toolIndex,comparison:comparisonMode,split:comparisonSplit,fit:viewport.fitMode,zoom:viewport.zoom,panX:viewport.panX,panY:viewport.panY,targetQuery:astrometryDialog.targetQuery};
     }
@@ -196,7 +197,7 @@ Control {
         if(restored.normalize!==undefined)normalize.checked=restored.normalize;
         if(restored.badPixels!==undefined)badPixels.checked=restored.badPixels;
         sequenceBackground.checked=restored.sequenceBackground||false;
-        diagnosticMaps.checked=restored.diagnosticMaps||false;drizzle.checked=restored.drizzle||false;
+        wcsProjection.checked=restored.wcsProjection||false;diagnosticMaps.checked=restored.diagnosticMaps||false;drizzle.checked=restored.drizzle||false;
         nativeBayer.checked=restored.nativeBayer||false;
         bayerPattern.currentIndex=Math.max(0,["","RGGB","BGGR","GRBG","GBRG"].indexOf(restored.bayerPattern||""));
         drizzleScale.currentIndex=restored.drizzleScale===undefined?2:Math.max(0,Math.min(2,restored.drizzleScale));
@@ -248,7 +249,7 @@ Control {
             if(settings.normalize!==undefined)normalize.checked=settings.normalize;
             if(settings.badPixels!==undefined)badPixels.checked=settings.badPixels;
             sequenceBackground.checked=settings.sequenceBackground||false;
-            diagnosticMaps.checked=settings.diagnosticMaps||false;drizzle.checked=settings.drizzle||false;
+            wcsProjection.checked=settings.wcsProjection||false;diagnosticMaps.checked=settings.diagnosticMaps||false;drizzle.checked=settings.drizzle||false;
             nativeBayer.checked=settings.nativeBayer||false;
             bayerPattern.currentIndex=Math.max(0,["","RGGB","BGGR","GRBG","GBRG"].indexOf(settings.bayerPattern||""));
             drizzleScale.currentIndex=settings.drizzleScale===undefined?2:Math.max(0,Math.min(2,settings.drizzleScale));
@@ -640,6 +641,11 @@ DropArea {
                             visible:advanced.expanded;Layout.fillWidth:true;spacing:12
                             Label {text:qsTr("Normalization, stacking method and rejection threshold.");color:Atelier.secondary;font.pixelSize:12;wrapMode:Text.Wrap;Layout.fillWidth:true}
                             HelpCheckBox {id:diagnosticMaps;objectName:"deepSkyDiagnosticMaps";text:qsTr("Keep weight and rejection maps");Layout.fillWidth:true;enabled:!controller.busy;explanation:qsTr("Retains three RGB Float32 maps: weights after rejection, retained contributors, and combined low/high rejected sample counts. Adds about 36 bytes per output pixel per filter group to memory and saved projects (1.15 GB at 32 MP). Disabled by default. An older result needs to be stacked again to create maps.")}
+                            HelpCheckBox {id:wcsProjection;objectName:"deepSkyWcsProjection";text:qsTr("WCS / SIP distortion projection");Layout.fillWidth:true;enabled:!controller.busy
+                                explanation:qsTr("Use only FITS with valid TAN or TAN-SIP coordinates on every light. Projects calibrated pixels onto a common TAN grid without SIP, including the reference. Needs 12 distributed star matches, RMS at most 0.75 original reference pixel, and two validated lights per filter. Inconsistent sources are excluded with saved reasons; no affine fallback. Works with ordinary stacking and drizzle, including native Bayer. Retains input intensity units; does not calibrate absolute flux or pixel-area photometry. Solve the result against a catalogue before PCC/SPCC. See Guide → Deep sky for tolerances and limits.")
+                            }
+                            Label {visible:wcsProjection.checked;text:qsTr("Use astrometrically solved FITS for every light. Check the source solutions first; solving only the final stack is insufficient.");color:Atelier.secondary;font.pixelSize:12;wrapMode:Text.Wrap;Layout.fillWidth:true}
+                            Label {visible:root.wcsProjectionInvalid;text:qsTr("WCS projection needs at least two lights per filter group.");color:Atelier.warning;font.pixelSize:12;wrapMode:Text.Wrap;Layout.fillWidth:true}
                             ParameterLabel {label:qsTr("Normalization");explanation:qsTr("Match stellar flux and background offsets to the reference. Disable for data normalized externally. This is global normalization, not photometric color calibration.")}
                             CheckBox {id:normalize;text:qsTr("Normalize to the reference");checked:true;enabled:!controller.busy;Layout.fillWidth:true}
                             ParameterLabel {label:qsTr("Gradient before stacking");explanation:qsTr("Optional degree-1 subtraction after calibration and debayering, before alignment. Each exposure gets its own automatic grid (20 samples per line, tolerance 1). Leave disabled for fields filled with nebulosity.")}
@@ -695,12 +701,36 @@ DropArea {
                 ParameterLabel {visible:root.workflowStep===1;label:qsTr("Reference and alignment");explanation:qsTr("Reference selects one light per filter group. Other frames are aligned to its stars. Choose a sharp frame with many recognizable stars; this is not the frame used as the final output.")}
                 Label {visible:root.workflowStep===1;text:qsTr("Check the stars, FWHM and reference in the image list before stacking.");color:Atelier.secondary;font.pixelSize:12;wrapMode:Text.Wrap;Layout.fillWidth:true}
                 Rectangle {objectName:"deepSkyStackDivider";visible:root.workflowStep===1;Layout.fillWidth:true;Layout.preferredHeight:1;color:"#526174";Layout.topMargin:8;Layout.bottomMargin:8}
-                IconButton {visible:root.workflowStep===1;objectName:"deepSkyIntegrate";text:qsTr("Create the stacked image");Layout.fillWidth:true;Layout.minimumWidth:0;enabled:!controller.busy && !root.drizzleInvalid && controller.frames.some(row=>row.selected && row.role==="Light");onClicked:{if(root.saveOptions())controller.integrate(calibrated.checked,integrationMethod.currentIndex===0?sigma.value:0,normalize.checked,badPixels.checked,sequenceBackground.checked,drizzle.checked,[1,1.5,2][drizzleScale.currentIndex],pixelFraction.value,nativeBayer.checked,root.declaredBayer,diagnosticMaps.checked)}}
+                IconButton {visible:root.workflowStep===1;objectName:"deepSkyIntegrate";text:qsTr("Create the stacked image");Layout.fillWidth:true;Layout.minimumWidth:0;enabled:!controller.busy && !root.drizzleInvalid && !root.wcsProjectionInvalid && controller.frames.some(row=>row.selected && row.role==="Light");onClicked:{if(root.saveOptions())controller.integrate(calibrated.checked,integrationMethod.currentIndex===0?sigma.value:0,normalize.checked,badPixels.checked,sequenceBackground.checked,drizzle.checked,[1,1.5,2][drizzleScale.currentIndex],pixelFraction.value,nativeBayer.checked,root.declaredBayer,diagnosticMaps.checked,wcsProjection.checked)}}
 
                 IconButton {objectName:"openIntegrationMaps";visible:(root.workflowStep===1||root.workflowStep===6)&&controller.diagnosticMaps.length>0;text:qsTr("Inspect weight and rejection maps");Layout.fillWidth:true;enabled:!controller.busy&&controller.diagnosticMaps.length>0;onClicked:integrationTools.openMaps()}
                 IconButton {objectName:"openHdr";visible:root.workflowStep===1;text:qsTr("Merge different exposures · HDR");Layout.fillWidth:true;enabled:!controller.busy;onClicked:integrationTools.openHdr()}
                 Label {visible:(root.workflowStep===1||root.workflowStep===6)&&!!controller.hdrReport.imageKey;text:qsTr("HDR · %1 recovered pixels · %2 still saturated").arg(controller.hdrReport.recovered||0).arg(controller.hdrReport.clipped||0);color:Atelier.secondary;wrapMode:Text.Wrap;Layout.fillWidth:true}
 
+                Repeater {
+                    model:controller.integrationReport.filter(row=>row.wcsProjection===true)
+                    ColumnLayout {
+                        required property var modelData
+                        property bool detailsOpen:false
+                        visible:root.workflowStep===1;Layout.fillWidth:true;spacing:4
+                        Label {text:qsTr("WCS / SIP · %1 · TAN output").arg(modelData.group);color:Atelier.text;font.pixelSize:13;wrapMode:Text.Wrap;Layout.fillWidth:true}
+                        Label {text:qsTr("%1 validated frames · maximum RMS %2 px").arg((modelData.wcsChecks||[]).length).arg(Number((modelData.wcsChecks||[]).reduce((maximum,row)=>Math.max(maximum,row.rms),0)).toLocaleString(Qt.locale(),"f",3));color:Atelier.secondary;font.pixelSize:12;wrapMode:Text.Wrap;Layout.fillWidth:true}
+                        Label {text:qsTr("RMS measured in pixels of the original reference.");color:Atelier.secondary;font.pixelSize:12;wrapMode:Text.Wrap;Layout.fillWidth:true}
+                        Label {visible:(modelData.rejectedFrames||[]).length>0;text:qsTr("Excluded sources: %1. Open the checks for their reasons.").arg((modelData.rejectedFrames||[]).length);color:Atelier.warning;font.pixelSize:12;wrapMode:Text.Wrap;Layout.fillWidth:true}
+                        IconButton {objectName:"deepSkyWcsSourceChecks";text:parent.detailsOpen?qsTr("Hide source checks"):qsTr("Show source checks");Layout.fillWidth:true;onClicked:parent.detailsOpen=!parent.detailsOpen}
+                        Repeater {model:parent.detailsOpen?(modelData.wcsChecks||[]):[];Label {
+                            required property var modelData
+                            text:qsTr("%1 · SIP %2 · %3 stars · RMS %4 px").arg(modelData.name).arg(modelData.sipOrder).arg(modelData.matches).arg(Number(modelData.rms).toLocaleString(Qt.locale(),"f",3))
+                            color:Atelier.secondary;font.pixelSize:12;wrapMode:Text.Wrap;Layout.fillWidth:true
+                        }}
+                        Repeater {model:parent.detailsOpen?(modelData.rejectedFrames||[]):[];Label {
+                            required property var modelData
+                            text:modelData.name+" · "+qsTranslate("astro::app::DeepSkyController",modelData.reason)
+                            color:Atelier.warning;font.pixelSize:12;wrapMode:Text.Wrap;Layout.fillWidth:true
+                        }}
+                        Label {text:qsTr("Relative alignment checked; absolute catalogue coordinates remain unverified.");color:Atelier.secondary;font.pixelSize:12;wrapMode:Text.Wrap;Layout.fillWidth:true}
+                    }
+                }
                 Repeater {
                     model:controller.integrationReport.filter(row=>row.drizzle)
                     ColumnLayout {

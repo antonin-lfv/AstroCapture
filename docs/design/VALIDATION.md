@@ -594,3 +594,23 @@ Les limites scientifiques et les conditions avant V2 sont consignées dans
 `docs/decisions/ADR-023-integration-diagnostics-hdr.md` et
 `docs/releases/V2_READINESS.md`. La qualification sur de vraies séries HDR,
 la comparaison indépendante avec Siril et les essais d’endurance demeurent à faire.
+
+
+## 1.13.0 — projection WCS/SIP à l’empilement
+
+Rendu QML réel en français avec une image d’Orion (recadrage 1024 × 768),
+distorsion simulée sur une pose et coordonnées volontairement incohérentes
+sur une troisième. Pas de maquette et pas de qualification sur une série
+astrophotographique indépendante. Grille de sortie TAN 1017 × 765 ;
+128 correspondances, RMS 0,296005 pixel de la référence initiale.
+
+Réglages, aide, bilan compact/déplié, finition et carte du guide contrôlés
+à **1440 × 960, 1100 × 800, 900 × 700** en rendu Qt logiciel à dimensions
+exactes. Aide entièrement dans la fenêtre, avec test de ses bornes ; textes
+repliés et exclusion sauvegardée lisible. Bilan dépliable utilisant le bouton
+commun Atelier, option hors des réglages de finition, désactivée par défaut.
+18 captures : `previews/native/1.13.0-*.png`.
+
+47 tests automatisés passent ; options et bilan réouverts en projet portable
+avec pixels identiques, sortie FITS Float32 TAN sans SIP. Détails techniques
+et limites dans `docs/decisions/ADR-024-wcs-sip-stack-projection.md`.

@@ -3,6 +3,7 @@
 #include "AstrometrySettings.hpp"
 #include "GaiaCatalog.hpp"
 #include <QFileInfo>
+#include <QSet>
 #include <cmath>
 
 namespace astro::app {
@@ -33,6 +34,17 @@ bool DeepSkyController::validSession(const WorkspaceSnapshot& s) {
     if(!validRows(s.state["frames"].toList()))return false;
     const auto finish=s.state["finish"].toMap();if(!finish.isEmpty()&&!checkedDeepSkySettings(finish))return false;
     const auto options=s.state["options"].toMap();if(options.contains("finish")&&!checkedDeepSkySettings(options["finish"].toMap()))return false;if(options.contains("versions")&&!checkedDeepSkySnapshot(options["versions"].toMap()))return false;
+    const auto integration=s.state["integrationReport"].toList();if(integration.size()>500)return false;
+    for(const auto& value:integration) {
+        const auto row=value.toMap();if(!row.value("wcsProjection").toBool())continue;
+        const auto checks=row.value("wcsChecks").toList();if(checks.size()<2||checks.size()>500||checks.size()!=row.value("accepted").toDouble())return false;
+        QSet<int> seen;
+        for(const auto& item:checks){const auto c=item.toMap();bool ok=false;const double rms=c.value("rms").toDouble(&ok);const int frame=c.value("frame").toInt(),matches=c.value("matches").toInt(),order=c.value("sipOrder").toInt();
+            if(!ok||!std::isfinite(rms)||rms<0||rms>.75||!c.contains("frame")||!c.contains("matches")||!c.contains("sipOrder")||c.value("frame").toDouble()!=frame||c.value("matches").toDouble()!=matches||c.value("sipOrder").toDouble()!=order||frame<0||frame>=500||seen.contains(frame)||matches<12||matches>300||(order!=0&&(order<2||order>5)))return false;seen.insert(frame);
+        }
+        const auto rejected=row.value("rejectedFrames").toList();if(rejected.size()+checks.size()>500)return false;
+        for(const auto& item:rejected){const auto c=item.toMap();const int frame=c.value("frame",-1).toInt();if(frame<0||frame>=500||c.value("frame").toDouble()!=frame||seen.contains(frame)||c.value("name").toString().size()>1024||c.value("reason").toString().isEmpty()||c.value("reason").toString().size()>8192)return false;seen.insert(frame);}
+    }
     const auto linear=s.images.value("linear"),finished=s.images.value("finished");if(bool(linear)!=bool(finished))return false;
     if(linear && (!validImage(linear)||!validImage(finished)||s.previews.value("display").isNull()||s.previews.value("linear").size()!=QSize(linear->width,linear->height)||s.previews.value("result").size()!=QSize(finished->width,finished->height)))return false;
     for(const auto& p:s.images)if(!validImage(p))return false;

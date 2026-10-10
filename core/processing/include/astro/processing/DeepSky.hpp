@@ -24,20 +24,23 @@ struct StarAlignment {
     double fluxScale{1};
 };
 StarAlignment alignStars(const FloatImage& reference,const FloatImage& source,const CheckCancel& = {});
+class WcsProjection;
+struct WcsRegistrationCheck { int frame{},matches{},sipOrder{};double residual{}; };
 struct DrizzleOptions {
     double scale{2}, pixelFraction{0.8};
     bool nativeBayer{}; // Explicit opt-in; existing projects keep RGB drizzle.
 };
-// Exact overlap of affine square drops with output pixels. Values retain the
-// source intensity convention; flux is intensity times sky pixel area.
+// Exact overlap for affine drops; optional WCS/SIP drops are adaptively
+// subdivided at a 0.001 output-pixel midpoint tolerance. Values retain the
+// source intensity convention; no pixel-area photometry calibration is applied.
 struct DrizzleProjection { FloatImage image; std::vector<float> weights; int weightChannels{1}; };
 std::array<int,2> drizzleDimensions(int width,int height,const DrizzleOptions&);
 DrizzleProjection drizzleProject(const FloatImage&,const StarAlignment&,int referenceWidth,int referenceHeight,
-                                 const DrizzleOptions&,const CheckCancel& = {});
+                                 const DrizzleOptions&,const CheckCancel& = {},const WcsProjection* = nullptr);
 // Calibrated CFA values go only to their measured R/G/B channel. Weights are
 // interleaved RGB; zero weight means missing data, including a real zero value.
 DrizzleProjection drizzleProjectBayer(const AstroImage&,const StarAlignment&,int referenceWidth,int referenceHeight,
-                                      const DrizzleOptions&,const CheckCancel& = {});
+                                      const DrizzleOptions&,const CheckCancel& = {},const WcsProjection* = nullptr);
 struct BackgroundOptions {
     int degree{1}, samplesPerLine{20};
     double tolerance{1};
@@ -60,14 +63,15 @@ struct Integration {
     int minimumContributors{};
     double meanContributors{};
     bool subpixelDiversity{};
-    bool nativeBayer{};
+    bool nativeBayer{},wcsProjection{};
+    std::vector<WcsRegistrationCheck> wcsChecks;
     std::optional<recording::CelestialWcs> wcs;
     std::optional<double> centerRa,centerDec,pixelScale;
     std::string date;
 };
 Integration integrate(int count,const ImageLoader&,const Calibration&,bool calibrated,double sigma,
                       const CheckCancel& = {},const Progress& = {},bool normalize=true,const BackgroundOptions* background=nullptr,
-                      const DrizzleOptions* drizzle=nullptr,bool diagnosticMaps=false);
+                      const DrizzleOptions* drizzle=nullptr,bool diagnosticMaps=false,bool wcsProjection=false);
 struct HdrInput { double exposure{}, saturation{1}; };
 struct HdrResult {
     FloatImage image, recoveredMap, clippedMap;

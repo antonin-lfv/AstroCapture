@@ -180,9 +180,23 @@ désactivée sur des nébulosités étendues.
   lancer. ×2 multiplie les pixels par quatre : une pose de 26 MP ne peut donc
   pas être agrandie ×2 dans cette version. ×1 reste disponible.
 - Intensité linéaire conservée dans la convention des sources ; le flux intégré
-  tient compte de la surface des pixels sur le ciel. WCS TAN/SIP et
+  dépend de la surface des pixels sur le ciel ; aucune calibration photométrique
+  de surface n’est appliquée. WCS TAN/SIP et
   échantillonnage suivent l’échelle et le recadrage. Réglages sauvegardés dans
   les projets et sessions ; FITS linéaire conserve le résultat drizzle Float32.
+
+- **Projection des distorsions WCS / SIP**, depuis **1.13.0**, en option pour
+  les poses FITS déjà résolues : projection de toutes les poses, référence
+  comprise, sur une grille TAN sans SIP, en empilement classique et drizzle
+  (y compris Bayer natif). Chaque pose exige au moins **12 étoiles** dans quatre
+  régions, couvrant **35 %** de chaque dimension, avec **RMS ≤ 0,75 px**.
+  Une solution absente ou incohérente écarte la pose ; aucun remplacement
+  silencieux par un alignement affine. Au moins deux poses validées par filtre
+  doivent rester. Le bilan, les options et les coordonnées de sortie sont
+  sauvegardés. Ces contrôles vérifient l’alignement relatif ; l’astrométrie
+  absolue reste à résoudre avec un catalogue avant PCC/SPCC. Les valeurs
+  suivent la convention d’intensité des sources : cette option n’applique pas
+  de calibration de flux absolu ni de correction photométrique de surface des pixels.
 
 - **Bayer natif / CFA**, depuis **1.11.0**, reconstruit les trois canaux à partir
   des échantillons calibrés réellement mesurés, sans dématriçage des pixels

@@ -168,7 +168,7 @@ public:
     Q_INVOKABLE void chooseRawComparison(int index);
     Q_INVOKABLE void showRawComparison(bool enabled);
     Q_INVOKABLE void integrate(bool calibrated,double sigma=3,bool normalize=true,bool correctBadPixels=true,bool sequenceBackground=false,
-                              bool drizzle=false,double drizzleScale=2,double pixelFraction=0.8,bool nativeBayer=false,QString bayerPattern={},bool diagnosticMaps=false);
+                              bool drizzle=false,double drizzleScale=2,double pixelFraction=0.8,bool nativeBayer=false,QString bayerPattern={},bool diagnosticMaps=false,bool wcsProjection=false);
     Q_INVOKABLE void setReference(int index);
     Q_INVOKABLE void selectResult(const QString& group);
     Q_INVOKABLE void compose(const QString& red,const QString& green,const QString& blue,const QString& luminance="");

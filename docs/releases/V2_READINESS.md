@@ -1,6 +1,6 @@
 # AstroCapture — bilan avant V2
 
-État du 10 octobre 2026, après la livraison 1.12.0.
+État du 10 octobre 2026, après la livraison 1.13.0.
 
 ## Ce qui existe
 
@@ -11,6 +11,8 @@ masters réutilisables, masques, GHS, restauration et séparation paramétrique
 étoiles/fond, géométrie, comparaison, exports et projets récupérables sont
 implémentés. La 1.12 ajoute les cartes de contribution/rejet exportables et une
 fusion HDR linéaire limitée à des entrées comparables préparées par durée.
+La 1.13 ajoute la projection WCS/SIP des poses déjà résolues, avec contrôle
+relatif des étoiles et sortie TAN sans SIP, en empilement et drizzle.
 
 « Implémenté et testé » ne signifie pas « validé dans toutes les conditions ».
 Les aides et le guide expliquent les réglages ; les preuves d’une livraison sont
@@ -31,9 +33,12 @@ une parité scientifique complète avec Siril sans comparaison indépendante.
 
 ## Extensions de traitement encore absentes ou limitées
 
-- Projection utilisant les distorsions optiques pendant l’alignement/drizzle et
-  mosaïque de champs larges en FITS linéaire avec WCS. Le SIP livré décrit la
-  solution astrométrique ; il ne corrige pas automatiquement toute projection.
+- Mosaïque de champs larges en FITS linéaire avec WCS ; résolution automatique
+  d’une séquence avant projection, et correction photométrique de surface des
+  pixels. Depuis 1.13.0, la projection d’empilement WCS/SIP est livrée **sur
+  opt-in, pour des poses FITS déjà résolues**, avec contrôle relatif des étoiles
+  et sortie TAN sans SIP. Elle ne résout pas les poses à elle seule et ne
+  certifie pas les coordonnées absolues. Voir ADR-024.
 - Pondérations statistiques par bruit/FWHM ou nombre de poses, cartes bas/hauts
   séparées et contrôle plus poussé du rejet ; les cartes actuelles ne sont pas
   des cartes de variance ni de confiance.

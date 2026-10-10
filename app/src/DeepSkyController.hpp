@@ -18,6 +18,7 @@ class DeepSkyController : public QObject {
     Q_PROPERTY(QString importedMaskPath READ importedMaskPath NOTIFY maskFileChanged)
     QML_ELEMENT
     Q_PROPERTY(bool hasFinishComparison READ hasFinishComparison NOTIFY imageChanged)
+    Q_PROPERTY(QVariantList calibrationMasters READ calibrationMasters NOTIFY changed)
     Q_PROPERTY(QVariantMap blindSolver READ blindSolver NOTIFY changed)
     Q_PROPERTY(QVariantMap astrometry READ astrometry NOTIFY changed)
     Q_PROPERTY(bool hasCelestialCoordinates READ hasCelestialCoordinates NOTIFY changed)
@@ -64,6 +65,11 @@ public:
         for(const auto& key:{"catalog","localCatalog","response"})view.remove(key);
         return view;
     }
+    QVariantList calibrationMasters() const;
+    Q_INVOKABLE void createCalibrationMaster(const QString& role,const QString& name);
+    Q_INVOKABLE void importCalibrationMaster(const QUrl&,const QString& role,const QString& name,bool correctedFlat=false);
+    Q_INVOKABLE void useCalibrationMaster(const QString& id,bool reviewed=false);
+    Q_INVOKABLE void removeCalibrationMasterEntry(const QString& id);
     QVariantMap blindSolver() const;
     Q_INVOKABLE void chooseBlindIndexes(const QUrl&);
     Q_INVOKABLE void installBlindIndex();

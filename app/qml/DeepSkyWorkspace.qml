@@ -97,6 +97,7 @@ Control {
         asinhLuminance.currentIndex=finish.asinhLuminance||0;denoise.value=finish.denoise;asinh.checked=finish.asinh;asinhStrength.value=finish.asinhStrength;saturation.value=finish.saturation;
         updatingControls=previous;
     }
+    MasterLibraryDialog {id:masterLibrary;controller:root.controller;library:root.library;hostWidth:root.Window.width;hostHeight:root.Window.height}
     AstrometryDialog {id:astrometryDialog;controller:root.controller;library:root.library;values:root.options();hostWidth:root.Window.width;hostHeight:root.Window.height;onCalibrationRequested:settings=>root.setFinish(settings)}
     property var cursorSky: ({})
     function updateCursorSky() {
@@ -135,7 +136,7 @@ Control {
     Shortcut {sequence:StandardKey.Save;enabled:root.visible && root.shortcutsAllowed && !root.dialogOpen && !controller.busy && controller.frames.length>0;onActivated:root.saveCurrentProject()}
     Shortcut {sequences:[StandardKey.Redo];enabled:root.visible && root.shortcutsAllowed && !root.dialogOpen && root.finishEditable && edits.canRedo;onActivated:root.redoFinish()}
     Timer {id:adjustmentTimer;interval:200;onTriggered:controller.apply(root.options())}
-    readonly property bool dialogOpen: inputDialog.visible || folderDialog.visible || exportDialog.visible || projectOpen.visible || projectSave.visible || projectSaveChoice.visible || relinkDialog.visible || relinkFolderDialog.visible || presetDialog.visible || projectMenu.visible || exportPanel.visible || geometryEditor.visible || astrometryDialog.dialogOpen || advancedTools.catalogOpen
+    readonly property bool dialogOpen: inputDialog.visible || folderDialog.visible || exportDialog.visible || projectOpen.visible || projectSave.visible || projectSaveChoice.visible || relinkDialog.visible || relinkFolderDialog.visible || presetDialog.visible || projectMenu.visible || exportPanel.visible || geometryEditor.visible || astrometryDialog.dialogOpen || masterLibrary.opened || masterLibrary.fileDialogOpen || advancedTools.catalogOpen
     onDialogOpenChanged: if(dialogOpen)completionToast.close()
     background: Rectangle {color:Atelier.canvas}
     palette.window: Atelier.canvas
@@ -306,6 +307,7 @@ Control {
         AtelierMenuItem {text:qsTr("Open project");enabled:!controller.busy;onTriggered:projectOpen.open()}
         AtelierMenuItem {text:qsTr("Save project");enabled:!controller.busy&&controller.frames.length>0;onTriggered:root.saveCurrentProject()}
         MenuSeparator {}
+        AtelierMenuItem {objectName:"openMasterLibrary";text:qsTr("Master library");enabled:!controller.busy;onTriggered:masterLibrary.open()}
         AtelierMenuItem {text:qsTr("Find moved sources");enabled:!controller.busy&&controller.missingSources.length>0;onTriggered:relinkDialog.open()}
         AtelierMenuItem {objectName:"deepSkyPresets";text:qsTr("Finishing presets");description:qsTr("All adjustment families");enabled:root.finishEditable;onTriggered:presetDialog.open()}
         AtelierMenuItem {objectName:"deepSkyImageFocus";text:root.imageFocus?qsTr("Show adjustment panel"):qsTr("Enlarge preview");onTriggered:root.imageFocus=!root.imageFocus}

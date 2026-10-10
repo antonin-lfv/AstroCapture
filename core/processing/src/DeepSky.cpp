@@ -27,6 +27,8 @@ float median(std::vector<float> values) {return medianInPlace(values);}
 void same(const AstroImage& a,const AstroImage& b) {
     if(a.width!=b.width||a.height!=b.height||a.channels!=b.channels||a.bayer!=b.bayer||a.samples.size()!=b.samples.size())
         throw std::runtime_error("Calibration frames must match the lights' dimensions, channels and Bayer pattern.");
+    if((!a.camera.empty()&&!b.camera.empty()&&a.camera!=b.camera)||(a.binX&&b.binX&&a.binX!=b.binX)||(a.binY&&b.binY&&a.binY!=b.binY)||(a.hasOffset&&b.hasOffset&&std::abs(a.offset-b.offset)>.01))
+        throw std::runtime_error("Calibration camera, binning or offset does not match.");
 }
 float level(const FloatImage& image,int channel=0) {
     std::vector<float> sample;
@@ -73,10 +75,11 @@ cv::Rect commonRectangle(const std::vector<unsigned char>& mask,int width,int he
     return best;
 }
 }
-AstroImage masterFrame(int count,const ImageLoader& load,bool normalize,const CheckCancel& check) {
+AstroImage masterFrame(int count,const ImageLoader& load,bool normalize,const CheckCancel& check,bool robust) {
     if(count<1)throw std::runtime_error("No calibration frames selected.");
     auto result=load(0); std::vector<double> sum(result.samples.size());
     std::vector<unsigned> valid(sum.size()); double exposure=0;
+    std::vector<std::unique_ptr<FILE,decltype(&std::fclose)>> disk;robust=robust&&count>=3;
     for(int n=0;n<count;++n) {
         checked(check); auto image=n?load(n):result; same(result,image);
         if(result.exposure>0&&image.exposure>0&&std::abs(image.exposure-result.exposure)>0.01*result.exposure)
@@ -89,8 +92,15 @@ AstroImage masterFrame(int count,const ImageLoader& load,bool normalize,const Ch
         float scale=1;
         if(normalize){scale=median(image.samples);if(!(scale>0))throw std::runtime_error("Flat frames must have positive illumination.");}
         for(std::size_t i=0;i<sum.size();++i){if(i%65536==0)checked(check);if(std::isfinite(image.samples[i])){sum[i]+=image.samples[i]/scale;++valid[i];}}
+        if(robust){std::unique_ptr<FILE,decltype(&std::fclose)> file(std::tmpfile(),&std::fclose);if(!file)throw std::runtime_error("Not enough temporary disk space for masters.");for(auto& v:image.samples)v/=scale;if(std::fwrite(image.samples.data(),sizeof(float),image.samples.size(),file.get())!=image.samples.size())throw std::runtime_error("Not enough temporary disk space for masters.");std::rewind(file.get());disk.push_back(std::move(file));}
     }
     for(std::size_t i=0;i<sum.size();++i)result.samples[i]=valid[i]?float(sum[i]/valid[i]):NAN;
+    if(robust){
+        constexpr std::size_t tile=4096;std::vector<float> buffer(std::size_t(count)*tile),values,deviations;values.reserve(count);deviations.reserve(count);
+        for(std::size_t offset=0;offset<sum.size();offset+=tile){checked(check);const auto size=std::min(tile,sum.size()-offset);for(int n=0;n<count;++n)if(std::fread(buffer.data()+n*tile,sizeof(float),size,disk[n].get())!=size)throw std::runtime_error("Cannot read master working files.");
+            for(std::size_t p=0;p<size;++p){values.clear();for(int n=0;n<count;++n)if(std::isfinite(buffer[n*tile+p]))values.push_back(buffer[n*tile+p]);if(values.empty()){result.samples[offset+p]=NAN;continue;}const double center=median(values);deviations.clear();for(float v:values)deviations.push_back(std::abs(v-center));const double threshold=3*std::max(1e-6,1.4826*double(median(deviations)));double total=0;unsigned accepted=0;for(float v:values)if(std::abs(v-center)<=threshold){total+=v;++accepted;}else ++result.masterRejected;result.samples[offset+p]=accepted?float(total/accepted):float(center);}
+        }
+    }
     result.exposure=exposure/count; return result;
 }
 AstroImage detectBadPixels(const AstroImage& dark,double sigma) {
@@ -116,7 +126,7 @@ AstroImage calibrate(AstroImage light,const Calibration& masters,const CheckCanc
     if(masters.bias)same(light,*masters.bias);
     if(masters.dark&&light.exposure>0&&masters.dark->exposure>0&&std::abs(light.exposure-masters.dark->exposure)>std::max(.01,light.exposure*.01))
         throw std::runtime_error("Darks must have the same exposure as lights. Dark scaling is not applied.");
-    for(const auto* frame:{masters.dark?&*masters.dark:nullptr,masters.bias?&*masters.bias:nullptr}) {
+    for(const auto* frame:{masters.dark?&*masters.dark:nullptr,masters.bias?&*masters.bias:nullptr,masters.flat?&*masters.flat:nullptr}) {
         if(!frame)continue;
         if(light.hasGain&&frame->hasGain&&std::abs(light.gain-frame->gain)>.01)
             throw std::runtime_error("Calibration gain does not match the light frame.");

@@ -1,3 +1,4 @@
+#include "MasterLibrary.hpp"
 #include "FileProtection.hpp"
 #include "ProjectStorage.hpp"
 #include "MaskSettings.hpp"
@@ -43,6 +44,7 @@ QString groupName(QString text) {
 }
 recording::AstroImage readFrame(const QVariantMap& row) {
     const auto path=row["path"].toString();
+    if(row.contains("masterHash")&&calibrationFileHash(path)!=row["masterHash"].toString())throw std::runtime_error("Master integrity check failed. Import an intact copy.");
     const auto suffix=QFileInfo(path).suffix().toLower();
     if(QStringList{"png","tif","tiff"}.contains(suffix)) {
         QImageReader reader(path);
@@ -273,7 +275,9 @@ void DeepSkyController::addFiles(const QList<QUrl>& urls,const QString& role,con
                 QVariantMap row{{"path",path},{"name",QFileInfo(path).fileName()},{"role",role},{"selected",true},{"scale",scale}};
                 auto data=readFrame(row);
                 row["sourceFingerprint"]=ProjectStorage::fingerprint(path,[stop]{check(stop);});
-                if(role=="Auto") {
+                const auto metadata=calibrationMetadata(data);for(auto it=metadata.begin();it!=metadata.end();++it)row[it.key()]=it.value();
+                if(!data.masterRole.empty()){row["role"]=QString::fromStdString(data.masterRole);row["masterHash"]=calibrationFileHash(path,stop);}
+                if(role=="Auto"&&data.masterRole.empty()) {
                     const auto hint=(QFileInfo(path).fileName()+" "+QFileInfo(path).dir().dirName()+" "+QString::fromStdString(data.imageType)).toLower();
                     QString detected="Light";
                     if(hint.contains("darkflat")||hint.contains("dark_flat")||hint.contains("dark flat"))detected="DarkFlat";
@@ -335,6 +339,28 @@ void DeepSkyController::inspect(int index){
     if(busy_||index<0||index>=frames_.size())return;const auto row=frames_[index].toMap();const bool debayer=sourceDebayer_,autoStretch=sourceAutoStretch_;
     run(tr("Opening frame…"),[this,row,debayer,autoStretch](std::stop_token stop){auto raw=readFrame(row);QString interpretation=raw.channels==3?tr("RGB source · three channels"):raw.bayer!=domain::BayerPattern::None?(debayer?tr("Bayer %1 source · color preview is debayered"):tr("Bayer %1 source · raw mosaic preview")).arg(QString::fromUtf8(domain::to_string(raw.bayer).data())):tr("Monochrome source · one channel");if(!debayer)raw.bayer=domain::BayerPattern::None;auto rgb=std::make_shared<processing::FloatImage>(processing::linearRgb(raw,[stop]{check(stop);}));const auto display=autoStretch?prepare(*rgb):Display{rgb,makeImagePreview(*rgb),{}};check(stop);post([this,rgb,display,row,interpretation,stop]{if(!stop.stop_requested()){sourceRow_=row;sourceInterpretation_=interpretation;show(rgb,false,display.preview,display.pixels,display.stretch);status_=tr("Source preview: %1. This individual exposure is for inspection only. Final image exports the stack with your finishing adjustments; Linear FITS exports the stack before finishing.").arg(row["name"].toString());emit changed();}});});
 }
+QVariantList DeepSkyController::calibrationMasters() const {
+    try{auto rows=calibrationMasterInventory();for(auto& v:rows){auto r=v.toMap();const auto compatibility=masterCompatibility(r,frames_);for(auto it=compatibility.begin();it!=compatibility.end();++it)r[it.key()]=it.value();v=r;}return rows;}catch(const std::exception&){return {};}
+}
+void DeepSkyController::createCalibrationMaster(const QString& role,const QString& name){
+    const auto frames=frames_;run(tr("Building a calibration master…"),[this,frames,role,name](std::stop_token stop){
+        if(!QStringList{"Dark","Bias","Flat","DarkFlat"}.contains(role))throw std::runtime_error("Choose a calibration role.");QVariantList sources,biases,darkFlats;for(const auto& v:frames){const auto r=v.toMap();if(!r["selected"].toBool())continue;if(r["role"]==role)sources<<r;if(r["role"]=="Bias")biases<<r;if(r["role"]=="DarkFlat")darkFlats<<r;}
+        if(sources.isEmpty())throw std::runtime_error("Select source frames for this master first.");
+        const auto group=sources.front().toMap()["group"];const auto first=sources.front().toMap();for(const auto& v:sources){const auto row=v.toMap();for(const auto& key:{"camera","binX","binY","gain","offset","temperature"})if(first.contains(key)!=row.contains(key)||(QString(key)=="camera"&&first[key].toString().isEmpty()!=row[key].toString().isEmpty())||(QString(key).startsWith("bin")&&(first[key].toInt()>0)!=(row[key].toInt()>0)))throw std::runtime_error("Source metadata must be consistently present. Check the selected calibration frames.");}
+        for(const auto& v:sources)if(v.toMap()["master"].toBool()||v.toMap()["group"]!=group)throw std::runtime_error("Select raw calibration frames from one filter and configuration. Existing masters cannot be averaged with sources.");
+        const auto checkpoint=[stop]{check(stop);};auto build=[&](const QVariantList& rows){for(const auto& v:rows)if(v.toMap()["master"].toBool()){if(rows.size()!=1)throw std::runtime_error("Select one master or its source frames, never both.");return readFrame(v.toMap());}return processing::masterFrame(rows.size(),[&](int n){check(stop);return readFrame(rows[n].toMap());},false,checkpoint,true);};
+        recording::AstroImage result;
+        if(role=="Flat"){processing::Calibration correction;if(!darkFlats.isEmpty())correction.dark=build(darkFlats);else if(!biases.isEmpty())correction.bias=build(biases);else throw std::runtime_error("Select a matching dark-flat or bias before creating a normalized master flat.");result=processing::masterFrame(sources.size(),[&](int n){return processing::calibrate(readFrame(sources[n].toMap()),correction,checkpoint);},true,checkpoint,true);result.normalizedMasterFlat=true;}else result=build(sources);
+        result.masterRole=role.toStdString();result.masterCount=sources.size();const auto entry=storeCalibrationMaster(std::move(result),name,stop);post([this,entry]{status_=tr("Master saved: %1 · %2 source frames. Select it from the library to use it.").arg(entry["name"].toString()).arg(entry["masterCount"].toInt());emit changed();});
+    });
+}
+void DeepSkyController::importCalibrationMaster(const QUrl& url,const QString& role,const QString& name,bool correctedFlat){
+    if(!url.isLocalFile())return;run(tr("Importing a calibration master…"),[this,url,role,name,correctedFlat](std::stop_token stop){auto a=recording::readAstroImage(url.toLocalFile().toStdString());if(role=="Flat"){if(!a.normalizedMasterFlat&&!correctedFlat)throw std::runtime_error("Confirm that the imported flat is already bias/dark-flat corrected.");if(!a.normalizedMasterFlat)a=processing::masterFrame(1,[&](int){return a;},true,[stop]{check(stop);});a.normalizedMasterFlat=true;}a.masterRole=role.toStdString();const auto r=storeCalibrationMaster(std::move(a),name,stop);post([this,r]{status_=tr("Master imported: %1. Original file preserved.").arg(r["name"].toString());emit changed();});});
+}
+void DeepSkyController::useCalibrationMaster(const QString& id,bool reviewed){
+    const auto frames=frames_;run(tr("Checking calibration master…"),[this,id,frames,reviewed](std::stop_token stop){auto r=calibrationMaster(id,stop);const auto c=masterCompatibility(r,frames);if(c["compatibility"].toInt()==2)throw std::runtime_error((tr("Master incompatible: %1").arg(c["mismatch"].toString())).toStdString());if(c["compatibility"].toInt()==1&&!reviewed)throw std::runtime_error((tr("Check missing metadata before using this master: %1").arg(c["missing"].toString())).toStdString());r["masterHash"]=r["hash"];r["sourceFingerprint"]=ProjectStorage::fingerprint(r["path"].toString(),[stop]{check(stop);});r["selected"]=true;r["scale"]=0;check(stop);post([this,r]{for(int n=0;n<frames_.size();++n){auto old=frames_[n].toMap();if(old["role"]==r["role"]&&(r["role"]!="Flat"||old["group"]==r["group"])){old["selected"]=false;frames_[n]=old;}}bool found=false;for(auto& v:frames_)if(v.toMap()["path"]==r["path"]){v=r;found=true;}if(!found)frames_<<r;status_=tr("Master selected: %1. Other files in this calibration role are deselected.").arg(r["name"].toString());emit changed();});});
+}
+void DeepSkyController::removeCalibrationMasterEntry(const QString& id){if(busy_)return;try{removeCalibrationMaster(id);status_=tr("Master removed from the library. Its FITS file is retained for existing projects.");}catch(const std::exception& e){status_=tr(e.what());}emit changed();}
 void DeepSkyController::integrate(bool calibrated,double sigma,bool normalize,bool correctBadPixels,bool sequenceBackground) {
     const auto frames=frames_;const auto references=references_;
     run(tr("Calibrating and integrating…"),[this,frames,calibrated,sigma,normalize,correctBadPixels,sequenceBackground,references](std::stop_token stop){
@@ -344,7 +370,9 @@ void DeepSkyController::integrate(bool calibrated,double sigma,bool normalize,bo
         if(calibrated&&(!darks.empty()||!flats.empty()||!biases.empty()||!darkFlats.empty()||!badPixels.empty()))
             throw std::runtime_error("Calibration files are selected but Lights already calibrated is enabled. Disable it to apply your calibration files, or deselect those files.");
         auto checkpoint=[stop]{check(stop);};
-        auto master=[&](const QVariantList& rows,bool normalize=false){return processing::masterFrame(int(rows.size()),[&](int n){check(stop);return readFrame(rows[n].toMap());},normalize,checkpoint);};
+        auto master=[&](const QVariantList& rows,bool normalize=false){
+            for(const auto& v:rows)if(v.toMap()["master"].toBool()){if(rows.size()!=1)throw std::runtime_error("Select one master or its source frames, never both.");return readFrame(v.toMap());}
+            return processing::masterFrame(int(rows.size()),[&](int n){check(stop);return readFrame(rows[n].toMap());},normalize,checkpoint);};
         processing::Calibration calibration;
         if(!calibrated){if(!darks.empty())calibration.dark=master(darks);if(!biases.empty())calibration.bias=master(biases);if(!darkFlats.empty())calibration.darkFlat=master(darkFlats);if(correctBadPixels){if(!badPixels.empty())calibration.badPixels=master(badPixels);else if(calibration.dark)calibration.badPixels=processing::detectBadPixels(*calibration.dark);}}
         std::map<QString,std::shared_ptr<const processing::FloatImage>> results;std::map<QString,QVariantMap> astrometry;std::map<QString,double> exposures;std::map<QString,int> counts;QStringList summary;double exposure=0;
@@ -357,9 +385,11 @@ void DeepSkyController::integrate(bool calibrated,double sigma,bool normalize,bo
                 auto found=flats.find(group);
                 if(found==flats.end()&&flats.size()==1&&lights.size()==1)found=flats.begin();
                 if(found!=flats.end()) {
-                    processing::Calibration flatCalibration;flatCalibration.dark=calibration.darkFlat;if(!flatCalibration.dark)flatCalibration.bias=calibration.bias;
+                    bool stored=false;for(const auto& v:found->second)stored|=v.toMap()["master"].toBool();
+                    if(stored){if(found->second.size()!=1||!found->second.front().toMap()["masterFlat"].toBool())throw std::runtime_error("Select one calibrated normalized master flat, without raw flats.");groupCalibration.flat=readFrame(found->second.front().toMap());}
+                    else {processing::Calibration flatCalibration;flatCalibration.dark=calibration.darkFlat;if(!flatCalibration.dark)flatCalibration.bias=calibration.bias;
                     auto corrected=[&](int n){check(stop);return processing::calibrate(readFrame(found->second[n].toMap()),flatCalibration,checkpoint);};
-                    groupCalibration.flat=processing::masterFrame(int(found->second.size()),corrected,true,checkpoint);
+                    groupCalibration.flat=processing::masterFrame(int(found->second.size()),corrected,true,checkpoint);}
                 }
             }
             processing::BackgroundOptions sequenceGradient;

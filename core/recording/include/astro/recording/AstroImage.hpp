@@ -19,6 +19,11 @@ struct AstroImage {
     int fitsBitpix{}; // Original FITS storage type; negative means floating point.
     std::optional<CelestialWcs> wcs;
     std::optional<double> centerRa,centerDec,pixelScale;
+    std::string camera, masterRole;
+    int binX{}, binY{}, masterCount{};
+    double offset{}, originalScale{1};
+    bool hasOffset{}, normalizedMasterFlat{};
+    std::uint64_t masterRejected{};
 };
 AstroImage readAstroImage(const std::filesystem::path& path, double inputScale = 0);
 std::optional<CelestialWcs> readCelestialWcs(const std::filesystem::path& path);

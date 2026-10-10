@@ -101,6 +101,10 @@ AstroImage readFits(const std::filesystem::path& path,double inputScale) {
     image.gain=numberKey(f.file,"GAIN",std::numeric_limits<double>::quiet_NaN()); image.hasGain=std::isfinite(image.gain);
     image.temperature=numberKey(f.file,"CCD-TEMP",std::numeric_limits<double>::quiet_NaN()); image.hasTemperature=std::isfinite(image.temperature);
     image.imageType=stringKey(f.file,"IMAGETYP"); image.filter=stringKey(f.file,"FILTER"); image.object=stringKey(f.file,"OBJECT"); image.date=stringKey(f.file,"DATE-OBS");
+    image.camera=stringKey(f.file,"INSTRUME");if(image.camera.empty())image.camera=stringKey(f.file,"CAMERA");
+    image.binX=int(numberKey(f.file,"XBINNING"));image.binY=int(numberKey(f.file,"YBINNING"));
+    image.offset=numberKey(f.file,"OFFSET",NAN);image.hasOffset=std::isfinite(image.offset);
+    image.masterRejected=std::uint64_t(std::max(0.,numberKey(f.file,"AC_REJ")));image.masterRole=stringKey(f.file,"AC_MASTR");image.masterCount=int(numberKey(f.file,"AC_COUNT"));image.normalizedMasterFlat=numberKey(f.file,"AC_FLAT") == 1;
     image.wcs=headerWcs(f.file);
     double ra=angleKey(f.file,"RA",true),dec=angleKey(f.file,"DEC",false);if(!std::isfinite(ra))ra=angleKey(f.file,"OBJCTRA",true);if(!std::isfinite(dec))dec=angleKey(f.file,"OBJCTDEC",false);
     if(std::isfinite(ra)&&ra>=0&&ra<360)image.centerRa=ra;
@@ -122,7 +126,7 @@ AstroImage readFits(const std::filesystem::path& path,double inputScale) {
             scale=bitpix==8?255:bitpix==16?65535:maximum>2?65535:1;
         }
     }
-    image.scale=scale; image.samples.resize(planar.size());
+    image.scale=scale;image.originalScale=numberKey(f.file,"AC_ORIG",scale); image.samples.resize(planar.size());
     for(std::size_t p=0;p<pixels;++p)
         for(int c=0;c<channels;++c)image.samples[p*channels+c]=float(planar[p+c*pixels]/scale);
     return image;
@@ -177,6 +181,9 @@ void writeAstroFits(const std::filesystem::path& path,const AstroImage& image) {
     auto key=[&](const char* name,double value){fits_update_key(f.file,TDOUBLE,name,&value,nullptr,&status);};
     auto text=[&](const char* name,const std::string& value){if(!value.empty())fits_update_key(f.file,TSTRING,name,const_cast<char*>(value.c_str()),nullptr,&status);};
     key("AC_SCALE",1); key("EXPTIME",image.exposure);
+    key("AC_ORIG",image.originalScale);text("INSTRUME",image.camera);
+    if(image.binX>0)key("XBINNING",image.binX);if(image.binY>0)key("YBINNING",image.binY);if(image.hasOffset)key("OFFSET",image.offset);
+    if(image.masterRejected)key("AC_REJ",double(image.masterRejected));text("AC_MASTR",image.masterRole);if(image.masterCount>0)key("AC_COUNT",image.masterCount);if(image.normalizedMasterFlat)key("AC_FLAT",1);
     if(image.hasGain)key("GAIN",image.gain);
     if(image.hasTemperature)key("CCD-TEMP",image.temperature);
     text("BAYERPAT",image.bayer==domain::BayerPattern::None?"":std::string(domain::to_string(image.bayer)));

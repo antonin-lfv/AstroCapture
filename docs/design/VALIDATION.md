@@ -669,3 +669,21 @@ Les résultats/finition restent en mémoire complète. Les profils matériel,
 la comparaison indépendante avec Siril, les essais de pression/endurance et
 le traitement de toute la chaîne par tuiles restent dans le bilan V2.
 Voir [ADR-025](../decisions/ADR-025-integration-resources.md).
+
+
+### Livraison macOS 1.14.0
+
+DMG reconstruit : `build/release/AstroCapture-1.14.0.dmg`.
+Contrôle `hdiutil`, montage en lecture seule, version 1.14.0 et exécutable
+identique au bundle compilé. La signature locale ad hoc profonde/stricte est
+valide ; les quatre helpers Astrometry.net démarrent, les trois archives de
+sources sont présentes et les **200 Mach-O** ne référencent aucune dépendance
+absolue Homebrew ni dossier utilisateur. Le volume de contrôle est démonté.
+Journaux : `build/resource-package.log`, `build/resource-dmg-verification.log`.
+
+- Taille : **117,184,542 octets** (111.76 Mio).
+- SHA-256 DMG : `e8ea9227fb27eea0f27ed3f2a8d58cb928b5fe744dba9e25096a853d5f934bf6`.
+- SHA-256 exécutable : `4d428948beb9977084cc2b204ac72897a233ea6ad9bb6cc24d7121b19d2d9334`.
+
+La signature Apple Developer ID, la notarisation et l'installation sur un Mac
+vierge restent à qualifier avant une distribution publique normale.

@@ -181,3 +181,18 @@ La réponse Bessell du contrôle est **virtuelle**, pas une mesure de la caméra
 ayant acquis Orion. Aucune nouvelle validation des couleurs physiques ni
 comparaison numérique avec Siril n’est revendiquée. Les fonctionnalités et
 formats du lot sont décrits dans l’[ADR 017](decisions/ADR-017-astrometry-workflow.md).
+
+### Installateur 1.8.0 vérifié
+
+Reconstruction après `bffd7f5`, une fois le parcours natif et les contrôles committés.
+Le DMG mesure **88 051 365 octets** (83,97 Mio). Toutes les sommes de contrôle
+de `hdiutil verify` sont valides. Le montage en lecture seule contient la version
+1.8.0 ; son exécutable correspond exactement au paquet Release construit.
+La signature locale passe le contrôle profond et strict. QtNetwork, les trois
+extensions TLS et la notice Gaia/CALSPEC/SVO/CDS sont présents. La notice est
+identique au fichier source. **193 binaires Mach-O** sont contrôlés, sans aucune
+dépendance absolue à Homebrew. Le montage est démonté par son propre chemin.
+La signature reste ad hoc ; Developer ID et notarisation restent dans la feuille de route.
+
+SHA256 du DMG : `80140f261bf1e40a60ae24b8de98d6607f7adb84086cbd123bedc4bcc4a76895`.
+SHA256 de l’exécutable : `79546c94e013eec42d56b6453e9baa7d86f91a6c17f397f573755ad7f8fdac3a`.

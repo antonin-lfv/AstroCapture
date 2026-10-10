@@ -328,3 +328,15 @@ Les 39 tests Release passent (26,01 s). Après le dernier ajustement de placemen
 des confirmations, le test de l’espace Ciel profond repasse (3,35 s) et le parcours
 natif est contrôlé de nouveau. Les vérifications de précision et de sauvegarde
 sont consignées dans [VALIDATION_SIRIL.md](../VALIDATION_SIRIL.md).
+
+### Livraison 1.8.0 vérifiée
+
+Le DMG est reconstruit après le commit `bffd7f5`. Il mesure **88 051 365 octets**
+(83,97 Mio). Sommes de contrôle de l’image disque valides ; montage en lecture
+seule, version 1.8.0, exécutable identique à l’application Release construite
+et signature locale vérifiée en profondeur. QtNetwork et les trois extensions
+TLS sont présents. La notice incluant CDS Sesame correspond exactement au dépôt.
+Les 193 binaires Mach-O inspectés ne conservent aucune dépendance Homebrew absolue.
+Le montage de contrôle est démonté. Developer ID et notarisation restent à fournir.
+
+SHA256 du DMG : `80140f261bf1e40a60ae24b8de98d6607f7adb84086cbd123bedc4bcc4a76895`.

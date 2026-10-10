@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.14.0 — 2026-10-10
+
+- Estimate stacking memory, temporary disk space and recovery limits before
+  computation; expose a local temporary-folder choice and clear refusal reasons.
+- Bound rejection sample buffers to 64 MiB using horizontal and vertical tiles;
+  retain the existing 32 MP output limit and Float32 science conventions.
+- Use one private temporary archive per integration/robust master, with disk
+  checks during writes and cleanup on cancellation, failure or process closure.
+- Release unused master accumulation buffers before robust rejection; update
+  French help and guide with the scope and limits of resource estimates.
+
 ## 1.2.0 — 2026-10-08
 
 - Introduce Studio navigation with persistent workspace tabs, version, settings

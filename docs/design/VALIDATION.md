@@ -614,3 +614,58 @@ commun Atelier, option hors des réglages de finition, désactivée par défaut.
 47 tests automatisés passent ; options et bilan réouverts en projet portable
 avec pixels identiques, sortie FITS Float32 TAN sans SIP. Détails techniques
 et limites dans `docs/decisions/ADR-024-wcs-sip-stack-projection.md`.
+
+
+## 1.14.0 — Ressources avant empilement (10 octobre 2026)
+
+Phase sauvegardée par le commit `4d1ccff`, branche `codex/large-image-resources`.
+La direction Atelier et la limite de sortie de 32 MP restent en place.
+
+### Calcul et protection des résultats
+
+- **48/48 tests Release passent**, 10,26 s (`build/resource-final-tests.log`).
+- Le dimensionnement des tuiles vérifie 1, 12 et 500 poses, poids classiques,
+  drizzle RVB et Bayer, y compris une ligne dépassant 64 Mio ; refus des
+  paramètres invalides, débordements et sortie drizzle au-delà de 32 MP.
+- Les calculs sur tuiles forcées donnent des pixels Float32, cartes de poids,
+  contributions et rejets **identiques** au parcours de référence, en classique,
+  drizzle et Bayer natif avec calibration/normalisation. Le plafond de 64 Mio
+  s'applique aux buffers d'échantillons, pas à toute la mémoire du processus.
+- Master robuste de 300 sources contrôlé avec la limite de descripteurs ramenée
+  à 32. Lecture d'offsets, conservation des valeurs négatives/HDR, refus de
+  lecture hors archive et nettoyage après annulation sont vérifiés. Un enfant
+  POSIX termine par `_exit` sans destructeur : aucun fichier de travail ne reste.
+- Dossier temporaire absent et réserve de disque impossible refusés ; l'ancien
+  résultat reste disponible. Le dossier choisi contenant espaces, accent et `#`
+  conserve son fichier témoin ; la préférence locale est persistante et le retour
+  au dossier système fonctionne. Le dépassement de 64 références de reprise
+  est aussi refusé avant le calcul.
+
+### Image réelle et interface
+
+Contrôle QML natif en français aux tailles **1440 × 960, 1100 × 800, 900 × 700**
+avec un recadrage 1024 × 768 d'Orion : ressources, refus expliqué, aide au focus
+clavier et carte du guide. Les bornes du texte d'aide et des estimations sont
+contrôlées ; les actions restent accessibles dans l'inspecteur défilant.
+Treize captures : `previews/native/1.14.0-resources-*.png`.
+Le guide et les aides donnent unités, budget, réserve disque et limites de reprise.
+
+Un essai séparé utilise l'image réelle d'Orion **6244 × 4170** complète, soit
+26 037 480 pixels. Une copie temporaire du FITS est intégrée comme pose déjà
+calibrée, sans normalisation ni correction de pixels : les échantillons Float32
+linéaires de sortie sont exactement identiques à ceux de l'entrée (SHA-256).
+Ce parcours à une pose contrôle les dimensions, allocations et la précision ;
+il ne qualifie pas une série indépendante ni un gain de bruit ou une parité Siril.
+
+Dernière exécution : intégration **7 434 ms**, processus complet **21,45 s**,
+RSS maximal **2 428 551 168 octets** (2,26 Gio), empreinte mémoire maximale
+macOS **2 996 423 704 octets** (`build/resource-full.log`). Le modèle avant calcul
+annonce 5 085 369 256 octets, budget 8 Gio, archive 312 449 760 octets et besoin
+disque avec réserve 580 885 216 octets. Ces mesures dépendent de la machine,
+du mode et des parcours ouverts ; elles ne sont pas un benchmark général ni
+une garantie d'absence de manque de mémoire.
+
+Les résultats/finition restent en mémoire complète. Les profils matériel,
+la comparaison indépendante avec Siril, les essais de pression/endurance et
+le traitement de toute la chaîne par tuiles restent dans le bilan V2.
+Voir [ADR-025](../decisions/ADR-025-integration-resources.md).

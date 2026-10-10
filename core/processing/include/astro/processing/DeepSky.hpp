@@ -2,6 +2,7 @@
 #include <astro/processing/Planetary.hpp>
 #include <astro/processing/Preview.hpp>
 #include <astro/recording/AstroImage.hpp>
+#include <astro/processing/IntegrationResources.hpp>
 #include <functional>
 #include <optional>
 namespace astro::processing {
@@ -71,7 +72,7 @@ struct Integration {
 };
 Integration integrate(int count,const ImageLoader&,const Calibration&,bool calibrated,double sigma,
                       const CheckCancel& = {},const Progress& = {},bool normalize=true,const BackgroundOptions* background=nullptr,
-                      const DrizzleOptions* drizzle=nullptr,bool diagnosticMaps=false,bool wcsProjection=false);
+                      const DrizzleOptions* drizzle=nullptr,bool diagnosticMaps=false,bool wcsProjection=false,const IntegrationLimits* limits=nullptr);
 struct HdrInput { double exposure{}, saturation{1}; };
 struct HdrResult {
     FloatImage image, recoveredMap, clippedMap;

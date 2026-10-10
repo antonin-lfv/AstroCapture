@@ -4,6 +4,7 @@ add_library(astro_processing STATIC
     src/Planetary.cpp
     src/Geometry.cpp
     src/DeepSky.cpp
+    src/IntegrationResources.cpp
     src/Drizzle.cpp
     src/WcsProjection.cpp
     src/Hdr.cpp

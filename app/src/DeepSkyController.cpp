@@ -24,6 +24,7 @@
 #include <QColorSpace>
 #include <QSaveFile>
 #include <QTemporaryDir>
+#include <QSettings>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
@@ -367,9 +368,94 @@ void DeepSkyController::useCalibrationMaster(const QString& id,bool reviewed){
     const auto frames=frames_;run(tr("Checking calibration master…"),[this,id,frames,reviewed](std::stop_token stop){auto r=calibrationMaster(id,stop);const auto c=masterCompatibility(r,frames);if(c["compatibility"].toInt()==2)throw std::runtime_error((tr("Master incompatible: %1").arg(c["mismatch"].toString())).toStdString());if(c["compatibility"].toInt()==1&&!reviewed)throw std::runtime_error((tr("Check missing metadata before using this master: %1").arg(c["missing"].toString())).toStdString());r["masterHash"]=r["hash"];r["sourceFingerprint"]=ProjectStorage::fingerprint(r["path"].toString(),[stop]{check(stop);});r["selected"]=true;r["scale"]=0;check(stop);post([this,r]{for(int n=0;n<frames_.size();++n){auto old=frames_[n].toMap();if(old["role"]==r["role"]&&(r["role"]!="Flat"||old["group"]==r["group"])){old["selected"]=false;frames_[n]=old;}}bool found=false;for(auto& v:frames_)if(v.toMap()["path"]==r["path"]){v=r;found=true;}if(!found)frames_<<r;status_=tr("Master selected: %1. Other files in this calibration role are deselected.").arg(r["name"].toString());emit changed();});});
 }
 void DeepSkyController::removeCalibrationMasterEntry(const QString& id){if(busy_)return;try{removeCalibrationMaster(id);status_=tr("Master removed from the library. Its FITS file is retained for existing projects.");}catch(const std::exception& e){status_=tr(e.what());}emit changed();}
+QString DeepSkyController::integrationTemporaryDirectory() const {
+    return QSettings().value("application/integrationTemporaryDirectory",QDir::tempPath()).toString();
+}
+void DeepSkyController::chooseIntegrationTemporaryDirectory(const QUrl& url) {
+    if(busy_)return;
+    if(url.isEmpty())QSettings().remove("application/integrationTemporaryDirectory");
+    else {
+        const QFileInfo folder(url.toLocalFile());
+        if(!url.isLocalFile() || !folder.isDir() || !folder.isWritable()) {
+            status_=tr("Choose an existing writable local temporary folder.");emit changed();return;
+        }
+        QSettings().setValue("application/integrationTemporaryDirectory",folder.canonicalFilePath());
+    }
+    emit changed();
+}
+QVariantMap DeepSkyController::integrationResources(const QVariantMap& options) const {
+    const auto physical=processing::physicalMemoryBytes();
+    const auto budget=physical?std::min<std::uint64_t>(8ULL*1024*1024*1024,physical/2):2ULL*1024*1024*1024;
+    const auto directory=integrationTemporaryDirectory();
+    QVariantMap plan{{"memoryBudget",qulonglong(budget)},{"directory",directory},{"blocked",false},{"groups",QVariantList{}},{"availableDisk",qlonglong(-1)}};
+    try {
+        std::map<QString,QVariantList> groups;
+        std::map<QString,std::uint64_t> calibrations;
+        std::uint64_t calibrationBytes=0,largestCalibration=0;
+        for(const auto& v:frames_) {
+            const auto row=v.toMap();if(!row["selected"].toBool())continue;
+            if(row["role"]=="Light")groups[row["group"].toString()]<<row;
+            else if(!options.value("calibrated").toBool()) {
+                const auto w=row["width"].toInt(),h=row["height"].toInt(),c=row["channels"].toInt();
+                if(w<1 || h<1 || std::uint64_t(w)*h>32000000 || (c!=1 && c!=3))throw std::runtime_error("Invalid integration resource settings.");
+                const auto bytes=std::uint64_t(w)*h*c*4;
+                const auto key=row["role"].toString()+(row["role"]=="Flat"?"/"+row["group"].toString():QString());
+                calibrations[key]=std::max(calibrations[key],bytes);largestCalibration=std::max(largestCalibration,bytes);
+            }
+        }
+        for(const auto& [key,bytes]:calibrations)calibrationBytes+=bytes;
+        if(groups.empty()){plan["message"]=tr("Select light frames to estimate resources.");return plan;}
+        // Count shared native images and QImages once. Keep the previous result
+        // while the new stack is computed, including pipeline caches.
+        std::set<const processing::FloatImage*> images;std::set<qint64> previews;
+        std::uint64_t retained=256ULL*1024*1024;
+        auto keep=[&](const auto& image){if(image && images.insert(image.get()).second)retained+=image->rgb.size()*sizeof(float);};
+        for(const auto& [key,image]:stacks_)keep(image);
+        for(const auto& [key,image]:diagnosticMaps_)keep(image);
+        for(const auto& image:{linear_,finished_,starsLayer_,starBackgroundLayer_})keep(image);
+        keep(pipelineCache_);keep(pipelineSource_);
+        for(const auto& image:{preview_,resultPreview_,rawPreview_,backgroundPreview_,linearPreview_,comparisonPreview_,geometryPreview_,maskSourcePreview_,maskImportPreview_,maskPreview_,starsLayerPreview_,starBackgroundLayerPreview_,diagnosticPreview_})
+            if(!image.isNull() && previews.insert(image.cacheKey()).second)retained+=image.sizeInBytes();
+        std::uint64_t peak=retained+calibrationBytes*2+largestCalibration*6,results=0,disk=0,largestResult=0;
+        QVariantList rows;
+        for(const auto& [name,group]:groups) {
+            auto reference=group.front().toMap();
+            if(references_.contains(name))for(const auto& row:group)if(row.toMap()["path"].toString()==references_.at(name))reference=row.toMap();
+            processing::IntegrationResourceRequest request;
+            request.width=reference["width"].toInt();request.height=reference["height"].toInt();request.channels=reference["channels"].toInt();request.count=int(group.size());
+            request.drizzle=options.value("drizzle").toBool();request.scale=options.value("scale",1).toDouble();request.nativeBayer=options.value("nativeBayer").toBool();
+            request.diagnosticMaps=options.value("diagnosticMaps").toBool();request.sequenceBackground=options.value("sequenceBackground").toBool();request.wcsProjection=options.value("wcsProjection").toBool();request.calibrationBytes=calibrationBytes;
+            const auto estimate=processing::estimateIntegrationResources(request);
+            peak=std::max(peak,retained+results+estimate.workingBytes);results+=estimate.resultBytes;
+            disk=std::max(disk,estimate.temporaryBytes);largestResult=std::max(largestResult,std::uint64_t(estimate.width)*estimate.height*12);
+            rows<<QVariantMap{{"group",name},{"width",estimate.width},{"height",estimate.height},{"count",request.count},{"stripRows",estimate.stripRows},{"stripBytes",qulonglong(estimate.stripBytes)},{"temporaryBytes",qulonglong(estimate.temporaryBytes)}};
+        }
+        plan["groups"]=rows;plan["workingBytes"]=qulonglong(peak);plan["resultBytes"]=qulonglong(results+largestResult);
+        plan["temporaryBytes"]=qulonglong(disk);plan["requiredDisk"]=qulonglong(disk+256ULL*1024*1024);
+        // Query the actual path as the engine does. macOS firmlinks can make
+        // a mount-table lookup misclassify writable /var as the read-only root.
+        const QFileInfo folder(directory);std::error_code error;
+        const auto storage=std::filesystem::space(nativePath(directory),error);
+        if(!folder.isDir() || !folder.isWritable() || error || storage.available==std::uintmax_t(-1))
+            plan["error"]=tr("The temporary folder is unavailable or its free space cannot be checked. Choose another folder.");
+        else {
+            plan["availableDisk"]=qulonglong(storage.available);
+            if(storage.available<disk+256ULL*1024*1024)
+                plan["error"]=tr("Not enough temporary disk space. Choose another folder or fewer exposures.");
+        }
+        if(peak>budget)plan["error"]=tr("The estimated memory exceeds the safety budget. Disable diagnostic maps, reduce drizzle scale or use fewer filter groups.");
+        if(results+largestResult>4ULL*1024*1024*1024 || groups.size()*(options.value("diagnosticMaps").toBool()?4:1)+2>64)
+            plan["error"]=tr("The planned results exceed automatic recovery limits (4 GiB / 64 images). Disable maps or process fewer filter groups together.");
+    }catch(const std::exception& e){plan["error"]=tr(e.what());}
+    plan["blocked"]=plan.contains("error");return plan;
+}
 void DeepSkyController::integrate(bool calibrated,double sigma,bool normalize,bool correctBadPixels,bool sequenceBackground,bool drizzle,double drizzleScale,double pixelFraction,bool nativeBayer,QString bayerPattern,bool diagnosticMaps,bool wcsProjection) {
+    if(busy_)return;
+    const auto resources=integrationResources({{"calibrated",calibrated},{"sequenceBackground",sequenceBackground},{"drizzle",drizzle},{"scale",drizzleScale},{"nativeBayer",nativeBayer},{"diagnosticMaps",diagnosticMaps},{"wcsProjection",wcsProjection}});
+    if(resources.value("blocked").toBool()){status_=resources["error"].toString();emit changed();return;}
+    const auto temporaryDirectory=integrationTemporaryDirectory();
     const auto frames=frames_;const auto references=references_;
-    run(tr("Calibrating and integrating…"),[this,frames,calibrated,sigma,normalize,correctBadPixels,sequenceBackground,references,drizzle,drizzleScale,pixelFraction,nativeBayer,bayerPattern,diagnosticMaps,wcsProjection](std::stop_token stop){
+    run(tr("Calibrating and integrating…"),[this,frames,calibrated,sigma,normalize,correctBadPixels,sequenceBackground,references,drizzle,drizzleScale,pixelFraction,nativeBayer,bayerPattern,diagnosticMaps,wcsProjection,temporaryDirectory](std::stop_token stop){
         const QStringList patterns{"RGGB","BGGR","GRBG","GBRG"};
         if(drizzle&&nativeBayer&&!bayerPattern.isEmpty()&&!patterns.contains(bayerPattern))throw std::runtime_error("Invalid Bayer pattern selection.");
         const auto declaredPattern=drizzle&&nativeBayer&&!bayerPattern.isEmpty()?static_cast<domain::BayerPattern>(patterns.indexOf(bayerPattern)+1):domain::BayerPattern::None;
@@ -404,9 +490,10 @@ void DeepSkyController::integrate(bool calibrated,double sigma,bool normalize,bo
                 }
             }
             processing::BackgroundOptions sequenceGradient;
+            processing::IntegrationLimits limits;limits.temporaryDirectory=nativePath(temporaryDirectory);
             const processing::DrizzleOptions drizzleOptions{drizzleScale,pixelFraction,nativeBayer};
             auto result=processing::integrate(int(rows.size()),[&](int n){check(stop);return read(rows[n].toMap());},groupCalibration,calibrated,sigma,checkpoint,
-                [this,group](int done,int total,const std::string& stage){post([this,group,done,total,stage]{progress_=done*100/std::max(1,total);stage_=tr(stage.c_str());status_=group+" · "+stage_;emit changed();});},normalize,sequenceBackground?&sequenceGradient:nullptr,drizzle?&drizzleOptions:nullptr,diagnosticMaps,wcsProjection);
+                [this,group](int done,int total,const std::string& stage){post([this,group,done,total,stage]{progress_=done*100/std::max(1,total);stage_=tr(stage.c_str());status_=group+" · "+stage_;emit changed();});},normalize,sequenceBackground?&sequenceGradient:nullptr,drizzle?&drizzleOptions:nullptr,diagnosticMaps,wcsProjection,&limits);
             recording::AstroImage metadata;metadata.width=result.image.width;metadata.height=result.image.height;metadata.wcs=result.wcs;metadata.centerRa=result.centerRa;metadata.centerDec=result.centerDec;metadata.pixelScale=result.pixelScale;metadata.date=result.date;astrometry[group]=imageAstrometry(metadata);
             exposure+=result.totalExposure;exposures[group]=result.totalExposure;counts[group]=int(result.accepted.size());
             summary<<tr("%1: %2/%3 frames, %4 s, %5 rejected samples").arg(group).arg(result.accepted.size()).arg(rows.size()).arg(result.totalExposure,0,'f',1).arg(result.rejectedSamples);

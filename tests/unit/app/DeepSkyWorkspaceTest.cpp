@@ -18,6 +18,7 @@
 #include <QLocale>
 #include "ExportSizeEstimator.hpp"
 #include <QFile>
+#include <QCryptographicHash>
 #include <QFileInfo>
 #include <QDir>
 #include <QJsonDocument>
@@ -58,6 +59,33 @@ int main(int argc,char** argv){
     ASTRO_TEST_CHECK(!object->findChild<QObject*>("deepSkyWcsProjection")->property("checked").toBool());
     QQuickWindow window;window.resize(1100,720);auto* root=qobject_cast<QQuickItem*>(object.get());root->setParentItem(window.contentItem());root->setSize({1100,720});window.show();
     QCoreApplication::processEvents();
+    if(qEnvironmentVariableIsSet("ASTRO_UI_RESOURCE_QA")) {
+        const bool full=qEnvironmentVariableIsSet("ASTRO_RESOURCE_FULL_QA");
+        auto image=recording::readAstroImage(qEnvironmentVariable("ASTRO_UI_FITS_PATH").toStdString());ASTRO_TEST_CHECK(image.channels==3);
+        if(!full){auto original=std::move(image);image=original;image.width=1024;image.height=768;image.samples.resize(std::size_t(image.width)*image.height*3);const int ox=(original.width-image.width)/2,oy=(original.height-image.height)/2;for(int y=0;y<image.height;++y)std::copy_n(original.samples.begin()+(std::size_t(y+oy)*original.width+ox)*3,image.width*3,image.samples.begin()+std::size_t(y)*image.width*3);if(image.wcs)image.wcs=image.wcs->remap({1,0,-double(ox),0,1,-double(oy)});}
+        const auto expected=QCryptographicHash::hash(QByteArrayView(reinterpret_cast<const char*>(image.samples.data()),image.samples.size()*4),QCryptographicHash::Sha256);
+        const auto input=directory.filePath("Orion-resource-check.fits");recording::writeAstroFits(input.toStdString(),image);image.samples.clear();image.samples.shrink_to_fit();
+        controller.addFiles({QUrl::fromLocalFile(input)});wait(controller);root->setProperty("workflowStep",1);root->setProperty("frameListOpen",false);root->findChild<QObject*>("deepSkyCalibrated")->setProperty("checked",true);
+        const auto folder=qEnvironmentVariable("ASTRO_UI_RESOURCE_QA");QDir().mkpath(folder);
+        auto capture=[&](QString name){QMetaObject::invokeMethod(root->findChild<QObject*>("deepSkyCompletionToast"),"close");for(int i=0;i<12;++i){QCoreApplication::processEvents();QThread::msleep(40);}ASTRO_TEST_CHECK(window.grabWindow().save(folder+"/"+name));};
+        auto* scroll=root->findChild<QObject*>("deepSkyInspector")->property("contentItem").value<QObject*>();
+        for(const auto size:{QSize(1440,960),QSize(1100,800),QSize(900,700)}){
+            window.resize(size);root->setSize(size);QCoreApplication::processEvents();scroll->setProperty("contentY",std::max(0.,scroll->property("contentHeight").toDouble()-scroll->property("height").toDouble()));capture(QString("resources-%1x%2.png").arg(size.width()).arg(size.height()));
+            auto* label=qobject_cast<QQuickItem*>(root->findChild<QObject*>("deepSkyResourceMemory"));ASTRO_TEST_CHECK(label && label->width()>0);const auto box=label->mapRectToScene(QRectF(0,0,label->width(),label->height()));ASTRO_TEST_CHECK(box.left()>=0 && box.right()<=root->width() && box.top()>=0 && box.bottom()<=root->height());
+            auto* control=qobject_cast<QQuickItem*>(root->findChild<QObject*>("deepSkyResourcesHelp"));auto* help=visualItem(control,"helpIcon");ASTRO_TEST_CHECK(help);help->forceActiveFocus();capture(QString("resources-help-%1x%2.png").arg(size.width()).arg(size.height()));auto* tip=help->findChild<QObject*>("darkHelpTip");ASTRO_TEST_CHECK(tip && tip->property("visible").toBool());auto* text=qobject_cast<QQuickItem*>(tip->property("contentItem").value<QObject*>());const auto helpBox=text->mapRectToScene(QRectF(0,0,text->width(),text->height()));ASTRO_TEST_CHECK(helpBox.left()>=0 && helpBox.top()>=0 && helpBox.right()<=root->width() && helpBox.bottom()<=root->height());help->setFocus(false);
+            QSettings().setValue("application/integrationTemporaryDirectory",directory.filePath("missing"));QMetaObject::invokeMethod(&controller,"changed");capture(QString("resources-error-%1x%2.png").arg(size.width()).arg(size.height()));ASTRO_TEST_CHECK(!root->findChild<QObject*>("deepSkyIntegrate")->property("enabled").toBool());controller.chooseIntegrationTemporaryDirectory({});
+        }
+        qInfo()<<"Resource plan before stack:"<<controller.integrationResources({{"calibrated",true}});
+        QElapsedTimer timing;timing.start();controller.integrate(true,3,false,false);wait(controller);ASTRO_TEST_CHECK(controller.hasResult());
+        const auto result=controller.sessionSnapshot().images["linear"];const auto actual=QCryptographicHash::hash(QByteArrayView(reinterpret_cast<const char*>(result->rgb.data()),result->rgb.size()*4),QCryptographicHash::Sha256);
+        ASTRO_TEST_CHECK(actual==expected);qInfo()<<"Resource integration:"<<result->width<<result->height<<timing.elapsed()<<"ms; Float32 identical";
+        if(!full){
+            window.resize(900,700);root->setSize({900,700});root->setProperty("workflowStep",1);capture("resources-result-900x700.png");
+            QQmlComponent guideComponent(&engine);guideComponent.loadUrl(QUrl::fromLocalFile(QStringLiteral(ASTRO_SOURCE_DIR "/app/qml/GuideWorkspace.qml")));ASTRO_TEST_CHECK(guideComponent.isReady());std::unique_ptr<QObject> guideObject(guideComponent.create());auto* guide=qobject_cast<QQuickItem*>(guideObject.get());ASTRO_TEST_CHECK(guide);guide->setParentItem(window.contentItem());guide->setProperty("topic",3);root->setVisible(false);
+            for(const auto size:{QSize(1440,960),QSize(1100,800),QSize(900,700)}){window.resize(size);guide->setSize(size);for(int i=0;i<5;++i){QCoreApplication::processEvents();QThread::msleep(40);}auto* lesson=guide->findChild<QObject*>("guideLessonScroll")->property("contentItem").value<QObject*>();lesson->setProperty("contentY",500);for(int i=0;i<5;++i){QCoreApplication::processEvents();QThread::msleep(40);}ASTRO_TEST_CHECK(window.grabWindow().save(folder+QString("/resources-guide-%1x%2.png").arg(size.width()).arg(size.height())));}
+        }
+        return 0;
+    }
     if(qEnvironmentVariableIsSet("ASTRO_UI_WCS_QA")) {
         auto original=recording::readAstroImage(qEnvironmentVariable("ASTRO_UI_FITS_PATH").toStdString());ASTRO_TEST_CHECK(original.channels==3);
         auto crop=original;crop.width=1024;crop.height=768;crop.samples.resize(std::size_t(crop.width)*crop.height*3);const int ox=(original.width-crop.width)/2,oy=(original.height-crop.height)/2;
@@ -208,6 +236,29 @@ int main(int argc,char** argv){
     ASTRO_TEST_CHECK(root->property("frameListOpen").toBool());
     if(!controller.hasResult())qWarning()<<controller.status();ASTRO_TEST_CHECK(controller.hasResult()&&controller.displayingResult()&&controller.groups()==QStringList{"R"});
     ASTRO_TEST_CHECK(controller.hasRawComparison());
+    {
+        const auto previous=controller.sessionSnapshot();
+        const auto plan=controller.integrationResources({{"calibrated",true}});
+        ASTRO_TEST_CHECK(!plan["blocked"].toBool() && plan["temporaryBytes"].toULongLong()==160ULL*128*2*12);
+        const auto work=directory.filePath("temporary space é # folder");ASTRO_TEST_CHECK(QDir().mkpath(work));
+        controller.chooseIntegrationTemporaryDirectory(QUrl::fromLocalFile(work));
+        ASTRO_TEST_CHECK(controller.integrationTemporaryDirectoryUrl().toLocalFile()==QFileInfo(work).canonicalFilePath());
+        app::DeepSkyController other;ASTRO_TEST_CHECK(other.integrationTemporaryDirectory()==controller.integrationTemporaryDirectory());
+        const auto sentinel=work+"/keep-user-file.txt";QFile marker(sentinel);ASTRO_TEST_CHECK(marker.open(QIODevice::WriteOnly));marker.write("keep");marker.close();
+        controller.integrate(true);wait(controller);ASTRO_TEST_CHECK(controller.hasResult());
+        ASTRO_TEST_CHECK(QDir(work).entryList(QDir::Files|QDir::Dirs|QDir::NoDotAndDotDot)==QStringList{"keep-user-file.txt"});
+        const auto stable=controller.sessionSnapshot();
+        QSettings().setValue("application/integrationTemporaryDirectory",work+"/missing");QMetaObject::invokeMethod(&controller,"changed");QCoreApplication::processEvents();
+        ASTRO_TEST_CHECK(controller.integrationResources({{"calibrated",true}})["blocked"].toBool());
+        ASTRO_TEST_CHECK(!root->findChild<QObject*>("deepSkyIntegrate")->property("enabled").toBool());
+        controller.integrate(true);ASTRO_TEST_CHECK(!controller.busy() && controller.sessionSnapshot().images["linear"]->rgb==stable.images["linear"]->rgb);
+        controller.chooseIntegrationTemporaryDirectory({});controller.restoreSession(previous);
+        auto excessive=previous;QVariantList groups;
+        for(int n=0;n<63;++n){auto row=previous.state["frames"].toList().front().toMap();row["selected"]=true;row["group"]=QString("filter-%1").arg(n);groups<<row;}
+        excessive.state["frames"]=groups;app::DeepSkyController grouped;grouped.restoreSession(excessive);
+        const auto recovery=grouped.integrationResources({{"calibrated",true}});
+        ASTRO_TEST_CHECK(recovery["blocked"].toBool() && recovery["error"].toString().contains("recovery",Qt::CaseInsensitive));
+    }
     {
         // The actual QML action persists drizzle controls; portable results
         // and failed operations preserve the previous usable calculation.

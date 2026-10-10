@@ -51,6 +51,8 @@ class DeepSkyController : public QObject {
     Q_PROPERTY(QVariantList frames READ frames NOTIFY changed)
     Q_PROPERTY(QStringList groups READ groups NOTIFY changed)
     Q_PROPERTY(QVariantList integrationReport READ integrationReport NOTIFY changed)
+    Q_PROPERTY(QString integrationTemporaryDirectory READ integrationTemporaryDirectory NOTIFY changed)
+    Q_PROPERTY(QUrl integrationTemporaryDirectoryUrl READ integrationTemporaryDirectoryUrl NOTIFY changed)
     Q_PROPERTY(QVariantList diagnosticMaps READ diagnosticMaps NOTIFY changed)
     Q_PROPERTY(QVariantMap hdrReport READ hdrReport NOTIFY changed)
     Q_PROPERTY(QImage diagnosticImage READ diagnosticImage NOTIFY diagnosticChanged)
@@ -65,6 +67,10 @@ class DeepSkyController : public QObject {
     Q_PROPERTY(double linearExportBytes READ linearExportBytes NOTIFY resultChanged)
 public:
     explicit DeepSkyController(QObject* parent=nullptr):QObject(parent){}
+    QString integrationTemporaryDirectory() const;
+    QUrl integrationTemporaryDirectoryUrl() const{return QUrl::fromLocalFile(integrationTemporaryDirectory());}
+    Q_INVOKABLE void chooseIntegrationTemporaryDirectory(const QUrl&);
+    Q_INVOKABLE QVariantMap integrationResources(const QVariantMap& options) const;
     ~DeepSkyController() override;
     QVariantMap advancedReport() const{return advancedReport_;}
     QVariantMap astrometry() const {

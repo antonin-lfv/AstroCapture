@@ -41,9 +41,19 @@ int main() {
     auto lights=[&](int n){auto a=scene();for(auto& v:a.samples)v=std::min(v,.5f);if(n==3)a.samples[(60*96+40)*3]=10;return a;};
     auto plain=processing::integrate(4,lights,{},true,3,{}, {},false);
     auto maps=processing::integrate(4,lights,{},true,3,{}, {},false,nullptr,nullptr,true);
+    processing::IntegrationLimits tiny;tiny.stripBytes=4*12*5;tiny.diskReserveBytes=0;
+    const auto tiled=processing::integrate(4,lights,{},true,3,{}, {},false,nullptr,nullptr,true,false,&tiny);
+    ASTRO_TEST_CHECK(tiled.image.rgb==maps.image.rgb && tiled.weights.rgb==maps.weights.rgb && tiled.contributors.rgb==maps.contributors.rgb && tiled.rejectionMap.rgb==maps.rejectionMap.rgb && tiled.rejectedSamples==maps.rejectedSamples);
     ASTRO_TEST_CHECK(plain.image.rgb==maps.image.rgb&&maps.weights.width==maps.image.width&&maps.rejectionMap.height==maps.image.height);
     double rejected=0;for(std::size_t i=0;i<maps.image.rgb.size();++i){ASTRO_TEST_CHECK(maps.weights.rgb[i]==maps.contributors.rgb[i]);ASTRO_TEST_CHECK(maps.contributors.rgb[i]+maps.rejectionMap.rgb[i]==4);rejected+=maps.rejectionMap.rgb[i];}
     ASTRO_TEST_CHECK(rejected==double(maps.rejectedSamples)&&rejected>0&&plain.weights.rgb.empty());
     processing::DrizzleOptions drizzle{1,1};auto projected=processing::integrate(4,lights,{},true,3,{}, {},false,nullptr,&drizzle,true);
+    tiny.stripBytes=4*16*5;
+    const auto tiledDrizzle=processing::integrate(4,lights,{},true,3,{}, {},false,nullptr,&drizzle,true,false,&tiny);
+    ASTRO_TEST_CHECK(tiledDrizzle.image.rgb==projected.image.rgb && tiledDrizzle.weights.rgb==projected.weights.rgb && tiledDrizzle.rejectionMap.rgb==projected.rejectionMap.rgb);
+    tiny.temporaryDirectory=std::filesystem::temp_directory_path()/"astrocapture-folder-that-does-not-exist";
+    fails([&]{processing::integrate(4,lights,{},true,3,{}, {},false,nullptr,nullptr,true,false,&tiny);});
+    tiny.temporaryDirectory.clear();tiny.diskReserveBytes=std::numeric_limits<std::uint64_t>::max();
+    fails([&]{processing::integrate(4,lights,{},true,3,{}, {},false,nullptr,nullptr,true,false,&tiny);});
     for(std::size_t i=0;i<projected.image.rgb.size();++i)ASTRO_TEST_CHECK(projected.weights.rgb[i]>=0&&projected.weights.rgb[i]<=projected.contributors.rgb[i]+1e-4);
 }

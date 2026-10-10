@@ -1,6 +1,9 @@
 #include <astro/processing/DeepSky.hpp>
 #include <random>
 #include <cmath>
+#ifndef _WIN32
+#include <sys/resource.h>
+#endif
 #include "Check.hpp"
 using namespace astro;
 recording::AstroImage stars(double angle=0,double dx=0,double dy=0,int seed=1) {
@@ -34,6 +37,15 @@ int main(){
     calibration.dark->exposure=120;bool refused=false;try{processing::calibrate(signal,calibration);}catch(const std::exception&){refused=true;}ASTRO_TEST_CHECK(refused);
     auto otherDark=dark;dark.hasGain=otherDark.hasGain=true;dark.gain=10;otherDark.gain=20;
     refused=false;try{processing::masterFrame(2,[&](int n){return n?otherDark:dark;},false);}catch(const std::exception&){refused=true;}ASTRO_TEST_CHECK(refused);
+    // Robust masters must not hold one descriptor open per exposure.
+#ifndef _WIN32
+    rlimit original{},limited{};ASTRO_TEST_CHECK(getrlimit(RLIMIT_NOFILE,&original)==0);limited=original;limited.rlim_cur=std::min<rlim_t>(32,original.rlim_cur);ASTRO_TEST_CHECK(setrlimit(RLIMIT_NOFILE,&limited)==0);
+#endif
+    const auto many=processing::masterFrame(300,[&](int n){auto image=dark;image.samples.assign(64,.02f);if(n==100)image.samples[5]=100;return image;},false,{},true);
+    ASTRO_TEST_CHECK(many.masterRejected==1);for(float v:many.samples)ASTRO_TEST_CHECK(std::abs(v-.02f)<1e-7);
+#ifndef _WIN32
+    ASTRO_TEST_CHECK(setrlimit(RLIMIT_NOFILE,&original)==0);
+#endif
     // Integration must reject a one-frame cosmic ray and discard an unusable field.
     std::vector<recording::AstroImage> frames;
     for(int n=0;n<5;++n)frames.push_back(stars(0,0,0,n+1));

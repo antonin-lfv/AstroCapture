@@ -322,6 +322,11 @@ astro_add_unit_test(astro_processing_integration_diagnostics_test
     LIBS astro::processing
 )
 
+astro_add_unit_test(astro_processing_integration_resources_test
+    SOURCES processing/IntegrationResourcesTest.cpp
+    LIBS astro::processing
+)
+
 astro_add_unit_test(astro_processing_wcs_projection_test
     SOURCES processing/WcsProjectionTest.cpp
     LIBS astro::processing

@@ -137,6 +137,9 @@ int main() {
         auto result=processing::integrate(12,[&](int n){auto raw=bayerField(n%2,(n/2)%2);raw.wcs=wcs;raw.pixelScale=3.6;for(auto& v:raw.samples)v=v*.8f+.001f;if(n==8)raw.samples[36*64+36]=20;return raw;},masters,false,3,{}, {},normalize,nullptr,&cfaOptions);
         ASTRO_TEST_CHECK(result.nativeBayer&&result.accepted.size()==12&&result.minimumContributors>=3&&result.meanContributors>3&&result.subpixelDiversity&&result.rejectedSamples>0&&result.wcs&&std::abs(result.wcs->scale()-3.6)<1e-8);
         for(float v:result.image.rgb)ASTRO_TEST_CHECK(std::isfinite(v));
+        processing::IntegrationLimits tiny;tiny.stripBytes=12*24*3;
+        auto tiled=processing::integrate(12,[&](int n){auto raw=bayerField(n%2,(n/2)%2);raw.wcs=wcs;raw.pixelScale=3.6;for(auto& v:raw.samples)v=v*.8f+.001f;if(n==8)raw.samples[36*64+36]=20;return raw;},masters,false,3,{}, {},normalize,nullptr,&cfaOptions,false,false,&tiny);
+        ASTRO_TEST_CHECK(tiled.image.rgb==result.image.rgb && tiled.accepted==result.accepted && tiled.rejectedSamples==result.rejectedSamples);
         ASTRO_TEST_CHECK(result.image.width>=60&&result.image.height>=60);
         std::array<std::vector<float>,3> background;for(int y=2;y<7;++y)for(int x=2;x<7;++x)for(int c=0;c<3;++c)background[c].push_back(result.image.rgb[(y*result.image.width+x)*3+c]);for(int c=0;c<3;++c){std::sort(background[c].begin(),background[c].end());ASTRO_TEST_CHECK(std::abs(background[c][12]-.02*(c+1))<.001);}
     }

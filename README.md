@@ -255,6 +255,15 @@ caméra/filtres restent à développer.
 Le WCS guidé et les calibrations PCC/SPCC sont décrits ci-dessous. La précision de centroidage annoncée par APP
 n’est pas une mesure de performance d’AstroCapture.
 
+Depuis **1.14.0**, Empilement affiche la mémoire estimée, le budget de sécurité et
+l’espace temporaire nécessaire/libre avant le calcul. **Dossier temporaire** permet
+de choisir un disque local plus grand. Les buffers flottants de rejet sont bornés
+à **64 Mio**, avec une archive de travail par calcul et contrôle d’espace pendant
+l’écriture. Les demandes dépassant le budget mémoire ou les limites prévues de
+reprise sont refusées avec une explication. La mémoire affichée est un modèle
+conservateur, pas une mesure exacte du processus ; la sortie reste limitée à
+**32 MP**. Voir les [unités et limites](docs/decisions/ADR-025-integration-resources.md).
+
 ### Transformations avancées du ciel profond
 
 La fenêtre **Transformations avancées** conserve l’image visible et regroupe

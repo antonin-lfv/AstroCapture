@@ -21,6 +21,7 @@ struct AstroImage {
     std::optional<double> centerRa,centerDec,pixelScale;
 };
 AstroImage readAstroImage(const std::filesystem::path& path, double inputScale = 0);
+std::optional<CelestialWcs> readCelestialWcs(const std::filesystem::path& path);
 void writeAstroFits(const std::filesystem::path& path, const AstroImage& image);
 AstroImage imageFromFrame(const domain::FrameBuffer& frame);
 }

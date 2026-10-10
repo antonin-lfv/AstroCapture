@@ -198,16 +198,9 @@ found:
     throw std::runtime_error("The solved sampling or distortion is "
                              "inconsistent with the input scale.");
   AstrometricSolution result;
-  result.wcs = seed;
-  // world tangent = seed.CD × (affine × source - seed.CRPIX + 1).
-  result.wcs.cd = {seed.cd[0] * best[0] + seed.cd[1] * best[3],
-                   seed.cd[0] * best[1] + seed.cd[1] * best[4],
-                   seed.cd[2] * best[0] + seed.cd[3] * best[3],
-                   seed.cd[2] * best[1] + seed.cd[3] * best[4]};
-  const double det = best[0] * best[4] - best[1] * best[3],
-               x = seed.crpix[0] - 1 - best[2], y = seed.crpix[1] - 1 - best[5];
-  result.wcs.crpix = {1 + (best[4] * x - best[1] * y) / det,
-                      1 + (-best[3] * x + best[0] * y) / det};
+  const double det=best[0]*best[4]-best[1]*best[3];
+  const double a=best[4]/det,b=-best[1]/det,c=-best[3]/det,d=best[0]/det;
+  result.wcs=seed.remap({a,b,-a*best[2]-b*best[5],c,d,-c*best[2]-d*best[5]});
   const auto centre =
       *result.wcs.sky((image.width - 1) / 2., (image.height - 1) / 2.);
   constexpr double rad = 3.14159265358979323846 / 180.;

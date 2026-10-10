@@ -4,12 +4,13 @@
 #include <astro/recording/CelestialWcs.hpp>
 namespace astro::app {
 inline QVariantList wcsValues(const recording::CelestialWcs &w) {
-  return {w.crval[0], w.crval[1], w.crpix[0], w.crpix[1],
-          w.cd[0],    w.cd[1],    w.cd[2],    w.cd[3]};
+  QVariantList values{w.crval[0],w.crval[1],w.crpix[0],w.crpix[1],w.cd[0],w.cd[1],w.cd[2],w.cd[3]};
+  if(w.sipOrder){QVariantList a,b;for(double v:w.sipA)a<<v;for(double v:w.sipB)b<<v;values<<w.sipOrder<<QVariant(a)<<QVariant(b);}
+  return values;
 }
 inline std::optional<recording::CelestialWcs> readWcs(const QVariant &value) {
   const auto a = value.toList();
-  if (a.size() != 8)
+  if (a.size() != 8 && a.size()!=11)
     return {};
   double v[8];
   for (int i = 0; i < 8; ++i) {
@@ -20,6 +21,11 @@ inline std::optional<recording::CelestialWcs> readWcs(const QVariant &value) {
   }
   recording::CelestialWcs w{
       {v[0], v[1]}, {v[2], v[3]}, {v[4], v[5], v[6], v[7]}};
+  if(a.size()==11){
+    bool ok=false;const double order=a[8].toDouble(&ok);if(!ok||order!=std::floor(order)||order<2||order>5)return {};
+    w.sipOrder=int(order);const auto aa=a[9].toList(),bb=a[10].toList();if(aa.size()!=36||bb.size()!=36)return {};
+    for(int i=0;i<36;++i){w.sipA[i]=aa[i].toDouble(&ok);if(!ok)return {};w.sipB[i]=bb[i].toDouble(&ok);if(!ok)return {};}
+  }
   if (!w.valid() || w.scale() > 100 || w.scale() < .001)
     return {};
   return w;

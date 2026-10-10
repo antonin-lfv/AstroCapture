@@ -1,4 +1,5 @@
 #include "AstrometrySettings.hpp"
+#include "BlindSolver.hpp"
 #include "DeepSkyController.hpp"
 #include "GaiaCatalog.hpp"
 #include "EquipmentProfile.hpp"
@@ -268,15 +269,19 @@ bool DeepSkyController::copySkyCoordinates(double x,double y) const {
     QGuiApplication::clipboard()->setText(QString("ICRS RA %1 Dec %2\nRA %3° Dec %4°").arg(p["raText"].toString(),p["decText"].toString()).arg(p["ra"].toDouble(),0,'f',8).arg(p["dec"].toDouble(),0,'f',8));
     return true;
 }
+QVariantMap DeepSkyController::blindSolver() const{return blindSolverConfiguration();}
+void DeepSkyController::chooseBlindIndexes(const QUrl& url){if(busy_||!url.isLocalFile())return;try{setBlindIndexDirectory(url.toLocalFile());status_=tr("Astrometry index folder selected.");}catch(const std::exception& e){status_=tr(e.what());}emit changed();}
+void DeepSkyController::installBlindIndex(){if(busy_)return;run(tr("Downloading wide-field astrometry index (47.5 MiB)…"),[this](std::stop_token stop){installWideFieldIndex(stop);check(stop);post([this]{status_=tr("Wide-field index installed. Blind solving is ready.");emit changed();});});}
 void DeepSkyController::solveAstrometry(const QVariantMap &options) {
   if (busy_ || !linear_)
     return;
+  const bool blind=options["blind"].toBool();
   const double ra = options["ra"].toDouble(), dec = options["dec"].toDouble(),
                scale = options["scale"].toDouble(),
                mag = options.value("magnitude", 16).toDouble();
-  if (!std::isfinite(ra) || ra < 0 || ra >= 360 || !std::isfinite(dec) ||
+  if ((!blind&&(!std::isfinite(ra) || ra < 0 || ra >= 360 || !std::isfinite(dec) ||
       std::abs(dec) > 90 || !std::isfinite(scale) || scale < .01 ||
-      scale > 100 || !std::isfinite(mag) || mag < 5 || mag > 20) {
+      scale > 100)) || !std::isfinite(mag) || mag < 5 || mag > 20) {
     status_ = tr("Enter RA in degrees (0–360), declination (−90–90), sampling "
                  "(0.01–100 arcsec/pixel) and magnitude (5–20).");
     emit changed();
@@ -287,7 +292,7 @@ void DeepSkyController::solveAstrometry(const QVariantMap &options) {
   const bool local = options["local"].toBool();
   run(tr("Solving astrometry with Gaia DR3…"), [this, image, previous, local,
                                                 ra, dec, scale,
-                                                mag](std::stop_token stop) {
+                                                mag, blind, options](std::stop_token stop) {
     auto seed = readWcs(previous["wcs"])
                     .value_or(recording::CelestialWcs{
                         {ra, dec},
@@ -301,12 +306,15 @@ void DeepSkyController::solveAstrometry(const QVariantMap &options) {
       seed = {{ra, dec},
               {(image->width + 1) / 2., (image->height + 1) / 2.},
               {-scale / 3600, 0, 0, scale / 3600}};
+    if(blind)seed=solveBlindField(*image,options,stop);
+    const auto searchCentre=seed.sky((image->width-1)/2.,(image->height-1)/2.);
+    const double searchRa=blind?(*searchCentre)[0]:ra,searchDec=blind?(*searchCentre)[1]:dec,searchScale=blind?seed.scale():scale;
     std::vector<processing::CatalogStar> catalog;
     if (local)
       catalog = readCatalogValues(previous["localCatalog"].toList());
     else {
       const double radius =
-          std::hypot(image->width, image->height) * scale / 7200 * 1.25;
+          std::hypot(image->width, image->height) * searchScale / 7200 * 1.25;
       if (radius > 8)
         throw std::runtime_error(
             "Targeted WCS supports a search radius up to 8 degrees. Use a "
@@ -318,8 +326,8 @@ void DeepSkyController::solveAstrometry(const QVariantMap &options) {
                   "1=CONTAINS(POINT('ICRS',ra,dec),CIRCLE('ICRS',%1,%2,%3)) "
                   "AND phot_g_mean_mag<%4 AND duplicated_source='false' ORDER "
                   "BY phot_g_mean_mag")
-              .arg(ra, 0, 'g', 14)
-              .arg(dec, 0, 'g', 14)
+              .arg(searchRa, 0, 'g', 14)
+              .arg(searchDec, 0, 'g', 14)
               .arg(radius, 0, 'g', 14)
               .arg(mag, 0, 'g', 8);
       QUrl url("https://gea.esac.esa.int/tap-server/tap/sync");
@@ -346,11 +354,15 @@ void DeepSkyController::solveAstrometry(const QVariantMap &options) {
     });
     const auto solution = processing::solveAstrometry(*image, catalog, seed,
                                                       [stop] { check(stop); });
+    if(solution.wcs.sipOrder&&solution.matches.size()<std::size_t(3*(solution.wcs.sipOrder+1)*(solution.wcs.sipOrder+2)/2))
+      throw std::runtime_error("Too few independently verified stars for this SIP order. Use a lower order.");
     const auto centre =
         solution.wcs.sky((image->width - 1) / 2., (image->height - 1) / 2.);
     auto state = previous;
     state["wcs"] = wcsValues(solution.wcs);
     state["verified"] = true;
+    state["solver"] = blind?QString("Astrometry.net + Gaia DR3"):QString("Gaia DR3");
+    state["sipOrder"] = solution.wcs.sipOrder;
     state["ra"] = (*centre)[0];
     state["dec"] = (*centre)[1];
     state["scale"] = solution.wcs.scale();

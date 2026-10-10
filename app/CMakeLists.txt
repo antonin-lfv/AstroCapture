@@ -107,6 +107,7 @@ qt_add_qml_module(AstroCapture
         src/ProjectStorage.cpp src/ProjectStorage.hpp
         src/DeepSkySession.cpp
         src/DeepSkyAstrometry.cpp
+        src/BlindSolver.cpp src/BlindSolver.hpp
         src/GaiaCatalog.cpp
         src/TargetResolver.cpp src/TargetResolver.hpp src/EquipmentProfile.hpp
         src/SessionController.hpp

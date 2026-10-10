@@ -164,6 +164,22 @@ vendor_binary() {
     done <<< "${deps}"
 }
 
+# Blind solving runs separate native Astrometry.net helpers. No Python runtime
+# or user image upload is needed for FITS extraction and solving.
+ASTROMETRY_PREFIX="$(brew --prefix astrometry-net)"
+HELPERS_DIR="${APP_BUNDLE}/Contents/Helpers/astrometry"
+mkdir -p "${HELPERS_DIR}"
+for source_helper in "${ASTROMETRY_PREFIX}"/bin/*; do
+    if file -b "${source_helper}" | grep -q "Mach-O"; then
+        helper="${HELPERS_DIR}/$(basename "${source_helper}")"
+        cp -L "${source_helper}" "${helper}"
+        chmod u+w "${helper}"
+        vendor_binary "${helper}"
+        install_name_tool -add_rpath "@loader_path/../../Frameworks" "${helper}" 2>/dev/null || true
+    fi
+done
+cp -R "${REPO_ROOT}/third_party/notices" "${APP_BUNDLE}/Contents/Resources/ThirdPartyNotices"
+
 echo "  fixing ${EXECUTABLE}"
 vendor_binary "${EXECUTABLE}"
 

@@ -738,3 +738,21 @@ masters ; l'application automatique de calibrations distinctes aux poses
 hétérogènes et le pipeline HDR brut complet restent hors de ce périmètre.
 Voir [ADR-026](../decisions/ADR-026-batch-calibration-masters.md) et le
 [bilan avant V2](../releases/V2_READINESS.md).
+
+### Livraison macOS 1.15.0
+
+Implémentation et preuves sauvegardées par le commit `88e0e87`.
+DMG reconstruit : `build/release/AstroCapture-1.15.0.dmg`.
+Contrôle `hdiutil`, montage en lecture seule, version 1.15.0 et exécutable
+identique au bundle compilé. Signature locale ad hoc profonde/stricte valide ;
+les quatre helpers Astrometry.net démarrent et les trois archives de sources
+sont présentes. Les **200 Mach-O** ne référencent aucune dépendance absolue
+Homebrew ni dossier utilisateur. Le volume de contrôle est démonté.
+Journaux : `build/batch-package.log`, `build/batch-dmg-verification.log`.
+
+- Taille : **112 765 247 octets** (107,54 Mio).
+- SHA-256 DMG : `29cc9a1ae5601a99a61b766a4aafee165526c09b9d30efa1489aad82c26430d3`.
+- SHA-256 exécutable : `975e12d585f52a84f7fbf29df03b6c9e7e1294d4df36815a6a66ca7f1bbca6fa`.
+
+Apple Developer ID, notarisation, installation sur Mac vierge et qualification
+indépendante restent à faire ; les contrôles de ce lot ne les remplacent pas.

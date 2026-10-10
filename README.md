@@ -317,8 +317,8 @@ Astrométrie · PCC / SPCC** :
   dépend du WCS vérifié.
 
 - Catalogues, spectres et recherches de noms sont mis en cache. Les requêtes
-  transmettent le nom ou les coordonnées, jamais l’image. La résolution aveugle,
-  les distorsions SIP et des profils fabricant prévalidés restent à développer.
+  transmettent le nom ou les coordonnées, jamais l’image. Les profils fabricant
+  prévalidés restent à développer.
 
 Voir [le guide des formats et des limites](docs/decisions/ADR-016-astrometry-colors.md).
 Le [parcours des cibles, profils et coordonnées](docs/decisions/ADR-017-astrometry-workflow.md)

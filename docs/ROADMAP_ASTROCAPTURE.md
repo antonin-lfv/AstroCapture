@@ -1,6 +1,6 @@
 # AstroCapture — prochaines étapes
 
-État après le lot 1.8.0 du 10 octobre 2026. Cette liste distingue ce qui est livré
+État après le lot 1.9.0 du 10 octobre 2026. Cette liste distingue ce qui est livré
 et les prochains travaux ; elle ne promet pas une équivalence complète avec Siril.
 
 ## Déjà livré

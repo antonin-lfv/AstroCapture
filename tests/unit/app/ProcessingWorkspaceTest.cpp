@@ -424,13 +424,29 @@ int main(int argc, char** argv) {
     std::unique_ptr<QObject> guideObject(guideComponent.create());
     auto* guide=qobject_cast<QQuickItem*>(guideObject.get()); ASTRO_TEST_CHECK(guide);
     guide->setParentItem(window.contentItem()); guide->setSize({720,480});
-    for(int topic=0;topic<5;++topic) {
+    for(int topic=0;topic<9;++topic) {
         guide->setProperty("topic",topic);
         QElapsedTimer layoutTimer;layoutTimer.start();
         while(layoutTimer.elapsed()<50){QCoreApplication::processEvents();QThread::msleep(1);}
         auto* scroll=guide->findChild<QQuickItem*>("guideLessonScroll");ASTRO_TEST_CHECK(scroll);
         ASTRO_TEST_CHECK(scroll->width()>0 && scroll->width()<=720 && scroll->height()>100);
         ASTRO_TEST_CHECK(scroll->property("contentHeight").toDouble()>scroll->height());
+    }
+    if(qEnvironmentVariableIsSet("ASTRO_UI_GUIDE_QA")) {
+        const auto folder=qEnvironmentVariable("ASTRO_UI_GUIDE_QA");QDir().mkpath(folder);
+        for(const auto size:{QSize(1440,960),QSize(1100,800),QSize(900,700)}) {
+            window.resize(size);guide->setSize(size);
+            for(const int topic:{3,8}) {
+                guide->setProperty("topic",topic);QCoreApplication::processEvents();
+                auto* scroll=guide->findChild<QObject*>("guideLessonScroll");
+                auto* content=scroll->property("contentItem").value<QObject*>();ASTRO_TEST_CHECK(content);
+                for(const bool bottom:{false,true}) {
+                    content->setProperty("contentY",bottom?std::max(0.,content->property("contentHeight").toDouble()-content->property("height").toDouble()):0.);
+                    for(int i=0;i<5;++i){QCoreApplication::processEvents();QThread::msleep(40);}
+                    ASTRO_TEST_CHECK(window.grabWindow().save(folder+QString("/guide-%1-%2-%3x%4.png").arg(topic).arg(bottom?"bottom":"top").arg(size.width()).arg(size.height())));
+                }
+            }
+        }
     }
     guide->setParentItem(nullptr);
 }

@@ -1,6 +1,13 @@
 # AstroCapture — bilan avant V2
 
-État du 10 octobre 2026, après la livraison 1.15.0.
+État du 10 octobre 2026, après la livraison 1.15.1.
+
+L’utilisateur réserve pour l’instant AstroCapture à son usage personnel.
+La qualification de distribution publique reste une étape ultérieure ; elle
+n’empêche pas les essais locaux. La 1.15.1 ajoute le contrôle de la fenêtre
+complète, de la reprise entre processus et des échecs de sauvegarde/export
+sur un volume de test plein. La comparaison finale avec Siril est prévue
+avec l’utilisateur demain ; elle n’est pas encore effectuée.
 
 Ce document centralise les travaux restants. Les fonctions livrées sont décrites
 dans le [README](../../README.md) et le guide intégré ; les anciens lots sont

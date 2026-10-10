@@ -340,3 +340,29 @@ astro_add_unit_test(astro_processing_wcs_projection_test
     SOURCES processing/WcsProjectionTest.cpp
     LIBS astro::processing
 )
+
+# Exercise the complete window and its real signal connections in separate
+# processes. Only the mock backend is compiled into this validation runner.
+if(ASTRO_ENABLE_MOCK_CAMERA)
+    get_target_property(personal_app_sources AstroCapture SOURCES)
+    set(personal_controller_sources)
+    foreach(source IN LISTS personal_app_sources)
+        if(source MATCHES "^src/.*\\.(cpp|hpp)$" AND NOT source MATCHES "CameraPermission")
+            list(APPEND personal_controller_sources "${PROJECT_SOURCE_DIR}/app/${source}")
+        endif()
+    endforeach()
+    astro_add_unit_test(astro_app_personal_use_test
+        SOURCES app/PersonalUseTest.cpp ${personal_controller_sources}
+        LIBS Qt6::Quick Qt6::Gui Qt6::Network astro::processing astro::recording
+            astro::driver::mock Threads::Threads ZLIB::ZLIB
+    )
+    set_target_properties(astro_app_personal_use_test PROPERTIES AUTOMOC ON)
+    target_include_directories(astro_app_personal_use_test PRIVATE ../../app/src)
+    target_compile_definitions(astro_app_personal_use_test PRIVATE
+        ASTRO_ENABLE_MOCK_CAMERA ASTRO_SOURCE_DIR="${PROJECT_SOURCE_DIR}"
+        ASTRO_TRANSLATION_PATH="${PROJECT_BINARY_DIR}/app/astrocapture_fr.qm"
+        ASTRO_APP_VERSION="${PROJECT_VERSION}"
+    )
+    set_tests_properties(astro_app_personal_use_test PROPERTIES
+        ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_BACKEND=software" TIMEOUT 120)
+endif()

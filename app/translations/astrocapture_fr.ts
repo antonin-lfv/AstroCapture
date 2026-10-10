@@ -4191,11 +4191,11 @@ Ajoutez-le depuis son nouvel emplacement.</translation>
         </message>
         <message>
             <source>Processing</source>
-            <translation type="vanished">Traitement</translation>
+            <translation>Traitement</translation>
         </message>
         <message>
             <source>Deep sky</source>
-            <translation type="vanished">Ciel profond</translation>
+            <translation>Ciel profond</translation>
         </message>
         <message>
             <source>History</source>
@@ -4469,7 +4469,7 @@ Ajoutez-le depuis son nouvel emplacement.</translation>
         </message>
         <message>
             <source>Mosaic</source>
-            <translation type="vanished">Mosaïque</translation>
+            <translation>Mosaïque</translation>
         </message>
         <message>
             <source>Guide</source>

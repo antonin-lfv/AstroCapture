@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.15.1 — 2026-10-10
+
+- Restore French workspace names in the save-before-quitting dialog.
+- Add an isolated full-window test with cross-process session recovery, mock
+  recording, lossless caption exports and cancellation checks.
+- Add a macOS personal-use validation runner for a bounded full filesystem
+  and native startup from the packaged DMG with protected user preferences.
+
 ## 1.15.0 — 2026-10-10
 
 - Review and build calibration masters in sequential batches by recorded sensor

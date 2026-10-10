@@ -316,3 +316,8 @@ astro_add_unit_test(astro_processing_drizzle_test
     SOURCES processing/DrizzleTest.cpp
     LIBS astro::processing
 )
+
+astro_add_unit_test(astro_processing_integration_diagnostics_test
+    SOURCES processing/IntegrationDiagnosticsTest.cpp
+    LIBS astro::processing
+)

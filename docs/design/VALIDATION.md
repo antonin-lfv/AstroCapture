@@ -521,3 +521,76 @@ Le volume de vérification est démonté.
   messages de validation (5,13 s, `build/bayer-delivery-tests.log`).
 
 La signature Developer ID et la notarisation restent à fournir.
+
+## 1.12.0 — Cartes d’intégration et HDR linéaire (10 octobre 2026)
+
+Phase sauvegardée par le commit `ab4d42e`, branche `codex/integration-maps-hdr`.
+La direction Atelier existante est conservée.
+
+### Contrôles du calcul et des projets
+
+- **46/46 tests Release passent**, 20,46 s (`build/maps-hdr-final-tests.log`).
+- Les trois contrôles ciblés de livraison passent, 6,25 s, après ajout du contrôle
+  WCS/SIP des exports HDR et cartes (`build/maps-hdr-delivery-tests.log`).
+- Le nouveau test numérique vérifie radiance analytique, rapports RVB, vrais
+  zéros, valeurs négatives, dépassements de 1, saturation partielle/totale,
+  translation stellaire, erreurs de paramètres/métadonnées, données non finies,
+  défaut isolé et annulation. Les diagnostics facultatifs ne changent pas le
+  résultat ; les comptes de rejets correspondent au bilan global.
+- Le test du parcours QML vérifie activation volontaire des cartes, export
+  Float32 exact, refus de carte corrompue, restitution portable des pixels/cartes,
+  confirmation HDR, saisie décimale conservée, paramètres HDR en projet lié,
+  sources remappées en projet portable, refus/annulation conservant le résultat,
+  EXPTIME du FITS HDR égal à la durée de référence et WCS/SIP conservé.
+- La consultation/export d’un WCS absent ne crée plus de valeur WCS invalide dans
+  le projet. La réouverture après export est contrôlée. Les messages de calcul
+  drizzle/HDR sont traduits dans le contexte C++ effectivement utilisé.
+
+### Interface et guide
+
+Contrôle natif en français aux tailles **1440 × 960, 1100 × 800 et 900 × 700** :
+réglages HDR, consultation des cartes, résultat final et cartes HDR. Les fenêtres
+modales conservent les actions accessibles, une zone de contenu défilante sans
+barre visible si nécessaire et des aides au survol des paramètres. L’aperçu des
+cartes conserve les proportions, affiche min/max et échelle, et indique la taille
+estimée du FITS. Tous les nouveaux libellés et erreurs HDR ont une traduction.
+
+Le parcours utilise un recadrage **1024 × 768** de la vraie image RVB de M42.
+Trois expositions sont **simulées** (120/30/3 s, valeurs multipliées par 4 et
+écrêtées à 1 avant fusion), pour vérifier le parcours sans les présenter comme
+une acquisition HDR indépendante. Le bilan obtenu : **19 969 pixels récupérés**,
+**9 encore saturés**, 131 étoiles correspondantes par source alignée, résidu
+maximal **0,120 px**, calcul de 543 ms lors de cette exécution. Ce temps n’est pas
+un benchmark général du traitement ni une preuve de gain sur le terrain.
+
+Le guide contient les unités, la préparation par durée, les limites du HDR,
+le rôle exact des cartes et leur coût mémoire. La mention de stockage temporaire
+Bayer est corrigée : **24 contre 16 octets**, soit 1,5 fois, plutôt que deux fois.
+Les cartes du guide sont aussi contrôlées aux trois tailles.
+
+Captures de cette livraison dans `docs/design/previews/native/` :
+
+- `1.12.0-hdr-settings-{1440x960,1100x800,900x700}.png`
+- `1.12.0-maps-{1440x960,1100x800,900x700}.png`
+- `1.12.0-hdr-result-{1440x960,1100x800,900x700}.png`
+- `1.12.0-hdr-map-{1440x960,1100x800,900x700}.png`
+- `1.12.0-guide-maps-{1440x960,1100x800,900x700}.png`
+- `1.12.0-guide-hdr-{1440x960,1100x800,900x700}.png`
+
+### Paquet macOS
+
+DMG : `build/release/AstroCapture-1.12.0.dmg`. Vérification `hdiutil`, montage en
+lecture seule, version 1.12.0, signature ad hoc profonde/stricte valide et
+exécutable identique à celui compilé. Les quatre helpers Astrometry.net démarrent,
+les archives de sources sont présentes et les **200 Mach-O** n’ont aucune
+référence absolue Homebrew ni dossier utilisateur. Volume de contrôle démonté.
+
+- Taille : **116 648 837 octets** (111,25 Mio).
+- SHA-256 DMG : `ca2a3f7fb37dda5d4be332fb807ecb680f5b7e1845ddb694cb5fe9ef18ddc949`.
+- SHA-256 exécutable : `4d48bbd2015ff10cbe80fbda0bc1a5ac60f19f3ce52fc76c6e2b46fb6413b701`.
+
+La signature Apple Developer ID et la notarisation ne sont pas fournies.
+Les limites scientifiques et les conditions avant V2 sont consignées dans
+`docs/decisions/ADR-023-integration-diagnostics-hdr.md` et
+`docs/releases/V2_READINESS.md`. La qualification sur de vraies séries HDR,
+la comparaison indépendante avec Siril et les essais d’endurance demeurent à faire.

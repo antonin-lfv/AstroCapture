@@ -15,6 +15,7 @@
 #include <QThread>
 #include <QSettings>
 #include <QTranslator>
+#include <QLocale>
 #include "ExportSizeEstimator.hpp"
 #include <QFile>
 #include <QFileInfo>
@@ -56,6 +57,23 @@ int main(int argc,char** argv){
     ASTRO_TEST_CHECK(!object->findChild<QObject*>("deepSkyCalibrated")->property("checked").toBool());
     QQuickWindow window;window.resize(1100,720);auto* root=qobject_cast<QQuickItem*>(object.get());root->setParentItem(window.contentItem());root->setSize({1100,720});window.show();
     QCoreApplication::processEvents();
+    if(qEnvironmentVariableIsSet("ASTRO_UI_HDR_QA")) {
+        auto original=recording::readAstroImage(qEnvironmentVariable("ASTRO_UI_FITS_PATH").toStdString());ASTRO_TEST_CHECK(original.channels==3);
+        auto crop=original;crop.width=1024;crop.height=768;crop.samples.resize(std::size_t(crop.width)*crop.height*3);const int ox=(original.width-crop.width)/2,oy=(original.height-crop.height)/2;
+        for(int y=0;y<crop.height;++y)std::copy_n(original.samples.begin()+(std::size_t(y+oy)*original.width+ox)*3,crop.width*3,crop.samples.begin()+std::size_t(y)*crop.width*3);if(crop.wcs)crop.wcs=crop.wcs->remap({1,0,-double(ox),0,1,-double(oy)});original.samples.clear();original.samples.shrink_to_fit();
+        QList<QUrl> inputs;for(int n=0;n<3;++n){auto frame=crop;frame.exposure=std::array<double,3>{120,30,3}[n];frame.filter="RGB";for(auto& v:frame.samples)v=std::min(1.f,float(v*4*frame.exposure/120));const auto path=directory.filePath(QString("M42-%1s.fits").arg(frame.exposure));recording::writeAstroFits(path.toStdString(),frame);inputs<<QUrl::fromLocalFile(path);}controller.addFiles(inputs);wait(controller);
+        const auto folder=qEnvironmentVariable("ASTRO_UI_HDR_QA");QDir().mkpath(folder);auto capture=[&](const QString& name){QMetaObject::invokeMethod(root->findChild<QObject*>("deepSkyCompletionToast"),"close");for(int i=0;i<5;++i){QCoreApplication::processEvents();QThread::msleep(40);}ASTRO_TEST_CHECK(window.grabWindow().save(folder+"/"+name));};
+        controller.integrate(true,3,false,false,false,false,1,1,false,{},true);wait(controller);ASTRO_TEST_CHECK(controller.diagnosticMaps().size()==3);
+        root->setProperty("workflowStep",1);root->setProperty("frameListOpen",false);ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root->findChild<QObject*>("openIntegrationMaps"),"clicked"));wait(controller);
+        for(const auto size:{QSize(1440,960),QSize(1100,800),QSize(900,700)}){window.resize(size);root->setSize(size);capture(QString("maps-%1x%2.png").arg(size.width()).arg(size.height()));}
+        QMetaObject::invokeMethod(root->findChild<QObject*>("integrationMapsDialog"),"close");ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root->findChild<QObject*>("openHdr"),"clicked"));
+        for(const auto size:{QSize(1440,960),QSize(1100,800),QSize(900,700)}){window.resize(size);root->setSize(size);capture(QString("hdr-settings-%1x%2.png").arg(size.width()).arg(size.height()));}
+        root->findChild<QObject*>("hdrReviewed")->setProperty("checked",true);QCoreApplication::processEvents();QElapsedTimer time;time.start();ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root->findChild<QObject*>("hdrMerge"),"clicked"));wait(controller);qInfo()<<"Orion HDR interface fixture:"<<time.elapsed()<<"ms"<<controller.hdrReport();ASTRO_TEST_CHECK(controller.hdrReport()["recovered"].toULongLong()>0);root->setProperty("workflowStep",6);
+        for(const auto size:{QSize(1440,960),QSize(1100,800),QSize(900,700)}){window.resize(size);root->setSize(size);capture(QString("hdr-result-%1x%2.png").arg(size.width()).arg(size.height()));}
+        ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root->findChild<QObject*>("openIntegrationMaps"),"clicked"));wait(controller);
+        for(const auto size:{QSize(1440,960),QSize(1100,800),QSize(900,700)}){window.resize(size);root->setSize(size);capture(QString("hdr-map-%1x%2.png").arg(size.width()).arg(size.height()));}
+        controller.exportImage(QUrl::fromLocalFile(folder+"/orion-hdr.fits"),true);wait(controller);return 0;
+    }
     if(qEnvironmentVariableIsSet("ASTRO_UI_FEATURES_QA")) {
         app::setBlindIndexDirectory(QStringLiteral(ASTRO_SOURCE_DIR "/build/astrometry-indexes"));
         QSettings().setValue("calibration/libraryDirectory",directory.filePath("masters"));
@@ -177,15 +195,20 @@ int main(int argc,char** argv){
         // and failed operations preserve the previous usable calculation.
         const auto original=controller.sessionSnapshot();const auto view=root->property("sessionState");
         auto* drizzle=root->findChild<QObject*>("deepSkyDrizzle");auto* fraction=root->findChild<QObject*>("deepSkyDrizzlePixelFraction");
-        drizzle->setProperty("checked",true);fraction->setProperty("value",.75);QCoreApplication::processEvents();
+        drizzle->setProperty("checked",true);root->findChild<QObject*>("deepSkyDiagnosticMaps")->setProperty("checked",true);fraction->setProperty("value",.75);QCoreApplication::processEvents();
         controller.setSelected(1,false);QCoreApplication::processEvents();ASTRO_TEST_CHECK(root->property("drizzleInvalid").toBool());
         ASTRO_TEST_CHECK(!root->findChild<QObject*>("deepSkyIntegrate")->property("enabled").toBool());controller.setSelected(1,true);
         ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root->findChild<QObject*>("deepSkyIntegrate"),"clicked"));wait(controller);
         const auto result=controller.sessionSnapshot();ASTRO_TEST_CHECK(controller.integrationReport().size()==1&&controller.integrationReport().front().toMap()["drizzle"].toBool());ASTRO_TEST_CHECK(result.images["linear"]->width>300&&result.images["linear"]->height>250);
         ASTRO_TEST_CHECK(controller.projectOptions()["drizzle"].toBool()&&controller.projectOptions()["pixelFraction"].toDouble()==.75);
-        const auto path=QUrl::fromLocalFile(directory.filePath("drizzle.astroproject"));controller.savePortableProject(path);wait(controller);
-        app::DeepSkyController reopened;reopened.setProjectCacheDirectory(directory.filePath("drizzle-cache"));reopened.loadProject(path);wait(reopened);
-        ASTRO_TEST_CHECK(reopened.hasResult()&&reopened.integrationReport()==controller.integrationReport()&&reopened.projectOptions()["drizzle"].toBool()&&reopened.sessionSnapshot().images["linear"]->rgb==result.images["linear"]->rgb);
+        ASTRO_TEST_CHECK(controller.diagnosticMaps().size()==3&&controller.projectOptions()["diagnosticMaps"].toBool());
+        const auto mapKey=controller.diagnosticMaps().front().toMap()["key"].toString();controller.inspectDiagnostic(mapKey,0);wait(controller);ASTRO_TEST_CHECK(!controller.diagnosticImage().isNull()&&controller.diagnosticInfo()["key"]==mapKey);
+        const auto mapPath=QUrl::fromLocalFile(directory.filePath("weights.fits"));controller.exportDiagnostic(mapPath,mapKey);wait(controller);const auto mapFits=recording::readAstroImage(mapPath.toLocalFile().toStdString());ASTRO_TEST_CHECK(mapFits.samples==result.images["diagnostic/"+mapKey]->rgb&&mapFits.fitsBitpix==-32);
+        auto invalid=result;auto wrong=std::make_shared<processing::FloatImage>(*invalid.images["diagnostic/"+mapKey]);wrong->rgb[0]=-1;invalid.images["diagnostic/"+mapKey]=wrong;ASTRO_TEST_CHECK(!app::DeepSkyController::validSession(invalid));
+
+        ASTRO_TEST_CHECK(app::DeepSkyController::validSession(result)&&app::DeepSkyController::validSession(controller.sessionSnapshot()));const auto path=QUrl::fromLocalFile(directory.filePath("drizzle.astroproject"));controller.savePortableProject(path);wait(controller);if(!QFileInfo::exists(path.toLocalFile()))qWarning()<<controller.status();
+        app::DeepSkyController reopened;reopened.setProjectCacheDirectory(directory.filePath("drizzle-cache"));reopened.loadProject(path);wait(reopened);if(!reopened.hasResult())qWarning()<<reopened.status();
+        ASTRO_TEST_CHECK(reopened.hasResult()&&reopened.integrationReport()==controller.integrationReport()&&reopened.projectOptions()["drizzle"].toBool()&&reopened.sessionSnapshot().images["linear"]->rgb==result.images["linear"]->rgb);ASTRO_TEST_CHECK(reopened.diagnosticMaps()==controller.diagnosticMaps()&&reopened.sessionSnapshot().images["diagnostic/"+mapKey]->rgb==result.images["diagnostic/"+mapKey]->rgb);
         controller.integrate(true,3,true,true,false,true,0,.8);wait(controller);ASTRO_TEST_CHECK(controller.sessionSnapshot().images["linear"]==result.images["linear"]);
         auto* native=root->findChild<QObject*>("deepSkyDrizzleNativeBayer");ASTRO_TEST_CHECK(native&&!native->property("checked").toBool());
         native->setProperty("checked",true);ASTRO_TEST_CHECK(QMetaObject::invokeMethod(native,"clicked"));QCoreApplication::processEvents();
@@ -193,6 +216,28 @@ int main(int argc,char** argv){
         controller.integrate(true,3,true,true,false,true,1,1,true);wait(controller);ASTRO_TEST_CHECK(controller.sessionSnapshot().images["linear"]==result.images["linear"]);
         controller.restoreSession(original);ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root,"restoreSessionState",Q_ARG(QVariant,view)));QCoreApplication::processEvents();ASTRO_TEST_CHECK(!drizzle->property("checked").toBool());
         ASTRO_TEST_CHECK(!native->property("checked").toBool());
+    }
+
+    {
+        const auto original=controller.sessionSnapshot();const auto view=root->property("sessionState");controller.clear();
+        recording::AstroImage hdr=data;recording::CelestialWcs hdrWcs;hdrWcs.crval={83.8,-5.4};hdrWcs.crpix={80.5,64.5};hdrWcs.cd={-.001,0,0,.001};hdrWcs.sipOrder=3;hdrWcs.sipA[12]=1e-5;hdrWcs.sipB[2]=-2e-5;hdr.wcs=hdrWcs;hdr.channels=3;hdr.filter="RGB";hdr.bits=32;hdr.samples.resize(std::size_t(hdr.width)*hdr.height*3);QList<QUrl> hdrUrls;
+        for(int n=0;n<2;++n){hdr.exposure=n?6:60;for(int y=0;y<hdr.height;++y)for(int x=0;x<hdr.width;++x)for(int c=0;c<3;++c){double v=.02;for(const auto& star:stars)v+=.2*std::exp(-((x-star[0])*(x-star[0])+(y-star[1])*(y-star[1]))/5.);v+=2.5*std::exp(-((x-78)*(x-78)+(y-82)*(y-82))/40.);hdr.samples[(y*hdr.width+x)*3+c]=float(std::min(1.,v*(1-c*.2)*hdr.exposure/60));}const auto path=directory.filePath(QString("hdr-%1.fits").arg(n));recording::writeAstroFits(path.toStdString(),hdr);hdrUrls<<QUrl::fromLocalFile(path);}
+        controller.addFiles(hdrUrls);wait(controller);root->setProperty("workflowStep",1);
+        const QVariantList inputs{QVariantMap{{"index",0},{"exposure",60},{"saturation",1}},QVariantMap{{"index",1},{"exposure",6},{"saturation",1}}};
+        controller.mergeHdr(inputs,.1,false);wait(controller);ASTRO_TEST_CHECK(!controller.hasResult());
+        ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root->findChild<QObject*>("openHdr"),"clicked"));QCoreApplication::processEvents();
+        auto* threshold=visualItem(window.contentItem(),"hdrSaturation0");ASTRO_TEST_CHECK(threshold);const auto entered=QLocale().toString(.95,'g',8);threshold->setProperty("text",entered);ASTRO_TEST_CHECK(QMetaObject::invokeMethod(threshold,"textEdited"));QCoreApplication::processEvents();ASTRO_TEST_CHECK(threshold->property("text").toString()==entered);
+        ASTRO_TEST_CHECK(!root->findChild<QObject*>("hdrMerge")->property("enabled").toBool());root->findChild<QObject*>("hdrReviewed")->setProperty("checked",true);QCoreApplication::processEvents();ASTRO_TEST_CHECK(root->findChild<QObject*>("hdrMerge")->property("enabled").toBool());
+        ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root->findChild<QObject*>("hdrMerge"),"clicked"));wait(controller);if(!controller.hasResult())qWarning()<<controller.status();ASTRO_TEST_CHECK(controller.hasResult()&&controller.hdrReport()["recovered"].toULongLong()>0&&controller.hdrReport()["clipped"].toULongLong()==0&&controller.diagnosticMaps().size()==2);
+        const auto state=controller.sessionSnapshot();const auto file=QUrl::fromLocalFile(directory.filePath("hdr.astroproject"));controller.savePortableProject(file);wait(controller);app::DeepSkyController reopened;reopened.setProjectCacheDirectory(directory.filePath("hdr-cache"));reopened.loadProject(file);wait(reopened);ASTRO_TEST_CHECK(reopened.hdrReport()["imageKey"]==controller.hdrReport()["imageKey"]&&reopened.hdrReport()["recovered"]==controller.hdrReport()["recovered"]&&reopened.sessionSnapshot().images["linear"]->rgb==state.images["linear"]->rgb&&reopened.diagnosticMaps()==controller.diagnosticMaps());for(const auto& source:reopened.hdrReport()["sources"].toList())ASTRO_TEST_CHECK(QFileInfo::exists(source.toMap()["path"].toString()));
+        ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root,"saveOptions"));ASTRO_TEST_CHECK(controller.projectOptions()["hdrOptions"].toMap()["sources"].toList().size()==2);
+        const auto linked=QUrl::fromLocalFile(directory.filePath("hdr-linked.astroproject"));controller.saveProject(linked);wait(controller);app::DeepSkyController linkedController;linkedController.loadProject(linked);wait(linkedController);ASTRO_TEST_CHECK(linkedController.projectOptions()["hdrOptions"].toMap()==controller.projectOptions()["hdrOptions"].toMap());
+        auto bad=inputs;auto same=bad[1].toMap();same["exposure"]=60;bad[1]=same;controller.mergeHdr(bad,.1,true);wait(controller);ASTRO_TEST_CHECK(controller.sessionSnapshot().images["linear"]==state.images["linear"]&&controller.hdrReport()==state.state["hdrReport"]);
+        controller.mergeHdr(inputs,.1,true);controller.cancel();wait(controller);ASTRO_TEST_CHECK(controller.sessionSnapshot().images["linear"]==state.images["linear"]);
+        controller.exportImage(QUrl::fromLocalFile(directory.filePath("hdr-result.fits")),true);wait(controller);const auto exported=recording::readAstroImage(directory.filePath("hdr-result.fits").toStdString());ASTRO_TEST_CHECK(exported.samples==state.images["linear"]->rgb&&exported.exposure==60);ASTRO_TEST_CHECK(exported.wcs&&exported.wcs->crpix==hdrWcs.crpix&&exported.wcs->sipA==hdrWcs.sipA);
+        const auto diagnostic=QUrl::fromLocalFile(directory.filePath("hdr-diagnostic.fits"));controller.exportDiagnostic(diagnostic,"HDR/recovered");wait(controller);const auto diagnosticFits=recording::readAstroImage(diagnostic.toLocalFile().toStdString());ASTRO_TEST_CHECK(diagnosticFits.wcs&&diagnosticFits.wcs->sipB==hdrWcs.sipB&&diagnosticFits.samples==state.images["diagnostic/HDR/recovered"]->rgb);
+
+        controller.clear();controller.restoreSession(original);ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root,"restoreSessionState",Q_ARG(QVariant,view)));wait(controller);
     }
 
     {

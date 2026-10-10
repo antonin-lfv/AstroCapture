@@ -176,11 +176,11 @@ Control {
         if(!edits.applyValues(options())){editError=qsTr("Check parameters and operation order: white must exceed black; photometry and deconvolution require linear, unrotated input; photometry cannot be masked.");return false;}
         edits.endEdit();
         const view=root.sessionState;delete view.options;
-        controller.projectOptions={view:view,calibrated:calibrated.checked,normalize:normalize.checked,badPixels:badPixels.checked,sequenceBackground:sequenceBackground.checked,drizzle:drizzle.checked,nativeBayer:nativeBayer.checked,bayerPattern:root.declaredBayer,drizzleScale:drizzleScale.currentIndex,pixelFraction:pixelFraction.value,sigma:sigma.value,method:integrationMethod.currentIndex,finish:edits.values,caption:root.captionOptions,versions:edits.snapshot()};return true;
+        controller.projectOptions={view:view,calibrated:calibrated.checked,normalize:normalize.checked,badPixels:badPixels.checked,sequenceBackground:sequenceBackground.checked,hdrOptions:controller.projectOptions.hdrOptions||{},diagnosticMaps:diagnosticMaps.checked,drizzle:drizzle.checked,nativeBayer:nativeBayer.checked,bayerPattern:root.declaredBayer,drizzleScale:drizzleScale.currentIndex,pixelFraction:pixelFraction.value,sigma:sigma.value,method:integrationMethod.currentIndex,finish:edits.values,caption:root.captionOptions,versions:edits.snapshot()};return true;
     }
     readonly property var sessionState: {
         edits.values; edits.version; edits.canUndo; edits.canRedo;
-        return {options:{calibrated:calibrated.checked,normalize:normalize.checked,badPixels:badPixels.checked,sequenceBackground:sequenceBackground.checked,drizzle:drizzle.checked,nativeBayer:nativeBayer.checked,bayerPattern:root.declaredBayer,drizzleScale:drizzleScale.currentIndex,pixelFraction:pixelFraction.value,
+        return {options:{calibrated:calibrated.checked,normalize:normalize.checked,badPixels:badPixels.checked,sequenceBackground:sequenceBackground.checked,hdrOptions:controller.projectOptions.hdrOptions||{},diagnosticMaps:diagnosticMaps.checked,drizzle:drizzle.checked,nativeBayer:nativeBayer.checked,bayerPattern:root.declaredBayer,drizzleScale:drizzleScale.currentIndex,pixelFraction:pixelFraction.value,
             sigma:sigma.value,method:integrationMethod.currentIndex,finish:edits.values,caption:root.captionOptions,versions:edits.snapshot()},
             step:workflowStep,tool:finishingTool,expandedFamilies:expandedFamilies.slice(),advancedTool:advancedTools.toolIndex,comparison:comparisonMode,split:comparisonSplit,fit:viewport.fitMode,zoom:viewport.zoom,panX:viewport.panX,panY:viewport.panY,targetQuery:astrometryDialog.targetQuery};
     }
@@ -196,7 +196,7 @@ Control {
         if(restored.normalize!==undefined)normalize.checked=restored.normalize;
         if(restored.badPixels!==undefined)badPixels.checked=restored.badPixels;
         sequenceBackground.checked=restored.sequenceBackground||false;
-        drizzle.checked=restored.drizzle||false;
+        diagnosticMaps.checked=restored.diagnosticMaps||false;drizzle.checked=restored.drizzle||false;
         nativeBayer.checked=restored.nativeBayer||false;
         bayerPattern.currentIndex=Math.max(0,["","RGGB","BGGR","GRBG","GBRG"].indexOf(restored.bayerPattern||""));
         drizzleScale.currentIndex=restored.drizzleScale===undefined?2:Math.max(0,Math.min(2,restored.drizzleScale));
@@ -248,7 +248,7 @@ Control {
             if(settings.normalize!==undefined)normalize.checked=settings.normalize;
             if(settings.badPixels!==undefined)badPixels.checked=settings.badPixels;
             sequenceBackground.checked=settings.sequenceBackground||false;
-            drizzle.checked=settings.drizzle||false;
+            diagnosticMaps.checked=settings.diagnosticMaps||false;drizzle.checked=settings.drizzle||false;
             nativeBayer.checked=settings.nativeBayer||false;
             bayerPattern.currentIndex=Math.max(0,["","RGGB","BGGR","GRBG","GBRG"].indexOf(settings.bayerPattern||""));
             drizzleScale.currentIndex=settings.drizzleScale===undefined?2:Math.max(0,Math.min(2,settings.drizzleScale));
@@ -639,6 +639,7 @@ DropArea {
                         ColumnLayout {
                             visible:advanced.expanded;Layout.fillWidth:true;spacing:12
                             Label {text:qsTr("Normalization, stacking method and rejection threshold.");color:Atelier.secondary;font.pixelSize:12;wrapMode:Text.Wrap;Layout.fillWidth:true}
+                            HelpCheckBox {id:diagnosticMaps;objectName:"deepSkyDiagnosticMaps";text:qsTr("Keep weight and rejection maps");Layout.fillWidth:true;enabled:!controller.busy;explanation:qsTr("Retains three RGB Float32 maps: weights after rejection, retained contributors, and combined low/high rejected sample counts. Adds about 36 bytes per output pixel per filter group to memory and saved projects (1.15 GB at 32 MP). Disabled by default. An older result needs to be stacked again to create maps.")}
                             ParameterLabel {label:qsTr("Normalization");explanation:qsTr("Match stellar flux and background offsets to the reference. Disable for data normalized externally. This is global normalization, not photometric color calibration.")}
                             CheckBox {id:normalize;text:qsTr("Normalize to the reference");checked:true;enabled:!controller.busy;Layout.fillWidth:true}
                             ParameterLabel {label:qsTr("Gradient before stacking");explanation:qsTr("Optional degree-1 subtraction after calibration and debayering, before alignment. Each exposure gets its own automatic grid (20 samples per line, tolerance 1). Leave disabled for fields filled with nebulosity.")}
@@ -694,7 +695,11 @@ DropArea {
                 ParameterLabel {visible:root.workflowStep===1;label:qsTr("Reference and alignment");explanation:qsTr("Reference selects one light per filter group. Other frames are aligned to its stars. Choose a sharp frame with many recognizable stars; this is not the frame used as the final output.")}
                 Label {visible:root.workflowStep===1;text:qsTr("Check the stars, FWHM and reference in the image list before stacking.");color:Atelier.secondary;font.pixelSize:12;wrapMode:Text.Wrap;Layout.fillWidth:true}
                 Rectangle {objectName:"deepSkyStackDivider";visible:root.workflowStep===1;Layout.fillWidth:true;Layout.preferredHeight:1;color:"#526174";Layout.topMargin:8;Layout.bottomMargin:8}
-                IconButton {visible:root.workflowStep===1;objectName:"deepSkyIntegrate";text:qsTr("Create the stacked image");Layout.fillWidth:true;Layout.minimumWidth:0;enabled:!controller.busy && !root.drizzleInvalid && controller.frames.some(row=>row.selected && row.role==="Light");onClicked:{if(root.saveOptions())controller.integrate(calibrated.checked,integrationMethod.currentIndex===0?sigma.value:0,normalize.checked,badPixels.checked,sequenceBackground.checked,drizzle.checked,[1,1.5,2][drizzleScale.currentIndex],pixelFraction.value,nativeBayer.checked,root.declaredBayer)}}
+                IconButton {visible:root.workflowStep===1;objectName:"deepSkyIntegrate";text:qsTr("Create the stacked image");Layout.fillWidth:true;Layout.minimumWidth:0;enabled:!controller.busy && !root.drizzleInvalid && controller.frames.some(row=>row.selected && row.role==="Light");onClicked:{if(root.saveOptions())controller.integrate(calibrated.checked,integrationMethod.currentIndex===0?sigma.value:0,normalize.checked,badPixels.checked,sequenceBackground.checked,drizzle.checked,[1,1.5,2][drizzleScale.currentIndex],pixelFraction.value,nativeBayer.checked,root.declaredBayer,diagnosticMaps.checked)}}
+
+                IconButton {objectName:"openIntegrationMaps";visible:(root.workflowStep===1||root.workflowStep===6)&&controller.diagnosticMaps.length>0;text:qsTr("Inspect weight and rejection maps");Layout.fillWidth:true;enabled:!controller.busy&&controller.diagnosticMaps.length>0;onClicked:integrationTools.openMaps()}
+                IconButton {objectName:"openHdr";visible:root.workflowStep===1;text:qsTr("Merge different exposures · HDR");Layout.fillWidth:true;enabled:!controller.busy;onClicked:integrationTools.openHdr()}
+                Label {visible:(root.workflowStep===1||root.workflowStep===6)&&!!controller.hdrReport.imageKey;text:qsTr("HDR · %1 recovered pixels · %2 still saturated").arg(controller.hdrReport.recovered||0).arg(controller.hdrReport.clipped||0);color:Atelier.secondary;wrapMode:Text.Wrap;Layout.fillWidth:true}
 
                 Repeater {
                     model:controller.integrationReport.filter(row=>row.drizzle)
@@ -847,6 +852,7 @@ ParameterControl {id:black;label:qsTr("Black level");textIsValue:true;text:"0";f
         enter:Transition {NumberAnimation {property:"opacity";from:0;to:1;duration:150}}
         exit:Transition {NumberAnimation {property:"opacity";from:1;to:0;duration:150}}
     }
+    IntegrationTools {id:integrationTools;controller:root.controller;workspaceWidth:root.width;workspaceHeight:root.height}
     DarkDialog {
         id:presetDialog;objectName:"deepSkyPresetDialog";parent:Overlay.overlay;anchors.centerIn:parent;modal:true
         title:qsTr("Deep-sky presets");width:Math.min(440,root.width-32)

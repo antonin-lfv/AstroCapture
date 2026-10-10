@@ -308,7 +308,7 @@ found:
     if(!ratios.empty())best.fluxScale=std::clamp(double(median(std::move(ratios))),.1,10.);
     return best;
 }
-Integration integrate(int count,const ImageLoader& load,const Calibration& masters,bool calibrated,double sigma,const CheckCancel& check,const Progress& progress,bool normalize,const BackgroundOptions* backgroundOptions,const DrizzleOptions* drizzle) {
+Integration integrate(int count,const ImageLoader& load,const Calibration& masters,bool calibrated,double sigma,const CheckCancel& check,const Progress& progress,bool normalize,const BackgroundOptions* backgroundOptions,const DrizzleOptions* drizzle,bool diagnosticMaps) {
     if(count<1||count>500)throw std::runtime_error("Select between 1 and 500 light frames per group.");
     if(!std::isfinite(sigma)||sigma<0||sigma>10)throw std::runtime_error("Sigma rejection must be between 0 and 10.");
     if(drizzle&&count<2)throw std::runtime_error("Drizzle requires at least two usable light frames per filter group.");
@@ -385,6 +385,8 @@ Integration integrate(int count,const ImageLoader& load,const Calibration& maste
     if(result.wcs)result.wcs=result.wcs->remap({scale,0,(scale-1)*.5-crop.x,0,scale,(scale-1)*.5-crop.y});
     if(result.pixelScale)result.pixelScale=*result.pixelScale/scale;
     result.image={crop.width,crop.height,std::vector<float>(std::size_t(crop.width)*crop.height*3)};
+    if(diagnosticMaps)for(auto* map:{&result.weights,&result.contributors,&result.rejectionMap})
+        *map={crop.width,crop.height,std::vector<float>(result.image.rgb.size())};
     // Disk-backed strips keep memory independent of the number of full images.
     const int rows=std::max(1,65536/(outputWidth*3));
     std::vector<float> values;values.reserve(disk.size());
@@ -422,14 +424,15 @@ Integration integrate(int count,const ImageLoader& load,const Calibration& maste
                 float center=0,limit=0;
                 const bool reject=sigma>0&&values.size()>=3;
                 if(reject){center=medianInPlace(values);deviations.clear();for(float v:values)deviations.push_back(std::abs(v-center));limit=float(sigma)*std::max(1e-7f,1.4826f*medianInPlace(deviations));}
-                double sum=0,totalWeight=0;
+                double sum=0,totalWeight=0;int retained=0,rejected=0;
                 for(std::size_t n=0;n<disk.size();++n) {
                     const float w=drizzle?weights[n][weightAt]:1,v=strips[n][pixel*3+c];
                     if(w<=0||!std::isfinite(v))continue;
-                    if(reject&&std::abs(v-center)>limit){++result.rejectedSamples;continue;}
-                    sum+=double(v)*w;totalWeight+=w;
+                    if(reject&&std::abs(v-center)>limit){++result.rejectedSamples;++rejected;continue;}
+                    sum+=double(v)*w;totalWeight+=w;++retained;
                 }
                 result.image.rgb[(std::size_t(y+yy)*crop.width+x)*3+c]=totalWeight>0?float(sum/totalWeight):center;
+                if(diagnosticMaps){const auto at=(std::size_t(y+yy)*crop.width+x)*3+c;result.weights.rgb[at]=float(totalWeight);result.contributors.rgb[at]=float(retained);result.rejectionMap.rgb[at]=float(rejected);}
             }
         }
     }

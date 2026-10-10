@@ -209,10 +209,34 @@ Le [guide technique du drizzle mono/RVB](docs/decisions/ADR-021-drizzle.md) et
 son [extension Bayer native](docs/decisions/ADR-022-bayer-drizzle.md) précisent les
 unités, la couverture et les limites de ces modes.
 
+**Cartes de diagnostic** — dans **Empilement → Réglages avancés**, activez
+**Conserver les cartes de poids et de rejet** avant le calcul. Inspectez et
+exportez en FITS Float32 les poids géométriques conservés, le nombre de
+contributeurs après rejet et les rejets bas/hauts réunis, séparément en R/V/B.
+Le WCS est celui de l'empilement. L'aperçu réduit est normalisé pour l'affichage ;
+l'export conserve les valeurs exactes. Ces cartes ne mesurent pas le bruit ni
+la qualité. Elles ajoutent environ **36 octets par pixel de sortie et par groupe**
+à la mémoire et aux projets ; elles sont facultatives et désactivées par défaut.
+
+**Fusion HDR linéaire** — dans **Empilement → Fusionner les expositions · HDR**,
+sélectionnez **2 à 8 FITS linéaires déjà calibrés**, du même filtre et avec la
+même caméra, le même gain/offset/binning et les mêmes unités. Préparez un
+empilement moyen par durée, sans étirement ; vérifiez les **durées individuelles**,
+car `EXPTIME` peut désigner le temps cumulé d'un empilement. Le seuil de
+saturation est propre à chaque entrée : **1 n'est pas une valeur universelle**.
+L'alignement stellaire et le fondu emploient un poids commun aux trois canaux.
+Les incompatibilités connues et les alignements dont le résidu dépasse 1 pixel
+bloquent la fusion. Le résultat reste linéaire, exprimé comme la pose
+individuelle la plus longue. Les pixels saturés dans toutes les poses disponibles
+restent signalés ; leur détail n'est pas inventé. Deux cartes binaires et le bilan
+sont conservés dans le projet. Le temps total d'intégration n'est pas déduit.
+Les limites et unités sont détaillées dans
+[la note technique](docs/decisions/ADR-023-integration-diagnostics-hdr.md).
+
 Limites actuelles : **32 MP par image**, **500 poses sélectionnées par groupe**,
 **2000 fichiers par projet**. Les RAW X-Trans et les autres matrices non Bayer
-ne sont pas pris en charge. Les cartes de poids exportables, la correction optique dynamique, les
-projections grand angle, la fusion HDR et les profils fabricant prévalidés
+ne sont pas pris en charge. La correction optique dynamique, les
+projections grand angle et les profils fabricant prévalidés
 caméra/filtres restent à développer.
 Le WCS guidé et les calibrations PCC/SPCC sont décrits ci-dessous. La précision de centroidage annoncée par APP
 n’est pas une mesure de performance d’AstroCapture.

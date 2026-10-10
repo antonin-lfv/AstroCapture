@@ -51,6 +51,10 @@ class DeepSkyController : public QObject {
     Q_PROPERTY(QVariantList frames READ frames NOTIFY changed)
     Q_PROPERTY(QStringList groups READ groups NOTIFY changed)
     Q_PROPERTY(QVariantList integrationReport READ integrationReport NOTIFY changed)
+    Q_PROPERTY(QVariantList diagnosticMaps READ diagnosticMaps NOTIFY changed)
+    Q_PROPERTY(QVariantMap hdrReport READ hdrReport NOTIFY changed)
+    Q_PROPERTY(QImage diagnosticImage READ diagnosticImage NOTIFY diagnosticChanged)
+    Q_PROPERTY(QVariantMap diagnosticInfo READ diagnosticInfo NOTIFY diagnosticChanged)
     Q_PROPERTY(QVariantMap projectOptions READ projectOptions WRITE setProjectOptions NOTIFY projectOptionsChanged)
     Q_PROPERTY(bool hasResult READ hasResult NOTIFY changed)
     Q_PROPERTY(bool displayingResult READ displayingResult NOTIFY changed)
@@ -124,6 +128,13 @@ public:
     QVariantList frames() const{return frames_;}
     QStringList groups() const{return groups_;}
     QVariantList integrationReport() const{return integrationReport_;}
+    QVariantList diagnosticMaps() const;
+    QVariantMap hdrReport() const{return hdrReport_;}
+    QImage diagnosticImage() const{return diagnosticPreview_;}
+    QVariantMap diagnosticInfo() const{return diagnosticInfo_;}
+    Q_INVOKABLE void inspectDiagnostic(const QString& key,int channel=3);
+    Q_INVOKABLE void exportDiagnostic(const QUrl&,const QString& key);
+    Q_INVOKABLE void mergeHdr(const QVariantList& sources,double transition,bool reviewed);
     bool hasResult() const{return bool(linear_);}
     bool displayingResult() const{return displayingResult_;}
     int imageWidth() const{return preview_.width();}
@@ -157,7 +168,7 @@ public:
     Q_INVOKABLE void chooseRawComparison(int index);
     Q_INVOKABLE void showRawComparison(bool enabled);
     Q_INVOKABLE void integrate(bool calibrated,double sigma=3,bool normalize=true,bool correctBadPixels=true,bool sequenceBackground=false,
-                              bool drizzle=false,double drizzleScale=2,double pixelFraction=0.8,bool nativeBayer=false,QString bayerPattern={});
+                              bool drizzle=false,double drizzleScale=2,double pixelFraction=0.8,bool nativeBayer=false,QString bayerPattern={},bool diagnosticMaps=false);
     Q_INVOKABLE void setReference(int index);
     Q_INVOKABLE void selectResult(const QString& group);
     Q_INVOKABLE void compose(const QString& red,const QString& green,const QString& blue,const QString& luminance="");
@@ -183,6 +194,7 @@ signals:
     void operationFinished(bool success, const QString& message);
     void changed();
     void imageChanged();
+    void diagnosticChanged();
     void resultChanged();
     void projectOptionsChanged();
     void imageExported(const QUrl&);
@@ -209,6 +221,9 @@ private:
     std::optional<QVariantMap> pendingAdjustments_;
     QVariantMap histogram_,advancedReport_;
     QVariantList integrationReport_;
+    QVariantMap hdrReport_,diagnosticInfo_;
+    QImage diagnosticPreview_;
+    std::map<QString,std::shared_ptr<const processing::FloatImage>> diagnosticMaps_;
     int starLayerView_{};
     std::shared_ptr<const processing::FloatImage> starsLayer_,starBackgroundLayer_;
     QImage starsLayerPreview_,starBackgroundLayerPreview_;

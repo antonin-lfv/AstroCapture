@@ -50,6 +50,9 @@ FloatImage removeGreen(const FloatImage&,int method=0,float amount=1,bool preser
 FloatImage orientImage(const FloatImage&,int quarterTurns,bool mirrorHorizontal,bool mirrorVertical,const CheckCancel& = {});
 struct Integration {
     FloatImage image;
+    // Optional RGB diagnostics on the same cropped grid, after rejection.
+    // Weights are geometrical overlap sums, not inverse noise variances.
+    FloatImage weights, contributors, rejectionMap;
     std::vector<int> accepted, rejected;
     std::vector<std::string> reasons;
     std::uint64_t rejectedSamples{};
@@ -64,7 +67,16 @@ struct Integration {
 };
 Integration integrate(int count,const ImageLoader&,const Calibration&,bool calibrated,double sigma,
                       const CheckCancel& = {},const Progress& = {},bool normalize=true,const BackgroundOptions* background=nullptr,
-                      const DrizzleOptions* drizzle=nullptr);
+                      const DrizzleOptions* drizzle=nullptr,bool diagnosticMaps=false);
+struct HdrInput { double exposure{}, saturation{1}; };
+struct HdrResult {
+    FloatImage image, recoveredMap, clippedMap;
+    std::uint64_t recoveredPixels{}, clippedPixels{};
+    std::vector<StarAlignment> alignments;
+};
+// Linear calibrated data, identical sensor units/gain/filter. Output units
+// match the longest individual exposure. Shared RGB weights protect color.
+HdrResult mergeHdr(const std::vector<HdrInput>&,const ImageLoader&,double transition=0.1,const CheckCancel& = {});
 struct Finish {
     bool background{};
     BackgroundOptions backgroundOptions;

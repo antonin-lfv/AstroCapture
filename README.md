@@ -166,8 +166,8 @@ désactivée sur des nébulosités étendues.
 Limites actuelles : **32 MP par image**, **500 poses sélectionnées par groupe**,
 **2000 fichiers par projet**. Les RAW X-Trans et les autres matrices non Bayer
 ne sont pas pris en charge. Le drizzle, la correction optique dynamique, les
-projections grand angle, la fusion HDR, la résolution astrométrique aveugle
-et une bibliothèque de réponses mesurées caméra/filtres restent à développer.
+projections grand angle, la fusion HDR et les profils fabricant prévalidés
+caméra/filtres restent à développer.
 Le WCS guidé et les calibrations PCC/SPCC sont décrits ci-dessous. La précision de centroidage annoncée par APP
 n’est pas une mesure de performance d’AstroCapture.
 
@@ -237,6 +237,46 @@ appliqué, pas les paramètres encore en attente.
   **PCC / SPCC** ci-dessous utilisent le catalogue automatiquement. Les références sont
   spécifiques à une image, même lorsqu’un préréglage les conserve.
 
+**Bibliothèque de masters** — dans le **rouage du projet → Bibliothèque de masters** :
+
+- Créez un dark, bias, dark-flat ou flat depuis les sources sélectionnées d’un
+  seul filtre et matériel ; ou importez un master FITS existant. La moyenne
+  utilise un rejet médiane/MAD dès trois sources, avec fichiers temporaires
+  pour limiter la mémoire. Les masters restent en Float32.
+- Caméra, dimensions, Bayer, binning, gain, offset, température et durée
+  servent à vérifier la compatibilité. Les informations manquantes demandent
+  une revue explicite ; les incompatibilités bloquent l’application.
+  Les dark-flats sont comparés aux flats sélectionnés.
+- Pour créer un flat, sélectionnez aussi son bias ou dark-flat adapté. Un
+  flat enregistré est déjà corrigé et normalisé : son niveau électronique
+  n’est pas soustrait deux fois. Un master dark contient déjà le bias.
+- Le bilan expose sources, médiane, bruit MAD et échantillons rejetés.
+  L’empreinte SHA256 protège chaque FITS lors de son utilisation. Sélectionner
+  un master désélectionne les autres fichiers de ce rôle. Retirer son entrée
+  conserve le fichier pour les projets existants. Les projets portables
+  emportent les masters utilisés avec leurs autres sources.
+
+**Étoiles et fond** — nouvelle famille dans **Finition** :
+
+- Extraction native par ajustement d’une PSF circulaire gaussienne ou Moffat
+  sur un fond local plan, après correction du gradient et calibration couleur.
+  Les vues **Combiné**, **Étoiles** et **Fond** montrent les couches calculées.
+- Luminosité et tons moyens des étoiles, saturation indépendante des deux
+  couches, luminosité et débruitage du fond. La réduction stellaire diminue
+  leur contribution lumineuse ; elle ne rétrécit pas leur rayon. Les réglages
+  neutres reproduisent exactement la finition commune, même après étirement.
+- FWHM, bêta Moffat, limite des candidates, tolérance de l’ajustement et seuil
+  de saturation sont accessibles, avec aides. Le bilan affiche étoiles
+  acceptées/rejetées, saturées et RMS normalisée. Les étoiles saturées,
+  superposées et mal ajustées restent dans le fond. Les aigrettes, halos
+  irréguliers et structures compactes imposent une inspection à 100 % : le
+  fond est une **estimation PSF**, pas un retrait neuronal complet des étoiles.
+- Les couches finies s’exportent séparément en FITS Float32 signé avec WCS/SIP
+  et géométrie actuelle. Leur addition reproduit le résultat combiné à
+  l’arrondi flottant près. L’export principal conserve l’image combinée ;
+  **FITS linéaire** garde l’intégration d’origine. Réglages, A/B et couches
+  calculées persistent dans les sessions et projets portables.
+
 **Astrométrie WCS et couleurs sur catalogue** — dans **Finition → Couleur →
 Astrométrie · PCC / SPCC** :
 
@@ -244,6 +284,15 @@ Astrométrie · PCC / SPCC** :
   ou CSV local, prise en compte des mouvements propres, rotation et miroir.
   Contrôles par étoiles associées, RMS en pixels/secondes d’arc et couverture du
   champ ; repères sur l’image. La résolution ne modifie aucun pixel.
+- **Résolution aveugle locale** : identifie le champ sans coordonnées ni échelle
+  de départ avec Astrometry.net embarqué dans le DMG. Installez l’index grand
+  champ 4109 depuis le dialogue (47,5 Mio), ou choisissez un dossier d’index
+  adaptés à votre champ. L’image reste sur le Mac ; seule la vérification Gaia
+  interroge le catalogue en ligne. Un CSV Gaia permet cette vérification hors ligne.
+- **SIP d’ordre 2 à 5** : modèle les distorsions optiques. L’ordre 3 est proposé ;
+  davantage de coefficients exige davantage d’étoiles de référence. Le modèle
+  est vérifié sur le champ et conservé dans les projets, sessions et FITS,
+  ainsi qu’après recadrage, rotation, miroirs et changement d’échelle.
 - **Recherche par nom** : M42, NGC 7000 ou une autre désignation de catalogue
   via CDS Sesame. La position J2000 proposée renseigne le centre de recherche ;
   il faut ensuite résoudre et vérifier le champ. Le WCS existant reste intact.

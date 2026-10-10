@@ -18,6 +18,8 @@ class DeepSkyController : public QObject {
     Q_PROPERTY(QString importedMaskPath READ importedMaskPath NOTIFY maskFileChanged)
     QML_ELEMENT
     Q_PROPERTY(bool hasFinishComparison READ hasFinishComparison NOTIFY imageChanged)
+    Q_PROPERTY(bool hasStarLayers READ hasStarLayers NOTIFY changed)
+    Q_PROPERTY(int starLayerView READ starLayerView WRITE setStarLayerView NOTIFY changed)
     Q_PROPERTY(QVariantList calibrationMasters READ calibrationMasters NOTIFY changed)
     Q_PROPERTY(QVariantMap blindSolver READ blindSolver NOTIFY changed)
     Q_PROPERTY(QVariantMap astrometry READ astrometry NOTIFY changed)
@@ -65,6 +67,10 @@ public:
         for(const auto& key:{"catalog","localCatalog","response"})view.remove(key);
         return view;
     }
+    bool hasStarLayers() const{return bool(starsLayer_)&&bool(starBackgroundLayer_);}
+    int starLayerView() const{return starLayerView_;}
+    void setStarLayerView(int);
+    Q_INVOKABLE void exportStarLayer(const QUrl&,int layer);
     QVariantList calibrationMasters() const;
     Q_INVOKABLE void createCalibrationMaster(const QString& role,const QString& name);
     Q_INVOKABLE void importCalibrationMaster(const QUrl&,const QString& role,const QString& name,bool correctedFlat=false);
@@ -199,6 +205,9 @@ private:
     bool busy_{},adjusting_{},exporting_{};
     std::optional<QVariantMap> pendingAdjustments_;
     QVariantMap histogram_,advancedReport_;
+    int starLayerView_{};
+    std::shared_ptr<const processing::FloatImage> starsLayer_,starBackgroundLayer_;
+    QImage starsLayerPreview_,starBackgroundLayerPreview_;
     QVariantMap astrometry_;
     std::map<QString,QVariantMap> stackAstrometry_;
     QVariantList psfKernel_;

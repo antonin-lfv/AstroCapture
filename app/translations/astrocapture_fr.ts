@@ -8297,7 +8297,92 @@ Rejets : bords %7 · saturation %8 · signal faible %9 · incohérence %10</tran
             <source>Equipment profiles</source>
             <translation>Profils de matériel</translation>
         </message>
-    </context>
+            <message>
+            <location filename="../qml/AstrometryDialog.qml" line="131" />
+            <source>Identify and verify the field</source>
+            <translation>Identifier et vérifier le champ</translation>
+        </message>
+        <message>
+            <location filename="../qml/AstrometryDialog.qml" line="172" />
+            <source>Astrometry.net index folder</source>
+            <translation>Dossier des index Astrometry.net</translation>
+        </message>
+        <message>
+            <location filename="../qml/AstrometryDialog.qml" line="105" />
+            <source>Identify the field without changing pixels. Guided mode uses approximate coordinates and Gaia. Blind mode searches the sky with local Astrometry.net indexes and can fit SIP distortion, then verifies the result with Gaia.</source>
+            <translation>Identifie le champ sans modifier les pixels. Le mode guidé utilise des coordonnées approximatives et Gaia. Le mode aveugle recherche le champ dans les index locaux Astrometry.net, peut ajuster la distorsion SIP, puis vérifie la solution avec Gaia.</translation>
+        </message>
+        <message>
+            <location filename="../qml/AstrometryDialog.qml" line="106" />
+            <source>Guided · coordinates and Gaia</source>
+            <translation>Guidée · coordonnées et Gaia</translation>
+        </message>
+        <message>
+            <location filename="../qml/AstrometryDialog.qml" line="106" />
+            <source>Blind · identify the sky</source>
+            <translation>Aveugle · identifier le ciel</translation>
+        </message>
+        <message>
+            <location filename="../qml/AstrometryDialog.qml" line="106" />
+            <source>Blind mode does not use the target name, FITS coordinates or sampling hints. Images remain on this computer. Gaia verification then sends only field coordinates, never pixels. Suitable local indexes are required.</source>
+            <translation>Le mode aveugle utilise uniquement les pixels, sans nom de cible, coordonnées FITS ni échantillonnage indicatif. L’image reste sur cet ordinateur. La vérification Gaia transmet ensuite seulement les coordonnées du champ. Des index locaux adaptés sont nécessaires.</translation>
+        </message>
+        <message>
+            <location filename="../qml/AstrometryDialog.qml" line="108" />
+            <source>Local astrometry engine available · %1 index files</source>
+            <translation>Moteur local disponible · %1 fichiers d’index</translation>
+        </message>
+        <message>
+            <location filename="../qml/AstrometryDialog.qml" line="108" />
+            <source>Astrometry.net is unavailable. Use the packaged app or install Astrometry.net.</source>
+            <translation>Astrometry.net est indisponible. Utilisez l’application distribuée ou installez Astrometry.net.</translation>
+        </message>
+        <message>
+            <location filename="../qml/AstrometryDialog.qml" line="110" />
+            <source>Install wide-field index</source>
+            <translation>Installer l’index grand champ</translation>
+        </message>
+        <message>
+            <location filename="../qml/AstrometryDialog.qml" line="111" />
+            <source>Downloads index 4109 (47.5 MiB) from Astrometry.net with an integrity check. Covers star patterns of 42–60 arcminutes, suitable for many 1–3° fields such as T68. Other field sizes may need additional indexes. No image is uploaded.</source>
+            <translation>Télécharge l’index 4109 (47,5 Mio) depuis Astrometry.net et contrôle son intégrité. Ses motifs stellaires de 42 à 60 minutes d’arc conviennent à de nombreux champs de 1 à 3°, comme T68. D’autres champs peuvent nécessiter d’autres index. Aucune image n’est transmise.</translation>
+        </message>
+        <message>
+            <location filename="../qml/AstrometryDialog.qml" line="113" />
+            <source>Choose index folder</source>
+            <translation>Choisir le dossier des index</translation>
+        </message>
+        <message>
+            <location filename="../qml/AstrometryDialog.qml" line="114" />
+            <source>TAN · no distortion</source>
+            <translation>TAN · sans distorsion</translation>
+        </message>
+        <message>
+            <location filename="../qml/AstrometryDialog.qml" line="114" />
+            <source>SIP · order 2</source>
+            <translation>SIP · ordre 2</translation>
+        </message>
+        <message>
+            <location filename="../qml/AstrometryDialog.qml" line="114" />
+            <source>SIP · order 3</source>
+            <translation>SIP · ordre 3</translation>
+        </message>
+        <message>
+            <location filename="../qml/AstrometryDialog.qml" line="114" />
+            <source>SIP · order 4</source>
+            <translation>SIP · ordre 4</translation>
+        </message>
+        <message>
+            <location filename="../qml/AstrometryDialog.qml" line="114" />
+            <source>SIP · order 5</source>
+            <translation>SIP · ordre 5</translation>
+        </message>
+        <message>
+            <location filename="../qml/AstrometryDialog.qml" line="114" />
+            <source>SIP models field distortion. Order 3 is a useful starting point. Higher orders need enough well-distributed stars and may overfit. Coordinates and FITS exports preserve the distortion after crop, rotation and resize.</source>
+            <translation>SIP modélise la distorsion du champ. Commencez par l’ordre 3. Les ordres plus élevés exigent davantage d’étoiles bien réparties et peuvent surajuster les données. Les coordonnées et les exports FITS conservent la distorsion après recadrage, rotation et redimensionnement.</translation>
+        </message>
+</context>
     <context>
         <name>DeepSkyWorkspace</name>
         <message>
@@ -8312,7 +8397,17 @@ Rejets : bords %7 · saturation %8 · signal faible %9 · incohérence %10</tran
             <source>Copy the last image position in ICRS, as hours/degrees and decimal degrees. Coordinates follow crop, rotation, mirrors and resize. Available only after verified WCS on the result, including before/after comparison.</source>
             <translation>Copie la dernière position pointée dans l’image, en ICRS : heures/degrés et degrés décimaux. Les coordonnées suivent le recadrage, la rotation, les miroirs et le redimensionnement. Disponibles sur le résultat après vérification du WCS, y compris en comparaison avant/après.</translation>
         </message>
-    </context>
+            <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="27" />
+            <source>Stars and background</source>
+            <translation>Étoiles et fond</translation>
+        </message>
+        <message>
+            <location filename="../qml/DeepSkyWorkspace.qml" line="311" />
+            <source>Master library</source>
+            <translation>Bibliothèque de masters</translation>
+        </message>
+</context>
     <context>
         <name>EquipmentProfilesDialog</name>
         <message>
@@ -8553,7 +8648,294 @@ Rejets : bords %7 · saturation %8 · signal faible %9 · incohérence %10</tran
             <source>The CDS target resolver is unavailable. Retry or enter coordinates manually.</source>
             <translation>Le service de recherche CDS est indisponible. Réessayez ou saisissez les coordonnées manuellement.</translation>
         </message>
-    </context>
+            <message>
+            <location filename="../src/DeepSkyController.cpp" line="352" />
+            <source>Building a calibration master…</source>
+            <translation>Création du master de calibration…</translation>
+        </message>
+        <message>
+            <location filename="../src/DeepSkyController.cpp" line="360" />
+            <source>Master saved: %1 · %2 source frames. Select it from the library to use it.</source>
+            <translation>Master enregistré : %1 · %2 sources. Sélectionnez-le dans la bibliothèque pour l’utiliser.</translation>
+        </message>
+        <message>
+            <location filename="../src/DeepSkyController.cpp" line="364" />
+            <source>Importing a calibration master…</source>
+            <translation>Import du master de calibration…</translation>
+        </message>
+        <message>
+            <location filename="../src/DeepSkyController.cpp" line="364" />
+            <source>Master imported: %1. Original file preserved.</source>
+            <translation>Master importé : %1. Le fichier d’origine est conservé.</translation>
+        </message>
+        <message>
+            <location filename="../src/DeepSkyController.cpp" line="367" />
+            <source>Checking calibration master…</source>
+            <translation>Vérification du master de calibration…</translation>
+        </message>
+        <message>
+            <location filename="../src/DeepSkyController.cpp" line="367" />
+            <source>Master incompatible: %1</source>
+            <translation>Master incompatible : %1</translation>
+        </message>
+        <message>
+            <location filename="../src/DeepSkyController.cpp" line="367" />
+            <source>Check missing metadata before using this master: %1</source>
+            <translation>Vérifiez les informations manquantes avant d’utiliser ce master : %1</translation>
+        </message>
+        <message>
+            <location filename="../src/DeepSkyController.cpp" line="367" />
+            <source>Master selected: %1. Other files in this calibration role are deselected.</source>
+            <translation>Master sélectionné : %1. Les autres fichiers de ce rôle sont désélectionnés.</translation>
+        </message>
+        <message>
+            <location filename="../src/DeepSkyController.cpp" line="369" />
+            <source>Master removed from the library. Its FITS file is retained for existing projects.</source>
+            <translation>Master retiré de la bibliothèque. Son FITS est conservé pour les projets existants.</translation>
+        </message>
+        <message>
+            <location filename="../src/DeepSkyController.cpp" line="521" />
+            <source>Export layers as floating-point FITS to preserve signed values.</source>
+            <translation>Exportez les couches en FITS flottant pour conserver les valeurs signées.</translation>
+        </message>
+        <message>
+            <location filename="../src/DeepSkyController.cpp" line="522" />
+            <source>Exporting image layer…</source>
+            <translation>Export de la couche…</translation>
+        </message>
+        <message>
+            <location filename="../src/DeepSkyController.cpp" line="522" />
+            <source>Image layer exported as Float32 FITS.</source>
+            <translation>Couche exportée en FITS Float32.</translation>
+        </message>
+        <message>
+            <location filename="../src/DeepSkyAstrometry.cpp" line="273" />
+            <source>Astrometry index folder selected.</source>
+            <translation>Dossier des index astrométriques sélectionné.</translation>
+        </message>
+        <message>
+            <location filename="../src/DeepSkyAstrometry.cpp" line="274" />
+            <source>Downloading wide-field astrometry index (47.5 MiB)…</source>
+            <translation>Téléchargement de l’index grand champ (47,5 Mio)…</translation>
+        </message>
+        <message>
+            <location filename="../src/DeepSkyAstrometry.cpp" line="274" />
+            <source>Wide-field index installed. Blind solving is ready.</source>
+            <translation>Index grand champ installé. La résolution aveugle est prête.</translation>
+        </message>
+        <message>
+            <source>Choose an existing Astrometry.net index folder.</source>
+            <translation>Choisissez un dossier d’index Astrometry.net existant.</translation>
+        </message>
+        <message>
+            <source>Cannot create the astrometry index folder.</source>
+            <translation>Impossible de créer le dossier des index astrométriques.</translation>
+        </message>
+        <message>
+            <source>Cannot write the astrometry index.</source>
+            <translation>Impossible d’écrire l’index astrométrique.</translation>
+        </message>
+        <message>
+            <source>Index download failed. Check the connection and retry.</source>
+            <translation>Échec du téléchargement de l’index. Vérifiez la connexion et réessayez.</translation>
+        </message>
+        <message>
+            <source>Cannot save the astrometry index.</source>
+            <translation>Impossible d’enregistrer l’index astrométrique.</translation>
+        </message>
+        <message>
+            <source>Astrometry.net is unavailable. Install it or use the guided Gaia solver.</source>
+            <translation>Astrometry.net est indisponible. Installez-le ou utilisez la résolution guidée Gaia.</translation>
+        </message>
+        <message>
+            <source>Install a wide-field index or choose your Astrometry.net index folder first.</source>
+            <translation>Installez un index grand champ ou choisissez votre dossier d’index Astrometry.net.</translation>
+        </message>
+        <message>
+            <source>Invalid blind solving scale range or SIP order.</source>
+            <translation>Plage d’échantillonnage ou ordre SIP invalide.</translation>
+        </message>
+        <message>
+            <source>Cannot create astrometry working files.</source>
+            <translation>Impossible de créer les fichiers de travail astrométriques.</translation>
+        </message>
+        <message>
+            <source>Cannot start Astrometry.net.</source>
+            <translation>Impossible de démarrer Astrometry.net.</translation>
+        </message>
+        <message>
+            <source>Blind solving timed out. Try a scale range or different indexes.</source>
+            <translation>Le délai de résolution aveugle est dépassé. Essayez des index adaptés à la taille du champ.</translation>
+        </message>
+        <message>
+            <source>Blind solving found no reliable field. Check focus, stars and index scale coverage.</source>
+            <translation>Aucun champ fiable identifié. Vérifiez la mise au point, les étoiles et la couverture d’échelle des index.</translation>
+        </message>
+        <message>
+            <source>Astrometry.net returned an unsupported WCS.</source>
+            <translation>Astrometry.net a renvoyé un WCS non pris en charge.</translation>
+        </message>
+        <message>
+            <source>SIP verification failed. Previous coordinates are preserved.</source>
+            <translation>Échec de la vérification SIP. Les coordonnées précédentes sont conservées.</translation>
+        </message>
+        <message>
+            <source>Cannot read the master library.</source>
+            <translation>Impossible de lire la bibliothèque de masters.</translation>
+        </message>
+        <message>
+            <source>Invalid master library.</source>
+            <translation>Bibliothèque de masters invalide.</translation>
+        </message>
+        <message>
+            <source>Cannot save the master library.</source>
+            <translation>Impossible d’enregistrer la bibliothèque de masters.</translation>
+        </message>
+        <message>
+            <source>Master file is missing or unreadable.</source>
+            <translation>Le fichier du master est absent ou illisible.</translation>
+        </message>
+        <message>
+            <source>Cannot read master file.</source>
+            <translation>Impossible de lire le fichier du master.</translation>
+        </message>
+        <message>
+            <source>Master integrity check failed. Import an intact copy.</source>
+            <translation>L’intégrité du master est incorrecte. Importez une copie intacte.</translation>
+        </message>
+        <message>
+            <source>Master not found in the library.</source>
+            <translation>Master introuvable dans la bibliothèque.</translation>
+        </message>
+        <message>
+            <source>Invalid master name, role or flat calibration.</source>
+            <translation>Nom, rôle ou calibration du flat invalide.</translation>
+        </message>
+        <message>
+            <source>A library master must contain finite samples only. Repair or exclude defective source frames.</source>
+            <translation>Un master de la bibliothèque doit contenir uniquement des valeurs finies. Réparez ou écartez les sources défectueuses.</translation>
+        </message>
+        <message>
+            <source>Master flat contains zero or invalid illumination.</source>
+            <translation>Le master flat contient un éclairage nul ou invalide.</translation>
+        </message>
+        <message>
+            <source>Cannot create the master library.</source>
+            <translation>Impossible de créer la bibliothèque de masters.</translation>
+        </message>
+        <message>
+            <source>Cannot create master working files.</source>
+            <translation>Impossible de créer les fichiers de travail du master.</translation>
+        </message>
+        <message>
+            <source>Master library is in use. Retry shortly.</source>
+            <translation>La bibliothèque de masters est occupée. Réessayez dans un instant.</translation>
+        </message>
+        <message>
+            <source>Master library is limited to 1000 entries.</source>
+            <translation>La bibliothèque est limitée à 1 000 masters.</translation>
+        </message>
+        <message>
+            <source>Cannot store the master file.</source>
+            <translation>Impossible d’enregistrer le FITS du master.</translation>
+        </message>
+        <message>
+            <source>Invalid star-layer image.</source>
+            <translation>Image invalide pour la séparation stellaire.</translation>
+        </message>
+        <message>
+            <source>Invalid stellar separation parameters.</source>
+            <translation>Paramètres de séparation stellaire invalides.</translation>
+        </message>
+        <message>
+            <source>Star separation requires finite pixels.</source>
+            <translation>La séparation des étoiles exige des pixels de valeur finie.</translation>
+        </message>
+        <message>
+            <source>Invalid star-layer adjustments.</source>
+            <translation>Réglages des couches stellaires invalides.</translation>
+        </message>
+        <message>
+            <source>Correct gradients before separating stars.</source>
+            <translation>Corrigez les gradients avant de séparer les étoiles.</translation>
+        </message>
+        <message>
+            <source>Choose a calibration role.</source>
+            <translation>Choisissez un rôle de calibration.</translation>
+        </message>
+        <message>
+            <source>Select source frames for this master first.</source>
+            <translation>Sélectionnez d’abord les sources de ce master.</translation>
+        </message>
+        <message>
+            <source>Source metadata must be consistently present. Check the selected calibration frames.</source>
+            <translation>Les métadonnées doivent être présentes de façon cohérente. Vérifiez les sources sélectionnées.</translation>
+        </message>
+        <message>
+            <source>Select raw calibration frames from one filter and configuration. Existing masters cannot be averaged with sources.</source>
+            <translation>Sélectionnez des sources brutes d’un seul filtre et matériel. Un master existant ne peut pas être moyenné avec des sources.</translation>
+        </message>
+        <message>
+            <source>Select one master or its source frames, never both.</source>
+            <translation>Sélectionnez un master ou ses sources, jamais les deux.</translation>
+        </message>
+        <message>
+            <source>Select a matching dark-flat or bias before creating a normalized master flat.</source>
+            <translation>Sélectionnez un dark-flat ou un bias adapté avant de créer un master flat normalisé.</translation>
+        </message>
+        <message>
+            <source>Confirm that the imported flat is already bias/dark-flat corrected.</source>
+            <translation>Confirmez que le flat importé est déjà corrigé par bias ou dark-flat.</translation>
+        </message>
+        <message>
+            <source>Select one calibrated normalized master flat, without raw flats.</source>
+            <translation>Sélectionnez un seul master flat corrigé et normalisé, sans flats bruts.</translation>
+        </message>
+        <message>
+            <source>Calibration camera, binning or offset does not match.</source>
+            <translation>La caméra, le binning ou l’offset de calibration ne correspond pas.</translation>
+        </message>
+        <message>
+            <source>Not enough temporary disk space for masters.</source>
+            <translation>Espace disque temporaire insuffisant pour créer les masters.</translation>
+        </message>
+        <message>
+            <source>Cannot read master working files.</source>
+            <translation>Impossible de lire les fichiers de travail du master.</translation>
+        </message>
+        <message>
+            <source>A master must contain frames with the same exposure duration.</source>
+            <translation>Les sources d’un master doivent avoir la même durée de pose.</translation>
+        </message>
+        <message>
+            <source>A master must contain frames with the same gain.</source>
+            <translation>Les sources d’un master doivent avoir le même gain.</translation>
+        </message>
+        <message>
+            <source>Calibration frames differ in temperature by more than two degrees.</source>
+            <translation>Les sources de calibration diffèrent de plus de deux degrés.</translation>
+        </message>
+        <message>
+            <source>Flat frames must have positive illumination.</source>
+            <translation>Les flats doivent avoir un éclairage positif.</translation>
+        </message>
+        <message>
+            <source>Darks must have the same exposure as lights. Dark scaling is not applied.</source>
+            <translation>Les darks doivent avoir la durée des poses de l’objet. Leur durée n’est pas extrapolée.</translation>
+        </message>
+        <message>
+            <source>Calibration gain does not match the light frame.</source>
+            <translation>Le gain de calibration ne correspond pas à la pose de l’objet.</translation>
+        </message>
+        <message>
+            <source>Dark temperature differs from lights by more than 2 degrees.</source>
+            <translation>La température du dark diffère de celle des poses de plus de 2 °C.</translation>
+        </message>
+        <message>
+            <source>Calibration frames must match the lights' dimensions, channels and Bayer pattern.</source>
+            <translation>Les dimensions, canaux et motif Bayer de calibration doivent correspondre aux poses de l’objet.</translation>
+        </message>
+</context>
     <context>
         <name>GuideWorkspace</name>
         <message>
@@ -8563,6 +8945,460 @@ Rejets : bords %7 · saturation %8 · signal faible %9 · incohérence %10</tran
         <message>
             <source>In Astrometry, enter a catalogue name such as M42 or NGC 7000 and choose Search. CDS Sesame returns approximate J2000 coordinates; only the target name is sent. This fills the centre hint without replacing a verified WCS or changing the pixels. Set the sampling and solve to verify the image. Equipment profiles stores your imported measured RGB responses with camera, filters, source and notes. Use profile copies the curve into the project; run PCC/SPCC separately to recalibrate. Import/export library creates a local JSON backup. No manufacturer curve is inferred automatically. After a verified WCS, hover over the result to read ICRS RA in hours and Dec in degrees. The copy icon keeps the last image position and copies both sexagesimal and decimal coordinates. Crop, mirrors, rotation, resize and before/after comparison use the same sky position. Precision is limited by the WCS fit; source, mask and background-model previews have no readout.</source>
             <translation>Dans Astrométrie, saisissez un nom de catalogue, par exemple M42 ou NGC 7000, puis cliquez sur Rechercher. CDS Sesame propose des coordonnées J2000 ; seul le nom de cible est transmis. Ces coordonnées renseignent le centre de recherche sans remplacer le WCS vérifié ni modifier les pixels. Renseignez l’échantillonnage et résolvez l’image pour vérifier son champ. Profils de matériel conserve les réponses RVB mesurées que vous importez, avec caméra, filtres, source et notes. Utiliser copie la courbe dans le projet ; lancez ensuite PCC/SPCC pour recalibrer. Importer/Exporter permet de sauvegarder la bibliothèque en JSON. Aucune courbe de fabricant n’est déduite automatiquement. Après vérification du WCS, survolez le résultat : l’ascension droite ICRS est affichée en heures, la déclinaison en degrés. L’icône de copie reprend la dernière position pointée, en coordonnées sexagésimales et degrés décimaux. Recadrage, miroirs, rotation, changement d’échelle et comparaison avant/après suivent la même position céleste. La précision dépend de l’ajustement WCS ; les aperçus de source, masque et modèle de fond ne proposent pas ces coordonnées.</translation>
+        </message>
+    </context>
+    <context>
+        <name>MasterLibraryDialog</name>
+        <message>
+            <location filename="../qml/MasterLibraryDialog.qml" line="27" />
+            <source>Master library</source>
+            <translation>Bibliothèque de masters</translation>
+        </message>
+        <message>
+            <location filename="../qml/MasterLibraryDialog.qml" line="28" />
+            <source>Close</source>
+            <translation>Fermer</translation>
+        </message>
+        <message>
+            <location filename="../qml/MasterLibraryDialog.qml" line="34" />
+            <source>Reuse calibration masters across sessions. FITS Float32 files preserve linear precision. Select your lights first to check compatibility; dark-flats are checked against selected flats.</source>
+            <translation>Réutilisez vos masters de calibration entre les séances. Les FITS Float32 préservent la précision linéaire. Sélectionnez les poses de l’objet pour vérifier la compatibilité ; les dark-flats sont comparés aux flats sélectionnés.</translation>
+        </message>
+        <message>
+            <location filename="../qml/MasterLibraryDialog.qml" line="35" />
+            <source>No saved masters</source>
+            <translation>Aucun master enregistré</translation>
+        </message>
+        <message>
+            <location filename="../qml/MasterLibraryDialog.qml" line="35" />
+            <source>Each master keeps its camera, binning, gain, offset, temperature, exposure, filter and source count when known. SHA256 verifies the saved FITS before use. Missing metadata requires explicit review; a mismatch cannot be overridden.</source>
+            <translation>Chaque master conserve la caméra, le binning, le gain, l’offset, la température, la pose, le filtre et le nombre de sources connus. SHA256 vérifie le FITS avant utilisation. Les informations manquantes exigent une vérification explicite ; une incompatibilité ne peut pas être ignorée.</translation>
+        </message>
+        <message>
+            <location filename="../qml/MasterLibraryDialog.qml" line="36" />
+            <source>Unknown camera</source>
+            <translation>Caméra inconnue</translation>
+        </message>
+        <message>
+            <location filename="../qml/MasterLibraryDialog.qml" line="36" />
+            <source>Exposure %1 s · gain %2 · temperature %3 °C · binning %4 × %5</source>
+            <translation>Pose %1 s · gain %2 · température %3 °C · binning %4 × %5</translation>
+        </message>
+        <message>
+            <location filename="../qml/MasterLibraryDialog.qml" line="36" />
+            <source>Sources %1 · median %2 · MAD noise %3 · rejected samples %4</source>
+            <translation>Sources %1 · médiane %2 · bruit MAD %3 · échantillons rejetés %4</translation>
+        </message>
+        <message>
+            <location filename="../qml/MasterLibraryDialog.qml" line="37" />
+            <source>Compatible with the selected frames</source>
+            <translation>Compatible avec les images sélectionnées</translation>
+        </message>
+        <message>
+            <location filename="../qml/MasterLibraryDialog.qml" line="37" />
+            <source>Review missing metadata: %1</source>
+            <translation>Informations à vérifier : %1</translation>
+        </message>
+        <message>
+            <location filename="../qml/MasterLibraryDialog.qml" line="37" />
+            <source>Incompatible: %1</source>
+            <translation>Incompatible : %1</translation>
+        </message>
+        <message>
+            <location filename="../qml/MasterLibraryDialog.qml" line="38" />
+            <source>I checked the missing equipment information</source>
+            <translation>J’ai vérifié les informations manquantes du matériel</translation>
+        </message>
+        <message>
+            <location filename="../qml/MasterLibraryDialog.qml" line="38" />
+            <source>Only confirm after checking the source files and observing log. Unknown metadata cannot establish compatibility automatically. Exposure scaling of darks is never applied.</source>
+            <translation>Confirmez après avoir consulté les fichiers sources et le journal d’observation. Sans ces informations, la compatibilité ne peut pas être établie automatiquement. La durée des darks n’est jamais extrapolée.</translation>
+        </message>
+        <message>
+            <location filename="../qml/MasterLibraryDialog.qml" line="40" />
+            <source>Use this master</source>
+            <translation>Utiliser ce master</translation>
+        </message>
+        <message>
+            <location filename="../qml/MasterLibraryDialog.qml" line="41" />
+            <source>Show master in Finder</source>
+            <translation>Afficher le master dans le Finder</translation>
+        </message>
+        <message>
+            <location filename="../qml/MasterLibraryDialog.qml" line="42" />
+            <source>Remove from library</source>
+            <translation>Retirer de la bibliothèque</translation>
+        </message>
+        <message>
+            <location filename="../qml/MasterLibraryDialog.qml" line="45" />
+            <source>Create or import a master</source>
+            <translation>Créer ou importer un master</translation>
+        </message>
+        <message>
+            <location filename="../qml/MasterLibraryDialog.qml" line="46" />
+            <source>Dark</source>
+            <translation>Dark</translation>
+        </message>
+        <message>
+            <location filename="../qml/MasterLibraryDialog.qml" line="46" />
+            <source>Bias</source>
+            <translation>Bias</translation>
+        </message>
+        <message>
+            <location filename="../qml/MasterLibraryDialog.qml" line="46" />
+            <source>Flat</source>
+            <translation>Flat</translation>
+        </message>
+        <message>
+            <location filename="../qml/MasterLibraryDialog.qml" line="46" />
+            <source>Dark flat</source>
+            <translation>Dark-flat</translation>
+        </message>
+        <message>
+            <location filename="../qml/MasterLibraryDialog.qml" line="46" />
+            <source>Dark includes the bias and matches light exposure. Bias corrects the electronic pedestal. Dark-flat matches flat exposure. Flat must be bias/dark-flat corrected and normalized. Masters and their raw sources must not be mixed.</source>
+            <translation>Le dark contient le bias et doit avoir la durée des poses de l’objet. Le bias corrige le niveau électronique. Le dark-flat correspond à la durée des flats. Un flat doit être corrigé par bias ou dark-flat, puis normalisé. Ne mélangez pas les masters et leurs sources brutes.</translation>
+        </message>
+        <message>
+            <location filename="../qml/MasterLibraryDialog.qml" line="48" />
+            <source>Master name · camera, exposure, temperature…</source>
+            <translation>Nom du master · caméra, pose, température…</translation>
+        </message>
+        <message>
+            <location filename="../qml/MasterLibraryDialog.qml" line="48" />
+            <source>Master name</source>
+            <translation>Nom du master</translation>
+        </message>
+        <message>
+            <location filename="../qml/MasterLibraryDialog.qml" line="49" />
+            <source>Give this master a recognizable name. Creation averages selected raw frames with median/MAD rejection from three frames onward. It uses temporary disk files to limit memory. Select frames of the chosen role and one filter/configuration. One source is allowed but gives no multi-frame noise reduction. Nonfinite samples and unusable flats are rejected.</source>
+            <translation>Choisissez un nom reconnaissable. La création moyenne les sources brutes sélectionnées, avec rejet médiane/MAD dès trois images. Des fichiers temporaires limitent la mémoire nécessaire. Sélectionnez un seul rôle, filtre et matériel. Une source seule ne réduit pas le bruit. Les masters contenant des valeurs non finies et les flats inutilisables sont refusés.</translation>
+        </message>
+        <message>
+            <location filename="../qml/MasterLibraryDialog.qml" line="51" />
+            <source>To create a flat, also select its matching dark-flat or bias. The library stores the corrected normalized flat, so integration will not subtract its pedestal again.</source>
+            <translation>Pour créer un flat, sélectionnez aussi son dark-flat ou son bias adapté. La bibliothèque conserve le flat corrigé et normalisé : l’empilement ne soustraira pas son niveau électronique une seconde fois.</translation>
+        </message>
+        <message>
+            <location filename="../qml/MasterLibraryDialog.qml" line="52" />
+            <source>Create from selected source frames</source>
+            <translation>Créer depuis les sources sélectionnées</translation>
+        </message>
+        <message>
+            <location filename="../qml/MasterLibraryDialog.qml" line="53" />
+            <source>Imported flat is already bias/dark-flat corrected</source>
+            <translation>Le flat importé est déjà corrigé par bias ou dark-flat</translation>
+        </message>
+        <message>
+            <location filename="../qml/MasterLibraryDialog.qml" line="53" />
+            <source>Required for external flats without AstroCapture provenance. Import normalizes illumination once; it cannot infer whether a pedestal has already been removed. Raw uncorrected flats should use Create from selected source frames.</source>
+            <translation>Requis pour un flat externe sans provenance AstroCapture. L’import normalise l’éclairage une fois et ne peut pas deviner si le niveau électronique a été retiré. Pour des flats bruts, utilisez la création depuis les sources sélectionnées.</translation>
+        </message>
+        <message>
+            <location filename="../qml/MasterLibraryDialog.qml" line="54" />
+            <source>Import existing FITS master</source>
+            <translation>Importer un master FITS existant</translation>
+        </message>
+        <message>
+            <location filename="../qml/MasterLibraryDialog.qml" line="59" />
+            <source>Cancel calculation</source>
+            <translation>Annuler le calcul</translation>
+        </message>
+        <message>
+            <location filename="../qml/MasterLibraryDialog.qml" line="61" />
+            <source>Import a calibration master</source>
+            <translation>Importer un master de calibration</translation>
+        </message>
+        <message>
+            <location filename="../qml/MasterLibraryDialog.qml" line="61" />
+            <source>FITS master (*.fits *.fit *.fts)</source>
+            <translation>Master FITS (*.fits *.fit *.fts)</translation>
+        </message>
+        <message>
+            <location filename="../qml/MasterLibraryDialog.qml" line="62" />
+            <source>Remove this library entry?</source>
+            <translation>Retirer cette entrée ?</translation>
+        </message>
+        <message>
+            <location filename="../qml/MasterLibraryDialog.qml" line="63" />
+            <source>Remove %1 from the list? Its FITS file stays on disk so existing projects remain usable.</source>
+            <translation>Retirer %1 de la liste ? Son FITS reste sur disque pour préserver les projets existants.</translation>
+        </message>
+        <message>
+            <source>Width</source>
+            <translation>Largeur</translation>
+        </message>
+        <message>
+            <source>Height</source>
+            <translation>Hauteur</translation>
+        </message>
+        <message>
+            <source>Channels</source>
+            <translation>Canaux</translation>
+        </message>
+        <message>
+            <source>Bayer pattern</source>
+            <translation>Motif Bayer</translation>
+        </message>
+        <message>
+            <source>Camera</source>
+            <translation>Caméra</translation>
+        </message>
+        <message>
+            <source>Horizontal binning</source>
+            <translation>Binning horizontal</translation>
+        </message>
+        <message>
+            <source>Vertical binning</source>
+            <translation>Binning vertical</translation>
+        </message>
+        <message>
+            <source>Gain</source>
+            <translation>Gain</translation>
+        </message>
+        <message>
+            <source>Offset</source>
+            <translation>Offset</translation>
+        </message>
+        <message>
+            <source>Temperature</source>
+            <translation>Température</translation>
+        </message>
+        <message>
+            <source>Exposure</source>
+            <translation>Durée de pose</translation>
+        </message>
+        <message>
+            <source>Filter</source>
+            <translation>Filtre</translation>
+        </message>
+        <message>
+            <source>Select matching lights (dark-flat: select flats)</source>
+            <translation>Sélectionnez les poses adaptées (dark-flat : les flats)</translation>
+        </message>
+        <message>
+            <source>Unknown metadata</source>
+            <translation>Informations inconnues</translation>
+        </message>
+        <message>
+            <source>Monochrome</source>
+            <translation>Monochrome</translation>
+        </message>
+    </context>
+    <context>
+        <name>StarLayerTools</name>
+        <message>
+            <location filename="../qml/StarLayerTools.qml" line="30" />
+            <source>Separate stars and background</source>
+            <translation>Séparer les étoiles et le fond</translation>
+        </message>
+        <message>
+            <location filename="../qml/StarLayerTools.qml" line="30" />
+            <source>Fits circular Gaussian/Moffat stars over a local sky plane on linear pixels, after color calibration and gradient correction. Extended structures and rejected stars stay in the background. This PSF estimate is incomplete for saturated, blended or irregular stars. Inspect both layers. Disable masks; scientific measurements must precede separation.</source>
+            <translation>Ajuste des étoiles circulaires gaussiennes ou Moffat sur un fond local plan, dans les pixels linéaires après correction du gradient et calibration des couleurs. Les structures étendues et les étoiles rejetées restent dans le fond. Cette estimation PSF est incomplète pour les étoiles saturées, superposées ou irrégulières. Inspectez les deux couches. Désactivez les masques ; les mesures scientifiques doivent précéder la séparation.</translation>
+        </message>
+        <message>
+            <location filename="../qml/StarLayerTools.qml" line="31" />
+            <source>Common stretch stays in the Stretch family. Neutral layer controls reproduce that result exactly. Final image exports the recombined result.</source>
+            <translation>L’étirement commun reste dans sa famille. Les réglages neutres des couches reproduisent exactement ce résultat. L’export final utilise l’image recombinée.</translation>
+        </message>
+        <message>
+            <location filename="../qml/StarLayerTools.qml" line="33" />
+            <source>Combined</source>
+            <translation>Combiné</translation>
+        </message>
+        <message>
+            <location filename="../qml/StarLayerTools.qml" line="34" />
+            <location filename="../qml/StarLayerTools.qml" line="38" />
+            <source>Stars</source>
+            <translation>Étoiles</translation>
+        </message>
+        <message>
+            <location filename="../qml/StarLayerTools.qml" line="35" />
+            <source>Background</source>
+            <translation>Fond</translation>
+        </message>
+        <message>
+            <location filename="../qml/StarLayerTools.qml" line="37" />
+            <source>Fitted %1 / %2 · rejected %3 (saturated %4)
+Mean normalized fit RMS %5</source>
+            <translation>Ajustées %1 / %2 · rejetées %3 (saturées %4)
+RMS normalisée moyenne %5</translation>
+        </message>
+        <message>
+            <location filename="../qml/StarLayerTools.qml" line="38" />
+            <source>Adjust only the stellar layer. It is the difference between the common finished image and the common finished PSF residual, so its appearance follows the common stretch. Signed Float32 values are preserved; preview and integer exports clip the display range.</source>
+            <translation>Ajuste uniquement la couche stellaire : différence entre l’image finie commune et son fond résiduel PSF fini avec les mêmes réglages. Son apparence suit donc l’étirement commun. Les valeurs Float32 signées sont conservées ; l’aperçu et les exports entiers limitent la plage affichée.</translation>
+        </message>
+        <message>
+            <location filename="../qml/StarLayerTools.qml" line="39" />
+            <source>Stellar brightness / reduction</source>
+            <translation>Luminosité / réduction des étoiles</translation>
+        </message>
+        <message>
+            <location filename="../qml/StarLayerTools.qml" line="39" />
+            <source>1 preserves stellar intensity; below 1 reduces the fitted stellar contribution, 0 removes it. This reduces brightness, not stellar radius, and leaves rejected stars in the background. Values above 1 brighten stars and can exceed the display range.</source>
+            <translation>1 conserve l’intensité stellaire ; une valeur inférieure réduit la contribution ajustée, 0 la retire. La réduction agit sur la luminosité, pas sur le rayon. Les étoiles rejetées restent dans le fond. Au-delà de 1, les étoiles s’éclaircissent et peuvent dépasser la plage d’affichage.</translation>
+        </message>
+        <message>
+            <location filename="../qml/StarLayerTools.qml" line="40" />
+            <source>Stellar midtones</source>
+            <translation>Tons moyens des étoiles</translation>
+        </message>
+        <message>
+            <location filename="../qml/StarLayerTools.qml" line="40" />
+            <source>0.5 is neutral. Lower values brighten the intermediate stellar signal; higher values dim it. The curve acts only between 0 and 1 after stellar gain, retaining signed and high-range values outside that interval.</source>
+            <translation>0,5 est neutre. Une valeur plus basse éclaircit le signal stellaire intermédiaire ; une valeur plus haute l’assombrit. La courbe agit entre 0 et 1 après le gain stellaire, en conservant les valeurs signées et hors plage au-delà.</translation>
+        </message>
+        <message>
+            <location filename="../qml/StarLayerTools.qml" line="41" />
+            <source>Stellar saturation</source>
+            <translation>Saturation des étoiles</translation>
+        </message>
+        <message>
+            <location filename="../qml/StarLayerTools.qml" line="41" />
+            <source>1 preserves stellar colors; 0 makes the stellar contribution neutral in weighted luminance. Higher values strengthen color differences and may create out-of-range channel values.</source>
+            <translation>1 conserve les couleurs stellaires ; 0 neutralise la contribution en luminance pondérée. Les valeurs plus élevées renforcent les différences de couleur et peuvent faire sortir des canaux de la plage affichée.</translation>
+        </message>
+        <message>
+            <location filename="../qml/StarLayerTools.qml" line="42" />
+            <source>Background and extended structures</source>
+            <translation>Fond et structures étendues</translation>
+        </message>
+        <message>
+            <location filename="../qml/StarLayerTools.qml" line="42" />
+            <source>The background is the original image minus accepted stellar PSF models. It retains nebulae, galaxies, noise and rejected stars. Check it at 100% before increasing brightness or reducing noise.</source>
+            <translation>Le fond est l’image d’origine moins les modèles PSF stellaires acceptés. Il conserve les nébuleuses, galaxies, bruit et étoiles rejetées. Vérifiez-le à 100 % avant de l’éclaircir ou de réduire le bruit.</translation>
+        </message>
+        <message>
+            <location filename="../qml/StarLayerTools.qml" line="43" />
+            <source>Background brightness</source>
+            <translation>Luminosité du fond</translation>
+        </message>
+        <message>
+            <location filename="../qml/StarLayerTools.qml" line="43" />
+            <source>Multiplies the finished residual layer independently of the stellar contribution. 1 is neutral. Brightening also reveals noise and remaining stars; no clipped or missing structure is recovered.</source>
+            <translation>Multiplie la couche résiduelle finie indépendamment des étoiles. 1 est neutre. Éclaircir révèle aussi le bruit et les étoiles restantes, sans récupérer les structures écrêtées ou absentes.</translation>
+        </message>
+        <message>
+            <location filename="../qml/StarLayerTools.qml" line="44" />
+            <source>Background saturation</source>
+            <translation>Saturation du fond</translation>
+        </message>
+        <message>
+            <location filename="../qml/StarLayerTools.qml" line="44" />
+            <source>Changes color differences in the finished residual only. 1 is neutral and 0 is monochrome. It does not replace PCC/SPCC, which must measure original linear stars before separation.</source>
+            <translation>Modifie les différences de couleur du fond résiduel fini. 1 est neutre, 0 donne un fond monochrome. Ce réglage ne remplace pas PCC/SPCC, qui doit mesurer les étoiles linéaires d’origine avant séparation.</translation>
+        </message>
+        <message>
+            <location filename="../qml/StarLayerTools.qml" line="45" />
+            <source>Background denoising</source>
+            <translation>Débruitage du fond</translation>
+        </message>
+        <message>
+            <location filename="../qml/StarLayerTools.qml" line="45" />
+            <source>Applies the existing denoising filter to the finished residual only. 0 disables it; larger values smooth more. Fine nebular structures can be lost, so compare at 100%.</source>
+            <translation>Applique le filtre de débruitage existant au fond résiduel fini uniquement. 0 le désactive ; une valeur plus élevée lisse davantage. Les structures fines peuvent être perdues : comparez à 100 %.</translation>
+        </message>
+        <message>
+            <location filename="../qml/StarLayerTools.qml" line="46" />
+            <source>Extraction settings</source>
+            <translation>Réglages de l’extraction</translation>
+        </message>
+        <message>
+            <location filename="../qml/StarLayerTools.qml" line="47" />
+            <source>Gaussian PSF</source>
+            <translation>PSF gaussienne</translation>
+        </message>
+        <message>
+            <location filename="../qml/StarLayerTools.qml" line="47" />
+            <source>Moffat PSF</source>
+            <translation>PSF Moffat</translation>
+        </message>
+        <message>
+            <location filename="../qml/StarLayerTools.qml" line="47" />
+            <source>Gaussian fits compact stellar cores. Moffat has stronger wings, controlled by beta. Neither models diffraction spikes or saturation. Choose the closest profile and inspect residuals.</source>
+            <translation>La gaussienne décrit les cœurs stellaires compacts. Moffat possède des ailes plus étendues, contrôlées par bêta. Ces profils ne modélisent ni les aigrettes ni la saturation. Choisissez le profil le plus proche et inspectez le résidu.</translation>
+        </message>
+        <message>
+            <location filename="../qml/StarLayerTools.qml" line="48" />
+            <source>PSF FWHM · pixels</source>
+            <translation>FWHM de la PSF · pixels</translation>
+        </message>
+        <message>
+            <location filename="../qml/StarLayerTools.qml" line="48" />
+            <source>Typical stellar width at half maximum in original image pixels. Fits explore 0.65–1.5 times this width. Use the measured PSF in Advanced transformations as a guide. Excessive width can include compact nebular knots.</source>
+            <translation>Largeur stellaire typique à mi-hauteur, en pixels de l’image d’origine. Les ajustements explorent de 0,65 à 1,5 fois cette largeur. La mesure PSF des transformations avancées sert de repère. Une largeur excessive peut inclure des nodules de nébulosité.</translation>
+        </message>
+        <message>
+            <location filename="../qml/StarLayerTools.qml" line="49" />
+            <source>Moffat beta</source>
+            <translation>Bêta de Moffat</translation>
+        </message>
+        <message>
+            <location filename="../qml/StarLayerTools.qml" line="49" />
+            <source>Lower beta gives stronger extended wings for the same FWHM. Higher beta approaches a Gaussian-like core. This value is used only by the Moffat profile.</source>
+            <translation>Un bêta plus bas renforce les ailes à FWHM identique. Un bêta élevé se rapproche d’un cœur gaussien. Ce réglage concerne uniquement le profil Moffat.</translation>
+        </message>
+        <message>
+            <location filename="../qml/StarLayerTools.qml" line="50" />
+            <source>Maximum detected stars</source>
+            <translation>Maximum d’étoiles détectées</translation>
+        </message>
+        <message>
+            <location filename="../qml/StarLayerTools.qml" line="50" />
+            <source>Caps candidate detection, brightest first, to control processing cost. The detector downsamples large images; faint or closely spaced stars can remain in the residual even below the cap.</source>
+            <translation>Limite les candidates, des plus brillantes aux plus faibles, pour maîtriser le coût du calcul. Le détecteur réduit les grandes images : des étoiles faibles ou rapprochées peuvent rester dans le fond même sous cette limite.</translation>
+        </message>
+        <message>
+            <location filename="../qml/StarLayerTools.qml" line="51" />
+            <source>Fit tolerance</source>
+            <translation>Tolérance de l’ajustement</translation>
+        </message>
+        <message>
+            <location filename="../qml/StarLayerTools.qml" line="51" />
+            <source>Maximum local fit RMS divided by stellar peak amplitude. Smaller values keep only cleaner PSF fits; larger values accept imperfect stars and risk subtracting compact structures. Rejected candidates remain in the background.</source>
+            <translation>RMS locale maximale divisée par l’amplitude du pic stellaire. Une valeur basse conserve les meilleurs ajustements ; une valeur haute accepte des étoiles imparfaites mais risque de soustraire des structures compactes. Les candidates rejetées restent dans le fond.</translation>
+        </message>
+        <message>
+            <location filename="../qml/StarLayerTools.qml" line="52" />
+            <source>Saturation limit · image units</source>
+            <translation>Seuil de saturation · unités de l’image</translation>
+        </message>
+        <message>
+            <location filename="../qml/StarLayerTools.qml" line="52" />
+            <source>Reject a star when any core channel reaches this threshold in the prepared linear image, including calibrated RGB gains. Saturated cores cannot be reconstructed reliably. Check the units and actual sensor saturation.</source>
+            <translation>Rejette une étoile lorsqu’un canal du cœur atteint ce seuil dans l’image linéaire préparée, gains RVB calibrés inclus. Un cœur saturé ne peut pas être reconstruit de manière fiable. Vérifiez les unités et le niveau réel de saturation du capteur.</translation>
+        </message>
+        <message>
+            <location filename="../qml/StarLayerTools.qml" line="55" />
+            <source>Export stars</source>
+            <translation>Exporter les étoiles</translation>
+        </message>
+        <message>
+            <location filename="../qml/StarLayerTools.qml" line="56" />
+            <source>Export background</source>
+            <translation>Exporter le fond</translation>
+        </message>
+        <message>
+            <location filename="../qml/StarLayerTools.qml" line="57" />
+            <source>Exports the finished layer as signed Float32 FITS, with current geometry and WCS/SIP. Adding stars and background reproduces the combined result within floating-point rounding. The main Export command always exports the combined image.</source>
+            <translation>Exporte la couche finie en FITS Float32 signé, avec la géométrie actuelle et le WCS/SIP. Additionner les étoiles et le fond reproduit le résultat combiné à l’arrondi flottant près. La commande Exporter principale utilise toujours l’image combinée.</translation>
+        </message>
+        <message>
+            <location filename="../qml/StarLayerTools.qml" line="60" />
+            <source>Export stellar layer</source>
+            <translation>Exporter la couche stellaire</translation>
+        </message>
+        <message>
+            <location filename="../qml/StarLayerTools.qml" line="60" />
+            <source>Export residual background</source>
+            <translation>Exporter le fond résiduel</translation>
+        </message>
+        <message>
+            <location filename="../qml/StarLayerTools.qml" line="60" />
+            <source>Floating-point FITS (*.fits)</source>
+            <translation>FITS flottant (*.fits)</translation>
         </message>
     </context>
 </TS>

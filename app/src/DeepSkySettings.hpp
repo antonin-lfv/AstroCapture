@@ -7,7 +7,7 @@
 
 namespace astro::app {
 inline QVariantMap defaultDeepSkySettings() {
-    return {{"geometry",defaultGeometry()},{"pedestal",0.0},{"ghs",false},{"ghsStrength",0.0},{"ghsLocal",0.0},{"ghsSymmetry",0.0},{"ghsShadows",0.0},{"ghsHighlights",1.0},{"ghsInverse",false},{"ghsMode",0},{"maskStrokes",QVariantList{}},{"maskBaseWhite",true},{"maskFile",QString{}},{"maskBlurRadius",0.0},{"maskScope",0},{"maskType",0},{"maskLow",0.0},{"maskHigh",1.0},{"maskFeather",.05},{"maskX",.5},{"maskY",.5},{"maskRadius",.25},{"maskStarRadius",2.0},{"maskInvert",false},{"deconvolution",false},{"psfProfile",0},{"psfFwhm",3.0},{"psfBeta",3.0},{"rlIterations",10},{"rlDamping",.001},{"rlBlend",1.0},{"rlStopping",.0001},{"advancedDenoise",false},{"noiseScales",3},{"noiseThreshold",3.0},{"noiseAmount",.5},{"noiseChroma",.5},{"photometryMethod",QString{}},{"photometryProfile",QString{}},{"photometryWhite",QString{}},{"photometryImageKey",QString{}},{"photometry",false},{"photometryReferences",QVariantList{}},{"photometryAperture",5.0},{"photometryInner",8.0},{"photometryOuter",12.0},{"photometrySaturation",1.0},{"background",false},{"stretch",true},{"black",0.0},{"white",1.0},
+    return {{"starSeparation",false},{"starPsfProfile",0},{"starFwhm",3.0},{"starBeta",3.0},{"starLimit",2000},{"starFitTolerance",.15},{"starSaturationLimit",.98},{"starsGain",1.0},{"starsSaturation",1.0},{"starsMidtones",.5},{"starBackgroundGain",1.0},{"starBackgroundSaturation",1.0},{"starBackgroundDenoise",0.0},{ "geometry",defaultGeometry()},{"pedestal",0.0},{"ghs",false},{"ghsStrength",0.0},{"ghsLocal",0.0},{"ghsSymmetry",0.0},{"ghsShadows",0.0},{"ghsHighlights",1.0},{"ghsInverse",false},{"ghsMode",0},{"maskStrokes",QVariantList{}},{"maskBaseWhite",true},{"maskFile",QString{}},{"maskBlurRadius",0.0},{"maskScope",0},{"maskType",0},{"maskLow",0.0},{"maskHigh",1.0},{"maskFeather",.05},{"maskX",.5},{"maskY",.5},{"maskRadius",.25},{"maskStarRadius",2.0},{"maskInvert",false},{"deconvolution",false},{"psfProfile",0},{"psfFwhm",3.0},{"psfBeta",3.0},{"rlIterations",10},{"rlDamping",.001},{"rlBlend",1.0},{"rlStopping",.0001},{"advancedDenoise",false},{"noiseScales",3},{"noiseThreshold",3.0},{"noiseAmount",.5},{"noiseChroma",.5},{"photometryMethod",QString{}},{"photometryProfile",QString{}},{"photometryWhite",QString{}},{"photometryImageKey",QString{}},{"photometry",false},{"photometryReferences",QVariantList{}},{"photometryAperture",5.0},{"photometryInner",8.0},{"photometryOuter",12.0},{"photometrySaturation",1.0},{"background",false},{"stretch",true},{"black",0.0},{"white",1.0},
             {"midtones",.15},{"red",1.0},{"green",1.0},{"blue",1.0},
             {"operations",QVariantList{}},{"scnr",false},{"scnrMethod",0},{"scnrAmount",1.0},{"scnrPreserve",true},{"backgroundPoints",QVariantList{}},{"backgroundDegree",1},{"backgroundSamples",20},{"backgroundTolerance",1.0},
             {"rotation",0},{"mirrorHorizontal",false},{"mirrorVertical",false},{"denoise",0.0},{"asinh",false},{"asinhLuminance",0},{"asinhStrength",20.0},{"saturation",1.0}};
@@ -15,7 +15,7 @@ inline QVariantMap defaultDeepSkySettings() {
 // Full parameter snapshots: reject missing/unknown fields and invalid input.
 inline std::optional<QVariantMap> checkedDeepSkySettings(const QVariantMap& input) {
     auto result=defaultDeepSkySettings();
-    const QStringList extensions{"photometryMethod","photometryProfile","photometryWhite","photometryImageKey","maskStrokes","maskBaseWhite","maskFile","maskBlurRadius","maskScope","geometry","pedestal","ghs","ghsStrength","ghsLocal","ghsSymmetry","ghsShadows","ghsHighlights","ghsInverse","ghsMode","maskType","maskLow","maskHigh","maskFeather","maskX","maskY","maskRadius","maskStarRadius","maskInvert","deconvolution","psfProfile","psfFwhm","psfBeta","rlIterations","rlDamping","rlBlend","rlStopping","advancedDenoise","noiseScales","noiseThreshold","noiseAmount","noiseChroma","photometry","photometryReferences","photometryAperture","photometryInner","photometryOuter","photometrySaturation","asinhLuminance","operations","scnr","scnrMethod","scnrAmount","scnrPreserve","backgroundPoints","backgroundDegree","backgroundSamples","backgroundTolerance","rotation","mirrorHorizontal","mirrorVertical"};
+    const QStringList extensions{"starSeparation","starPsfProfile","starFwhm","starBeta","starLimit","starFitTolerance","starSaturationLimit","starsGain","starsSaturation","starsMidtones","starBackgroundGain","starBackgroundSaturation","starBackgroundDenoise","photometryMethod","photometryProfile","photometryWhite","photometryImageKey","maskStrokes","maskBaseWhite","maskFile","maskBlurRadius","maskScope","geometry","pedestal","ghs","ghsStrength","ghsLocal","ghsSymmetry","ghsShadows","ghsHighlights","ghsInverse","ghsMode","maskType","maskLow","maskHigh","maskFeather","maskX","maskY","maskRadius","maskStarRadius","maskInvert","deconvolution","psfProfile","psfFwhm","psfBeta","rlIterations","rlDamping","rlBlend","rlStopping","advancedDenoise","noiseScales","noiseThreshold","noiseAmount","noiseChroma","photometry","photometryReferences","photometryAperture","photometryInner","photometryOuter","photometrySaturation","asinhLuminance","operations","scnr","scnrMethod","scnrAmount","scnrPreserve","backgroundPoints","backgroundDegree","backgroundSamples","backgroundTolerance","rotation","mirrorHorizontal","mirrorVertical"};
     for(auto it=input.begin();it!=input.end();++it)if(!result.contains(it.key()))return std::nullopt;
     for(auto it=result.begin();it!=result.end();++it) {
         if(!input.contains(it.key())){if(extensions.contains(it.key()))continue;return std::nullopt;}
@@ -54,6 +54,15 @@ inline std::optional<QVariantMap> checkedDeepSkySettings(const QVariantMap& inpu
         const auto k=it.key();
         if((k=="backgroundDegree"&&(v<1||v>4||v!=std::floor(v)))||(k=="backgroundSamples"&&(v<2||v>50||v!=std::floor(v)))||(k=="backgroundTolerance"&&(v<0||v>10))||(k=="rotation"&&(v<0||v>3||v!=std::floor(v))))return std::nullopt;
         if((k=="scnrMethod"&&(v<0||v>3||v!=std::floor(v)))||(k=="scnrAmount"&&(v<0||v>1)))return std::nullopt;
+        if((QStringList{"starsGain","starsSaturation","starBackgroundGain","starBackgroundSaturation"}.contains(k))&&(v<0||v>3))return {};
+        if(k=="starBackgroundDenoise"&&(v<0||v>1))return {};
+        if(k=="starsMidtones"&&(v<.001||v>.999))return {};
+        if(k=="starLimit"&&(v<1||v>5000||v!=std::floor(v)))return {};
+        if(k=="starPsfProfile"&&(v<0||v>1||v!=std::floor(v)))return {};
+        if(k=="starFwhm"&&(v<.5||v>12))return {};
+        if(k=="starBeta"&&(v<1.5||v>10))return {};
+        if(k=="starFitTolerance"&&(v<.01||v>.5))return {};
+        if(k=="starSaturationLimit"&&(v<=0||v>100))return {};
         if(k=="pedestal"&&(v< -1||v>1))return std::nullopt;
         if((k=="ghsStrength"&&(v<0||v>20))||(k=="ghsLocal"&&(v< -5||v>15)))return std::nullopt;
         if((QStringList{"ghsSymmetry","ghsShadows","ghsHighlights","maskLow","maskHigh","maskX","maskY","rlBlend","noiseAmount","noiseChroma"}.contains(k))&&(v<0||v>1))return std::nullopt;
@@ -87,9 +96,9 @@ inline std::optional<QVariantMap> checkedDeepSkySettings(const QVariantMap& inpu
     if(result["photometryInner"].toDouble()<=result["photometryAperture"].toDouble()||result["photometryOuter"].toDouble()<=result["photometryInner"].toDouble())return std::nullopt;
     // Scientific measurements require an un-stretched and unrotated reference image.
     bool nonlinear=false,oriented=false;
-    for(const auto& value:result["operations"].toList()){const auto op=value.toMap();if(!op["enabled"].toBool())continue;const auto settings=op["settings"].toMap();if((nonlinear||oriented)&&(settings["photometry"].toBool()||settings["deconvolution"].toBool()))return std::nullopt;nonlinear|=settings["stretch"].toBool()||settings["scnr"].toBool()||settings["saturation"].toDouble()!=1;oriented|=geometryActive(settings["geometry"].toMap())||settings["rotation"].toInt()!=0||settings["mirrorHorizontal"].toBool()||settings["mirrorVertical"].toBool();}
-    if((nonlinear||oriented)&&(result["photometry"].toBool()||result["deconvolution"].toBool()))return std::nullopt;
-    if(result["photometry"].toBool()&&result["maskType"].toInt()!=0)return std::nullopt;
+    for(const auto& value:result["operations"].toList()){const auto op=value.toMap();if(!op["enabled"].toBool())continue;const auto settings=op["settings"].toMap();if((nonlinear||oriented)&&(settings["photometry"].toBool()||settings["deconvolution"].toBool()||settings["starSeparation"].toBool()))return std::nullopt;nonlinear|=settings["starSeparation"].toBool()||settings["stretch"].toBool()||settings["scnr"].toBool()||settings["saturation"].toDouble()!=1;oriented|=geometryActive(settings["geometry"].toMap())||settings["rotation"].toInt()!=0||settings["mirrorHorizontal"].toBool()||settings["mirrorVertical"].toBool();}
+    if((nonlinear||oriented)&&(result["photometry"].toBool()||result["deconvolution"].toBool()||result["starSeparation"].toBool()))return std::nullopt;
+    if((result["photometry"].toBool()||result["starSeparation"].toBool())&&result["maskType"].toInt()!=0)return std::nullopt;
     return result;
 }
 inline std::optional<QVariantMap> checkedDeepSkySnapshot(const QVariantMap& input) {

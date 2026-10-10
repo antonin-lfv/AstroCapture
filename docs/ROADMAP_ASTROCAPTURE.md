@@ -49,18 +49,25 @@ Le projet portable ne sauvegarde pas la pile d’annulation ni un calcul en cour
 Il conserve les empilements terminés par filtre ; les caches internes des étapes
 de recette sont reconstruits à la prochaine modification.
 
+- [x] Résolution aveugle Astrometry.net locale, index grand champ téléchargeable,
+  vérification Gaia et SIP 2–5 conservé par les transformations et les FITS.
+- [x] Bibliothèque de masters avec création robuste, provenance FITS, contrôle
+  de compatibilité, statistiques et intégration sans double calibration des flats.
+- [x] Couches étoiles/fond par PSF native, vues séparées, réglages indépendants,
+  recombinaison neutre exacte et exports Float32 ; persistance portable et A/B.
+  Le résidu conserve les étoiles rejetées : ce moteur n’est pas StarNet.
+
 ## Priorités suivantes
 
-1. **Approfondir l’astrométrie et les profils spectraux.** Résolution aveugle,
-   distorsions SIP, annotations d’objets, profils fabricant prévalidés et
+1. **Approfondir l’astrométrie et les profils spectraux.** Annotations d’objets, profils fabricant prévalidés et
    composition interactive des réponses QE/filtres. Comparaison scientifique
    avec des étalons et Siril ; modes bande étroite distincts.
-2. **Bibliothèque de calibration.** Masters dark/flat/bias/dark-flat réutilisables,
-   regroupement par caméra, gain, binning, température et exposition ; bilan des
-   incompatibilités et contrôle de qualité des masters.
-3. **Traitement séparé des étoiles et du fond.** Extraction/recombinaison,
-   réduction contrôlée des étoiles et comparaison de l’effet sur les structures.
-   Choisir et valider le moteur avant d’exposer une commande de production.
+2. **Calibration avancée.** Regroupement automatique de séries hétérogènes,
+   recherche multicritère et diagnostics approfondis des masters ; validation
+   sur de nouvelles caméras et séries réelles.
+3. **Extraction stellaire avancée.** Moteur neuronal optionnel et modèles dont
+   la redistribution est autorisée, ou import de couches externes ; contrôle des
+   halos et aigrettes, réduction du rayon et validation sur champs denses.
 4. **Performance et séries.** Aperçu sur région d’intérêt, caches ciblés,
    comparaison de performances, accélération des outils avancés, traitements
    et exports de plusieurs images avec état et annulation par tâche.

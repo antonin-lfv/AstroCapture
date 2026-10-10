@@ -1,3 +1,4 @@
+#include <astro/processing/StarLayers.hpp>
 #include "MasterLibrary.hpp"
 #include "FileProtection.hpp"
 #include "ProjectStorage.hpp"
@@ -190,6 +191,10 @@ processing::FloatImage scientificPreparation(const processing::FloatImage& sourc
     }
     return image;
 }
+processing::StarLayers finishLayers(const processing::FloatImage& source,const QVariantMap& s,const processing::Finish& f,const processing::CheckCancel& check) {
+    processing::StarSeparationOptions o;o.psf={s["starPsfProfile"].toInt(),s["starFwhm"].toDouble(),s["starBeta"].toDouble()};o.maximumStars=s["starLimit"].toInt();o.fitTolerance=s["starFitTolerance"].toDouble();o.saturation=s["starSaturationLimit"].toDouble();
+    return processing::finishStarLayers(source,o,f,{s["starsGain"].toDouble(),s["starsSaturation"].toDouble(),s["starsMidtones"].toDouble(),s["starBackgroundGain"].toDouble(),s["starBackgroundSaturation"].toDouble(),s["starBackgroundDenoise"].toDouble()},check);
+}
 processing::FloatImage evaluateOperations(const processing::FloatImage& source,const QVariantList& operations,const processing::CheckCancel& check) {
     processing::FloatImage image=source;
     for(const auto& item:operations) {
@@ -201,7 +206,7 @@ processing::FloatImage evaluateOperations(const processing::FloatImage& source,c
         if(f.background){image=processing::extractBackground(image,f.backgroundOptions,check).image;f.background=false;}
         if(settings["pedestal"].toDouble()!=0||settings["photometry"].toBool()||settings["advancedDenoise"].toBool()||settings["deconvolution"].toBool())image=scientificPreparation(image,settings,check,nullptr,{},mask.empty()?nullptr:&mask);
         const auto finishingInput=settings["maskScope"].toInt()==3&&!mask.empty()?std::optional<processing::FloatImage>(image):std::nullopt;
-        image=processing::finishDeepSky(image,f,check);
+        image=settings["starSeparation"].toBool()?finishLayers(image,settings,f,check).image:processing::finishDeepSky(image,f,check);
         if(settings["scnr"].toBool())image=processing::removeGreen(image,settings["scnrMethod"].toInt(),settings["scnrAmount"].toFloat(),settings["scnrPreserve"].toBool(),check);
         if(original&&settings["maskScope"].toInt()==0)processing::blendMask(*original,image,mask,check);
         if(finishingInput)processing::blendMask(*finishingInput,image,mask,check);
@@ -230,11 +235,12 @@ void DeepSkyController::run(const QString& status,std::function<void(std::stop_t
     });
 }
 void DeepSkyController::show(std::shared_ptr<const processing::FloatImage> image,bool result,QImage preview,std::shared_ptr<const processing::FloatImage> displayed,QVariantMap stretch,QImage before) {
-    showingMask_=false;maskPreview_={};advancedReport_.clear();psfKernel_.clear();showingBackgroundModel_=false;backgroundPreview_={};comparingRaw_=false;displayingResult_=result;
+    if(result){starsLayer_.reset();starBackgroundLayer_.reset();starsLayerPreview_={};starBackgroundLayerPreview_={};}starLayerView_=0;showingMask_=false;maskPreview_={};if(result)advancedReport_.clear();psfKernel_.clear();showingBackgroundModel_=false;backgroundPreview_={};comparingRaw_=false;displayingResult_=result;
     if(result){astrometry_.clear();finishSettings_=defaultDeepSkySettings();for(auto it=finishSettings_.begin();it!=finishSettings_.end();++it)if(stretch.contains(it.key()))it.value()=stretch[it.key()];if(auto validated=checkedDeepSkySettings(finishSettings_))finishSettings_=*validated;linear_=image;linearPreview_=before;comparisonPreview_=before;comparisonOrientationKey_=QJsonDocument(QJsonArray{}).toJson(QJsonDocument::Compact);finished_=displayed;resultPreview_=preview;stretch_=stretch;histogram_=stretch.value("histogram").toMap();emit resultChanged();}
     if(result){geometryPreview_=preview;maskSourcePreview_=preview;}preview_=std::move(preview);emit imageChanged();emit changed();
 }
-void DeepSkyController::setShowingMask(bool enabled){if(busy_||!linear_)return;showingMask_=enabled&&!maskPreview_.isNull();showingBackgroundModel_=false;comparingRaw_=false;preview_=showingMask_?maskPreview_:resultPreview_;emit imageChanged();emit changed();}
+void DeepSkyController::setStarLayerView(int view){if(busy_||!hasStarLayers()||view<0||view>2)return;starLayerView_=view;showingMask_=showingBackgroundModel_=comparingRaw_=false;displayingResult_=true;preview_=view==1?starsLayerPreview_:view==2?starBackgroundLayerPreview_:resultPreview_;emit imageChanged();emit changed();}
+void DeepSkyController::setShowingMask(bool enabled){starLayerView_=0;if(busy_||!linear_)return;showingMask_=enabled&&!maskPreview_.isNull();showingBackgroundModel_=false;comparingRaw_=false;preview_=showingMask_?maskPreview_:resultPreview_;emit imageChanged();emit changed();}
 QVariantList DeepSkyController::ghsCurve(const QVariantMap& parameters) const {
     QVariantList values;try{const auto f=finishFromSettings(parameters);const processing::GhsCurve curve({f.ghsStrength,f.ghsLocal,f.ghsSymmetry,f.ghsShadows,f.ghsHighlights,f.ghsInverse,f.ghsMode});for(int n=0;n<=512;++n)values<<curve(n/512.);}catch(const std::exception&){}return values;
 }
@@ -247,7 +253,7 @@ void DeepSkyController::estimatePsf(){
     const auto image=linear_;const auto settings=finishSettings_;auto test=settings;test["deconvolution"]=true;if(!checkedDeepSkySettings(test)){status_=tr("PSF estimation requires a linear, unrotated recipe input. Remove earlier stretches or use a new version.");emit changed();return;}
     run(tr("Measuring stellar PSF…"),[this,image,settings](std::stop_token stop){const auto checkpoint=[stop]{check(stop);};auto source=evaluateOperations(*image,settings["operations"].toList(),checkpoint);auto f=finishFromSettings(settings);if(f.background)source=processing::extractBackground(source,f.backgroundOptions,checkpoint).image;auto scientific=settings;scientific["deconvolution"]=false;source=scientificPreparation(source,scientific,checkpoint);const auto measured=processing::estimatePsf(source,checkpoint);post([this,stop,measured]{if(stop.stop_requested())return;advancedReport_["estimatedFwhm"]=measured.fwhm;advancedReport_["estimatedScatter"]=measured.scatter;advancedReport_["estimatedStars"]=measured.stars;status_=tr("PSF measured from %1 stars. Review the estimate before using it.").arg(measured.stars);emit changed();});});
 }
-void DeepSkyController::setRole(int index,const QString& role){if(busy_||index<0||index>=frames_.size()||!QStringList{"Light","Dark","Flat","Bias","DarkFlat","BadPixels"}.contains(role))return;auto row=frames_[index].toMap();if(references_.contains(row["group"].toString())&&references_[row["group"].toString()]==row["path"].toString())references_.erase(row["group"].toString());row["role"]=role;row["reference"]=false;frames_[index]=row;emit changed();}
+void DeepSkyController::setRole(int index,const QString& role){if(busy_||index<0||index>=frames_.size()||!QStringList{"Light","Dark","Flat","Bias","DarkFlat","BadPixels"}.contains(role))return;auto row=frames_[index].toMap();if(row["master"].toBool())return;if(references_.contains(row["group"].toString())&&references_[row["group"].toString()]==row["path"].toString())references_.erase(row["group"].toString());row["role"]=role;row["reference"]=false;frames_[index]=row;emit changed();}
 void DeepSkyController::setGroup(int index,const QString& group){if(busy_||index<0||index>=frames_.size())return;auto row=frames_[index].toMap();const auto previous=row["group"].toString();if(references_.contains(previous)&&references_[previous]==row["path"].toString())references_.erase(previous);row["group"]=groupName(group);row["reference"]=false;frames_[index]=row;emit changed();}
 void DeepSkyController::addFolder(const QUrl& url,const QString& role,const QString& group,double scale){
     if(busy_||!url.isLocalFile())return;QList<QUrl> files;
@@ -316,18 +322,18 @@ void DeepSkyController::setReference(int index) {
     emit changed();
 }
 void DeepSkyController::remove(int index){if(busy_||index<0||index>=frames_.size())return;frames_.removeAt(index);emit changed();}
-void DeepSkyController::clear(){if(busy_)return;projectUrl_=QUrl();sourceFingerprints_.clear();maskImportPreview_={};maskImportPath_.clear();geometryPreview_={};maskSourcePreview_={};advancedReport_.clear();psfKernel_.clear();maskPreview_={};showingMask_=false;projectOptions_.clear();sourceRow_.clear();sourceInterpretation_.clear();sourceDebayer_=sourceAutoStretch_=true;finishSettings_.clear();rawPreview_={};backgroundPreview_={};showingBackgroundModel_=false;rawName_.clear();comparingRaw_=false;histogram_.clear();pendingAdjustments_.reset();displayingResult_=false;stage_.clear();frames_.clear();backgroundSamples_.clear();references_.clear();stacks_.clear();astrometry_.clear();stackAstrometry_.clear();groupExposure_.clear();groupCounts_.clear();exposureCount_=0;resultFilters_.clear();groups_.clear();linear_.reset();finished_.reset();pipelineCache_.reset();pipelineSource_.reset();pipelineCacheKey_.clear();preview_={};resultPreview_={};linearPreview_={};comparisonPreview_={};comparisonOrientationKey_.clear();status_.clear();emit projectOptionsChanged();emit changed();emit imageChanged();}
+void DeepSkyController::clear(){if(busy_)return;starsLayer_.reset();starBackgroundLayer_.reset();starsLayerPreview_={};starBackgroundLayerPreview_={};starLayerView_=0;projectUrl_=QUrl();sourceFingerprints_.clear();maskImportPreview_={};maskImportPath_.clear();geometryPreview_={};maskSourcePreview_={};advancedReport_.clear();psfKernel_.clear();maskPreview_={};showingMask_=false;projectOptions_.clear();sourceRow_.clear();sourceInterpretation_.clear();sourceDebayer_=sourceAutoStretch_=true;finishSettings_.clear();rawPreview_={};backgroundPreview_={};showingBackgroundModel_=false;rawName_.clear();comparingRaw_=false;histogram_.clear();pendingAdjustments_.reset();displayingResult_=false;stage_.clear();frames_.clear();backgroundSamples_.clear();references_.clear();stacks_.clear();astrometry_.clear();stackAstrometry_.clear();groupExposure_.clear();groupCounts_.clear();exposureCount_=0;resultFilters_.clear();groups_.clear();linear_.reset();finished_.reset();pipelineCache_.reset();pipelineSource_.reset();pipelineCacheKey_.clear();preview_={};resultPreview_={};linearPreview_={};comparisonPreview_={};comparisonOrientationKey_.clear();status_.clear();emit projectOptionsChanged();emit changed();emit imageChanged();}
 void DeepSkyController::chooseRawComparison(int index){
     if(busy_||index<0||index>=frames_.size()||frames_[index].toMap()["role"]!="Light")return;
     const auto row=frames_[index].toMap();
     run(tr("Preparing raw comparison…"),[this,row](std::stop_token stop){auto raw=processing::linearRgb(readFrame(row),[stop]{check(stop);});const auto image=previewImage(raw,true);check(stop);post([this,image,row,stop]{if(stop.stop_requested())return;rawPreview_=image;rawName_=row["name"].toString();emit changed();});});
 }
-void DeepSkyController::showRawComparison(bool enabled){
+void DeepSkyController::showRawComparison(bool enabled){starLayerView_=0;
     if(!hasResult()||(enabled&&(busy_||!hasRawComparison())))return;
     showingBackgroundModel_=false;comparingRaw_=enabled;preview_=enabled?rawPreview_:resultPreview_;displayingResult_=!enabled;emit imageChanged();emit changed();
 }
-void DeepSkyController::restoreResult(){if(busy_||!hasResult())return;comparingRaw_=false;showingBackgroundModel_=false;showingMask_=false;preview_=resultPreview_;displayingResult_=true;status_=tr("Showing the stacked result.");emit imageChanged();emit changed();}
-void DeepSkyController::setShowingBackgroundModel(bool enabled) {
+void DeepSkyController::restoreResult(){if(busy_||!hasResult())return;starLayerView_=0;comparingRaw_=false;showingBackgroundModel_=false;showingMask_=false;preview_=resultPreview_;displayingResult_=true;status_=tr("Showing the stacked result.");emit imageChanged();emit changed();}
+void DeepSkyController::setShowingBackgroundModel(bool enabled) {starLayerView_=0;
     if(busy_||(enabled&&backgroundPreview_.isNull()))return;
     showingBackgroundModel_=enabled;showingMask_=false;comparingRaw_=false;
     preview_=enabled?backgroundPreview_:resultPreview_;displayingResult_=true;
@@ -474,31 +480,46 @@ void DeepSkyController::apply(const QVariantMap& options) {
         const auto& source=prepared?*prepared:corrected?*corrected:operationInput;
         QVariantList psfKernel;int psfSize;const auto kernel=processing::makePsf({settings["psfProfile"].toInt(),settings["psfFwhm"].toDouble(),settings["psfBeta"].toDouble()},&psfSize);for(float v:kernel)psfKernel<<v;advancedReport["psfSize"]=psfSize;
         auto preview=allocateImagePreview(source);const auto target=previewTarget(preview);
-        const bool extras=!mask.empty()||settings["scnr"].toBool()||settings["rotation"].toInt()||settings["mirrorHorizontal"].toBool()||settings["mirrorVertical"].toBool();
-        auto result=std::make_shared<processing::FloatImage>(processing::finishDeepSky(source,f,checkpoint,nullptr,extras?nullptr:&target));
+        const bool extras=settings["starSeparation"].toBool()||!mask.empty()||settings["scnr"].toBool()||settings["rotation"].toInt()||settings["mirrorHorizontal"].toBool()||settings["mirrorVertical"].toBool();
+        std::shared_ptr<processing::FloatImage> result,starBase;std::shared_ptr<const processing::FloatImage> starsLayer,starBackgroundLayer;QImage starsPreview,starBasePreview;
+        if(settings["starSeparation"].toBool()){auto layers=finishLayers(source,settings,f,checkpoint);advancedReport["starsDetected"]=layers.detected;advancedReport["starsAccepted"]=layers.accepted;advancedReport["starsRejected"]=layers.rejected;advancedReport["starsSaturated"]=layers.saturated;advancedReport["starsFitRms"]=layers.fitRms;result=std::make_shared<processing::FloatImage>(std::move(layers.image));starBase=std::make_shared<processing::FloatImage>(std::move(layers.background));}
+        else result=std::make_shared<processing::FloatImage>(processing::finishDeepSky(source,f,checkpoint,nullptr,extras?nullptr:&target));
         const auto histogram=makeLinearHistogram(source,f.color,f.black,f.white);
         if(extras){if(settings["scnr"].toBool())*result=processing::removeGreen(*result,settings["scnrMethod"].toInt(),settings["scnrAmount"].toFloat(),settings["scnrPreserve"].toBool(),checkpoint);if(!mask.empty()&&settings["maskScope"].toInt()==0)processing::blendMask(operationInput,*result,mask,checkpoint);if(!mask.empty()&&settings["maskScope"].toInt()==3)processing::blendMask(source,*result,mask,checkpoint);if(settings["rotation"].toInt()||settings["mirrorHorizontal"].toBool()||settings["mirrorVertical"].toBool())*result=processing::orientImage(*result,settings["rotation"].toInt(),settings["mirrorHorizontal"].toBool(),settings["mirrorVertical"].toBool(),checkpoint);preview=makeImagePreview(*result,checkpoint);}
         if(!maskPreview.isNull()&&(settings["rotation"].toInt()||settings["mirrorHorizontal"].toBool()||settings["mirrorVertical"].toBool())){maskPreview=maskPreview.transformed(QTransform().rotate(settings["rotation"].toInt()*90));maskPreview=maskPreview.transformed(QTransform().scale(settings["mirrorHorizontal"].toBool()?-1:1,settings["mirrorVertical"].toBool()?-1:1));}
         const auto geometryPreview=preview;
         const auto maskSourcePreview=maskSourceCache.isNull()?previewImage(operationInput,true,checkpoint):maskSourceCache;
         if(geometryActive(settings["geometry"].toMap())){*result=processing::transformGeometry(*result,geometryFrom(settings["geometry"].toMap()),checkpoint);preview=makeImagePreview(*result,checkpoint);if(!maskPreview.isNull())maskPreview=imageGeometry(maskPreview,settings["geometry"].toMap());}
+        if(starBase){
+            if(settings["scnr"].toBool())*starBase=processing::removeGreen(*starBase,settings["scnrMethod"].toInt(),settings["scnrAmount"].toFloat(),settings["scnrPreserve"].toBool(),checkpoint);
+            if(settings["rotation"].toInt()||settings["mirrorHorizontal"].toBool()||settings["mirrorVertical"].toBool())*starBase=processing::orientImage(*starBase,settings["rotation"].toInt(),settings["mirrorHorizontal"].toBool(),settings["mirrorVertical"].toBool(),checkpoint);
+            if(geometryActive(settings["geometry"].toMap()))*starBase=processing::transformGeometry(*starBase,geometryFrom(settings["geometry"].toMap()),checkpoint);
+            auto stars=std::make_shared<processing::FloatImage>(*result);for(std::size_t i=0;i<stars->rgb.size();++i){if(i%65536==0)checkpoint();stars->rgb[i]-=starBase->rgb[i];}
+            starsPreview=makeImagePreview(*stars,checkpoint);starBasePreview=makeImagePreview(*starBase,checkpoint);starsLayer=stars;starBackgroundLayer=starBase;
+        }
         double low=std::numeric_limits<double>::infinity(),high=-low;std::uint64_t below=0,above=0;
         for(std::size_t i=0;i<result->rgb.size();++i){if(i%65536==0)checkpoint();const double value=result->rgb[i];if(!std::isfinite(value))throw std::runtime_error("Processing produced a non-finite sample; previous result is preserved.");low=std::min(low,value);high=std::max(high,value);below+=value<0;above+=value>1;}
         advancedReport["outputMinimum"]=low;advancedReport["outputMaximum"]=high;advancedReport["outputBelowZero"]=100.*below/result->rgb.size();advancedReport["outputAboveOne"]=100.*above/result->rgb.size();
         check(stop);
-        post([this,image,pipeline,cacheKey,result,preview,backgroundPreview,histogram,samples,settings,stop,advancedReport,maskPreview,psfKernel,before,orientationKey,geometryPreview,maskSourcePreview] {
+        post([this,image,pipeline,cacheKey,result,preview,backgroundPreview,histogram,samples,settings,stop,advancedReport,maskPreview,psfKernel,before,orientationKey,geometryPreview,maskSourcePreview,starsLayer,starBackgroundLayer,starsPreview,starBasePreview] {
             if(stop.stop_requested())return;
             pipelineSource_=image;pipelineCache_=pipeline;pipelineCacheKey_=cacheKey;
+            starsLayer_=starsLayer;starBackgroundLayer_=starBackgroundLayer;starsLayerPreview_=starsPreview;starBackgroundLayerPreview_=starBasePreview;if(!starsLayer)starLayerView_=0;
             advancedReport_=advancedReport;maskPreview_=maskPreview;psfKernel_=psfKernel;if(maskPreview.isNull())showingMask_=false;
             geometryPreview_=geometryPreview;maskSourcePreview_=maskSourcePreview;finishSettings_=settings;backgroundSamples_=samples;histogram_=histogram;
             comparisonPreview_=before;comparisonOrientationKey_=orientationKey;
             finished_=result;resultPreview_=preview;backgroundPreview_=backgroundPreview;preview_=showingMask_&&!maskPreview.isNull()?maskPreview:showingBackgroundModel_&&!backgroundPreview.isNull()?backgroundPreview:preview;
+            if(starLayerView_)preview_=starLayerView_==1?starsLayerPreview_:starBackgroundLayerPreview_;
             if(backgroundPreview.isNull())showingBackgroundModel_=false;
             comparingRaw_=false;displayingResult_=true;
             status_=tr("Adjustments applied. Linear FITS retains the original integration.");progress_=100;
             emit imageChanged();emit changed();
         });
     });
+}
+void DeepSkyController::exportStarLayer(const QUrl& url,int layer){
+    if(busy_||!hasStarLayers()||!url.isLocalFile()||(layer!=1&&layer!=2))return;const auto path=url.toLocalFile();if(!QStringList{"fits","fit","fts"}.contains(QFileInfo(path).suffix().toLower())){status_=tr("Export layers as floating-point FITS to preserve signed values.");emit changed();return;}for(const auto& v:frames_)if(sameFile(v.toMap()["path"].toString(),path)){status_=tr("An original image cannot be overwritten.");emit changed();return;}if(projectUrl_.isLocalFile()&&sameFile(projectUrl_.toLocalFile(),path)){status_=tr("A project file cannot be overwritten by an image.");emit changed();return;}
+    auto wcs=readWcs(astrometry_["wcs"]);if(wcs)wcs=finishWcs(*wcs,linear_->width,linear_->height,finishSettings_);const auto pixels=layer==1?starsLayer_:starBackgroundLayer_;exporting_=true;run(tr("Exporting image layer…"),[this,path,pixels,wcs,layer](std::stop_token stop){QTemporaryDir temp(QFileInfo(path).absolutePath()+"/.astro-layer-XXXXXX");if(!temp.isValid())throw std::runtime_error("Cannot open export destination.");recording::AstroImage a;a.width=pixels->width;a.height=pixels->height;a.channels=3;a.bits=32;a.samples=pixels->rgb;a.wcs=wcs;a.imageType=layer==1?"STARS":"PSF RESIDUAL";const auto file=temp.filePath("layer.fits");check(stop);recording::writeAstroFits(file.toStdString(),a);atomicCopy(file,path,stop);post([this]{status_=tr("Image layer exported as Float32 FITS.");emit changed();});});
 }
 QUrl DeepSkyController::exportUrl() const {
     if(frames_.isEmpty())return {};

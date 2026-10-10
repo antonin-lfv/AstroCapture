@@ -1,3 +1,5 @@
+#include "MasterLibrary.hpp"
+#include "BlindSolver.hpp"
 #include "MaskOverlayItem.hpp"
 #include "ImagePixelsItem.hpp"
 #include "EquipmentProfile.hpp"
@@ -54,6 +56,25 @@ int main(int argc,char** argv){
     ASTRO_TEST_CHECK(!object->findChild<QObject*>("deepSkyCalibrated")->property("checked").toBool());
     QQuickWindow window;window.resize(1100,720);auto* root=qobject_cast<QQuickItem*>(object.get());root->setParentItem(window.contentItem());root->setSize({1100,720});window.show();
     QCoreApplication::processEvents();
+    if(qEnvironmentVariableIsSet("ASTRO_UI_FEATURES_QA")) {
+        app::setBlindIndexDirectory(QStringLiteral(ASTRO_SOURCE_DIR "/build/astrometry-indexes"));
+        QSettings().setValue("calibration/libraryDirectory",directory.filePath("masters"));
+        recording::AstroImage master;master.width=master.height=64;master.bits=32;master.samples.assign(4096,.001f);master.camera="ASI071MC · séance de référence";master.masterRole="Dark";master.masterCount=30;master.exposure=30;master.hasTemperature=true;master.temperature=-10;master.binX=master.binY=1;
+        app::storeCalibrationMaster(master,"ASI071MC · 30 s · −10 °C",{});
+        controller.addFiles({QUrl::fromLocalFile(qEnvironmentVariable("ASTRO_UI_FITS_PATH"))});wait(controller);controller.integrate(true);wait(controller);ASTRO_TEST_CHECK(controller.hasResult());
+        auto settings=controller.finishSettings();settings["starSeparation"]=true;settings["starsGain"]=.8;ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root,"setFinish",Q_ARG(QVariant,QVariant(settings))));wait(controller);ASTRO_TEST_CHECK(controller.hasStarLayers());
+        qInfo()<<"Real Orion star fits"<<controller.advancedReport()["starsAccepted"]<<controller.advancedReport()["starsDetected"]<<controller.advancedReport()["starsFitRms"];
+        root->setProperty("workflowStep",6);root->setProperty("imageFocus",false);root->setProperty("expandedFamilies",QVariantList{5});root->setProperty("finishingTool",5);
+        const auto folder=qEnvironmentVariable("ASTRO_UI_FEATURES_QA");QDir().mkpath(folder);
+        auto capture=[&](const QString& path){for(int i=0;i<5;++i){QCoreApplication::processEvents();QThread::msleep(40);}ASTRO_TEST_CHECK(window.grabWindow().save(path));};
+        for(const auto size:{QSize(1440,960),QSize(1100,800),QSize(900,700)}) {
+            window.resize(size);root->setSize(size);controller.setStarLayerView(0);const auto suffix=QString("-%1x%2.png").arg(size.width()).arg(size.height());capture(folder+"/stars"+suffix);
+            controller.setStarLayerView(2);capture(folder+"/residual"+suffix);controller.setStarLayerView(0);
+            auto* masterDialog=root->findChild<QObject*>("masterLibraryDialog");ASTRO_TEST_CHECK(masterDialog);ASTRO_TEST_CHECK(QMetaObject::invokeMethod(masterDialog,"open"));capture(folder+"/masters"+suffix);ASTRO_TEST_CHECK(QMetaObject::invokeMethod(masterDialog,"close"));
+            auto* astrometry=root->findChild<QObject*>("astrometryDialog");ASTRO_TEST_CHECK(astrometry);ASTRO_TEST_CHECK(QMetaObject::invokeMethod(astrometry,"open"));root->findChild<QObject*>("astrometrySolveMode")->setProperty("currentIndex",1);capture(folder+"/blind"+suffix);ASTRO_TEST_CHECK(QMetaObject::invokeMethod(astrometry,"close"));
+        }
+        return 0;
+    }
     // Opening the dialog restores stored limits; a user changing methods must
     // still get the appropriate default after that assignment breaks the binding.
     auto* calibrationMethod=root->findChild<QObject*>("catalogCalibrationMethod");
@@ -433,7 +454,7 @@ int main(int argc,char** argv){
             auto* popup=chooser->property("popup").value<QObject*>();ASTRO_TEST_CHECK(popup);
             ASTRO_TEST_CHECK(QMetaObject::invokeMethod(popup,"open"));
             QCoreApplication::processEvents();QThread::msleep(100);QCoreApplication::processEvents();
-            ASTRO_TEST_CHECK(popup->property("contentItem").value<QObject*>()->property("count").toInt()==5);
+            ASTRO_TEST_CHECK(popup->property("contentItem").value<QObject*>()->property("count").toInt()==6);
             ASTRO_TEST_CHECK(window.grabWindow().save(snapshot+".dropdown.png"));
             ASTRO_TEST_CHECK(QMetaObject::invokeMethod(popup,"close"));QCoreApplication::processEvents();
             ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root->findChild<QObject*>("deepSkyProjectMenu"),"clicked"));QCoreApplication::processEvents();

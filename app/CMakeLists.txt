@@ -75,6 +75,7 @@ qt_add_qml_module(AstroCapture
         qml/DeepSkyAdvancedTools.qml
         qml/AstrometryDialog.qml
         qml/MasterLibraryDialog.qml
+        qml/StarLayerTools.qml
         qml/MosaicWorkspace.qml
         qml/CaptionEditor.qml
         qml/ImageViewport.qml

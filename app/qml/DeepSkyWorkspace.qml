@@ -20,11 +20,11 @@ Control {
     property string editError: ""
     property bool imageFocus: false
     property var advancedOptions: ({})
-    readonly property var advancedKeys:["photometryMethod","photometryProfile","photometryWhite","photometryImageKey","maskStrokes","maskBaseWhite","maskFile","maskBlurRadius","maskScope","pedestal","ghs", "ghsStrength", "ghsLocal", "ghsSymmetry", "ghsShadows", "ghsHighlights", "ghsInverse", "ghsMode", "maskType", "maskLow", "maskHigh", "maskFeather", "maskX", "maskY", "maskRadius", "maskStarRadius", "maskInvert", "deconvolution", "psfProfile", "psfFwhm", "psfBeta", "rlIterations", "rlDamping", "rlBlend", "rlStopping", "advancedDenoise", "noiseScales", "noiseThreshold", "noiseAmount", "noiseChroma", "photometry", "photometryReferences", "photometryAperture", "photometryInner", "photometryOuter", "photometrySaturation"]
-    readonly property bool linearRecipeInput:!operations.some(op=>op.enabled && (op.settings.stretch || op.settings.scnr || op.settings.saturation!==1 || op.settings.rotation || op.settings.mirrorHorizontal || op.settings.mirrorVertical || (op.settings.geometry && (op.settings.geometry.crop || op.settings.geometry.angle || op.settings.geometry.scale!==1))))
+    readonly property var advancedKeys:["starSeparation","starPsfProfile","starFwhm","starBeta","starLimit","starFitTolerance","starSaturationLimit","starsGain","starsSaturation","starsMidtones","starBackgroundGain","starBackgroundSaturation","starBackgroundDenoise","photometryMethod","photometryProfile","photometryWhite","photometryImageKey","maskStrokes","maskBaseWhite","maskFile","maskBlurRadius","maskScope","pedestal","ghs", "ghsStrength", "ghsLocal", "ghsSymmetry", "ghsShadows", "ghsHighlights", "ghsInverse", "ghsMode", "maskType", "maskLow", "maskHigh", "maskFeather", "maskX", "maskY", "maskRadius", "maskStarRadius", "maskInvert", "deconvolution", "psfProfile", "psfFwhm", "psfBeta", "rlIterations", "rlDamping", "rlBlend", "rlStopping", "advancedDenoise", "noiseScales", "noiseThreshold", "noiseAmount", "noiseChroma", "photometry", "photometryReferences", "photometryAperture", "photometryInner", "photometryOuter", "photometrySaturation"]
+    readonly property bool linearRecipeInput:!operations.some(op=>op.enabled && (op.settings.starSeparation || op.settings.stretch || op.settings.scnr || op.settings.saturation!==1 || op.settings.rotation || op.settings.mirrorHorizontal || op.settings.mirrorVertical || (op.settings.geometry && (op.settings.geometry.crop || op.settings.geometry.angle || op.settings.geometry.scale!==1))))
     property int finishingTool:0
     property var expandedFamilies: [0]
-    readonly property var familyNames: [qsTr("Stretch"), qsTr("Background"), qsTr("Color"), qsTr("Geometry"), qsTr("Advanced transformations")]
+    readonly property var familyNames: [qsTr("Stretch"), qsTr("Background"), qsTr("Color"), qsTr("Geometry"), qsTr("Advanced transformations"), qsTr("Stars and background")]
     function familyOpen(index) { return expandedFamilies.indexOf(index) >= 0; }
     function openFamily(index) {
         if (!familyOpen(index)) expandedFamilies = expandedFamilies.concat([index]);
@@ -115,7 +115,8 @@ Control {
             {background:false,backgroundDegree:1,backgroundSamples:20,backgroundTolerance:1,backgroundPoints:[]},
             {photometry:false,photometryMethod:"",photometryProfile:"",photometryWhite:"",photometryImageKey:"",photometryReferences:[],red:1,green:1,blue:1,saturation:1,denoise:0,scnr:false,scnrMethod:0,scnrAmount:1,scnrPreserve:true},
             {rotation:0,mirrorHorizontal:false,mirrorVertical:false,geometry:{crop:false,x:0,y:0,width:1,height:1,angle:0,scale:1,interpolation:4,clamp:true,keepSize:false}}];
-        if(root.finishingTool===4) {
+        if(root.finishingTool===5){root.setFinish(Object.assign({},options(),{starSeparation:false,starPsfProfile:0,starFwhm:3,starBeta:3,starLimit:2000,starFitTolerance:.15,starSaturationLimit:.98,starsGain:1,starsSaturation:1,starsMidtones:.5,starBackgroundGain:1,starBackgroundSaturation:1,starBackgroundDenoise:0}));}
+        else if(root.finishingTool===4) {
             const defaults={maskStrokes:[],maskBaseWhite:true,maskFile:"",maskBlurRadius:0,maskScope:0,pedestal:0,ghs:false,ghsStrength:0,ghsLocal:0,ghsSymmetry:0,ghsShadows:0,ghsHighlights:1,ghsInverse:false,ghsMode:0,maskType:0,maskLow:0,maskHigh:1,maskFeather:0.05,maskX:0.5,maskY:0.5,maskRadius:0.25,maskStarRadius:2,maskInvert:false,deconvolution:false,psfProfile:0,psfFwhm:3,psfBeta:3,rlIterations:10,rlDamping:0.001,rlBlend:1,rlStopping:0.0001,advancedDenoise:false,noiseScales:3,noiseThreshold:3,noiseAmount:0.5,noiseChroma:0.5,photometryMethod:"",photometryProfile:"",photometryWhite:"",photometryImageKey:"",photometry:false,photometryReferences:[],photometryAperture:5,photometryInner:8,photometryOuter:12,photometrySaturation:1};
             root.setFinish(Object.assign({},options(),defaults));
         } else root.setFinish(Object.assign({},options(),families[root.finishingTool]));
@@ -136,7 +137,7 @@ Control {
     Shortcut {sequence:StandardKey.Save;enabled:root.visible && root.shortcutsAllowed && !root.dialogOpen && !controller.busy && controller.frames.length>0;onActivated:root.saveCurrentProject()}
     Shortcut {sequences:[StandardKey.Redo];enabled:root.visible && root.shortcutsAllowed && !root.dialogOpen && root.finishEditable && edits.canRedo;onActivated:root.redoFinish()}
     Timer {id:adjustmentTimer;interval:200;onTriggered:controller.apply(root.options())}
-    readonly property bool dialogOpen: inputDialog.visible || folderDialog.visible || exportDialog.visible || projectOpen.visible || projectSave.visible || projectSaveChoice.visible || relinkDialog.visible || relinkFolderDialog.visible || presetDialog.visible || projectMenu.visible || exportPanel.visible || geometryEditor.visible || astrometryDialog.dialogOpen || masterLibrary.opened || masterLibrary.fileDialogOpen || advancedTools.catalogOpen
+    readonly property bool dialogOpen: inputDialog.visible || folderDialog.visible || exportDialog.visible || projectOpen.visible || projectSave.visible || projectSaveChoice.visible || relinkDialog.visible || relinkFolderDialog.visible || presetDialog.visible || projectMenu.visible || exportPanel.visible || geometryEditor.visible || astrometryDialog.dialogOpen || masterLibrary.opened || masterLibrary.fileDialogOpen || advancedTools.catalogOpen || starTools.dialogOpen
     onDialogOpenChanged: if(dialogOpen)completionToast.close()
     background: Rectangle {color:Atelier.canvas}
     palette.window: Atelier.canvas
@@ -184,11 +185,11 @@ Control {
             edits.resetSession(Object.assign(initial,controller.hasResult?controller.finishSettings:{},restored.finish||{}));
         }
         workflowStep=controller.hasResult?6:(state.step || 0);
-        finishingTool=Math.max(0,Math.min(4,Number(state.tool)||0));
+        finishingTool=Math.max(0,Math.min(5,Number(state.tool)||0));
         // Stored QVariant lists are Qt sequences rather than JavaScript arrays.
         const restoredFamilies=state.expandedFamilies;
-        expandedFamilies=restoredFamilies&&typeof restoredFamilies!=="string"&&Number.isInteger(restoredFamilies.length)&&restoredFamilies.length<=5
-            ?Array.from(restoredFamilies).filter((value,index,items)=>Number.isInteger(value)&&value>=0&&value<5&&items.indexOf(value)===index):[finishingTool];
+        expandedFamilies=restoredFamilies&&typeof restoredFamilies!=="string"&&Number.isInteger(restoredFamilies.length)&&restoredFamilies.length<=6
+            ?Array.from(restoredFamilies).filter((value,index,items)=>Number.isInteger(value)&&value>=0&&value<6&&items.indexOf(value)===index):[finishingTool];
         advancedTools.toolIndex=state.advancedTool||0;comparisonMode=state.comparison || "result";comparisonSplit=state.split===undefined?.5:state.split;viewport.fitMode=state.fit!==false;viewport.zoom=state.zoom||1;viewport.panX=state.panX||0;viewport.panY=state.panY||0;viewport.constrainPan();
         pendingProjectFinish=!controller.hasResult&&restored.finish?edits.values:null;
         editError="";updatingControls=false;
@@ -422,7 +423,7 @@ DropArea {
                             Label {text:modelData.name;color:Atelier.text;Layout.fillWidth:true;elide:Text.ElideMiddle;MouseArea {anchors.fill:parent;enabled:!controller.busy;onClicked:controller.inspect(modelData.sourceIndex)}}
                             Label {text:root.roleLabel(modelData.role)+" · "+modelData.group+" · "+Number(modelData.exposure).toFixed(1)+" s · "+modelData.width+"×"+modelData.height+(modelData.stars!==undefined?" · "+modelData.stars+qsTr(" stars")+" · FWHM "+Number(modelData.fwhm||0).toFixed(1):"");color:Atelier.secondary;font.pixelSize:11;Layout.fillWidth:true;elide:Text.ElideRight}
                         }
-                        DarkComboBox {model:root.roleNames.slice(1);currentIndex:Math.max(0,root.roles.indexOf(modelData.role)-1);Layout.preferredWidth:110;enabled:!controller.busy;onActivated:controller.setRole(modelData.sourceIndex,root.roles[currentIndex+1])} HelpIcon {text:qsTr("Light contains the object; Dark corrects thermal signal; Flat corrects dust and illumination. Bias or Dark flat calibrates flats. A wrong role changes calibration: check automatic classifications.")}
+                        DarkComboBox {model:root.roleNames.slice(1);currentIndex:Math.max(0,root.roles.indexOf(modelData.role)-1);Layout.preferredWidth:110;enabled:!controller.busy&&!modelData.master;onActivated:controller.setRole(modelData.sourceIndex,root.roles[currentIndex+1])} HelpIcon {text:qsTr("Light contains the object; Dark corrects thermal signal; Flat corrects dust and illumination. Bias or Dark flat calibrates flats. A wrong role changes calibration: check automatic classifications.")}
                         DarkComboBox {model:["Mono","RGB","R","G","B","L","HA","OIII","SII"];currentIndex:Math.max(0,model.indexOf(modelData.group));Layout.preferredWidth:72;enabled:!controller.busy;onActivated:controller.setGroup(modelData.sourceIndex,currentText)} HelpIcon {text:qsTr("Assigns a filter group for separate integration. RGB is for color-camera data; R/G/B/L and HA/OIII/SII represent separate filters. A wrong group can mix incompatible exposures.")}
                         IconButton {text:modelData.reference?qsTr("Alignment reference ✓"):qsTr("Use as reference");borderColor:modelData.reference?Atelier.accent:Atelier.border;visible:modelData.role==="Light";enabled:!controller.busy && modelData.selected;onClicked:controller.setReference(modelData.sourceIndex);Accessible.name:qsTr("Set reference frame");helpText:qsTr("Align the other lights in this group to this image")}
                         IconButton {text:"×";enabled:!controller.busy;onClicked:controller.remove(modelData.sourceIndex);Accessible.name:qsTr("Remove frame")}
@@ -548,7 +549,7 @@ DropArea {
                     }
                     RowLayout {Layout.fillWidth:true;spacing:2;enabled:controller.hasFinishComparison&&!controller.busy&&controller.displayingResult&&!controller.showingMask&&!controller.showingBackgroundModel
                         Repeater {model:[{key:"before",label:qsTr("Before")},{key:"result",label:qsTr("Result")},{key:"split",label:qsTr("Split")}]
-                            delegate:IconButton {required property var modelData;objectName:"deepSkyCompare_"+modelData.key;text:modelData.label;ghost:root.comparisonMode!==modelData.key;Layout.fillWidth:true;borderColor:root.comparisonMode===modelData.key?Atelier.border:"transparent";onClicked:root.comparisonMode=modelData.key;Accessible.description:modelData.key==="before"?qsTr("Stack before finishing, displayed without stretch"):""}
+                            delegate:IconButton {required property var modelData;objectName:"deepSkyCompare_"+modelData.key;text:modelData.label;ghost:root.comparisonMode!==modelData.key;Layout.fillWidth:true;borderColor:root.comparisonMode===modelData.key?Atelier.border:"transparent";onClicked:{if(controller.starLayerView)controller.starLayerView=0;root.comparisonMode=modelData.key;}Accessible.description:modelData.key==="before"?qsTr("Stack before finishing, displayed without stretch"):""}
                         }
                     }
                     IconButton {objectName:"deepSkyResetFamily";text:qsTr("Delete adjustments: %1").arg(root.familyNames[root.finishingTool]);Layout.fillWidth:true;enabled:root.finishEditable&&root.expandedFamilies.length>0;active:true;onClicked:root.resetFamily();Accessible.description:qsTr("Reset the selected family. Cmd+Z restores its settings.")}
@@ -722,6 +723,13 @@ ParameterControl {id:black;label:qsTr("Black level");textIsValue:true;text:"0";f
         onGestureStarted:edits.beginEdit()
         onGestureEnded:edits.endEdit()
     }
+                }
+                InspectorFamily {objectName:"deepSkyFamily5";title:root.familyNames[5];expanded:root.familyOpen(5);current:root.finishingTool===5;onActivated:root.toggleFamily(5);onInteracted:root.finishingTool=5
+                    StarLayerTools {id:starTools;controller:root.controller;values:root.advancedOptions;editable:root.finishEditable;linearInput:root.linearRecipeInput
+                        onEdited:settings=>{root.advancedOptions=settings;root.previewAdjustments();}
+                        onGestureStarted:edits.beginEdit();onGestureEnded:edits.endEdit()
+                        onViewRequested:layer=>{root.comparisonMode="result";controller.starLayerView=layer;}
+                    }
                 }
             }
         }

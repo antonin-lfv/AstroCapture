@@ -4,6 +4,7 @@
 #include <QDateTime>
 #include <QDir>
 #include <QFile>
+#include <QFileInfo>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -82,6 +83,7 @@ QString reasons(QStringList keys) {
       {"temperature", "Temperature"},
       {"exposure", "Exposure"},
       {"filter", "Filter"},
+      {"aduScale", "Sample normalization units"},
       {"selected lights / filter group",
        "Select matching lights (dark-flat: select flats)"}};
   for (auto &key : keys)
@@ -95,6 +97,149 @@ double median(std::vector<float> a) {
   return *mid;
 }
 } // namespace
+namespace {
+QString batchText(const char* text) { return QCoreApplication::translate("MasterLibraryDialog",text); }
+QVariantMap configuration(const QVariantMap& row) {
+  QVariantMap config;
+  for(const auto* key:{"role","width","height","channels","bayer","camera","binX","binY","gain","offset","temperature","exposure","aduScale"})
+    config[key]=row.value(key);
+  if(row["role"]=="Flat") {config["group"]=row["group"];config["filter"]=row["filter"].toString().toUpper();}
+  return config;
+}
+QString configurationId(const QVariantMap& row) {
+  return QString::fromLatin1(QCryptographicHash::hash(QJsonDocument::fromVariant(configuration(row)).toJson(QJsonDocument::Compact),QCryptographicHash::Sha256).toHex());
+}
+QStringList missingConfiguration(const QVariantMap& row) {
+  QStringList missing;
+  if(row["camera"].toString().isEmpty())missing<<"camera";
+  for(const auto* key:{"binX","binY"})if(row[key].toInt()<=0)missing<<key;
+  for(const auto* key:{"gain","offset","temperature"})if(!row.contains(key))missing<<key;
+  if(row["exposure"].toDouble()<=0)missing<<"exposure";
+  if(!row.contains("aduScale"))missing<<"aduScale";
+  if(row["role"]=="Flat"&&row["filter"].toString().isEmpty())missing<<"filter";
+  return missing;
+}
+QString batchName(const QVariantMap& row) {
+  const auto camera=row["camera"].toString().isEmpty()?batchText("Unknown camera"):row["camera"].toString();
+  const auto role=row["role"].toString();
+  const auto label=role=="DarkFlat"?batchText("Dark flat"):batchText(role.toUtf8().constData());
+  auto name=QString("%1 · %2 · %3 s").arg(camera,label,QString::number(row["exposure"].toDouble(),'g',8));
+  if(role=="Flat")name+=" · "+row["group"].toString();
+  if(row.contains("temperature"))name+=QString(" · %1 °C").arg(row["temperature"].toDouble(),0,'g',6);
+  if(row.contains("gain"))name+=QString(" · ")+batchText("Gain")+" "+QString::number(row["gain"].toDouble(),'g',6);
+  return name.left(100);
+}
+}
+QVariantMap calibrationCorrectionCompatibility(const QVariantMap& candidate,const QVariantMap& flatGroup) {
+  auto sources=flatGroup["sources"].toList();
+  const bool bias=candidate["role"]=="Bias";
+  for(auto& v:sources) {auto row=v.toMap();row["selected"]=true;row["role"]=bias?"Light":"Flat";v=row;}
+  auto result=masterCompatibility(candidate,sources);
+  // AC_ORIG describes the input normalization units even for Float32 masters.
+  for(const auto& v:sources)if(candidate.contains("aduScale") && v.toMap().contains("aduScale") && candidate["aduScale"].toDouble()!=v.toMap()["aduScale"].toDouble()) {
+    result["compatibility"]=2;result["mismatch"]=batchText("Sample normalization units");
+  }
+  return result;
+}
+QVariantMap calibrationBatchPlan(const QVariantList& frames,const QVariantList& library) {
+  QMap<QString,QVariantMap> groups;QVariantList candidates,selected;
+  int ignored=0;
+  for(const auto& v:frames) {
+    const auto row=v.toMap();
+    if(!row["selected"].toBool()||!QStringList{"Bias","DarkFlat","Dark","Flat"}.contains(row["role"].toString()))continue;
+    selected<<row;
+    if(row["master"].toBool()) {
+      ++ignored;
+      if(row["role"]=="Bias"||row["role"]=="DarkFlat") {auto c=row;c["id"]="selected:"+row["path"].toString();c["savedMaster"]=true;c["label"]=row["name"];candidates<<c;}
+      continue;
+    }
+    const auto id=configurationId(row);
+    auto group=groups.value(id,row);group["id"]=id;group["name"]=batchName(row);
+    auto sources=group["sources"].toList();sources<<row;group["sources"]=sources;group["count"]=sources.size();
+    group["missing"]=reasons(missingConfiguration(row));group["reviewRequired"]=!missingConfiguration(row).isEmpty();
+    const auto pixels=std::uint64_t(std::max(0,row["width"].toInt()))*std::max(0,row["height"].toInt());
+    const auto samples=pixels*std::max(0,row["channels"].toInt());
+    if(pixels<1||pixels>32000000||(row["channels"].toInt()!=1&&row["channels"].toInt()!=3)||sources.size()>2000)
+      group["error"]=batchText("Invalid calibration dimensions or source count.");
+    for(const auto* key:{"exposure","aduScale","gain","offset","temperature"})if(row.contains(key) && (!std::isfinite(row[key].toDouble()) || (QString(key)=="exposure"&&row[key].toDouble()<0) || (QString(key)=="aduScale"&&row[key].toDouble()<=0)))
+      group["error"]=batchText("Invalid calibration metadata.");
+    const auto extension=QFileInfo(row["path"].toString()).suffix().toLower();
+    if(!QStringList{"fits","fit","fts","fz","cr2","cr3","nef","nrw","arw","dng","orf","raf","rw2","pef"}.contains(extension))
+      group["error"]=batchText("Batch masters require FITS or native RAW source files.");
+    group["workingBytes"]=qulonglong(samples*(row["role"]=="Flat"?44:36)+32ULL*1024*1024);
+    group["temporaryBytes"]=qulonglong(sources.size()>=3?samples*4*sources.size():0);
+    groups[id]=group;
+  }
+  for(const auto& v:library) {
+    auto candidate=v.toMap();if(candidate["role"]!="Bias"&&candidate["role"]!="DarkFlat")continue;
+    const auto canonical=QFileInfo(candidate["path"].toString()).canonicalFilePath();
+    bool duplicate=false;for(const auto& c:candidates) {
+      const auto existing=c.toMap()["path"].toString();
+      if(existing==candidate["path"].toString()||(!canonical.isEmpty()&&QFileInfo(existing).canonicalFilePath()==canonical))duplicate=true;
+    }
+    if(duplicate)continue;
+    candidate["masterHash"]=candidate["hash"];candidate["id"]="library:"+candidate["id"].toString();candidate["savedMaster"]=true;candidate["label"]=candidate["name"];candidates<<candidate;
+  }
+  for(const auto& group:groups)if(group["role"]=="Bias"||group["role"]=="DarkFlat") {
+    if(group.contains("error"))continue;
+    auto c=group;c["label"]=group["name"];c["savedMaster"]=false;candidates<<c;
+  }
+  QVariantList jobs;
+  for(auto group:groups) {
+    if(group["role"]=="Flat") {
+      QVariantList options;QStringList preferred, fallback;
+      for(auto c:candidates) {
+        auto candidate=c.toMap();const auto compatibility=calibrationCorrectionCompatibility(candidate,group);
+        if(compatibility["compatibility"].toInt()==2)continue;
+        candidate["compatibility"]=compatibility["compatibility"];candidate["missing"]=compatibility["missing"];
+        options<<candidate;
+        (candidate["role"]=="DarkFlat"?preferred:fallback)<<candidate["id"].toString();
+      }
+      group["corrections"]=options;
+      const auto& choices=preferred.isEmpty()?fallback:preferred;
+      group["defaultCorrection"]=choices.size()==1?choices.front():QString();
+      if(options.empty())group["error"]=batchText("Select a matching dark-flat or bias for this flat group.");
+    }
+    group["blocked"]=group.contains("error");jobs<<group;
+  }
+  std::stable_sort(jobs.begin(),jobs.end(),[](const QVariant& a,const QVariant& b){
+    const QStringList order{"Bias","DarkFlat","Dark","Flat"};
+    const auto aa=a.toMap(),bb=b.toMap();const auto ra=order.indexOf(aa["role"].toString()),rb=order.indexOf(bb["role"].toString());
+    return ra==rb?aa["name"].toString()<bb["name"].toString():ra<rb;
+  });
+  const auto revision=QString::fromLatin1(QCryptographicHash::hash(QJsonDocument(QJsonObject{{"selected",QJsonArray::fromVariantList(selected)},{"library",QJsonArray::fromVariantList(library)}}).toJson(QJsonDocument::Compact),QCryptographicHash::Sha256).toHex());
+  return {{"groups",jobs},{"revision",revision},{"ignoredMasters",ignored}};
+}
+recording::AstroImage buildCalibrationBatchMaster(const QVariantMap& group,const QVariantMap& correction,
+    const std::function<recording::AstroImage(const QVariantMap&)>& load,std::stop_token stop,const processing::IntegrationLimits& limits) {
+  check(stop);
+  if(group["blocked"].toBool()||group["sources"].toList().isEmpty())throw std::runtime_error("This calibration group is blocked. Review the batch plan.");
+  const auto checkpoint=[stop]{check(stop);};
+  auto checkedLoad=[&](const QVariantMap& row) {
+    checkpoint();auto image=load(row);auto actual=calibrationMetadata(image);actual["role"]=row["role"];actual["group"]=row["group"];
+    if(configurationId(actual)!=configurationId(row) || !image.masterRole.empty())throw std::runtime_error("Calibration source metadata changed. Reimport the source files.");
+    return image;
+  };
+  auto average=[&](const QVariantMap& job,bool normalize,const processing::Calibration& calibration) {
+    const auto sources=job["sources"].toList();
+    return processing::masterFrame(sources.size(),[&](int n){auto source=checkedLoad(sources[n].toMap());return normalize?processing::calibrate(std::move(source),calibration,checkpoint):source;},normalize,checkpoint,true,&limits);
+  };
+  processing::Calibration calibration;
+  if(group["role"]=="Flat") {
+    if(correction.isEmpty()||calibrationCorrectionCompatibility(correction,group)["compatibility"].toInt()==2)
+      throw std::runtime_error("A matching flat correction is required. Review the batch plan.");
+    auto corrected=correction["savedMaster"].toBool()?load(correction):average(correction,false,{});
+    // Recheck decoded correction metadata; known mismatches cannot be confirmed away.
+    auto actual=calibrationMetadata(corrected);actual["role"]=correction["role"];
+    if(calibrationCorrectionCompatibility(actual,group)["compatibility"].toInt()==2)
+      throw std::runtime_error("Flat correction metadata changed. Reimport the correction.");
+    if(correction["role"]=="DarkFlat")calibration.dark=std::move(corrected);else calibration.bias=std::move(corrected);
+  }
+  auto result=average(group,group["role"]=="Flat",calibration);
+  result.masterRole=group["role"].toString().toStdString();result.masterCount=group["count"].toInt();result.normalizedMasterFlat=group["role"]=="Flat";
+  return result;
+}
+
 QString calibrationFileHash(const QString &path, std::stop_token stop) {
   QFile file(path);
   if (!file.open(QIODevice::ReadOnly))
@@ -164,6 +309,10 @@ QVariantMap masterCompatibility(const QVariantMap &master,
                    : std::abs(master[key].toDouble() - l[key].toDouble()) > .01)
         errors << QString::fromUtf8(key);
     }
+    if(role!="Flat") {
+      if(!master.contains("aduScale")||!l.contains("aduScale"))missing<<"aduScale";
+      else if(!std::isfinite(master["aduScale"].toDouble())||!std::isfinite(l["aduScale"].toDouble())||master["aduScale"].toDouble()<=0||l["aduScale"].toDouble()<=0||master["aduScale"].toDouble()!=l["aduScale"].toDouble())errors<<"aduScale";
+    }
     if (role == "Dark" || role == "DarkFlat") {
       if (!master.contains("temperature") || !l.contains("temperature"))
         missing << "temperature";
@@ -217,7 +366,7 @@ QVariantMap calibrationMaster(const QString &id, std::stop_token stop) {
   throw std::runtime_error("Master not found in the library.");
 }
 QVariantMap storeCalibrationMaster(recording::AstroImage image,
-                                   const QString &name, std::stop_token stop) {
+                                   const QString &name, std::stop_token stop, const QVariantMap &provenance) {
   check(stop);
   if (name.trimmed().isEmpty() || name.size() > 120 ||
       !QStringList{"Dark", "Flat", "Bias", "DarkFlat"}.contains(
@@ -267,6 +416,13 @@ QVariantMap storeCalibrationMaster(recording::AstroImage image,
   r["role"] = QString::fromStdString(image.masterRole);
   r["date"] = QDateTime::currentDateTimeUtc().toString(Qt::ISODate);
   r["hash"] = calibrationFileHash(file, stop);
+  for(const auto* key:{"sourceHashes","correctionHashes"}) {
+    const auto hashes=provenance.value(key).toList();
+    if(hashes.size()>2000)throw std::runtime_error("Invalid master provenance.");
+    for(const auto& hash:hashes)if(!QRegularExpression("^[a-f0-9]{64}$").match(hash.toString()).hasMatch())throw std::runtime_error("Invalid master provenance.");
+    if(!hashes.empty())r[key]=hashes;
+  }
+  if(provenance.contains("metadataReviewed"))r["metadataReviewed"]=provenance["metadataReviewed"].toBool();
   r["median"] = med;
   r["noiseMAD"] = noise;
   r["minimum"] = minimum;

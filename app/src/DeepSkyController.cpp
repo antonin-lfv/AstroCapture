@@ -296,7 +296,7 @@ void DeepSkyController::addFiles(const QList<QUrl>& urls,const QString& role,con
                 QString assigned=group=="Auto"?groupName(QString::fromStdString(data.filter)):groupName(group);
                 if(assigned.isEmpty())assigned=data.channels==3||data.bayer!=domain::BayerPattern::None?"RGB":"Mono";
                 row["group"]=assigned;row["exposure"]=data.exposure;row["width"]=data.width;row["height"]=data.height;
-                row["channels"]=data.channels;row["bayer"]=QString::fromUtf8(domain::to_string(data.bayer).data());row["bits"]=data.bits;row["aduScale"]=data.scale;
+                row["channels"]=data.channels;row["bayer"]=QString::fromUtf8(domain::to_string(data.bayer).data());row["bits"]=data.bits;row["aduScale"]=data.originalScale;
                 row["filter"]=QString::fromStdString(data.filter);if(data.hasGain)row["gain"]=data.gain;if(data.hasTemperature)row["temperature"]=data.temperature;
                 auto rgb=std::make_shared<processing::FloatImage>(processing::linearRgb(data,[stop]{check(stop);}));
                 if(row["role"]=="Light") {
@@ -323,7 +323,7 @@ void DeepSkyController::setReference(int index) {
     emit changed();
 }
 void DeepSkyController::remove(int index){if(busy_||index<0||index>=frames_.size())return;frames_.removeAt(index);emit changed();}
-void DeepSkyController::clear(){if(busy_)return;diagnosticMaps_.clear();hdrReport_.clear();diagnosticPreview_={};diagnosticInfo_.clear();emit diagnosticChanged();integrationReport_.clear();starsLayer_.reset();starBackgroundLayer_.reset();starsLayerPreview_={};starBackgroundLayerPreview_={};starLayerView_=0;projectUrl_=QUrl();sourceFingerprints_.clear();maskImportPreview_={};maskImportPath_.clear();geometryPreview_={};maskSourcePreview_={};advancedReport_.clear();psfKernel_.clear();maskPreview_={};showingMask_=false;projectOptions_.clear();sourceRow_.clear();sourceInterpretation_.clear();sourceDebayer_=sourceAutoStretch_=true;finishSettings_.clear();rawPreview_={};backgroundPreview_={};showingBackgroundModel_=false;rawName_.clear();comparingRaw_=false;histogram_.clear();pendingAdjustments_.reset();displayingResult_=false;stage_.clear();frames_.clear();backgroundSamples_.clear();references_.clear();stacks_.clear();astrometry_.clear();stackAstrometry_.clear();groupExposure_.clear();groupCounts_.clear();exposureCount_=0;resultFilters_.clear();groups_.clear();linear_.reset();finished_.reset();pipelineCache_.reset();pipelineSource_.reset();pipelineCacheKey_.clear();preview_={};resultPreview_={};linearPreview_={};comparisonPreview_={};comparisonOrientationKey_.clear();status_.clear();emit projectOptionsChanged();emit changed();emit imageChanged();}
+void DeepSkyController::clear(){if(busy_)return;calibrationBatchResults_.clear();diagnosticMaps_.clear();hdrReport_.clear();diagnosticPreview_={};diagnosticInfo_.clear();emit diagnosticChanged();integrationReport_.clear();starsLayer_.reset();starBackgroundLayer_.reset();starsLayerPreview_={};starBackgroundLayerPreview_={};starLayerView_=0;projectUrl_=QUrl();sourceFingerprints_.clear();maskImportPreview_={};maskImportPath_.clear();geometryPreview_={};maskSourcePreview_={};advancedReport_.clear();psfKernel_.clear();maskPreview_={};showingMask_=false;projectOptions_.clear();sourceRow_.clear();sourceInterpretation_.clear();sourceDebayer_=sourceAutoStretch_=true;finishSettings_.clear();rawPreview_={};backgroundPreview_={};showingBackgroundModel_=false;rawName_.clear();comparingRaw_=false;histogram_.clear();pendingAdjustments_.reset();displayingResult_=false;stage_.clear();frames_.clear();backgroundSamples_.clear();references_.clear();stacks_.clear();astrometry_.clear();stackAstrometry_.clear();groupExposure_.clear();groupCounts_.clear();exposureCount_=0;resultFilters_.clear();groups_.clear();linear_.reset();finished_.reset();pipelineCache_.reset();pipelineSource_.reset();pipelineCacheKey_.clear();preview_={};resultPreview_={};linearPreview_={};comparisonPreview_={};comparisonOrientationKey_.clear();status_.clear();emit projectOptionsChanged();emit changed();emit imageChanged();}
 void DeepSkyController::chooseRawComparison(int index){
     if(busy_||index<0||index>=frames_.size()||frames_[index].toMap()["role"]!="Light")return;
     const auto row=frames_[index].toMap();
@@ -349,6 +349,118 @@ void DeepSkyController::inspect(int index){
 QVariantList DeepSkyController::calibrationMasters() const {
     try{auto rows=calibrationMasterInventory();for(auto& v:rows){auto r=v.toMap();const auto compatibility=masterCompatibility(r,frames_);for(auto it=compatibility.begin();it!=compatibility.end();++it)r[it.key()]=it.value();v=r;}return rows;}catch(const std::exception&){return {};}
 }
+std::uint64_t DeepSkyController::retainedImageBytes() const {
+    std::set<const processing::FloatImage*> seen;std::uint64_t retained=256ULL*1024*1024;
+    auto keep=[&](const auto& image){if(image&&seen.insert(image.get()).second)retained+=image->rgb.size()*sizeof(float);};
+    for(const auto& [key,image]:stacks_)keep(image);for(const auto& [key,image]:diagnosticMaps_)keep(image);
+    for(const auto& image:{linear_,finished_,starsLayer_,starBackgroundLayer_,pipelineCache_,pipelineSource_})keep(image);
+    std::set<qint64> previews;
+    for(const auto& image:{preview_,resultPreview_,rawPreview_,backgroundPreview_,linearPreview_,comparisonPreview_,geometryPreview_,maskSourcePreview_,maskImportPreview_,maskPreview_,starsLayerPreview_,starBackgroundLayerPreview_,diagnosticPreview_})
+        if(!image.isNull()&&previews.insert(image.cacheKey()).second)retained+=image.sizeInBytes();
+    return retained;
+}
+QVariantMap DeepSkyController::calibrationBatchPlan() const {
+    QVariantList inventory;QString libraryError;
+    try{inventory=calibrationMasterInventory();}catch(const std::exception& e){libraryError=tr(e.what());}
+    auto plan=astro::app::calibrationBatchPlan(frames_,inventory);plan["libraryError"]=libraryError;
+    const auto physical=processing::physicalMemoryBytes();
+    const auto budget=physical?std::min<std::uint64_t>(8ULL*1024*1024*1024,physical/2):2ULL*1024*1024*1024;
+    const auto retained=retainedImageBytes();
+    std::error_code error;const auto space=std::filesystem::space(nativePath(integrationTemporaryDirectory()),error);
+    const auto folder=QFileInfo(integrationTemporaryDirectory());
+    const bool diskKnown=!error&&space.available!=std::uintmax_t(-1)&&folder.isDir()&&folder.isWritable();
+    auto groups=plan["groups"].toList();
+    for(auto& v:groups) {
+        auto job=v.toMap();auto temporary=job["temporaryBytes"].toULongLong();
+        for(const auto& c:job["corrections"].toList())temporary=std::max(temporary,c.toMap()["temporaryBytes"].toULongLong());
+        const auto working=retained+job["workingBytes"].toULongLong();job["workingBytes"]=qulonglong(working);job["temporaryBytes"]=qulonglong(temporary);
+        if(!libraryError.isEmpty())job["error"]=libraryError;
+        else if(!job["blocked"].toBool()) {
+            if(working>budget)job["error"]=tr("The master batch memory estimate exceeds the safety budget. Close other results or use smaller source images.");
+            else if(!diskKnown||temporary>space.available||256ULL*1024*1024>space.available-temporary)job["error"]=tr("Not enough accessible temporary disk space for this master group. Choose another temporary folder.");
+        }
+        job["blocked"]=job.contains("error");v=job;
+    }
+    plan["groups"]=groups;plan["memoryBudget"]=qulonglong(budget);plan["temporaryDirectory"]=integrationTemporaryDirectory();
+    return plan;
+}
+void DeepSkyController::createCalibrationMasters(const QVariantList& ids,const QVariantMap& corrections,const QString& prefix,bool reviewed,const QString& revision) {
+    if(busy_)return;
+    const auto plan=calibrationBatchPlan();
+    QVariantList jobs;
+    try {
+        if(ids.empty()||ids.size()>64||prefix.size()>40)throw std::runtime_error("Choose between 1 and 64 master groups and a name prefix of at most 40 characters.");
+        if(revision!=plan["revision"].toString())throw std::runtime_error("The calibration selection changed. Review the refreshed batch plan.");
+        QSet<QString> selected;
+        for(const auto& id:ids) {
+            const auto key=id.toString();if(selected.contains(key))throw std::runtime_error("Duplicate master group selection.");selected.insert(key);
+            bool found=false;
+            for(const auto& v:plan["groups"].toList())if(v.toMap()["id"]==key) {
+                auto job=v.toMap();found=true;
+                if(job["blocked"].toBool())throw std::runtime_error(job["error"].toString().toStdString());
+                if(job["reviewRequired"].toBool()&&!reviewed)throw std::runtime_error("Review the missing calibration metadata before building this batch.");
+                if(job["role"]=="Flat") {
+                    const auto requested=corrections.value(key,job["defaultCorrection"]).toString();QVariantMap correction;
+                    for(const auto& c:job["corrections"].toList())if(c.toMap()["id"]==requested)correction=c.toMap();
+                    if(correction.empty())throw std::runtime_error("Choose an explicit correction for each ambiguous flat group.");
+                    if((correction["reviewRequired"].toBool()||correction["compatibility"].toInt()==1)&&!reviewed)
+                        throw std::runtime_error("Review the missing calibration metadata before building this batch.");
+                    job["correction"]=correction;
+                }
+                jobs<<job;break;
+            }
+            if(!found)throw std::runtime_error("The calibration selection changed. Review the refreshed batch plan.");
+        }
+    }catch(const std::exception& e){status_=tr(e.what());emit changed();return;}
+    // Keep dependency order from the reviewed plan rather than caller order.
+    std::stable_sort(jobs.begin(),jobs.end(),[](const QVariant& a,const QVariant& b){return QStringList{"Bias","DarkFlat","Dark","Flat"}.indexOf(a.toMap()["role"].toString())<QStringList{"Bias","DarkFlat","Dark","Flat"}.indexOf(b.toMap()["role"].toString());});
+    calibrationBatchResults_.clear();emit changed();
+    const auto temporary=integrationTemporaryDirectory();
+    run(tr("Building calibration masters…"),[this,jobs,prefix,reviewed,temporary](std::stop_token stop){
+        QVariantList report;int completed=0;QMap<QString,QString> verifiedHashes;
+        const auto checkpoint=[stop]{check(stop);};
+        auto readVerified=[&](const QVariantMap& row) {
+            checkpoint();const auto path=row["path"].toString();const auto expected=row["sourceFingerprint"].toMap()["sha256"].toString();
+            const auto before=ProjectStorage::fingerprint(path,checkpoint);
+            if(!expected.isEmpty()&&expected!=before["sha256"].toString())throw std::runtime_error("A calibration source changed since import. Reimport it before building masters.");
+            auto image=readFrame(row);
+            if(ProjectStorage::fingerprint(path,checkpoint)["sha256"]!=before["sha256"])
+                throw std::runtime_error("A calibration source changed during reading. Reimport it before building masters.");
+            verifiedHashes[path]=before["sha256"].toString();
+            return image;
+        };
+        for(int n=0;n<jobs.size();++n) {
+            const auto job=jobs[n].toMap();const auto name=(prefix.trimmed().isEmpty()?QString():prefix.trimmed()+" · ")+job["name"].toString();
+            QVariantMap result{{"id",job["id"]},{"name",name.left(120)},{"role",job["role"]},{"count",job["count"]}};
+            post([this,n,total=int(jobs.size()),name]{progress_=n*100/total;status_=tr("Master %1/%2 · %3").arg(n+1).arg(total).arg(name);emit changed();});
+            try {
+                checkpoint();processing::IntegrationLimits limits;limits.temporaryDirectory=nativePath(temporary);
+                auto image=buildCalibrationBatchMaster(job,job["correction"].toMap(),readVerified,stop,limits);
+                QVariantList sourceHashes,correctionHashes;
+                for(const auto& v:job["sources"].toList())sourceHashes<<verifiedHashes[v.toMap()["path"].toString()];
+                const auto correction=job["correction"].toMap();
+                if(correction["savedMaster"].toBool())correctionHashes<<verifiedHashes[correction["path"].toString()];
+                else for(const auto& v:correction["sources"].toList())correctionHashes<<verifiedHashes[v.toMap()["path"].toString()];
+                const auto entry=storeCalibrationMaster(std::move(image),name.left(120),stop,{{"sourceHashes",sourceHashes},{"correctionHashes",correctionHashes},{"metadataReviewed",reviewed}});
+                result["state"]="saved";result["masterId"]=entry["id"];result["path"]=entry["path"];result["rejectedSamples"]=entry["rejectedSamples"];++completed;
+            }catch(const Cancelled&) {
+                result["state"]="cancelled";result["error"]=tr("Cancelled. Previous results are preserved.");report<<result;
+                for(int k=n+1;k<jobs.size();++k){const auto skipped=jobs[k].toMap();report<<QVariantMap{{"id",skipped["id"]},{"name",skipped["name"]},{"state","pending"}};}
+                break;
+            }catch(const std::exception& e) {
+                result["state"]=stop.stop_requested()?"cancelled":"failed";result["error"]=tr(e.what());report<<result;
+                // Stop on the first failure: no repeated writes on a full disk.
+                for(int k=n+1;k<jobs.size();++k){auto skipped=jobs[k].toMap();report<<QVariantMap{{"id",skipped["id"]},{"name",skipped["name"]},{"state","pending"}};}
+                break;
+            }
+            report<<result;
+            post([this,report]{calibrationBatchResults_=report;emit changed();});
+        }
+        post([this,report,completed,total=int(jobs.size()),stop]{calibrationBatchResults_=report;progress_=completed*100/std::max(1,total);status_=stop.stop_requested()?tr("Batch cancelled: %1/%2 masters saved. Completed masters remain in the library; sources and the image result are preserved.").arg(completed).arg(total):completed==total?tr("Batch complete: %1 masters saved. Choose them explicitly from the library to apply them.").arg(completed):tr("Batch stopped: %1/%2 masters saved. Review the failed group; completed masters remain available.").arg(completed).arg(total);emit changed();});
+        if(!stop.stop_requested()&&completed!=jobs.size())throw std::runtime_error(tr("Batch stopped: %1/%2 masters saved. Review the failed group; completed masters remain available.").arg(completed).arg(jobs.size()).toStdString());
+    });
+}
+
 void DeepSkyController::createCalibrationMaster(const QString& role,const QString& name){
     const auto frames=frames_;run(tr("Building a calibration master…"),[this,frames,role,name](std::stop_token stop){
         if(!QStringList{"Dark","Bias","Flat","DarkFlat"}.contains(role))throw std::runtime_error("Choose a calibration role.");QVariantList sources,biases,darkFlats;for(const auto& v:frames){const auto r=v.toMap();if(!r["selected"].toBool())continue;if(r["role"]==role)sources<<r;if(r["role"]=="Bias")biases<<r;if(r["role"]=="DarkFlat")darkFlats<<r;}
@@ -407,15 +519,7 @@ QVariantMap DeepSkyController::integrationResources(const QVariantMap& options) 
         if(groups.empty()){plan["message"]=tr("Select light frames to estimate resources.");return plan;}
         // Count shared native images and QImages once. Keep the previous result
         // while the new stack is computed, including pipeline caches.
-        std::set<const processing::FloatImage*> images;std::set<qint64> previews;
-        std::uint64_t retained=256ULL*1024*1024;
-        auto keep=[&](const auto& image){if(image && images.insert(image.get()).second)retained+=image->rgb.size()*sizeof(float);};
-        for(const auto& [key,image]:stacks_)keep(image);
-        for(const auto& [key,image]:diagnosticMaps_)keep(image);
-        for(const auto& image:{linear_,finished_,starsLayer_,starBackgroundLayer_})keep(image);
-        keep(pipelineCache_);keep(pipelineSource_);
-        for(const auto& image:{preview_,resultPreview_,rawPreview_,backgroundPreview_,linearPreview_,comparisonPreview_,geometryPreview_,maskSourcePreview_,maskImportPreview_,maskPreview_,starsLayerPreview_,starBackgroundLayerPreview_,diagnosticPreview_})
-            if(!image.isNull() && previews.insert(image.cacheKey()).second)retained+=image.sizeInBytes();
+        const auto retained=retainedImageBytes();
         std::uint64_t peak=retained+calibrationBytes*2+largestCalibration*6,results=0,disk=0,largestResult=0;
         QVariantList rows;
         for(const auto& [name,group]:groups) {

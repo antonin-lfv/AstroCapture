@@ -12,7 +12,7 @@ using Progress = std::function<void(int,int,const std::string&)>;
 struct Calibration {
     std::optional<AstroImage> dark, flat, bias, darkFlat, badPixels;
 };
-AstroImage masterFrame(int count, const ImageLoader&, bool normalize, const CheckCancel& = {}, bool robust = false);
+AstroImage masterFrame(int count, const ImageLoader&, bool normalize, const CheckCancel& = {}, bool robust = false, const IntegrationLimits* = nullptr);
 AstroImage detectBadPixels(const AstroImage& dark,double sigma=8);
 AstroImage calibrate(AstroImage light, const Calibration&, const CheckCancel& = {});
 FloatImage linearRgb(const AstroImage&, const CheckCancel& = {});

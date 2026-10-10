@@ -1,6 +1,6 @@
 # AstroCapture — bilan avant V2
 
-État du 10 octobre 2026, après la livraison 1.14.0.
+État du 10 octobre 2026, après la livraison 1.15.0.
 
 Ce document centralise les travaux restants. Les fonctions livrées sont décrites
 dans le [README](../../README.md) et le guide intégré ; les anciens lots sont
@@ -24,6 +24,11 @@ La 1.14 borne les buffers de rejet à 64 Mio, utilise une archive temporaire
 par calcul et contrôle mémoire, espace disque et limites de reprise avant
 l’empilement. La limite de sortie de 32 MP demeure : toute la chaîne ne travaille
 pas encore par tuiles. Voir [ADR-025](../decisions/ADR-025-integration-resources.md).
+
+La 1.15 ajoute la préparation de masters par lots, séparés par configuration
+avec choix des correctifs de flats, vérification des sources, provenance,
+recherche/filtrage et bilan d’annulation ou d’échec. La création reste distincte
+de l’application aux poses. Voir [ADR-026](../decisions/ADR-026-batch-calibration-masters.md).
 
 « Implémenté et testé » ne signifie pas « validé dans toutes les conditions ».
 Les aides et le guide expliquent les réglages ; les preuves d’une livraison sont
@@ -67,10 +72,11 @@ une parité scientifique complète avec Siril sans comparaison indépendante.
 - Retrait de gradient RBF et par division, réglages de grille par séquence ;
   diagnostic exact des pertes finales distinguant saturation des sources et
   écrêtage ajouté par la finition.
-- Regroupement de calibrations hétérogènes, recherche multicritère et proposition
-  contrôlée de masters par configuration ; création par lots et diagnostics de
-  calibration plus détaillés. La bibliothèque actuelle reste disponible avec
-  choix explicite et contrôles de compatibilité.
+- Application de calibrations distinctes à des poses hétérogènes dans une seule
+  intégration et pipeline HDR brut complet. Depuis 1.15, les **masters** sont
+  regroupés/créés par lots avec recherche et contrôles explicites ; cela
+  n’automatise pas toute la préparation des poses. Diagnostics de calibration
+  spatiaux plus détaillés et critères de classement avancés restent possibles.
 - Normalisation locale, interpolation d’empilement configurable, champ de sortie
   choisi par l’utilisateur et projections grand angle. Le changement d’échelle
   existe déjà en géométrie et dans les modes drizzle documentés.

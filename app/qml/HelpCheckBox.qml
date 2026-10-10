@@ -8,6 +8,14 @@ CheckBox {
     property string explanation: ""
     Accessible.description: explanation
     Layout.minimumWidth: 0
+    indicator: Rectangle {
+        implicitWidth:20;implicitHeight:20
+        x:control.leftPadding;y:(control.height-height)/2
+        color:control.down?Atelier.hover:Atelier.field
+        border.color:control.activeFocus?Atelier.accent:control.hovered?Atelier.secondary:Atelier.border
+        radius:2;opacity:control.enabled?1:0.6
+        Text {anchors.centerIn:parent;text:control.checkState===Qt.PartiallyChecked?"−":"✓";visible:control.checkState!==Qt.Unchecked;color:Atelier.text;font.pixelSize:16}
+    }
     contentItem: RowLayout {
         spacing: 6
         Text {

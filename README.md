@@ -349,6 +349,18 @@ appliqué, pas les paramètres encore en attente.
   conserve le fichier pour les projets existants. Les projets portables
   emportent les masters utilisés avec leurs autres sources.
 
+Depuis **1.15.0**, **Créer des masters par lots** prépare jusqu’à 64 groupes à la
+fois, séparés par les métadonnées enregistrées de leur configuration. Vérifiez
+le plan, les sources et les correctifs des flats ; les informations inconnues
+et les correctifs ambigus demandent une décision explicite. Les groupes sont
+calculés successivement, avec contrôle mémoire/disque et provenance SHA-256.
+Une annulation ou la première erreur arrête le lot en conservant les masters
+terminés et le résultat de l’image. La bibliothèque permet la recherche par
+nom, caméra, filtre ou réglages, le filtrage par rôle et le masquage des
+incompatibilités. Aucun master n’est appliqué automatiquement. Des poses de
+configurations hétérogènes nécessitent encore des intégrations séparées.
+Voir [le périmètre et les limites](docs/decisions/ADR-026-batch-calibration-masters.md).
+
 **Étoiles et fond** — nouvelle famille dans **Finition** :
 
 - Extraction native par ajustement d’une PSF circulaire gaussienne ou Moffat

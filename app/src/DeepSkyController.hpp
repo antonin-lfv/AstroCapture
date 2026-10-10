@@ -83,6 +83,10 @@ public:
     void setStarLayerView(int);
     Q_INVOKABLE void exportStarLayer(const QUrl&,int layer);
     QVariantList calibrationMasters() const;
+    Q_INVOKABLE QVariantMap calibrationBatchPlan() const;
+    Q_INVOKABLE void createCalibrationMasters(const QVariantList& ids,const QVariantMap& corrections,const QString& prefix,bool reviewed,const QString& revision);
+    Q_PROPERTY(QVariantList calibrationBatchResults READ calibrationBatchResults NOTIFY changed)
+    QVariantList calibrationBatchResults() const{return calibrationBatchResults_;}
     Q_INVOKABLE void createCalibrationMaster(const QString& role,const QString& name);
     Q_INVOKABLE void importCalibrationMaster(const QUrl&,const QString& role,const QString& name,bool correctedFlat=false);
     Q_INVOKABLE void useCalibrationMaster(const QString& id,bool reviewed=false);
@@ -213,6 +217,7 @@ private:
     QVariantMap sourceFingerprints_;
     bool restoringProject_{};
     void restoreProject(const WorkspaceSnapshot&, const QUrl&, const QString&);
+    std::uint64_t retainedImageBytes() const;
     void run(const QString&,std::function<void(std::stop_token)>);
     void post(std::function<void()>);
     void show(std::shared_ptr<const processing::FloatImage>,bool result, QImage preview, std::shared_ptr<const processing::FloatImage> displayed, QVariantMap stretch, QImage before = {});
@@ -226,7 +231,7 @@ private:
     bool busy_{},adjusting_{},exporting_{};
     std::optional<QVariantMap> pendingAdjustments_;
     QVariantMap histogram_,advancedReport_;
-    QVariantList integrationReport_;
+    QVariantList integrationReport_,calibrationBatchResults_;
     QVariantMap hdrReport_,diagnosticInfo_;
     QImage diagnosticPreview_;
     std::map<QString,std::shared_ptr<const processing::FloatImage>> diagnosticMaps_;

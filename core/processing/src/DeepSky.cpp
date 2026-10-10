@@ -84,7 +84,7 @@ cv::Rect commonRectangle(const std::vector<unsigned char>& mask,int width,int he
     return best;
 }
 }
-AstroImage masterFrame(int count,const ImageLoader& load,bool normalize,const CheckCancel& check,bool robust) {
+AstroImage masterFrame(int count,const ImageLoader& load,bool normalize,const CheckCancel& check,bool robust,const IntegrationLimits* requestedLimits) {
     if(count<1)throw std::runtime_error("No calibration frames selected.");
     auto result=load(0); std::vector<double> sum(result.samples.size());
     std::vector<unsigned> valid(sum.size()); double exposure=0;
@@ -92,7 +92,8 @@ AstroImage masterFrame(int count,const ImageLoader& load,bool normalize,const Ch
     std::unique_ptr<WorkingFiles> files;
     if(robust){
         if(count>2000 || result.samples.size()>32000000ULL*3)throw std::runtime_error("Too many calibration samples for a master.");
-        files=std::make_unique<WorkingFiles>(std::filesystem::path{},std::uint64_t(result.samples.size())*count*sizeof(float),256ULL*1024*1024);
+        const auto limits=requestedLimits?*requestedLimits:IntegrationLimits{};
+        files=std::make_unique<WorkingFiles>(limits.temporaryDirectory,std::uint64_t(result.samples.size())*count*sizeof(float),limits.diskReserveBytes);
     }
     for(int n=0;n<count;++n) {
         checked(check); auto image=n?load(n):result; same(result,image);

@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.15.0 — 2026-10-10
+
+- Review and build calibration masters in sequential batches by recorded sensor
+  configuration, with explicit flat correction choices and metadata review.
+- Verify source hashes and preserve per-master provenance; stop at cancellation
+  or first failure, keeping completed masters and the previous image result.
+- Search/filter the master library and rank compatible entries before use;
+  preserve original normalization units when importing Float32 masters.
+- Share retained-image memory estimates across integration and batch planning;
+  update French help, guide and dark checkbox states.
+
 ## 1.14.0 — 2026-10-10
 
 - Estimate stacking memory, temporary disk space and recovery limits before

@@ -301,6 +301,15 @@ astro_add_unit_test(astro_app_master_library_test
 set_target_properties(astro_app_master_library_test PROPERTIES AUTOMOC ON)
 target_include_directories(astro_app_master_library_test PRIVATE ../../app/src)
 set_tests_properties(astro_app_master_library_test PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen" TIMEOUT 45)
+astro_add_unit_test(astro_app_batch_master_library_test
+    SOURCES app/BatchMasterLibraryTest.cpp ../../app/src/MasterLibrary.cpp
+        ../../app/src/DeepSkyController.cpp ../../app/src/DeepSkyController.hpp
+        ../../app/src/DeepSkyAstrometry.cpp ../../app/src/BlindSolver.cpp ../../app/src/GaiaCatalog.cpp ../../app/src/TargetResolver.cpp
+        ../../app/src/DeepSkySession.cpp ../../app/src/ProjectStorage.cpp ../../app/src/SessionStorage.cpp
+    LIBS Qt6::Quick Qt6::Gui Qt6::Network astro::processing astro::recording ZLIB::ZLIB)
+set_target_properties(astro_app_batch_master_library_test PROPERTIES AUTOMOC ON)
+target_include_directories(astro_app_batch_master_library_test PRIVATE ../../app/src)
+set_tests_properties(astro_app_batch_master_library_test PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen" TIMEOUT 45)
 astro_add_unit_test(astro_processing_star_layers_test SOURCES processing/StarLayersTest.cpp LIBS astro::processing)
 astro_add_unit_test(astro_app_star_layers_test
     SOURCES app/StarLayersControllerTest.cpp ../../app/src/MasterLibrary.cpp

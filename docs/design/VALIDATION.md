@@ -687,3 +687,54 @@ Journaux : `build/resource-package.log`, `build/resource-dmg-verification.log`.
 
 La signature Apple Developer ID, la notarisation et l'installation sur un Mac
 vierge restent à qualifier avant une distribution publique normale.
+
+
+## 1.15.0 — Masters de calibration par lots (10 octobre 2026)
+
+Phase sauvegardée par le commit `44502f3`, branche
+`codex/batch-calibration-masters`. Direction Atelier conservée.
+
+### Calcul et protection des données
+
+- **49/49 tests Release passent**, 7,96 s (`build/batch-final-tests.log`).
+- Regroupement strict testé pour durée, caméra, dimensions, Bayer, binning,
+  gain, offset, température, unités et filtre ; les valeurs absentes restent
+  distinctes et demandent une revue. Une incompatibilité connue bloque le calcul.
+- Masters robustes de durées différentes et rejet d'un échantillon aberrant
+  vérifiés. Les flats corrigés/normalisés donnent exactement les mêmes
+  échantillons que le parcours de référence, sans double soustraction du piédestal.
+- Dark-flat préféré, ambiguïtés explicites et correctifs disponibles directement
+  dans la bibliothèque vérifiés. Les alias macOS d'un même chemin ne dupliquent
+  pas le candidat. Les masters enregistrés ne sont pas regroupés comme bruts.
+- `AC_ORIG` conservé à l'import Float32 ; incompatibilités d'unités refusées.
+  Provenance SHA-256 des sources/correctifs et revue des métadonnées relues dans
+  l'index, avec compatibilité du format de bibliothèque existant.
+- Plan périmé, source modifiée, index corrompu et dossier temporaire absent
+  refusés. Annulation immédiate et échec après un premier master publié donnent
+  un bilan explicite, conservent les masters terminés et arrêtent les suivants.
+  Le résultat linéaire, les sources et les sélections restent inchangés.
+- Budgets mémoire/disque partagés avec l'intégration ; le choix du dossier
+  temporaire s'applique aussi au calcul des masters et correctifs bruts.
+  Publication atomique par entrée, pas transaction de tout le lot.
+
+### Interface, aides et guide
+
+Rendu QML natif en français aux tailles **1440 × 960, 1100 × 800, 900 × 700** :
+plan, aide au focus, correctif du flat, bilan de cinq masters, recherche dans la
+bibliothèque et carte du guide. Dix-huit captures :
+`previews/native/1.15.0-*.png`. Bornes des aides contrôlées ; actions de création,
+dossier temporaire et fermeture accessibles, états d'activité/désactivation
+vérifiés. Cases à cocher communes avec indicateur sombre, survol et focus Atelier.
+Recherche par durée et masquage des incompatibilités contrôlés, application
+explicite conservée. Le guide décrit aussi les limites et l'arrêt du lot.
+
+L'image d'Orion est réelle, recadrée à 1024 × 768, avec des métadonnées de matériel
+de démonstration sur sa copie ; les calibrations du contrôle d'interface sont
+synthétiques. Il s'agit d'un contrôle de parcours et de précision, pas d'une
+qualification indépendante des capteurs ni d'une comparaison avec Siril.
+
+Les images restent complètes en mémoire, limitées à 32 MP. Le lot prépare les
+masters ; l'application automatique de calibrations distinctes aux poses
+hétérogènes et le pipeline HDR brut complet restent hors de ce périmètre.
+Voir [ADR-026](../decisions/ADR-026-batch-calibration-masters.md) et le
+[bilan avant V2](../releases/V2_READINESS.md).

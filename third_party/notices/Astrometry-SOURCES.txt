@@ -20,3 +20,8 @@ from https://data.astrometry.net/4100/index-4109.fits with the official checksum
 Users can select any supported local index folder. Upstream documentation:
 https://astrometry.net/doc/readme.html
 https://github.com/dstndstn/astrometry.net/releases/tag/0.97
+
+The FITS-only command line uses --no-remove-lines --uniformize 0 to avoid
+Astrometry.net's optional Python input-list filters. Native engine verification
+and AstroCapture's independent Gaia verification remain enabled. No Python
+runtime, plotting utilities or image conversion tools are shipped.

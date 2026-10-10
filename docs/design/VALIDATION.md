@@ -349,7 +349,7 @@ Les phases sont sauvegardées séparément : `b8127e8` avant modification,
 masters et `a84514c` pour les couches étoiles/fond. Les réglages précédents
 et les projets sans ces nouvelles options restent compatibles.
 
-Les **44 tests Release passent** (20,41 s), dont les nouvelles suites SIP,
+Les **44 tests Release passent** (27,30 s, après la correction du parcours natif), dont les nouvelles suites SIP,
 résolution aveugle, bibliothèque et couches. Ils couvrent les inverses WCS,
 les transformations et les FITS Float32, le rejet robuste, les métadonnées
 manquantes/incompatibles, les contrôles d’empreintes et la non-répétition de
@@ -390,3 +390,14 @@ de l’archive officielle contrôlée, car l’archive actuelle ne correspond pl
 Le pré-inclusion de `stdio.h` dans les options de compilation corrige une
 déclaration manquante dans un test amont avec le compilateur macOS actuel.
 Aucune bibliothèque Homebrew installée n’est modifiée.
+
+Le contrôle sans Homebrew dans le chemin des outils a détecté les filtres
+Python optionnels `removelines` et `uniformize`. Le parcours FITS natif les
+désactive explicitement (`--no-remove-lines --uniformize 0`) ; la vérification
+C du moteur conserve sa propre répartition/déduplication et le contrôle Gaia
+reste obligatoire. Aucun runtime Python n’est requis sur le Mac destinataire.
+
+Le parcours réel du contrôleur repasse avec uniquement les helpers du paquet
+et les outils système dans PATH : résolution aveugle, 675 associations Gaia,
+RMS 0,523018 pixel, export SIP et vérification des pixels linéaires à l’identique.
+Une demande SIP invalide conserve ensuite le WCS vérifié et les résultats.

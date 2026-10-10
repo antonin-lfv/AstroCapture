@@ -165,7 +165,13 @@ recording::CelestialWcs solveBlindField(const processing::FloatImage &image,
   const auto inputPath = temporary.filePath("field.fits");
   recording::writeAstroFits(inputPath.toStdString(), input);
   check(stop);
+  // These optional input-list filters are Python scripts in Astrometry.net.
+  // Keep the FITS path native; the engine's C verification still performs its
+  // own uniformization/deduplication, followed by our independent Gaia check.
   QStringList args{"--fits-image",
+                   "--no-remove-lines",
+                   "--uniformize",
+                   "0",
                    "--no-verify",
                    "--no-plots",
                    "--overwrite",

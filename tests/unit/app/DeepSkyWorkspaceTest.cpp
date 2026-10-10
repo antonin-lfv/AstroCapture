@@ -1,5 +1,6 @@
 #include "MaskOverlayItem.hpp"
 #include "ImagePixelsItem.hpp"
+#include "EquipmentProfile.hpp"
 #include <QGuiApplication>
 #include <QQmlEngine>
 #include <QQmlComponent>
@@ -20,10 +21,12 @@
 #include <QJsonObject>
 #include <astro/recording/AstroImage.hpp>
 #include <cmath>
+#include <limits>
 #include "DeepSkyController.hpp"
 #include "DeepSkyEdits.hpp"
 #include "DeepSkyImageItem.hpp"
 #include "AppLibrary.hpp"
+#include "AstrometrySettings.hpp"
 #include "Check.hpp"
 using namespace astro;
 QQuickItem* visualItem(QQuickItem* parent,const QString& name) {
@@ -111,6 +114,57 @@ int main(int argc,char** argv){
     ASTRO_TEST_CHECK(root->property("frameListOpen").toBool());
     if(!controller.hasResult())qWarning()<<controller.status();ASTRO_TEST_CHECK(controller.hasResult()&&controller.displayingResult()&&controller.groups()==QStringList{"R"});
     ASTRO_TEST_CHECK(controller.hasRawComparison());
+    {
+        const auto original=controller.sessionSnapshot();auto verified=original;
+        const recording::CelestialWcs wcs{{83.82,-5.39},{80.5,64.5},{-.001,0,0,.001}};
+        std::vector<processing::CatalogStar> catalog;
+        for(int i=0;i<10;++i){const auto p=wcs.sky(stars[i][0],stars[i][1]);catalog.push_back({std::to_string(i+1),(*p)[0],(*p)[1],12.,5778.,true});}
+        verified.state["astrometry"]=QVariantMap{{"verified",true},{"wcs",app::wcsValues(wcs)},{"catalog",app::catalogValues(catalog)},{"imageKey",QString::fromLatin1(app::linearImageKey(*original.images["linear"]))}};
+        ASTRO_TEST_CHECK(controller.canRestoreSession(verified));controller.restoreSession(verified);QCoreApplication::processEvents();
+        ASTRO_TEST_CHECK(controller.hasCelestialCoordinates());
+        auto* astroDialog=root->findChild<QObject*>("astrometryDialog");ASTRO_TEST_CHECK(astroDialog);
+        const auto previousWcs=controller.astrometry();
+        ASTRO_TEST_CHECK(QMetaObject::invokeMethod(astroDialog,"open"));
+        controller.targetResolved({{"name","M 42"},{"source","CDS fixture"},{"ra",83.8201},{"dec",-5.3876}});
+        controller.operationFinished(true,"Target lookup finished");QCoreApplication::processEvents();
+        ASTRO_TEST_CHECK(std::abs(astroDialog->findChild<QObject*>("astrometryRaField")->property("text").toDouble()-83.8201)<1e-7);
+        ASTRO_TEST_CHECK(controller.astrometry()==previousWcs);
+        ASTRO_TEST_CHECK(!toast->property("opened").toBool());
+        ASTRO_TEST_CHECK(QMetaObject::invokeMethod(astroDialog,"close"));
+        astroDialog->setProperty("targetQuery","M42");
+        const auto expected=*wcs.sky(35,60);const auto p=controller.skyCoordinates(35,60);
+        ASTRO_TEST_CHECK(std::abs(p["ra"].toDouble()-expected[0])<1e-10&&std::abs(p["dec"].toDouble()-expected[1])<1e-10);
+        ASTRO_TEST_CHECK(controller.skyCoordinates(-1,0).isEmpty()&&controller.skyCoordinates(160,0).isEmpty());
+        auto transformed=controller.finishSettings();transformed["rotation"]=1;transformed["mirrorHorizontal"]=true;
+        transformed["geometry"]=QVariantMap{{"crop",true},{"x",6.},{"y",7.},{"width",100.},{"height",120.},{"angle",0.},{"scale",2.},{"interpolation",1},{"clamp",true},{"keepSize",false}};
+        controller.apply(transformed);wait(controller);
+        // Quarter rotation followed by a horizontal mirror maps (x,y) to (y,x).
+        // Crop and resize map centres to 2*(coordinate-origin)+0.5.
+        const auto moved=controller.skyCoordinates(2*(60-6)+.5,2*(35-7)+.5);
+        ASTRO_TEST_CHECK(std::abs(moved["ra"].toDouble()-expected[0])<1e-10&&std::abs(moved["dec"].toDouble()-expected[1])<1e-10);
+        controller.showRawComparison(true);ASTRO_TEST_CHECK(!controller.hasCelestialCoordinates()&&controller.skyCoordinates(10,10).isEmpty());controller.showRawComparison(false);
+        const auto responsePath=directory.filePath("synthetic-response.csv");QFile responseFile(responsePath);ASTRO_TEST_CHECK(responseFile.open(QIODevice::WriteOnly));responseFile.write("wavelength_nm,red,green,blue\n336,0,0,0\n550,0.6,0.8,0.4\n1020,0,0,0\n");responseFile.close();
+        ASTRO_TEST_CHECK(controller.importColorResponse(QUrl::fromLocalFile(responsePath)));
+        const auto curve=controller.colorResponse();const auto previousSettings=controller.finishSettings();
+        ASTRO_TEST_CHECK(library.saveEquipmentProfile("Synthetic QA response",curve,{{"camera","Fixture sensor"},{"source","Synthetic test, not camera measurement"}}));
+        ASTRO_TEST_CHECK(controller.useEquipmentProfile(library.equipmentProfile("Synthetic QA response")));
+        ASTRO_TEST_CHECK(controller.finishSettings()==previousSettings&&controller.astrometry()["responseCamera"]=="Fixture sensor");
+        library.removeEquipmentProfile("Synthetic QA response");ASTRO_TEST_CHECK(controller.colorResponse()["response"].toList()==curve["response"].toList());
+        const auto retained=controller.colorResponse();auto damaged=retained;damaged["dataHash"]=QString(64,'f');
+        ASTRO_TEST_CHECK(!controller.useEquipmentProfile(damaged)&&controller.colorResponse()==retained);
+        // A syntactically valid passband can still integrate to zero. Reject it
+        // before publishing state that the session validator would refuse.
+        auto underflow=retained;
+        const QVariantList narrow{QVariant(QVariantList{550.,0.,0.,0.}),
+            QVariant(QVariantList{550.+1e-10,std::numeric_limits<double>::denorm_min(),std::numeric_limits<double>::denorm_min(),std::numeric_limits<double>::denorm_min()}),
+            QVariant(QVariantList{550.+2e-10,0.,0.,0.})};
+        underflow["response"]=narrow;underflow["dataHash"]=QString::fromLatin1(app::equipmentDataHash(narrow));
+        ASTRO_TEST_CHECK(app::checkedEquipmentProfile(underflow).has_value());
+        ASTRO_TEST_CHECK(!controller.useEquipmentProfile(underflow)&&controller.colorResponse()==retained);
+        const auto portableState=controller.sessionSnapshot();controller.clear();controller.restoreSession(portableState);
+        ASTRO_TEST_CHECK(controller.colorResponse()==retained&&controller.hasCelestialCoordinates());
+        controller.restoreSession(original);QCoreApplication::processEvents();
+    }
     ASTRO_TEST_CHECK(finishTab->property("enabled").toBool());
     const auto handed=controller.processingDocument().value<app::ImageDocument>();ASTRO_TEST_CHECK(handed.exposureCount==2&&handed.totalExposure==120&&handed.filters==QStringList{"R"}&&!handed.processingSummary.isEmpty());
     const auto integratedPixels=handed.pixels;

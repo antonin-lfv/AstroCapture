@@ -8,11 +8,16 @@ Popup {
     id: dialog
     objectName: "astrometryDialog"
     required property var controller
+    required property var library
+    property alias targetQuery:target.text
+    property string lookupMessage: ""
+    property bool lookingUp: false
+    property bool resolvedDuringOperation: false
     property var values: ({})
     property var prepared: null
     property bool showMatches: false
     property int stageIndex: 0
-    readonly property bool dialogOpen: opened || localCatalog.visible || equipmentResponse.visible
+    readonly property bool dialogOpen: opened || localCatalog.visible || equipmentResponse.visible || equipmentProfiles.opened || equipmentProfiles.libraryFilesOpen
     property real hostWidth: 1100
     property real hostHeight: 800
     signal calibrationRequested(var settings)
@@ -31,6 +36,7 @@ Popup {
         dec.text=s.dec===undefined?"":Number(s.dec).toFixed(7);
         sampling.text=s.scale===undefined?"":Number(s.scale).toFixed(5);
     }
+    function lookupTarget() {resolvedDuringOperation=false;lookupMessage="";dialog.controller.resolveTarget(target.text);lookingUp=dialog.controller.busy;}
     onOpened: {
         refreshHints();stageIndex=controller.astrometry.verified===true?1:0;
         method.currentIndex=String(values.photometryMethod||"").startsWith("SPCC")?1:0;
@@ -40,14 +46,16 @@ Popup {
     }
     Connections {
         target: dialog.controller
+        function onTargetResolved(position) {ra.text=Number(position.ra).toFixed(7);dec.text=Number(position.dec).toFixed(7);dialog.resolvedDuringOperation=true;dialog.lookupMessage=qsTr("%1 · J2000 position from %2").arg(position.name).arg(position.source);}
         function onCatalogCalibrationReady(settings) {dialog.prepared=settings;}
         function onOperationFinished(success,message) {
             if(success&&dialog.prepared!==null){const settings=Object.assign({},dialog.values,dialog.prepared);dialog.prepared=null;dialog.calibrationRequested(settings);}
             else if(!success)dialog.prepared=null;
-            if(success&&dialog.controller.astrometry.verified)dialog.refreshHints();
+            if(success&&dialog.controller.astrometry.verified&&!dialog.resolvedDuringOperation)dialog.refreshHints();
+            dialog.resolvedDuringOperation=false;dialog.lookingUp=false;
         }
     }
-    component Note: Label {Layout.fillWidth:true;wrapMode:Text.Wrap;color:Atelier.secondary;font.pixelSize:12}
+    component Note: Label {Layout.fillWidth:true;wrapMode:Text.Wrap;color:Atelier.secondary;font.pixelSize:12;textFormat:Text.PlainText}
     component SectionTitle: RowLayout {
         property string label
         property string explanation
@@ -95,6 +103,12 @@ Popup {
                 spacing:12
                 ColumnLayout {Layout.fillWidth:true;visible:dialog.stageIndex===0;spacing:12
                 SectionTitle {label:qsTr("1 · Solve the field (WCS)");explanation:qsTr("Identify stars without changing pixels. The approximate centre and sampling constrain the search; rotation and mirroring are found automatically. This is a targeted TAN solver, not a blind full-sky solver.")}
+                RowLayout {Layout.fillWidth:true
+                    TextField {id:target;objectName:"astrometryTargetName";Layout.fillWidth:true;placeholderText:qsTr("Target name · M42, NGC 7000…");maximumLength:120;enabled:!dialog.controller.busy;selectByMouse:true;color:Atelier.text;Accessible.name:qsTr("Target name");background:Rectangle {color:Atelier.field;radius:4;border.color:target.activeFocus?Atelier.accent:Atelier.border} onAccepted:if(text.trim().length)dialog.lookupTarget()}
+                    HelpIcon {text:qsTr("CDS Sesame looks up an astronomical catalogue name outside the Solar System. Only the name is sent, never the image. The returned J2000 position fills a search hint; it does not identify or solve the current image. Enter sampling, then verify WCS with Gaia. Recent successful names are cached for 30 days.")}
+                    IconButton {objectName:"astrometryTargetLookup";text:qsTr("Find target");busy:dialog.lookingUp;enabled:target.text.trim().length>0&&!dialog.controller.busy;onClicked:dialog.lookupTarget()}
+                }
+                Note {visible:dialog.lookupMessage.length>0;text:dialog.lookupMessage}
                 Input {id:ra;objectName:"astrometryRa";label:qsTr("Right ascension · degrees");minimum:0;maximum:359.99999999;help:qsTr("Approximate ICRS field centre. Convert RA in hours to degrees by multiplying by 15. Example: M42 is near 83.82°. FITS hints are filled when available.")}
                 Input {id:dec;objectName:"astrometryDec";label:qsTr("Declination · degrees");minimum:-90;maximum:90;help:qsTr("Approximate ICRS declination, with its sign. M42 is near −5.39°. Keep the target within the search field.")}
                 Input {id:sampling;objectName:"astrometrySampling";label:qsTr("Sampling · arcsec/pixel");minimum:.01;maximum:100;help:qsTr("Use 206.265 × pixel size in µm / effective focal length in mm. Include binning in pixel size. A seed between half and twice the actual sampling can be refined.")}
@@ -104,7 +118,7 @@ Popup {
                     IconButton {text:qsTr("Import CSV");enabled:!dialog.controller.busy;onClicked:localCatalog.open()}
                 }
                 Note {visible:catalogMode.currentIndex===1;text:dialog.controller.astrometry.localName||qsTr("Import a Gaia catalogue before solving.")}
-                IconButton {objectName:"astrometrySolve";text:qsTr("Solve and verify WCS");Layout.fillWidth:true;busy:dialog.controller.busy&&dialog.prepared===null;enabled:dialog.controller.hasResult&&!dialog.controller.busy&&ra.text.length>0&&dec.text.length>0&&sampling.text.length>0&&(catalogMode.currentIndex===0||!!dialog.controller.astrometry.localName);onClicked:dialog.controller.solveAstrometry({ra:Number(ra.text),dec:Number(dec.text),scale:Number(sampling.text),magnitude:Number(limit.text),local:catalogMode.currentIndex===1})}
+                IconButton {objectName:"astrometrySolve";text:qsTr("Solve and verify WCS");Layout.fillWidth:true;busy:dialog.controller.busy&&!dialog.lookingUp&&dialog.prepared===null;enabled:dialog.controller.hasResult&&!dialog.controller.busy&&ra.text.length>0&&dec.text.length>0&&sampling.text.length>0&&(catalogMode.currentIndex===0||!!dialog.controller.astrometry.localName);onClicked:dialog.controller.solveAstrometry({ra:Number(ra.text),dec:Number(dec.text),scale:Number(sampling.text),magnitude:Number(limit.text),local:catalogMode.currentIndex===1})}
                 Note {objectName:"astrometryDiagnostics";visible:dialog.controller.astrometry.verified===true;text:{const s=dialog.controller.astrometry;return qsTr("Verified · %1 stars · RMS %2 px (%3″) · field coverage %4%").arg(s.matches||0).arg(Number(s.rms||0).toFixed(3)).arg(Number((s.rms||0)*(s.scale||0)).toFixed(3)).arg((Number(s.coverage||0)*100).toFixed(0));}}
                 RowLayout {visible:dialog.controller.astrometry.verified===true;Layout.fillWidth:true
                     CheckBox {text:qsTr("Mark matched stars on the image");checked:dialog.showMatches;enabled:!dialog.controller.busy;onClicked:dialog.showMatches=checked;Layout.fillWidth:true}
@@ -117,7 +131,10 @@ Popup {
                     onActivated: index => {referenceLimit.text=String(index===1?60:150)}
                     Layout.fillWidth:true;model:[qsTr("PCC · stellar temperature model"),qsTr("SPCC · Gaia XP spectra")];enabled:!dialog.controller.busy;explanation:qsTr("PCC approximates stellar continua using Gaia temperatures; extinction and absorption lines limit its accuracy. SPCC integrates measured Gaia XP spectra through the actual equipment response. Both use robust aperture photometry and reject outliers.")}
                 DarkComboBox {id:response;objectName:"catalogCalibrationResponse";Layout.fillWidth:true;model:method.currentIndex===1?[qsTr("My equipment · measured RGB response")]:[qsTr("Bessell R/V/B · PCC reference"),qsTr("My equipment · measured RGB response")];enabled:!dialog.controller.busy;explanation:qsTr("For SPCC import photon response QE × RGB filter × any additional transmission, per channel. CSV: wavelength_nm,red,green,blue; increasing 336–1020 nm, values 0–1 and zero endpoints. Do not normalize channels independently. The Bessell reference is a model, not your camera.")}
-                IconButton {text:qsTr("Import equipment response");Layout.fillWidth:true;enabled:!dialog.controller.busy;onClicked:equipmentResponse.open()}
+                RowLayout {Layout.fillWidth:true
+                    IconButton {text:qsTr("Import equipment response");Layout.fillWidth:true;enabled:!dialog.controller.busy;onClicked:equipmentResponse.open()}
+                    IconButton {objectName:"openEquipmentProfiles";text:qsTr("Equipment profiles");enabled:!dialog.controller.busy;onClicked:equipmentProfiles.open()}
+                }
                 Note {visible:!!dialog.controller.astrometry.responseName;text:dialog.controller.astrometry.responseName||""}
                 DarkComboBox {id:white;objectName:"catalogCalibrationWhite";Layout.fillWidth:true;model:[qsTr("White reference · Sun (CALSPEC)"),qsTr("White reference · constant Fν (AB)")];enabled:!dialog.controller.busy;explanation:qsTr("The Sun uses the measured CALSPEC solar spectrum as neutral white. Constant Fν uses an AB reference (Fλ proportional to 1/λ²). These choices define the desired white, not the sky background.")}
                 InspectorFamily {title:qsTr("Photometry settings");expanded:false;onActivated:expanded=!expanded
@@ -143,5 +160,6 @@ Popup {
         }
     }
     FileDialog {id:localCatalog;title:qsTr("Gaia DR3 catalogue");nameFilters:[qsTr("CSV catalogue (*.csv)")];onAccepted:{dialog.controller.importAstrometryCatalog(selectedFile);catalogMode.currentIndex=1;}}
-    FileDialog {id:equipmentResponse;title:qsTr("Measured equipment response");nameFilters:[qsTr("RGB response (*.csv)")];onAccepted:{dialog.controller.importColorResponse(selectedFile);response.currentIndex=method.currentIndex===0?1:0;}}
+    FileDialog {id:equipmentResponse;title:qsTr("Measured equipment response");nameFilters:[qsTr("RGB response (*.csv)")];onAccepted:if(dialog.controller.importColorResponse(selectedFile))response.currentIndex=method.currentIndex===0?1:0}
+    EquipmentProfilesDialog {id:equipmentProfiles;controller:dialog.controller;library:dialog.library;hostWidth:dialog.hostWidth;hostHeight:dialog.hostHeight;onResponseSelected:response.currentIndex=method.currentIndex===0?1:0}
 }

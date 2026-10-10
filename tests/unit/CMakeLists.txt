@@ -267,10 +267,13 @@ target_include_directories(astro_app_portable_project_test PRIVATE ../../app/src
 set_tests_properties(astro_app_portable_project_test PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_BACKEND=software" TIMEOUT 60)
 
 foreach(astrometry_test IN ITEMS astro_app_deep_sky_workspace_test astro_app_session_test astro_app_scientific_editing_test astro_app_portable_project_test)
-    target_sources(${astrometry_test} PRIVATE ../../app/src/DeepSkyAstrometry.cpp ../../app/src/GaiaCatalog.cpp)
+    target_sources(${astrometry_test} PRIVATE ../../app/src/DeepSkyAstrometry.cpp ../../app/src/GaiaCatalog.cpp ../../app/src/TargetResolver.cpp)
     target_link_libraries(${astrometry_test} PRIVATE Qt6::Network ZLIB::ZLIB)
 endforeach()
 
 astro_add_unit_test(astro_app_gaia_catalog_test SOURCES app/GaiaCatalogTest.cpp ../../app/src/GaiaCatalog.cpp LIBS Qt6::Core astro::processing ZLIB::ZLIB)
 target_include_directories(astro_app_gaia_catalog_test PRIVATE ../../app/src)
 target_compile_definitions(astro_app_gaia_catalog_test PRIVATE ASTRO_SOURCE_DIR="${PROJECT_SOURCE_DIR}")
+astro_add_unit_test(astro_app_target_resolver_test SOURCES app/TargetResolverTest.cpp ../../app/src/TargetResolver.cpp LIBS Qt6::Core Qt6::Network)
+target_include_directories(astro_app_target_resolver_test PRIVATE ../../app/src)
+target_compile_definitions(astro_app_target_resolver_test PRIVATE ASTRO_SOURCE_DIR="${PROJECT_SOURCE_DIR}")

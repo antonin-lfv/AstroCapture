@@ -290,3 +290,41 @@ et TLS ainsi que les notices des données scientifiques sont inclus.
 L’image disque mesure 85 394 898 octets (81,44 Mio).
 
 SHA-256 : `e5e3cbbbd4dfcc64ad3f3c6088658f46d0f44fc329b02476a215e33311d4fbce`.
+
+## Lot 1.8.0 — cibles, profils et coordonnées (10 octobre 2026)
+
+Le point de départ est sauvegardé par `5a2395e`, sur la branche
+`codex/astrometry-workflow`. Le parcours est intégré à Ciel profond → Finition →
+Couleur → Astrométrie · PCC / SPCC. La recherche de cible et les profils complètent
+les deux étapes existantes ; les coordonnées apparaissent directement sur l’image.
+Chaque nouveau réglage dispose d’une aide pratique « ? » ; la commande de copie
+a un nom accessible et une infobulle avec unités et conditions de disponibilité.
+
+Contrôle avec les vrais composants Qt/QML et le projet portable d’Orion 1.7.0,
+en français, rendu logiciel hors écran, exactement à 1440 × 960, 1100 × 800 et
+900 × 700. Les neuf captures `previews/native/1.8.0-*` montrent la recherche M42,
+la bibliothèque de profils et les coordonnées après transformation. Le rendu
+violet vient de la réponse Bessell virtuelle du contrôle précédent : il ne valide
+pas les couleurs du matériel réel et aucun original n’est modifié.
+
+- Les champs français, actions et pied des dialogues restent accessibles aux
+  trois tailles. Le contenu peut défiler sans barre de défilement apparente.
+  Les champs de provenance longs sont éditables horizontalement et s’ouvrent
+  au début du texte ; l’empreinte SHA256 se replie sur plusieurs lignes.
+- La recherche M42 sur CDS renseigne les indications sans effacer le WCS vérifié.
+  Le nom du service est lisible (« SIMBAD · CDS »), sans texte du protocole.
+  Recherche absente et annulation conservent les résultats précédents.
+- Les profils se sauvegardent depuis le dialogue, se sélectionnent explicitement
+  et conservent caméra, filtres, source et notes dans le projet. Le retrait global
+  et le retour par sauvegarde JSON ne changent pas la calibration existante.
+- Le curseur désigne le même pixel au zoom Adapter, 100 % et 170 %, avec déplacement.
+  La copie conserve le dernier pixel même quand le pointeur rejoint le bouton.
+  Avant/Résultat/Partagé utilisent la même géométrie et les mêmes coordonnées.
+- Les confirmations sont masquées quand un dialogue est ouvert. Sur le résultat,
+  elles restent dans la zone d’image, au-dessus des coordonnées : elles ne masquent
+  ni le bouton de copie ni les réglages de l’inspecteur.
+
+Les 39 tests Release passent (26,01 s). Après le dernier ajustement de placement
+des confirmations, le test de l’espace Ciel profond repasse (3,35 s) et le parcours
+natif est contrôlé de nouveau. Les vérifications de précision et de sauvegarde
+sont consignées dans [VALIDATION_SIRIL.md](../VALIDATION_SIRIL.md).

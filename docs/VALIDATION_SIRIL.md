@@ -128,3 +128,56 @@ locale ad hoc ; Developer ID et notarisation restent dans la feuille de route.
 
 SHA-256 du DMG : `e5e3cbbbd4dfcc64ad3f3c6088658f46d0f44fc329b02476a215e33311d4fbce`.
 SHA-256 de l’exécutable : `e6c4f155a160c37ebe05fcf0e35b6a512c95cd70dd5e66ef14491e494d6c8d5d`.
+
+## Validation 1.8.0 — 10 octobre 2026
+
+Ce lot prolonge le parcours 1.7.0 ; le solveur, PCC et SPCC restent inchangés.
+Le contrôle utilise le projet portable WCS/SPCC d’Orion sauvegardé en 1.7.0,
+avec ses 6 244 × 4 170 pixels Float32. Le fichier FITS original n’est pas modifié.
+
+### Cible et profils
+
+- La recherche M42 sur le service CDS réel propose **83,8201° / −5,3876°**,
+  source SIMBAD. La réponse remplit les indications du dialogue, sans modifier
+  le WCS vérifié, les réglages de finition ou l’empreinte de l’image linéaire.
+- Une cible absente et une recherche annulée conservent le WCS et le traitement.
+  La fixture publique M42 vérifie également l’encodage d’un nom, les erreurs XML,
+  champs incomplets, ambiguïtés, nombres non finis et bornes. Un repli NED valide
+  est accepté sans mélanger les coordonnées de résolveurs différents.
+- La réponse Bessell virtuelle de contrôle est enregistrée depuis le dialogue
+  avec caméra, filtres, provenance et notes. Le choix ne change pas les réglages.
+  Suppression/réimport JSON et réouverture des préférences retrouvent exactement
+  la même courbe, les empreintes et les métadonnées.
+- La régression refuse les empreintes corrompues, collisions de noms et imports
+  conflictuels sans remplacement partiel. Une courbe structurellement valide dont
+  l’intégrale sous-déborde à zéro est refusée avant publication dans le projet.
+
+### Coordonnées et sauvegarde
+
+- Transformation du résultat : quart de tour, miroir horizontal, recadrage
+  x = 20, y = 30, 1 800 × 1 500, puis échelle 0,5. Résultat **900 × 750**.
+  Le point source (1 234, 1 500) retrouve sa position céleste à **10⁻¹⁰ degré**
+  après transformation ; il s’agit d’une tolérance de calcul, pas d’exactitude
+  astrométrique physique.
+- Le pointeur sur le pixel (450, 300) affiche **AD 05:37:18.77, Déc −04:34:51.5**
+  aux trois tailles de fenêtre. Adapter, 100 %, 170 % et déplacement de la vue
+  retrouvent le même pixel et les mêmes valeurs. Le vrai bouton de copie conserve
+  la dernière position de l’image. Avant/Résultat/Partagé sont cohérents, avec une
+  image de comparaison de mêmes dimensions transformées.
+- Le projet portable 1.8.0 est sauvegardé, fermé puis rouvert après retrait du
+  profil global. Courbe, métadonnées, état astrométrique, références, réglages et
+  empreinte Float32 restent identiques ; le nom de recherche M42 est restauré.
+- Les tests couvrent aussi la restauration de session, les coordonnées hors image
+  et l’absence de coordonnées sur la comparaison brute non transformée.
+
+Les **39 tests Release** passent en **26,01 s**, dont le nouveau résolveur de noms.
+Les trois tests concernés passent aussi en Debug (5,80 s). Le dernier ajustement
+QML des confirmations repasse le test Ciel profond Release (3,35 s). Le contrôle
+natif isolé utilise de vraies instances de l’application en français, aux trois
+tailles, avec des préférences et caches de projets temporaires ; il ne touche
+pas la bibliothèque personnelle ni le presse-papiers Cocoa de l’utilisateur.
+
+La réponse Bessell du contrôle est **virtuelle**, pas une mesure de la caméra
+ayant acquis Orion. Aucune nouvelle validation des couleurs physiques ni
+comparaison numérique avec Siril n’est revendiquée. Les fonctionnalités et
+formats du lot sont décrits dans l’[ADR 017](decisions/ADR-017-astrometry-workflow.md).

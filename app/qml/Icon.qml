@@ -16,7 +16,7 @@ Item {
 
     Canvas {
         id:studioIcon;anchors.fill:parent
-        visible:["home","processing","stars","mosaic","history","book","export","loading"].indexOf(root.name)>=0
+        visible:["home","processing","stars","mosaic","history","book","export","loading","copy"].indexOf(root.name)>=0
         onWidthChanged:requestPaint();onHeightChanged:requestPaint()
         Connections {target:root;function onColorChanged(){studioIcon.requestPaint();}function onNameChanged(){studioIcon.requestPaint();}}
         onPaint: {
@@ -25,6 +25,7 @@ Item {
             c.beginPath();
             if(root.name==="export") {c.moveTo(3,3);c.lineTo(17,3);c.lineTo(21,7);c.lineTo(21,21);c.lineTo(3,21);c.closePath();c.rect(7,3,9,6);c.moveTo(13,5);c.lineTo(13,7);c.rect(7,13,10,8);}
             else if(root.name==="loading") {c.arc(12,12,8,-Math.PI/2,Math.PI);}
+            else if(root.name==="copy") {c.rect(8,8,12,13);c.moveTo(5,16);c.lineTo(3,16);c.lineTo(3,3);c.lineTo(15,3);c.lineTo(15,5);}
             else if(root.name==="home") {c.moveTo(3,11);c.lineTo(12,3);c.lineTo(21,11);c.moveTo(6,10);c.lineTo(6,21);c.lineTo(10,21);c.lineTo(10,15);c.lineTo(14,15);c.lineTo(14,21);c.lineTo(18,21);c.lineTo(18,10);}
             else if(root.name==="processing") {c.arc(12,12,9,0,Math.PI*2);c.moveTo(17,12);c.arc(12,12,5,0,Math.PI*2);c.moveTo(3,12);c.lineTo(7,12);c.moveTo(17,12);c.lineTo(21,12);c.moveTo(12,3);c.lineTo(12,7);c.moveTo(12,17);c.lineTo(12,21);}
             else if(root.name==="stars") {c.moveTo(10,2);c.lineTo(12,8);c.lineTo(18,10);c.lineTo(12,12);c.lineTo(10,18);c.lineTo(8,12);c.lineTo(2,10);c.lineTo(8,8);c.closePath();c.moveTo(19,15);c.lineTo(19,22);c.moveTo(15.5,18.5);c.lineTo(22.5,18.5);}

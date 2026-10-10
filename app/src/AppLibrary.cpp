@@ -13,6 +13,10 @@
 #include <QJsonObject>
 #include <QProcess>
 #include <QSettings>
+#include <QSaveFile>
+#include <QFile>
+#include <QSet>
+#include "EquipmentProfile.hpp"
 #include <algorithm>
 
 namespace astro::app {
@@ -42,6 +46,20 @@ void AppLibrary::reportBug() {
 }
 AppLibrary::AppLibrary(QObject* parent) : QObject(parent) {
     QSettings settings;
+    const auto equipmentBytes=settings.value("application/equipmentProfiles").toByteArray();
+    if(equipmentBytes.size()>4*1024*1024)status_=tr("Stored equipment profiles are invalid. Import a verified backup.");
+    else if(!equipmentBytes.isEmpty()) {
+        const auto document=QJsonDocument::fromJson(equipmentBytes);
+        const auto records=document.object()["profiles"].toArray();
+        bool valid=document.isObject()&&document.object().size()==2&&document.object()["version"].toDouble()==1&&document.object()["profiles"].isArray()&&records.size()<=32;
+        QSet<QString> names;
+        for(const auto& value:records) {
+            const auto profile=checkedEquipmentProfile(value.toObject().toVariantMap());
+            if(!profile||names.contains((*profile)["name"].toString().toCaseFolded())){valid=false;break;}
+            const auto name=(*profile)["name"].toString();names.insert(name.toCaseFolded());equipmentProfiles_[name]=*profile;
+        }
+        if(!valid){equipmentProfiles_.clear();status_=tr("Stored equipment profiles are invalid. Import a verified backup.");}
+    }
     exportDirectory_ = settings.value("application/exportDirectory").toString();
     language_ = settings.value("application/language", "en").toString() == "fr" ? "fr" : "en";
     historyEnabled_ = settings.value("application/historyEnabled", true).toBool();
@@ -104,6 +122,63 @@ void AppLibrary::save() {
     settings.sync();
     if (settings.status() != QSettings::NoError) status_ = tr("Could not save application preferences.");
     emit changed();
+}
+QVariantMap AppLibrary::equipmentProfile(const QString& name) const {
+    return equipmentProfiles_.value(name).toMap();
+}
+bool AppLibrary::storeEquipmentProfiles(const QVariantMap& profiles) {
+    QJsonArray records;for(auto i=profiles.cbegin();i!=profiles.cend();++i)records.append(QJsonObject::fromVariantMap(i.value().toMap()));
+    const auto bytes=QJsonDocument(QJsonObject{{"version",1},{"profiles",records}}).toJson(QJsonDocument::Compact);
+    if(profiles.size()>32||bytes.size()>4*1024*1024){status_=tr("The equipment library is limited to 32 profiles and 4 MiB.");emit changed();return false;}
+    QSettings settings;const auto previous=settings.value("application/equipmentProfiles");
+    settings.setValue("application/equipmentProfiles",bytes);settings.sync();
+    if(settings.status()!=QSettings::NoError){settings.setValue("application/equipmentProfiles",previous);settings.sync();status_=tr("Could not save equipment profiles.");emit changed();return false;}
+    equipmentProfiles_=profiles;emit equipmentProfilesChanged();return true;
+}
+bool AppLibrary::saveEquipmentProfile(const QString& rawName,const QVariantMap& response,const QVariantMap& metadata,bool overwrite) {
+    auto candidate=response;candidate["name"]=rawName.trimmed();
+    for(auto key:{"camera","filters","source","notes"})candidate[key]=metadata.value(key,QString{});
+    const auto profile=checkedEquipmentProfile(candidate);
+    if(!profile){status_=tr("Invalid equipment profile. Import a complete measured RGB response first.");emit changed();return false;}
+    const auto name=(*profile)["name"].toString();QString existing;
+    for(const auto& key:equipmentProfiles_.keys())if(key.compare(name,Qt::CaseInsensitive)==0)existing=key;
+    if(!existing.isEmpty()&&!overwrite){status_=tr("A profile with this name already exists. Choose another name or explicitly replace it.");emit changed();return false;}
+    auto next=equipmentProfiles_;if(!existing.isEmpty())next.remove(existing);next[name]=*profile;
+    if(!storeEquipmentProfiles(next))return false;
+    status_=tr("Equipment profile saved: %1.").arg(name);emit changed();return true;
+}
+bool AppLibrary::removeEquipmentProfile(const QString& name) {
+    if(!equipmentProfiles_.contains(name))return false;
+    auto next=equipmentProfiles_;next.remove(name);if(!storeEquipmentProfiles(next))return false;
+    status_=tr("Profile removed from the library. Open projects keep their response data.");emit changed();return true;
+}
+bool AppLibrary::importEquipmentProfiles(const QUrl& url) {
+    QFile file(url.toLocalFile());
+    if(!url.isLocalFile()||!file.open(QIODevice::ReadOnly)||file.size()>4*1024*1024){status_=tr("Cannot read equipment library (maximum 4 MiB).");emit changed();return false;}
+    const auto document=QJsonDocument::fromJson(file.readAll());const auto root=document.object();
+    if(!document.isObject()||root.size()!=2||root["version"].toDouble()!=1||!root["profiles"].isArray()||root["profiles"].toArray().size()>32){status_=tr("Invalid equipment library file.");emit changed();return false;}
+    auto next=equipmentProfiles_;QSet<QString> imported;
+    for(const auto& value:root["profiles"].toArray()) {
+        const auto profile=checkedEquipmentProfile(value.toObject().toVariantMap());
+        if(!profile||imported.contains((*profile)["name"].toString().toCaseFolded())){status_=tr("Invalid equipment library file.");emit changed();return false;}
+        const auto name=(*profile)["name"].toString();imported.insert(name.toCaseFolded());
+        QString existing;for(const auto& key:next.keys())if(key.compare(name,Qt::CaseInsensitive)==0)existing=key;
+        if(!existing.isEmpty()) {
+            if(next[existing].toMap()==*profile)continue;
+            status_=tr("Import stopped: profile %1 already exists with different data. No profiles were changed.").arg(name);emit changed();return false;
+        }
+        next[name]=*profile;
+    }
+    if(!storeEquipmentProfiles(next))return false;
+    status_=tr("Equipment library imported: %1 profiles.").arg(imported.size());emit changed();return true;
+}
+bool AppLibrary::exportEquipmentProfiles(const QUrl& url) {
+    if(!url.isLocalFile()||equipmentProfiles_.isEmpty()){status_=tr("Add an equipment profile before exporting the library.");emit changed();return false;}
+    QJsonArray records;for(auto i=equipmentProfiles_.cbegin();i!=equipmentProfiles_.cend();++i)records.append(QJsonObject::fromVariantMap(i.value().toMap()));
+    const auto bytes=QJsonDocument(QJsonObject{{"version",1},{"profiles",records}}).toJson(QJsonDocument::Compact);
+    QSaveFile out(url.toLocalFile());
+    if(!out.open(QIODevice::WriteOnly)||out.write(bytes)!=bytes.size()||!out.commit()){status_=tr("Could not export equipment profiles.");emit changed();return false;}
+    status_=tr("Equipment library exported.");emit changed();return true;
 }
 QVariantList AppLibrary::recentProjects() const {
     QVariantList result;

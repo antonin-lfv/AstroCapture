@@ -1,6 +1,11 @@
 #include "AstrometrySettings.hpp"
 #include "DeepSkyController.hpp"
 #include "GaiaCatalog.hpp"
+#include "EquipmentProfile.hpp"
+#include "TargetResolver.hpp"
+#include "WcsGeometry.hpp"
+#include <QClipboard>
+#include <QGuiApplication>
 #include <QCryptographicHash>
 #include <QDateTime>
 #include <QDebug>
@@ -160,9 +165,10 @@ void DeepSkyController::importAstrometryCatalog(const QUrl &url) {
   }
   emit changed();
 }
-void DeepSkyController::importColorResponse(const QUrl &url) {
+bool DeepSkyController::importColorResponse(const QUrl &url) {
   if (busy_ || !url.isLocalFile())
-    return;
+    return false;
+  bool imported=false;
   try {
     QFile f(url.toLocalFile());
     if (!f.open(QIODevice::ReadOnly) || f.size() > 256 * 1024)
@@ -195,15 +201,72 @@ void DeepSkyController::importColorResponse(const QUrl &url) {
     astrometry_["responseName"] = QFileInfo(f).fileName();
     astrometry_["responseHash"] = QString::fromLatin1(
         QCryptographicHash::hash(data, QCryptographicHash::Sha256).toHex());
+    astrometry_["responseFileName"] = QFileInfo(f).fileName();
+    for(auto key:{"responseCamera","responseFilters","responseSource","responseNotes"})astrometry_.remove(key);
     for (const auto &[key, stack] : stacks_)
       if (stack == linear_)
         stackAstrometry_[key] = astrometry_;
     status_ = tr("Equipment response imported. Include sensor QE × RGB filters "
                  "× any additional filter.");
+    imported=true;
   } catch (const std::exception &e) {
     status_ = tr(e.what());
   }
   emit changed();
+  return imported;
+}
+QVariantMap DeepSkyController::colorResponse() const {
+    if(astrometry_["response"].toList().isEmpty())return {};
+    const auto rows=astrometry_["response"].toList();
+    QVariantMap profile{{"version",1},{"name",astrometry_["responseName"].toString().left(80)},
+        {"fileName",astrometry_.value("responseFileName",astrometry_["responseName"])},
+        {"responseHash",astrometry_["responseHash"]},{"dataHash",QString::fromLatin1(equipmentDataHash(rows))},{"response",rows}};
+    for(const auto& key:{"camera","filters","source","notes"}) {
+        QString stateKey="response";QString suffix=key;suffix[0]=suffix[0].toUpper();stateKey+=suffix;
+        profile[key]=astrometry_.value(stateKey,QString{});
+    }
+    return checkedEquipmentProfile(profile).value_or(QVariantMap{});
+}
+bool DeepSkyController::useEquipmentProfile(const QVariantMap& input) {
+    if(busy_)return false;
+    const auto profile=checkedEquipmentProfile(input);
+    if(!profile){status_=tr("Invalid equipment profile. Import a complete measured RGB response first.");emit changed();return false;}
+    try {
+        processing::spectralFlux(processing::solarSpectrum(),responseValues((*profile)["response"].toList()));
+    } catch(const std::exception& e) {
+        status_=tr(e.what());emit changed();return false;
+    }
+    astrometry_["response"]=(*profile)["response"];astrometry_["responseName"]=(*profile)["name"];
+    astrometry_["responseHash"]=(*profile)["responseHash"];astrometry_["responseFileName"]=(*profile)["fileName"];
+    for(const auto& key:{"camera","filters","source","notes"}) {
+        QString stateKey="response";QString suffix=key;suffix[0]=suffix[0].toUpper();stateKey+=suffix;
+        astrometry_[stateKey]=(*profile)[key];
+    }
+    for(const auto& [key,stack]:stacks_)if(stack==linear_)stackAstrometry_[key]=astrometry_;
+    status_=tr("Profile selected: %1. Run PCC/SPCC to recalibrate; existing adjustments are unchanged.").arg((*profile)["name"].toString());
+    emit changed();return true;
+}
+void DeepSkyController::resolveTarget(const QString& name) {
+    if(busy_||!linear_)return;
+    try {targetResolverUrl(name);}catch(const std::exception& e){status_=tr(e.what());emit changed();return;}
+    run(tr("Looking up the target with CDS Sesame…"),[this,name](std::stop_token stop){
+        const auto result=resolveTargetPosition(name,stop);check(stop);
+        post([this,result,stop]{if(stop.stop_requested())return;progress_=100;
+            status_=tr("Target found: %1 · %2. Coordinates are a search hint; solve the image to verify its field.").arg(result["name"].toString(),result["source"].toString());
+            emit targetResolved(result);emit changed();});
+    });
+}
+QVariantMap DeepSkyController::skyCoordinates(double x,double y) const {
+    if(!hasCelestialCoordinates()||!std::isfinite(x)||!std::isfinite(y)||x<0||y<0||x>=finished_->width||y>=finished_->height)return {};
+    auto w=readWcs(astrometry_["wcs"]);if(!w)return {};
+    w=finishWcs(*w,linear_->width,linear_->height,finishSettings_);
+    const auto position=w->sky(x,y);if(!position)return {};
+    return {{"ra",(*position)[0]},{"dec",(*position)[1]},{"raText",rightAscensionText((*position)[0])},{"decText",declinationText((*position)[1])},{"x",x},{"y",y}};
+}
+bool DeepSkyController::copySkyCoordinates(double x,double y) const {
+    const auto p=skyCoordinates(x,y);if(p.isEmpty())return false;
+    QGuiApplication::clipboard()->setText(QString("ICRS RA %1 Dec %2\nRA %3° Dec %4°").arg(p["raText"].toString(),p["decText"].toString()).arg(p["ra"].toDouble(),0,'f',8).arg(p["dec"].toDouble(),0,'f',8));
+    return true;
 }
 void DeepSkyController::solveAstrometry(const QVariantMap &options) {
   if (busy_ || !linear_)

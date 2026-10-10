@@ -72,7 +72,7 @@ inline bool validAstrometryState(const QVariantMap &state) {
           return false;
       }
     for (auto key : {"responseName", "responseHash", "localName", "catalogName",
-                     "date", "imageKey"})
+                     "date", "imageKey","responseFileName","responseCamera","responseFilters","responseSource","responseNotes"})
       if (state.contains(key) && (state[key].typeId() != QMetaType::QString ||
                                   state[key].toString().size() > 512))
         return false;

@@ -1,6 +1,6 @@
 # AstroCapture — prochaines étapes
 
-État après le lot 1.7.0 du 10 octobre 2026. Cette liste distingue ce qui est livré
+État après le lot 1.8.0 du 10 octobre 2026. Cette liste distingue ce qui est livré
 et les prochains travaux ; elle ne promet pas une équivalence complète avec Siril.
 
 ## Déjà livré
@@ -10,6 +10,12 @@ et les prochains travaux ; elle ne promet pas une équivalence complète avec Si
 - [x] PCC par modèle de températures Gaia et SPCC par spectres XP mesurés,
   réponse de l’équipement importable, blancs CALSPEC/AB, diagnostics et
   références liées à l’image ; projets, session, versions A/B et Cmd+Z.
+- [x] Recherche du nom de cible via CDS Sesame pour préparer le centre WCS,
+  avec conservation du WCS existant et cache des réponses réussies.
+- [x] Bibliothèque de réponses RVB mesurées importées : caméra, filtres,
+  provenance, notes, copie dans le projet et sauvegarde JSON.
+- [x] Coordonnées ICRS au survol du résultat et copie, avec géométrie,
+  zoom et comparaison avant/après.
 
 - [x] Aperçu de légende affiché dès l’ouverture, indicateur animé d’export,
   familles de Finition indépendantes et état conservé après réouverture.
@@ -46,8 +52,8 @@ de recette sont reconstruits à la prochaine modification.
 ## Priorités suivantes
 
 1. **Approfondir l’astrométrie et les profils spectraux.** Résolution aveugle,
-   distorsions SIP, recherche du nom de cible, bibliothèque de réponses mesurées
-   caméra/filtres et sélection instrumentale guidée. Comparaison scientifique
+   distorsions SIP, annotations d’objets, profils fabricant prévalidés et
+   composition interactive des réponses QE/filtres. Comparaison scientifique
    avec des étalons et Siril ; modes bande étroite distincts.
 2. **Bibliothèque de calibration.** Masters dark/flat/bias/dark-flat réutilisables,
    regroupement par caméra, gain, binning, température et exposition ; bilan des

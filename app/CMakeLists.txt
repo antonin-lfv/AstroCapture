@@ -77,6 +77,7 @@ qt_add_qml_module(AstroCapture
         qml/MosaicWorkspace.qml
         qml/CaptionEditor.qml
         qml/ImageViewport.qml
+        qml/EquipmentProfilesDialog.qml
     qml/GeometryEditor.qml
     qml/MaskEditor.qml
         qml/GlobalSettingsWorkspace.qml
@@ -107,6 +108,7 @@ qt_add_qml_module(AstroCapture
         src/DeepSkySession.cpp
         src/DeepSkyAstrometry.cpp
         src/GaiaCatalog.cpp
+        src/TargetResolver.cpp src/TargetResolver.hpp src/EquipmentProfile.hpp
         src/SessionController.hpp
         src/SessionController.cpp
         src/DeepSkyController.hpp

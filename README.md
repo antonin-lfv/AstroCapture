@@ -244,6 +244,9 @@ Astrométrie · PCC / SPCC** :
   ou CSV local, prise en compte des mouvements propres, rotation et miroir.
   Contrôles par étoiles associées, RMS en pixels/secondes d’arc et couverture du
   champ ; repères sur l’image. La résolution ne modifie aucun pixel.
+- **Recherche par nom** : M42, NGC 7000 ou une autre désignation de catalogue
+  via CDS Sesame. La position J2000 proposée renseigne le centre de recherche ;
+  il faut ensuite résoudre et vérifier le champ. Le WCS existant reste intact.
 - **PCC** : modèle de continuum fondé sur les températures Gaia, référence Bessell
   R/V/B ou réponse importée. L’extinction et les raies stellaires limitent ce modèle.
 - **SPCC** : téléchargement des **spectres XP mesurés Gaia DR3** et intégration
@@ -251,15 +254,26 @@ Astrométrie · PCC / SPCC** :
   supplémentaire). Import CSV `wavelength_nm,red,green,blue`, valeurs de 0 à 1,
   longueurs croissantes entre 336 et 1 020 nm et extrémités nulles. La réponse de
   la caméra n’est pas devinée. Blanc Soleil CALSPEC ou Fν constant (AB).
+- **Profils de matériel** : enregistrer et réutiliser les réponses RVB mesurées
+  importées, avec caméra, filtres, source et notes. Sauvegarde de la bibliothèque
+  en JSON ; chaque projet conserve sa propre copie de la courbe. Choisir un profil
+  ne recalibre pas l’image : PCC/SPCC se lance séparément.
 - Photométrie robuste avant étirement, au moins huit étoiles acceptées, bilan des
   rejets et gains. Références liées à l’image linéaire exacte, intégrées aux
   projets, préréglages et versions A/B ; annulation par Cmd+Z.
 - WCS conservé en FITS flottant et transformé avec la géométrie de la finition.
-  Catalogues et spectres mis en cache ; les requêtes transmettent les coordonnées,
-  jamais l’image. La recherche aveugle sur tout le ciel, les distorsions SIP et
-  une bibliothèque de profils caméra/filtres restent à développer.
+- **Coordonnées au survol** du résultat : ascension droite ICRS en heures,
+  déclinaison en degrés, copie en formats sexagésimal et décimal. Les positions
+  suivent la géométrie, le zoom et la comparaison avant/après ; leur précision
+  dépend du WCS vérifié.
+
+- Catalogues, spectres et recherches de noms sont mis en cache. Les requêtes
+  transmettent le nom ou les coordonnées, jamais l’image. La résolution aveugle,
+  les distorsions SIP et des profils fabricant prévalidés restent à développer.
 
 Voir [le guide des formats et des limites](docs/decisions/ADR-016-astrometry-colors.md).
+Le [parcours des cibles, profils et coordonnées](docs/decisions/ADR-017-astrometry-workflow.md)
+précise leur utilisation et leur sauvegarde.
 
 L’ordre des traitements est : gradient → piédestal → photométrie →
 réduction du bruit multiéchelle → déconvolution → gains et étirement →

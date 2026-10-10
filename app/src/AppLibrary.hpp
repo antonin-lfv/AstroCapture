@@ -24,6 +24,7 @@ class AppLibrary : public QObject {
     Q_PROPERTY(bool compactProcessing READ compactProcessing WRITE setCompactProcessing NOTIFY changed)
     Q_PROPERTY(int deepSkyPanelWidth READ deepSkyPanelWidth WRITE setDeepSkyPanelWidth NOTIFY changed)
     Q_PROPERTY(int processingPanelWidth READ processingPanelWidth WRITE setProcessingPanelWidth NOTIFY changed)
+    Q_PROPERTY(QStringList equipmentProfileNames READ equipmentProfileNames NOTIFY equipmentProfilesChanged)
 public:
     explicit AppLibrary(QObject* parent = nullptr);
     QString exportDirectory() const { return exportDirectory_; }
@@ -64,6 +65,12 @@ public:
     Q_INVOKABLE void importImages(const QList<QUrl>& urls);
     Q_INVOKABLE QUrl bugReportUrl() const;
     Q_INVOKABLE void reportBug();
+    QStringList equipmentProfileNames() const{return equipmentProfiles_.keys();}
+    Q_INVOKABLE QVariantMap equipmentProfile(const QString& name) const;
+    Q_INVOKABLE bool saveEquipmentProfile(const QString& name,const QVariantMap& response,const QVariantMap& metadata,bool overwrite=false);
+    Q_INVOKABLE bool removeEquipmentProfile(const QString& name);
+    Q_INVOKABLE bool importEquipmentProfiles(const QUrl&);
+    Q_INVOKABLE bool exportEquipmentProfiles(const QUrl&);
     Q_INVOKABLE void refresh();
     Q_INVOKABLE void removeImage(const QUrl& url);
     Q_INVOKABLE void openImage(const QUrl& url);
@@ -71,16 +78,19 @@ public:
 signals:
     void changed();
     void languageChanged();
+    void equipmentProfilesChanged();
 private:
     bool addImage(const QUrl& url);
     bool pruneMissingImages();
     void save();
+    bool storeEquipmentProfiles(const QVariantMap& profiles);
     QString exportDirectory_, status_;
     QString language_{"en"};
     bool historyEnabled_{true};
     QVariantList images_;
     QStringList recentVideos_, recentProjects_;
     QVariantMap processingPresets_,deepSkyPresets_;
+    QVariantMap equipmentProfiles_;
     bool compactProcessing_{false};
     int processingPanelWidth_{330};
     int deepSkyPanelWidth_{360};

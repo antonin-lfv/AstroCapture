@@ -8,6 +8,7 @@
 #include "AppLibrary.hpp"
 #include "ProcessingSettings.hpp"
 #include "DeepSkySettings.hpp"
+#include "EquipmentProfile.hpp"
 #include "Check.hpp"
 
 int main(int argc, char** argv) {
@@ -27,6 +28,29 @@ int main(int argc, char** argv) {
     const QUrl suggestion = QUrl::fromLocalFile(temp.filePath("video-processed.tif"));
     astro::app::AppLibrary library;
     ASTRO_TEST_CHECK(library.language() == "en" && library.historyEnabled() && library.images().isEmpty());
+    const QVariantList responseRows{QVariant::fromValue(QVariantList{336.,0.,0.,0.}),QVariant::fromValue(QVariantList{550.,.6,.8,.4}),QVariant::fromValue(QVariantList{1020.,0.,0.,0.})};
+    const QVariantMap response{{"version",1},{"name","test.csv"},{"fileName","test.csv"},{"camera",""},{"filters",""},{"source",""},{"notes",""},{"responseHash",QString(64,'a')},{"dataHash",QString::fromLatin1(astro::app::equipmentDataHash(responseRows))},{"response",responseRows}};
+    const QVariantMap provenance{{"camera","Fixture sensor"},{"filters","Fixture RGB"},{"source","Synthetic test, not a measured camera profile"}};
+    ASTRO_TEST_CHECK(library.saveEquipmentProfile("Fixture RGB",response,provenance));
+    ASTRO_TEST_CHECK(!library.saveEquipmentProfile("fixture rgb",response,provenance));
+    auto corruptResponse=response;corruptResponse["dataHash"]=QString(64,'b');
+    ASTRO_TEST_CHECK(!library.saveEquipmentProfile("Corrupt",corruptResponse,provenance));
+    {astro::app::AppLibrary restored;ASTRO_TEST_CHECK(restored.equipmentProfile("Fixture RGB")["source"]==provenance["source"]);ASTRO_TEST_CHECK(restored.equipmentProfile("Fixture RGB")["response"].toList()==responseRows);}
+    const auto libraryBackup=QUrl::fromLocalFile(temp.filePath("equipment.json"));
+    ASTRO_TEST_CHECK(library.exportEquipmentProfiles(libraryBackup));
+    ASTRO_TEST_CHECK(library.removeEquipmentProfile("Fixture RGB")&&library.equipmentProfileNames().isEmpty());
+    ASTRO_TEST_CHECK(library.importEquipmentProfiles(libraryBackup));
+    auto changedProvenance=provenance;changedProvenance["camera"]="Different sensor";
+    ASTRO_TEST_CHECK(library.saveEquipmentProfile("Fixture RGB",response,changedProvenance,true));
+    const auto changedProfile=library.equipmentProfile("Fixture RGB");
+    ASTRO_TEST_CHECK(!library.importEquipmentProfiles(libraryBackup));
+    ASTRO_TEST_CHECK(library.equipmentProfile("Fixture RGB")==changedProfile);
+    // A damaged stored curve must not become an apparently usable profile.
+    const auto originalProfiles=QSettings().value("application/equipmentProfiles").toByteArray();
+    auto brokenProfiles=originalProfiles;brokenProfiles.replace(astro::app::equipmentDataHash(responseRows),QByteArray(64,'c'));
+    QSettings().setValue("application/equipmentProfiles",brokenProfiles);
+    {astro::app::AppLibrary restored;ASTRO_TEST_CHECK(restored.equipmentProfileNames().isEmpty());}
+    QSettings().setValue("application/equipmentProfiles",originalProfiles);
     QCoreApplication::setApplicationVersion("1.0.2");
     const QUrl report = library.bugReportUrl();
     ASTRO_TEST_CHECK(report.scheme() == "mailto" && report.path() == "antoninlefevre45@gmail.com");

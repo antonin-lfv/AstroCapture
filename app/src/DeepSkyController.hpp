@@ -19,6 +19,7 @@ class DeepSkyController : public QObject {
     QML_ELEMENT
     Q_PROPERTY(bool hasFinishComparison READ hasFinishComparison NOTIFY imageChanged)
     Q_PROPERTY(QVariantMap astrometry READ astrometry NOTIFY changed)
+    Q_PROPERTY(bool hasCelestialCoordinates READ hasCelestialCoordinates NOTIFY changed)
     Q_PROPERTY(QVariantMap advancedReport READ advancedReport NOTIFY changed)
     Q_PROPERTY(bool showingMask READ showingMask WRITE setShowingMask NOTIFY changed)
     Q_PROPERTY(bool hasMask READ hasMask NOTIFY changed)
@@ -65,7 +66,13 @@ public:
     Q_INVOKABLE void solveAstrometry(const QVariantMap& options);
     Q_INVOKABLE void prepareCatalogCalibration(int method,const QVariantMap& options);
     Q_INVOKABLE void importAstrometryCatalog(const QUrl&);
-    Q_INVOKABLE void importColorResponse(const QUrl&);
+    Q_INVOKABLE bool importColorResponse(const QUrl&);
+    Q_INVOKABLE void resolveTarget(const QString& name);
+    Q_INVOKABLE QVariantMap colorResponse() const;
+    Q_INVOKABLE bool useEquipmentProfile(const QVariantMap& profile);
+    bool hasCelestialCoordinates() const{return linear_&&finished_&&displayingResult_&&!comparingRaw_&&!showingMask_&&!showingBackgroundModel_&&!busy_&&astrometry_["verified"].toBool();}
+    Q_INVOKABLE QVariantMap skyCoordinates(double x,double y) const;
+    Q_INVOKABLE bool copySkyCoordinates(double x,double y) const;
     QVariantList psfKernel() const{return psfKernel_;}
     bool showingMask() const{return showingMask_;}
     bool hasMask() const{return !maskPreview_.isNull();}
@@ -150,6 +157,7 @@ public:
     void restoreSession(const WorkspaceSnapshot&);
     Q_INVOKABLE void cancel(){pendingAdjustments_.reset();worker_.request_stop();}
 signals:
+    void targetResolved(const QVariantMap& position);
     void maskFileChanged();
     void catalogCalibrationReady(const QVariantMap& settings);
     void maskFileReady(const QString& path);

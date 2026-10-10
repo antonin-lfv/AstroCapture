@@ -22,3 +22,12 @@ These generic passbands are an explicit PCC reference, not a camera profile.
 
 All processing algorithms are independently implemented. No Siril source code
 is included. This software does not claim numerical equivalence with Siril.
+
+CDS Sesame target name resolver
+------------------------------
+Target positions are queried from CDS Sesame (SIMBAD, NED and VizieR).
+Service documentation: https://cds.unistra.fr/doc/sesame.htx
+Only catalogue designations are sent; images are never submitted.
+The M42 XML response in the test fixtures is an unmodified CDS response,
+retrieved on 10 October 2026, for parser validation. Positions returned by
+the name resolver are approximate search hints, not an image WCS solution.

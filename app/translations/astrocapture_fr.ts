@@ -8271,4 +8271,298 @@ Rejets : bords %7 · saturation %8 · signal faible %9 · incohérence %10</tran
         <translation>Plus d’étoiles renforcent la robustesse des couleurs, mais allongent le téléchargement. Par défaut : 60 pour la SPCC, 150 pour la PCC. Au moins huit étoiles doivent rester après les rejets photométriques.</translation>
     </message>
 </context>
+    <context>
+        <name>AstrometryDialog</name>
+        <message>
+            <source>%1 · J2000 position from %2</source>
+            <translation>%1 · position J2000 fournie par %2</translation>
+        </message>
+        <message>
+            <source>Target name · M42, NGC 7000…</source>
+            <translation>Nom de cible · M42, NGC 7000…</translation>
+        </message>
+        <message>
+            <source>Target name</source>
+            <translation>Nom de la cible</translation>
+        </message>
+        <message>
+            <source>CDS Sesame looks up an astronomical catalogue name outside the Solar System. Only the name is sent, never the image. The returned J2000 position fills a search hint; it does not identify or solve the current image. Enter sampling, then verify WCS with Gaia. Recent successful names are cached for 30 days.</source>
+            <translation>CDS Sesame recherche un nom de catalogue astronomique, hors Système solaire. Seul le nom est transmis, jamais l’image. La position J2000 proposée sert d’indication pour la recherche ; elle ne résout pas l’image et n’en identifie pas le contenu. Renseignez l’échantillonnage, puis vérifiez le WCS avec Gaia. Les recherches réussies sont conservées en cache pendant 30 jours.</translation>
+        </message>
+        <message>
+            <source>Find target</source>
+            <translation>Rechercher</translation>
+        </message>
+        <message>
+            <source>Equipment profiles</source>
+            <translation>Profils de matériel</translation>
+        </message>
+    </context>
+    <context>
+        <name>DeepSkyWorkspace</name>
+        <message>
+            <source>ICRS · RA %1 · Dec %2</source>
+            <translation>ICRS · AD %1 · Déc %2</translation>
+        </message>
+        <message>
+            <source>Copy celestial coordinates</source>
+            <translation>Copier les coordonnées célestes</translation>
+        </message>
+        <message>
+            <source>Copy the last image position in ICRS, as hours/degrees and decimal degrees. Coordinates follow crop, rotation, mirrors and resize. Available only after verified WCS on the result, including before/after comparison.</source>
+            <translation>Copie la dernière position pointée dans l’image, en ICRS : heures/degrés et degrés décimaux. Les coordonnées suivent le recadrage, la rotation, les miroirs et le redimensionnement. Disponibles sur le résultat après vérification du WCS, y compris en comparaison avant/après.</translation>
+        </message>
+    </context>
+    <context>
+        <name>EquipmentProfilesDialog</name>
+        <message>
+            <source>Equipment profiles</source>
+            <translation>Profils de matériel</translation>
+        </message>
+        <message>
+            <source>Close</source>
+            <translation>Fermer</translation>
+        </message>
+        <message>
+            <source>Reuse your imported measured RGB responses. Each profile describes one complete camera and filter combination. Selecting a profile does not change an existing calibration.</source>
+            <translation>Réutilisez vos réponses RVB mesurées et importées. Chaque profil décrit une combinaison complète caméra et filtres. Choisir un profil ne modifie pas une calibration existante.</translation>
+        </message>
+        <message>
+            <source>No saved profiles</source>
+            <translation>Aucun profil enregistré</translation>
+        </message>
+        <message>
+            <source>Choose a saved camera/filter combination, then use it. The response data is copied into the project; removing a library entry will not alter that project.</source>
+            <translation>Choisissez une combinaison caméra/filtres enregistrée, puis utilisez-la. La courbe est copiée dans le projet ; retirer le profil de la bibliothèque ne modifie pas ce projet.</translation>
+        </message>
+        <message>
+            <source>Use profile</source>
+            <translation>Utiliser</translation>
+        </message>
+        <message>
+            <source>Import library</source>
+            <translation>Importer</translation>
+        </message>
+        <message>
+            <source>Export library</source>
+            <translation>Exporter</translation>
+        </message>
+        <message>
+            <source>Remove selected profile</source>
+            <translation>Retirer le profil sélectionné</translation>
+        </message>
+        <message>
+            <source>Save the currently loaded response</source>
+            <translation>Enregistrer la réponse chargée</translation>
+        </message>
+        <message>
+            <source>Import RGB CSV</source>
+            <translation>Importer un CSV RVB</translation>
+        </message>
+        <message>
+            <source>%1 · %2 wavelength samples</source>
+            <translation>%1 · %2 longueurs d’onde</translation>
+        </message>
+        <message>
+            <source>Import a complete RGB photon response first: sensor QE × RGB filters × additional transmission. No camera response is generated automatically.</source>
+            <translation>Importez d’abord une réponse photonique RVB complète : rendement quantique du capteur × filtres RVB × transmission supplémentaire. Aucune réponse de caméra n’est générée automatiquement.</translation>
+        </message>
+        <message>
+            <source>Profile name</source>
+            <translation>Nom du profil</translation>
+        </message>
+        <message>
+            <source>Use a distinct name for each optical combination, for example camera + RGB filters + light-pollution filter. Saving requires a name; replacing an existing profile is a separate explicit action.</source>
+            <translation>Donnez un nom distinct à chaque combinaison optique, par exemple caméra + filtres RVB + filtre antipollution. Un nom est obligatoire ; remplacer un profil existant demande une action explicite.</translation>
+        </message>
+        <message>
+            <source>Camera / sensor</source>
+            <translation>Caméra / capteur</translation>
+        </message>
+        <message>
+            <source>Record the sensor or camera whose quantum efficiency is included in the imported response. This description does not change the curve.</source>
+            <translation>Indiquez le capteur ou la caméra dont le rendement quantique est inclus dans la réponse importée. Cette description ne modifie pas la courbe.</translation>
+        </message>
+        <message>
+            <source>Filters</source>
+            <translation>Filtres</translation>
+        </message>
+        <message>
+            <source>List the RGB filters and any additional optical filter already included in this effective response. A different filter combination needs a different measured response.</source>
+            <translation>Indiquez les filtres RVB et tout filtre optique supplémentaire déjà inclus dans cette réponse globale. Une autre combinaison de filtres nécessite une autre réponse mesurée.</translation>
+        </message>
+        <message>
+            <source>Measurement source</source>
+            <translation>Source de la mesure</translation>
+        </message>
+        <message>
+            <source>Record the measurement, manufacturer document or URL from which the response was obtained. This is provenance text, not a curve download. Ensure all three channels use the same relative normalization.</source>
+            <translation>Indiquez la mesure, le document du fabricant ou l’URL ayant fourni la réponse. Ce texte conserve la provenance ; il ne télécharge pas une courbe. Vérifiez que les trois canaux utilisent la même normalisation relative.</translation>
+        </message>
+        <message>
+            <source>Notes</source>
+            <translation>Notes</translation>
+        </message>
+        <message>
+            <source>Optional measurement date, instrument configuration or limitations. Metadata accompanies the curve but cannot establish that it matches the actual equipment.</source>
+            <translation>Date de mesure, configuration ou limites éventuelles. Ces informations accompagnent la courbe ; elles ne prouvent pas qu’elle correspond au matériel utilisé.</translation>
+        </message>
+        <message>
+            <source>Source SHA256: %1</source>
+            <translation>Empreinte SHA256 de la source : %1</translation>
+        </message>
+        <message>
+            <source>Save new profile</source>
+            <translation>Enregistrer un profil</translation>
+        </message>
+        <message>
+            <source>Replace this profile</source>
+            <translation>Remplacer ce profil</translation>
+        </message>
+        <message>
+            <source>Measured equipment response</source>
+            <translation>Réponse mesurée de l’équipement</translation>
+        </message>
+        <message>
+            <source>RGB response (*.csv)</source>
+            <translation>Réponse RVB (*.csv)</translation>
+        </message>
+        <message>
+            <source>Import equipment library</source>
+            <translation>Importer des profils de matériel</translation>
+        </message>
+        <message>
+            <source>Equipment library (*.json)</source>
+            <translation>Bibliothèque de profils (*.json)</translation>
+        </message>
+        <message>
+            <source>Export equipment library</source>
+            <translation>Exporter les profils de matériel</translation>
+        </message>
+        <message>
+            <source>Remove this equipment profile?</source>
+            <translation>Retirer ce profil de matériel ?</translation>
+        </message>
+        <message>
+            <source>Remove %1 from the library? Existing projects and calibrations keep their own response data.</source>
+            <translation>Retirer %1 de la bibliothèque ? Les projets et calibrations existants conservent leur propre courbe de réponse.</translation>
+        </message>
+    </context>
+    <context>
+        <name>astro::app::AppLibrary</name>
+        <message>
+            <source>Stored equipment profiles are invalid. Import a verified backup.</source>
+            <translation>Les profils enregistrés sont invalides. Importez une sauvegarde vérifiée.</translation>
+        </message>
+        <message>
+            <source>The equipment library is limited to 32 profiles and 4 MiB.</source>
+            <translation>La bibliothèque est limitée à 32 profils et 4 Mio.</translation>
+        </message>
+        <message>
+            <source>Could not save equipment profiles.</source>
+            <translation>Impossible d’enregistrer les profils de matériel.</translation>
+        </message>
+        <message>
+            <source>Invalid equipment profile. Import a complete measured RGB response first.</source>
+            <translation>Profil de matériel invalide. Importez d’abord une réponse RVB mesurée et complète.</translation>
+        </message>
+        <message>
+            <source>A profile with this name already exists. Choose another name or explicitly replace it.</source>
+            <translation>Un profil porte déjà ce nom. Choisissez un autre nom ou remplacez-le explicitement.</translation>
+        </message>
+        <message>
+            <source>Equipment profile saved: %1.</source>
+            <translation>Profil de matériel enregistré : %1.</translation>
+        </message>
+        <message>
+            <source>Profile removed from the library. Open projects keep their response data.</source>
+            <translation>Profil retiré de la bibliothèque. Les projets ouverts conservent leur courbe de réponse.</translation>
+        </message>
+        <message>
+            <source>Cannot read equipment library (maximum 4 MiB).</source>
+            <translation>Impossible de lire la bibliothèque de profils (4 Mio maximum).</translation>
+        </message>
+        <message>
+            <source>Invalid equipment library file.</source>
+            <translation>Fichier de bibliothèque de profils invalide.</translation>
+        </message>
+        <message>
+            <source>Import stopped: profile %1 already exists with different data. No profiles were changed.</source>
+            <translation>Import interrompu : le profil %1 existe avec des données différentes. Aucun profil n’a été modifié.</translation>
+        </message>
+        <message>
+            <source>Equipment library imported: %1 profiles.</source>
+            <translation>Bibliothèque importée : %1 profils.</translation>
+        </message>
+        <message>
+            <source>Add an equipment profile before exporting the library.</source>
+            <translation>Ajoutez un profil avant d’exporter la bibliothèque.</translation>
+        </message>
+        <message>
+            <source>Could not export equipment profiles.</source>
+            <translation>Impossible d’exporter les profils de matériel.</translation>
+        </message>
+        <message>
+            <source>Equipment library exported.</source>
+            <translation>Bibliothèque de profils exportée.</translation>
+        </message>
+    </context>
+    <context>
+        <name>astro::app::DeepSkyController</name>
+        <message>
+            <source>Invalid equipment profile. Import a complete measured RGB response first.</source>
+            <translation>Profil de matériel invalide. Importez d’abord une réponse RVB mesurée et complète.</translation>
+        </message>
+        <message>
+            <source>Profile selected: %1. Run PCC/SPCC to recalibrate; existing adjustments are unchanged.</source>
+            <translation>Profil sélectionné : %1. Lancez PCC/SPCC pour recalibrer ; les réglages existants sont conservés.</translation>
+        </message>
+        <message>
+            <source>Looking up the target with CDS Sesame…</source>
+            <translation>Recherche de la cible avec CDS Sesame…</translation>
+        </message>
+        <message>
+            <source>Target found: %1 · %2. Coordinates are a search hint; solve the image to verify its field.</source>
+            <translation>Cible trouvée : %1 · %2. Ces coordonnées servent d’indication ; résolvez l’image pour vérifier son champ.</translation>
+        </message>
+        <message>
+            <source>Enter an astronomical target name (maximum 120 characters).</source>
+            <translation>Saisissez un nom de cible astronomique (120 caractères maximum).</translation>
+        </message>
+        <message>
+            <source>Invalid target name.</source>
+            <translation>Nom de cible invalide.</translation>
+        </message>
+        <message>
+            <source>Invalid target resolver response.</source>
+            <translation>Réponse du service de recherche de cible invalide.</translation>
+        </message>
+        <message>
+            <source>Invalid target resolver coordinates.</source>
+            <translation>Coordonnées fournies par le service de recherche invalides.</translation>
+        </message>
+        <message>
+            <source>Target not found. Try its catalogue designation, such as M42 or NGC 7000.</source>
+            <translation>Cible introuvable. Essayez son nom de catalogue, par exemple M42 ou NGC 7000.</translation>
+        </message>
+        <message>
+            <source>Target name is ambiguous. Use a more precise catalogue designation.</source>
+            <translation>Nom de cible ambigu. Utilisez une désignation de catalogue plus précise.</translation>
+        </message>
+        <message>
+            <source>The CDS target resolver is unavailable. Retry or enter coordinates manually.</source>
+            <translation>Le service de recherche CDS est indisponible. Réessayez ou saisissez les coordonnées manuellement.</translation>
+        </message>
+    </context>
+    <context>
+        <name>GuideWorkspace</name>
+        <message>
+            <source>Target names, equipment profiles and sky coordinates</source>
+            <translation>Cibles, profils de matériel et coordonnées célestes</translation>
+        </message>
+        <message>
+            <source>In Astrometry, enter a catalogue name such as M42 or NGC 7000 and choose Search. CDS Sesame returns approximate J2000 coordinates; only the target name is sent. This fills the centre hint without replacing a verified WCS or changing the pixels. Set the sampling and solve to verify the image. Equipment profiles stores your imported measured RGB responses with camera, filters, source and notes. Use profile copies the curve into the project; run PCC/SPCC separately to recalibrate. Import/export library creates a local JSON backup. No manufacturer curve is inferred automatically. After a verified WCS, hover over the result to read ICRS RA in hours and Dec in degrees. The copy icon keeps the last image position and copies both sexagesimal and decimal coordinates. Crop, mirrors, rotation, resize and before/after comparison use the same sky position. Precision is limited by the WCS fit; source, mask and background-model previews have no readout.</source>
+            <translation>Dans Astrométrie, saisissez un nom de catalogue, par exemple M42 ou NGC 7000, puis cliquez sur Rechercher. CDS Sesame propose des coordonnées J2000 ; seul le nom de cible est transmis. Ces coordonnées renseignent le centre de recherche sans remplacer le WCS vérifié ni modifier les pixels. Renseignez l’échantillonnage et résolvez l’image pour vérifier son champ. Profils de matériel conserve les réponses RVB mesurées que vous importez, avec caméra, filtres, source et notes. Utiliser copie la courbe dans le projet ; lancez ensuite PCC/SPCC pour recalibrer. Importer/Exporter permet de sauvegarder la bibliothèque en JSON. Aucune courbe de fabricant n’est déduite automatiquement. Après vérification du WCS, survolez le résultat : l’ascension droite ICRS est affichée en heures, la déclinaison en degrés. L’icône de copie reprend la dernière position pointée, en coordonnées sexagésimales et degrés décimaux. Recadrage, miroirs, rotation, changement d’échelle et comparaison avant/après suivent la même position céleste. La précision dépend de l’ajustement WCS ; les aperçus de source, masque et modèle de fond ne proposent pas ces coordonnées.</translation>
+        </message>
+    </context>
 </TS>

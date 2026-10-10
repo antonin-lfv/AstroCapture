@@ -97,7 +97,17 @@ Control {
         asinhLuminance.currentIndex=finish.asinhLuminance||0;denoise.value=finish.denoise;asinh.checked=finish.asinh;asinhStrength.value=finish.asinhStrength;saturation.value=finish.saturation;
         updatingControls=previous;
     }
-    AstrometryDialog {id:astrometryDialog;controller:root.controller;values:root.options();hostWidth:root.Window.width;hostHeight:root.Window.height;onCalibrationRequested:settings=>root.setFinish(settings)}
+    AstrometryDialog {id:astrometryDialog;controller:root.controller;library:root.library;values:root.options();hostWidth:root.Window.width;hostHeight:root.Window.height;onCalibrationRequested:settings=>root.setFinish(settings)}
+    property var cursorSky: ({})
+    function updateCursorSky() {
+        if(!root.visible||!controller.hasCelestialCoordinates||!skyHover.hovered){cursorSky={};return;}
+        const p=skyHover.point.position;
+        const hud=coordinateHud.mapFromItem(viewport.viewingSurface,p.x,p.y);
+        if(coordinateHud.visible&&hud.x>=0&&hud.y>=0&&hud.x<coordinateHud.width&&hud.y<coordinateHud.height)return;
+        const image=viewport.imageContainer.mapFromItem(viewport.viewingSurface,p.x,p.y);
+        cursorSky=controller.skyCoordinates(Math.floor(image.x*viewport.pixelRatio),Math.floor(image.y*viewport.pixelRatio));
+    }
+    Connections {target:root.controller;function onChanged(){root.updateCursorSky();}function onImageChanged(){root.updateCursorSky();}}
     GeometryEditor {id:geometryEditor;onAccepted:(values)=>root.setFinish(Object.assign({},root.options(),{geometry:values}))}
     function resetFamily() {
         const families=[{stretch:false,black:0,white:1,midtones:.15,asinh:false,asinhStrength:20,asinhLuminance:0,ghs:false,ghsStrength:0,ghsLocal:0,ghsSymmetry:0,ghsShadows:0,ghsHighlights:1,ghsInverse:false,ghsMode:0},
@@ -126,6 +136,7 @@ Control {
     Shortcut {sequences:[StandardKey.Redo];enabled:root.visible && root.shortcutsAllowed && !root.dialogOpen && root.finishEditable && edits.canRedo;onActivated:root.redoFinish()}
     Timer {id:adjustmentTimer;interval:200;onTriggered:controller.apply(root.options())}
     readonly property bool dialogOpen: inputDialog.visible || folderDialog.visible || exportDialog.visible || projectOpen.visible || projectSave.visible || projectSaveChoice.visible || relinkDialog.visible || relinkFolderDialog.visible || presetDialog.visible || projectMenu.visible || exportPanel.visible || geometryEditor.visible || astrometryDialog.dialogOpen || advancedTools.catalogOpen
+    onDialogOpenChanged: if(dialogOpen)completionToast.close()
     background: Rectangle {color:Atelier.canvas}
     palette.window: Atelier.canvas
     palette.windowText: Atelier.text
@@ -150,12 +161,14 @@ Control {
         edits.values; edits.version; edits.canUndo; edits.canRedo;
         return {options:{calibrated:calibrated.checked,normalize:normalize.checked,badPixels:badPixels.checked,sequenceBackground:sequenceBackground.checked,
             sigma:sigma.value,method:integrationMethod.currentIndex,finish:edits.values,caption:root.captionOptions,versions:edits.snapshot()},
-            step:workflowStep,tool:finishingTool,expandedFamilies:expandedFamilies.slice(),advancedTool:advancedTools.toolIndex,comparison:comparisonMode,split:comparisonSplit,fit:viewport.fitMode,zoom:viewport.zoom,panX:viewport.panX,panY:viewport.panY};
+            step:workflowStep,tool:finishingTool,expandedFamilies:expandedFamilies.slice(),advancedTool:advancedTools.toolIndex,comparison:comparisonMode,split:comparisonSplit,fit:viewport.fitMode,zoom:viewport.zoom,panX:viewport.panX,panY:viewport.panY,targetQuery:astrometryDialog.targetQuery};
     }
     function restoreSessionState(state) {
         adjustmentTimer.stop();pendingProjectFinish=null;
         controller.projectOptions=state.options || controller.projectOptions;
         updatingControls=true;
+        astrometryDialog.targetQuery=typeof state.targetQuery==="string"?state.targetQuery.slice(0,120):"";
+        astrometryDialog.lookupMessage="";
         const restored=state.options||controller.projectOptions;
         captionOptions=restored.caption||{};
         if(restored.calibrated!==undefined)calibrated.checked=restored.calibrated;
@@ -183,7 +196,7 @@ Control {
     Connections {
         target: root.controller
         function onOperationFinished(success, message) {
-            if(controller.busy)return;
+            if(controller.busy || root.dialogOpen)return;
             completionToast.success=success;
             completionToast.message=success?qsTr("Operation complete"):message;
             completionToast.open();toastTimer.restart();
@@ -330,6 +343,21 @@ DropArea {
             ImageViewport {
                 id:viewport;objectName:"deepSkyViewport";preserveViewOnSourceResize:root.rawViewState!==null;Layout.fillWidth:true;Layout.fillHeight:true;Layout.minimumHeight:100
                 sourceWidth:controller.imageWidth;sourceHeight:controller.imageHeight
+                onPanXChanged:root.updateCursorSky()
+                onPanYChanged:root.updateCursorSky()
+                onEffectiveZoomChanged:root.updateCursorSky()
+                HoverHandler {id:skyHover;objectName:"celestialHover";parent:viewport.viewingSurface;enabled:root.visible&&controller.hasCelestialCoordinates;onPointChanged:root.updateCursorSky();onHoveredChanged:root.updateCursorSky()}
+                Rectangle {
+                    id:coordinateHud;objectName:"celestialReadout";parent:viewport.viewingSurface;z:30
+                    anchors.left:parent.left;anchors.bottom:parent.bottom;anchors.margins:12
+                    visible:root.visible&&controller.hasCelestialCoordinates&&root.cursorSky.ra!==undefined
+                    width:Math.min(parent.width-24,coordinateRow.implicitWidth+16);height:40
+                    radius:4;color:Atelier.canvas;border.color:Atelier.border
+                    RowLayout {id:coordinateRow;anchors.fill:parent;anchors.margins:8;spacing:8
+                        Label {objectName:"celestialReadoutText";text:qsTr("ICRS · RA %1 · Dec %2").arg(root.cursorSky.raText||"").arg(root.cursorSky.decText||"");color:Atelier.text;font.pixelSize:11;Layout.fillWidth:true;elide:Text.ElideRight}
+                        IconAction {objectName:"copyCelestialCoordinates";text:qsTr("Copy celestial coordinates");iconName:"copy";implicitHeight:26;implicitWidth:26;hint:qsTr("Copy the last image position in ICRS, as hours/degrees and decimal degrees. Coordinates follow crop, rotation, mirrors and resize. Available only after verified WCS on the result, including before/after comparison.");onClicked:controller.copySkyCoordinates(root.cursorSky.x,root.cursorSky.y)}
+                    }
+                }
                 DeepSkyImageItem {parent:viewport.imageContainer;anchors.fill:parent;controller:root.controller}
                 Item {parent:viewport.viewingSurface;anchors.fill:parent;clip:true;visible:root.workflowStep===6 && controller.displayingResult && !controller.showingMask && !controller.showingBackgroundModel && root.comparisonMode!=="result"
                     Item {width:root.comparisonMode==="before"?parent.width:parent.width*root.comparisonSplit;height:parent.height;clip:true
@@ -715,12 +743,17 @@ ParameterControl {id:black;label:qsTr("Black level");textIsValue:true;text:"0";f
         id:completionToast;objectName:"deepSkyCompletionToast"
         property bool success:true
         property string message:""
+        readonly property bool overResult: root.workflowStep===6 && viewport.visible
         parent:root
-        x:Math.max(12,(root.width-width)/2);y:Math.max(12,root.height-height-80)
-        width:Math.min(440,root.width-24);padding:14
+        x:overResult?viewport.viewingSurface.mapToItem(root,Math.max(12,(viewport.viewingSurface.width-width)/2),0).x:Math.max(12,(root.width-width)/2)
+        y: {
+            const bottom=root.height-height-80;
+            return Math.max(12,coordinateHud.visible?Math.min(bottom,coordinateHud.mapToItem(root,0,0).y-height-12):bottom);
+        }
+        width:Math.min(440,(overResult?viewport.viewingSurface.width:root.width)-24);padding:14
         closePolicy:Popup.NoAutoClose
         background:Rectangle {color:Atelier.surface;radius:8;border.color:completionToast.success?"#4b8065":"#b97b56"}
-        contentItem:Label {text:(completionToast.success?"✓  ":"")+completionToast.message;color:Atelier.text;wrapMode:Text.Wrap;Accessible.name:text}
+        contentItem:Label {text:(completionToast.success?"✓  ":"")+completionToast.message;color:Atelier.text;wrapMode:Text.Wrap;textFormat:Text.PlainText;Accessible.name:text}
         enter:Transition {NumberAnimation {property:"opacity";from:0;to:1;duration:150}}
         exit:Transition {NumberAnimation {property:"opacity";from:1;to:0;duration:150}}
     }

@@ -74,6 +74,18 @@ de recette sont reconstruits à la prochaine modification.
    sessions, reconnexions et captures interrompues ; signature et notarisation
    Apple de l’installateur.
 
+## Plus tard — préparation des observations
+
+- [ ] **Visibilité des objets depuis la Terre.** Saisir un lieu (ville ou
+  latitude/longitude) pour connaître les objets visibles et leurs créneaux
+  d’observation ; ou rechercher un objet pour savoir s’il est visible depuis
+  un lieu choisi et depuis quelles régions du monde il peut être observé.
+  Prévoir une carte mondiale et un choix de date, heure et fuseau horaire,
+  avec hauteur au-dessus de l’horizon, direction et périodes de nuit locale.
+  Distinguer un objet au-dessus de l’horizon d’un objet observable dans de
+  bonnes conditions. Demande ajoutée le 10 octobre 2026 ; fonctionnalité
+  planifiée, pas encore implémentée.
+
 ## Repères pour un utilisateur de Siril
 
 | Repère | Dans AstroCapture | Point à vérifier |

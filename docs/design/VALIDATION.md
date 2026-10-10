@@ -756,3 +756,82 @@ Journaux : `build/batch-package.log`, `build/batch-dmg-verification.log`.
 
 Apple Developer ID, notarisation, installation sur Mac vierge et qualification
 indépendante restent à faire ; les contrôles de ce lot ne les remplacent pas.
+
+
+## 1.15.1 — Contrôle pour usage personnel (10 octobre 2026)
+
+L'utilisateur réserve AstroCapture à son usage personnel et reporte la
+comparaison finale avec Siril au lendemain. Les conditions de publication
+publique restent consignées dans le bilan V2, sans bloquer ces essais locaux.
+Phase sauvegardée par `140e1fc`, branche `codex/personal-validation` ; tests et
+correction de traduction sauvegardés par `85c564f`.
+
+### Fenêtre complète et reprise
+
+**50/50 tests Release passent**, 7,90 s (`build/personal-final-tests.log`).
+Le nouveau contrôle charge `Main.qml` et tous ses panneaux, avec les vrais
+contrôleurs et leurs connexions. Le chargement depuis les sources rend explicite
+l'import normalement implicite du module ; seules les destinations de stockage
+et les préférences sont redirigées vers des dossiers de test.
+
+- Capture SER simulée, zéro perte dans cet essai court ; quitter et changer
+  d'espace de traitement sont bloqués pendant l'enregistrement. Les barres de
+  couleur simulées sont correctement refusées en alignement planétaire ; leur
+  import à une seule image fonctionne. Cela ne qualifie pas une caméra réelle.
+- Une vraie image d'Orion, recadrée à 1024 × 768 sur une copie, est intégrée
+  comme image déjà calibrée, sans normalisation ni correction de pixels : les
+  échantillons Float32 sont identiques. Réglages de finition via le panneau,
+  export FITS linéaire exact, puis légende modifiée et export TIFF/PNG/JPEG.
+- TIFF et PNG 16 bits donnent les mêmes pixels, légende comprise ; JPEG est
+  relu et reste un format avec pertes. Les exports apparaissent dans l'historique.
+- Annulation d'un export préserve le fichier existant ; destination absente
+  et annulation d'empilement conservent le résultat précédent. Projet portable
+  enregistré, sources de test inchangées.
+- « Continuer à travailler » annule la fermeture. « Sauvegarder la session et
+  quitter » attend la sauvegarde puis ferme la fenêtre. Un nouveau processus
+  restaure les mêmes pixels linéaires, finis et de Traitement (SHA-256), la
+  légende corrigée et l'espace actif ; export FITS du résultat repris exact.
+- Fenêtre complète et confirmation de sortie contrôlées en français à
+  **1440 × 960, 1100 × 800, 900 × 700**. Les noms d'espaces restés en anglais
+  dans le choix d'export de sortie sont corrigés et couverts par le test.
+
+### Disque plein réel, limité au test
+
+Un volume HFS+ privé de **64 Mio** est rempli jusqu'à `ENOSPC`, sans remplir le
+disque du Mac. Échecs d'export PNG, FITS et projet portable : les fichiers
+préexistants restent identiques et aucun signal de réussite n'est émis.
+Échec de sauvegarde de session : l'ancien manifeste reste identique, le résultat
+linéaire reste disponible, le message d'échec est affiché et la fenêtre reste
+ouverte. Le volume temporaire est démonté et supprimé.
+
+Parcours reproductible : `scripts/validate_personal_macos.py` ; journaux dans
+`build/personal-validation/`. Ce contrôle ne simule pas une panne du disque
+physique, une perte d'alimentation ou une acquisition longue. La comparaison
+indépendante avec Siril et les essais de caméra réelle restent à effectuer.
+
+Huit captures archivées : `previews/native/1.15.1-personal-*.png`.
+Le parcours complet sur Orion et le test de volume plein passent après la
+correction de traduction (`build/personal-validation.log`).
+
+### Livraison et démarrage du DMG 1.15.1
+
+`build/release/AstroCapture-1.15.1.dmg` reconstruit et monté en lecture seule.
+Intégrité `hdiutil` et signature locale profonde/stricte valides ; version 1.15.1,
+quatre helpers Astrometry.net fonctionnels, trois archives de sources et
+**200 Mach-O** sans dépendance absolue Homebrew/utilisateur. Exécutable identique
+au bundle compilé. Journaux : `build/personal-package.log` et
+`build/personal-dmg-verification.log`.
+
+L'application du DMG démarre en mode **Cocoa natif** et reste active durant le
+contrôle de démarrage (5 s), sans erreur de chargement QML. Ses dossiers de
+données/cache sont isolés ; écriture dans la bibliothèque utilisateur et accès
+au service de préférences interdits pour ce lancement de contrôle. Le processus
+de test est arrêté et le volume démonté. Ce démarrage ne remplace pas un essai
+matériel ou d'endurance. Journal : `build/personal-validation/dmg-startup.log`.
+
+- Taille : **117 251 893 octets** (111,82 Mio).
+- SHA-256 DMG : `c9d7a61a2a2656590f7e73ba6b0fc14d415595e7fbbde4f9098bb3ea708fcac3`.
+- SHA-256 exécutable : `405dca616e70edd9debb24b972907255ed3dceaebbacad6a39c7569c0f96e49c`.
+
+La signature reste ad hoc pour cet usage personnel. La signature Apple et la
+notarisation ne sont pas annoncées comme réalisées.

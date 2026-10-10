@@ -1,5 +1,10 @@
 # Validation sur le jeu M8/M20 du tutoriel Siril
 
+Ce compte rendu conserve les observations datées des lots testés. Pour les
+fonctions et commandes actuelles, consulter le [README](../README.md) et le guide
+intégré. Le [bilan V2](releases/V2_READINESS.md) centralise les contrôles restants,
+dont la comparaison indépendante finale avec Siril.
+
 7 octobre 2026. Source : https://siril.org/fr/tutorials/tuto-scripts/
 
 ## Données et résultat
@@ -23,9 +28,13 @@ L’étirement initial fixe était trop faible pour cette série. Les étoiles l
 
 Un clic sur une pose peut remplacer l’aperçu par une source sans modifier le résultat exporté. L’interface identifie désormais la vue affichée et permet de revenir au résultat.
 
-## État actuel de la transposition
+## Transposition documentée pour les lots 1.4.0 et 1.7.0
 
-Le guide pratique à jour est TUTORIEL_M8_M20_ASTROCAPTURE.md. Gradient polynomial avec échantillons modifiables, asinh/GHS, SCNR, déconvolution Richardson–Lucy, débruitage multiéchelle et recettes réversibles sont disponibles en 1.4.0.
+Le tutoriel local TUTORIEL_M8_M20_ASTROCAPTURE.md décrit le parcours 1.4.0 ;
+ses anciens noms de commandes ne constituent pas le guide de la version actuelle.
+Gradient polynomial avec échantillons modifiables, asinh/GHS, SCNR, déconvolution
+Richardson–Lucy, débruitage multiéchelle et recettes réversibles sont disponibles
+dans ce lot.
 
 La photométrie par CSV de références déjà identifiées reste disponible. En 1.7.0,
 AstroCapture ajoute un solveur WCS TAN guidé, une PCC par modèle de températures

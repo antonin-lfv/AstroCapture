@@ -99,9 +99,11 @@ et projets ; les pixels des projets portables restent en Float32.
   Cette fixture vérifie le parcours et la composition ; elle ne démontre pas un
   gain sur une acquisition astronomique réelle avec dithering.
 
-## Suite
+## Évolutions depuis ce lot
 
-Cartes de poids et de rejet exportables, métriques de couverture plus complètes,
-projection de distorsions et traitement de grandes images avec limites cohérentes
-dans toute la finition. Une comparaison quantitative de bruit et résolution sur
-de véritables acquisitions avec dithering documenté reste nécessaire.
+Les cartes de contribution/rejet sont livrées en
+[1.12.0](ADR-023-integration-diagnostics-hdr.md) et la projection des distorsions
+WCS/SIP en [1.13.0](ADR-024-wcs-sip-stack-projection.md). Les métriques avancées,
+les grands fichiers et la comparaison quantitative de bruit et résolution sur
+acquisitions réelles avec dithering documenté restent dans le
+[bilan V2](../releases/V2_READINESS.md).

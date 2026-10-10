@@ -574,6 +574,9 @@ Les commandes propres à la caméra restent dans **Capture**. Les préférences 
 
 ## Périmètre actuel
 
+Le [bilan avant V2](docs/releases/V2_READINESS.md) centralise les travaux restants,
+les limites à qualifier et les pistes futures, dont la préparation des observations.
+
 AstroCapture propose un alignement global par translation et une correction locale des surfaces lunaires et solaires. Le mode Lune / Soleil peut sélectionner les meilleures prises indépendamment pour chaque zone. La qualité dépend du contraste, du bruit, du recouvrement entre prises et de l’intensité de la turbulence ; les zones sans détail fiable ne bénéficient pas d’un recalage local. La dérotation planétaire n’est pas disponible. Le ciel profond utilise son propre onglet avec les limites décrites plus haut. L’import AVI n’est pas disponible. La reprise de session restaure les résultats calculés, les réglages et les légendes ; elle ne relance pas une acquisition ou un calcul interrompu.
 
 Les captures d’écran présentent l’application réelle, avec une caméra simulée et des images synthétiques pour illustrer les commandes. Elles ne constituent pas une mesure de performance sur une observation astronomique.

@@ -2,6 +2,13 @@
 
 État du 10 octobre 2026, après la livraison 1.13.0.
 
+Ce document centralise les travaux restants. Les fonctions livrées sont décrites
+dans le [README](../../README.md) et le guide intégré ; les anciens lots sont
+consignés dans le [journal de validation](../design/VALIDATION.md), le
+[compte rendu M8/M20 et Orion](../VALIDATION_SIRIL.md) et les ADR.
+Les priorités et les pistes ci-dessous ne constituent pas des engagements de
+livraison ; leurs limites et critères de validation doivent rester explicites.
+
 ## Ce qui existe
 
 Capture, traitement planétaire, calibration ciel profond, alignement stellaire,
@@ -16,14 +23,14 @@ relatif des étoiles et sortie TAN sans SIP, en empilement et drizzle.
 
 « Implémenté et testé » ne signifie pas « validé dans toutes les conditions ».
 Les aides et le guide expliquent les réglages ; les preuves d’une livraison sont
-consignées dans docs/design/VALIDATION.md et les ADR. La V2 ne doit pas revendiquer
+consignées dans le journal de validation et les ADR. La V2 ne doit pas revendiquer
 une parité scientifique complète avec Siril sans comparaison indépendante.
 
 ## Conditions prioritaires pour une V2 publique robuste
 
 | Travail restant | Pourquoi | Preuve attendue avant clôture |
 | --- | --- | --- |
-| Qualification sur acquisitions réelles | Les scènes synthétiques détectent les erreurs mais ne couvrent pas tous les capteurs et défauts du ciel | Séries publiques ou autorisées mono, CFA, RGB, filtres étroits et HDR ; comparaison indépendante avec Siril ; mesures de bruit, flux, couleur, FWHM et astrométrie |
+| Qualification sur acquisitions réelles | Les scènes synthétiques détectent les erreurs mais ne couvrent pas tous les capteurs et défauts du ciel | Comparaison finale avec Siril prévue avec l’utilisateur : même sélection, référence et intégrations linéaires M8/M20, puis opérations de finition séparées ; séries publiques ou autorisées mono, CFA, RGB, filtres étroits et HDR ; mesures de bruit, flux, couleur, FWHM et astrométrie |
 | PCC/SPCC et profils de réponse | Les données Gaia XP, approximations éventuelles et courbes importées ne prouvent pas une justesse absolue pour chaque équipement | Profils caméra/filtres traçables, cibles de référence, erreurs/résidus publiés, cas de filtres atypiques et catalogue incomplet |
 | Ressources et grands fichiers | Limite 32 MP : un capteur de 26 MP en drizzle ×2 produit 104 MP et est refusé ; cartes et HDR augmentent la mémoire | Traitement par tuiles cohérent de l’entrée à l’export, plafonds mesurés, estimation mémoire/disque, contrôle des caches de 4 Gio/64 images |
 | Endurance et récupération | Les garanties de publication atomique ne remplacent pas des essais longs et interruptions système | Disque plein, fermeture forcée, annulation à chaque phase, fichiers déplacés/corrompus, export interrompu, sessions longues et migrations entre versions |
@@ -38,7 +45,7 @@ une parité scientifique complète avec Siril sans comparaison indépendante.
   pixels. Depuis 1.13.0, la projection d’empilement WCS/SIP est livrée **sur
   opt-in, pour des poses FITS déjà résolues**, avec contrôle relatif des étoiles
   et sortie TAN sans SIP. Elle ne résout pas les poses à elle seule et ne
-  certifie pas les coordonnées absolues. Voir ADR-024.
+  certifie pas les coordonnées absolues. Voir [ADR-024](../decisions/ADR-024-wcs-sip-stack-projection.md).
 - Pondérations statistiques par bruit/FWHM ou nombre de poses, cartes bas/hauts
   séparées et contrôle plus poussé du rejet ; les cartes actuelles ne sont pas
   des cartes de variance ni de confiance.
@@ -48,12 +55,45 @@ une parité scientifique complète avec Siril sans comparaison indépendante.
   PSF varie ; la saturation est déclarée, pas mesurée automatiquement.
 - Séparation d’étoiles plus générale : les modèles paramétriques actuels ne
   remplacent pas StarNet pour les étoiles saturées, mélangées, halos et aigrettes.
+  Étudier un moteur externe optionnel ou l’import de couches externes, avec
+  licence des modèles vérifiée et contrôle des artefacts ; une réduction du
+  rayon stellaire reste distincte de la réduction de luminosité actuelle.
+- PSF elliptique ou variable sur le champ, estimation plus avancée,
+  déconvolution régularisée et débruitage plus avancé.
+- Retrait de gradient RBF et par division, réglages de grille par séquence ;
+  diagnostic exact des pertes finales distinguant saturation des sources et
+  écrêtage ajouté par la finition.
+- Regroupement de calibrations hétérogènes, recherche multicritère et proposition
+  contrôlée de masters par configuration ; création par lots et diagnostics de
+  calibration plus détaillés. La bibliothèque actuelle reste disponible avec
+  choix explicite et contrôles de compatibilité.
+- Normalisation locale, interpolation d’empilement configurable, champ de sortie
+  choisi par l’utilisateur et projections grand angle. Le changement d’échelle
+  existe déjà en géométrie et dans les modes drizzle documentés.
+- Inspection et édition des métadonnées FITS, séparation des canaux RGB et
+  diagnostics de normalisation plus détaillés.
 - RAW X-Trans, import AVI et dérotation planétaire : hors périmètre actuellement
   documenté, à prioriser selon les usages plutôt que les annoncer comme livrés.
 
 Ces extensions ne doivent pas toutes bloquer une V2 à périmètre annoncé.
 En revanche, les conditions de qualification, intégrité, ressources et
 installation ci-dessus doivent être closes ou explicitement restreintes.
+
+## Autres pistes conservées
+
+- Fluidité et séries : aperçus sur région d’intérêt, caches ciblés après profilage,
+  mesure de chaque phase et accélération des outils avancés ; traitements et
+  exports par lots avec état et annulation par tâche.
+- Astrométrie et couleurs : élargir la qualification des champs/index du solveur,
+  composer les réponses QE/filtres et prévoir des modes bande étroite distincts.
+  Les profils fabricant prévalidés relèvent de la qualification PCC/SPCC ci-dessus.
+- Annotations NGC, Messier, planètes et cratères, avec confiance et correction
+  manuelle ; recherche de cible et coordonnées WCS au survol existent déjà.
+- Pilotage de monture, guidage et dithering, actuellement externes à AstroCapture.
+
+Les automatismes doivent rester optionnels, contrôlables et réversibles. Préserver
+les sources, la précision et le moteur indépendant ; ne pas annoncer de support
+matériel ou de justesse scientifique sans preuve.
 
 ## Demande utilisateur conservée pour la planification
 

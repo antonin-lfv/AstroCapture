@@ -88,9 +88,11 @@ vérifiée à 1 440 × 960, 1 100 × 800 et 900 × 700 avec un extrait de l’Or
 Deux copies identiques servent à valider le parcours et son avertissement ;
 ce contrôle visuel n’est pas une preuve de gain de résolution astronomique.
 
-## Travaux suivants
+## Évolutions depuis ce lot
 
-Drizzle CFA/Bayer sans dématriçage, cartes de poids/rejet exportables,
-reprojection de distorsions plutôt que l’affine seule, traitement de très
-grandes images avec des limites cohérentes dans toute la finition, et
-comparaison quantitative sur des poses réelles avec dithering connu.
+Le drizzle CFA/Bayer est livré en [1.11.0](ADR-022-bayer-drizzle.md), les cartes
+de contribution/rejet en [1.12.0](ADR-023-integration-diagnostics-hdr.md) et la
+projection des distorsions WCS/SIP en [1.13.0](ADR-024-wcs-sip-stack-projection.md).
+Les grands fichiers et la comparaison quantitative sur acquisitions réelles
+restent à qualifier ; les travaux ouverts sont centralisés dans le
+[bilan V2](../releases/V2_READINESS.md).

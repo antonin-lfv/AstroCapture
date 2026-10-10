@@ -9,6 +9,10 @@
 7. Use an ADR for costly cross-cutting decisions.
 8. Never claim hardware support without physical validation evidence.
 
+Use [the V2 readiness report](docs/releases/V2_READINESS.md) for current priorities
+and remaining work. Keep completed milestones in the changelog, ADRs and
+validation records; update the report instead of adding another progress list.
+
 Pull requests should explain:
 
 - problem being solved;

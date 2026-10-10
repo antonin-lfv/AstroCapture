@@ -415,3 +415,34 @@ Developer ID et notarisation restent à fournir, comme pour les versions précé
 
 SHA256 du DMG : `d29d0a6dd931eb87b6e64164d83d4032933b10819a2c7128c6a9ce35db359a0d`.
 SHA256 de l’exécutable : `38ee02d8fda67d8e31a8cb3312a459e8e9b9c5a673d1ff0c2c78b7d7654b98e8`.
+
+
+## Guide et drizzle — 1.10.0, 10 octobre 2026
+
+Le guide français intégré et le README reflètent les fonctions livrées :
+résolution aveugle/SIP, masters réutilisables, masques peints/importés,
+traitement séparé des étoiles et du fond, et exports actuels. Une carte
+drizzle décrit quand l’utiliser, ses paramètres et ses limites.
+
+Les **45 tests Release passent** (28,98 s, `build/drizzle-final-tests.log`).
+Les nouveaux contrôles portent sur les empreintes sous-pixel analytiques,
+rotations à 45°, valeurs signées/HDR et zéros, rejection d’aberrations,
+WCS/SIP et échantillonnage relus en FITS, trous de couverture, limite 32 MP
+et annulation de la dernière pose. L’action QML réelle, la réouverture
+portable du résultat et de son bilan, et la conservation du résultat
+précédent après erreur sont contrôlées.
+
+QA native française à **1440 × 960, 1100 × 800 et 900 × 700** : réglages et
+résultat sur un extrait 1024 × 768 du vrai Orion, guide et carte drizzle.
+La projection ×2 de deux copies de cet extrait aboutit à **2048 × 1536**,
+minimum/moyenne de **2 contributions** et un avertissement de phases
+similaires. Le parcours complet prend environ **1,15 s** sur ce Mac.
+Ce jeu valide l’interface et la stabilité ; les copies identiques ne
+démontrent pas un gain de résolution ou de bruit. Les captures 1.10.0
+sont conservées dans `docs/design/previews/native/`. Les neuf thèmes du
+guide ont aussi été chargés au format minimal du test existant.
+
+Le résultat conserve sa convention d’intensité linéaire et ses données
+Float32. L’échelle ×2 reste impossible sur les sources de 26 MP tant que
+la finition est limitée à 32 MP ; ×1 est disponible. Le drizzle CFA/Bayer
+natif et les cartes de poids exportables restent à développer.

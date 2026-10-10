@@ -1,6 +1,6 @@
 # Ciel profond et prochaines étapes
 
-État consolidé au 10 octobre 2026, version 1.9.0. Le README décrit les fonctions disponibles ; cette note contient uniquement les travaux restants.
+État consolidé au 10 octobre 2026, version 1.10.0. Le README décrit les fonctions disponibles ; cette note contient uniquement les travaux restants.
 
 ## Validation et fluidité
 
@@ -20,7 +20,7 @@
 
 ## Intégration et grands champs
 
-- Drizzle/Bayer drizzle, correction des distorsions, interpolation configurable et normalisation locale.
+- Drizzle Bayer natif, correction des distorsions dans la projection, interpolation configurable et normalisation locale. Le drizzle mono/RVB affine est disponible avec une limite de 32 MP.
 - Champ de sortie configurable, changement d’échelle, mosaïques linéaires et gestion de très grands champs.
 - HDR, projections grand angle et matrices RAW supplémentaires dont X-Trans.
 

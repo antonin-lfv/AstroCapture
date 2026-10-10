@@ -1,9 +1,13 @@
 # AstroCapture — prochaines étapes
 
-État après le lot 1.9.0 du 10 octobre 2026. Cette liste distingue ce qui est livré
+État après le lot 1.10.0 du 10 octobre 2026. Cette liste distingue ce qui est livré
 et les prochains travaux ; elle ne promet pas une équivalence complète avec Siril.
 
 ## Déjà livré
+
+- [x] Drizzle mono/RVB par projection de carrés, échelles ×1/×1,5/×2, fraction
+  0,5–1, couverture et rejet pondérés, WCS/SIP et garde-fou 32 MP.
+- [x] Guide intégré français actualisé pour les fonctions 1.9 et le drizzle.
 
 - [x] WCS TAN/ICRS guidé avec Gaia DR3 et catalogue CSV local, vérification des
   associations, repères et RMS ; WCS FITS propagé avec les transformations.
@@ -71,7 +75,7 @@ de recette sont reconstruits à la prochaine modification.
 4. **Performance et séries.** Aperçu sur région d’intérêt, caches ciblés,
    comparaison de performances, accélération des outils avancés, traitements
    et exports de plusieurs images avec état et annulation par tâche.
-5. **Intégration avancée.** Drizzle, pondération plus fine des poses et diagnostics
+5. **Intégration avancée.** Drizzle Bayer natif, pondération plus fine des poses et diagnostics
    FWHM/excentricité/SNR ; définir les unités et valider sur jeux synthétiques
    connus puis brutes réelles.
 6. **Compositions scientifiques.** HDR multi-expositions, mosaïques linéaires et

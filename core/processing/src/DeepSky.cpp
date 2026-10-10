@@ -37,11 +37,17 @@ float level(const FloatImage& image,int channel=0) {
     for(std::size_t i=0;i<pixels;i+=step)sample.push_back(image.rgb[i*3+channel]);
     return median(std::move(sample));
 }
+struct StorageError : std::runtime_error { using std::runtime_error::runtime_error; };
 struct DiskImage {
     std::unique_ptr<FILE,decltype(&std::fclose)> file{std::tmpfile(),&std::fclose};
-    explicit DiskImage(const FloatImage& image) {
-        if(!file||std::fwrite(image.rgb.data(),sizeof(float),image.rgb.size(),file.get())!=image.rgb.size())
-            throw std::runtime_error("Not enough temporary disk space for integration.");
+    explicit DiskImage(const std::vector<float>& samples) {
+        if(!file||std::fwrite(samples.data(),sizeof(float),samples.size(),file.get())!=samples.size())
+            throw StorageError("Not enough temporary disk space for integration.");
+    }
+    explicit DiskImage(const FloatImage& image):DiskImage(image.rgb) {}
+    DiskImage(const FloatImage& image,const std::vector<float>& weights):DiskImage(image) {
+        if(std::fwrite(weights.data(),sizeof(float),weights.size(),file.get())!=weights.size())
+            throw StorageError("Not enough temporary disk space for integration.");
     }
 };
 FloatImage warp(const FloatImage& source,const StarAlignment& alignment,int width,int height) {
@@ -293,16 +299,19 @@ found:
     if(!ratios.empty())best.fluxScale=std::clamp(double(median(std::move(ratios))),.1,10.);
     return best;
 }
-Integration integrate(int count,const ImageLoader& load,const Calibration& masters,bool calibrated,double sigma,const CheckCancel& check,const Progress& progress,bool normalize,const BackgroundOptions* backgroundOptions) {
+Integration integrate(int count,const ImageLoader& load,const Calibration& masters,bool calibrated,double sigma,const CheckCancel& check,const Progress& progress,bool normalize,const BackgroundOptions* backgroundOptions,const DrizzleOptions* drizzle) {
     if(count<1||count>500)throw std::runtime_error("Select between 1 and 500 light frames per group.");
     if(!std::isfinite(sigma)||sigma<0||sigma>10)throw std::runtime_error("Sigma rejection must be between 0 and 10.");
+    if(drizzle&&count<2)throw std::runtime_error("Drizzle requires at least two usable light frames per filter group.");
     Integration result;
-    auto raw=load(0);const auto pattern=raw.bayer;const int channels=raw.channels;
+    auto raw=load(0);if(drizzle)drizzleDimensions(raw.width,raw.height,*drizzle);const auto pattern=raw.bayer;const int channels=raw.channels;
     result.wcs=raw.wcs;result.centerRa=raw.centerRa;result.centerDec=raw.centerDec;result.pixelScale=raw.pixelScale;result.date=raw.date;
     if(!calibrated)raw=calibrate(std::move(raw),masters,check);
     auto reference=linearRgb(raw,check);
     if(backgroundOptions)reference=extractBackground(reference,*backgroundOptions,check).image;
-    std::vector<unsigned char> coverage(std::size_t(reference.width)*reference.height,1);
+    const auto dimensions=drizzle?drizzleDimensions(reference.width,reference.height,*drizzle):std::array<int,2>{reference.width,reference.height};
+    const int outputWidth=dimensions[0],outputHeight=dimensions[1];
+    std::vector<unsigned char> coverage(std::size_t(outputWidth)*outputHeight,1);
     std::vector<DiskImage> disk;
     std::array<float,3> background{level(reference,0),level(reference,1),level(reference,2)};
     for(int n=0;n<count;++n) {
@@ -314,55 +323,100 @@ Integration integrate(int count,const ImageLoader& load,const Calibration& maste
             if(!calibrated&&n)data=calibrate(std::move(data),masters,check);
             auto image=n?linearRgb(data,check):reference;
             if(n&&backgroundOptions){if(progress)progress(n,count,"Background extraction");image=extractBackground(image,*backgroundOptions,check).image;}
+            StarAlignment alignment;
             if(n){
                 if(progress)progress(n,count,"Star analysis and registration");
-                const auto alignment=alignStars(reference,image,check);
+                alignment=alignStars(reference,image,check);
                 if(normalize)for(auto& value:image.rgb)value*=float(alignment.fluxScale);
-                image=warp(image,alignment,reference.width,reference.height);
+                if(!drizzle)image=warp(image,alignment,reference.width,reference.height);
             }
             if(progress)progress(n,count,"Normalization");
             if(normalize)for(int c=0;c<3;++c){const auto offset=level(image,c)-background[c];for(std::size_t p=c;p<image.rgb.size();p+=3)if(std::isfinite(image.rgb[p]))image.rgb[p]-=offset;}
-            for(std::size_t p=0;p<coverage.size();++p)coverage[p]&=std::isfinite(image.rgb[p*3])&&std::isfinite(image.rgb[p*3+1])&&std::isfinite(image.rgb[p*3+2]);
-            disk.emplace_back(image);result.accepted.push_back(n);result.totalExposure+=data.exposure;
-        }catch(const std::runtime_error& e){if(n==0)throw;result.rejected.push_back(n);result.reasons.emplace_back(e.what());}
+            if(drizzle) {
+                if(progress)progress(n,count,"Drizzle projection");
+                auto projected=drizzleProject(image,alignment,reference.width,reference.height,*drizzle,check);
+                DiskImage stored(projected.image,projected.weights);
+                const auto& m=alignment.matrix;const double det=m[0]*m[4]-m[1]*m[3];
+                // Crop geometrical borders only. Missing drops inside that area
+                // stay explicit and are handled using weights during integration.
+                for(int y=0;y<outputHeight;++y) {
+                    checked(check);
+                    for(int x=0;x<outputWidth;++x) {
+                        const double rx=(x+.5)/drizzle->scale-.5-m[2],ry=(y+.5)/drizzle->scale-.5-m[5];
+                        const double sx=(m[4]*rx-m[1]*ry)/det,sy=(-m[3]*rx+m[0]*ry)/det;
+                        coverage[std::size_t(y)*outputWidth+x]&=sx>=-.5&&sy>=-.5&&sx<image.width-.5&&sy<image.height-.5;
+                    }
+                }
+                // Rotation/scale can provide different phases across the field.
+                for(const auto point:std::array<std::array<double,2>,3>{{{0,0},{reference.width*.5,reference.height*.5},{double(reference.width-1),double(reference.height-1)}}}) {
+                    const double dx=(m[0]-1)*point[0]+m[1]*point[1]+m[2],dy=m[3]*point[0]+(m[4]-1)*point[1]+m[5];
+                    result.subpixelDiversity|=std::hypot(std::remainder(dx,1.),std::remainder(dy,1.))>.1;
+                }
+                disk.push_back(std::move(stored));
+            } else {
+                DiskImage stored(image);
+                for(std::size_t p=0;p<coverage.size();++p)coverage[p]&=std::isfinite(image.rgb[p*3])&&std::isfinite(image.rgb[p*3+1])&&std::isfinite(image.rgb[p*3+2]);
+                disk.push_back(std::move(stored));
+            }
+            result.accepted.push_back(n);result.totalExposure+=data.exposure;
+        }catch(const StorageError&){throw;}catch(const std::runtime_error& e){checked(check);if(n==0)throw;result.rejected.push_back(n);result.reasons.emplace_back(e.what());}
     }
     if(disk.empty())throw std::runtime_error("No usable light frames.");
-    const auto crop=commonRectangle(coverage,reference.width,reference.height);
-    if(result.wcs){result.wcs->crpix[0]-=crop.x;result.wcs->crpix[1]-=crop.y;}
+    if(drizzle&&disk.size()<2)throw std::runtime_error("Drizzle requires at least two usable light frames per filter group.");
+    const auto crop=commonRectangle(coverage,outputWidth,outputHeight);
+    const double scale=drizzle?drizzle->scale:1;
+    if(result.wcs)result.wcs=result.wcs->remap({scale,0,(scale-1)*.5-crop.x,0,scale,(scale-1)*.5-crop.y});
+    if(result.pixelScale)result.pixelScale=*result.pixelScale/scale;
     result.image={crop.width,crop.height,std::vector<float>(std::size_t(crop.width)*crop.height*3)};
     // Disk-backed strips keep memory independent of the number of full images.
-    const int rows=std::max(1,65536/(reference.width*3));
-    std::vector<float> values(disk.size()),deviations(disk.size());
+    const int rows=std::max(1,65536/(outputWidth*3));
+    std::vector<float> values;values.reserve(disk.size());
+    std::vector<float> deviations;deviations.reserve(disk.size());
+    result.minimumContributors=int(disk.size());std::uint64_t contributors=0;
+    auto readStrip=[](DiskImage& stored,std::vector<float>& strip,std::uint64_t offset) {
+#ifdef _WIN32
+        const int seek=_fseeki64(stored.file.get(),offset,SEEK_SET);
+#else
+        const int seek=fseeko(stored.file.get(),off_t(offset),SEEK_SET);
+#endif
+        if(seek||std::fread(strip.data(),sizeof(float),strip.size(),stored.file.get())!=strip.size())
+            throw StorageError("Cannot read temporary integration data.");
+    };
     for(int y=0;y<crop.height;y+=rows) {
         checked(check);if(progress)progress(y,crop.height,"Rejection and integration");
         const int h=std::min(rows,crop.height-y);
-        const auto length=std::size_t(reference.width)*h*3;
+        const auto length=std::size_t(outputWidth)*h*3;
         std::vector<std::vector<float>> strips(disk.size(),std::vector<float>(length));
+        std::vector<std::vector<float>> weights(drizzle?disk.size():0,std::vector<float>(std::size_t(outputWidth)*h));
         for(std::size_t n=0;n<disk.size();++n) {
-            const auto offset=std::uint64_t(crop.y+y)*reference.width*3*sizeof(float);
-#ifdef _WIN32
-            const int seek=_fseeki64(disk[n].file.get(),offset,SEEK_SET);
-#else
-            const int seek=fseeko(disk[n].file.get(),off_t(offset),SEEK_SET);
-#endif
-            if(seek||std::fread(strips[n].data(),sizeof(float),length,disk[n].file.get())!=length)
-                throw std::runtime_error("Cannot read temporary integration data.");
+            checked(check);
+            readStrip(disk[n],strips[n],std::uint64_t(crop.y+y)*outputWidth*3*sizeof(float));
+            if(drizzle)readStrip(disk[n],weights[n],(std::uint64_t(outputHeight)*outputWidth*3+std::uint64_t(crop.y+y)*outputWidth)*sizeof(float));
         }
-        for(int yy=0;yy<h;++yy)for(int x=0;x<crop.width*3;++x) {
-            const auto at=std::size_t(yy)*reference.width*3+crop.x*3+x;
-            for(std::size_t n=0;n<disk.size();++n)values[n]=strips[n][at];
-            if(sigma==0 || values.size()<3) {
-                double sum=0;for(float v:values)sum+=v;
-                result.image.rgb[(std::size_t(y+yy)*crop.width*3)+x]=float(sum/values.size());continue;
+        for(int yy=0;yy<h;++yy)for(int x=0;x<crop.width;++x) {
+            const auto pixel=std::size_t(yy)*outputWidth+crop.x+x;
+            int available=0;for(std::size_t n=0;n<disk.size();++n)if(!drizzle||weights[n][pixel]>0)++available;
+            if(!available)throw std::runtime_error("Drizzle left uncovered pixels. Increase pixel fraction or use more dithered exposures.");
+            contributors+=available;result.minimumContributors=std::min(result.minimumContributors,available);
+            for(int c=0;c<3;++c) {
+                values.clear();
+                for(std::size_t n=0;n<disk.size();++n)if((!drizzle||weights[n][pixel]>0)&&std::isfinite(strips[n][pixel*3+c]))values.push_back(strips[n][pixel*3+c]);
+                if(values.empty())throw std::runtime_error("No finite image samples.");
+                float center=0,limit=0;
+                const bool reject=sigma>0&&values.size()>=3;
+                if(reject){center=medianInPlace(values);deviations.clear();for(float v:values)deviations.push_back(std::abs(v-center));limit=float(sigma)*std::max(1e-7f,1.4826f*medianInPlace(deviations));}
+                double sum=0,totalWeight=0;
+                for(std::size_t n=0;n<disk.size();++n) {
+                    const float w=drizzle?weights[n][pixel]:1,v=strips[n][pixel*3+c];
+                    if(w<=0||!std::isfinite(v))continue;
+                    if(reject&&std::abs(v-center)>limit){++result.rejectedSamples;continue;}
+                    sum+=double(v)*w;totalWeight+=w;
+                }
+                result.image.rgb[(std::size_t(y+yy)*crop.width+x)*3+c]=totalWeight>0?float(sum/totalWeight):center;
             }
-            const float center=medianInPlace(values);
-            for(std::size_t n=0;n<values.size();++n)deviations[n]=std::abs(values[n]-center);
-            const float limit=float(sigma)*std::max(1e-7f,1.4826f*medianInPlace(deviations));
-            double sum=0;int used=0;
-            for(float v:values)if(std::isfinite(v)&&(values.size()<3||std::abs(v-center)<=limit)){sum+=v;++used;}else ++result.rejectedSamples;
-            result.image.rgb[(std::size_t(y+yy)*crop.width*3)+x]=used?float(sum/used):center;
         }
     }
+    result.meanContributors=double(contributors)/(std::size_t(crop.width)*crop.height);
     return result;
 }
 BackgroundResult extractBackground(const FloatImage& input,const BackgroundOptions& options,const CheckCancel& check) {

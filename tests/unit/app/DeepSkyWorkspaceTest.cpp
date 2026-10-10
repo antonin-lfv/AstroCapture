@@ -75,6 +75,38 @@ int main(int argc,char** argv){
         }
         return 0;
     }
+    if(qEnvironmentVariableIsSet("ASTRO_UI_DRIZZLE_QA")) {
+        auto original=recording::readAstroImage(qEnvironmentVariable("ASTRO_UI_FITS_PATH").toStdString());
+        recording::AstroImage crop=original;crop.width=1024;crop.height=768;crop.samples.resize(std::size_t(crop.width)*crop.height*crop.channels);
+        const int ox=(original.width-crop.width)/2,oy=(original.height-crop.height)/2;
+        for(int y=0;y<crop.height;++y)std::copy_n(original.samples.begin()+(std::size_t(y+oy)*original.width+ox)*crop.channels,crop.width*crop.channels,crop.samples.begin()+std::size_t(y)*crop.width*crop.channels);
+        if(crop.wcs)crop.wcs=crop.wcs->remap({1,0,-double(ox),0,1,-double(oy)});
+        original.samples.clear();original.samples.shrink_to_fit();
+        QList<QUrl> urls;for(int n=0;n<2;++n){const auto path=directory.filePath(QString("orion-%1.fits").arg(n));recording::writeAstroFits(path.toStdString(),crop);urls<<QUrl::fromLocalFile(path);}
+        controller.addFiles(urls);wait(controller);
+        root->setProperty("workflowStep",1);root->setProperty("frameListOpen",false);
+        root->findChild<QObject*>("deepSkyAdvanced")->setProperty("expanded",true);
+        root->findChild<QObject*>("deepSkyDrizzle")->setProperty("checked",true);
+        root->findChild<QObject*>("deepSkyDrizzlePixelFraction")->setProperty("value",.8);
+        root->findChild<QObject*>("deepSkyCalibrated")->setProperty("checked",true);
+        const auto folder=qEnvironmentVariable("ASTRO_UI_DRIZZLE_QA");QDir().mkpath(folder);
+        auto capture=[&](const QString& path){for(int i=0;i<5;++i){QCoreApplication::processEvents();QThread::msleep(40);}ASTRO_TEST_CHECK(window.grabWindow().save(path));};
+        for(const auto size:{QSize(1440,960),QSize(1100,800),QSize(900,700)}) {
+            window.resize(size);root->setSize(size);root->setProperty("workflowStep",1);for(int i=0;i<5;++i){QCoreApplication::processEvents();QThread::msleep(40);}
+            auto* scroll=root->findChild<QObject*>("deepSkyInspector")->property("contentItem").value<QObject*>();
+            scroll->setProperty("contentY",std::max(0.,scroll->property("contentHeight").toDouble()-scroll->property("height").toDouble()));
+            QMetaObject::invokeMethod(root->findChild<QObject*>("deepSkyCompletionToast"),"close");capture(folder+QString("/drizzle-settings-%1x%2.png").arg(size.width()).arg(size.height()));
+        }
+        QElapsedTimer timing;timing.start();ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root->findChild<QObject*>("deepSkyIntegrate"),"clicked"));wait(controller);
+        ASTRO_TEST_CHECK(controller.hasResult());qInfo()<<"Real Orion crop drizzle:"<<timing.elapsed()<<"ms"<<controller.integrationReport();
+        ASTRO_TEST_CHECK(controller.processingDocument().value<app::ImageDocument>().pixels->width>2000);
+        const auto result=QUrl::fromLocalFile(folder+"/orion-drizzle.fits");controller.exportImage(result,true);wait(controller);ASTRO_TEST_CHECK(QFileInfo::exists(result.toLocalFile()));
+        for(const auto size:{QSize(1440,960),QSize(1100,800),QSize(900,700)}){window.resize(size);root->setSize(size);root->setProperty("workflowStep",6);QMetaObject::invokeMethod(root->findChild<QObject*>("deepSkyCompletionToast"),"close");capture(folder+QString("/drizzle-result-%1x%2.png").arg(size.width()).arg(size.height()));}
+        window.resize(900,700);root->setSize({900,700});root->setProperty("workflowStep",1);root->setProperty("frameListOpen",false);for(int i=0;i<5;++i){QCoreApplication::processEvents();QThread::msleep(40);}
+        auto* scroll=root->findChild<QObject*>("deepSkyInspector")->property("contentItem").value<QObject*>();
+        scroll->setProperty("contentY",std::max(0.,scroll->property("contentHeight").toDouble()-scroll->property("height").toDouble()));capture(folder+"/drizzle-report-900x700.png");
+        return 0;
+    }
     // Opening the dialog restores stored limits; a user changing methods must
     // still get the appropriate default after that assignment breaks the binding.
     auto* calibrationMethod=root->findChild<QObject*>("catalogCalibrationMethod");
@@ -135,6 +167,24 @@ int main(int argc,char** argv){
     ASTRO_TEST_CHECK(root->property("frameListOpen").toBool());
     if(!controller.hasResult())qWarning()<<controller.status();ASTRO_TEST_CHECK(controller.hasResult()&&controller.displayingResult()&&controller.groups()==QStringList{"R"});
     ASTRO_TEST_CHECK(controller.hasRawComparison());
+    {
+        // The actual QML action persists drizzle controls; portable results
+        // and failed operations preserve the previous usable calculation.
+        const auto original=controller.sessionSnapshot();const auto view=root->property("sessionState");
+        auto* drizzle=root->findChild<QObject*>("deepSkyDrizzle");auto* fraction=root->findChild<QObject*>("deepSkyDrizzlePixelFraction");
+        drizzle->setProperty("checked",true);fraction->setProperty("value",.75);QCoreApplication::processEvents();
+        controller.setSelected(1,false);QCoreApplication::processEvents();ASTRO_TEST_CHECK(root->property("drizzleInvalid").toBool());
+        ASTRO_TEST_CHECK(!root->findChild<QObject*>("deepSkyIntegrate")->property("enabled").toBool());controller.setSelected(1,true);
+        ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root->findChild<QObject*>("deepSkyIntegrate"),"clicked"));wait(controller);
+        const auto result=controller.sessionSnapshot();ASTRO_TEST_CHECK(controller.integrationReport().size()==1&&controller.integrationReport().front().toMap()["drizzle"].toBool());ASTRO_TEST_CHECK(result.images["linear"]->width>300&&result.images["linear"]->height>250);
+        ASTRO_TEST_CHECK(controller.projectOptions()["drizzle"].toBool()&&controller.projectOptions()["pixelFraction"].toDouble()==.75);
+        const auto path=QUrl::fromLocalFile(directory.filePath("drizzle.astroproject"));controller.savePortableProject(path);wait(controller);
+        app::DeepSkyController reopened;reopened.setProjectCacheDirectory(directory.filePath("drizzle-cache"));reopened.loadProject(path);wait(reopened);
+        ASTRO_TEST_CHECK(reopened.hasResult()&&reopened.integrationReport()==controller.integrationReport()&&reopened.projectOptions()["drizzle"].toBool()&&reopened.sessionSnapshot().images["linear"]->rgb==result.images["linear"]->rgb);
+        controller.integrate(true,3,true,true,false,true,0,.8);wait(controller);ASTRO_TEST_CHECK(controller.sessionSnapshot().images["linear"]==result.images["linear"]);
+        controller.restoreSession(original);ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root,"restoreSessionState",Q_ARG(QVariant,view)));QCoreApplication::processEvents();ASTRO_TEST_CHECK(!drizzle->property("checked").toBool());
+    }
+
     {
         const auto original=controller.sessionSnapshot();auto verified=original;
         const recording::CelestialWcs wcs{{83.82,-5.39},{80.5,64.5},{-.001,0,0,.001}};

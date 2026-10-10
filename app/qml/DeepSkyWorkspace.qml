@@ -18,6 +18,16 @@ Control {
     property var captionOptions:({})
     property bool shortcutsAllowed: true
     property string editError: ""
+    readonly property var drizzlePlan: {
+        const groups={},scale=[1,1.5,2][drizzleScale.currentIndex];
+        controller.frames.forEach(function(row) {
+            if(!row.selected || row.role!=="Light")return;
+            if(!groups[row.group])groups[row.group]={group:row.group,width:Math.ceil(row.width*scale),height:Math.ceil(row.height*scale),count:0};
+            groups[row.group].count++;
+        });
+        return Object.values(groups);
+    }
+    readonly property bool drizzleInvalid: drizzle.checked && drizzlePlan.some(row=>row.width*row.height>32000000 || row.count<2)
     property bool imageFocus: false
     property var advancedOptions: ({})
     readonly property var advancedKeys:["starSeparation","starPsfProfile","starFwhm","starBeta","starLimit","starFitTolerance","starSaturationLimit","starsGain","starsSaturation","starsMidtones","starBackgroundGain","starBackgroundSaturation","starBackgroundDenoise","photometryMethod","photometryProfile","photometryWhite","photometryImageKey","maskStrokes","maskBaseWhite","maskFile","maskBlurRadius","maskScope","pedestal","ghs", "ghsStrength", "ghsLocal", "ghsSymmetry", "ghsShadows", "ghsHighlights", "ghsInverse", "ghsMode", "maskType", "maskLow", "maskHigh", "maskFeather", "maskX", "maskY", "maskRadius", "maskStarRadius", "maskInvert", "deconvolution", "psfProfile", "psfFwhm", "psfBeta", "rlIterations", "rlDamping", "rlBlend", "rlStopping", "advancedDenoise", "noiseScales", "noiseThreshold", "noiseAmount", "noiseChroma", "photometry", "photometryReferences", "photometryAperture", "photometryInner", "photometryOuter", "photometrySaturation"]
@@ -164,11 +174,11 @@ Control {
         if(!edits.applyValues(options())){editError=qsTr("Check parameters and operation order: white must exceed black; photometry and deconvolution require linear, unrotated input; photometry cannot be masked.");return false;}
         edits.endEdit();
         const view=root.sessionState;delete view.options;
-        controller.projectOptions={view:view,calibrated:calibrated.checked,normalize:normalize.checked,badPixels:badPixels.checked,sequenceBackground:sequenceBackground.checked,sigma:sigma.value,method:integrationMethod.currentIndex,finish:edits.values,caption:root.captionOptions,versions:edits.snapshot()};return true;
+        controller.projectOptions={view:view,calibrated:calibrated.checked,normalize:normalize.checked,badPixels:badPixels.checked,sequenceBackground:sequenceBackground.checked,drizzle:drizzle.checked,drizzleScale:drizzleScale.currentIndex,pixelFraction:pixelFraction.value,sigma:sigma.value,method:integrationMethod.currentIndex,finish:edits.values,caption:root.captionOptions,versions:edits.snapshot()};return true;
     }
     readonly property var sessionState: {
         edits.values; edits.version; edits.canUndo; edits.canRedo;
-        return {options:{calibrated:calibrated.checked,normalize:normalize.checked,badPixels:badPixels.checked,sequenceBackground:sequenceBackground.checked,
+        return {options:{calibrated:calibrated.checked,normalize:normalize.checked,badPixels:badPixels.checked,sequenceBackground:sequenceBackground.checked,drizzle:drizzle.checked,drizzleScale:drizzleScale.currentIndex,pixelFraction:pixelFraction.value,
             sigma:sigma.value,method:integrationMethod.currentIndex,finish:edits.values,caption:root.captionOptions,versions:edits.snapshot()},
             step:workflowStep,tool:finishingTool,expandedFamilies:expandedFamilies.slice(),advancedTool:advancedTools.toolIndex,comparison:comparisonMode,split:comparisonSplit,fit:viewport.fitMode,zoom:viewport.zoom,panX:viewport.panX,panY:viewport.panY,targetQuery:astrometryDialog.targetQuery};
     }
@@ -184,6 +194,9 @@ Control {
         if(restored.normalize!==undefined)normalize.checked=restored.normalize;
         if(restored.badPixels!==undefined)badPixels.checked=restored.badPixels;
         sequenceBackground.checked=restored.sequenceBackground||false;
+        drizzle.checked=restored.drizzle||false;
+        drizzleScale.currentIndex=restored.drizzleScale===undefined?2:Math.max(0,Math.min(2,restored.drizzleScale));
+        pixelFraction.value=restored.pixelFraction===undefined?.8:Math.max(.5,Math.min(1,restored.pixelFraction));
         if(restored.sigma!==undefined)sigma.value=restored.sigma;
         if(restored.method!==undefined)integrationMethod.currentIndex=restored.method;
         if(restored.versions)edits.restoreSession(restored.versions);
@@ -231,6 +244,9 @@ Control {
             if(settings.normalize!==undefined)normalize.checked=settings.normalize;
             if(settings.badPixels!==undefined)badPixels.checked=settings.badPixels;
             sequenceBackground.checked=settings.sequenceBackground||false;
+            drizzle.checked=settings.drizzle||false;
+            drizzleScale.currentIndex=settings.drizzleScale===undefined?2:Math.max(0,Math.min(2,settings.drizzleScale));
+            pixelFraction.value=settings.pixelFraction===undefined?.8:Math.max(.5,Math.min(1,settings.pixelFraction));
             if(settings.sigma!==undefined)sigma.value=settings.sigma;
             if(settings.method!==undefined)integrationMethod.currentIndex=settings.method;
             const finish=settings.finish;
@@ -621,6 +637,32 @@ DropArea {
                             ParameterLabel {label:qsTr("Gradient before stacking");explanation:qsTr("Optional degree-1 subtraction after calibration and debayering, before alignment. Each exposure gets its own automatic grid (20 samples per line, tolerance 1). Leave disabled for fields filled with nebulosity.")}
                             CheckBox {id:sequenceBackground;objectName:"deepSkySequenceBackground";text:qsTr("Correct each calibrated exposure");enabled:!controller.busy;Layout.fillWidth:true}
                             Rectangle {Layout.fillWidth:true;Layout.preferredHeight:1;color:Atelier.border}
+                            HelpCheckBox {
+                                id:drizzle;objectName:"deepSkyDrizzle";text:qsTr("Drizzle · mono / RGB");Layout.fillWidth:true;enabled:!controller.busy
+                                explanation:qsTr("Projects calibrated source-pixel footprints directly onto the aligned output grid. Useful for undersampled images with varied subpixel shifts. At least two usable lights per filter are required; many dithered exposures give better coverage. Bayer sources are debayered first: this is not native CFA drizzle. Leave disabled for ordinary stacking.")
+                            }
+                            ColumnLayout {
+                                visible:drizzle.checked;Layout.fillWidth:true;spacing:8
+                                DarkComboBox {
+                                    id:drizzleScale;objectName:"deepSkyDrizzleScale";Layout.fillWidth:true;currentIndex:2;model:[qsTr("Scale ×1"),qsTr("Scale ×1.5"),qsTr("Scale ×2")];enabled:!controller.busy;Accessible.name:qsTr("Drizzle scale")
+                                    explanation:qsTr("×2 doubles width and height: four times as many pixels, about four times the output storage. It does not create photons or guarantee a resolution gain. ×1 reduces registration interpolation without enlarging the image. Output is limited to 32 MP; use a smaller scale for large sources.")
+                                }
+                                ParameterControl {
+                                    id:pixelFraction;objectName:"deepSkyDrizzlePixelFraction";label:qsTr("Pixel fraction");Layout.fillWidth:true;from:.5;to:1;value:.8;decimals:2;enabled:!controller.busy
+                                    explanation:qsTr("Linear size of each square input-pixel drop, from 0.5 to 1. Smaller drops can retain finer detail but reduce coverage and increase noise. Start at 0.8; increase toward 1 if the image is uneven. Missing samples are excluded using their weights, and uncovered pixels stop the operation. Brightness keeps the source intensity convention.")
+                                }
+                                Repeater {
+                                    model:root.drizzlePlan
+                                    Label {
+                                        required property var modelData
+                                        text:qsTr("%1 · before crop: %2 × %3 px · %4 MP").arg(modelData.group).arg(modelData.width).arg(modelData.height).arg(Number(modelData.width*modelData.height/1000000).toLocaleString(Qt.locale(),"f",1))
+                                        color:modelData.width*modelData.height>32000000?Atelier.warning:Atelier.secondary;font.pixelSize:12;wrapMode:Text.Wrap;Layout.fillWidth:true
+                                    }
+                                }
+                                Label {visible:root.drizzleInvalid;text:qsTr("Choose at least two lights per filter and an output of 32 MP or less.");color:Atelier.warning;font.pixelSize:12;wrapMode:Text.Wrap;Layout.fillWidth:true}
+                                Label {text:qsTr("Use many exposures with different subpixel shifts. Larger files alone do not mean more detail.");color:Atelier.secondary;font.pixelSize:12;wrapMode:Text.Wrap;Layout.fillWidth:true}
+                            }
+                            Rectangle {Layout.fillWidth:true;Layout.preferredHeight:1;color:Atelier.border;visible:drizzle.checked}
                             ParameterLabel {label:qsTr("Integration");explanation:qsTr("Robust rejection requires at least three accepted lights. Lower sigma rejects more aggressively. Mean without rejection keeps all usable samples. Borders are cropped to common coverage.")}
                             DarkComboBox {id:integrationMethod;Layout.fillWidth:true;Layout.minimumWidth:0;model:[qsTr("Mean with robust rejection"),qsTr("Mean without rejection")];enabled:!controller.busy}
                             RowLayout {
@@ -634,7 +676,19 @@ DropArea {
                 ParameterLabel {visible:root.workflowStep===1;label:qsTr("Reference and alignment");explanation:qsTr("Reference selects one light per filter group. Other frames are aligned to its stars. Choose a sharp frame with many recognizable stars; this is not the frame used as the final output.")}
                 Label {visible:root.workflowStep===1;text:qsTr("Check the stars, FWHM and reference in the image list before stacking.");color:Atelier.secondary;font.pixelSize:12;wrapMode:Text.Wrap;Layout.fillWidth:true}
                 Rectangle {objectName:"deepSkyStackDivider";visible:root.workflowStep===1;Layout.fillWidth:true;Layout.preferredHeight:1;color:"#526174";Layout.topMargin:8;Layout.bottomMargin:8}
-                IconButton {visible:root.workflowStep===1;objectName:"deepSkyIntegrate";text:qsTr("Create the stacked image");Layout.fillWidth:true;Layout.minimumWidth:0;enabled:!controller.busy && controller.frames.some(row=>row.selected && row.role==="Light");onClicked:controller.integrate(calibrated.checked,integrationMethod.currentIndex===0?sigma.value:0,normalize.checked,badPixels.checked,sequenceBackground.checked)}
+                IconButton {visible:root.workflowStep===1;objectName:"deepSkyIntegrate";text:qsTr("Create the stacked image");Layout.fillWidth:true;Layout.minimumWidth:0;enabled:!controller.busy && !root.drizzleInvalid && controller.frames.some(row=>row.selected && row.role==="Light");onClicked:{if(root.saveOptions())controller.integrate(calibrated.checked,integrationMethod.currentIndex===0?sigma.value:0,normalize.checked,badPixels.checked,sequenceBackground.checked,drizzle.checked,[1,1.5,2][drizzleScale.currentIndex],pixelFraction.value)}}
+
+                Repeater {
+                    model:controller.integrationReport.filter(row=>row.drizzle)
+                    ColumnLayout {
+                        required property var modelData
+                        visible:root.workflowStep===1;Layout.fillWidth:true;spacing:6
+                        Label {text:qsTr("Last drizzle · %1").arg(modelData.group);color:Atelier.text;font.pixelSize:13;Layout.fillWidth:true;wrapMode:Text.Wrap}
+                        Label {text:qsTr("×%1 · %2 × %3 px · contributors: min %4, mean %5").arg(Number(modelData.scale).toLocaleString(Qt.locale(),"f",1)).arg(modelData.width).arg(modelData.height).arg(modelData.minimum).arg(Number(modelData.mean).toLocaleString(Qt.locale(),"f",1));color:Atelier.secondary;font.pixelSize:12;Layout.fillWidth:true;wrapMode:Text.Wrap}
+                        Label {visible:!modelData.subpixelDiversity;text:qsTr("Subpixel shifts are very similar: no resolution gain is guaranteed.");color:Atelier.warning;font.pixelSize:12;Layout.fillWidth:true;wrapMode:Text.Wrap}
+                        Label {visible:modelData.minimum<3;text:qsTr("Fewer than three contributors in some pixels: robust rejection is unavailable there.");color:Atelier.warning;font.pixelSize:12;Layout.fillWidth:true;wrapMode:Text.Wrap}
+                    }
+                }
 
             ColumnLayout {visible:root.workflowStep===6;Layout.fillWidth:true;spacing:8
                 Label {text:root.editError;color:Atelier.warning;visible:text.length>0;wrapMode:Text.Wrap;Layout.fillWidth:true}

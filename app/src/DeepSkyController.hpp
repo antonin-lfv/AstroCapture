@@ -50,6 +50,7 @@ class DeepSkyController : public QObject {
     Q_PROPERTY(QString status READ status NOTIFY changed)
     Q_PROPERTY(QVariantList frames READ frames NOTIFY changed)
     Q_PROPERTY(QStringList groups READ groups NOTIFY changed)
+    Q_PROPERTY(QVariantList integrationReport READ integrationReport NOTIFY changed)
     Q_PROPERTY(QVariantMap projectOptions READ projectOptions WRITE setProjectOptions NOTIFY projectOptionsChanged)
     Q_PROPERTY(bool hasResult READ hasResult NOTIFY changed)
     Q_PROPERTY(bool displayingResult READ displayingResult NOTIFY changed)
@@ -122,6 +123,7 @@ public:
     QString status() const{return status_;}
     QVariantList frames() const{return frames_;}
     QStringList groups() const{return groups_;}
+    QVariantList integrationReport() const{return integrationReport_;}
     bool hasResult() const{return bool(linear_);}
     bool displayingResult() const{return displayingResult_;}
     int imageWidth() const{return preview_.width();}
@@ -154,7 +156,8 @@ public:
     Q_INVOKABLE void restoreResult();
     Q_INVOKABLE void chooseRawComparison(int index);
     Q_INVOKABLE void showRawComparison(bool enabled);
-    Q_INVOKABLE void integrate(bool calibrated,double sigma=3,bool normalize=true,bool correctBadPixels=true,bool sequenceBackground=false);
+    Q_INVOKABLE void integrate(bool calibrated,double sigma=3,bool normalize=true,bool correctBadPixels=true,bool sequenceBackground=false,
+                              bool drizzle=false,double drizzleScale=2,double pixelFraction=0.8);
     Q_INVOKABLE void setReference(int index);
     Q_INVOKABLE void selectResult(const QString& group);
     Q_INVOKABLE void compose(const QString& red,const QString& green,const QString& blue,const QString& luminance="");
@@ -205,6 +208,7 @@ private:
     bool busy_{},adjusting_{},exporting_{};
     std::optional<QVariantMap> pendingAdjustments_;
     QVariantMap histogram_,advancedReport_;
+    QVariantList integrationReport_;
     int starLayerView_{};
     std::shared_ptr<const processing::FloatImage> starsLayer_,starBackgroundLayer_;
     QImage starsLayerPreview_,starBackgroundLayerPreview_;

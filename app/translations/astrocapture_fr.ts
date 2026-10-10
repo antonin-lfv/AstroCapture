@@ -9456,4 +9456,148 @@ RMS normalisée moyenne %5</translation>
             <translation>Activez la séparation dans Étoiles et fond sur une entrée de recette linéaire, après correction du gradient et calibration des couleurs, avant l’étirement. Ajustez des profils stellaires gaussiens ou Moffat ; inspectez les nombres acceptés/rejetés et le fond résiduel. Les étoiles proches, saturées ou mal ajustées restent dans le fond : il s’agit d’une soustraction de PSF, pas d’un retrait complet des étoiles. Des réglages neutres reproduisent l’image combinée. Réglez séparément luminosité, saturation et tons moyens des étoiles, puis luminosité, saturation et lissage du fond. Les deux couches partagent l’étirement principal. Inspectez Combiné, Étoiles et Fond à 100 %. Exportez chaque couche calculée en FITS 32 bits signé avec la géométrie et le WCS actuels : leur somme reconstitue le résultat combiné. Les exports principaux enregistrent toujours l’image combinée.</translation>
         </message>
     </context>
+    <context>
+        <name>GuideWorkspace</name>
+        <message>
+            <source>Drizzle: when it can help</source>
+            <translation>Drizzle : quand il peut aider</translation>
+        </message>
+        <message>
+            <source>In Stack → Advanced stack settings, enable Drizzle · mono / RGB. It projects the original calibrated pixel footprints using their stellar alignment. Start at scale ×2 and pixel fraction 0.8 for undersampled data with varied subpixel shifts; many dithered exposures work better than two nearly identical poses. ×2 produces four times as many pixels, with more noise and storage, without creating new photons. Try ×1 when the sources are large. Review the output dimensions before crop and the final contributor counts. Fewer than three contributors cannot support robust rejection; uncovered pixels stop the operation. Sources and output remain limited to 32 MP. Bayer sources are debayered first; native CFA drizzle is not available. Keep ordinary stacking as a comparison.</source>
+            <translation>Dans Empilement → Réglages avancés, activez Drizzle · mono / RVB. Il projette les empreintes des pixels calibrés originaux selon leur alignement stellaire. Commencez avec une échelle ×2 et une fraction de pixel de 0,8 pour des données sous-échantillonnées avec des décalages sous-pixel variés ; de nombreuses poses avec dithering sont préférables à deux poses presque identiques. ×2 produit quatre fois plus de pixels, avec davantage de bruit et de stockage, sans créer de nouveaux photons. Essayez ×1 pour les grandes sources. Vérifiez les dimensions avant recadrage et les nombres de poses contributrices du bilan. Moins de trois contributions ne permettent pas de rejet robuste ; des pixels sans couverture arrêtent l’opération. Sources et résultat restent limités à 32 MP. Les sources Bayer sont dématricées au préalable ; le drizzle CFA natif n’est pas disponible. Conservez un empilement ordinaire pour comparer.</translation>
+        </message>
+    </context>
+    <context>
+        <name>DeepSkyWorkspace</name>
+        <message>
+            <source>Drizzle · mono / RGB</source>
+            <translation>Drizzle · mono / RVB</translation>
+        </message>
+        <message>
+            <source>Projects calibrated source-pixel footprints directly onto the aligned output grid. Useful for undersampled images with varied subpixel shifts. At least two usable lights per filter are required; many dithered exposures give better coverage. Bayer sources are debayered first: this is not native CFA drizzle. Leave disabled for ordinary stacking.</source>
+            <translation>Projette directement les empreintes des pixels sources calibrés sur la grille de sortie alignée. Utile pour les images sous-échantillonnées avec des décalages sous-pixel variés. Il faut au moins deux poses utilisables par filtre ; de nombreuses poses avec dithering améliorent la couverture. Les sources Bayer sont dématricées au préalable : ce n’est pas un drizzle CFA natif. Laissez désactivé pour l’empilement ordinaire.</translation>
+        </message>
+        <message>
+            <source>Scale ×1</source>
+            <translation>Échelle ×1</translation>
+        </message>
+        <message>
+            <source>Scale ×1.5</source>
+            <translation>Échelle ×1,5</translation>
+        </message>
+        <message>
+            <source>Scale ×2</source>
+            <translation>Échelle ×2</translation>
+        </message>
+        <message>
+            <source>Drizzle scale</source>
+            <translation>Échelle du drizzle</translation>
+        </message>
+        <message>
+            <source>×2 doubles width and height: four times as many pixels, about four times the output storage. It does not create photons or guarantee a resolution gain. ×1 reduces registration interpolation without enlarging the image. Output is limited to 32 MP; use a smaller scale for large sources.</source>
+            <translation>×2 double la largeur et la hauteur : quatre fois plus de pixels et environ quatre fois plus de stockage pour le résultat. Cela ne crée pas de photons et ne garantit pas un gain de résolution. ×1 réduit l’interpolation d’alignement sans agrandir l’image. La sortie est limitée à 32 MP : réduisez l’échelle pour les grandes sources.</translation>
+        </message>
+        <message>
+            <source>Pixel fraction</source>
+            <translation>Fraction de pixel</translation>
+        </message>
+        <message>
+            <source>Linear size of each square input-pixel drop, from 0.5 to 1. Smaller drops can retain finer detail but reduce coverage and increase noise. Start at 0.8; increase toward 1 if the image is uneven. Missing samples are excluded using their weights, and uncovered pixels stop the operation. Brightness keeps the source intensity convention.</source>
+            <translation>Taille linéaire de chaque empreinte carrée de pixel source, de 0,5 à 1. Des empreintes plus petites peuvent préserver des détails fins, mais réduisent la couverture et augmentent le bruit. Commencez à 0,8 ; augmentez vers 1 si le résultat est irrégulier. Les échantillons absents sont exclus grâce aux poids ; des pixels sans couverture arrêtent le calcul. La luminosité conserve la convention d’intensité de la source.</translation>
+        </message>
+        <message>
+            <source>%1 · before crop: %2 × %3 px · %4 MP</source>
+            <translation>%1 · avant recadrage : %2 × %3 px · %4 MP</translation>
+        </message>
+        <message>
+            <source>Choose at least two lights per filter and an output of 32 MP or less.</source>
+            <translation>Choisissez au moins deux poses par filtre et une sortie de 32 MP maximum.</translation>
+        </message>
+        <message>
+            <source>Use many exposures with different subpixel shifts. Larger files alone do not mean more detail.</source>
+            <translation>Préférez de nombreuses poses avec des décalages sous-pixel différents. Un fichier plus grand ne garantit pas plus de détails.</translation>
+        </message>
+    </context>
+    <context>
+        <name>DeepSkyController</name>
+        <message>
+            <source>Drizzle requires scale 1–2 and pixel fraction 0.5–1.</source>
+            <translation>Le drizzle demande une échelle de 1 à 2 et une fraction de pixel de 0,5 à 1.</translation>
+        </message>
+        <message>
+            <source>The drizzle output exceeds 32 million pixels. Use a smaller scale or smaller source images.</source>
+            <translation>Le résultat drizzle dépasse 32 millions de pixels. Réduisez l’échelle ou utilisez des sources plus petites.</translation>
+        </message>
+        <message>
+            <source>Invalid drizzle input dimensions.</source>
+            <translation>Dimensions de source invalides pour le drizzle.</translation>
+        </message>
+        <message>
+            <source>Invalid drizzle registration transform.</source>
+            <translation>Transformation d’alignement invalide pour le drizzle.</translation>
+        </message>
+        <message>
+            <source>Drizzle requires at least two usable light frames per filter group.</source>
+            <translation>Le drizzle demande au moins deux poses utilisables par groupe de filtre.</translation>
+        </message>
+        <message>
+            <source>Drizzle left uncovered pixels. Increase pixel fraction or use more dithered exposures.</source>
+            <translation>Des pixels restent sans couverture après le drizzle. Augmentez la fraction de pixel ou ajoutez des poses avec dithering.</translation>
+        </message>
+        <message>
+            <source>Drizzle ×%1 · pixel fraction %2 · %3 × %4 px · contributors: min %5, mean %6</source>
+            <translation>Drizzle ×%1 · fraction de pixel %2 · %3 × %4 px · contributions : min %5, moyenne %6</translation>
+        </message>
+        <message>
+            <source>Subpixel shifts are very similar: more output pixels do not guarantee finer detail.</source>
+            <translation>Les décalages sous-pixel sont très similaires : plus de pixels en sortie ne garantit pas des détails plus fins.</translation>
+        </message>
+        <message>
+            <source>Some drizzle pixels have fewer than three contributing frames; robust rejection is unavailable there.</source>
+            <translation>Certains pixels drizzle ont moins de trois poses contributrices ; le rejet robuste n’est pas possible à ces endroits.</translation>
+        </message>
+        <message>
+            <source>Calibration</source>
+            <translation>Calibration</translation>
+        </message>
+        <message>
+            <source>Background extraction</source>
+            <translation>Extraction du fond de ciel</translation>
+        </message>
+        <message>
+            <source>Star analysis and registration</source>
+            <translation>Analyse des étoiles et alignement</translation>
+        </message>
+        <message>
+            <source>Normalization</source>
+            <translation>Normalisation</translation>
+        </message>
+        <message>
+            <source>Drizzle projection</source>
+            <translation>Projection drizzle</translation>
+        </message>
+        <message>
+            <source>Rejection and integration</source>
+            <translation>Rejet et intégration</translation>
+        </message>
+    </context>
+    <context>
+        <name>DeepSkyWorkspace</name>
+        <message>
+            <source>Last drizzle · %1</source>
+            <translation>Dernier drizzle · %1</translation>
+        </message>
+        <message>
+            <source>×%1 · %2 × %3 px · contributors: min %4, mean %5</source>
+            <translation>×%1 · %2 × %3 px · contributions : min %4, moyenne %5</translation>
+        </message>
+        <message>
+            <source>Subpixel shifts are very similar: no resolution gain is guaranteed.</source>
+            <translation>Les décalages sous-pixel sont très similaires : aucun gain de résolution n’est garanti.</translation>
+        </message>
+        <message>
+            <source>Fewer than three contributors in some pixels: robust rejection is unavailable there.</source>
+            <translation>Moins de trois contributions sur certains pixels : le rejet robuste n’y est pas possible.</translation>
+        </message>
+    </context>
 </TS>

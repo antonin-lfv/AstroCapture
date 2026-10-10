@@ -445,6 +445,19 @@ int main(int argc, char** argv) {
                     for(int i=0;i<5;++i){QCoreApplication::processEvents();QThread::msleep(40);}
                     ASTRO_TEST_CHECK(window.grabWindow().save(folder+QString("/guide-%1-%2-%3x%4.png").arg(topic).arg(bottom?"bottom":"top").arg(size.width()).arg(size.height())));
                 }
+                if(topic==3) {
+                    auto* scroll=guide->findChild<QObject*>("guideLessonScroll");auto* content=scroll->property("contentItem").value<QObject*>();
+                    auto* canvas=qobject_cast<QQuickItem*>(content->property("contentItem").value<QObject*>());ASTRO_TEST_CHECK(canvas);
+                    std::function<QQuickItem*(QQuickItem*)> findTitle=[&](QQuickItem* parent)->QQuickItem* {
+                        if(parent->property("text").toString().startsWith("Drizzle"))return parent;
+                        for(auto* child:parent->childItems())if(auto* title=findTitle(child))return title;
+                        return nullptr;
+                    };
+                    auto* title=findTitle(guide);ASTRO_TEST_CHECK(title);
+                    content->setProperty("contentY",title->mapToItem(canvas,QPointF()).y()-16);
+                    for(int i=0;i<5;++i){QCoreApplication::processEvents();QThread::msleep(40);}
+                    ASTRO_TEST_CHECK(window.grabWindow().save(folder+QString("/guide-drizzle-%1x%2.png").arg(size.width()).arg(size.height())));
+                }
             }
         }
     }

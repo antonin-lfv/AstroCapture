@@ -163,9 +163,33 @@ Utilisez une échelle cohérente entre poses et calibrations. La correction
 automatique du gradient est un ajustement planaire : comparez avec l’option
 désactivée sur des nébulosités étendues.
 
+**Drizzle mono/RVB** — dans **Empilement → Réglages avancés** :
+
+- Projection directe des pixels calibrés par recouvrement de carrés, avant toute
+  interpolation d’alignement, avec échelle **×1, ×1,5 ou ×2** et fraction de pixel
+  **0,5 à 1** (départ conseillé : **0,8**). Les sources Bayer sont dématricées.
+- Pertinent pour des poses sous-échantillonnées et décalées à des phases
+  sous-pixel variées ; augmenter la taille ne garantit pas de nouveaux détails.
+  Il faut au moins deux poses utilisables par filtre ; beaucoup de poses avec
+  dithering améliorent la couverture et permettent un rejet plus fiable.
+- Moyenne pondérée par surface couverte et rejet robuste sur les contributions
+  disponibles. Les valeurs nulles, négatives et supérieures à 1 restent valides.
+  Les zones sans données bloquent l’opération ; les bordures géométriques sont
+  recadrées. Le bilan indique les nombres minimal/moyen de poses contributrices.
+- Dimensions avant recadrage affichées et limite de **32 MP** vérifiée avant de
+  lancer. ×2 multiplie les pixels par quatre : une pose de 26 MP ne peut donc
+  pas être agrandie ×2 dans cette version. ×1 reste disponible.
+- Intensité linéaire conservée dans la convention des sources ; le flux intégré
+  tient compte de la surface des pixels sur le ciel. WCS TAN/SIP et
+  échantillonnage suivent l’échelle et le recadrage. Réglages sauvegardés dans
+  les projets et sessions ; FITS linéaire conserve le résultat drizzle Float32.
+
+Le [guide technique du drizzle](docs/decisions/ADR-021-drizzle.md) précise les
+unités, la couverture et les limites de cette première version.
+
 Limites actuelles : **32 MP par image**, **500 poses sélectionnées par groupe**,
 **2000 fichiers par projet**. Les RAW X-Trans et les autres matrices non Bayer
-ne sont pas pris en charge. Le drizzle, la correction optique dynamique, les
+ne sont pas pris en charge. Le drizzle Bayer natif, la correction optique dynamique, les
 projections grand angle, la fusion HDR et les profils fabricant prévalidés
 caméra/filtres restent à développer.
 Le WCS guidé et les calibrations PCC/SPCC sont décrits ci-dessous. La précision de centroidage annoncée par APP

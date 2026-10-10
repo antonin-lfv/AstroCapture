@@ -311,3 +311,8 @@ astro_add_unit_test(astro_app_star_layers_test
 set_target_properties(astro_app_star_layers_test PROPERTIES AUTOMOC ON)
 target_include_directories(astro_app_star_layers_test PRIVATE ../../app/src)
 set_tests_properties(astro_app_star_layers_test PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen" TIMEOUT 60)
+
+astro_add_unit_test(astro_processing_drizzle_test
+    SOURCES processing/DrizzleTest.cpp
+    LIBS astro::processing
+)

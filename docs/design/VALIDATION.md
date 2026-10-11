@@ -976,3 +976,26 @@ dérivées du RGB ; leurs noms HA/OIII/SII ne prouvent aucune acquisition réell
 en bande étroite. La qualification d’une vraie série T33 et la comparaison
 finale Siril restent à faire. Chaque nouveau réglage possède une aide française,
 et le guide contient une carte Composition multifiltre.
+
+
+### Livraison macOS 1.17.0
+
+DMG recréé après le commit fonctionnel `1ce20d6` :
+`build/release/AstroCapture-1.17.0.dmg`, **114 412 348 octets**.
+SHA-256 : `fb0f6a8b1f4ea383a40560e6c303500bda6031939ba62600faf4d55ae3492223`.
+Exécutable : `1a7f9982b1f93c521e0005724a4915f8d9bae6729ce079a2776f373386fd76dd`,
+identique entre le bundle compilé et celui du DMG.
+
+Somme de contrôle, version 1.17.0 et signature locale vérifiées ; 200 fichiers
+Mach-O sans dépendance vers Homebrew ni les dossiers utilisateur, quatre
+auxiliaires d’astrométrie démarrables et trois archives sources tierces présentes.
+Journal : `build/composition-dmg-verification.log`.
+
+Le parcours personnel a aussi été relancé : sauvegarde et exports, reprise
+dans un second processus, protection des fichiers/résultats sur un volume
+privé plein de 64 Mio et démarrage natif Cocoa depuis le DMG en lecture seule.
+Les contrôles réussissent, les préférences utilisateur sont protégées et les
+volumes temporaires sont démontés. Aucun échec de chargement QML ; le seul
+diagnostic de démarrage concerne l’alias de police « Monospace ». Journaux :
+`build/composition-personal-validation.log` et
+`build/composition-personal-validation/`.

@@ -909,3 +909,32 @@ contrôles distincts. Le plafond de 128 MP n’annonce pas toutes les combinaiso
 comme possibles : le budget mémoire et la reprise 4 Gio/64 images priment.
 
 **Vérification Release finale : 50/50 tests, 10,39 s**, journal `build/large-delivery-tests.log`.
+
+### Installateur 1.16.0 et parcours personnel
+
+DMG recréé après le commit fonctionnel `f7e957c` :
+`build/release/AstroCapture-1.16.0.dmg`, **116 660 457 octets**.
+SHA-256 : `fda45743c47d7bfd5338443dce252b89e2a687642541042b16bc5cd55df2c659`.
+Exécutable : `2f06f571e8bcfd1d1ad5d7007edbbd7f02a3862b9a81d1c8aa68feb5886f749b`,
+identique entre le bundle compilé et celui du DMG.
+
+Contrôles réussis : somme de contrôle du DMG, version embarquée 1.16.0,
+signature locale vérifiée, **200 fichiers Mach-O** sans dépendance vers
+Homebrew ni les dossiers utilisateur, quatre exécutables auxiliaires
+d’astrométrie démarrables et trois archives sources tierces présentes.
+Journal : `build/large-dmg-verification.log`.
+
+Le parcours `scripts/validate_personal_macos.py` a été relancé avec le
+recadrage central 1024 × 768 de la source Orion : fenêtre complète, exports,
+projet portable et reprise dans un second processus. Sur un volume privé de
+64 Mio rempli, les échecs d’export/sauvegarde préservent les fichiers existants
+et les résultats. L’application du DMG démarre avec le backend natif Cocoa,
+reste active pendant les cinq secondes de contrôle et ne produit pas d’erreur
+de chargement QML. Les préférences utilisateur sont protégées et les volumes
+de test ont été démontés. Le seul diagnostic de démarrage concerne l’alias
+de police « Monospace ». Journaux : `build/large-personal-validation.log` et
+`build/large-personal-validation/`.
+
+Ces essais locaux ne remplacent pas le contrôle d’une caméra réelle, la
+comparaison scientifique finale avec Siril ni la qualification de distribution
+publique décrite dans le [bilan V2](../releases/V2_READINESS.md).

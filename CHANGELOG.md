@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.16.0 — 2026-10-11
+
+- Support scientific / still images and saved results up to 128 MP, with a
+  32,700-pixel dimension limit and explicit memory/recovery budgets.
+- Accumulate mono/RGB and native Bayer drizzle projections in 64 MiB strips,
+  preserving double sums, source order, footprint geometry and Float32 outputs.
+  Store strips in the existing private archive; roll back abandoned reservations.
+- Read/write FITS in bounded blocks and export immutable samples without a full
+  planar copy. Stream TIFF pixel encoding without a complete encoded-file buffer.
+- Check expensive finishing/wavelet combinations and decoded session previews
+  against the local memory budget before calculation/loading; preserve prior
+  results on refusal. Keep the 4 GiB recovery limit and existing project formats.
+- Update shared image bounds, PNG/TIFF decoder allowance, French help and guide.
+  Full scientific results remain in RAM; this is not an unlimited out-of-core
+  engine, and actual shifted-series/Siril qualification remains separate.
+
 ## 1.15.1 — 2026-10-10
 
 - Restore French workspace names in the save-before-quitting dialog.

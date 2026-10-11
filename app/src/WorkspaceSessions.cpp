@@ -1,3 +1,4 @@
+#include <astro/domain/ImageLimits.hpp>
 #include "ProcessingController.hpp"
 #include "MosaicController.hpp"
 #include "DeepSkyController.hpp"
@@ -10,7 +11,7 @@
 namespace astro::app {
 namespace {
 bool validImage(const std::shared_ptr<const processing::FloatImage>& p) {
-    return p && p->width>0 && p->height>0 && std::uint64_t(p->width)*p->height<=32000000 && p->rgb.size()==std::size_t(p->width)*p->height*3;
+    return p && astro::domain::supportedImageSize(p->width,p->height) && p->rgb.size()==std::size_t(p->width)*p->height*3;
 }
 
 }
@@ -34,7 +35,7 @@ bool ProcessingController::canRestoreSession(const WorkspaceSnapshot& s) const {
     if(s.state["still"].toBool() && !stack)return false;
     if(!source.isEmpty()) {
         const int count=source["count"].toInt();const auto width=source["width"].toInt(),height=source["height"].toInt();
-        if(source["path"].toString().isEmpty() || width<=0||height<=0||std::uint64_t(width)*height>32000000||count<1||count>10000000||s.state["index"].toInt()<0||s.state["index"].toInt()>=count)return false;
+        if(source["path"].toString().isEmpty() || !domain::supportedImageSize(width,height)||count<1||count>10000000||s.state["index"].toInt()<0||s.state["index"].toInt()>=count)return false;
         std::set<int> indices;for(const auto& row:s.state["ranks"].toList()){const auto r=row.toMap();const int index=r["index"].toInt();const auto quality=r["quality"].toDouble();if(index<0||index>=count||!indices.insert(index).second||!std::isfinite(quality)||quality<0)return false;}
     }
     const auto edges=s.planes.value("edges");if(edges && (!stack||edges->size()!=std::size_t(stack->width)*stack->height))return false;

@@ -1,3 +1,4 @@
+#include <astro/domain/ImageLimits.hpp>
 #include <algorithm>
 #include <astro/processing/DeepSkyAdvanced.hpp>
 #include <cmath>
@@ -13,8 +14,7 @@ void checkpoint(const CheckCancel &c) {
     c();
 }
 void validate(const FloatImage &image) {
-  if (image.width < 1 || image.height < 1 ||
-      std::uint64_t(image.width) * image.height > 32000000 ||
+  if (!domain::supportedImageSize(image.width,image.height) ||
       image.rgb.size() != std::size_t(image.width) * image.height * 3)
     throw std::runtime_error("Invalid advanced processing image.");
 }

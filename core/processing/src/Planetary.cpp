@@ -1,3 +1,4 @@
+#include <astro/domain/ImageLimits.hpp>
 #include "MetalProcessing.hpp"
 #include <algorithm>
 #include <astro/processing/Planetary.hpp>
@@ -12,13 +13,13 @@ void checkpoint(const CheckCancel &check) {
     check();
 }
 void validate(const FloatImage &image, std::uint64_t maxPixels = 16000000) {
-  if (image.width <= 0 || image.height <= 0 ||
+  if (!domain::supportedImageSize(image.width,image.height) ||
       std::uint64_t(image.width) * image.height > maxPixels ||
       image.rgb.size() != std::size_t(image.width) * image.height * 3)
     throw std::runtime_error("Invalid processing image dimensions.");
 }
 void validateGray(const GrayImage &image) {
-  if (image.width <= 0 || image.height <= 0 ||
+  if (!domain::supportedImageSize(image.width,image.height) ||
       std::uint64_t(image.width) * image.height > 16000000 ||
       image.pixels.size() != std::size_t(image.width) * image.height)
     throw std::runtime_error("Invalid analysis image.");
@@ -358,7 +359,7 @@ FloatImage MeanStack::finish() const {
 FloatImage wavelets(const FloatImage &image, const std::array<float, 6> &gains,
                     float denoise, const std::array<float, 3> &color,
                     float gamma, const CheckCancel &check, ComputePreference preference, ComputeReport* report,const PreviewTarget* preview) {
-  validate(image, 32000000);
+  validate(image, astro::domain::maximumImagePixels);
   if (!std::isfinite(gamma) || gamma < .1f || gamma > 5 ||
       !std::isfinite(denoise) || denoise < 0 || denoise > 1)
     throw std::runtime_error("Invalid wavelet settings.");

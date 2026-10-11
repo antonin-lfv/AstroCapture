@@ -1,3 +1,4 @@
+#include <astro/domain/ImageLimits.hpp>
 #include <astro/processing/Preview.hpp>
 #include "MetalProcessing.hpp"
 #include <algorithm>
@@ -7,7 +8,7 @@
 namespace astro::processing {
 void validatePreviewTarget(const FloatImage& image,const PreviewTarget& target) {
     const auto destination=target.pixels;const auto stride=target.bytesPerLine;
-    if(image.width<=0||image.height<=0||std::uint64_t(image.width)*image.height>32000000||image.rgb.size()!=std::size_t(image.width)*image.height*3)
+    if(!astro::domain::supportedImageSize(image.width,image.height)||image.rgb.size()!=std::size_t(image.width)*image.height*3)
         throw std::runtime_error("Invalid processing image dimensions.");
     const auto row=std::size_t(image.width)*3;
     if(!destination.data()||stride<row||stride>(std::numeric_limits<std::size_t>::max()-row)/std::size_t(image.height)||destination.size()<stride*std::size_t(image.height-1)+row)

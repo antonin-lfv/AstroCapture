@@ -1,3 +1,4 @@
+#include <astro/domain/ImageLimits.hpp>
 #include <astro/processing/WcsProjection.hpp>
 #include <algorithm>
 #include <cmath>
@@ -49,7 +50,7 @@ std::array<double,2> map(const Wcs& a,const Wcs& b,const std::array<double,9>& h
 }
 }
 WcsProjection::WcsProjection(const Wcs& source,const Wcs& target,int width,int height,const CheckCancel& check):source_(source),target_(target) {
-    if(!source.valid()||!target.valid()||width<1||height<1||std::uint64_t(width)*height>32000000)
+    if(!source.valid()||!target.valid()||!domain::supportedImageSize(width,height))
         throw std::runtime_error("WCS projection requires valid TAN or TAN-SIP coordinates on every light, including the reference.");
     forward_=plane(source,target);inverse_=plane(target,source);
     double parity=0;
@@ -83,7 +84,7 @@ StarAlignment validateWcsRegistration(const FloatImage& reference,const FloatIma
     return out;
 }
 FloatImage reprojectWcs(const FloatImage& source,const WcsProjection& projection,int width,int height,const CheckCancel& check) {
-    if(width<1||height<1||source.width<1||source.height<1||std::uint64_t(width)*height>32000000||std::uint64_t(source.width)*source.height>32000000||source.rgb.size()!=std::size_t(source.width)*source.height*3)
+    if(!domain::supportedImageSize(width,height)||!domain::supportedImageSize(source.width,source.height)||source.rgb.size()!=std::size_t(source.width)*source.height*3)
         throw std::runtime_error("Invalid WCS projection image dimensions.");
     FloatImage out{width,height,std::vector<float>(std::size_t(width)*height*3,std::numeric_limits<float>::quiet_NaN())};
     for(int y=0;y<height;++y){if(check)check();for(int x=0;x<width;++x){const auto p=projection.inverse(x,y);const double sx=p[0],sy=p[1];if(sx<0||sy<0||sx>source.width-1||sy>source.height-1)continue;

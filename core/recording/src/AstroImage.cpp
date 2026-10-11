@@ -1,3 +1,4 @@
+#include <astro/domain/ImageLimits.hpp>
 #include <astro/recording/AstroImage.hpp>
 #include <fitsio.h>
 #include <libraw/libraw.h>
@@ -76,8 +77,8 @@ domain::BayerPattern pattern(std::string text) {
     return domain::BayerPattern::None;
 }
 void validate(int w,int h,int c) {
-    if(w<=0||h<=0||(c!=1&&c!=3)||std::uint64_t(w)*h>32000000)
-        throw std::runtime_error("Images must be mono or RGB and at most 32 megapixels.");
+    if(!astro::domain::supportedImageSize(w,h)||(c!=1&&c!=3))
+        throw std::runtime_error("Images must be mono or RGB and at most 128 megapixels.");
 }
 AstroImage readFits(const std::filesystem::path& path,double inputScale) {
     Fits f; int status=0;
@@ -91,7 +92,8 @@ AstroImage readFits(const std::filesystem::path& path,double inputScale) {
         if(dim>=2&&dim<=3&&axes[0]>0&&axes[1]>0) {found=true;break;}
     }
     if(!found)throw std::runtime_error("No supported image HDU in this FITS file.");
-    if(axes[0]>32000000||axes[1]>32000000)throw std::runtime_error("FITS dimensions are too large.");
+    if(axes[0]>astro::domain::maximumImageDimension||axes[1]>astro::domain::maximumImageDimension)throw std::runtime_error("FITS dimensions are too large.");
+    if(dim==3&&axes[2]!=1&&axes[2]!=3)throw std::runtime_error("Images must be mono or RGB and at most 128 megapixels.");
     const int channels=dim==2?1:int(axes[2]);
     validate(int(axes[0]),int(axes[1]),channels);
     AstroImage image; image.width=int(axes[0]); image.height=int(axes[1]); image.channels=channels;
@@ -113,22 +115,29 @@ AstroImage readFits(const std::filesystem::path& path,double inputScale) {
     const double sampling=numberKey(f.file,"PIXSCALE",focal>0?206.264806*pixel/focal:0);
     if(sampling>0&&sampling<=100)image.pixelScale=sampling;
     const auto pixels=std::size_t(image.width)*image.height;
-    std::vector<float> planar(pixels*channels);
-    float nullValue=std::numeric_limits<float>::quiet_NaN(); int anyNull=0;
-    fits_read_img(f.file,TFLOAT,1,LONGLONG(planar.size()),&nullValue,planar.data(),&anyNull,&status); fail(status);
+    domain::requireImageMemory(pixels*channels*8+256ULL*1024*1024);
+    image.samples.resize(pixels*channels);
+    constexpr std::size_t blockSize=262144;
+    std::vector<float> block(std::min(pixels,blockSize));
+    float nullValue=std::numeric_limits<float>::quiet_NaN();int anyNull=0;
+    for(int c=0;c<channels;++c)for(std::size_t at=0;at<pixels;at+=blockSize) {
+        const auto count=std::min(blockSize,pixels-at);
+        fits_read_img(f.file,TFLOAT,LONGLONG(c*pixels+at+1),LONGLONG(count),&nullValue,block.data(),&anyNull,&status);fail(status);
+        for(std::size_t i=0;i<count;++i)image.samples[(at+i)*channels+c]=block[i];
+    }
     double scale=inputScale;
     if(!(scale>0)) {
         scale=numberKey(f.file,"AC_SCALE",0);
         if(!(scale>0)) {
             // FITS floats may contain normalized samples or CCD ADUs. Do not
             // normalize each frame by its maximum: that changes photometry.
-            const auto maximum=*std::max_element(planar.begin(),planar.end(),[](float a,float b){return (!std::isfinite(a)?-INFINITY:a)<(!std::isfinite(b)?-INFINITY:b);});
+            const auto maximum=*std::max_element(image.samples.begin(),image.samples.end(),[](float a,float b){return (!std::isfinite(a)?-INFINITY:a)<(!std::isfinite(b)?-INFINITY:b);});
             scale=bitpix==8?255:bitpix==16?65535:maximum>2?65535:1;
         }
     }
-    image.scale=scale;image.originalScale=numberKey(f.file,"AC_ORIG",scale); image.samples.resize(planar.size());
+    image.scale=scale;image.originalScale=numberKey(f.file,"AC_ORIG",scale);
     for(std::size_t p=0;p<pixels;++p)
-        for(int c=0;c<channels;++c)image.samples[p*channels+c]=float(planar[p+c*pixels]/scale);
+        for(int c=0;c<channels;++c)image.samples[p*channels+c]=float(image.samples[p*channels+c]/scale);
     return image;
 }
 AstroImage readRaw(const std::filesystem::path& path,double inputScale) {
@@ -171,9 +180,12 @@ AstroImage readAstroImage(const std::filesystem::path& path,double inputScale) {
     return readRaw(path,inputScale);
 }
 void writeAstroFits(const std::filesystem::path& path,const AstroImage& image) {
+    writeAstroFits(path,image,image.samples);
+}
+void writeAstroFits(const std::filesystem::path& path,const AstroImage& image,std::span<const float> samples,const std::function<void()>& check) {
     validate(image.width,image.height,image.channels);
     const auto pixels=std::size_t(image.width)*image.height;
-    if(image.samples.size()!=pixels*image.channels)throw std::runtime_error("Invalid FITS sample count.");
+    if(samples.size()!=pixels*image.channels)throw std::runtime_error("Invalid FITS sample count.");
     Fits f; int status=0;
     fits_create_diskfile(&f.file,path.string().c_str(),&status); fail(status); // never overwrite an input
     long axes[3]{image.width,image.height,image.channels};
@@ -201,9 +213,14 @@ void writeAstroFits(const std::filesystem::path& path,const AstroImage& image) {
 
     }
     if(image.centerRa)key("RA",*image.centerRa);if(image.centerDec)key("DEC",*image.centerDec);if(image.pixelScale)key("PIXSCALE",*image.pixelScale);
-    std::vector<float> planar(image.samples.size());
-    for(std::size_t p=0;p<pixels;++p)for(int c=0;c<image.channels;++c)planar[p+c*pixels]=image.samples[p*image.channels+c];
-    fits_write_img(f.file,TFLOAT,1,LONGLONG(planar.size()),planar.data(),&status);
+    constexpr std::size_t blockSize=262144;
+    std::vector<float> block(std::min(pixels,blockSize));
+    for(int c=0;c<image.channels;++c)for(std::size_t at=0;at<pixels;at+=blockSize) {
+        if(check)check();const auto count=std::min(blockSize,pixels-at);
+        for(std::size_t i=0;i<count;++i)block[i]=samples[(at+i)*image.channels+c];
+        fits_write_img(f.file,TFLOAT,LONGLONG(c*pixels+at+1),LONGLONG(count),block.data(),&status);fail(status);
+    }
+    if(check)check();
     fits_write_chksum(f.file,&status); fail(status);
     fits_close_file(f.file,&status); f.file=nullptr; fail(status);
 }

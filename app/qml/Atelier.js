@@ -23,3 +23,7 @@ var controlRadius = 4;
 var dialogRadius = 10;
 var inspectorWidth = 360;
 var compactInspectorWidth = 320;
+
+// Must match astro/domain/ImageLimits.hpp.
+var maximumImagePixels = 128000000;
+var maximumImageDimension = 32700;

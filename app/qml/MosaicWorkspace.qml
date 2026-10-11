@@ -224,7 +224,7 @@ Rectangle {
             Layout.fillWidth: true
             Layout.minimumHeight: 48; Layout.preferredHeight: 48; Layout.maximumHeight: 48
             Label {
-                text: root.controller.status || qsTr("TIFF, PNG or JPEG · up to 100 images · 32 MP output · originals stay unchanged")
+                text: root.controller.status || qsTr("TIFF, PNG or JPEG · up to 100 images · 128 MP output · originals stay unchanged")
                 color: "#b8c7da"; wrapMode: Text.WordWrap; maximumLineCount: 3; elide: Text.ElideRight; Layout.fillWidth: true; font.pixelSize: 12
                 HoverHandler { id: statusHover }
                 ToolTip.visible: statusHover.hovered && truncated

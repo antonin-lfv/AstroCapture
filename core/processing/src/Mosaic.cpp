@@ -1,3 +1,4 @@
+#include <astro/domain/ImageLimits.hpp>
 #include <astro/processing/Mosaic.hpp>
 #include <opencv2/calib3d.hpp>
 #include <opencv2/features2d.hpp>
@@ -209,9 +210,11 @@ MosaicResult buildMosaic(const std::vector<MosaicSource>& inputSources,const Loa
         left=std::min(left,p.x); top=std::min(top,p.y); right=std::max(right,p.x); bottom=std::max(bottom,p.y);
     }
     left=std::floor(left); top=std::floor(top);
-    if(!std::isfinite(right) || !std::isfinite(bottom) || right-left>32700 || bottom-top>32700 || (right-left)*(bottom-top)>32000000)
-        throw std::runtime_error("The mosaic exceeds the 32-megapixel limit. Use smaller images or fewer tiles.");
+    if(!std::isfinite(right) || !std::isfinite(bottom) || right-left>32700 || bottom-top>32700 || (right-left)*(bottom-top)>astro::domain::maximumImagePixels)
+        throw std::runtime_error("The mosaic exceeds the 128-megapixel limit. Use smaller images or fewer tiles.");
     const int width=int(std::ceil(right-left)),height=int(std::ceil(bottom-top));
+    if(!domain::supportedImageSize(width,height))throw std::runtime_error("The mosaic exceeds the 128-megapixel limit. Use smaller images or fewer tiles.");
+    domain::requireImageMemory(std::uint64_t(width)*height*44+512ULL*1024*1024);
     cv::Mat sum=cv::Mat::zeros(height,width,CV_32FC3),weight=cv::Mat::zeros(height,width,CV_32F);
     for(int i=0;i<n;++i) {
         report(60+i*35/n,"blending");

@@ -29,7 +29,7 @@ Control {
     }
     readonly property string declaredBayer: ["","RGGB","BGGR","GRBG","GBRG"][bayerPattern.currentIndex]
     readonly property bool bayerDrizzleInvalid: nativeBayer.checked && controller.frames.some(row=>row.selected && row.role==="Light" && (row.channels!==1 || (!root.declaredBayer && ["RGGB","BGGR","GRBG","GBRG"].indexOf(row.bayer)<0) || (root.declaredBayer && ["RGGB","BGGR","GRBG","GBRG"].indexOf(row.bayer)>=0 && row.bayer!==root.declaredBayer)))
-    readonly property bool drizzleInvalid: drizzle.checked && (bayerDrizzleInvalid || drizzlePlan.some(row=>row.width*row.height>32000000 || row.count<2))
+    readonly property bool drizzleInvalid: drizzle.checked && (bayerDrizzleInvalid || drizzlePlan.some(row=>row.width>Atelier.maximumImageDimension || row.height>Atelier.maximumImageDimension || row.width*row.height>Atelier.maximumImagePixels || row.count<2))
     readonly property bool wcsProjectionInvalid: wcsProjection.checked && drizzlePlan.some(row=>row.count<2)
     property int resourcesRevision: 0
     readonly property var resourcePlan: {
@@ -678,7 +678,7 @@ DropArea {
                                 Label {visible:root.bayerDrizzleInvalid;text:qsTr("Native Bayer requires single-channel lights and a consistent pattern. Declare a verified missing pattern above; use mono / RGB for debayered files.");color:Atelier.warning;font.pixelSize:12;wrapMode:Text.Wrap;Layout.fillWidth:true}
                                 DarkComboBox {
                                     id:drizzleScale;objectName:"deepSkyDrizzleScale";Layout.fillWidth:true;currentIndex:2;model:[qsTr("Scale ×1"),qsTr("Scale ×1.5"),qsTr("Scale ×2")];enabled:!controller.busy;Accessible.name:qsTr("Drizzle scale")
-                                    explanation:qsTr("×2 doubles width and height: four times as many pixels, about four times the output storage. It does not create photons or guarantee a resolution gain. ×1 reduces registration interpolation without enlarging the image. Output is limited to 32 MP; use a smaller scale for large sources.")
+                                    explanation:qsTr("×2 doubles width and height: four times as many pixels, about four times the output storage. It does not create photons or guarantee a resolution gain. ×1 reduces registration interpolation without enlarging the image. Output is limited to 128 MP and 32,700 pixels per dimension, subject to memory and recovery budgets. Review Resources before stacking.")
                                 }
                                 ParameterControl {
                                     id:pixelFraction;objectName:"deepSkyDrizzlePixelFraction";label:qsTr("Pixel fraction");Layout.fillWidth:true;from:.5;to:1;value:.8;decimals:2;enabled:!controller.busy
@@ -689,10 +689,10 @@ DropArea {
                                     Label {
                                         required property var modelData
                                         text:qsTr("%1 · before crop: %2 × %3 px · %4 MP").arg(modelData.group).arg(modelData.width).arg(modelData.height).arg(Number(modelData.width*modelData.height/1000000).toLocaleString(Qt.locale(),"f",1))
-                                        color:modelData.width*modelData.height>32000000?Atelier.warning:Atelier.secondary;font.pixelSize:12;wrapMode:Text.Wrap;Layout.fillWidth:true
+                                        color:modelData.width*modelData.height>Atelier.maximumImagePixels?Atelier.warning:Atelier.secondary;font.pixelSize:12;wrapMode:Text.Wrap;Layout.fillWidth:true
                                     }
                                 }
-                                Label {visible:drizzle.checked && root.drizzlePlan.some(row=>row.width*row.height>32000000 || row.count<2);text:qsTr("Choose at least two lights per filter and an output of 32 MP or less.");color:Atelier.warning;font.pixelSize:12;wrapMode:Text.Wrap;Layout.fillWidth:true}
+                                Label {visible:drizzle.checked && root.drizzlePlan.some(row=>row.width>Atelier.maximumImageDimension || row.height>Atelier.maximumImageDimension || row.width*row.height>Atelier.maximumImagePixels || row.count<2);text:qsTr("Choose at least two lights per filter, at most 128 MP and 32,700 pixels per dimension.");color:Atelier.warning;font.pixelSize:12;wrapMode:Text.Wrap;Layout.fillWidth:true}
                                 Label {text:qsTr("Use many exposures with different subpixel shifts. Larger files alone do not mean more detail.");color:Atelier.secondary;font.pixelSize:12;wrapMode:Text.Wrap;Layout.fillWidth:true}
                             }
                             Rectangle {Layout.fillWidth:true;Layout.preferredHeight:1;color:Atelier.border;visible:drizzle.checked}
@@ -711,7 +711,7 @@ DropArea {
                 Rectangle {objectName:"deepSkyStackDivider";visible:root.workflowStep===1;Layout.fillWidth:true;Layout.preferredHeight:1;color:"#526174";Layout.topMargin:8;Layout.bottomMargin:8}
                 ColumnLayout {
                     visible:root.workflowStep===1;Layout.fillWidth:true;spacing:4
-                    ParameterLabel {objectName:"deepSkyResourcesHelp";label:qsTr("Resources before stacking");explanation:qsTr("Estimates use all selected exposures and the full output before cropping. Native strip buffers are limited to 64 MiB. Memory includes retained Deep sky results and modeled working buffers, not other applications or an exact peak measurement. Safety budget: half physical RAM, capped at 8 GiB; 2 GiB if unavailable. Temporary space includes a 256 MiB reserve, is checked again during computation, and is released after success, failure or cancellation. Automatic recovery remains limited to 4 GiB / 64 image references; image output stays limited to 32 MP.")}
+                    ParameterLabel {objectName:"deepSkyResourcesHelp";label:qsTr("Resources before stacking");explanation:qsTr("Estimates use all selected exposures and the full output before cropping. Native strip buffers are limited to 64 MiB. Memory includes retained Deep sky results and modeled working buffers, not other applications or an exact peak measurement. Safety budget: half physical RAM, capped at 8 GiB; 2 GiB if unavailable. Temporary space includes a 256 MiB reserve, is checked again during computation, and is released after success, failure or cancellation. Automatic recovery remains limited to 4 GiB / 64 image references; image output supports up to 128 MP and 32,700 pixels per dimension. Drizzle projection also uses 64 MiB strips. Full scientific images remain in memory; expensive finishing combinations can be refused before computation.")}
                     Label {objectName:"deepSkyResourceMemory";visible:root.resourcePlan.workingBytes!==undefined;text:qsTr("Estimated memory: %1 · budget: %2").arg(root.resourceSize(root.resourcePlan.workingBytes||0)).arg(root.resourceSize(root.resourcePlan.memoryBudget||0));color:Atelier.secondary;font.pixelSize:11;wrapMode:Text.Wrap;Layout.fillWidth:true}
                     Label {objectName:"deepSkyResourceDisk";visible:root.resourcePlan.requiredDisk!==undefined;text:root.resourcePlan.availableDisk>=0?qsTr("Temporary disk: %1 required · %2 free").arg(root.resourceSize(root.resourcePlan.requiredDisk)).arg(root.resourceSize(root.resourcePlan.availableDisk)):qsTr("Temporary disk: free space unavailable");color:Atelier.secondary;font.pixelSize:11;wrapMode:Text.Wrap;Layout.fillWidth:true}
                     Label {objectName:"deepSkyResourceError";visible:root.resourcePlan.blocked;text:root.resourcePlan.error||"";color:Atelier.warning;font.pixelSize:12;wrapMode:Text.Wrap;Layout.fillWidth:true;Accessible.name:text}

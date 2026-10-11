@@ -1,3 +1,4 @@
+#include <astro/domain/ImageLimits.hpp>
 #include <algorithm>
 #include <astro/processing/StarLayers.hpp>
 #include <cmath>
@@ -11,7 +12,7 @@ void check(const CheckCancel &c) {
 }
 void validate(const FloatImage &a) {
   if (a.width < 8 || a.height < 8 ||
-      std::uint64_t(a.width) * a.height > 32000000 ||
+      !domain::supportedImageSize(a.width,a.height) ||
       a.rgb.size() != std::size_t(a.width) * a.height * 3)
     throw std::runtime_error("Invalid star-layer image.");
 }

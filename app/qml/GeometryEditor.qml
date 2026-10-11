@@ -29,7 +29,7 @@ Popup {
         property string label
         property string key
         property string explanation
-        property int maximum:32000000
+        property int maximum:Atelier.maximumImageDimension
         Layout.fillWidth:true;spacing:3
         SettingLabel {text:parent.label;explanation:parent.explanation;color:Atelier.secondary;font.pixelSize:12}
         DarkSpinBox {Layout.fillWidth:true;from:parent.key==="x"||parent.key==="y"?0:1;to:parent.maximum;value:root.draft[parent.key]||0;editable:true;Accessible.name:parent.label;onValueModified:{root.update(parent.key,value);root.update("crop",true);}}
@@ -101,7 +101,7 @@ Popup {
         RowLayout {Layout.fillWidth:true
             Label {text:root.valid?qsTr("Output: %1 × %2 px").arg(root.outputWidth).arg(root.outputHeight):qsTr("The crop rectangle exceeds the image boundaries.");color:root.valid?Atelier.secondary:Atelier.danger;Layout.fillWidth:true;wrapMode:Text.Wrap}
             IconButton {text:qsTr("Cancel");onClicked:root.close()}
-            IconButton {objectName:"geometryApply";text:qsTr("Apply geometry");primary:true;enabled:root.valid&&root.outputWidth*root.outputHeight<=32000000;onClicked:{root.accepted(root.draft);root.close();}}
+            IconButton {objectName:"geometryApply";text:qsTr("Apply geometry");primary:true;enabled:root.valid&&root.outputWidth<=Atelier.maximumImageDimension&&root.outputHeight<=Atelier.maximumImageDimension&&root.outputWidth*root.outputHeight<=Atelier.maximumImagePixels;onClicked:{root.accepted(root.draft);root.close();}}
         }
     }
 }

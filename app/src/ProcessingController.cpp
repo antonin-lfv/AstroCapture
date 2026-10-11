@@ -1,3 +1,5 @@
+#include "ImageDecoding.hpp"
+#include <astro/domain/ImageLimits.hpp>
 #include "FileProtection.hpp"
 #include "ImageGeometry.hpp"
 #include "ProcessingController.hpp"
@@ -7,6 +9,7 @@
 #include "SequenceReader.hpp"
 #include <QFileInfo>
 #include <QImageReader>
+#include <set>
 #include <QImageWriter>
 #include <QColorSpace>
 #include <QSaveFile>
@@ -181,19 +184,20 @@ void ProcessingController::open(const QUrl &url) {
   }
   if(QStringList{"png","tif","tiff"}.contains(suffix)) {
     run(tr("Opening image…"), [this,path](std::stop_token stop) {
-      QImageReader reader(path); reader.setAutoTransform(true);
+      ensureLargeImageDecoding();QImageReader reader(path); reader.setAutoTransform(true);
       const auto size=reader.size();
       if(size.width()<=0 || size.height()<=0)
         throw std::runtime_error("Cannot read this image. Choose a valid PNG or TIFF file.");
-      if(std::uint64_t(size.width())*size.height()>32000000)
-        throw std::runtime_error("Images are limited to 32 megapixels.");
+      if(!astro::domain::supportedImageSize(size.width(),size.height()))
+        throw std::runtime_error("Images are limited to 128 megapixels.");
+      domain::requireImageMemory(std::uint64_t(size.width())*size.height()*60+256ULL*1024*1024);
       if(reader.imageCount()>1)
         throw std::runtime_error("Choose a single-image PNG or TIFF, not a multi-page file.");
       const auto image=reader.read().convertToFormat(QImage::Format_RGBA64);
       if(image.isNull())
         throw std::runtime_error("Cannot read this image. Choose a valid PNG or TIFF file.");
-      if(std::uint64_t(image.width())*image.height()>32000000)
-        throw std::runtime_error("Images are limited to 32 megapixels.");
+      if(!astro::domain::supportedImageSize(image.width(),image.height()))
+        throw std::runtime_error("Images are limited to 128 megapixels.");
       auto pixels=std::make_shared<FloatImage>(FloatImage{image.width(),image.height(),std::vector<float>(std::size_t(image.width())*image.height()*3)});
       for(int y=0;y<image.height();++y) {
         check(stop);
@@ -256,7 +260,7 @@ bool ProcessingController::openDocument(const QVariant& value) {
   if(busy_ || !value.canConvert<ImageDocument>()) return false;
   auto document=value.value<ImageDocument>();
   if(!document.pixels || document.pixels->width<=0 || document.pixels->height<=0 ||
-     std::uint64_t(document.pixels->width)*document.pixels->height>32000000 ||
+     !domain::supportedImageSize(document.pixels->width,document.pixels->height) ||
      document.pixels->rgb.size()!=std::size_t(document.pixels->width)*document.pixels->height*3 ||
      document.preview.size()!=QSize(document.pixels->width,document.pixels->height) ||
      (document.edgeMask && document.edgeMask->size()!=std::size_t(document.pixels->width)*document.pixels->height)) return false;
@@ -437,6 +441,14 @@ void ProcessingController::apply(const QVariantList &values, double denoise,
 }
 void ProcessingController::startAdjustments(const Adjustments &settings) {
   const auto original = stack_;
+  if(!original)return;
+  std::set<const FloatImage*> seen;std::uint64_t retained=256ULL*1024*1024;
+  for(const auto& p:{stack_,result_,frameCache_,document_.pixels})if(p&&seen.insert(p.get()).second)retained+=p->rgb.size()*4;
+  std::set<qint64> previews;
+  for(const auto& p:{preview_,beforePreview_,afterPreview_,geometryPreview_,annotationImage_,document_.preview})if(!p.isNull()&&previews.insert(p.cacheKey()).second)retained+=p.sizeInBytes();
+  const auto pixels=std::uint64_t(original->width)*original->height;
+  try{domain::requireImageMemory(retained+pixels*48+geometryWorkingBytes(original->width,original->height,settings.geometry));}
+  catch(const std::exception& e){status_=tr(e.what());emit changed();return;}
   const auto edgeMask = document_.edgeMask;
   const auto revision = adjustmentRevision_;
   const auto basePreview=geometryPreview_;

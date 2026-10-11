@@ -21,7 +21,7 @@ QString localizedError(QString error) {
         QT_TRANSLATE_NOOP("astro::app::MosaicController", ". Add an intermediate view or remove this image."),
         QT_TRANSLATE_NOOP("astro::app::MosaicController", "Overlaps disagree. Remove a changed, blurred or mismatched view and try again."),
         QT_TRANSLATE_NOOP("astro::app::MosaicController", "Inconsistent image scales. Use images from the same setup."),
-        QT_TRANSLATE_NOOP("astro::app::MosaicController", "The mosaic exceeds the 32-megapixel limit. Use smaller images or fewer tiles."),
+        QT_TRANSLATE_NOOP("astro::app::MosaicController", "The mosaic exceeds the 128-megapixel limit. Use smaller images or fewer tiles."),
         QT_TRANSLATE_NOOP("astro::app::MosaicController", "Each image must be at least 64 pixels per side and no larger than 24 megapixels: "),
         QT_TRANSLATE_NOOP("astro::app::MosaicController", "An input image changed or could not be read: "),
         QT_TRANSLATE_NOOP("astro::app::MosaicController", "The image positions could not be resolved."),

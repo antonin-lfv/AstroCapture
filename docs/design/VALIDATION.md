@@ -835,3 +835,77 @@ matériel ou d'endurance. Journal : `build/personal-validation/dmg-startup.log`.
 
 La signature reste ad hoc pour cet usage personnel. La signature Apple et la
 notarisation ne sont pas annoncées comme réalisées.
+
+
+## 11 octobre 2026 — Images jusqu’à 128 MP (1.16.0)
+
+Plafond commun de 128 000 000 pixels / 32 700 pixels par dimension, budgets
+mémoire et reprise conservés. Voir [ADR-027](../decisions/ADR-027-large-images.md).
+Projection drizzle en bandes de 64 Mio ; FITS par blocs de 262 144 échantillons,
+TIFF par blocs encodés de 128 Kio. Les images scientifiques restent complètes
+en RAM ; les combinaisons avancées peuvent être refusées avant calcul.
+
+Les tests comparent les bandes de drizzle aux projections complètes, avec
+égalité des valeurs et poids (NaN comparés comme absence de données) :
+translations, rotation, cisaillement, RGGB/BGGR/GRBG/GBRG, TAN-SIP et valeurs
+signées. Réservations de l’archive, abandon/troncature, offsets, annulation et
+fin du processus sont contrôlés. L’export des cartes utilise le même writer
+FITS par vue immuable ; une régression transitoire détectée dans ce chemin a
+été corrigée avant livraison. La petite géométrie recadrée d’une grande source
+est estimée sur ses propres canevas, au lieu de multiplier toute la source.
+
+### Contrôle natif sur 104,15 MP
+
+Source réelle Orion : 6244 × 4170 px, déjà calibrée. Deux fichiers identiques,
+dont une copie privée, servent au contrôle des ressources et des pixels.
+Aucune prétention de photons supplémentaires ni de gain de résolution par
+cette duplication. Originaux préservés, préférences et sorties de test isolées.
+
+- Drizzle RVB ×2, fraction de pixel 1, sans normalisation/rejet :
+  **12488 × 8340 px (104 149 920 pixels)**. Calcul mesuré à **27,983 s** sur
+  le Mac local de 16 Gio, sans seuil de performance imposé.
+- Intensités comparées à toute la source répétée sur la grille ×2 : écart
+  inférieur à 2e-6. SHA-256 Float32 linéaire reproductible :
+  `0b0ffcd3f95b88cce3dbbfea807015175adcfa9327d6ffd19e561b082fa4a515`.
+- Finition demandée via les commandes QML natives ; fichier FITS relu avec
+  égalité complète des échantillons Float32, TIFF 16 bits relu avec dimensions
+  et quantification vérifiées aux bords/centre. Session sauvegardée et relue :
+  égalité complète des images linéaire et finie, validateurs applicatifs valides.
+- Combinaison étoiles + débruitage avancé + déconvolution : refusée avant calcul
+  par le budget, en français, image finie précédente conservée.
+- Parcours complet de contrôle : 174,95 s ; RSS maximal **5 322 686 464 octets**
+  (4,96 Gio), empreinte physique maximale **10 175 848 560 octets** (9,48 Gio).
+  Le contrôle conserve aussi l’état initial pendant les relectures/décodages
+  et la restauration pour les comparer. Ce pic n’est pas une mesure isolée de
+  l’empilement : son estimation de **6 863 978 552 octets** (6,39 Gio) couvre
+  les buffers modélisés de cette phase, pas les copies du banc de contrôle,
+  les autres espaces/applications ni un plafond mesuré de tout le processus.
+
+Journaux : `build/large-image-final-validation.log`,
+`build/large-processing-validation.log`, `build/large-processing-ui-validation.log`
+et `build/large-resources-ui-validation.log`.
+
+### Traitement, PNG et composition française
+
+TIFF de 104,15 MP importé dans Traitement, ondelettes calculées, **PNG 16 bits**
+exporté et relu ; dimensions et valeurs quantifiées vérifiées aux bords/centre.
+Le contrôle d’export dure 102,65 s, RSS maximal 5 623 791 616 octets (5,24 Gio),
+empreinte maximale 5 920 478 176 octets (5,51 Gio). La sonde de format du plugin
+TIFF écrit un diagnostic « bad magic number » ; le décodage effectif et les
+vérifications de pixels réussissent. Ce message ne constitue pas une validation
+ni un échec d’export. Le parcours visuel séparé utilise les réglages QML et
+montre la valeur de l’ondelette appliquée.
+
+Composition vérifiée aux tailles **1440 × 960**, **1100 × 800** et **900 × 700**
+avec la vraie image, en français : plan drizzle à 104 MP, Finition, Traitement,
+aide des ressources et guide. Pas de chevauchement introduit ; les contrôles
+inférieurs restent accessibles par le défilement du panneau compact.
+Captures conservées : `previews/native/1.16.0-large-*.png` et
+`previews/native/1.16.0-resources-*.png`.
+
+La qualification d’une vraie série dithered mono/CFA/WCS-SIP, la pression
+mémoire globale, le matériel réel et la comparaison finale Siril restent des
+contrôles distincts. Le plafond de 128 MP n’annonce pas toutes les combinaisons
+comme possibles : le budget mémoire et la reprise 4 Gio/64 images priment.
+
+**Vérification Release finale : 50/50 tests, 10,39 s**, journal `build/large-delivery-tests.log`.

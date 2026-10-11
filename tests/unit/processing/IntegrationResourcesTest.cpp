@@ -16,7 +16,12 @@ int main() {
     ASTRO_TEST_CHECK(normal.resultBytes==6244ULL*4170*12);
     ASTRO_TEST_CHECK(normal.stripBytes<=64ULL*1024*1024 && normal.width==6244 && normal.height==4170);
     request.drizzle=true;request.scale=2;
-    fails([&]{estimateIntegrationResources(request);}); // No silent lift of downstream 32 MP limits.
+    const auto enlarged=estimateIntegrationResources(request);
+    ASTRO_TEST_CHECK(enlarged.width==12488 && enlarged.height==8340);
+    ASTRO_TEST_CHECK(enlarged.temporaryBytes==6244ULL*4170*4*12*16);
+    ASTRO_TEST_CHECK(enlarged.workingBytes+1024ULL*1024*1024<8ULL*1024*1024*1024);
+    auto over=request;over.width=8000;over.height=5000;fails([&]{estimateIntegrationResources(over);});
+    over=request;over.width=17000;over.height=100;fails([&]{estimateIntegrationResources(over);});
     request.scale=1;const auto rgb=estimateIntegrationResources(request);
     ASTRO_TEST_CHECK(rgb.temporaryBytes==6244ULL*4170*12*16);
     request.channels=1;request.nativeBayer=true;request.count=500;
@@ -45,6 +50,15 @@ int main() {
         std::vector<float> read(5);archive.read(read.data(),read.size(),first);ASTRO_TEST_CHECK(read==samples);
         archive.read(read.data(),read.size(),second+samples.size()*4);ASTRO_TEST_CHECK(read==samples);
         fails([&]{archive.read(read.data(),read.size(),second+samples.size()*8);});
+        const auto tiled=archive.reserve(samples.size()*2);
+        archive.writeAt(std::span(samples).subspan(0,2),tiled,{});
+        archive.writeAt(samples,tiled+samples.size()*4,{});
+        archive.writeAt(std::span(samples).subspan(2),tiled+2*4,{});
+        archive.read(read.data(),read.size(),tiled);ASTRO_TEST_CHECK(read==samples);
+        archive.read(read.data(),read.size(),tiled+samples.size()*4);ASTRO_TEST_CHECK(read==samples);
+        const auto discarded=archive.reserve(100);archive.writeAt(samples,discarded,{});archive.discardReservation(discarded);
+        const auto reused=archive.write(samples,nullptr,{});ASTRO_TEST_CHECK(reused==discarded);
+        archive.read(read.data(),read.size(),reused);ASTRO_TEST_CHECK(read==samples);
     }
     ASTRO_TEST_CHECK(std::filesystem::is_empty(directory));
     fails([&]{WorkingFiles archive(directory,128,0);archive.write(samples,nullptr,[]{throw std::runtime_error("cancel");});});

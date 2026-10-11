@@ -5,6 +5,8 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <span>
+#include <functional>
 namespace astro::recording {
 // Interleaved, linear samples. Integer FITS use physical values after BZERO/BSCALE.
 // Calibration operates on these samples before demosaicing. No display stretch.
@@ -28,5 +30,8 @@ struct AstroImage {
 AstroImage readAstroImage(const std::filesystem::path& path, double inputScale = 0);
 std::optional<CelestialWcs> readCelestialWcs(const std::filesystem::path& path);
 void writeAstroFits(const std::filesystem::path& path, const AstroImage& image);
+// Metadata can be separate from immutable full-precision pixels. Writes planar
+// FITS in bounded blocks, without duplicating the scientific image.
+void writeAstroFits(const std::filesystem::path&,const AstroImage& metadata,std::span<const float>,const std::function<void()>& check = {});
 AstroImage imageFromFrame(const domain::FrameBuffer& frame);
 }

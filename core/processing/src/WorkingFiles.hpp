@@ -7,6 +7,7 @@
 #include <random>
 #include <stdexcept>
 #include <vector>
+#include <span>
 #ifdef _WIN32
 #include <fcntl.h>
 #include <io.h>
@@ -64,6 +65,37 @@ public:
     ~WorkingFiles(){file_.reset();cleanup();}
     WorkingFiles(const WorkingFiles&)=delete;
     WorkingFiles& operator=(const WorkingFiles&)=delete;
+    // Reserve the existing RGB-then-weight layout without holding a complete
+    // projection in RAM. Sparse seeks are private and never published.
+    std::uint64_t reserve(std::uint64_t samples) {
+        if(pending_ || samples>(UINT64_MAX-next_)/sizeof(float))throw StorageError("Invalid temporary integration size.");
+        pending_=samples*sizeof(float);checkSpace(pending_);
+        const auto start=next_;next_+=pending_;return start;
+    }
+    void writeAt(std::span<const float> data,std::uint64_t offset,const CheckCancel& check) {
+        if(offset>next_ || data.size()>(next_-offset)/sizeof(float) || data.size_bytes()>pending_)
+            throw StorageError("Invalid temporary integration size.");
+        seek(offset);
+        for(std::size_t at=0;at<data.size();at+=65536) {
+            if(check)check();const auto count=std::min<std::size_t>(65536,data.size()-at);
+            if(writtenSinceCheck_>=16ULL*1024*1024){checkSpace(pending_);writtenSinceCheck_=0;}
+            if(std::fwrite(data.data()+at,sizeof(float),count,file_.get())!=count)
+                throw StorageError("Not enough temporary disk space for integration.");
+            pending_-=count*sizeof(float);writtenSinceCheck_+=count*sizeof(float);
+        }
+        if(std::fflush(file_.get()))throw StorageError("Cannot finish writing integration working files.");
+    }
+    void discardReservation(std::uint64_t offset) {
+        if(offset>next_)throw StorageError("Invalid temporary integration size.");
+        if(std::fflush(file_.get()))throw StorageError("Cannot finish writing integration working files.");
+#ifdef _WIN32
+        const auto result=_chsize_s(_fileno(file_.get()),offset);
+#else
+        const auto result=ftruncate(fileno(file_.get()),off_t(offset));
+#endif
+        if(result)throw StorageError("Cannot release temporary integration data.");
+        next_=offset;pending_=0;writtenSinceCheck_=0;
+    }
     std::uint64_t write(const std::vector<float>& samples,const std::vector<float>* weights,const CheckCancel& check) {
         const auto bytes=(std::uint64_t(samples.size())+(weights?weights->size():0))*sizeof(float);
         checkSpace(bytes);
@@ -106,5 +138,6 @@ private:
     std::filesystem::path parent_;
     std::unique_ptr<FILE,decltype(&std::fclose)> file_{nullptr,&std::fclose};
     std::uint64_t next_{},lastSpaceCheck_{},reserve_{};
+    std::uint64_t pending_{},writtenSinceCheck_{};
 };
 }

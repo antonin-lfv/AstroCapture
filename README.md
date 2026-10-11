@@ -176,7 +176,7 @@ désactivée sur des nébulosités étendues.
   disponibles. Les valeurs nulles, négatives et supérieures à 1 restent valides.
   Les zones sans données bloquent l’opération ; les bordures géométriques sont
   recadrées. Le bilan indique les nombres minimal/moyen de poses contributrices.
-- Dimensions avant recadrage affichées et limite de **32 MP** vérifiée avant de
+- Dimensions avant recadrage affichées et limite de **128 MP** vérifiée avant de
   lancer. ×2 multiplie les pixels par quatre : une pose de 26 MP ne peut donc
   pas être agrandie ×2 dans cette version. ×1 reste disponible.
 - Intensité linéaire conservée dans la convention des sources ; le flux intégré
@@ -247,7 +247,7 @@ sont conservés dans le projet. Le temps total d'intégration n'est pas déduit.
 Les limites et unités sont détaillées dans
 [la note technique](docs/decisions/ADR-023-integration-diagnostics-hdr.md).
 
-Limites actuelles : **32 MP par image**, **500 poses sélectionnées par groupe**,
+Limites actuelles : **128 MP par image**, **500 poses sélectionnées par groupe**,
 **2000 fichiers par projet**. Les RAW X-Trans et les autres matrices non Bayer
 ne sont pas pris en charge. La correction optique dynamique, les
 projections grand angle et les profils fabricant prévalidés
@@ -262,7 +262,7 @@ de choisir un disque local plus grand. Les buffers flottants de rejet sont born�
 l’écriture. Les demandes dépassant le budget mémoire ou les limites prévues de
 reprise sont refusées avec une explication. La mémoire affichée est un modèle
 conservateur, pas une mesure exacte du processus ; la sortie reste limitée à
-**32 MP**. Voir les [unités et limites](docs/decisions/ADR-025-integration-resources.md).
+**128 MP et 32 700 pixels par dimension**, selon les budgets mémoire et de reprise. Depuis **1.16.0**, la projection drizzle utilise aussi des bandes de **64 Mio** ; FITS et TIFF sont encodés par blocs. Les résultats Float32 restent complets en mémoire : les combinaisons de finition trop coûteuses sont refusées avant calcul. Un capteur de 26 MP en drizzle ×2 produit environ **104 MP**. Les cartes, couches et groupes supplémentaires peuvent dépasser le budget ; la reprise reste limitée à **4 Gio / 64 images**. Voir les [unités et limites](docs/decisions/ADR-027-large-images.md).
 
 ### Transformations avancées du ciel profond
 
@@ -462,7 +462,7 @@ dépendent des capacités du pilote et doivent être validées sur le matériel 
 
 Déposez un fichier **SER ou ACRAW** dans la fenêtre, ouvrez-le avec le sélecteur de fichiers ou retrouvez-le dans **Récents**. Les dix dernières vidéos ouvertes avec succès sont mémorisées.
 
-Pour retoucher une image existante, utilisez **Ouvrir une image ou une vidéo** ou déposez un **PNG ou TIFF** dans l’onglet Traitement. Les ondelettes, la couleur, la comparaison avant / après et la légende sont disponibles directement, sans analyse ni empilement. Les images 8 et 16 bits sont acceptées, jusqu’à **32 MP**, avec conservation des valeurs 16 bits. Les fichiers multipages ne sont pas acceptés et la transparence est placée sur fond noir. Choisissez **PNG 16 bits** (par défaut) ou **TIFF 16 bits** dans la fenêtre **Exporter**. Les deux formats conservent les détails sans compression destructive et acceptent une légende. L’export crée une copie ; l’original est protégé contre l’écrasement.
+Pour retoucher une image existante, utilisez **Ouvrir une image ou une vidéo** ou déposez un **PNG ou TIFF** dans l’onglet Traitement. Les ondelettes, la couleur, la comparaison avant / après et la légende sont disponibles directement, sans analyse ni empilement. Les images 8 et 16 bits sont acceptées, jusqu’à **128 MP**, avec conservation des valeurs 16 bits. Les fichiers multipages ne sont pas acceptés et la transparence est placée sur fond noir. Choisissez **PNG 16 bits** (par défaut) ou **TIFF 16 bits** dans la fenêtre **Exporter**. Les deux formats conservent les détails sans compression destructive et acceptent une légende. L’export crée une copie ; l’original est protégé contre l’écrasement.
 
 ![Finition d’une mosaïque lunaire dans Traitement : ondelettes, couleur et comparaison](assets/screenshots/processing-image.png)
 
@@ -511,7 +511,7 @@ Une **légende facultative** peut être inscrite dans l’image exportée : obje
 | Usage | Formats |
 | --- | --- |
 | Vidéo à traiter | ACRAW ou SER monochrome, Bayer, RGB ou BGR, de 1 à 16 bits par canal. |
-| Image à retoucher directement | PNG ou TIFF, 8 ou 16 bits, une seule image, jusqu’à 32 MP. |
+| Image à retoucher directement | PNG ou TIFF, 8 ou 16 bits, une seule image, jusqu’à 128 MP. |
 | Images issues de la caméra | PNG, TIFF 16 bits, FITS brut ; séries de FITS individuels. |
 | Ciel profond | FITS (entiers, flottants, compressés), RAW Bayer, PNG, TIFF. |
 | Résultat du traitement | PNG ou TIFF RGB 16 bits par canal, JPEG 8 bits pour le partage. |
@@ -531,7 +531,7 @@ La capture de retouche lunaire dans [Traitement](#traitement) montre cette derni
 
 Pour reconstituer la Lune ou le Soleil, prévoyez **25 à 40 % de recouvrement**, avec le même matériel, la même séance et des réglages aussi constants que possible. Des portions déjà empilées donnent généralement une base plus propre. Assemblez les images avant d’y inscrire une légende. La surface doit présenter des détails reconnaissables : une zone solaire uniforme ou un champ presque entièrement noir peut empêcher le raccordement.
 
-Une mosaïque accepte de **2 à 100 images**, jusqu’à **24 MP par image** et **32 MP pour le résultat**. Dans **Options d’assemblage**, l’exclusion automatique conserve le plus grand groupe de vues raccordables. Les autres restent visibles dans la grille, décochées ; le bilan les signale et permet de les réintégrer. Il faut au moins deux vues compatibles : si aucune paire ne se raccorde, l’application explique l’échec et conserve la sélection pour réessayer. Désactivez cette option pour exiger que toutes les vues sélectionnées soient raccordées. Les zones non photographiées restent noires. Les originaux ne sont ni déplacés ni modifiés.
+Une mosaïque accepte de **2 à 100 images**, jusqu’à **24 MP par image** et **128 MP pour le résultat**. Dans **Options d’assemblage**, l’exclusion automatique conserve le plus grand groupe de vues raccordables. Les autres restent visibles dans la grille, décochées ; le bilan les signale et permet de les réintégrer. Il faut au moins deux vues compatibles : si aucune paire ne se raccorde, l’application explique l’échec et conserve la sélection pour réessayer. Désactivez cette option pour exiger que toutes les vues sélectionnées soient raccordées. Les zones non photographiées restent noires. Les originaux ne sont ni déplacés ni modifiés.
 
 L’option **Adoucir les bords de la mosaïque**, activée par défaut, écarte deux pixels sur le bord de chaque vue et fond progressivement la limite de couverture vers le noir. Une fine bande est donc assombrie. Cette limite reste protégée des ondelettes lors du transfert vers Traitement. Cela réduit les liserés artificiels sans reconstituer les zones manquantes ni corriger tous les défauts de raccordement internes.
 
@@ -652,7 +652,7 @@ Une sauvegarde annulée ou échouée ne ferme pas l’application.
 
 ## Géométrie et masques locaux — 1.5.0
 
-**Ciel profond → Finition → Géométrie** et **Traitement → Recadrer, pivoter et redimensionner** ouvrent un éditeur commun. Tracez un rectangle ou saisissez X, Y, largeur et hauteur en pixels depuis le coin supérieur gauche. Les proportions peuvent être libres ou verrouillées. Le recadrage copie exactement les pixels ; la rotation libre (sens horaire positif) et le changement d’échelle utilisent l’interpolation choisie : plus proche voisin, bilinéaire, bicubique, moyenne de zone ou Lanczos-4. La moyenne de zone est destinée au redimensionnement ; la rotation utilise alors l’interpolation linéaire d’OpenCV. La limitation des dépassements borne les valeurs à l’étendue de chaque canal d’entrée, en incluant les marges noires de rotation ; elle n’est pas le clamping local de Siril. La sortie reste limitée à 32 MP. La comparaison suit la même géométrie, et le FITS linéaire garde l’intégration initiale.
+**Ciel profond → Finition → Géométrie** et **Traitement → Recadrer, pivoter et redimensionner** ouvrent un éditeur commun. Tracez un rectangle ou saisissez X, Y, largeur et hauteur en pixels depuis le coin supérieur gauche. Les proportions peuvent être libres ou verrouillées. Le recadrage copie exactement les pixels ; la rotation libre (sens horaire positif) et le changement d’échelle utilisent l’interpolation choisie : plus proche voisin, bilinéaire, bicubique, moyenne de zone ou Lanczos-4. La moyenne de zone est destinée au redimensionnement ; la rotation utilise alors l’interpolation linéaire d’OpenCV. La limitation des dépassements borne les valeurs à l’étendue de chaque canal d’entrée, en incluant les marges noires de rotation ; elle n’est pas le clamping local de Siril. La sortie reste limitée à 128 MP. La comparaison suit la même géométrie, et le FITS linéaire garde l’intégration initiale.
 
 **Transformations avancées → Masques** rassemble les masques automatiques, peints et importés. Le rouge montre les zones protégées ; la vue du masque seul expose ses poids. Un trait applique son opacité une fois, même lorsque ses segments se chevauchent ; les traits successifs se cumulent. Cmd+Z annule un trait dans l’éditeur, puis un réglage de finition lorsque l’éditeur est fermé. L’éditeur n’engage ses modifications qu’avec **Appliquer le masque**. Les paramètres sont conservés dans le projet, les préréglages et les versions A/B. Limites : 200 traits et 10 000 points par masque. L’aperçu du pinceau est réduit ; le calcul utilise les dimensions complètes. L’image de l’éditeur reçoit un étirement d’affichage pour révéler les structures faibles, sans modifier les données ni les poids du masque.
 

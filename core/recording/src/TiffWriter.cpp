@@ -1,6 +1,7 @@
 #include "astro/recording/TiffWriter.hpp"
 
 #include <array>
+#include <algorithm>
 #include <fstream>
 #include <vector>
 #include <limits>
@@ -67,7 +68,7 @@ static Result<void> writeTiffImpl(const std::string& path, std::uint32_t width, 
     const std::uint32_t pixelDataSize = static_cast<std::uint32_t>(pixelCount * 3 * 2);  // 3 channels, 16-bit each
 
     std::vector<std::uint8_t> out;
-    out.reserve(pixelDataOffset + pixelDataSize);
+    out.reserve(pixelDataOffset);
 
     // --- Header ---
     out.push_back('I');
@@ -104,17 +105,24 @@ static Result<void> writeTiffImpl(const std::string& path, std::uint32_t width, 
 
     out.insert(out.end(),icc.begin(),icc.end());if(icc.size()%2)out.push_back(0);
 
-    // Preserve 16-bit samples, or replicate 8-bit samples to retain endpoints.
-    for (std::uint64_t i = 0; i < pixelCount * 3; ++i) {
-        const std::uint16_t upsampled = sizeof(Sample)==1 ? static_cast<std::uint16_t>(rgb8[i]*257u) : rgb8[i];
-        appendU16(out, upsampled);
-    }
-
     std::ofstream file(std::filesystem::path(std::u8string(path.begin(), path.end())), std::ios::binary | std::ios::trunc);
     if (!file.is_open()) {
         return Result<void>::failure({ErrorCode::RecordingOpenFailed, "Failed to open file for writing", path});
     }
     file.write(reinterpret_cast<const char*>(out.data()), static_cast<std::streamsize>(out.size()));
+    // The baseline TIFF layout stays identical, but only a 128 KiB pixel block
+    // is encoded at once. Large exports no longer need a second complete file.
+    std::array<std::uint8_t,131072> block{};
+    for(std::uint64_t at=0;at<pixelCount*3;) {
+        const auto count=std::min<std::uint64_t>(block.size()/2,pixelCount*3-at);
+        for(std::uint64_t i=0;i<count;++i) {
+            const std::uint16_t value=sizeof(Sample)==1?static_cast<std::uint16_t>(rgb8[at+i]*257u):rgb8[at+i];
+            block[i*2]=std::uint8_t(value&255);block[i*2+1]=std::uint8_t(value>>8);
+        }
+        file.write(reinterpret_cast<const char*>(block.data()),std::streamsize(count*2));
+        if(!file.good())return Result<void>::failure({ErrorCode::DiskWriteFailed,"Failed writing TIFF data",path});
+        at+=count;
+    }
     if (!file.good()) {
         return Result<void>::failure({ErrorCode::DiskWriteFailed, "Failed writing TIFF data", path});
     }

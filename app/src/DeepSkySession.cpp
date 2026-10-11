@@ -1,3 +1,4 @@
+#include <astro/domain/ImageLimits.hpp>
 #include "DeepSkyController.hpp"
 #include "DeepSkySettings.hpp"
 #include "AstrometrySettings.hpp"
@@ -9,7 +10,7 @@
 namespace astro::app {
 namespace {
 bool validImage(const std::shared_ptr<const processing::FloatImage>& p) {
-    return p && p->width>0 && p->height>0 && std::uint64_t(p->width)*p->height<=32000000 && p->rgb.size()==std::size_t(p->width)*p->height*3;
+    return p && astro::domain::supportedImageSize(p->width,p->height) && p->rgb.size()==std::size_t(p->width)*p->height*3;
 }
 bool validRows(const QVariantList& rows) {
     if(rows.size()>2000)return false;

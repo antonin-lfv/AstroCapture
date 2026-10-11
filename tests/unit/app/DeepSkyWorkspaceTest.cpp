@@ -1,4 +1,6 @@
 #include "MasterLibrary.hpp"
+#include "SessionStorage.hpp"
+#include <QImageReader>
 #include "BlindSolver.hpp"
 #include "MaskOverlayItem.hpp"
 #include "ImagePixelsItem.hpp"
@@ -38,7 +40,7 @@ QQuickItem* visualItem(QQuickItem* parent,const QString& name) {
     for(auto* child:parent->childItems())if(auto* found=visualItem(child,name))return found;
     return nullptr;
 }
-void wait(app::DeepSkyController& controller){QElapsedTimer timer;timer.start();while(controller.busy()&&timer.elapsed()<20000){QCoreApplication::processEvents();QThread::msleep(1);}ASTRO_TEST_CHECK(!controller.busy());}
+void wait(app::DeepSkyController& controller){QElapsedTimer timer;timer.start();while(controller.busy()&&timer.elapsed()<(qEnvironmentVariableIsSet("ASTRO_UI_LARGE_QA")?240000:20000)){QCoreApplication::processEvents();QThread::msleep(1);}ASTRO_TEST_CHECK(!controller.busy());}
 int main(int argc,char** argv){
     QGuiApplication application(argc,argv);QTemporaryDir directory;
     QTranslator translator;if(qEnvironmentVariableIsSet("ASTRO_UI_TRANSLATION_PATH") && translator.load(qEnvironmentVariable("ASTRO_UI_TRANSLATION_PATH")))application.installTranslator(&translator);
@@ -59,6 +61,51 @@ int main(int argc,char** argv){
     ASTRO_TEST_CHECK(!object->findChild<QObject*>("deepSkyWcsProjection")->property("checked").toBool());
     QQuickWindow window;window.resize(1100,720);auto* root=qobject_cast<QQuickItem*>(object.get());root->setParentItem(window.contentItem());root->setSize({1100,720});window.show();
     QCoreApplication::processEvents();
+    if(qEnvironmentVariableIsSet("ASTRO_UI_LARGE_QA")) {
+        // Two identical private copies qualify resources and exact pixels;
+        // they intentionally provide no additional photons/subpixel diversity.
+        const auto path=qEnvironmentVariable("ASTRO_UI_FITS_PATH");
+        const auto folder=qEnvironmentVariable("ASTRO_UI_LARGE_QA");QDir().mkpath(folder);
+        const auto second=directory.filePath("Orion-duplicate.fits");ASTRO_TEST_CHECK(QFile::copy(path,second));
+        controller.addFiles({QUrl::fromLocalFile(path),QUrl::fromLocalFile(second)},"Light","RGB");wait(controller);
+        ASTRO_TEST_CHECK(controller.frames().size()==2);
+        const auto plan=controller.integrationResources({{"calibrated",true},{"drizzle",true},{"scale",2.0}});
+        qInfo()<<"Large-image preflight"<<plan;ASTRO_TEST_CHECK(!plan["blocked"].toBool());
+        root->setProperty("workflowStep",1);root->findChild<QObject*>("deepSkyAdvanced")->setProperty("expanded",true);
+        root->findChild<QObject*>("deepSkyCalibrated")->setProperty("checked",true);root->findChild<QObject*>("deepSkyDrizzle")->setProperty("checked",true);root->findChild<QObject*>("deepSkyDrizzleScale")->setProperty("currentIndex",2);
+        auto* scroll=root->findChild<QObject*>("deepSkyInspector")->property("contentItem").value<QObject*>();
+        auto capture=[&](const QString& name){QMetaObject::invokeMethod(root->findChild<QObject*>("deepSkyCompletionToast"),"close");for(int n=0;n<8;++n){QCoreApplication::processEvents();QThread::msleep(40);}ASTRO_TEST_CHECK(window.grabWindow().save(folder+"/"+name));};
+        for(const auto size:{QSize(1440,960),QSize(1100,800),QSize(900,700)}){window.resize(size);root->setSize(size);scroll->setProperty("contentY",450);capture(QString("large-plan-%1x%2.png").arg(size.width()).arg(size.height()));}
+        QElapsedTimer elapsed;elapsed.start();controller.integrate(true,0,false,false,false,true,2,1);wait(controller);
+        qInfo()<<"Large integration ms"<<elapsed.elapsed()<<controller.status();ASTRO_TEST_CHECK(controller.hasResult());
+        auto result=controller.sessionSnapshot().images["linear"];
+        ASTRO_TEST_CHECK(std::uint64_t(result->width)*result->height>100000000);
+        ASTRO_TEST_CHECK(app::DeepSkyController::validSession(controller.sessionSnapshot()));
+        // Exact identity-grid drizzle must keep every input intensity.
+        {const auto source=recording::readAstroImage(path.toStdString());
+            ASTRO_TEST_CHECK(result->width==source.width*2 && result->height==source.height*2);
+            for(int y=0;y<result->height;++y)for(int x=0;x<result->width;++x)for(int c=0;c<3;++c)
+                ASTRO_TEST_CHECK(std::abs(result->rgb[(std::size_t(y)*result->width+x)*3+c]-source.samples[(std::size_t(y/2)*source.width+x/2)*3+c])<2e-6);
+        }
+        const auto hash=QCryptographicHash::hash(QByteArrayView(reinterpret_cast<const char*>(result->rgb.data()),result->rgb.size()*4),QCryptographicHash::Sha256);
+        qInfo()<<"Large dimensions"<<result->width<<result->height<<"linear SHA256"<<hash.toHex();
+        root->setProperty("workflowStep",6);root->setProperty("frameListOpen",false);
+        auto finish=app::defaultDeepSkySettings();const auto suggested=controller.suggestedStretch();for(const auto& key:{"black","white","midtones","red","green","blue"})finish[key]=suggested[key];
+        ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root,"setFinish",Q_ARG(QVariant,QVariant(finish))));wait(controller);
+        qInfo()<<"Large finish"<<controller.status();ASTRO_TEST_CHECK(controller.sessionSnapshot().images["linear"]==result);
+        const auto finished=controller.sessionSnapshot().images["finished"];ASTRO_TEST_CHECK(finished&&finished->width==result->width);
+        for(const auto size:{QSize(1440,960),QSize(1100,800),QSize(900,700)}){window.resize(size);root->setSize(size);scroll->setProperty("contentY",0);capture(QString("large-finish-%1x%2.png").arg(size.width()).arg(size.height()));}
+        const auto fits=directory.filePath("large-linear.fits");controller.exportImage(QUrl::fromLocalFile(fits),true);wait(controller);ASTRO_TEST_CHECK(QFileInfo(fits).size()>1200000000);
+        {const auto restored=recording::readAstroImage(fits.toStdString());ASTRO_TEST_CHECK(restored.samples==result->rgb);}
+        const auto tiff=QFileInfo(folder+"/large-finished.tif").absoluteFilePath();controller.exportImage(QUrl::fromLocalFile(tiff),false);wait(controller);ASTRO_TEST_CHECK(QFileInfo(tiff).size()>600000000);
+        {QImageReader::setAllocationLimit(1024);QImageReader reader(tiff);ASTRO_TEST_CHECK(reader.size()==QSize(finished->width,finished->height));const auto decoded=reader.read().convertToFormat(QImage::Format_RGBA64);ASTRO_TEST_CHECK(!decoded.isNull());for(int y:{0,decoded.height()/2,decoded.height()-1}){const auto* row=reinterpret_cast<const QRgba64*>(decoded.constScanLine(y));for(int x:{0,decoded.width()/2,decoded.width()-1})for(int c=0;c<3;++c){const auto v=c==0?row[x].red():c==1?row[x].green():row[x].blue();ASTRO_TEST_CHECK(v==std::uint16_t(std::lround(std::clamp(finished->rgb[(std::size_t(y)*decoded.width()+x)*3+c],0.f,1.f)*65535)));}}}
+        qInfo()<<"Large FITS and TIFF verified";
+        app::SessionStorage storage(directory.filePath("large-session"));app::SavedSession saved;saved.workspaces["deepSky"]=controller.sessionSnapshot();storage.save(saved);
+        {const auto restored=storage.load();ASTRO_TEST_CHECK(app::DeepSkyController::validSession(restored.workspaces["deepSky"]));ASTRO_TEST_CHECK(restored.workspaces["deepSky"].images["linear"]->rgb==result->rgb);ASTRO_TEST_CHECK(restored.workspaces["deepSky"].images["finished"]->rgb==finished->rgb);}
+        // A heavy combination is rejected before changing scientific results.
+        controller.apply({{"starSeparation",true},{"advancedDenoise",true},{"deconvolution",true}});ASTRO_TEST_CHECK(!controller.busy());ASTRO_TEST_CHECK(controller.sessionSnapshot().images["finished"]==finished);qInfo()<<"Large preflight rejection"<<controller.status();
+        qInfo()<<"Large image integration / finish / FITS / TIFF / recovery passed";return 0;
+    }
     if(qEnvironmentVariableIsSet("ASTRO_UI_BATCH_QA")) {
         QSettings().setValue("calibration/libraryDirectory",directory.filePath("masters"));
         auto original=recording::readAstroImage(qEnvironmentVariable("ASTRO_UI_FITS_PATH").toStdString());auto image=original;image.width=1024;image.height=768;image.samples.resize(1024*768*3);const int ox=(original.width-1024)/2,oy=(original.height-768)/2;for(int y=0;y<768;++y)std::copy_n(original.samples.begin()+(std::size_t(y+oy)*original.width+ox)*3,1024*3,image.samples.begin()+std::size_t(y)*1024*3);original.samples.clear();original.samples.shrink_to_fit();image.wcs.reset();image.camera="ZWO ASI071MC - controle interface";image.binX=image.binY=1;image.hasGain=image.hasOffset=image.hasTemperature=true;image.gain=90;image.offset=10;image.temperature=-10;image.exposure=30;image.filter="RGB";

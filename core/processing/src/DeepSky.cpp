@@ -1,3 +1,4 @@
+#include <astro/domain/ImageLimits.hpp>
 #include <astro/processing/DeepSky.hpp>
 #include <astro/processing/WcsProjection.hpp>
 #include "MetalProcessing.hpp"
@@ -50,6 +51,7 @@ std::array<float,3> bayerLevels(const FloatImage& image,domain::BayerPattern pat
 }
 struct DiskImage {
     std::uint64_t offset{};
+    explicit DiskImage(std::uint64_t at):offset(at) {}
     DiskImage(WorkingFiles& files,const FloatImage& image,const CheckCancel& check,const std::vector<float>* weights=nullptr)
         :offset(files.write(image.rgb,weights,check)) {}
 };
@@ -91,7 +93,7 @@ AstroImage masterFrame(int count,const ImageLoader& load,bool normalize,const Ch
     std::vector<std::uint64_t> disk;robust=robust&&count>=3;
     std::unique_ptr<WorkingFiles> files;
     if(robust){
-        if(count>2000 || result.samples.size()>32000000ULL*3)throw std::runtime_error("Too many calibration samples for a master.");
+        if(count>2000 || result.samples.size()>astro::domain::maximumImagePixels*3)throw std::runtime_error("Too many calibration samples for a master.");
         const auto limits=requestedLimits?*requestedLimits:IntegrationLimits{};
         files=std::make_unique<WorkingFiles>(limits.temporaryDirectory,std::uint64_t(result.samples.size())*count*sizeof(float),limits.diskReserveBytes);
     }
@@ -370,8 +372,18 @@ Integration integrate(int count,const ImageLoader& load,const Calibration& maste
                 // The RGB copy is for star registration/model estimation only.
                 // Its measured channel is still the calibrated CFA sample,
                 // with only the explicit background/gain/offset corrections.
-                auto projected=cfa?drizzleProjectBayer(data,alignment,reference.width,reference.height,*drizzle,check,projection?&*projection:nullptr):drizzleProject(image,alignment,reference.width,reference.height,*drizzle,check,projection?&*projection:nullptr);
-                DiskImage stored(files,projected.image,check,&projected.weights);
+                const auto pixels=std::uint64_t(outputWidth)*outputHeight;
+                DiskImage stored(files.reserve(pixels*(3+weightChannels)));
+                const int stripRows=int(std::max<std::uint64_t>(1,(64ULL*1024*1024)/(std::uint64_t(outputWidth)*12*(3+weightChannels))));
+                const auto sink=[&](int y,const DrizzleProjection& strip){
+                    const auto offset=std::uint64_t(y)*outputWidth;
+                    files.writeAt(strip.image.rgb,stored.offset+offset*3*sizeof(float),check);
+                    files.writeAt(strip.weights,stored.offset+(pixels*3+offset*weightChannels)*sizeof(float),check);
+                };
+                try {
+                    if(cfa)drizzleProjectBayerStrips(data,alignment,reference.width,reference.height,*drizzle,stripRows,sink,check,projection?&*projection:nullptr);
+                    else drizzleProjectStrips(image,alignment,reference.width,reference.height,*drizzle,stripRows,sink,check,projection?&*projection:nullptr);
+                } catch(...) {files.discardReservation(stored.offset);throw;}
                 std::vector<unsigned char> projectedCoverage(projection?coverage.size():0);
                 const auto& m=alignment.matrix;const double det=m[0]*m[4]-m[1]*m[3];
                 // Crop geometrical borders only. Missing drops inside that area
@@ -473,7 +485,7 @@ Integration integrate(int count,const ImageLoader& load,const Calibration& maste
     return result;
 }
 BackgroundResult extractBackground(const FloatImage& input,const BackgroundOptions& options,const CheckCancel& check) {
-    if(input.width<2||input.height<2||std::uint64_t(input.width)*input.height>32000000||input.rgb.size()!=std::size_t(input.width)*input.height*3)
+    if(input.width<2||input.height<2||!domain::supportedImageSize(input.width,input.height)||input.rgb.size()!=std::size_t(input.width)*input.height*3)
         throw std::runtime_error("Invalid background image dimensions.");
     if(options.degree<1||options.degree>4||options.samplesPerLine<2||options.samplesPerLine>50||!std::isfinite(options.tolerance)||options.tolerance<0||options.tolerance>10||options.samples.size()>2500)
         throw std::runtime_error("Invalid background sampling settings.");
@@ -507,7 +519,7 @@ BackgroundResult extractBackground(const FloatImage& input,const BackgroundOptio
     return result;
 }
 FloatImage removeGreen(const FloatImage& input,int method,float amount,bool preserve,const CheckCancel& check) {
-    if(input.width<=0||input.height<=0||std::uint64_t(input.width)*input.height>32000000||input.rgb.size()!=std::size_t(input.width)*input.height*3||method<0||method>3||!std::isfinite(amount)||amount<0||amount>1)throw std::runtime_error("Invalid green noise reduction settings.");
+    if(!astro::domain::supportedImageSize(input.width,input.height)||input.rgb.size()!=std::size_t(input.width)*input.height*3||method<0||method>3||!std::isfinite(amount)||amount<0||amount>1)throw std::runtime_error("Invalid green noise reduction settings.");
     FloatImage out=input;
     // CIE L* preservation, in bounded RGB display space, one row at a time.
     for(int y=0;y<input.height;++y){checked(check);const auto at=std::size_t(y)*input.width*3;cv::Mat original(1,input.width,CV_32FC3,const_cast<float*>(input.rgb.data()+at)),corrected(1,input.width,CV_32FC3,out.rgb.data()+at);
@@ -517,13 +529,13 @@ FloatImage removeGreen(const FloatImage& input,int method,float amount,bool pres
     return out;
 }
 FloatImage orientImage(const FloatImage& input,int turns,bool horizontal,bool vertical,const CheckCancel& check) {
-    if(input.width<=0||input.height<=0||std::uint64_t(input.width)*input.height>32000000||input.rgb.size()!=std::size_t(input.width)*input.height*3||turns<0||turns>3)throw std::runtime_error("Invalid image orientation.");
+    if(!astro::domain::supportedImageSize(input.width,input.height)||input.rgb.size()!=std::size_t(input.width)*input.height*3||turns<0||turns>3)throw std::runtime_error("Invalid image orientation.");
     FloatImage output;output.width=turns%2?input.height:input.width;output.height=turns%2?input.width:input.height;output.rgb.resize(input.rgb.size());
     for(int y=0;y<input.height;++y){checked(check);for(int x=0;x<input.width;++x){int tx=x,ty=y;if(turns==1){tx=input.height-1-y;ty=x;}else if(turns==2){tx=input.width-1-x;ty=input.height-1-y;}else if(turns==3){tx=y;ty=input.width-1-x;}if(horizontal)tx=output.width-1-tx;if(vertical)ty=output.height-1-ty;for(int c=0;c<3;++c)output.rgb[(std::size_t(ty)*output.width+tx)*3+c]=input.rgb[(std::size_t(y)*input.width+x)*3+c];}}
     return output;
 }
 FloatImage finishDeepSky(const FloatImage& input,const Finish& options,const CheckCancel& check,ComputeReport* report,const PreviewTarget* preview) {
-    if(input.width<=0 || input.height<=0 || std::uint64_t(input.width)*input.height>32000000 || input.rgb.size()!=std::size_t(input.width)*input.height*3)
+    if(!astro::domain::supportedImageSize(input.width,input.height) || input.rgb.size()!=std::size_t(input.width)*input.height*3)
         throw std::runtime_error("Invalid processing image dimensions.");
     if(!std::isfinite(options.white)||!std::isfinite(options.black)||!std::isfinite(options.midtones)||!(options.white>options.black)||options.midtones<=0||options.midtones>=1)
         throw std::runtime_error("White must exceed black; midtones must be between 0 and 1.");

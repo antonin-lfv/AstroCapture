@@ -1,3 +1,4 @@
+#include <astro/domain/ImageLimits.hpp>
 #include <astro/processing/IntegrationResources.hpp>
 #include <algorithm>
 #include <cmath>
@@ -40,7 +41,7 @@ int integrationStripRows(int width, int count, int weightChannels, std::uint64_t
     return int(std::max<std::uint64_t>(1,std::min<std::uint64_t>(65536ULL/(std::uint64_t(width)*3),budget/row)));
 }
 IntegrationResourceEstimate estimateIntegrationResources(const IntegrationResourceRequest& r,const IntegrationLimits& limits) {
-    if(r.width<1 || r.height<1 || std::uint64_t(r.width)*r.height>32000000 ||
+    if(!astro::domain::supportedImageSize(r.width,r.height) ||
        (r.channels!=1 && r.channels!=3) || r.count<1 || r.count>500 ||
        !std::isfinite(r.scale) || (r.drizzle && (r.scale<1 || r.scale>2)) ||
        (r.drizzle && r.nativeBayer && r.channels!=1))
@@ -48,8 +49,8 @@ IntegrationResourceEstimate estimateIntegrationResources(const IntegrationResour
     IntegrationResourceEstimate e;
     const double scale=r.drizzle?r.scale:1;
     e.width=int(std::ceil(r.width*scale));e.height=int(std::ceil(r.height*scale));
-    if(std::uint64_t(e.width)*e.height>32000000)
-        throw std::runtime_error("The drizzle output exceeds 32 million pixels. Use a smaller scale or smaller source images.");
+    if(!astro::domain::supportedImageSize(e.width,e.height))
+        throw std::runtime_error("The drizzle output exceeds 128 million pixels. Use a smaller scale or smaller source images.");
     const int weights=r.drizzle?(r.nativeBayer?3:1):0;
     e.stripColumns=integrationStripColumns(e.width,r.count,weights,limits.stripBytes);
     e.stripRows=std::min(e.height,integrationStripRows(e.stripColumns,r.count,weights,limits.stripBytes));
@@ -58,25 +59,16 @@ IntegrationResourceEstimate estimateIntegrationResources(const IntegrationResour
     e.temporaryBytes=multiply(multiply(output,r.count),4ULL*(3+weights));
     e.resultBytes=multiply(output,r.diagnosticMaps?48:12);
     // Reference/source/calibration/registration/background intermediates.
-    // Include native drizzle's double sums plus its Float32 output and weights.
+    // Drizzle double sums, weights and Float32 delivery now share a bounded
+    // 64 MiB strip. Ordinary projection still has full-image intermediates.
     const auto source=multiply(input,4ULL*r.channels*4+12ULL*(r.sequenceBackground?10:8));
-    const auto projection=multiply(output,r.drizzle?12ULL*(3+weights)+2:36ULL+2);
-    const auto display=multiply(output,100); // finish/comparison/export preparation
+    const auto projection=r.drizzle?add(multiply(output,2),64ULL*1024*1024):multiply(output,38);
+    // Result is counted separately: four RGB Float32-equivalent images cover
+    // finishing/comparison/export preparation, plus native GPU/tile allowance.
+    const auto display=add(multiply(output,48),256ULL*1024*1024);
     const auto rejection=add(add(multiply(input,12+4ULL*r.channels),output*2),add(e.resultBytes,e.stripBytes));
     e.workingBytes=add(std::max({add(source,projection),rejection,add(e.resultBytes,display)}),multiply(r.calibrationBytes,2));
     return e;
 }
-std::uint64_t physicalMemoryBytes() {
-#ifdef _WIN32
-    MEMORYSTATUSEX state{};state.dwLength=sizeof(state);
-    return GlobalMemoryStatusEx(&state)?state.ullTotalPhys:0;
-#elif defined(__APPLE__)
-    std::uint64_t bytes=0;std::size_t length=sizeof(bytes);
-    return sysctlbyname("hw.memsize",&bytes,&length,nullptr,0)==0?bytes:0;
-#else
-    const auto pages=sysconf(_SC_PHYS_PAGES),size=sysconf(_SC_PAGESIZE);
-    if(pages<=0 || size<=0)return 0;
-    return std::uint64_t(pages)*std::uint64_t(size);
-#endif
-}
+std::uint64_t physicalMemoryBytes() {return domain::physicalMemoryBytes();}
 }

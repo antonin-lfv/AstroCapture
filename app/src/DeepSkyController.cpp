@@ -1,3 +1,5 @@
+#include "ImageDecoding.hpp"
+#include <astro/domain/ImageLimits.hpp>
 #include <astro/processing/StarLayers.hpp>
 #include "MasterLibrary.hpp"
 #include "FileProtection.hpp"
@@ -49,10 +51,11 @@ recording::AstroImage readFrame(const QVariantMap& row) {
     if(row.contains("masterHash")&&calibrationFileHash(path)!=row["masterHash"].toString())throw std::runtime_error("Master integrity check failed. Import an intact copy.");
     const auto suffix=QFileInfo(path).suffix().toLower();
     if(QStringList{"png","tif","tiff"}.contains(suffix)) {
-        QImageReader reader(path);
+        ensureLargeImageDecoding();QImageReader reader(path);
         const auto size=reader.size();
-        if(size.width()<=0||size.height()<=0||std::uint64_t(size.width())*size.height()>32000000||reader.imageCount()>1)
-            throw std::runtime_error("Choose a single image of at most 32 megapixels.");
+        if(!astro::domain::supportedImageSize(size.width(),size.height())||reader.imageCount()>1)
+            throw std::runtime_error("Choose a single image of at most 128 megapixels.");
+        domain::requireImageMemory(std::uint64_t(size.width())*size.height()*48+256ULL*1024*1024);
         auto image=reader.read().convertToFormat(QImage::Format_RGBA64);
         if(image.isNull())throw std::runtime_error("Cannot read this PNG/TIFF image.");
         recording::AstroImage out;out.width=image.width();out.height=image.height();out.channels=3;out.bits=16;out.samples.resize(std::size_t(out.width)*out.height*3);
@@ -115,7 +118,7 @@ Display prepare(const processing::FloatImage& image,bool withComparison=false,co
     const auto settings=suggested(image);processing::Finish f;
     f.black=settings["black"].toFloat();f.white=settings["white"].toFloat();f.midtones=settings["midtones"].toFloat();f.color={settings["red"].toFloat(),settings["green"].toFloat(),settings["blue"].toFloat()};
     auto preview=allocateImagePreview(image);const auto target=previewTarget(preview);
-    auto pixels=std::make_shared<processing::FloatImage>(processing::finishDeepSky(image,f,{},nullptr,&target));
+    auto pixels=std::make_shared<processing::FloatImage>(processing::finishDeepSky(image,f,check,nullptr,&target));
     auto complete=settings;complete["histogram"]=makeLinearHistogram(image,f.color,f.black,f.white);
     return {pixels,preview,complete,withComparison?makeImagePreview(image,check):QImage{}};
 }
@@ -509,7 +512,7 @@ QVariantMap DeepSkyController::integrationResources(const QVariantMap& options) 
             if(row["role"]=="Light")groups[row["group"].toString()]<<row;
             else if(!options.value("calibrated").toBool()) {
                 const auto w=row["width"].toInt(),h=row["height"].toInt(),c=row["channels"].toInt();
-                if(w<1 || h<1 || std::uint64_t(w)*h>32000000 || (c!=1 && c!=3))throw std::runtime_error("Invalid integration resource settings.");
+                if(w<1 || h<1 || std::uint64_t(w)*h>astro::domain::maximumImagePixels || (c!=1 && c!=3))throw std::runtime_error("Invalid integration resource settings.");
                 const auto bytes=std::uint64_t(w)*h*c*4;
                 const auto key=row["role"].toString()+(row["role"]=="Flat"?"/"+row["group"].toString():QString());
                 calibrations[key]=std::max(calibrations[key],bytes);largestCalibration=std::max(largestCalibration,bytes);
@@ -652,8 +655,8 @@ void DeepSkyController::exportDiagnostic(const QUrl& url,const QString& key) {
     const auto image=diagnosticMaps_.at(key);const auto group=key.left(key.lastIndexOf('/'));const auto state=stackAstrometry_.find(group);const auto wcs=state==stackAstrometry_.end()?std::optional<recording::CelestialWcs>{}:readWcs(state->second.value("wcs"));
     exporting_=true;run(tr("Exporting diagnostic map…"),[this,image,path,wcs](std::stop_token stop){
         QTemporaryDir directory(QFileInfo(path).dir().filePath(".astrocapture-XXXXXX"));if(!directory.isValid())throw std::runtime_error("Cannot create temporary export files.");
-        recording::AstroImage output;output.width=image->width;output.height=image->height;output.channels=3;output.bits=32;output.samples=image->rgb;output.wcs=wcs;output.imageType="Diagnostic";
-        const auto temporary=directory.filePath("map.fits");check(stop);recording::writeAstroFits(nativePath(temporary),output);check(stop);atomicCopy(temporary,path,stop);
+        recording::AstroImage output;output.width=image->width;output.height=image->height;output.channels=3;output.bits=32;output.wcs=wcs;output.imageType="Diagnostic";
+        const auto temporary=directory.filePath("map.fits");check(stop);recording::writeAstroFits(nativePath(temporary),output,image->rgb,[stop]{check(stop);});check(stop);atomicCopy(temporary,path,stop);
         post([this,path]{status_=tr("Saved %1").arg(path);emit changed();});
     });
 }
@@ -698,6 +701,24 @@ void DeepSkyController::apply(const QVariantMap& options) {
     const auto validated=checkedDeepSkySettings(settings);
     if(!validated){status_=tr("Invalid finishing settings. Check levels and parameter ranges.");emit changed();return;}
     const auto image=linear_;
+    // Bounds apply to the combination of options and retained results, not
+    // just the file dimensions. Advanced operations remain accessible.
+    const auto pixels=std::uint64_t(image->width)*image->height;
+    std::uint64_t working=36;
+    if((*validated)["background"].toBool())working+=24;
+    if((*validated)["maskType"].toInt())working+=12;
+    if((*validated)["photometry"].toBool()||(*validated)["pedestal"].toDouble()!=0)working+=24;
+    if((*validated)["deconvolution"].toBool()||(*validated)["advancedDenoise"].toBool())working+=48;
+    if((*validated)["starSeparation"].toBool())working+=72;
+    if(!(*validated)["operations"].toList().isEmpty())working+=144;
+    const auto geometryBytes=geometryWorkingBytes(image->width,image->height,(*validated)["geometry"].toMap());
+    try{domain::requireImageMemory(retainedImageBytes()+pixels*working+geometryBytes);}catch(const std::exception& e){status_=tr(e.what());emit changed();return;}
+    // Keep recovery viable before producing new star layers/masks.
+    std::set<const processing::FloatImage*> saved;std::uint64_t recovery=pixels*((*validated)["starSeparation"].toBool()?48:24);
+    for(const auto& [group,p]:stacks_)if(p!=image&&saved.insert(p.get()).second)recovery+=p->rgb.size()*4;
+    for(const auto& [group,p]:diagnosticMaps_)if(saved.insert(p.get()).second)recovery+=p->rgb.size()*4;
+    recovery+=pixels*16; // uncompressed RGB/mask previews and manifest margin
+    if(recovery>4ULL*1024*1024*1024){status_=tr("These finishing options exceed the 4 GiB recovery limit. Reduce image size, layers or maps; previous results are preserved.");emit changed();return;}
     const auto key=QString::fromLatin1(linearImageKey(*image));
     auto bound=[&](const QVariantMap& v){return !v["photometry"].toBool()||v["photometryImageKey"].toString().isEmpty()||v["photometryImageKey"].toString()==key;};
     bool validReferences=bound(*validated);for(const auto& op:(*validated)["operations"].toList())if(op.toMap()["enabled"].toBool())validReferences&=bound(op.toMap()["settings"].toMap());
@@ -786,7 +807,7 @@ void DeepSkyController::apply(const QVariantMap& options) {
 }
 void DeepSkyController::exportStarLayer(const QUrl& url,int layer){
     if(busy_||!hasStarLayers()||!url.isLocalFile()||(layer!=1&&layer!=2))return;const auto path=url.toLocalFile();if(!QStringList{"fits","fit","fts"}.contains(QFileInfo(path).suffix().toLower())){status_=tr("Export layers as floating-point FITS to preserve signed values.");emit changed();return;}for(const auto& v:frames_)if(sameFile(v.toMap()["path"].toString(),path)){status_=tr("An original image cannot be overwritten.");emit changed();return;}if(projectUrl_.isLocalFile()&&sameFile(projectUrl_.toLocalFile(),path)){status_=tr("A project file cannot be overwritten by an image.");emit changed();return;}
-    auto wcs=readWcs(astrometry_.value("wcs"));if(wcs)wcs=finishWcs(*wcs,linear_->width,linear_->height,finishSettings_);const auto pixels=layer==1?starsLayer_:starBackgroundLayer_;exporting_=true;run(tr("Exporting image layer…"),[this,path,pixels,wcs,layer](std::stop_token stop){QTemporaryDir temp(QFileInfo(path).absolutePath()+"/.astro-layer-XXXXXX");if(!temp.isValid())throw std::runtime_error("Cannot open export destination.");recording::AstroImage a;a.width=pixels->width;a.height=pixels->height;a.channels=3;a.bits=32;a.samples=pixels->rgb;a.wcs=wcs;a.imageType=layer==1?"STARS":"PSF RESIDUAL";const auto file=temp.filePath("layer.fits");check(stop);recording::writeAstroFits(file.toStdString(),a);atomicCopy(file,path,stop);post([this]{status_=tr("Image layer exported as Float32 FITS.");emit changed();});});
+    auto wcs=readWcs(astrometry_.value("wcs"));if(wcs)wcs=finishWcs(*wcs,linear_->width,linear_->height,finishSettings_);const auto pixels=layer==1?starsLayer_:starBackgroundLayer_;exporting_=true;run(tr("Exporting image layer…"),[this,path,pixels,wcs,layer](std::stop_token stop){QTemporaryDir temp(QFileInfo(path).absolutePath()+"/.astro-layer-XXXXXX");if(!temp.isValid())throw std::runtime_error("Cannot open export destination.");recording::AstroImage a;a.width=pixels->width;a.height=pixels->height;a.channels=3;a.bits=32;a.wcs=wcs;a.imageType=layer==1?"STARS":"PSF RESIDUAL";const auto file=temp.filePath("layer.fits");check(stop);recording::writeAstroFits(file.toStdString(),a,pixels->rgb,[stop]{check(stop);});atomicCopy(file,path,stop);post([this]{status_=tr("Image layer exported as Float32 FITS.");emit changed();});});
 }
 QUrl DeepSkyController::exportUrl() const {
     if(frames_.isEmpty())return {};
@@ -807,8 +828,8 @@ void DeepSkyController::exportImage(const QUrl& url,bool linear) {
         const auto temp=directory.filePath("image");
         const auto suffix=QFileInfo(path).suffix().toLower();
         if(suffix=="fits"||suffix=="fit"||suffix=="fts") {
-            recording::AstroImage output;output.width=image->width;output.height=image->height;output.channels=3;output.bits=32;output.exposure=exposure;output.samples=image->rgb;output.wcs=exportWcs;
-            recording::writeAstroFits(nativePath(temp),output);
+            recording::AstroImage output;output.width=image->width;output.height=image->height;output.channels=3;output.bits=32;output.exposure=exposure;output.wcs=exportWcs;
+            recording::writeAstroFits(nativePath(temp),output,image->rgb,[stop]{check(stop);});
         }else if(suffix=="tif"||suffix=="tiff") {
             if(linear)throw std::runtime_error("Use FITS to preserve linear floating-point data.");
             std::vector<std::uint16_t> samples(image->rgb.size());for(std::size_t i=0;i<samples.size();++i){if(i%65536==0)check(stop);const float v=image->rgb[i];samples[i]=std::isfinite(v)?std::uint16_t(std::lround(std::clamp(v,0.f,1.f)*65535)):0;}

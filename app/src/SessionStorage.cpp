@@ -1,3 +1,5 @@
+#include "ImageDecoding.hpp"
+#include <astro/domain/ImageLimits.hpp>
 #include "SessionStorage.hpp"
 #include <QCryptographicHash>
 #include <QDataStream>
@@ -39,7 +41,7 @@ QString assetPath(const QString& folder,const QString& file) {
     require(name.match(file).hasMatch()&&!info.isSymLink(),"Invalid saved session file name.");return path;
 }
 void writePixels(const QString& path,int width,int height,int channels,std::span<const float> pixels,const std::function<void()>& check) {
-    require(width>0&&height>0&&std::uint64_t(width)*height<=32000000&&pixels.size()==std::size_t(width)*height*channels,"Invalid saved session image.");
+    require(astro::domain::supportedImageSize(width,height)&&pixels.size()==std::size_t(width)*height*channels,"Invalid saved session image.");
     QSaveFile file(path);require(file.open(QIODevice::WriteOnly),"Cannot save the session. Check free disk space.");QDataStream stream(&file);stream.setByteOrder(QDataStream::LittleEndian);
     stream<<quint32(0x41534350)<<quint32(1)<<quint32(width)<<quint32(height)<<quint32(channels);
     for(std::size_t start=0;start<pixels.size();start+=262144){if(check)check();const auto block=pixels.subspan(start,std::min(std::size_t(262144),pixels.size()-start));
@@ -51,7 +53,7 @@ void writePixels(const QString& path,int width,int height,int channels,std::span
 struct Pixels {int width{},height{},channels{};std::vector<float> samples;};
 Pixels readPixels(const QString& path,int channels,const std::function<void()>& check) {
     QFile file(path);require(file.open(QIODevice::ReadOnly),"A saved session image is missing.");QDataStream stream(&file);stream.setByteOrder(QDataStream::LittleEndian);quint32 magic,version,w,h,c;stream>>magic>>version>>w>>h>>c;
-    require(stream.status()==QDataStream::Ok&&magic==0x41534350&&version==1&&w>0&&h>0&&std::uint64_t(w)*h<=32000000&&c==quint32(channels)&&file.size()==20+qint64(w)*h*c*4,"Invalid saved session image.");
+    require(stream.status()==QDataStream::Ok&&magic==0x41534350&&version==1&&w<=astro::domain::maximumImageDimension&&h<=astro::domain::maximumImageDimension&&astro::domain::supportedImageSize(int(w),int(h))&&c==quint32(channels)&&file.size()==20+qint64(w)*h*c*4,"Invalid saved session image.");
     Pixels p{int(w),int(h),int(c),std::vector<float>(std::size_t(w)*h*c)};
     for(std::size_t start=0;start<p.samples.size();start+=262144){if(check)check();const auto count=std::min(std::size_t(262144),p.samples.size()-start);auto* output=p.samples.data()+start;require(file.read(reinterpret_cast<char*>(output),qint64(count*4))==qint64(count*4),"Incomplete saved session image.");
         if constexpr(std::endian::native!=std::endian::little)for(std::size_t i=0;i<count;++i)output[i]=std::bit_cast<float>(qFromLittleEndian<quint32>(reinterpret_cast<const char*>(output+i)));
@@ -94,6 +96,17 @@ SavedSession SessionStorage::load(const std::function<void()>& check) {
     const auto manifest=readManifest(directory_);SavedSession session;session.ui=manifest["ui"].toObject().toVariantMap();const auto spaces=manifest["workspaces"].toObject();require(spaces.size()<=3,"Invalid session workspaces.");
     QMap<QString,QByteArray> verified; qint64 totalBytes=0;
     auto verify=[&](const QString& file,const QJsonObject& ref){const auto path=assetPath(directory_,file);const auto expected=ref["sha256"].toString().toLatin1();require(expected.size()==64,"Invalid saved session checksum.");if(!verified.contains(file)){totalBytes+=QFileInfo(path).size();require(totalBytes<=qint64(4)*1024*1024*1024,"The saved session exceeds the 4 GiB recovery limit.");verified[file]=fileHash(path,check).toHex();}require(verified[file]==expected,"A saved session file is damaged.");return path;};
+    for(auto space=spaces.begin();space!=spaces.end();++space)for(const auto* category:{"images","planes","previews"}) {
+        const auto refs=space.value().toObject()[category].toObject();
+        for(auto p=refs.begin();p!=refs.end();++p){const auto ref=p.value().toObject();verify(ref["file"].toString(),ref);}
+    }
+    std::uint64_t restoredBytes=std::uint64_t(totalBytes);
+    for(auto file=verified.begin();file!=verified.end();++file)if(file.key().endsWith(".png")) {
+        ensureLargeImageDecoding();QImageReader reader(assetPath(directory_,file.key()));const auto size=reader.size();
+        require(domain::supportedImageSize(size.width(),size.height()),"Invalid session preview dimensions.");
+        restoredBytes+=std::uint64_t(size.width())*size.height()*8; // decoder/conversion allowance
+    }
+    domain::requireImageMemory(restoredBytes+256ULL*1024*1024);
     QMap<QString,std::shared_ptr<const processing::FloatImage>> loadedImages;QMap<QString,std::shared_ptr<const std::vector<float>>> loadedPlanes;QMap<QString,QImage> loadedPreviews;
     for(auto it=spaces.begin();it!=spaces.end();++it){require(QStringList{"processing","deepSky","mosaic"}.contains(it.key()),"Invalid session workspace.");const auto space=it.value().toObject();WorkspaceSnapshot s;s.state=space["state"].toObject().toVariantMap();
         auto refs=space["images"].toObject();require(refs.size()<=64,"Too many saved session images.");for(auto p=refs.begin();p!=refs.end();++p){const auto ref=p.value().toObject();const auto file=ref["file"].toString();const auto path=verify(file,ref);
@@ -105,7 +118,7 @@ SavedSession SessionStorage::load(const std::function<void()>& check) {
             s.planes[p.key()]=loadedPlanes[file];
         }
         refs=space["previews"].toObject();require(refs.size()<=16,"Too many session previews.");for(auto p=refs.begin();p!=refs.end();++p){const auto ref=p.value().toObject();const auto file=ref["file"].toString();const auto path=verify(file,ref);
-            if(!loadedPreviews.contains(file)){QImageReader reader(path);const auto size=reader.size();require(size.width()>0&&size.height()>0&&std::uint64_t(size.width())*size.height()<=32000000,"Invalid session preview dimensions.");auto image=reader.read();require(!image.isNull(),"Cannot read the session preview.");loadedPreviews[file]=image;previews_[image.cacheKey()]={file,QByteArray::fromHex(ref["sha256"].toString().toLatin1())};}
+            if(!loadedPreviews.contains(file)){ensureLargeImageDecoding();QImageReader reader(path);const auto size=reader.size();require(astro::domain::supportedImageSize(size.width(),size.height()),"Invalid session preview dimensions.");auto image=reader.read();require(!image.isNull(),"Cannot read the session preview.");loadedPreviews[file]=image;previews_[image.cacheKey()]={file,QByteArray::fromHex(ref["sha256"].toString().toLatin1())};}
             s.previews[p.key()]=loadedPreviews[file];
         }
         session.workspaces[it.key()]=std::move(s);

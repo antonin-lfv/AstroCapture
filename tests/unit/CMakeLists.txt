@@ -366,3 +366,11 @@ if(ASTRO_ENABLE_MOCK_CAMERA)
     set_tests_properties(astro_app_personal_use_test PROPERTIES
         ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_BACKEND=software" TIMEOUT 120)
 endif()
+
+# App settings and session validators share domain image bounds.
+get_directory_property(astro_unit_targets BUILDSYSTEM_TARGETS)
+foreach(unit_target IN LISTS astro_unit_targets)
+    if(unit_target MATCHES "^astro_app_")
+        target_link_libraries(${unit_target} PRIVATE astro::domain)
+    endif()
+endforeach()

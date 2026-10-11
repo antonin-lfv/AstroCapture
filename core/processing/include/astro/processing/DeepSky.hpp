@@ -42,6 +42,11 @@ DrizzleProjection drizzleProject(const FloatImage&,const StarAlignment&,int refe
 // interleaved RGB; zero weight means missing data, including a real zero value.
 DrizzleProjection drizzleProjectBayer(const AstroImage&,const StarAlignment&,int referenceWidth,int referenceHeight,
                                       const DrizzleOptions&,const CheckCancel& = {},const WcsProjection* = nullptr);
+// The sink receives full-width strips; image.height is the strip height.
+// Double sums + weights + Float32 delivery use at most 64 MiB in integration.
+using DrizzleStripSink = std::function<void(int firstRow,const DrizzleProjection&)>;
+void drizzleProjectStrips(const FloatImage&,const StarAlignment&,int,int,const DrizzleOptions&,int rows,const DrizzleStripSink&,const CheckCancel& = {},const WcsProjection* = nullptr);
+void drizzleProjectBayerStrips(const AstroImage&,const StarAlignment&,int,int,const DrizzleOptions&,int rows,const DrizzleStripSink&,const CheckCancel& = {},const WcsProjection* = nullptr);
 struct BackgroundOptions {
     int degree{1}, samplesPerLine{20};
     double tolerance{1};

@@ -1,6 +1,7 @@
 add_library(astro_domain STATIC
     src/PixelFormat.cpp
     src/Result.cpp
+    src/ImageLimits.cpp
 )
 add_library(astro::domain ALIAS astro_domain)
 

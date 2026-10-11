@@ -1,5 +1,7 @@
 #include "ImagePixelsItem.hpp"
 #include <QImageReader>
+#include <QFileInfo>
+#include <QDir>
 #include <QGuiApplication>
 #include <QElapsedTimer>
 #include <QFile>
@@ -31,7 +33,7 @@
 
 static void until(const std::function<bool()>& ready) {
     QElapsedTimer timer; timer.start();
-    while (!ready() && timer.elapsed() < 10000) { QCoreApplication::processEvents(); QThread::msleep(1); }
+    while (!ready() && timer.elapsed() < (qEnvironmentVariableIsSet("ASTRO_UI_LARGE_PROCESSING_PATH")?180000:10000)) { QCoreApplication::processEvents(); QThread::msleep(1); }
     ASTRO_TEST_CHECK(ready());
 }
 int main(int argc, char** argv) {
@@ -62,6 +64,21 @@ int main(int argc, char** argv) {
     auto* root = qobject_cast<QQuickItem*>(object.get());
     QQuickWindow window;
     window.resize(1100, 720); root->setParentItem(window.contentItem()); root->setSize({1100, 720}); window.show();
+    if(qEnvironmentVariableIsSet("ASTRO_UI_LARGE_PROCESSING_PATH")) {
+        controller.open(QUrl::fromLocalFile(qEnvironmentVariable("ASTRO_UI_LARGE_PROCESSING_PATH")));until([&]{return !controller.busy();});
+        const auto stack=controller.exportSizeInput().value<astro::app::ExportSizeInput>().pixels;ASTRO_TEST_CHECK(stack&&std::uint64_t(stack->width)*stack->height>100000000);
+        root->setProperty("restoringControls",true);auto* edits=root->findChild<astro::app::ProcessingEdits*>();ASTRO_TEST_CHECK(edits);auto values=edits->values();values["level1"]=1.0;ASTRO_TEST_CHECK(edits->applyValues(values));root->setProperty("restoringControls",false);
+        ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root,"applyAdjustments"));until([&]{return !controller.busy();});
+        const auto result=controller.exportSizeInput().value<astro::app::ExportSizeInput>().pixels;ASTRO_TEST_CHECK(result&&result!=stack&&result->width==stack->width);
+        if(!qEnvironmentVariableIsSet("ASTRO_UI_LARGE_PROCESSING_CAPTURE_ONLY")) {
+        const auto path=temp.filePath("large-finished.png");controller.exportImage(QUrl::fromLocalFile(path));until([&]{return !controller.busy();});ASTRO_TEST_CHECK(QFileInfo(path).size()>0);
+        QImageReader reader(path);ASTRO_TEST_CHECK(reader.size()==QSize(result->width,result->height));const auto decoded=reader.read().convertToFormat(QImage::Format_RGBA64);ASTRO_TEST_CHECK(!decoded.isNull());
+        for(int y:{0,decoded.height()/2,decoded.height()-1}){const auto* row=reinterpret_cast<const QRgba64*>(decoded.constScanLine(y));for(int x:{0,decoded.width()/2,decoded.width()-1})for(int c=0;c<3;++c){const auto v=c==0?row[x].red():c==1?row[x].green():row[x].blue();ASTRO_TEST_CHECK(v==std::uint16_t(std::lround(std::clamp(result->rgb[(std::size_t(y)*decoded.width()+x)*3+c],0.f,1.f)*65535)));}}
+        }
+        const auto folder=qEnvironmentVariable("ASTRO_UI_LARGE_PROCESSING_QA");QDir().mkpath(folder);
+        for(const auto size:{QSize(1440,960),QSize(1100,800),QSize(900,700)}){window.resize(size);root->setSize(size);for(int i=0;i<6;++i){QCoreApplication::processEvents();QThread::msleep(40);}ASTRO_TEST_CHECK(window.grabWindow().save(folder+QString("/large-processing-%1x%2.png").arg(size.width()).arg(size.height())));}
+        qInfo()<<(qEnvironmentVariableIsSet("ASTRO_UI_LARGE_PROCESSING_CAPTURE_ONLY")?"Large TIFF import and QML wavelets visual check passed":"Large TIFF import, wavelets and PNG16 verified")<<result->width<<result->height<<controller.status();return 0;
+    }
     auto* controls=root->findChild<QQuickItem*>("processingControls");ASTRO_TEST_CHECK(controls && !controls->isVisible());
     const QString path = temp.filePath("test.ser");
     astro::domain::FrameDescriptor descriptor;

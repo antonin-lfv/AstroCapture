@@ -3,6 +3,9 @@
 #include "ProcessingEdits.hpp"
 #include "Check.hpp"
 int main(int argc, char** argv) {
+    auto smallCrop=astro::app::defaultGeometry();smallCrop["crop"]=true;smallCrop["width"]=512;smallCrop["height"]=512;smallCrop["scale"]=2;
+    ASTRO_TEST_CHECK(astro::app::geometryWorkingBytes(12488,8340,smallCrop)<64ULL*1024*1024);
+
     QCoreApplication app(argc, argv);
     astro::app::ProcessingEdits edits;
     const auto neutral = edits.values();

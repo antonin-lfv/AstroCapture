@@ -1,4 +1,5 @@
 #include <astro/processing/DeepSky.hpp>
+#include <astro/processing/WcsProjection.hpp>
 #include <astro/recording/AstroImage.hpp>
 #include "Check.hpp"
 #include <cmath>
@@ -106,7 +107,30 @@ int main() {
     double error=0,interpolationError=0;
     for(int y=2;y<30;++y)for(int x=2;x<30;++x){const int at=y*32+x;ASTRO_TEST_CHECK(weights[at]>0);const double truth=scene((x+.5)/2-.5,(y+.5)/2-.5);error+=std::pow(sum[at]/weights[at]-truth,2);interpolationError+=std::pow(bilinear[at]-truth,2);}
     ASTRO_TEST_CHECK(error<1e-10&&interpolationError>.1);
+    for(const auto matrix:std::array<std::array<double,6>,4>{{{1,0,.37,0,1,-.2},{.8,-.3,4,.3,.8,2},{0,-1,7,1,0,0},{1,.2,-2,.1,1,-1}}}) {
+        processing::StarAlignment m;m.matrix=matrix;
+        auto source=processing::linearRgb(field());
+        const auto full=processing::drizzleProject(source,m,64,64,{2,.8});
+        std::vector<float> rgb(full.image.rgb.size()),weights(full.weights.size());
+        processing::drizzleProjectStrips(source,m,64,64,{2,.8},3,[&](int y,const auto& tile){std::copy(tile.image.rgb.begin(),tile.image.rgb.end(),rgb.begin()+std::size_t(y)*128*3);std::copy(tile.weights.begin(),tile.weights.end(),weights.begin()+std::size_t(y)*128);});
+        ASTRO_TEST_CHECK(weights==full.weights);
+        for(std::size_t i=0;i<rgb.size();++i)ASTRO_TEST_CHECK(rgb[i]==full.image.rgb[i]||(std::isnan(rgb[i])&&std::isnan(full.image.rgb[i])));
+        const auto raw=bayerField();const auto fullCfa=processing::drizzleProjectBayer(raw,m,64,64,{2,.8,true});
+        weights.resize(fullCfa.weights.size());
+        processing::drizzleProjectBayerStrips(raw,m,64,64,{2,.8,true},1,[&](int y,const auto& tile){std::copy(tile.image.rgb.begin(),tile.image.rgb.end(),rgb.begin()+std::size_t(y)*128*3);std::copy(tile.weights.begin(),tile.weights.end(),weights.begin()+std::size_t(y)*128*3);});
+        ASTRO_TEST_CHECK(weights==fullCfa.weights);
+        for(std::size_t i=0;i<rgb.size();++i)ASTRO_TEST_CHECK(rgb[i]==fullCfa.image.rgb[i]||(std::isnan(rgb[i])&&std::isnan(fullCfa.image.rgb[i])));
+    }
     auto a=field();recording::CelestialWcs wcs;wcs.crval={23,30};wcs.crpix={32.5,32.5};wcs.cd={-.001,0,0,.001};wcs.sipOrder=3;wcs.sipA[12]=1e-5;wcs.sipB[2]=-2e-5;a.wcs=wcs;a.pixelScale=3.6;
+    {
+        auto target=wcs;target.sipOrder=0;target.sipA.fill(0);target.sipB.fill(0);
+        processing::WcsProjection projection(wcs,target,64,64);const auto source=processing::linearRgb(a);
+        const auto full=processing::drizzleProject(source,{},64,64,{2,.8},{},&projection);
+        std::vector<float> rgb(full.image.rgb.size()),weights(full.weights.size());
+        processing::drizzleProjectStrips(source,{},64,64,{2,.8},2,[&](int y,const auto& tile){std::copy(tile.image.rgb.begin(),tile.image.rgb.end(),rgb.begin()+std::size_t(y)*128*3);std::copy(tile.weights.begin(),tile.weights.end(),weights.begin()+std::size_t(y)*128);},{},&projection);
+        ASTRO_TEST_CHECK(weights==full.weights);
+        for(std::size_t i=0;i<rgb.size();++i)ASTRO_TEST_CHECK(rgb[i]==full.image.rgb[i]||(std::isnan(rgb[i])&&std::isnan(full.image.rgb[i])));
+    }
     processing::DrizzleOptions options{2,.8};
     auto integrated=processing::integrate(4,[&](int n){auto f=n?field((n%2)*.5,(n/2)*.5):a;if(n==2)f.samples[(32*64+32)*3]=10;return f;},{},true,3,{}, {},false,nullptr,&options);
     ASTRO_TEST_CHECK(integrated.accepted.size()==4&&integrated.totalExposure==480&&integrated.image.width>=125&&integrated.image.height>=125&&integrated.subpixelDiversity);
@@ -118,7 +142,8 @@ int main() {
     recording::AstroImage exported=a;exported.width=integrated.image.width;exported.height=integrated.image.height;exported.samples=integrated.image.rgb;exported.wcs=integrated.wcs;exported.pixelScale=integrated.pixelScale;
     recording::writeAstroFits(path,exported);const auto restored=recording::readAstroImage(path);std::filesystem::remove(path);
     ASTRO_TEST_CHECK(restored.samples==exported.samples&&restored.wcs&&std::abs(restored.wcs->scale()-1.8)<1e-8);
-    bool refused=false;try{processing::drizzleDimensions(6244,4170,{2,.8});}catch(const std::runtime_error&){refused=true;}ASTRO_TEST_CHECK(refused);
+    const auto large=processing::drizzleDimensions(6244,4170,{2,.8});ASTRO_TEST_CHECK(large[0]==12488&&large[1]==8340);
+    bool refused=false;try{processing::drizzleDimensions(8000,5000,{2,.8});}catch(const std::runtime_error&){refused=true;}ASTRO_TEST_CHECK(refused);
     refused=false;try{processing::drizzleProject(input,{},8,8,{1,0});}catch(const std::runtime_error&){refused=true;}ASTRO_TEST_CHECK(refused);
     refused=false;try{processing::integrate(1,[&](int){return a;},{},true,0,{}, {},false,nullptr,&options);}catch(const std::runtime_error&){refused=true;}ASTRO_TEST_CHECK(refused);
     auto hole=a;for(int y=25;y<30;++y)for(int x=25;x<30;++x)for(int ch=0;ch<3;++ch)hole.samples[(y*64+x)*3+ch]=NAN;

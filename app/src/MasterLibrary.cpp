@@ -1,3 +1,4 @@
+#include <astro/domain/ImageLimits.hpp>
 #include "MasterLibrary.hpp"
 #include <QCoreApplication>
 #include <QCryptographicHash>
@@ -159,7 +160,7 @@ QVariantMap calibrationBatchPlan(const QVariantList& frames,const QVariantList& 
     group["missing"]=reasons(missingConfiguration(row));group["reviewRequired"]=!missingConfiguration(row).isEmpty();
     const auto pixels=std::uint64_t(std::max(0,row["width"].toInt()))*std::max(0,row["height"].toInt());
     const auto samples=pixels*std::max(0,row["channels"].toInt());
-    if(pixels<1||pixels>32000000||(row["channels"].toInt()!=1&&row["channels"].toInt()!=3)||sources.size()>2000)
+    if(pixels<1||pixels>astro::domain::maximumImagePixels||(row["channels"].toInt()!=1&&row["channels"].toInt()!=3)||sources.size()>2000)
       group["error"]=batchText("Invalid calibration dimensions or source count.");
     for(const auto* key:{"exposure","aduScale","gain","offset","temperature"})if(row.contains(key) && (!std::isfinite(row[key].toDouble()) || (QString(key)=="exposure"&&row[key].toDouble()<0) || (QString(key)=="aduScale"&&row[key].toDouble()<=0)))
       group["error"]=batchText("Invalid calibration metadata.");

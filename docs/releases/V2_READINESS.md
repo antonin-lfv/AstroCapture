@@ -1,6 +1,6 @@
 # AstroCapture — bilan avant V2
 
-État du 10 octobre 2026, après la livraison 1.15.1.
+État du 11 octobre 2026, après les contrôles de la livraison 1.16.0.
 
 L’utilisateur réserve pour l’instant AstroCapture à son usage personnel.
 La qualification de distribution publique reste une étape ultérieure ; elle
@@ -29,8 +29,11 @@ La 1.13 ajoute la projection WCS/SIP des poses déjà résolues, avec contrôle
 relatif des étoiles et sortie TAN sans SIP, en empilement et drizzle.
 La 1.14 borne les buffers de rejet à 64 Mio, utilise une archive temporaire
 par calcul et contrôle mémoire, espace disque et limites de reprise avant
-l’empilement. La limite de sortie de 32 MP demeure : toute la chaîne ne travaille
-pas encore par tuiles. Voir [ADR-025](../decisions/ADR-025-integration-resources.md).
+l’empilement. Voir [ADR-025](../decisions/ADR-025-integration-resources.md).
+La 1.16 porte le plafond à 128 MP / 32 700 pixels par dimension, avec projection
+drizzle bornée à 64 Mio, FITS/TIFF par blocs et contrôle de la finition et de la
+reprise. Les résultats restent complets en RAM : les combinaisons dépassant les
+budgets sont refusées. Voir [ADR-027](../decisions/ADR-027-large-images.md).
 
 La 1.15 ajoute la préparation de masters par lots, séparés par configuration
 avec choix des correctifs de flats, vérification des sources, provenance,
@@ -48,7 +51,7 @@ une parité scientifique complète avec Siril sans comparaison indépendante.
 | --- | --- | --- |
 | Qualification sur acquisitions réelles | Les scènes synthétiques détectent les erreurs mais ne couvrent pas tous les capteurs et défauts du ciel | Comparaison finale avec Siril prévue avec l’utilisateur : même sélection, référence et intégrations linéaires M8/M20, puis opérations de finition séparées ; séries publiques ou autorisées mono, CFA, RGB, filtres étroits et HDR ; mesures de bruit, flux, couleur, FWHM et astrométrie |
 | PCC/SPCC et profils de réponse | Les données Gaia XP, approximations éventuelles et courbes importées ne prouvent pas une justesse absolue pour chaque équipement | Profils caméra/filtres traçables, cibles de référence, erreurs/résidus publiés, cas de filtres atypiques et catalogue incomplet |
-| Ressources et grands fichiers | Limite 32 MP : un capteur de 26 MP en drizzle ×2 produit 104 MP et est refusé ; cartes et HDR augmentent la mémoire. Depuis 1.14, rejet borné et contrôle conservateur avant empilement ; finition et résultats restent en mémoire | Traitement par tuiles cohérent de l’entrée à l’export avant hausse du plafond ; mesures sur séries et modes réels, pression mémoire avec les autres espaces ouverts ; qualification des estimations et de la reprise 4 Gio/64 images |
+| Ressources et grands fichiers | Plafond 128 MP / 32 700 pixels par dimension et budgets : un capteur de 26 MP en drizzle ×2 peut produire 104 MP ; cartes, filtres, couches et HDR peuvent dépasser mémoire/reprise. Rejet et projection drizzle bornés, mais résultats et intermédiaires avancés restent en RAM | Qualification sur vraies séries décalées mono/CFA/WCS-SIP de grande taille ; pression mémoire avec les autres espaces ouverts ; contrôle des estimations et de la reprise 4 Gio/64 images ; moteur intégralement sur disque pour aller au-delà des budgets actuels |
 | Endurance et récupération | Les garanties de publication atomique ne remplacent pas des essais longs et interruptions système | Disque plein, fermeture forcée, annulation à chaque phase, fichiers déplacés/corrompus, export interrompu, sessions longues et migrations entre versions |
 | Qualification capture matérielle | Une caméra et un mode ne représentent pas les autres pilotes | Caméras réelles, couleurs CFA confirmées, cadence, pertes, longues acquisitions, reconnexion et permissions sur Mac propre |
 | Distribution macOS | Le DMG est signé ad hoc ; il manque la confiance Apple pour une distribution normale | Apple Developer ID, notarisation, essai d’installation et mise à jour sur un Mac vierge, procédure de retour à la version précédente |

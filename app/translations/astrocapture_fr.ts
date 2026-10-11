@@ -3008,6 +3008,16 @@ L’aperçu est automatiquement éclairci ; les données restent linéaires.</tr
     </context>
     <context>
         <name>GuideWorkspace</name>
+    <message><source>Observation</source><translation>Observation</translation></message>
+    <message><source>Find a suitable time before capturing</source><translation>Trouver un bon créneau avant la capture</translation></message>
+    <message><source>Observation is independent of Deep sky. It includes the Moon, planets and fixed catalogue objects. Choose your target, location and local date; start with a minimum height of 30°.</source><translation>Observation est indépendant de Ciel profond. Il inclut la Lune, les planètes et les objets fixes des catalogues. Choisissez la cible, le lieu et la date locale ; commencez avec une hauteur minimale de 30°.</translation></message>
+    <message><source>Read the curve and the map</source><translation>Lire la courbe et la carte</translation></message>
+    <message><source>Night shows the object&#x27;s height over a complete local night. Blue intervals meet the selected height and darkness thresholds. Drag the time slider or click the curve; Horizon and World use the same instant. The map uses a regional 6° grid; clicking it preserves UTC and chooses a new site with UTC as its initial time zone.</source><translation>Nuit montre la hauteur de l’objet sur une nuit locale entière. Les créneaux bleus respectent les seuils de hauteur et d’obscurité choisis. Déplacez le curseur horaire ou cliquez sur la courbe ; Horizon et Monde utilisent le même instant. La carte utilise une grille régionale de 6° ; un clic conserve l’instant UTC et choisit un nouveau lieu, initialement dans le fuseau UTC.</translation></message>
+    <message><source>Understand the limits</source><translation>Comprendre les limites</translation></message>
+    <message><source>A target above the horizon can still be too low or in a bright sky. Very dark is suggested for deep sky, twilight for the Moon and planets. The lunar readout gives illuminated fraction, height and angular distance from your target. No weather, seeing, obstructions, reservations or camera control are included. Coordinates and body centres use a flat geometric horizon without refraction.</source><translation>Une cible au-dessus de l’horizon peut être trop basse ou dans un ciel clair. Le seuil très sombre est proposé pour le ciel profond, le crépuscule pour la Lune et les planètes. Les informations lunaires donnent la fraction éclairée, la hauteur et la distance angulaire à la cible. La météo, la turbulence, les obstacles, les réservations et le pilotage de caméra ne sont pas inclus. Les calculs utilisent un horizon géométrique plat, sans réfraction, et le centre des astres.</translation></message>
+    <message><source>Names and favourite places</source><translation>Noms et lieux favoris</translation></message>
+    <message><source>OpenNGC is available offline for NGC, IC and Messier identifiers. Other fixed-object names can be searched using CDS Sesame; only the name is sent. City search uses Open-Meteo / GeoNames and sends only the typed city name. Advanced lets you enter exact site coordinates and save local favourites. For moving bodies, use the Moon or planet entries instead of manual fixed coordinates.</source><translation>OpenNGC est disponible sans connexion pour les numéros NGC, IC et Messier. Les autres objets fixes se recherchent par CDS Sesame ; seul le nom est envoyé. La recherche de ville utilise Open-Meteo / GeoNames et transmet seulement le nom saisi. Les options avancées permettent de saisir les coordonnées précises du lieu et de garder des favoris locaux. Pour les astres mobiles, choisissez la Lune ou la planète plutôt que des coordonnées fixes manuelles.</translation></message>
+    <message><source>Go to Observation</source><translation>Aller à Observation</translation></message>
         <message>
             <location filename="../qml/GuideWorkspace.qml" line="80" />
             <source>Studio navigation</source>
@@ -3030,8 +3040,8 @@ L’aperçu est automatiquement éclairci ; les données restent linéaires.</tr
         </message>
         <message>
             <location filename="../qml/GuideWorkspace.qml" line="83" />
-            <source>The top tabs stay visible. Switching tabs preserves loaded images, framing and controls, and calculations continue in the background. Click the activity label to return to a running task. During recording, Home, Capture and Guide remain available; other workspaces are locked.</source>
-            <translation>Les onglets supérieurs restent visibles. Changer d’onglet conserve les images chargées, le cadrage et les réglages ; les calculs continuent en arrière-plan. Cliquez sur l’activité pour revenir à la tâche en cours. Pendant une capture, Accueil, Capture et Guide restent disponibles ; les autres espaces sont verrouillés.</translation>
+            <source>The top tabs stay visible. Switching tabs preserves loaded images, framing and controls, and calculations continue in the background. Click the activity label to return to a running task. During recording, Home, Capture, Observation and Guide remain available; other workspaces are locked.</source>
+            <translation>Les onglets supérieurs restent visibles. Changer d’onglet conserve les images chargées, le cadrage et les réglages ; les calculs continuent en arrière-plan. Cliquez sur l’activité pour revenir à la tâche en cours. Pendant une capture, Accueil, Capture, Observation et Guide restent disponibles ; les autres espaces sont verrouillés.</translation>
         </message>
         <message>
             <location filename="../qml/GuideWorkspace.qml" line="84" />
@@ -5671,6 +5681,7 @@ Télescope · caméra · accessoires</translation>
 </context>
     <context>
         <name>StudioNavigation</name>
+    <message><source>Observation</source><translation>Observation</translation></message>
         <message>
             <location filename="../qml/StudioNavigation.qml" line="13" />
             <source>Home</source>
@@ -8962,6 +8973,16 @@ Rejets : bords %7 · saturation %8 · signal faible %9 · incohérence %10</tran
 </context>
     <context>
         <name>GuideWorkspace</name>
+    <message><source>Observation</source><translation>Observation</translation></message>
+    <message><source>Find a suitable time before capturing</source><translation>Trouver un bon créneau avant la capture</translation></message>
+    <message><source>Observation is independent of Deep sky. It includes the Moon, planets and fixed catalogue objects. Choose your target, location and local date; start with a minimum height of 30°.</source><translation>Observation est indépendant de Ciel profond. Il inclut la Lune, les planètes et les objets fixes des catalogues. Choisissez la cible, le lieu et la date locale ; commencez avec une hauteur minimale de 30°.</translation></message>
+    <message><source>Read the curve and the map</source><translation>Lire la courbe et la carte</translation></message>
+    <message><source>Night shows the object&#x27;s height over a complete local night. Blue intervals meet the selected height and darkness thresholds. Drag the time slider or click the curve; Horizon and World use the same instant. The map uses a regional 6° grid; clicking it preserves UTC and chooses a new site with UTC as its initial time zone.</source><translation>Nuit montre la hauteur de l’objet sur une nuit locale entière. Les créneaux bleus respectent les seuils de hauteur et d’obscurité choisis. Déplacez le curseur horaire ou cliquez sur la courbe ; Horizon et Monde utilisent le même instant. La carte utilise une grille régionale de 6° ; un clic conserve l’instant UTC et choisit un nouveau lieu, initialement dans le fuseau UTC.</translation></message>
+    <message><source>Understand the limits</source><translation>Comprendre les limites</translation></message>
+    <message><source>A target above the horizon can still be too low or in a bright sky. Very dark is suggested for deep sky, twilight for the Moon and planets. The lunar readout gives illuminated fraction, height and angular distance from your target. No weather, seeing, obstructions, reservations or camera control are included. Coordinates and body centres use a flat geometric horizon without refraction.</source><translation>Une cible au-dessus de l’horizon peut être trop basse ou dans un ciel clair. Le seuil très sombre est proposé pour le ciel profond, le crépuscule pour la Lune et les planètes. Les informations lunaires donnent la fraction éclairée, la hauteur et la distance angulaire à la cible. La météo, la turbulence, les obstacles, les réservations et le pilotage de caméra ne sont pas inclus. Les calculs utilisent un horizon géométrique plat, sans réfraction, et le centre des astres.</translation></message>
+    <message><source>Names and favourite places</source><translation>Noms et lieux favoris</translation></message>
+    <message><source>OpenNGC is available offline for NGC, IC and Messier identifiers. Other fixed-object names can be searched using CDS Sesame; only the name is sent. City search uses Open-Meteo / GeoNames and sends only the typed city name. Advanced lets you enter exact site coordinates and save local favourites. For moving bodies, use the Moon or planet entries instead of manual fixed coordinates.</source><translation>OpenNGC est disponible sans connexion pour les numéros NGC, IC et Messier. Les autres objets fixes se recherchent par CDS Sesame ; seul le nom est envoyé. La recherche de ville utilise Open-Meteo / GeoNames et transmet seulement le nom saisi. Les options avancées permettent de saisir les coordonnées précises du lieu et de garder des favoris locaux. Pour les astres mobiles, choisissez la Lune ou la planète plutôt que des coordonnées fixes manuelles.</translation></message>
+    <message><source>Go to Observation</source><translation>Aller à Observation</translation></message>
         <message>
             <source>Target names, equipment profiles and sky coordinates</source>
             <translation>Cibles, profils de matériel et coordonnées célestes</translation>
@@ -9427,6 +9448,16 @@ RMS normalisée moyenne %5</translation>
     </context>
     <context>
         <name>GuideWorkspace</name>
+    <message><source>Observation</source><translation>Observation</translation></message>
+    <message><source>Find a suitable time before capturing</source><translation>Trouver un bon créneau avant la capture</translation></message>
+    <message><source>Observation is independent of Deep sky. It includes the Moon, planets and fixed catalogue objects. Choose your target, location and local date; start with a minimum height of 30°.</source><translation>Observation est indépendant de Ciel profond. Il inclut la Lune, les planètes et les objets fixes des catalogues. Choisissez la cible, le lieu et la date locale ; commencez avec une hauteur minimale de 30°.</translation></message>
+    <message><source>Read the curve and the map</source><translation>Lire la courbe et la carte</translation></message>
+    <message><source>Night shows the object&#x27;s height over a complete local night. Blue intervals meet the selected height and darkness thresholds. Drag the time slider or click the curve; Horizon and World use the same instant. The map uses a regional 6° grid; clicking it preserves UTC and chooses a new site with UTC as its initial time zone.</source><translation>Nuit montre la hauteur de l’objet sur une nuit locale entière. Les créneaux bleus respectent les seuils de hauteur et d’obscurité choisis. Déplacez le curseur horaire ou cliquez sur la courbe ; Horizon et Monde utilisent le même instant. La carte utilise une grille régionale de 6° ; un clic conserve l’instant UTC et choisit un nouveau lieu, initialement dans le fuseau UTC.</translation></message>
+    <message><source>Understand the limits</source><translation>Comprendre les limites</translation></message>
+    <message><source>A target above the horizon can still be too low or in a bright sky. Very dark is suggested for deep sky, twilight for the Moon and planets. The lunar readout gives illuminated fraction, height and angular distance from your target. No weather, seeing, obstructions, reservations or camera control are included. Coordinates and body centres use a flat geometric horizon without refraction.</source><translation>Une cible au-dessus de l’horizon peut être trop basse ou dans un ciel clair. Le seuil très sombre est proposé pour le ciel profond, le crépuscule pour la Lune et les planètes. Les informations lunaires donnent la fraction éclairée, la hauteur et la distance angulaire à la cible. La météo, la turbulence, les obstacles, les réservations et le pilotage de caméra ne sont pas inclus. Les calculs utilisent un horizon géométrique plat, sans réfraction, et le centre des astres.</translation></message>
+    <message><source>Names and favourite places</source><translation>Noms et lieux favoris</translation></message>
+    <message><source>OpenNGC is available offline for NGC, IC and Messier identifiers. Other fixed-object names can be searched using CDS Sesame; only the name is sent. City search uses Open-Meteo / GeoNames and sends only the typed city name. Advanced lets you enter exact site coordinates and save local favourites. For moving bodies, use the Moon or planet entries instead of manual fixed coordinates.</source><translation>OpenNGC est disponible sans connexion pour les numéros NGC, IC et Messier. Les autres objets fixes se recherchent par CDS Sesame ; seul le nom est envoyé. La recherche de ville utilise Open-Meteo / GeoNames et transmet seulement le nom saisi. Les options avancées permettent de saisir les coordonnées précises du lieu et de garder des favoris locaux. Pour les astres mobiles, choisissez la Lune ou la planète plutôt que des coordonnées fixes manuelles.</translation></message>
+    <message><source>Go to Observation</source><translation>Aller à Observation</translation></message>
         <message>
             <source>Processing and Deep sky export 16-bit RGB PNG or TIFF without lossy compression. JPEG is an 8-bit compressed sharing format: keep a PNG, TIFF or linear FITS as your master. Mosaic exports TIFF, or transfers its result to Processing for other formats. A 16-bit file cannot restore information absent from an 8-bit original. JPEG is not a direct Processing input.</source>
             <translation>Traitement et Ciel profond exportent en PNG ou TIFF RVB 16 bits sans compression destructive. Le JPEG est un format 8 bits compressé pour le partage : conservez un PNG, TIFF ou FITS linéaire comme original de travail. Mosaïque exporte en TIFF, ou transfère son résultat vers Traitement pour les autres formats. Un fichier 16 bits ne récupère pas les informations absentes d’un original 8 bits. Le JPEG ne s’ouvre pas directement dans Traitement.</translation>
@@ -9482,6 +9513,16 @@ RMS normalisée moyenne %5</translation>
     </context>
     <context>
         <name>GuideWorkspace</name>
+    <message><source>Observation</source><translation>Observation</translation></message>
+    <message><source>Find a suitable time before capturing</source><translation>Trouver un bon créneau avant la capture</translation></message>
+    <message><source>Observation is independent of Deep sky. It includes the Moon, planets and fixed catalogue objects. Choose your target, location and local date; start with a minimum height of 30°.</source><translation>Observation est indépendant de Ciel profond. Il inclut la Lune, les planètes et les objets fixes des catalogues. Choisissez la cible, le lieu et la date locale ; commencez avec une hauteur minimale de 30°.</translation></message>
+    <message><source>Read the curve and the map</source><translation>Lire la courbe et la carte</translation></message>
+    <message><source>Night shows the object&#x27;s height over a complete local night. Blue intervals meet the selected height and darkness thresholds. Drag the time slider or click the curve; Horizon and World use the same instant. The map uses a regional 6° grid; clicking it preserves UTC and chooses a new site with UTC as its initial time zone.</source><translation>Nuit montre la hauteur de l’objet sur une nuit locale entière. Les créneaux bleus respectent les seuils de hauteur et d’obscurité choisis. Déplacez le curseur horaire ou cliquez sur la courbe ; Horizon et Monde utilisent le même instant. La carte utilise une grille régionale de 6° ; un clic conserve l’instant UTC et choisit un nouveau lieu, initialement dans le fuseau UTC.</translation></message>
+    <message><source>Understand the limits</source><translation>Comprendre les limites</translation></message>
+    <message><source>A target above the horizon can still be too low or in a bright sky. Very dark is suggested for deep sky, twilight for the Moon and planets. The lunar readout gives illuminated fraction, height and angular distance from your target. No weather, seeing, obstructions, reservations or camera control are included. Coordinates and body centres use a flat geometric horizon without refraction.</source><translation>Une cible au-dessus de l’horizon peut être trop basse ou dans un ciel clair. Le seuil très sombre est proposé pour le ciel profond, le crépuscule pour la Lune et les planètes. Les informations lunaires donnent la fraction éclairée, la hauteur et la distance angulaire à la cible. La météo, la turbulence, les obstacles, les réservations et le pilotage de caméra ne sont pas inclus. Les calculs utilisent un horizon géométrique plat, sans réfraction, et le centre des astres.</translation></message>
+    <message><source>Names and favourite places</source><translation>Noms et lieux favoris</translation></message>
+    <message><source>OpenNGC is available offline for NGC, IC and Messier identifiers. Other fixed-object names can be searched using CDS Sesame; only the name is sent. City search uses Open-Meteo / GeoNames and sends only the typed city name. Advanced lets you enter exact site coordinates and save local favourites. For moving bodies, use the Moon or planet entries instead of manual fixed coordinates.</source><translation>OpenNGC est disponible sans connexion pour les numéros NGC, IC et Messier. Les autres objets fixes se recherchent par CDS Sesame ; seul le nom est envoyé. La recherche de ville utilise Open-Meteo / GeoNames et transmet seulement le nom saisi. Les options avancées permettent de saisir les coordonnées précises du lieu et de garder des favoris locaux. Pour les astres mobiles, choisissez la Lune ou la planète plutôt que des coordonnées fixes manuelles.</translation></message>
+    <message><source>Go to Observation</source><translation>Aller à Observation</translation></message>
         <message>
             <source>Drizzle: when it can help</source>
             <translation>Drizzle : quand il peut aider</translation>
@@ -9669,6 +9710,16 @@ RMS normalisée moyenne %5</translation>
     </context>
     <context>
         <name>GuideWorkspace</name>
+    <message><source>Observation</source><translation>Observation</translation></message>
+    <message><source>Find a suitable time before capturing</source><translation>Trouver un bon créneau avant la capture</translation></message>
+    <message><source>Observation is independent of Deep sky. It includes the Moon, planets and fixed catalogue objects. Choose your target, location and local date; start with a minimum height of 30°.</source><translation>Observation est indépendant de Ciel profond. Il inclut la Lune, les planètes et les objets fixes des catalogues. Choisissez la cible, le lieu et la date locale ; commencez avec une hauteur minimale de 30°.</translation></message>
+    <message><source>Read the curve and the map</source><translation>Lire la courbe et la carte</translation></message>
+    <message><source>Night shows the object&#x27;s height over a complete local night. Blue intervals meet the selected height and darkness thresholds. Drag the time slider or click the curve; Horizon and World use the same instant. The map uses a regional 6° grid; clicking it preserves UTC and chooses a new site with UTC as its initial time zone.</source><translation>Nuit montre la hauteur de l’objet sur une nuit locale entière. Les créneaux bleus respectent les seuils de hauteur et d’obscurité choisis. Déplacez le curseur horaire ou cliquez sur la courbe ; Horizon et Monde utilisent le même instant. La carte utilise une grille régionale de 6° ; un clic conserve l’instant UTC et choisit un nouveau lieu, initialement dans le fuseau UTC.</translation></message>
+    <message><source>Understand the limits</source><translation>Comprendre les limites</translation></message>
+    <message><source>A target above the horizon can still be too low or in a bright sky. Very dark is suggested for deep sky, twilight for the Moon and planets. The lunar readout gives illuminated fraction, height and angular distance from your target. No weather, seeing, obstructions, reservations or camera control are included. Coordinates and body centres use a flat geometric horizon without refraction.</source><translation>Une cible au-dessus de l’horizon peut être trop basse ou dans un ciel clair. Le seuil très sombre est proposé pour le ciel profond, le crépuscule pour la Lune et les planètes. Les informations lunaires donnent la fraction éclairée, la hauteur et la distance angulaire à la cible. La météo, la turbulence, les obstacles, les réservations et le pilotage de caméra ne sont pas inclus. Les calculs utilisent un horizon géométrique plat, sans réfraction, et le centre des astres.</translation></message>
+    <message><source>Names and favourite places</source><translation>Noms et lieux favoris</translation></message>
+    <message><source>OpenNGC is available offline for NGC, IC and Messier identifiers. Other fixed-object names can be searched using CDS Sesame; only the name is sent. City search uses Open-Meteo / GeoNames and sends only the typed city name. Advanced lets you enter exact site coordinates and save local favourites. For moving bodies, use the Moon or planet entries instead of manual fixed coordinates.</source><translation>OpenNGC est disponible sans connexion pour les numéros NGC, IC et Messier. Les autres objets fixes se recherchent par CDS Sesame ; seul le nom est envoyé. La recherche de ville utilise Open-Meteo / GeoNames et transmet seulement le nom saisi. Les options avancées permettent de saisir les coordonnées précises du lieu et de garder des favoris locaux. Pour les astres mobiles, choisissez la Lune ou la planète plutôt que des coordonnées fixes manuelles.</translation></message>
+    <message><source>Go to Observation</source><translation>Aller à Observation</translation></message>
         <message>
             <source>In Stack → Advanced stack settings, enable Drizzle. Mono / RGB projects calibrated pixel footprints with their stellar alignment; Bayer inputs are debayered in this standard mode. For undersampled mono / RGB data with varied subpixel shifts, try ×2 and pixel fraction 0.8. ×2 creates four times as many pixels, without guaranteeing finer detail. Review dimensions and contributor counts; the output supports up to 128 MP and 32,700 pixels per dimension, subject to memory and recovery budgets. A 26 MP source at ×2 is about 104 MP. Maps and multiple filter groups can exceed the budgets; review Resources before stacking. Compare with ordinary stacking.</source>
             <translation>Dans Empilement → Réglages avancés, activez Drizzle. Le mode mono / RVB projette les pixels calibrés avec leur alignement stellaire ; les sources Bayer sont dématricées dans ce mode standard. Pour des données mono / RVB sous-échantillonnées avec des décalages sous-pixel variés, essayez ×2 et une fraction de pixel de 0,8. ×2 produit quatre fois plus de pixels, sans garantir des détails plus fins. Vérifiez les dimensions et le nombre de contributions ; la sortie est limitée à 128 MP. Comparez avec l’empilement classique. Limite : 32 700 pixels par dimension, selon les budgets mémoire et de reprise. Une source de 26 MP en ×2 atteint environ 104 MP : vérifiez les ressources avant d’empiler.</translation>
@@ -9754,6 +9805,16 @@ RMS normalisée moyenne %5</translation>
 
 <context>
     <name>GuideWorkspace</name>
+    <message><source>Observation</source><translation>Observation</translation></message>
+    <message><source>Find a suitable time before capturing</source><translation>Trouver un bon créneau avant la capture</translation></message>
+    <message><source>Observation is independent of Deep sky. It includes the Moon, planets and fixed catalogue objects. Choose your target, location and local date; start with a minimum height of 30°.</source><translation>Observation est indépendant de Ciel profond. Il inclut la Lune, les planètes et les objets fixes des catalogues. Choisissez la cible, le lieu et la date locale ; commencez avec une hauteur minimale de 30°.</translation></message>
+    <message><source>Read the curve and the map</source><translation>Lire la courbe et la carte</translation></message>
+    <message><source>Night shows the object&#x27;s height over a complete local night. Blue intervals meet the selected height and darkness thresholds. Drag the time slider or click the curve; Horizon and World use the same instant. The map uses a regional 6° grid; clicking it preserves UTC and chooses a new site with UTC as its initial time zone.</source><translation>Nuit montre la hauteur de l’objet sur une nuit locale entière. Les créneaux bleus respectent les seuils de hauteur et d’obscurité choisis. Déplacez le curseur horaire ou cliquez sur la courbe ; Horizon et Monde utilisent le même instant. La carte utilise une grille régionale de 6° ; un clic conserve l’instant UTC et choisit un nouveau lieu, initialement dans le fuseau UTC.</translation></message>
+    <message><source>Understand the limits</source><translation>Comprendre les limites</translation></message>
+    <message><source>A target above the horizon can still be too low or in a bright sky. Very dark is suggested for deep sky, twilight for the Moon and planets. The lunar readout gives illuminated fraction, height and angular distance from your target. No weather, seeing, obstructions, reservations or camera control are included. Coordinates and body centres use a flat geometric horizon without refraction.</source><translation>Une cible au-dessus de l’horizon peut être trop basse ou dans un ciel clair. Le seuil très sombre est proposé pour le ciel profond, le crépuscule pour la Lune et les planètes. Les informations lunaires donnent la fraction éclairée, la hauteur et la distance angulaire à la cible. La météo, la turbulence, les obstacles, les réservations et le pilotage de caméra ne sont pas inclus. Les calculs utilisent un horizon géométrique plat, sans réfraction, et le centre des astres.</translation></message>
+    <message><source>Names and favourite places</source><translation>Noms et lieux favoris</translation></message>
+    <message><source>OpenNGC is available offline for NGC, IC and Messier identifiers. Other fixed-object names can be searched using CDS Sesame; only the name is sent. City search uses Open-Meteo / GeoNames and sends only the typed city name. Advanced lets you enter exact site coordinates and save local favourites. For moving bodies, use the Moon or planet entries instead of manual fixed coordinates.</source><translation>OpenNGC est disponible sans connexion pour les numéros NGC, IC et Messier. Les autres objets fixes se recherchent par CDS Sesame ; seul le nom est envoyé. La recherche de ville utilise Open-Meteo / GeoNames et transmet seulement le nom saisi. Les options avancées permettent de saisir les coordonnées précises du lieu et de garder des favoris locaux. Pour les astres mobiles, choisissez la Lune ou la planète plutôt que des coordonnées fixes manuelles.</translation></message>
+    <message><source>Go to Observation</source><translation>Aller à Observation</translation></message>
     <message><source>Weight and rejection maps</source><translation>Cartes de poids et de rejet</translation></message>
     <message><source>In Stack → Advanced stack settings, enable Keep weight and rejection maps before stacking. The optional RGB Float32 maps sum retained geometrical weights, count retained contributors, and count combined low/high rejected samples. They add about 36 bytes per output pixel per group to memory and projects. Inspect each color independently, especially with native Bayer. The preview scales zero to black and the maximum to white; it is reduced and is not a noise or confidence measure. Export maps as full-resolution floating-point FITS with the stack WCS, without stretch or caption. Existing projects without maps still open normally; stack again to create diagnostics.</source><translation>Dans Empilement → Réglages avancés, activez Conserver les cartes de poids et de rejet avant le calcul. Les cartes RVB Float32 facultatives additionnent les poids géométriques retenus, comptent les contributeurs après rejet et réunissent les rejets bas/hauts. Elles ajoutent environ 36 octets par pixel de sortie et par groupe à la mémoire et aux projets. Examinez chaque couleur, surtout en Bayer natif. L’aperçu réduit affiche zéro en noir et le maximum en blanc ; il ne mesure ni le bruit ni la confiance. Exportez en FITS flottant à pleine résolution, avec le WCS de l’empilement, sans étirement ni légende. Les anciens projets sans cartes restent compatibles ; relancez l’empilement pour créer les diagnostics.</translation></message>
     <message><source>Linear HDR: preserve bright cores</source><translation>HDR linéaire : préserver les zones brillantes</translation></message>
@@ -9804,6 +9865,16 @@ RMS normalisée moyenne %5</translation>
   </context>
   <context>
     <name>GuideWorkspace</name>
+    <message><source>Observation</source><translation>Observation</translation></message>
+    <message><source>Find a suitable time before capturing</source><translation>Trouver un bon créneau avant la capture</translation></message>
+    <message><source>Observation is independent of Deep sky. It includes the Moon, planets and fixed catalogue objects. Choose your target, location and local date; start with a minimum height of 30°.</source><translation>Observation est indépendant de Ciel profond. Il inclut la Lune, les planètes et les objets fixes des catalogues. Choisissez la cible, le lieu et la date locale ; commencez avec une hauteur minimale de 30°.</translation></message>
+    <message><source>Read the curve and the map</source><translation>Lire la courbe et la carte</translation></message>
+    <message><source>Night shows the object&#x27;s height over a complete local night. Blue intervals meet the selected height and darkness thresholds. Drag the time slider or click the curve; Horizon and World use the same instant. The map uses a regional 6° grid; clicking it preserves UTC and chooses a new site with UTC as its initial time zone.</source><translation>Nuit montre la hauteur de l’objet sur une nuit locale entière. Les créneaux bleus respectent les seuils de hauteur et d’obscurité choisis. Déplacez le curseur horaire ou cliquez sur la courbe ; Horizon et Monde utilisent le même instant. La carte utilise une grille régionale de 6° ; un clic conserve l’instant UTC et choisit un nouveau lieu, initialement dans le fuseau UTC.</translation></message>
+    <message><source>Understand the limits</source><translation>Comprendre les limites</translation></message>
+    <message><source>A target above the horizon can still be too low or in a bright sky. Very dark is suggested for deep sky, twilight for the Moon and planets. The lunar readout gives illuminated fraction, height and angular distance from your target. No weather, seeing, obstructions, reservations or camera control are included. Coordinates and body centres use a flat geometric horizon without refraction.</source><translation>Une cible au-dessus de l’horizon peut être trop basse ou dans un ciel clair. Le seuil très sombre est proposé pour le ciel profond, le crépuscule pour la Lune et les planètes. Les informations lunaires donnent la fraction éclairée, la hauteur et la distance angulaire à la cible. La météo, la turbulence, les obstacles, les réservations et le pilotage de caméra ne sont pas inclus. Les calculs utilisent un horizon géométrique plat, sans réfraction, et le centre des astres.</translation></message>
+    <message><source>Names and favourite places</source><translation>Noms et lieux favoris</translation></message>
+    <message><source>OpenNGC is available offline for NGC, IC and Messier identifiers. Other fixed-object names can be searched using CDS Sesame; only the name is sent. City search uses Open-Meteo / GeoNames and sends only the typed city name. Advanced lets you enter exact site coordinates and save local favourites. For moving bodies, use the Moon or planet entries instead of manual fixed coordinates.</source><translation>OpenNGC est disponible sans connexion pour les numéros NGC, IC et Messier. Les autres objets fixes se recherchent par CDS Sesame ; seul le nom est envoyé. La recherche de ville utilise Open-Meteo / GeoNames et transmet seulement le nom saisi. Les options avancées permettent de saisir les coordonnées précises du lieu et de garder des favoris locaux. Pour les astres mobiles, choisissez la Lune ou la planète plutôt que des coordonnées fixes manuelles.</translation></message>
+    <message><source>Go to Observation</source><translation>Aller à Observation</translation></message>
     <message><source>WCS / SIP: optical distortion during stacking</source><translation>WCS / SIP : distorsions optiques à l’empilement</translation></message>
     <message><source>In Stack → Advanced stack settings, enable WCS / SIP distortion projection only when each input FITS has a valid TAN or TAN-SIP solution for its stored pixels. Coordinates from a cropped, flipped or debayered image must describe that exact image. Solving the final stack alone is insufficient. The software compares relative stellar positions: at least 12 matches in four of nine regions, spanning 35% of each image dimension, and RMS at most 0.75 pixel of the original reference. Wrong or missing coordinates reject that source; there is no affine fallback, and at least two validated lights per group must remain. All sources, including the reference, are projected onto its TAN plane without SIP. Ordinary stacking uses bilinear sampling; drizzle uses adaptive curved pixel footprints (0.001 output-pixel subdivision tolerance), with separate measured Bayer colors if enabled. Borders are cropped to common coverage and unmeasured Bayer channels remain explicit. Float32 values retain the source intensity convention, not an absolute flux or pixel-area photometry calibration. Source WCS consistency does not prove absolute sky coordinates: solve the result against a catalogue before PCC/SPCC. Review each source's star count and RMS in the stack report. Disabled by default; existing projects keep their previous behavior.</source><translation>Dans Empilement → Réglages avancés, activez la projection des distorsions WCS / SIP seulement si chaque FITS possède une solution TAN ou TAN-SIP valide pour ses pixels enregistrés. Après recadrage, inversion ou dématriçage, les coordonnées doivent décrire exactement cette image. Résoudre seulement l’empilement final ne suffit pas. Le logiciel compare les positions relatives des étoiles : au moins 12 correspondances dans quatre des neuf régions, couvrant 35 % de chaque dimension, et un écart RMS maximal de 0,75 pixel de la référence initiale. Une solution absente ou incohérente écarte la pose ; aucun remplacement par un alignement affine, et au moins deux poses validées par filtre doivent rester. Toutes les poses, référence comprise, sont projetées sur son plan TAN sans SIP. L’empilement classique utilise une interpolation bilinéaire ; le drizzle utilise des empreintes courbes subdivisées selon une tolérance de 0,001 pixel de sortie, en conservant les couleurs mesurées du Bayer natif si activé. Les bords sont recadrés à la couverture commune ; les couleurs non mesurées restent explicites. Les valeurs Float32 conservent la convention d’intensité des sources : ce n’est ni une calibration de flux absolu, ni une correction photométrique de surface des pixels. La cohérence relative des WCS ne prouve pas les coordonnées absolues : résolvez le résultat avec un catalogue avant PCC/SPCC. Consultez le nombre d’étoiles et le RMS de chaque pose dans le bilan. Désactivé par défaut ; les anciens projets conservent leur comportement.</translation></message>
   </context>
@@ -9860,6 +9931,16 @@ RMS normalisée moyenne %5</translation>
   </context>
   <context>
     <name>GuideWorkspace</name>
+    <message><source>Observation</source><translation>Observation</translation></message>
+    <message><source>Find a suitable time before capturing</source><translation>Trouver un bon créneau avant la capture</translation></message>
+    <message><source>Observation is independent of Deep sky. It includes the Moon, planets and fixed catalogue objects. Choose your target, location and local date; start with a minimum height of 30°.</source><translation>Observation est indépendant de Ciel profond. Il inclut la Lune, les planètes et les objets fixes des catalogues. Choisissez la cible, le lieu et la date locale ; commencez avec une hauteur minimale de 30°.</translation></message>
+    <message><source>Read the curve and the map</source><translation>Lire la courbe et la carte</translation></message>
+    <message><source>Night shows the object&#x27;s height over a complete local night. Blue intervals meet the selected height and darkness thresholds. Drag the time slider or click the curve; Horizon and World use the same instant. The map uses a regional 6° grid; clicking it preserves UTC and chooses a new site with UTC as its initial time zone.</source><translation>Nuit montre la hauteur de l’objet sur une nuit locale entière. Les créneaux bleus respectent les seuils de hauteur et d’obscurité choisis. Déplacez le curseur horaire ou cliquez sur la courbe ; Horizon et Monde utilisent le même instant. La carte utilise une grille régionale de 6° ; un clic conserve l’instant UTC et choisit un nouveau lieu, initialement dans le fuseau UTC.</translation></message>
+    <message><source>Understand the limits</source><translation>Comprendre les limites</translation></message>
+    <message><source>A target above the horizon can still be too low or in a bright sky. Very dark is suggested for deep sky, twilight for the Moon and planets. The lunar readout gives illuminated fraction, height and angular distance from your target. No weather, seeing, obstructions, reservations or camera control are included. Coordinates and body centres use a flat geometric horizon without refraction.</source><translation>Une cible au-dessus de l’horizon peut être trop basse ou dans un ciel clair. Le seuil très sombre est proposé pour le ciel profond, le crépuscule pour la Lune et les planètes. Les informations lunaires donnent la fraction éclairée, la hauteur et la distance angulaire à la cible. La météo, la turbulence, les obstacles, les réservations et le pilotage de caméra ne sont pas inclus. Les calculs utilisent un horizon géométrique plat, sans réfraction, et le centre des astres.</translation></message>
+    <message><source>Names and favourite places</source><translation>Noms et lieux favoris</translation></message>
+    <message><source>OpenNGC is available offline for NGC, IC and Messier identifiers. Other fixed-object names can be searched using CDS Sesame; only the name is sent. City search uses Open-Meteo / GeoNames and sends only the typed city name. Advanced lets you enter exact site coordinates and save local favourites. For moving bodies, use the Moon or planet entries instead of manual fixed coordinates.</source><translation>OpenNGC est disponible sans connexion pour les numéros NGC, IC et Messier. Les autres objets fixes se recherchent par CDS Sesame ; seul le nom est envoyé. La recherche de ville utilise Open-Meteo / GeoNames et transmet seulement le nom saisi. Les options avancées permettent de saisir les coordonnées précises du lieu et de garder des favoris locaux. Pour les astres mobiles, choisissez la Lune ou la planète plutôt que des coordonnées fixes manuelles.</translation></message>
+    <message><source>Go to Observation</source><translation>Aller à Observation</translation></message>
     <message><source>Resources and temporary files</source><translation>Ressources et fichiers temporaires</translation></message>
     <message><source>Before stacking, review the memory estimate, safety budget, required temporary disk space and available space. Estimates use all selected lights on the full grid before cropping. Rejection reads bounded horizontal/vertical tiles: at most 64 MiB of float sample buffers, even with 500 exposures. Drizzle projection also accumulates in strips of at most 64 MiB. Outputs support up to 128 MP and 32,700 pixels per dimension. Scientific results and ordinary projection remain full images in memory. Metal finishing uses strips; CPU and advanced operations can require complete intermediates. Finishing checks the combined options and retained results before computation; an oversized request keeps the previous result. FITS and TIFF encode bounded blocks without a complete planar/file copy. WCS/SIP drizzle scans source rows for each strip to preserve curved footprints and can take longer. The memory model includes retained Deep sky images and native buffers, not an exact process measurement or other applications; budget is half physical RAM, capped at 8 GiB, with 2 GiB fallback. Disk uses 12 bytes per output pixel per exposure in ordinary stacking, 16 in mono/RGB drizzle and 24 in native Bayer, plus 256 MiB reserve. Filter groups run sequentially, so temporary projections are released between groups. Choose Temporary folder for a larger writable local disk; the preference stays on this computer, outside the project. Space is checked again by the engine; write or read failures stop the whole operation and keep the previous result. Private working files are removed on success, error and cancellation. Working data uses one anonymous or deleted-on-close archive per job; the operating system releases its contents if the process terminates. Automatic recovery remains limited to 4 GiB and 64 image references; disable maps or split filter groups when the planned results exceed these limits.</source><translation>Avant d’empiler, vérifiez la mémoire estimée, le budget et l’espace temporaire nécessaire/libre. Le rejet et la projection drizzle utilisent des bandes de 64 Mio au maximum. Les sorties acceptent jusqu’à 128 MP et 32 700 pixels par dimension. Les résultats scientifiques et la projection ordinaire restent des images complètes en mémoire. La finition Metal utilise des bandes ; les traitements avancés et certains calculs CPU ont besoin d’images intermédiaires complètes. Les combinaisons de réglages dépassant le budget sont refusées avant le calcul, en conservant le résultat précédent. FITS et TIFF sont encodés par blocs, sans copie complète supplémentaire. Le drizzle WCS/SIP parcourt les lignes source pour chaque bande afin de conserver les empreintes courbes et peut être plus lent. Le budget mémoire est la moitié de la RAM, plafonné à 8 Gio (2 Gio si inconnue), et inclut les résultats Ciel profond conservés : ce n’est pas une mesure exacte du processus ni des autres applications. Le disque utilise 12 octets par pixel de sortie et par pose en empilement ordinaire, 16 en drizzle mono/RVB et 24 en Bayer natif, plus 256 Mio de réserve. Les groupes sont calculés successivement et libèrent leurs projections entre les groupes. Choisissez Dossier temporaire pour un disque local plus grand. L’espace est vérifié pendant le calcul ; une erreur arrête l’opération et conserve le résultat précédent. Les fichiers privés sont libérés à la réussite, à l’erreur, à l’annulation et à la fermeture du processus. La reprise automatique reste limitée à 4 Gio et 64 références d’images : désactivez les cartes ou séparez les groupes si nécessaire.</translation></message>
   </context>
@@ -9924,6 +10005,16 @@ RMS normalisée moyenne %5</translation>
   </context>
   <context>
     <name>GuideWorkspace</name>
+    <message><source>Observation</source><translation>Observation</translation></message>
+    <message><source>Find a suitable time before capturing</source><translation>Trouver un bon créneau avant la capture</translation></message>
+    <message><source>Observation is independent of Deep sky. It includes the Moon, planets and fixed catalogue objects. Choose your target, location and local date; start with a minimum height of 30°.</source><translation>Observation est indépendant de Ciel profond. Il inclut la Lune, les planètes et les objets fixes des catalogues. Choisissez la cible, le lieu et la date locale ; commencez avec une hauteur minimale de 30°.</translation></message>
+    <message><source>Read the curve and the map</source><translation>Lire la courbe et la carte</translation></message>
+    <message><source>Night shows the object&#x27;s height over a complete local night. Blue intervals meet the selected height and darkness thresholds. Drag the time slider or click the curve; Horizon and World use the same instant. The map uses a regional 6° grid; clicking it preserves UTC and chooses a new site with UTC as its initial time zone.</source><translation>Nuit montre la hauteur de l’objet sur une nuit locale entière. Les créneaux bleus respectent les seuils de hauteur et d’obscurité choisis. Déplacez le curseur horaire ou cliquez sur la courbe ; Horizon et Monde utilisent le même instant. La carte utilise une grille régionale de 6° ; un clic conserve l’instant UTC et choisit un nouveau lieu, initialement dans le fuseau UTC.</translation></message>
+    <message><source>Understand the limits</source><translation>Comprendre les limites</translation></message>
+    <message><source>A target above the horizon can still be too low or in a bright sky. Very dark is suggested for deep sky, twilight for the Moon and planets. The lunar readout gives illuminated fraction, height and angular distance from your target. No weather, seeing, obstructions, reservations or camera control are included. Coordinates and body centres use a flat geometric horizon without refraction.</source><translation>Une cible au-dessus de l’horizon peut être trop basse ou dans un ciel clair. Le seuil très sombre est proposé pour le ciel profond, le crépuscule pour la Lune et les planètes. Les informations lunaires donnent la fraction éclairée, la hauteur et la distance angulaire à la cible. La météo, la turbulence, les obstacles, les réservations et le pilotage de caméra ne sont pas inclus. Les calculs utilisent un horizon géométrique plat, sans réfraction, et le centre des astres.</translation></message>
+    <message><source>Names and favourite places</source><translation>Noms et lieux favoris</translation></message>
+    <message><source>OpenNGC is available offline for NGC, IC and Messier identifiers. Other fixed-object names can be searched using CDS Sesame; only the name is sent. City search uses Open-Meteo / GeoNames and sends only the typed city name. Advanced lets you enter exact site coordinates and save local favourites. For moving bodies, use the Moon or planet entries instead of manual fixed coordinates.</source><translation>OpenNGC est disponible sans connexion pour les numéros NGC, IC et Messier. Les autres objets fixes se recherchent par CDS Sesame ; seul le nom est envoyé. La recherche de ville utilise Open-Meteo / GeoNames et transmet seulement le nom saisi. Les options avancées permettent de saisir les coordonnées précises du lieu et de garder des favoris locaux. Pour les astres mobiles, choisissez la Lune ou la planète plutôt que des coordonnées fixes manuelles.</translation></message>
+    <message><source>Go to Observation</source><translation>Aller à Observation</translation></message>
     <message><source>Create calibration masters in batches</source><translation>Créer des masters de calibration par lots</translation></message>
     <message><source>In Master library, choose Create masters in batches. Review the groups made from selected raw FITS or native RAW calibration files. Recorded camera, dimensions, channels, Bayer pattern, binning, gain, offset, temperature, exposure and input normalization units must be equal; flat filters remain separate. Unknown metadata is kept distinct and needs explicit review. Choose which groups to save and an optional name prefix. For each flat, select a matching dark-flat or bias; a unique dark-flat is proposed first, but ambiguity requires your choice. Compatible library masters are available directly, without applying them to lights. Raw correction groups can be used without saving a separate master. Pedestal is subtracted once and each flat is normalized before robust averaging. Groups run sequentially, with MAD rejection from three sources onward and no multi-frame noise reduction from one source. The temporary folder and memory budget are checked; full images support up to 128 MP and 32,700 pixels per dimension, within the memory budget. SHA-256 checks source changes and records source/correction provenance. Each completed master is published atomically; cancellation or the first failure stops the batch and reports unfinished groups, while completed entries remain. Creation does not change the image result or apply masters: return to Find a master, search name/camera/filter/settings, optionally hide known mismatches, inspect diagnostics, then explicitly use a compatible master. Heterogeneous light configurations still require separate integrations; this batch tool creates calibration masters, not a complete automated light/HDR pipeline.</source><translation>Dans Bibliothèque de masters, choisissez Créer des masters par lots. Vérifiez les groupes issus des fichiers FITS ou RAW natifs de calibration sélectionnés. Les valeurs enregistrées doivent être identiques : caméra, dimensions, canaux, motif Bayer, binning, gain, offset, température, durée et unités de normalisation ; les filtres des flats restent séparés. Les informations inconnues restent distinctes et demandent une vérification explicite. Choisissez les groupes à enregistrer et un préfixe facultatif. Pour chaque flat, choisissez un dark-flat ou un bias adapté ; un dark-flat unique est proposé en premier, mais les ambiguïtés demandent votre choix. Les masters compatibles de la bibliothèque sont proposés directement, sans les appliquer aux poses. Un correctif brut peut être utilisé sans enregistrer un master séparé. Le piédestal est soustrait une fois, puis chaque flat est normalisé avant la moyenne robuste. Les groupes sont calculés successivement, avec rejet MAD à partir de trois sources ; une seule source ne réduit pas le bruit. Dossier temporaire et budget mémoire sont contrôlés ; les images complètes restent limitées à 128 MP. Le SHA-256 détecte les changements des sources et conserve leur provenance ainsi que celle des correctifs. Chaque master terminé est publié atomiquement ; une annulation ou la première erreur arrête le lot et signale les groupes inachevés, en conservant les masters terminés. La création ne modifie pas le résultat de l’image et n’applique pas les masters : revenez dans Trouver un master, recherchez par nom, caméra, filtre ou réglages, masquez éventuellement les incompatibilités, inspectez les diagnostics puis utilisez explicitement un master compatible. Les poses de configurations différentes nécessitent encore des intégrations séparées ; ce lot crée les masters de calibration et n’automatise pas tout le traitement des poses ni le HDR. Limite : 32 700 pixels par dimension, selon les budgets mémoire et de reprise.</translation></message>
   </context>
@@ -9978,6 +10069,16 @@ RMS normalisée moyenne %5</translation>
     </context>
     <context>
         <name>GuideWorkspace</name>
+    <message><source>Observation</source><translation>Observation</translation></message>
+    <message><source>Find a suitable time before capturing</source><translation>Trouver un bon créneau avant la capture</translation></message>
+    <message><source>Observation is independent of Deep sky. It includes the Moon, planets and fixed catalogue objects. Choose your target, location and local date; start with a minimum height of 30°.</source><translation>Observation est indépendant de Ciel profond. Il inclut la Lune, les planètes et les objets fixes des catalogues. Choisissez la cible, le lieu et la date locale ; commencez avec une hauteur minimale de 30°.</translation></message>
+    <message><source>Read the curve and the map</source><translation>Lire la courbe et la carte</translation></message>
+    <message><source>Night shows the object&#x27;s height over a complete local night. Blue intervals meet the selected height and darkness thresholds. Drag the time slider or click the curve; Horizon and World use the same instant. The map uses a regional 6° grid; clicking it preserves UTC and chooses a new site with UTC as its initial time zone.</source><translation>Nuit montre la hauteur de l’objet sur une nuit locale entière. Les créneaux bleus respectent les seuils de hauteur et d’obscurité choisis. Déplacez le curseur horaire ou cliquez sur la courbe ; Horizon et Monde utilisent le même instant. La carte utilise une grille régionale de 6° ; un clic conserve l’instant UTC et choisit un nouveau lieu, initialement dans le fuseau UTC.</translation></message>
+    <message><source>Understand the limits</source><translation>Comprendre les limites</translation></message>
+    <message><source>A target above the horizon can still be too low or in a bright sky. Very dark is suggested for deep sky, twilight for the Moon and planets. The lunar readout gives illuminated fraction, height and angular distance from your target. No weather, seeing, obstructions, reservations or camera control are included. Coordinates and body centres use a flat geometric horizon without refraction.</source><translation>Une cible au-dessus de l’horizon peut être trop basse ou dans un ciel clair. Le seuil très sombre est proposé pour le ciel profond, le crépuscule pour la Lune et les planètes. Les informations lunaires donnent la fraction éclairée, la hauteur et la distance angulaire à la cible. La météo, la turbulence, les obstacles, les réservations et le pilotage de caméra ne sont pas inclus. Les calculs utilisent un horizon géométrique plat, sans réfraction, et le centre des astres.</translation></message>
+    <message><source>Names and favourite places</source><translation>Noms et lieux favoris</translation></message>
+    <message><source>OpenNGC is available offline for NGC, IC and Messier identifiers. Other fixed-object names can be searched using CDS Sesame; only the name is sent. City search uses Open-Meteo / GeoNames and sends only the typed city name. Advanced lets you enter exact site coordinates and save local favourites. For moving bodies, use the Moon or planet entries instead of manual fixed coordinates.</source><translation>OpenNGC est disponible sans connexion pour les numéros NGC, IC et Messier. Les autres objets fixes se recherchent par CDS Sesame ; seul le nom est envoyé. La recherche de ville utilise Open-Meteo / GeoNames et transmet seulement le nom saisi. Les options avancées permettent de saisir les coordonnées précises du lieu et de garder des favoris locaux. Pour les astres mobiles, choisissez la Lune ou la planète plutôt que des coordonnées fixes manuelles.</translation></message>
+    <message><source>Go to Observation</source><translation>Aller à Observation</translation></message>
         <message><source>Multifilter composition</source><translation>Composition multifiltre</translation></message>
         <message><source>In Finishing → Color, choose RGB, LRGB, HOO or SHO to assign integrated filters automatically. Missing or ambiguous filters are listed and prevent composition. Custom keeps manual channel assignment. Luminance contribution blends RGB brightness at 0% with aligned L brightness at 100%; it does not equalize exposure units or restore saturated detail. Click Compose image after changing the choices: until then, the previous composition remains displayed. Choices are saved in projects and recovery. Resolve WCS again for the composed image; PCC/SPCC applies to broadband RGB, not representative HOO/SHO palettes.</source><translation>Dans Finition → Couleur, choisissez RGB, LRGB, HOO ou SHO pour attribuer automatiquement les filtres empilés. Les filtres manquants ou ambigus sont indiqués et bloquent la composition. Personnalisée conserve le choix manuel de chaque canal. L’apport de luminance mélange la luminosité RGB à 0 % avec celle de L recalée à 100 % ; il n’égalise pas les unités d’exposition et ne restaure pas les détails saturés. Cliquez sur Composer l’image après modification : la composition précédente reste affichée jusque-là. Les choix sont conservés dans les projets et la reprise. Résolvez de nouveau le WCS sur l’image composée ; PCC/SPCC s’applique au RGB à large bande, pas aux palettes de représentation HOO/SHO.</translation></message>
     </context>
@@ -9994,4 +10095,594 @@ RMS normalisée moyenne %5</translation>
         <message><source>Invalid channel image dimensions.</source><translation>Dimensions de couche invalides.</translation></message>
     </context>
 <context><name>ChannelComposition</name><message><source>View an integrated filter</source><translation>Voir un filtre empilé</translation></message><message><source>Display an individual filter integration for inspection or finishing. Its original data is preserved. Compose image returns to a calculated color composition using the selected palette.</source><translation>Affichez l’empilement d’un filtre pour l’inspecter ou le retoucher. Ses données originales sont conservées. Composer l’image recalcule une composition couleur avec la palette choisie.</translation></message></context>
+
+<context>
+    <name>ObservationWorkspace</name>
+    <message><source>%1 results · choose an object</source><translation>%1 résultats · choisir un objet</translation></message>
+    <message><source>Open the list to choose a suggestion or a search result. The selected object appears above the curve.</source><translation>Ouvrez la liste pour choisir une suggestion ou un résultat de recherche. L’objet choisi apparaît au-dessus de la courbe.</translation></message>
+    <message><source>Another city…</source><translation>Autre ville…</translation></message>
+    <message><source>Another city</source><translation>Autre ville</translation></message>
+    <message><source>Enter a city name, optionally followed by its country. Searching sends only this text to Open-Meteo / GeoNames. No weather is requested.</source><translation>Saisissez une ville, éventuellement suivie de son pays. La recherche envoie seulement ce texte à Open-Meteo / GeoNames. Aucune météo n’est demandée.</translation></message>
+    <message><source>Find this city online</source><translation>Rechercher cette ville en ligne</translation></message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="39"/>
+        <source>Prepare an observation</source>
+        <translation>Préparer une observation</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="40"/>
+        <source>Choose an object, a place and a night. Explore when it is high enough in the sky.</source>
+        <translation>Choisissez un objet, un lieu et une nuit. Découvrez quand il est assez haut dans le ciel.</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="42"/>
+        <source>Start with the suggestions or type a name, such as Moon, Jupiter, M42 or NGC 7000. Then choose your location and date. Blue intervals satisfy the height and darkness limits. They do not predict weather or guarantee an observation.</source>
+        <translation>Choisissez une suggestion ou saisissez un nom : Lune, Jupiter, M42 ou NGC 7000. Choisissez ensuite le lieu et la date. Les créneaux bleus respectent les seuils de hauteur et d’obscurité. Ils ne prédisent pas la météo et ne garantissent pas une observation.</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="57"/>
+        <source>Custom location</source>
+        <translation>Lieu personnalisé</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="63"/>
+        <source>Height above the horizon</source>
+        <translation>Hauteur au-dessus de l’horizon</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="63"/>
+        <source>0° is the horizon; 90° is directly overhead. A higher object usually crosses less atmosphere. Buildings and mountains are not included.</source>
+        <translation>0° correspond à l’horizon ; 90° au point juste au-dessus de vous. Un objet plus haut traverse généralement moins d’atmosphère. Les bâtiments et les montagnes ne sont pas pris en compte.</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="67"/>
+        <source>Direction</source>
+        <translation>Direction</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="67"/>
+        <source>Azimuth is measured clockwise from north: north 0°, east 90°, south 180°, west 270°.</source>
+        <translation>L’azimut indique la direction, mesurée depuis le nord dans le sens des aiguilles d’une montre : nord 0°, est 90°, sud 180°, ouest 270°.</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="74"/>
+        <source>Night</source>
+        <translation>Nuit</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="74"/>
+        <source>Horizon</source>
+        <translation>Horizon</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="74"/>
+        <source>World</source>
+        <translation>Monde</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="75"/>
+        <source>Selected view</source>
+        <translation>Vue sélectionnée</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="85"/>
+        <source>World visibility map at the selected UTC instant</source>
+        <translation>Carte mondiale de visibilité à l’instant UTC choisi</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="85"/>
+        <source>Object&apos;s trajectory above the horizon</source>
+        <translation>Trajectoire de l’objet au-dessus de l’horizon</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="85"/>
+        <source>Height curve over the chosen night, with eligible intervals in blue</source>
+        <translation>Courbe de hauteur pendant la nuit choisie, avec les créneaux admissibles en bleu</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="89"/>
+        <source>Dark: below horizon · amber: too low · grey: sky too bright · blue: selected limits met. Regional grid: 6°. Click to choose a place; its time zone is set to UTC.</source>
+        <translation>Sombre : sous l’horizon · ambre : trop bas · gris : ciel trop clair · bleu : seuils respectés. Grille régionale de 6°. Cliquez pour choisir un lieu ; son fuseau est réglé sur UTC.</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="94"/>
+        <source>Explore the night</source>
+        <translation>Parcourir la nuit</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="95"/>
+        <source>Curve times are local. Each date covers noon to the following noon, including clock changes.</source>
+        <translation>Les heures de la courbe sont locales. Chaque date couvre midi jusqu’au midi suivant, en tenant compte des changements d’heure.</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="100"/>
+        <source>Observation windows</source>
+        <translation>Créneaux d’observation</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="101"/>
+        <source>No period is dark enough for the selected limit. For the Moon or a planet, try a brighter-sky limit.</source>
+        <translation>Aucune période n’est assez sombre pour le seuil choisi. Pour la Lune ou une planète, essayez un seuil acceptant un ciel plus clair.</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="101"/>
+        <source>No window with these limits. Try a different date, location or minimum height.</source>
+        <translation>Aucun créneau avec ces seuils. Essayez une autre date, un autre lieu ou une hauteur minimale différente.</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="103"/>
+        <source> · %1 min</source>
+        <translation> · %1 min</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="105"/>
+        <source>Highest in this period: %1 · %2°</source>
+        <translation>Au plus haut sur cette période : %1 · %2°</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="108"/>
+        <source>There is no astronomical night during this period (Sun never below −18°).</source>
+        <translation>Il n’y a pas de nuit astronomique sur cette période : le Soleil ne descend jamais sous −18°.</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="109"/>
+        <source>Moon: %1% illuminated · height %2°</source>
+        <translation>Lune : %1 % éclairée · hauteur %2°</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="109"/>
+        <source>Moon: %1% illuminated · height %2° · %3° from the target</source>
+        <translation>Lune : %1 % éclairée · hauteur %2° · à %3° de la cible</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="110"/>
+        <source>Geometric visibility only. Check weather, obstacles and telescope availability separately.</source>
+        <translation>Visibilité géométrique uniquement. Vérifiez séparément la météo, les obstacles et la disponibilité du télescope.</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="121"/>
+        <source>1 · Which object?</source>
+        <translation>1 · Quel objet ?</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="121"/>
+        <source>Search the offline OpenNGC catalogue by NGC, IC or Messier number. Moon and planets use date-dependent positions. CDS Sesame can resolve more names online; only the name is sent.</source>
+        <translation>Recherchez un numéro NGC, IC ou Messier dans le catalogue local OpenNGC. Les positions de la Lune et des planètes dépendent de la date. CDS Sesame permet de rechercher d’autres noms en ligne ; seul le nom est envoyé.</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="122"/>
+        <source>Name or catalogue number</source>
+        <translation>Nom ou numéro de catalogue</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="122"/>
+        <source>Examples: Moon, Jupiter, M31, M42, NGC 7000. Start typing to filter the local catalogue.</source>
+        <translation>Exemples : Lune, Jupiter, M31, M42, NGC 7000. Commencez à écrire pour filtrer le catalogue local.</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="129"/>
+        <source>Searching…</source>
+        <translation>Recherche…</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="129"/>
+        <source>Search other names online</source>
+        <translation>Rechercher d’autres noms en ligne</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="131"/>
+        <source>2 · From where?</source>
+        <translation>2 · Depuis quel lieu ?</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="131"/>
+        <source>Choose a city or enter coordinates in Advanced. City positions are approximate city centres, at sea level. Save your actual observing site as a favourite.</source>
+        <translation>Choisissez une ville ou saisissez les coordonnées dans les options avancées. Les villes correspondent approximativement à leur centre, au niveau de la mer. Enregistrez votre lieu d’observation précis en favori.</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="132"/>
+        <source>The city&apos;s time zone follows local daylight-saving rules. A map click uses UTC until you choose a time zone in Advanced.</source>
+        <translation>Le fuseau de la ville applique les changements d’heure locaux. Un clic sur la carte utilise UTC jusqu’au choix d’un fuseau dans les options avancées.</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="133"/>
+        <source>3 · Which night?</source>
+        <translation>3 · Quelle nuit ?</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="133"/>
+        <source>The date is local to the selected time zone. The curve spans noon to the next noon, so the complete night stays together.</source>
+        <translation>La date est locale au fuseau choisi. La courbe va de midi au midi suivant pour garder la nuit entière.</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="134"/>
+        <source>Local date · YYYY-MM-DD</source>
+        <translation>Date locale · AAAA-MM-JJ</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="134"/>
+        <source>For example 2026-10-11. Dates from 1900 to 2100 are supported.</source>
+        <translation>Par exemple 2026-10-11. Les dates de 1900 à 2100 sont acceptées.</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="135"/>
+        <source>Previous day</source>
+        <translation>Jour précédent</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="135"/>
+        <source>Next day</source>
+        <translation>Jour suivant</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="136"/>
+        <source>Minimum height · degrees</source>
+        <translation>Hauteur minimale · degrés</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="136"/>
+        <source>30° is a useful starting point. Higher limits reduce the available time but avoid the thickest atmosphere near the horizon. Lowering this limit cannot remove buildings or mountains.</source>
+        <translation>30° est un bon point de départ. Un seuil plus haut réduit le temps disponible, mais évite l’atmosphère plus épaisse près de l’horizon. Abaisser ce seuil ne supprime pas les bâtiments ni les montagnes.</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="137"/>
+        <source>Very dark · Sun below −18°</source>
+        <translation>Très sombre · Soleil sous −18°</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="137"/>
+        <source>Dark · Sun below −12°</source>
+        <translation>Sombre · Soleil sous −12°</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="137"/>
+        <source>Twilight · Sun below −6°</source>
+        <translation>Crépuscule · Soleil sous −6°</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="137"/>
+        <source>Any sky brightness</source>
+        <translation>Toute luminosité du ciel</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="137"/>
+        <source>Deep-sky objects benefit from a very dark sky. The Moon and bright planets can be observed in twilight, so that limit is suggested automatically. Any sky brightness also includes daytime; exercise particular care with objects near the Sun.</source>
+        <translation>Le ciel profond bénéficie d’un ciel très sombre. La Lune et les planètes brillantes peuvent s’observer au crépuscule : ce seuil est proposé automatiquement. « Toute luminosité » inclut aussi le jour ; soyez particulièrement prudent avec les objets proches du Soleil.</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="138"/>
+        <source>The displayed results keep the previous valid choices.</source>
+        <translation>Les résultats affichés conservent les derniers choix valides.</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="140"/>
+        <source>Advanced · coordinates &amp; sources</source>
+        <translation>Options avancées · coordonnées et sources</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="143"/>
+        <source>Set an exact observing site or J2000 celestial coordinates. The module calculates body centres without atmospheric refraction, terrain or a local horizon mask.</source>
+        <translation>Définissez un lieu précis ou des coordonnées célestes J2000. Les calculs portent sur le centre des objets, sans réfraction atmosphérique, relief ni masque d’horizon local.</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="144"/>
+        <source>Latitude · degrees</source>
+        <translation>Latitude · degrés</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="144"/>
+        <source>North is positive; south is negative. Range −90 to +90.</source>
+        <translation>Le nord est positif, le sud négatif. De −90 à +90.</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="145"/>
+        <source>Longitude · degrees</source>
+        <translation>Longitude · degrés</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="145"/>
+        <source>East is positive; west is negative. Range −180 to +180.</source>
+        <translation>L’est est positif, l’ouest négatif. De −180 à +180.</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="146"/>
+        <source>Elevation · metres</source>
+        <translation>Altitude du lieu · mètres</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="146"/>
+        <source>Height above sea level, −500 to 10000 metres. Terrain and horizon dip are not modelled.</source>
+        <translation>Hauteur au-dessus du niveau de la mer, de −500 à 10 000 mètres. Le relief et l’abaissement de l’horizon ne sont pas modélisés.</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="147"/>
+        <source>Time zone</source>
+        <translation>Fuseau horaire</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="147"/>
+        <source>Use an IANA name such as Europe/Paris, America/Santiago or UTC. Clock changes are applied automatically.</source>
+        <translation>Utilisez un nom IANA comme Europe/Paris, America/Santiago ou UTC. Les changements d’heure sont appliqués automatiquement.</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="148"/>
+        <source>Favourite site name</source>
+        <translation>Nom du lieu favori</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="148"/>
+        <source>Give your observing site a name. Coordinates and time zone are kept on this computer.</source>
+        <translation>Donnez un nom à votre lieu d’observation. Ses coordonnées et son fuseau restent sur cet ordinateur.</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="149"/>
+        <source>Save this site</source>
+        <translation>Enregistrer ce lieu</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="150"/>
+        <source>Remove selected favourite</source>
+        <translation>Retirer le favori sélectionné</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="151"/>
+        <source>Right ascension J2000 · degrees</source>
+        <translation>Ascension droite J2000 · degrés</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="151"/>
+        <source>0 to less than 360 degrees. If your catalogue gives hours, multiply by 15.</source>
+        <translation>De 0 à moins de 360 degrés. Si le catalogue donne des heures, multipliez-les par 15.</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="152"/>
+        <source>Declination J2000 · degrees</source>
+        <translation>Déclinaison J2000 · degrés</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="152"/>
+        <source>−90 to +90 degrees. Manual coordinates are for fixed objects, not the Moon or planets.</source>
+        <translation>De −90 à +90 degrés. La saisie manuelle concerne les objets fixes, pas la Lune ni les planètes.</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="153"/>
+        <source>Use these celestial coordinates</source>
+        <translation>Utiliser ces coordonnées célestes</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="154"/>
+        <source>Source: %1</source>
+        <translation>Source : %1</translation>
+    </message>
+    <message>
+        <location filename="../qml/ObservationWorkspace.qml" line="155"/>
+        <source>OpenNGC: %1 objects with coordinates, plus Solar System targets. Positions include precession and nutation. Fixed objects omit proper motion and annual aberration. Astronomy Engine models moving bodies; planning precision is about one arcminute, not telescope pointing accuracy. Windows use one-minute bracketing; boundaries are refined to one second and displayed to the minute.</source>
+        <translation>OpenNGC : %1 objets avec coordonnées, plus les cibles du Système solaire. Les positions incluent la précession et la nutation. Les objets fixes omettent le mouvement propre et l’aberration annuelle. Astronomy Engine modélise les astres mobiles ; la précision de préparation est de l’ordre d’une minute d’arc, pas celle d’un pointage de télescope. Les créneaux sont recherchés par pas d’une minute, leurs limites affinées à la seconde et affichées à la minute.</translation>
+    </message>
+</context>
+<context>
+    <name>astro::app::ObservationController</name>
+    <message><source>Searching cities…</source><translation>Recherche de villes…</translation></message>
+    <message><source>City search unavailable. Choose a preset or enter coordinates in Advanced.</source><translation>Recherche de ville indisponible. Choisissez une ville proposée ou saisissez les coordonnées dans les options avancées.</translation></message>
+    <message><source>No matching city. Try the city name followed by its country.</source><translation>Aucune ville trouvée. Essayez le nom de la ville suivi du pays.</translation></message>
+    <message><source>Choose the matching city below.</source><translation>Choisissez la ville correspondante ci-dessous.</translation></message>
+    <message><source>Invalid observation site or date (1900–2100).</source><translation>Lieu ou date invalide (1900–2100).</translation></message>
+    <message><source>Invalid J2000 coordinates.</source><translation>Coordonnées J2000 invalides.</translation></message>
+    <message><source>Cannot calculate this object&#x27;s position.</source><translation>Impossible de calculer la position de cet objet.</translation></message>
+    <message><source>Cannot calculate lunar phase.</source><translation>Impossible de calculer la phase lunaire.</translation></message>
+    <message><source>Enter a valid date (1900–2100) and time zone.</source><translation>Saisissez une date valide (1900–2100) et un fuseau horaire valide.</translation></message>
+    <message><source>Enter valid numerical values.</source><translation>Saisissez des valeurs numériques valides.</translation></message>
+    <message><source>Invalid visibility thresholds.</source><translation>Seuils de visibilité invalides.</translation></message>
+    <message><source>Invalid observation period.</source><translation>Période d’observation invalide.</translation></message>
+    <message>
+        <location filename="../src/ObservationController.cpp" line="22"/>
+        <source>Paris</source>
+        <translation>Paris</translation>
+    </message>
+    <message>
+        <location filename="../src/ObservationController.cpp" line="22"/>
+        <source>Lyon</source>
+        <translation>Lyon</translation>
+    </message>
+    <message>
+        <location filename="../src/ObservationController.cpp" line="22"/>
+        <source>Marseille</source>
+        <translation>Marseille</translation>
+    </message>
+    <message>
+        <location filename="../src/ObservationController.cpp" line="22"/>
+        <source>La Serena · Chile</source>
+        <translation>La Serena · Chili</translation>
+    </message>
+    <message>
+        <location filename="../src/ObservationController.cpp" line="22"/>
+        <source>Sydney</source>
+        <translation>Sydney</translation>
+    </message>
+    <message>
+        <location filename="../src/ObservationController.cpp" line="22"/>
+        <source>Tokyo</source>
+        <translation>Tokyo</translation>
+    </message>
+    <message>
+        <location filename="../src/ObservationController.cpp" line="22"/>
+        <source>New York</source>
+        <translation>New York</translation>
+    </message>
+    <message>
+        <location filename="../src/ObservationController.cpp" line="22"/>
+        <source>Tromsø</source>
+        <translation>Tromsø</translation>
+    </message>
+    <message>
+        <location filename="../src/ObservationController.cpp" line="22"/>
+        <source>Cape Town</source>
+        <translation>Le Cap</translation>
+    </message>
+    <message>
+        <location filename="../src/ObservationController.cpp" line="26"/>
+        <location filename="../src/ObservationController.cpp" line="56"/>
+        <source>Manual coordinates</source>
+        <translation>Coordonnées manuelles</translation>
+    </message>
+    <message>
+        <location filename="../src/ObservationController.cpp" line="26"/>
+        <location filename="../src/ObservationController.cpp" line="56"/>
+        <source>Manual J2000 coordinates</source>
+        <translation>Coordonnées J2000 manuelles</translation>
+    </message>
+    <message>
+        <location filename="../src/ObservationController.cpp" line="31"/>
+        <source>Moon</source>
+        <translation>Lune</translation>
+    </message>
+    <message>
+        <location filename="../src/ObservationController.cpp" line="31"/>
+        <source>Mercury</source>
+        <translation>Mercure</translation>
+    </message>
+    <message>
+        <location filename="../src/ObservationController.cpp" line="31"/>
+        <source>Venus</source>
+        <translation>Vénus</translation>
+    </message>
+    <message>
+        <location filename="../src/ObservationController.cpp" line="31"/>
+        <source>Mars</source>
+        <translation>Mars</translation>
+    </message>
+    <message>
+        <location filename="../src/ObservationController.cpp" line="31"/>
+        <source>Jupiter</source>
+        <translation>Jupiter</translation>
+    </message>
+    <message>
+        <location filename="../src/ObservationController.cpp" line="31"/>
+        <source>Saturn</source>
+        <translation>Saturne</translation>
+    </message>
+    <message>
+        <location filename="../src/ObservationController.cpp" line="31"/>
+        <source>Uranus</source>
+        <translation>Uranus</translation>
+    </message>
+    <message>
+        <location filename="../src/ObservationController.cpp" line="31"/>
+        <source>Neptune</source>
+        <translation>Neptune</translation>
+    </message>
+    <message>
+        <location filename="../src/ObservationController.cpp" line="32"/>
+        <source> · Orion Nebula</source>
+        <translation> · Nébuleuse d’Orion</translation>
+    </message>
+    <message>
+        <location filename="../src/ObservationController.cpp" line="32"/>
+        <source> · Andromeda Galaxy</source>
+        <translation> · Galaxie d’Andromède</translation>
+    </message>
+    <message>
+        <location filename="../src/ObservationController.cpp" line="32"/>
+        <source> · Pleiades</source>
+        <translation> · Pléiades</translation>
+    </message>
+    <message>
+        <location filename="../src/ObservationController.cpp" line="40"/>
+        <source>80 results shown. Refine the name.</source>
+        <translation>80 résultats affichés. Précisez le nom.</translation>
+    </message>
+    <message>
+        <location filename="../src/ObservationController.cpp" line="43"/>
+        <source>Searching CDS Sesame…</source>
+        <translation>Recherche dans CDS Sesame…</translation>
+    </message>
+    <message>
+        <location filename="../src/ObservationController.cpp" line="44"/>
+        <source>Object found. Select it below.</source>
+        <translation>Objet trouvé. Sélectionnez-le ci-dessous.</translation>
+    </message>
+    <message>
+        <location filename="../src/ObservationController.cpp" line="44"/>
+        <source>Search unavailable or name not found. Try a catalogue identifier, or enter coordinates in Advanced.</source>
+        <translation>Recherche indisponible ou nom introuvable. Essayez un numéro de catalogue ou saisissez les coordonnées dans les options avancées.</translation>
+    </message>
+    <message>
+        <location filename="../src/ObservationController.cpp" line="61"/>
+        <source>Rise (centre)</source>
+        <translation>Lever du centre</translation>
+    </message>
+    <message>
+        <location filename="../src/ObservationController.cpp" line="61"/>
+        <source>Set (centre)</source>
+        <translation>Coucher du centre</translation>
+    </message>
+    <message>
+        <location filename="../src/ObservationController.cpp" line="65"/>
+        <source>Above the horizon throughout this period</source>
+        <translation>Au-dessus de l’horizon sur toute cette période</translation>
+    </message>
+    <message>
+        <location filename="../src/ObservationController.cpp" line="65"/>
+        <source>Below the horizon throughout this period</source>
+        <translation>Sous l’horizon sur toute cette période</translation>
+    </message>
+    <message>
+        <location filename="../src/ObservationController.cpp" line="65"/>
+        <source>Rises and sets during this period</source>
+        <translation>Franchit l’horizon pendant cette période</translation>
+    </message>
+    <message>
+        <location filename="../src/ObservationController.cpp" line="72"/>
+        <source>Below the horizon</source>
+        <translation>Sous l’horizon</translation>
+    </message>
+    <message>
+        <location filename="../src/ObservationController.cpp" line="72"/>
+        <source>Too low</source>
+        <translation>Trop bas</translation>
+    </message>
+    <message>
+        <location filename="../src/ObservationController.cpp" line="72"/>
+        <source>Sky too bright for the chosen limit</source>
+        <translation>Ciel trop clair pour le seuil choisi</translation>
+    </message>
+    <message>
+        <location filename="../src/ObservationController.cpp" line="72"/>
+        <source>Above the threshold, in the chosen darkness</source>
+        <translation>Assez haut, avec l’obscurité choisie</translation>
+    </message>
+    <message>
+        <location filename="../src/ObservationController.cpp" line="77"/>
+        <source>Map position</source>
+        <translation>Position sur la carte</translation>
+    </message>
+</context>
+<context>
+    <name>astro::app::ObservationPlot</name>
+    <message>
+        <location filename="../src/ObservationPlot.cpp" line="25"/>
+        <source>Click a location · UTC is kept for map positions</source>
+        <translation>Cliquez sur un lieu · les positions sur la carte utilisent UTC</translation>
+    </message>
+    <message>
+        <location filename="../src/ObservationPlot.cpp" line="31"/>
+        <source>North</source>
+        <translation>Nord</translation>
+    </message>
+    <message>
+        <location filename="../src/ObservationPlot.cpp" line="31"/>
+        <source>South</source>
+        <translation>Sud</translation>
+    </message>
+    <message>
+        <location filename="../src/ObservationPlot.cpp" line="31"/>
+        <source>West</source>
+        <translation>Ouest</translation>
+    </message>
+    <message>
+        <location filename="../src/ObservationPlot.cpp" line="31"/>
+        <source>East</source>
+        <translation>Est</translation>
+    </message>
+</context>
 </TS>

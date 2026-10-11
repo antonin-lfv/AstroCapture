@@ -147,7 +147,7 @@ ApplicationWindow {
             processingWorkspace.restoreSessionState(state.processing || {});
             deepSkyWorkspace.restoreSessionState(state.deepSky || {});
             mosaicWorkspace.restoreSessionState(state.mosaic || {});
-            window.currentTab=["home","processing","deepSky","mosaic","history","guide","settings"].indexOf(state.tab)>=0?state.tab:"home";
+            window.currentTab=["home","processing","deepSky","mosaic","history","observation","guide","settings"].indexOf(state.tab)>=0?state.tab:"home";
         }
         onSaveFinished: success => {
             if(!window.quitAfterSessionSave)return;
@@ -160,7 +160,7 @@ ApplicationWindow {
     readonly property string activityText: previewController.recording?qsTr("Recording…"):deepSkyController.busy?qsTr("Deep sky · %1%").arg(deepSkyController.progress):mosaicController.busy?qsTr("Mosaic · processing…"):processingController.busy && !processingController.seeking?qsTr("Processing · %1%").arg(processingController.progress):""
     function navigate(tab) {
         if(sharedCaptionEditor.dialogOpen)return;
-        if(previewController.recording && ["home","capture","guide"].indexOf(tab)<0)return;
+        if(previewController.recording && ["home","capture","observation","guide"].indexOf(tab)<0)return;
         currentTab=tab;
     }
     header: StudioNavigation {
@@ -240,6 +240,12 @@ ApplicationWindow {
         }
     }
     Connections { target: mosaicController; function onImageExported(url) { appLibrary.recordExport(url); } }
+    ObservationController { id: observationController; objectName: "observationController" }
+    ObservationWorkspace {
+        anchors.fill: parent
+        visible: window.currentTab === "observation"
+        controller: observationController
+    }
     GuideWorkspace {
         anchors.fill: parent
         visible: window.currentTab === "guide"

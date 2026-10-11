@@ -8,7 +8,46 @@
 
 AstroCapture réunit la capture vidéo et FITS, le traitement planétaire, la calibration et l’empilement du ciel profond, les transformations de finition, les ondelettes et les mosaïques. Son studio conserve les espaces de travail entre les onglets, avec une interface en français et en anglais. Les fichiers et les traitements restent sur votre ordinateur. Les aides au survol des réglages du ciel profond décrivent le calcul appliqué, son effet visuel et ses limites : seuils et écrêtage, courbes d’étirement, modèle polynomial du fond, rejet robuste, saturation et lissage.
 
-[Capture](#capture) · [Ciel profond](#ciel-profond) · [Traitement](#traitement) · [Mosaïque](#mosaïque) · [Historique](#historique) · [Guide](#guide-intégré)
+[Capture](#capture) · [Ciel profond](#ciel-profond) · [Traitement](#traitement) · [Mosaïque](#mosaïque) · [Historique](#historique) · [Observation](#observation) · [Guide](#guide-intégré)
+
+## Observation
+
+L’onglet **Observation**, placé avant **Guide**, prépare une observation de la Lune,
+des planètes ou d’un objet fixe. Il est indépendant de **Ciel profond**.
+
+1. Choisissez une suggestion ou recherchez un nom / numéro NGC, IC ou Messier.
+2. Choisissez un lieu proposé ou recherchez une ville en ligne. Ses coordonnées
+   et son fuseau sont renseignés ; les options avancées permettent d’enregistrer
+   votre site précis en favori local.
+3. Choisissez la date locale et une hauteur minimale. **30°** est un point de départ.
+   Le ciel très sombre est proposé pour le ciel profond, le crépuscule pour la Lune
+   et les planètes. Un seuil sans contrainte d’obscurité permet aussi d’explorer le jour.
+
+**Nuit**, **Horizon** et **Monde** suivent le même curseur horaire. Les créneaux bleus
+respectent les seuils de hauteur et d’obscurité. Les heures locales et UTC sont
+affichées avec la date ; la période va de midi au midi suivant et peut durer 23 ou
+25 heures lors d’un changement d’heure. Le module indique aussi le lever/coucher
+du centre, le point le plus haut dans cette période, la fraction éclairée de la Lune
+et sa distance angulaire à la cible.
+
+La carte est une vue régionale sur une grille de **6°**, calculée au même instant UTC.
+Un clic choisit un lieu et conserve cet instant, avec le fuseau initial **UTC** :
+choisissez le fuseau local dans les options avancées si nécessaire.
+
+Le catalogue [OpenNGC](https://github.com/mattiaverga/OpenNGC) est inclus sans connexion.
+Les autres noms d’objets fixes sont recherchés par [CDS Sesame](https://cds.unistra.fr/doc/sesame.htx),
+en envoyant uniquement le nom. La recherche de ville envoie seulement le texte saisi
+à [Open-Meteo / GeoNames](https://open-meteo.com/en/docs/geocoding-api).
+Les éphémérides de la Lune et des planètes sont calculées localement avec
+[Astronomy Engine](https://github.com/cosinekitty/astronomy).
+
+Les calculs utilisent un horizon géométrique plat et le centre des astres, sans
+réfraction ni masque des obstacles. Les coordonnées fixes J2000 incluent précession
+et nutation, mais pas le mouvement propre ni l’aberration annuelle. Ce module vise
+la préparation à la minute d’arc, sans garantir une précision de pointage. Les créneaux
+sont recherchés par pas d’une minute et leurs limites affinées à la seconde ; de très
+brèves fenêtres tangentes peuvent échapper au pas de recherche. **La météo, la
+turbulence, les réservations et le pilotage d’acquisition ne sont pas inclus.**
 
 ## Installer sur macOS
 

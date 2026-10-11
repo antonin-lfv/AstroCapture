@@ -14,7 +14,7 @@ Rectangle {
         {key:"home",label:qsTr("Home")}, {key:"capture",label:qsTr("Capture")},
         {key:"processing",label:qsTr("Processing")}, {key:"deepSky",label:qsTr("Deep sky")},
         {key:"mosaic",label:qsTr("Mosaic")}, {key:"history",label:qsTr("History")},
-        {key:"guide",label:qsTr("Guide")}
+        {key:"observation",label:qsTr("Observation")}, {key:"guide",label:qsTr("Guide")}
     ]
     implicitHeight: 44
     color: Atelier.toolbar
@@ -29,7 +29,7 @@ Rectangle {
                 required property var modelData
                 objectName: "studioTab_"+modelData.key
                 readonly property bool selected: root.currentTab===modelData.key
-                enabled: !root.recording || ["home","capture","guide"].indexOf(modelData.key)>=0
+                enabled: !root.recording || ["home","capture","observation","guide"].indexOf(modelData.key)>=0
                 Accessible.name: modelData.label
                 Accessible.role: Accessible.PageTab
                 Accessible.description: selected?qsTr("Current workspace"):""

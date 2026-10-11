@@ -1,0 +1,16 @@
+Observation uses Astronomy Engine by Don Cross (MIT), OpenNGC by Mattia Verga
+and contributors (CC BY-SA 4.0), and Natural Earth map geometry (public domain).
+Their licenses are included alongside this notice.
+
+OpenNGC: https://github.com/mattiaverga/OpenNGC
+This research has made use of the NASA/IPAC Extragalactic Database (NED), operated
+by the Jet Propulsion Laboratory, California Institute of Technology, under
+contract with the National Aeronautics and Space Administration; the HyperLEDA
+database (http://leda.univ-lyon1.fr); the SIMBAD database, operated at CDS,
+Strasbourg, France; HEASARC catalogues; and Harold Corwin's NGC/IC positions/notes.
+The unmodified OpenNGC catalogue data remains available under CC BY-SA 4.0.
+
+Natural Earth: https://www.naturalearthdata.com/about/terms-of-use/
+Astronomy Engine: https://github.com/cosinekitty/astronomy
+Optional city lookup: GeoNames through Open-Meteo,
+https://open-meteo.com/en/docs/geocoding-api (non-commercial service for personal use).

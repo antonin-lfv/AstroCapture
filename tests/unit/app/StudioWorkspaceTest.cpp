@@ -94,6 +94,8 @@ int main(int argc,char** argv) {
     ASTRO_TEST_CHECK(item(nav,"studioTab_home")->isEnabled());
     ASTRO_TEST_CHECK(item(nav,"studioTab_capture")->isEnabled());
     ASTRO_TEST_CHECK(item(nav,"studioTab_guide")->isEnabled());
+    ASTRO_TEST_CHECK(item(nav,"studioTab_observation")->isEnabled());
+    ASTRO_TEST_CHECK(item(nav,"studioTab_observation")->x()<item(nav,"studioTab_guide")->x());
     ASTRO_TEST_CHECK(!item(nav,"studioTab_processing")->isEnabled());
     ASTRO_TEST_CHECK(!item(nav,"studioSettings")->isEnabled());
     nav->setProperty("recording",false);nav->setSize({900,104});QCoreApplication::processEvents();

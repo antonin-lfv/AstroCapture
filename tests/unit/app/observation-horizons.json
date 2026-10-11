@@ -1,0 +1,62 @@
+[
+  {
+    "name": "Moon Paris",
+    "horizonsBody": 301,
+    "latitude": 48.8566,
+    "longitude": 2.3522,
+    "utc": "2026-10-11T22:00:00Z",
+    "azimuth": 303.832677457,
+    "altitude": -47.042941402,
+    "url": "https://ssd.jpl.nasa.gov/api/horizons.api?format=json&COMMAND=%27301%27&EPHEM_TYPE=%27OBSERVER%27&CENTER=%27coord%40399%27&COORD_TYPE=%27GEODETIC%27&SITE_COORD=%272.3522%2C48.8566%2C0%27&START_TIME=%272026-10-11+22%3A00%27&STOP_TIME=%272026-10-11+22%3A01%27&STEP_SIZE=%271+m%27&QUANTITIES=%274%27&APPARENT=%27AIRLESS%27&CSV_FORMAT=%27YES%27&EXTRA_PREC=%27YES%27",
+    "retrieved": "2026-10-11",
+    "reference": "NASA JPL Horizons, topocentric apparent airless, body centre, elevation 0 km"
+  },
+  {
+    "name": "Saturn Paris",
+    "horizonsBody": 699,
+    "latitude": 48.8566,
+    "longitude": 2.3522,
+    "utc": "2026-10-11T22:00:00Z",
+    "azimuth": 155.983957209,
+    "altitude": 40.40527527,
+    "url": "https://ssd.jpl.nasa.gov/api/horizons.api?format=json&COMMAND=%27699%27&EPHEM_TYPE=%27OBSERVER%27&CENTER=%27coord%40399%27&COORD_TYPE=%27GEODETIC%27&SITE_COORD=%272.3522%2C48.8566%2C0%27&START_TIME=%272026-10-11+22%3A00%27&STOP_TIME=%272026-10-11+22%3A01%27&STEP_SIZE=%271+m%27&QUANTITIES=%274%27&APPARENT=%27AIRLESS%27&CSV_FORMAT=%27YES%27&EXTRA_PREC=%27YES%27",
+    "retrieved": "2026-10-11",
+    "reference": "NASA JPL Horizons, topocentric apparent airless, body centre, elevation 0 km"
+  },
+  {
+    "name": "Jupiter Sydney",
+    "horizonsBody": 599,
+    "latitude": -33.8688,
+    "longitude": 151.2093,
+    "utc": "2026-12-12T14:00:00Z",
+    "azimuth": 65.80516653,
+    "altitude": 10.77726869,
+    "url": "https://ssd.jpl.nasa.gov/api/horizons.api?format=json&COMMAND=%27599%27&EPHEM_TYPE=%27OBSERVER%27&CENTER=%27coord%40399%27&COORD_TYPE=%27GEODETIC%27&SITE_COORD=%27151.2093%2C-33.8688%2C0%27&START_TIME=%272026-12-12+14%3A00%27&STOP_TIME=%272026-12-12+14%3A01%27&STEP_SIZE=%271+m%27&QUANTITIES=%274%27&APPARENT=%27AIRLESS%27&CSV_FORMAT=%27YES%27&EXTRA_PREC=%27YES%27",
+    "retrieved": "2026-10-11",
+    "reference": "NASA JPL Horizons, topocentric apparent airless, body centre, elevation 0 km"
+  },
+  {
+    "name": "Moon Chile",
+    "horizonsBody": 301,
+    "latitude": -29.9027,
+    "longitude": -71.2519,
+    "utc": "2026-10-11T04:00:00Z",
+    "azimuth": 196.823015524,
+    "altitude": -46.029231703,
+    "url": "https://ssd.jpl.nasa.gov/api/horizons.api?format=json&COMMAND=%27301%27&EPHEM_TYPE=%27OBSERVER%27&CENTER=%27coord%40399%27&COORD_TYPE=%27GEODETIC%27&SITE_COORD=%27-71.2519%2C-29.9027%2C0%27&START_TIME=%272026-10-11+04%3A00%27&STOP_TIME=%272026-10-11+04%3A01%27&STEP_SIZE=%271+m%27&QUANTITIES=%274%27&APPARENT=%27AIRLESS%27&CSV_FORMAT=%27YES%27&EXTRA_PREC=%27YES%27",
+    "retrieved": "2026-10-11",
+    "reference": "NASA JPL Horizons, topocentric apparent airless, body centre, elevation 0 km"
+  },
+  {
+    "name": "Moon polar",
+    "horizonsBody": 301,
+    "latitude": 89.5,
+    "longitude": 18.9553,
+    "utc": "2026-06-21T00:00:00Z",
+    "azimuth": 299.168960017,
+    "altitude": 1.922436495,
+    "url": "https://ssd.jpl.nasa.gov/api/horizons.api?format=json&COMMAND=%27301%27&EPHEM_TYPE=%27OBSERVER%27&CENTER=%27coord%40399%27&COORD_TYPE=%27GEODETIC%27&SITE_COORD=%2718.9553%2C89.5%2C0%27&START_TIME=%272026-06-21+00%3A00%27&STOP_TIME=%272026-06-21+00%3A01%27&STEP_SIZE=%271+m%27&QUANTITIES=%274%27&APPARENT=%27AIRLESS%27&CSV_FORMAT=%27YES%27&EXTRA_PREC=%27YES%27",
+    "retrieved": "2026-10-11",
+    "reference": "NASA JPL Horizons, topocentric apparent airless, body centre, elevation 0 km"
+  }
+]

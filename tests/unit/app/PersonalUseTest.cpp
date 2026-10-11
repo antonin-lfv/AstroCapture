@@ -9,6 +9,8 @@
 #include "MaskOverlayItem.hpp"
 #include "MosaicController.hpp"
 #include "MosaicImageItem.hpp"
+#include "ObservationController.hpp"
+#include "ObservationPlot.hpp"
 #include "PreviewController.hpp"
 #include "ProcessingEdits.hpp"
 #include "ProcessingImageItem.hpp"
@@ -80,6 +82,7 @@ static void registerTypes() {
     REGISTER(MaskOverlayItem);REGISTER(MosaicController);REGISTER(MosaicImageItem);
     REGISTER(PreviewController);REGISTER(ProcessingController);REGISTER(ProcessingEdits);
     REGISTER(ProcessingImageItem);REGISTER(SessionController);REGISTER(ZoomLoupeItem);
+    REGISTER(ObservationController);REGISTER(ObservationPlot);
 #undef REGISTER
 }
 static recording::AstroImage sourceImage() {
@@ -151,6 +154,21 @@ static int workspace(const QString& directory,bool restore,bool faults=false) {
     ASTRO_TEST_CHECK(deep->projectCacheDirectory()==directory+"/projects");
     QuitGuard guard(window);QCoreApplication::instance()->installEventFilter(&guard);
     auto* quit=window->findChild<QObject*>("quitConfirmation");ASTRO_TEST_CHECK(quit);
+
+    if(qEnvironmentVariableIsSet("ASTRO_OBSERVATION_WINDOW")) {
+        auto* observation=window->findChild<ObservationController*>("observationController");ASTRO_TEST_CHECK(observation);
+        auto settings=observation->settings();settings["date"]="2026-12-12";ASTRO_TEST_CHECK(observation->calculate(settings));
+        ASTRO_TEST_CHECK(observation->selectTarget("NGC1976"));
+        window->setProperty("currentTab","observation");
+        auto* workspace=window->findChild<QObject*>("observationWorkspace");ASTRO_TEST_CHECK(workspace);
+        for(const auto size:{QSize(1440,960),QSize(1100,800),QSize(900,700)}) {
+            window->resize(size);capture(window,QString("observation-night-%1").arg(size.width()));
+        }
+        workspace->setProperty("viewMode","world");capture(window,"observation-world-900");
+        settings=observation->settings();settings["date"]="2026-12-23";ASTRO_TEST_CHECK(observation->calculate(settings));
+        ASTRO_TEST_CHECK(observation->selectTarget("moon"));observation->setFraction(.6);workspace->setProperty("viewMode","sky");capture(window,"observation-moon-horizon-900");
+        window->setProperty("quitApproved",true);return 0;
+    }
 
     if(restore) {
         ASTRO_TEST_CHECK(session->recoveryAvailable()&&!deep->hasResult());

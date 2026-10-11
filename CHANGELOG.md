@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.18.0 — 2026-10-11
+
+- Add an independent Observation workspace before Guide, for the Moon, seven planets and fixed catalogue objects.
+- Bundle the OpenNGC catalogue and Astronomy Engine; provide offline identifier search, optional CDS Sesame name lookup, city presets, optional Open-Meteo / GeoNames city search and saved local sites.
+- Synchronize night altitude, horizon trajectory and regional world visibility with a local/UTC time slider. Show geometric centre rise/set, highest altitude, eligible intervals and lunar illumination/separation.
+- Apply IANA time zones and daylight-saving changes; explain height, darkness, polar cases, data sources and planning limits in French and English. Preserve processing and project formats.
+- Verify five topocentric positions against independent NASA/JPL Horizons references, and cover hemispheres, polar conditions, date changes, 23/25-hour periods, invalid inputs, persistence and native QML composition.
+
 ## 1.17.0 — 2026-10-11
 
 - Add RGB/LRGB/HOO/SHO palette selection with automatic integrated-filter assignment, explicit missing-filter checks and a preserved Custom mode.

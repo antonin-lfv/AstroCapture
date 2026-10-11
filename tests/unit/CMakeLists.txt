@@ -357,6 +357,9 @@ if(ASTRO_ENABLE_MOCK_CAMERA)
             astro::driver::mock Threads::Threads ZLIB::ZLIB
     )
     set_target_properties(astro_app_personal_use_test PROPERTIES AUTOMOC ON)
+    target_link_libraries(astro_app_personal_use_test PRIVATE astro_observation_ephemeris)
+    qt_add_resources(astro_app_personal_use_test observation_data PREFIX "/observation" BASE "${PROJECT_SOURCE_DIR}/app/data"
+        FILES ../../app/data/NGC.csv ../../app/data/NGC-addendum.csv ../../app/data/world-land.json)
     target_include_directories(astro_app_personal_use_test PRIVATE ../../app/src)
     target_compile_definitions(astro_app_personal_use_test PRIVATE
         ASTRO_ENABLE_MOCK_CAMERA ASTRO_SOURCE_DIR="${PROJECT_SOURCE_DIR}"
@@ -367,10 +370,23 @@ if(ASTRO_ENABLE_MOCK_CAMERA)
         ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_BACKEND=software" TIMEOUT 120)
 endif()
 
+astro_add_unit_test(astro_app_observation_test
+    SOURCES app/ObservationTest.cpp ../../app/src/ObservationAstronomy.cpp
+        ../../app/src/ObservationController.cpp ../../app/src/ObservationController.hpp
+        ../../app/src/ObservationPlot.cpp ../../app/src/ObservationPlot.hpp ../../app/src/TargetResolver.cpp
+    LIBS Qt6::Quick Qt6::Gui Qt6::Network astro_observation_ephemeris Threads::Threads)
+set_target_properties(astro_app_observation_test PROPERTIES AUTOMOC ON)
+target_include_directories(astro_app_observation_test PRIVATE ../../app/src)
+target_compile_definitions(astro_app_observation_test PRIVATE ASTRO_SOURCE_DIR="${PROJECT_SOURCE_DIR}" ASTRO_TRANSLATION_PATH="${PROJECT_BINARY_DIR}/app/astrocapture_fr.qm")
+qt_add_resources(astro_app_observation_test observation_data PREFIX "/observation" BASE "${PROJECT_SOURCE_DIR}/app/data"
+    FILES ../../app/data/NGC.csv ../../app/data/NGC-addendum.csv ../../app/data/world-land.json)
+set_tests_properties(astro_app_observation_test PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_BACKEND=software" TIMEOUT 90)
+
 # App settings and session validators share domain image bounds.
 get_directory_property(astro_unit_targets BUILDSYSTEM_TARGETS)
 foreach(unit_target IN LISTS astro_unit_targets)
-    if(unit_target MATCHES "^astro_app_")
+    get_target_property(unit_type ${unit_target} TYPE)
+    if(unit_target MATCHES "^astro_app_" AND NOT unit_type STREQUAL "UTILITY")
         target_link_libraries(${unit_target} PRIVATE astro::domain)
     endif()
 endforeach()

@@ -1,5 +1,7 @@
 find_package(Qt6 6.5 REQUIRED COMPONENTS Quick Gui Network LinguistTools)
 find_package(Threads REQUIRED)
+add_library(astro_observation_ephemeris STATIC ../third_party/astronomy-engine/astronomy.c)
+target_include_directories(astro_observation_ephemeris PUBLIC ../third_party/astronomy-engine)
 
 qt_standard_project_setup(REQUIRES 6.5)
 
@@ -88,6 +90,8 @@ qt_add_qml_module(AstroCapture
         qml/GlobalSettingsWorkspace.qml
         qml/HistoryWorkspace.qml
         qml/GuideWorkspace.qml
+        qml/ObservationWorkspace.qml
+        qml/ObservationField.qml
         qml/Icon.qml
         qml/IconButton.qml
         qml/IconAction.qml
@@ -116,6 +120,9 @@ qt_add_qml_module(AstroCapture
         src/MasterLibrary.cpp src/MasterLibrary.hpp
         src/GaiaCatalog.cpp
         src/TargetResolver.cpp src/TargetResolver.hpp src/EquipmentProfile.hpp
+        src/ObservationAstronomy.cpp src/ObservationAstronomy.hpp
+        src/ObservationController.cpp src/ObservationController.hpp
+        src/ObservationPlot.cpp src/ObservationPlot.hpp
         src/SessionController.hpp
         src/SessionController.cpp
         src/DeepSkyController.hpp
@@ -160,7 +167,9 @@ if(ASTRO_ENABLE_DEVTOOLS)
     target_compile_definitions(AstroCapture PRIVATE ASTRO_ENABLE_DEVTOOLS)
 endif()
 
-target_link_libraries(AstroCapture PRIVATE Qt6::Quick Qt6::Gui Qt6::Network astro::processing astro::recording Threads::Threads ZLIB::ZLIB)
+target_link_libraries(AstroCapture PRIVATE Qt6::Quick Qt6::Gui Qt6::Network astro::processing astro::recording astro_observation_ephemeris Threads::Threads ZLIB::ZLIB)
+qt_add_resources(AstroCapture observation_data PREFIX "/observation" BASE "${PROJECT_SOURCE_DIR}/app/data"
+    FILES data/NGC.csv data/NGC-addendum.csv data/world-land.json)
 
 if(APPLE)
     find_library(AVFOUNDATION_FRAMEWORK AVFoundation REQUIRED)

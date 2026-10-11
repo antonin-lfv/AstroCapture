@@ -181,15 +181,16 @@ Control {
     palette.dark: Atelier.surface
     function chooseProject() {if(!controller.busy)projectOpen.open();}
     function importFiles(role) { importRole=role; inputDialog.open(); }
+    property var compositionSettings: ({palette:"RGB",luminanceAmount:1})
     function saveOptions() {
         if(!edits.applyValues(options())){editError=qsTr("Check parameters and operation order: white must exceed black; photometry and deconvolution require linear, unrotated input; photometry cannot be masked.");return false;}
         edits.endEdit();
         const view=root.sessionState;delete view.options;
-        controller.projectOptions={view:view,calibrated:calibrated.checked,normalize:normalize.checked,badPixels:badPixels.checked,sequenceBackground:sequenceBackground.checked,hdrOptions:controller.projectOptions.hdrOptions||{},diagnosticMaps:diagnosticMaps.checked,wcsProjection:wcsProjection.checked,drizzle:drizzle.checked,nativeBayer:nativeBayer.checked,bayerPattern:root.declaredBayer,drizzleScale:drizzleScale.currentIndex,pixelFraction:pixelFraction.value,sigma:sigma.value,method:integrationMethod.currentIndex,finish:edits.values,caption:root.captionOptions,versions:edits.snapshot()};return true;
+        controller.projectOptions={view:view,calibrated:calibrated.checked,normalize:normalize.checked,badPixels:badPixels.checked,sequenceBackground:sequenceBackground.checked,hdrOptions:controller.projectOptions.hdrOptions||{},composition:root.compositionSettings,diagnosticMaps:diagnosticMaps.checked,wcsProjection:wcsProjection.checked,drizzle:drizzle.checked,nativeBayer:nativeBayer.checked,bayerPattern:root.declaredBayer,drizzleScale:drizzleScale.currentIndex,pixelFraction:pixelFraction.value,sigma:sigma.value,method:integrationMethod.currentIndex,finish:edits.values,caption:root.captionOptions,versions:edits.snapshot()};return true;
     }
     readonly property var sessionState: {
         edits.values; edits.version; edits.canUndo; edits.canRedo;
-        return {options:{calibrated:calibrated.checked,normalize:normalize.checked,badPixels:badPixels.checked,sequenceBackground:sequenceBackground.checked,hdrOptions:controller.projectOptions.hdrOptions||{},diagnosticMaps:diagnosticMaps.checked,wcsProjection:wcsProjection.checked,drizzle:drizzle.checked,nativeBayer:nativeBayer.checked,bayerPattern:root.declaredBayer,drizzleScale:drizzleScale.currentIndex,pixelFraction:pixelFraction.value,
+        return {options:{calibrated:calibrated.checked,normalize:normalize.checked,badPixels:badPixels.checked,sequenceBackground:sequenceBackground.checked,hdrOptions:controller.projectOptions.hdrOptions||{},composition:root.compositionSettings,diagnosticMaps:diagnosticMaps.checked,wcsProjection:wcsProjection.checked,drizzle:drizzle.checked,nativeBayer:nativeBayer.checked,bayerPattern:root.declaredBayer,drizzleScale:drizzleScale.currentIndex,pixelFraction:pixelFraction.value,
             sigma:sigma.value,method:integrationMethod.currentIndex,finish:edits.values,caption:root.captionOptions,versions:edits.snapshot()},
             step:workflowStep,tool:finishingTool,expandedFamilies:expandedFamilies.slice(),advancedTool:advancedTools.toolIndex,comparison:comparisonMode,split:comparisonSplit,fit:viewport.fitMode,zoom:viewport.zoom,panX:viewport.panX,panY:viewport.panY,targetQuery:astrometryDialog.targetQuery};
     }
@@ -201,6 +202,7 @@ Control {
         astrometryDialog.lookupMessage="";
         const restored=state.options||controller.projectOptions;
         captionOptions=restored.caption||{};
+        compositionSettings=restored.composition||({palette:"RGB",luminanceAmount:1});
         if(restored.calibrated!==undefined)calibrated.checked=restored.calibrated;
         if(restored.normalize!==undefined)normalize.checked=restored.normalize;
         if(restored.badPixels!==undefined)badPixels.checked=restored.badPixels;
@@ -253,6 +255,7 @@ Control {
             root.updatingControls=true;
             const settings=controller.projectOptions;
             root.captionOptions=settings.caption||{};
+            root.compositionSettings=settings.composition||({palette:"RGB",luminanceAmount:1});
             if(settings.calibrated!==undefined)calibrated.checked=settings.calibrated;
             if(settings.normalize!==undefined)normalize.checked=settings.normalize;
             if(settings.badPixels!==undefined)badPixels.checked=settings.badPixels;
@@ -803,6 +806,13 @@ ParameterControl {id:black;label:qsTr("Black level");textIsValue:true;text:"0";f
                 }
                 }
                 InspectorFamily {id:family2;objectName:"deepSkyFamily2";title:root.familyNames[2];expanded:root.familyOpen(2);current:root.finishingTool===2;onActivated:root.toggleFamily(2);onInteracted:root.finishingTool=2
+                ChannelComposition {
+                    objectName:"deepSkyComposition"
+                    controller:root.controller;settings:root.compositionSettings
+                    visible:controller.groups.length>1 || controller.groups.some(group=>["R","G","B","L","HA","OIII","SII"].indexOf(group)>=0)
+                    onSettingsEdited:settings=>root.compositionSettings=settings
+                    onComposeRequested:settings=>{if(root.saveOptions())controller.composeChannels(settings);}
+                }
                 SectionTitle {label:qsTr("Color and noise")}
                 IconButton {objectName:"openAstrometry";text:qsTr("Astrometry · PCC / SPCC");Layout.fillWidth:true;enabled:root.finishEditable&&root.linearRecipeInput;onClicked:astrometryDialog.open()}
                 Label {visible:!!root.advancedOptions.photometryMethod;text:root.advancedOptions.photometryMethod||"";color:Atelier.accent;wrapMode:Text.Wrap;Layout.fillWidth:true;font.pixelSize:12}
@@ -824,23 +834,7 @@ ParameterControl {id:black;label:qsTr("Black level");textIsValue:true;text:"0";f
                 }
 
                 ParameterControl {id:denoise;label:qsTr("Noise smoothing");decimals:2;explanation:qsTr("Output = (1 − amount) × image + amount × GaussianBlur(image), with a Gaussian standard deviation of 0.7 pixel. At 0 nothing changes; at 1 the full blur is used. It reduces small-scale fluctuations but also softens stars and fine structures. Inspect at 100% and start low. This is not an adaptive denoiser.");onMoved:root.previewAdjustments();onGestureStarted:edits.beginEdit();onGestureEnded:edits.endEdit();Layout.fillWidth:true;Layout.minimumWidth:0;from:0;to:1;value:0;enabled:root.finishEditable}
-                ColumnLayout {Layout.fillWidth:true;Layout.minimumWidth:0;visible:controller.groups.length>1
-                SectionTitle {label:qsTr("Channel composition");explanation:qsTr("Assign R/G/B or a narrowband palette. RGB uses R/G/B, SHO uses SII/HA/OIII and HOO uses HA/OIII/OIII. Optional luminance adds detail. Each chosen filter must have an integrated result.")}
-                DarkComboBox {explanation: qsTr("Chooses which integrated filter result to finish or use in a composition. Check the filter name before adjusting colors or exporting."); id:resultGroup;Layout.fillWidth:true;Layout.minimumWidth:0;model:controller.groups;enabled:!controller.busy && count>0;onActivated:controller.selectResult(currentText)}
-                Label {text:qsTr("Combine integrated filters: RGB = R/G/B, SHO = SII/HA/OIII, HOO = HA/OIII/OIII.");color:Atelier.secondary;wrapMode:Text.Wrap;Layout.fillWidth:true;Layout.minimumWidth:0;font.pixelSize:11}
-                GridLayout {
-                    columns:2;Layout.fillWidth:true;Layout.minimumWidth:0;enabled:!controller.busy && controller.groups.length>0
-                    Label {text:qsTr("Red");color:Atelier.secondary}
-                    DarkComboBox {explanation: qsTr("Chooses which integrated filter supplies the red output channel. RGB uses R; SHO uses SII; HOO uses HA. Assigning a filter changes the palette, not its original integration."); id:redChannel;Layout.fillWidth:true;Layout.minimumWidth:0;model:controller.groups}
-                    Label {text:qsTr("Green");color:Atelier.secondary}
-                    DarkComboBox {explanation: qsTr("Chooses which integrated filter supplies green. RGB uses G; SHO uses HA; HOO uses OIII. The same filter may feed more than one channel."); id:greenChannel;Layout.fillWidth:true;Layout.minimumWidth:0;model:controller.groups}
-                    Label {text:qsTr("Blue");color:Atelier.secondary}
-                    DarkComboBox {explanation: qsTr("Chooses which integrated filter supplies blue. RGB uses B; SHO and HOO use OIII. Combine channels to calculate the chosen palette."); id:blueChannel;Layout.fillWidth:true;Layout.minimumWidth:0;model:controller.groups}
-                    Label {text:qsTr("Luminance");color:Atelier.secondary}
-                    DarkComboBox {explanation: qsTr("Optional integrated luminance adds detail to the RGB composition. None keeps the RGB-only result. Use a compatible filter and aligned field; inspect star brightness and color afterwards."); id:luminanceChannel;Layout.fillWidth:true;Layout.minimumWidth:0;model:[qsTr("None")].concat(controller.groups)}
-                }
-                IconButton {text:qsTr("Combine channels");Layout.fillWidth:true;Layout.minimumWidth:0;enabled:!controller.busy && controller.groups.length>0;onClicked:controller.compose(redChannel.currentText,greenChannel.currentText,blueChannel.currentText,luminanceChannel.currentIndex>0?luminanceChannel.currentText:"")}
-                }
+
                 }
                 InspectorFamily {id:family3;objectName:"deepSkyFamily3";title:root.familyNames[3];expanded:root.familyOpen(3);current:root.finishingTool===3;onActivated:root.toggleFamily(3);onInteracted:root.finishingTool=3
                 SectionTitle {label:qsTr("Orientation");explanation:qsTr("Rotate clockwise, then mirror the finished image. The original linear integration remains unchanged. Orientation is saved with the project and can be undone.")}

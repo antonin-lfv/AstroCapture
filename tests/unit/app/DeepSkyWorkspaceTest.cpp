@@ -61,6 +61,65 @@ int main(int argc,char** argv){
     ASTRO_TEST_CHECK(!object->findChild<QObject*>("deepSkyWcsProjection")->property("checked").toBool());
     QQuickWindow window;window.resize(1100,720);auto* root=qobject_cast<QQuickItem*>(object.get());root->setParentItem(window.contentItem());root->setSize({1100,720});window.show();
     QCoreApplication::processEvents();
+    // Complete palette workflow, including missing layers and saved choices.
+    if(!qEnvironmentVariableIsSet("ASTRO_UI_LARGE_QA")&&!qEnvironmentVariableIsSet("ASTRO_UI_BATCH_QA")&&!qEnvironmentVariableIsSet("ASTRO_UI_RESOURCE_QA")&&!qEnvironmentVariableIsSet("ASTRO_UI_DRIZZLE_QA")&&!qEnvironmentVariableIsSet("ASTRO_UI_BAYER_QA")) {
+        const bool visual=qEnvironmentVariableIsSet("ASTRO_UI_COMPOSITION_QA");
+        const QStringList filters{"R","G","B","L","HA","OIII"};
+        recording::AstroImage real;
+        if(visual)real=recording::readAstroImage(qEnvironmentVariable("ASTRO_UI_FITS_PATH").toStdString());
+        for(int n=0;n<filters.size();++n) {
+            recording::AstroImage frame;frame.width=visual?1024:160;frame.height=visual?768:140;frame.channels=1;frame.exposure=60;frame.filter=filters[n].toStdString();
+            frame.samples.resize(std::size_t(frame.width)*frame.height);
+            for(int y=0;y<frame.height;++y)for(int x=0;x<frame.width;++x) {
+                double value=.01;
+                if(visual){const auto at=(std::size_t(y+(real.height-frame.height)/2)*real.width+x+(real.width-frame.width)/2)*real.channels;value=n==3?(real.samples[at]+real.samples[at+1]+real.samples[at+2])/3:real.samples[at+(n==0||n==4?0:n==1||n==5?1:2)];}
+                else for(const auto& xy:std::vector<std::pair<int,int>>{{20,21},{50,20},{85,25},{120,20},{140,55},{30,55},{65,62},{100,60},{125,85},{20,110},{60,110},{100,115}}){const auto dx=x-xy.first,dy=y-xy.second;value+=.3*std::exp(-(dx*dx+dy*dy)/4.5);}
+                frame.samples[std::size_t(y)*frame.width+x]=float(value);
+            }
+            const auto path=directory.filePath("composition-"+filters[n]+".fits");recording::writeAstroFits(path.toStdString(),frame);
+            controller.addFiles({QUrl::fromLocalFile(path)},"Light","Auto");wait(controller);
+        }
+        controller.integrate(true,0,false,false);wait(controller);ASTRO_TEST_CHECK(controller.hasResult()&&controller.groups().size()==6);
+        auto* panel=root->findChild<QObject*>("deepSkyComposition");auto* palette=root->findChild<QObject*>("compositionPalette");auto* apply=root->findChild<QObject*>("compositionApply");ASTRO_TEST_CHECK(panel&&palette&&apply);
+        root->setProperty("workflowStep",6);root->setProperty("expandedFamilies",QVariantList{2});root->setProperty("finishingTool",2);root->setProperty("frameListOpen",false);
+        auto choose=[&](int index){ASTRO_TEST_CHECK(QMetaObject::invokeMethod(panel,"choosePalette",Q_ARG(QVariant,QVariant(index))));QCoreApplication::processEvents();};
+        for(const auto& name:{"RGB","LRGB","HOO"}){const auto plan=controller.compositionPlan({{"palette",name}});ASTRO_TEST_CHECK(plan["ready"].toBool());const auto settings=plan["settings"].toMap();if(QString(name)=="HOO")ASTRO_TEST_CHECK(settings["red"]=="HA"&&settings["green"]=="OIII"&&settings["blue"]=="OIII");if(QString(name)=="LRGB")ASTRO_TEST_CHECK(settings["luminance"]=="L");}
+        const auto prior=controller.sessionSnapshot().images["linear"];
+        choose(3);ASTRO_TEST_CHECK(!apply->property("enabled").toBool());ASTRO_TEST_CHECK(controller.compositionPlan({{"palette","SHO"}})["missing"].toStringList()==QStringList{"SII"});
+        controller.composeChannels({{"palette","SHO"}});ASTRO_TEST_CHECK(!controller.busy()&&controller.sessionSnapshot().images["linear"]==prior);
+        auto capture=[&](const QString& name){const auto folder=qEnvironmentVariable("ASTRO_UI_COMPOSITION_QA");QDir().mkpath(folder);QMetaObject::invokeMethod(root->findChild<QObject*>("deepSkyCompletionToast"),"close");for(int i=0;i<8;++i){QCoreApplication::processEvents();QThread::msleep(30);}ASTRO_TEST_CHECK(window.grabWindow().save(folder+"/"+name));};
+        if(visual)for(const auto size:{QSize(1440,960),QSize(1100,800),QSize(900,700)}){window.resize(size);root->setSize(size);auto* scroll=root->findChild<QObject*>("deepSkyInspector")->property("contentItem").value<QObject*>();scroll->setProperty("contentY",0);capture(QString("composition-missing-%1x%2.png").arg(size.width()).arg(size.height()));}
+        auto sii=recording::readAstroImage(directory.filePath("composition-HA.fits").toStdString());sii.filter="SII";for(auto& v:sii.samples)v*=.8f;
+        const auto siiPath=directory.filePath("composition-SII.fits");recording::writeAstroFits(siiPath.toStdString(),sii);controller.addFiles({QUrl::fromLocalFile(siiPath)},"Light","Auto");wait(controller);controller.integrate(true,0,false,false);wait(controller);
+        ASTRO_TEST_CHECK(controller.compositionPlan({{"palette","SHO"}})["ready"].toBool());ASTRO_TEST_CHECK(apply->property("enabled").toBool());ASTRO_TEST_CHECK(QMetaObject::invokeMethod(apply,"clicked"));wait(controller);ASTRO_TEST_CHECK(controller.compositionState()["palette"]=="SHO");
+        choose(1);ASTRO_TEST_CHECK(apply->property("enabled").toBool());
+        auto* amount=root->findChild<QObject*>("compositionLuminanceAmount");ASTRO_TEST_CHECK(amount);amount->setProperty("value",50);ASTRO_TEST_CHECK(QMetaObject::invokeMethod(amount,"moved"));
+        ASTRO_TEST_CHECK(QMetaObject::invokeMethod(apply,"clicked"));wait(controller);
+        ASTRO_TEST_CHECK(controller.compositionState()["palette"]=="LRGB"&&controller.compositionState()["luminanceAmount"].toDouble()==.5);
+        ASTRO_TEST_CHECK(!panel->property("pending").toBool());ASTRO_TEST_CHECK(app::DeepSkyController::validSession(controller.sessionSnapshot()));
+        if(visual)for(const auto size:{QSize(1440,960),QSize(1100,800),QSize(900,700)}){window.resize(size);root->setSize(size);auto* scroll=root->findChild<QObject*>("deepSkyInspector")->property("contentItem").value<QObject*>();scroll->setProperty("contentY",0);capture(QString("composition-lrgb-%1x%2.png").arg(size.width()).arg(size.height()));}
+        const auto savedChoices=root->property("compositionSettings").toMap();root->setProperty("compositionSettings",QVariantMap{{"palette","LRGB"},{"luminanceAmount",.25}});QCoreApplication::processEvents();ASTRO_TEST_CHECK(amount->property("value").toDouble()==25.);root->setProperty("compositionSettings",savedChoices);QCoreApplication::processEvents();ASTRO_TEST_CHECK(amount->property("value").toDouble()==50.);
+        const auto composed=controller.sessionSnapshot().images["linear"];
+        choose(2);ASTRO_TEST_CHECK(panel->property("pending").toBool()&&controller.sessionSnapshot().images["linear"]==composed);
+        ASTRO_TEST_CHECK(QMetaObject::invokeMethod(apply,"clicked"));wait(controller);ASTRO_TEST_CHECK(controller.compositionState()["palette"]=="HOO");
+        const auto beforeCancel=controller.sessionSnapshot().images["linear"];controller.composeChannels({{"palette","LRGB"},{"luminanceAmount",.25}});controller.cancel();wait(controller);ASTRO_TEST_CHECK(controller.sessionSnapshot().images["linear"]==beforeCancel&&controller.compositionState()["palette"]=="HOO");
+        ASTRO_TEST_CHECK(QMetaObject::invokeMethod(panel,"chooseChannel",Q_ARG(QVariant,QVariant("green")),Q_ARG(QVariant,QVariant("B"))));
+        ASTRO_TEST_CHECK(root->property("compositionSettings").toMap()["palette"]=="Custom");ASTRO_TEST_CHECK(panel->property("pending").toBool());
+        auto* manualGreen=visualItem(root,"compositionChannel_green");ASTRO_TEST_CHECK(manualGreen&&manualGreen->property("visible").toBool());
+        if(visual)for(const auto size:{QSize(1440,960),QSize(1100,800),QSize(900,700)}){window.resize(size);root->setSize(size);auto* scroll=root->findChild<QObject*>("deepSkyInspector")->property("contentItem").value<QObject*>();scroll->setProperty("contentY",0);capture(QString("composition-custom-%1x%2.png").arg(size.width()).arg(size.height()));}
+
+        ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root,"saveOptions"));const auto saved=controller.sessionSnapshot();
+        app::SessionStorage storage(directory.filePath("composition-session"));app::SavedSession serialized;serialized.workspaces["deepSky"]=saved;storage.save(serialized);const auto loaded=storage.load();
+        app::DeepSkyController recovered;recovered.restoreSession(loaded.workspaces["deepSky"]);ASTRO_TEST_CHECK(recovered.compositionState()==controller.compositionState()&&recovered.projectOptions()["composition"]==controller.projectOptions()["composition"]);
+        const auto path=QUrl::fromLocalFile(directory.filePath("composition-linked.astroproject"));controller.saveProject(path);wait(controller);app::DeepSkyController linked;linked.loadProject(path);ASTRO_TEST_CHECK(linked.projectOptions()["composition"]==controller.projectOptions()["composition"]);
+        auto invalid=saved;auto options=invalid.state["options"].toMap();options["composition"]=QVariantMap{{"palette","LRGB"},{"luminanceAmount",2.}};invalid.state["options"]=options;ASTRO_TEST_CHECK(!app::DeepSkyController::validSession(invalid));
+        const auto result=controller.sessionSnapshot().images["linear"];controller.composeChannels({{"palette","Custom"},{"red","R"},{"green","G"},{"blue","B"},{"luminanceAmount",-1.}});ASTRO_TEST_CHECK(!controller.busy()&&controller.sessionSnapshot().images["linear"]==result);
+        auto* layer=root->findChild<QObject*>("compositionInspectLayer");ASTRO_TEST_CHECK(layer);layer->setProperty("currentIndex",controller.groups().indexOf("R"));ASTRO_TEST_CHECK(QMetaObject::invokeMethod(layer,"activated",Q_ARG(int,controller.groups().indexOf("R"))));wait(controller);ASTRO_TEST_CHECK(controller.compositionState().isEmpty());
+        qInfo()<<"Composition palettes, missing filters, L contribution, pending state and project/recovery checks passed";
+        if(visual)return 0;
+        controller.clear();QCoreApplication::processEvents();
+        ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root,"restoreSessionState",Q_ARG(QVariant,QVariant(QVariantMap{}))));QCoreApplication::processEvents();
+    }
     if(qEnvironmentVariableIsSet("ASTRO_UI_LARGE_QA")) {
         // Two identical private copies qualify resources and exact pixels;
         // they intentionally provide no additional photons/subpixel diversity.

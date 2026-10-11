@@ -9951,4 +9951,47 @@ RMS normalisée moyenne %5</translation>
   </context>
 <context><name>BatchMasterPane</name><message><source>1 source</source><translation>1 source</translation></message></context>
 <context><name>BatchMasterPane</name><message><source>Library</source><translation>Bibliothèque</translation></message><message><source>Raw sources</source><translation>Sources brutes</translation></message></context>
+    <context>
+        <name>ChannelComposition</name>
+        <message><source>Channel composition</source><translation>Composition des canaux</translation></message>
+        <message><source>Combine the integrated filters before finishing. Palettes assign the channels automatically; Custom lets you choose each layer. The source integrations are preserved. Changing these choices requires Compose image to update the result.</source><translation>Combinez les filtres empilés avant la finition. Les palettes attribuent les canaux automatiquement ; Personnalisée permet de choisir chaque couche. Les empilements sources sont conservés. Après modification, cliquez sur Composer l’image pour actualiser le résultat.</translation></message>
+        <message><source>RGB · color</source><translation>RGB · couleur</translation></message>
+        <message><source>LRGB · color and luminance</source><translation>LRGB · couleur et luminance</translation></message>
+        <message><source>HOO · hydrogen and oxygen</source><translation>HOO · hydrogène et oxygène</translation></message>
+        <message><source>SHO · Hubble palette</source><translation>SHO · palette Hubble</translation></message>
+        <message><source>Custom</source><translation>Personnalisée</translation></message>
+        <message><source>Composition palette</source><translation>Palette de composition</translation></message>
+        <message><source>RGB assigns R/G/B. LRGB also uses L. HOO assigns Hα/OIII/OIII; SHO assigns SII/Hα/OIII. HOO and SHO are representative palettes, not natural RGB colors. Every required filter must first be integrated.</source><translation>RGB utilise R/G/B ; LRGB ajoute L. HOO utilise Hα/OIII/OIII et SHO utilise SII/Hα/OIII. HOO et SHO représentent les signaux par une palette, pas par des couleurs RGB naturelles. Chaque filtre nécessaire doit d’abord être empilé.</translation></message>
+        <message><source>Red</source><translation>Rouge</translation></message>
+        <message><source>Green</source><translation>Vert</translation></message>
+        <message><source>Blue</source><translation>Bleu</translation></message>
+        <message><source>Luminance</source><translation>Luminance</translation></message>
+        <message><source>None</source><translation>Aucune</translation></message>
+        <message><source>Missing: %1</source><translation>Manquant : %1</translation></message>
+        <message><source>Select a filter</source><translation>Choisir un filtre</translation></message>
+        <message><source>Use an integrated layer for this output channel. Choosing a different layer switches to Custom. Luminance is optional in Custom; None preserves the RGB composition. The layers are aligned on stars when composed.</source><translation>Choisissez une couche empilée pour ce canal. Une autre attribution passe en mode Personnalisée. La luminance y est facultative ; Aucune conserve la composition RGB. Les couches sont recalées sur les étoiles lors de la composition.</translation></message>
+        <message><source>Luminance contribution (%)</source><translation>Apport de luminance (%)</translation></message>
+        <message><source>0 keeps the RGB brightness and ignores L. 100 uses the aligned L brightness; intermediate values blend both. RGB channel ratios are retained where their mean is positive. This does not equalize different exposure units, recover saturated detail or sharpen the image. Recompose after changing the value.</source><translation>0 conserve la luminosité RGB et ignore L. 100 utilise la luminosité de L recalée ; les valeurs intermédiaires mélangent les deux. Les rapports RGB sont conservés lorsque leur moyenne est positive. Ce réglage n’égalise pas des unités d’exposition différentes, ne récupère pas les détails saturés et n’accentue pas l’image. Recomposez après modification.</translation></message>
+        <message><source>Previous composition displayed. Recompose to apply these choices.</source><translation>Composition précédente affichée. Recomposez pour appliquer ces choix.</translation></message>
+        <message><source>This composition is displayed.</source><translation>Cette composition est affichée.</translation></message>
+        <message><source>Compose image</source><translation>Composer l’image</translation></message>
+    </context>
+    <context>
+        <name>GuideWorkspace</name>
+        <message><source>Multifilter composition</source><translation>Composition multifiltre</translation></message>
+        <message><source>In Finishing → Color, choose RGB, LRGB, HOO or SHO to assign integrated filters automatically. Missing or ambiguous filters are listed and prevent composition. Custom keeps manual channel assignment. Luminance contribution blends RGB brightness at 0% with aligned L brightness at 100%; it does not equalize exposure units or restore saturated detail. Click Compose image after changing the choices: until then, the previous composition remains displayed. Choices are saved in projects and recovery. Resolve WCS again for the composed image; PCC/SPCC applies to broadband RGB, not representative HOO/SHO palettes.</source><translation>Dans Finition → Couleur, choisissez RGB, LRGB, HOO ou SHO pour attribuer automatiquement les filtres empilés. Les filtres manquants ou ambigus sont indiqués et bloquent la composition. Personnalisée conserve le choix manuel de chaque canal. L’apport de luminance mélange la luminosité RGB à 0 % avec celle de L recalée à 100 % ; il n’égalise pas les unités d’exposition et ne restaure pas les détails saturés. Cliquez sur Composer l’image après modification : la composition précédente reste affichée jusque-là. Les choix sont conservés dans les projets et la reprise. Résolvez de nouveau le WCS sur l’image composée ; PCC/SPCC s’applique au RGB à large bande, pas aux palettes de représentation HOO/SHO.</translation></message>
+    </context>
+    <context>
+        <name>astro::app::DeepSkyController</name>
+        <message><source>Invalid channel composition settings.</source><translation>Réglages de composition des canaux invalides.</translation></message>
+        <message><source>Red channel</source><translation>Canal rouge</translation></message>
+        <message><source>Green channel</source><translation>Canal vert</translation></message>
+        <message><source>Blue channel</source><translation>Canal bleu</translation></message>
+        <message><source>Missing or ambiguous integrated filters: %1. Integrate these filters or choose Custom.</source><translation>Filtres empilés manquants ou ambigus : %1. Empilez ces filtres ou choisissez Personnalisée.</translation></message>
+        <message><source>This composition exceeds the 4 GiB recovery limit. Reduce image size, groups or maps; previous results are preserved.</source><translation>Cette composition dépasse la limite de reprise de 4 Gio. Réduisez les dimensions, les groupes ou les cartes ; le résultat précédent est conservé.</translation></message>
+        <message><source>Filters ready. Channels will be aligned on their stars.</source><translation>Filtres prêts. Les couches seront recalées sur leurs étoiles.</translation></message>
+        <message><source>Luminance contribution must be between 0 and 100 percent.</source><translation>L’apport de luminance doit être compris entre 0 et 100 %.</translation></message>
+        <message><source>Invalid channel image dimensions.</source><translation>Dimensions de couche invalides.</translation></message>
+    </context>
+<context><name>ChannelComposition</name><message><source>View an integrated filter</source><translation>Voir un filtre empilé</translation></message><message><source>Display an individual filter integration for inspection or finishing. Its original data is preserved. Compose image returns to a calculated color composition using the selected palette.</source><translation>Affichez l’empilement d’un filtre pour l’inspecter ou le retoucher. Ses données originales sont conservées. Composer l’image recalcule une composition couleur avec la palette choisie.</translation></message></context>
 </TS>

@@ -601,17 +601,23 @@ FloatImage finishDeepSky(const FloatImage& input,const Finish& options,const Che
     if(preview)renderRgb8(image,preview->pixels,preview->bytesPerLine,check,ComputePreference::Cpu);
     return image;
 }
-FloatImage combineChannels(const FloatImage& red,const FloatImage& green,const FloatImage& blue,const FloatImage* luminance,const CheckCancel& check) {
+FloatImage combineChannels(const FloatImage& red,const FloatImage& green,const FloatImage& blue,const FloatImage* luminance,const CheckCancel& check,double luminanceAmount) {
+    if(!std::isfinite(luminanceAmount)||luminanceAmount<0||luminanceAmount>1)
+        throw std::runtime_error("Luminance contribution must be between 0 and 100 percent.");
+    for(const auto* image:{&red,&green,&blue,luminance})if(image&&(!domain::supportedImageSize(image->width,image->height)||image->rgb.size()!=std::size_t(image->width)*image->height*3))throw std::runtime_error("Invalid channel image dimensions.");
+    checked(check);
+    const auto pixels=std::uint64_t(red.width)*red.height;
+    domain::requireImageMemory((red.rgb.size()+green.rgb.size()+blue.rgb.size()+(luminance&&luminanceAmount>0?luminance->rgb.size():0))*4+pixels*72+256ULL*1024*1024);
     const auto ga=alignStars(red,green,check),ba=alignStars(red,blue,check);
     const auto g=warp(green,ga,red.width,red.height),b=warp(blue,ba,red.width,red.height);
-    std::optional<FloatImage> l;if(luminance)l=warp(*luminance,alignStars(red,*luminance,check),red.width,red.height);
+    std::optional<FloatImage> l;if(luminance&&luminanceAmount>0)l=warp(*luminance,alignStars(red,*luminance,check),red.width,red.height);
     FloatImage out=red;std::vector<unsigned char> mask(std::size_t(red.width)*red.height);
     for(std::size_t p=0;p<mask.size();++p) {
         if(p%65536==0)checked(check);
         out.rgb[p*3]=(red.rgb[p*3]+red.rgb[p*3+1]+red.rgb[p*3+2])/3;
         out.rgb[p*3+1]=(g.rgb[p*3]+g.rgb[p*3+1]+g.rgb[p*3+2])/3;
         out.rgb[p*3+2]=(b.rgb[p*3]+b.rgb[p*3+1]+b.rgb[p*3+2])/3;
-        if(l){const auto brightness=(out.rgb[p*3]+out.rgb[p*3+1]+out.rgb[p*3+2])/3;const auto lv=(l->rgb[p*3]+l->rgb[p*3+1]+l->rgb[p*3+2])/3;if(brightness>1e-8)for(int c=0;c<3;++c)out.rgb[p*3+c]*=lv/brightness;}
+        if(l){const auto brightness=(out.rgb[p*3]+out.rgb[p*3+1]+out.rgb[p*3+2])/3;const auto lv=(l->rgb[p*3]+l->rgb[p*3+1]+l->rgb[p*3+2])/3;if(brightness>1e-8)for(int c=0;c<3;++c)out.rgb[p*3+c]*=luminanceAmount==1?lv/brightness:1+luminanceAmount*(lv/brightness-1);}
         mask[p]=std::isfinite(out.rgb[p*3])&&std::isfinite(out.rgb[p*3+1])&&std::isfinite(out.rgb[p*3+2]);
     }
     const auto crop=commonRectangle(mask,out.width,out.height);

@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.17.0 — 2026-10-11
+
+- Add RGB/LRGB/HOO/SHO palette selection with automatic integrated-filter assignment, explicit missing-filter checks and a preserved Custom mode.
+- Blend the aligned luminance contribution from 0 to 100%, preserving the previous 100% default and linear channel ratios.
+- Save composition choices in projects/recovery and distinguish displayed results from choices awaiting recomposition. Check memory/recovery budgets, preserve prior results on errors/cancellation and clear obsolete composed-image astrometry.
+- Add French contextual help, a multifilter guide and native workflow/precision checks.
+
 ## 1.16.0 — 2026-10-11
 
 - Support scientific / still images and saved results up to 128 MP, with a

@@ -938,3 +938,41 @@ de police « Monospace ». Journaux : `build/large-personal-validation.log` et
 Ces essais locaux ne remplacent pas le contrôle d’une caméra réelle, la
 comparaison scientifique finale avec Siril ni la qualification de distribution
 publique décrite dans le [bilan V2](../releases/V2_READINESS.md).
+
+
+## 11 octobre 2026 — Composition multifiltre guidée (1.17.0)
+
+La famille Couleur propose RGB/LRGB/HOO/SHO et Personnalisée. Les palettes
+attribuent les couches intégrées automatiquement et affichent leurs attributions
+sur deux lignes ; les sélecteurs détaillés restent dans Personnalisée. Les
+filtres absents/ambigus sont nommés et bloquent la composition. L’inspection
+individuelle des empilements reste accessible. Voir [ADR-028](../decisions/ADR-028-channel-composition.md).
+
+L’apport de luminance va de 0 à 100 %. Les tests vérifient le résultat RGB à 0 %
+y compris avec une L sans étoiles, le mélange à 50 %, le doublement contrôlé
+avec L = 2 × RGB, les rapports des canaux d’une image colorée, l’identité entre
+l’ancien défaut et 100 % explicite, les valeurs invalides et l’annulation.
+Le parcours natif contrôle les quatre palettes, le refus SHO sans SII puis sa
+réussite après ajout/empilement de SII, le mode personnalisé, les choix en attente
+sans changement des pixels, l’annulation conservant le résultat précédent et
+l’accès à un empilement individuel. La restauration du pourcentage après une
+interaction est aussi vérifiée. Les choix sont comparés après sauvegarde/relecture
+JSON du projet lié et sérialisation/relecture de la session ; les valeurs
+hors plage sont refusées. L’astrométrie de l’image composée est retirée, car
+sa grille a changé ; les empilements sources restent disponibles.
+
+**50/50 tests Release passent, 9,20 s** (`build/composition-tests.log`).
+Le banc graphique supplémentaire réussit (`build/composition-ui-validation.log`).
+Une assertion du banc a été corrigée pour chercher les sélecteurs instanciés
+par Repeater dans l’arbre visuel, avec vérification du pointeur avant lecture.
+Ce problème du banc de contrôle n’était pas une erreur de traitement.
+
+Composition inspectée en français à **1440 × 960**, **1100 × 800** et
+**900 × 700**, avec une région de l’image réelle Orion. États conservés :
+LRGB à 50 %, SHO sans SII et Personnalisée. Le panneau compact défile et garde
+les commandes de comparaison/zoom dans leurs zones réservées. Neuf captures :
+`previews/native/1.17.0-composition-*.png`. Les couches de cette fixture sont
+dérivées du RGB ; leurs noms HA/OIII/SII ne prouvent aucune acquisition réelle
+en bande étroite. La qualification d’une vraie série T33 et la comparaison
+finale Siril restent à faire. Chaque nouveau réglage possède une aide française,
+et le guide contient une carte Composition multifiltre.

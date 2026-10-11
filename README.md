@@ -98,7 +98,14 @@ cochez **Poses déjà calibrées** uniquement pour des données déjà prétrait
   Le rejet nécessite trois poses retenues ou plus. Le résultat est recadré sur
   la couverture commune. Le bilan indique les poses exclues et les valeurs
   rejetées ; les images alignées utilisent de l’espace disque temporaire.
-- Composez les couches en **RGB, LRGB, SHO ou HOO**, puis réglez le fond de
+- Dans **Finition → Couleur**, choisissez **RGB, LRGB, SHO ou HOO** : les couches
+  empilées sont attribuées automatiquement. Les filtres manquants bloquent la
+  composition et sont indiqués ; **Personnalisée** conserve le choix manuel.
+  L’**apport de luminance** va de 0 % (luminosité RGB) à 100 % (L recalée),
+  sans égalisation implicite des unités d’exposition. Cliquez sur **Composer
+  l’image** après modification ; l’indication distingue le résultat affiché des
+  nouveaux choix. Ceux-ci sont sauvegardés dans le projet et la reprise.
+  Résolvez de nouveau le WCS de l’image composée. Réglez ensuite le fond de
   ciel, les gains couleur, les niveaux noir/blanc, les tons moyens ou l’étirement
   asinh (maximum, luminance visuelle ou moyenne RGB), la saturation avec protection du fond sombre et le lissage
   du bruit. L’histogramme RGB/luminance représente l’image affichée. Un second

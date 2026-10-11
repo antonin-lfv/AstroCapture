@@ -91,6 +91,24 @@ int main(){
     processing::BackgroundOptions sequenceBg;
     const auto bgStack=processing::integrate(2,[&](int n){return frames[n];},{},true,3,{}, {},true,&sequenceBg);ASTRO_TEST_CHECK(bgStack.accepted.size()==2);
     const auto combined=processing::combineChannels(ar,br,ar);ASTRO_TEST_CHECK(combined.width>200&&combined.height>180);for(auto v:combined.rgb)ASTRO_TEST_CHECK(std::isfinite(v));
+    // L contribution is a brightness blend, with the old 100% behavior intact.
+    auto twice=ar;for(auto& v:twice.rgb)v*=2;
+    const auto rgb=processing::combineChannels(ar,ar,ar);
+    const auto full=processing::combineChannels(ar,ar,ar,&twice);
+    const auto explicitFull=processing::combineChannels(ar,ar,ar,&twice,{},1);
+    const auto half=processing::combineChannels(ar,ar,ar,&twice,{},.5);
+    auto blankL=ar;for(auto& v:blankL.rgb)v=0;
+    const auto zero=processing::combineChannels(ar,ar,ar,&blankL,{},0);
+    ASTRO_TEST_CHECK(full.rgb==explicitFull.rgb&&zero.rgb==rgb.rgb);
+    ASTRO_TEST_CHECK(full.width==rgb.width&&half.width==rgb.width&&half.height==rgb.height);
+    for(std::size_t i=0;i<rgb.rgb.size();++i){ASTRO_TEST_CHECK(std::abs(full.rgb[i]-2*rgb.rgb[i])<2e-5);ASTRO_TEST_CHECK(std::abs(half.rgb[i]-1.5*rgb.rgb[i])<2e-5);}
+    auto scaledGreen=ar,scaledBlue=ar;for(auto& v:scaledGreen.rgb)v*=.5f;for(auto& v:scaledBlue.rgb)v*=.25f;
+    const auto colorRgb=processing::combineChannels(ar,scaledGreen,scaledBlue);
+    const auto colorL=processing::combineChannels(ar,scaledGreen,scaledBlue,&twice,{},.5);
+    ASTRO_TEST_CHECK(colorL.width==colorRgb.width&&colorL.height==colorRgb.height);
+    for(std::size_t p=0;p<colorRgb.rgb.size();p+=3)for(int c=1;c<3;++c)ASTRO_TEST_CHECK(std::abs(colorL.rgb[p]*colorRgb.rgb[p+c]-colorL.rgb[p+c]*colorRgb.rgb[p])<2e-7);
+    for(double amount:{-.1,1.1,std::numeric_limits<double>::quiet_NaN(),std::numeric_limits<double>::infinity()}){refused=false;try{processing::combineChannels(ar,ar,ar,&twice,{},amount);}catch(const std::exception&){refused=true;}ASTRO_TEST_CHECK(refused);}
+    refused=false;try{processing::combineChannels(ar,ar,ar,&twice,[]{throw std::logic_error("cancel");},.5);}catch(const std::logic_error&){refused=true;}ASTRO_TEST_CHECK(refused);
     int checks=0;refused=false;try{processing::integrate(5,[&](int n){return frames[n];},{},true,3,[&]{if(++checks>3)throw std::logic_error("cancel");});}catch(const std::logic_error&){refused=true;}ASTRO_TEST_CHECK(refused);
     std::cout<<"OK\n";
 }

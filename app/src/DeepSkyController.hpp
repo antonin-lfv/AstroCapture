@@ -50,6 +50,7 @@ class DeepSkyController : public QObject {
     Q_PROPERTY(QString status READ status NOTIFY changed)
     Q_PROPERTY(QVariantList frames READ frames NOTIFY changed)
     Q_PROPERTY(QStringList groups READ groups NOTIFY changed)
+    Q_PROPERTY(QVariantMap compositionState READ compositionState NOTIFY changed)
     Q_PROPERTY(QVariantList integrationReport READ integrationReport NOTIFY changed)
     Q_PROPERTY(QString integrationTemporaryDirectory READ integrationTemporaryDirectory NOTIFY changed)
     Q_PROPERTY(QUrl integrationTemporaryDirectoryUrl READ integrationTemporaryDirectoryUrl NOTIFY changed)
@@ -137,6 +138,9 @@ public:
     QString status() const{return status_;}
     QVariantList frames() const{return frames_;}
     QStringList groups() const{return groups_;}
+    QVariantMap compositionState() const{return compositionState_;}
+    Q_INVOKABLE QVariantMap compositionPlan(const QVariantMap&) const;
+    Q_INVOKABLE void composeChannels(const QVariantMap&);
     QVariantList integrationReport() const{return integrationReport_;}
     QVariantList diagnosticMaps() const;
     QVariantMap hdrReport() const{return hdrReport_;}
@@ -252,6 +256,7 @@ private:
     QByteArray comparisonOrientationKey_;
     bool showingBackgroundModel_{};
     QVariantMap stretch_,projectOptions_,finishSettings_;
+    QVariantMap compositionState_;
     std::map<QString,std::shared_ptr<const processing::FloatImage>> stacks_;
     std::shared_ptr<const processing::FloatImage> linear_,finished_,pipelineCache_,pipelineSource_;
     QByteArray pipelineCacheKey_;

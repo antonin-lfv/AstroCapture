@@ -1,6 +1,6 @@
 # AstroCapture — bilan avant V2
 
-État du 11 octobre 2026, après les contrôles de la livraison 1.16.0.
+État du 11 octobre 2026, après les contrôles de la livraison 1.17.0.
 
 L’utilisateur réserve pour l’instant AstroCapture à son usage personnel.
 La qualification de distribution publique reste une étape ultérieure ; elle
@@ -34,6 +34,12 @@ La 1.16 porte le plafond à 128 MP / 32 700 pixels par dimension, avec projectio
 drizzle bornée à 64 Mio, FITS/TIFF par blocs et contrôle de la finition et de la
 reprise. Les résultats restent complets en RAM : les combinaisons dépassant les
 budgets sont refusées. Voir [ADR-027](../decisions/ADR-027-large-images.md).
+
+La 1.17 simplifie la composition multifiltre : palettes RGB/LRGB/HOO/SHO,
+attribution automatique des couches empilées, contrôle des filtres manquants,
+mode personnalisé et apport de luminance 0–100 %. Les choix sont sauvegardés ;
+la qualification sur une vraie acquisition T33 reste distincte des contrôles
+du moteur et de l’interface. Voir [ADR-028](../decisions/ADR-028-channel-composition.md).
 
 La 1.15 ajoute la préparation de masters par lots, séparés par configuration
 avec choix des correctifs de flats, vérification des sources, provenance,

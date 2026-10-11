@@ -105,5 +105,5 @@ struct Finish {
 };
 FloatImage finishDeepSky(const FloatImage&,const Finish&,const CheckCancel& = {},ComputeReport* = nullptr,const PreviewTarget* preview = nullptr);
 FloatImage combineChannels(const FloatImage& red,const FloatImage& green,const FloatImage& blue,
-                          const FloatImage* luminance=nullptr,const CheckCancel& = {});
+                          const FloatImage* luminance=nullptr,const CheckCancel& = {},double luminanceAmount=1);
 }

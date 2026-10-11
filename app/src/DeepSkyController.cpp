@@ -1,3 +1,4 @@
+#include "CompositionSettings.hpp"
 #include "ImageDecoding.hpp"
 #include <astro/domain/ImageLimits.hpp>
 #include <astro/processing/StarLayers.hpp>
@@ -326,7 +327,7 @@ void DeepSkyController::setReference(int index) {
     emit changed();
 }
 void DeepSkyController::remove(int index){if(busy_||index<0||index>=frames_.size())return;frames_.removeAt(index);emit changed();}
-void DeepSkyController::clear(){if(busy_)return;calibrationBatchResults_.clear();diagnosticMaps_.clear();hdrReport_.clear();diagnosticPreview_={};diagnosticInfo_.clear();emit diagnosticChanged();integrationReport_.clear();starsLayer_.reset();starBackgroundLayer_.reset();starsLayerPreview_={};starBackgroundLayerPreview_={};starLayerView_=0;projectUrl_=QUrl();sourceFingerprints_.clear();maskImportPreview_={};maskImportPath_.clear();geometryPreview_={};maskSourcePreview_={};advancedReport_.clear();psfKernel_.clear();maskPreview_={};showingMask_=false;projectOptions_.clear();sourceRow_.clear();sourceInterpretation_.clear();sourceDebayer_=sourceAutoStretch_=true;finishSettings_.clear();rawPreview_={};backgroundPreview_={};showingBackgroundModel_=false;rawName_.clear();comparingRaw_=false;histogram_.clear();pendingAdjustments_.reset();displayingResult_=false;stage_.clear();frames_.clear();backgroundSamples_.clear();references_.clear();stacks_.clear();astrometry_.clear();stackAstrometry_.clear();groupExposure_.clear();groupCounts_.clear();exposureCount_=0;resultFilters_.clear();groups_.clear();linear_.reset();finished_.reset();pipelineCache_.reset();pipelineSource_.reset();pipelineCacheKey_.clear();preview_={};resultPreview_={};linearPreview_={};comparisonPreview_={};comparisonOrientationKey_.clear();status_.clear();emit projectOptionsChanged();emit changed();emit imageChanged();}
+void DeepSkyController::clear(){if(busy_)return;compositionState_.clear();calibrationBatchResults_.clear();diagnosticMaps_.clear();hdrReport_.clear();diagnosticPreview_={};diagnosticInfo_.clear();emit diagnosticChanged();integrationReport_.clear();starsLayer_.reset();starBackgroundLayer_.reset();starsLayerPreview_={};starBackgroundLayerPreview_={};starLayerView_=0;projectUrl_=QUrl();sourceFingerprints_.clear();maskImportPreview_={};maskImportPath_.clear();geometryPreview_={};maskSourcePreview_={};advancedReport_.clear();psfKernel_.clear();maskPreview_={};showingMask_=false;projectOptions_.clear();sourceRow_.clear();sourceInterpretation_.clear();sourceDebayer_=sourceAutoStretch_=true;finishSettings_.clear();rawPreview_={};backgroundPreview_={};showingBackgroundModel_=false;rawName_.clear();comparingRaw_=false;histogram_.clear();pendingAdjustments_.reset();displayingResult_=false;stage_.clear();frames_.clear();backgroundSamples_.clear();references_.clear();stacks_.clear();astrometry_.clear();stackAstrometry_.clear();groupExposure_.clear();groupCounts_.clear();exposureCount_=0;resultFilters_.clear();groups_.clear();linear_.reset();finished_.reset();pipelineCache_.reset();pipelineSource_.reset();pipelineCacheKey_.clear();preview_={};resultPreview_={};linearPreview_={};comparisonPreview_={};comparisonOrientationKey_.clear();status_.clear();emit projectOptionsChanged();emit changed();emit imageChanged();}
 void DeepSkyController::chooseRawComparison(int index){
     if(busy_||index<0||index>=frames_.size()||frames_[index].toMap()["role"]!="Light")return;
     const auto row=frames_[index].toMap();
@@ -624,7 +625,7 @@ void DeepSkyController::integrate(bool calibrated,double sigma,bool normalize,bo
         const auto rawRow=lights.begin()->second[0].toMap();
         const auto rawPreview=previewImage(processing::linearRgb(read(rawRow),checkpoint),true);
         check(stop);
-        post([this,results=std::move(results),maps=std::move(maps),astrometry,exposures,counts,display,summary,integrationReport,exposure,rawRow,rawPreview,stop]()mutable{if(stop.stop_requested())return;diagnosticMaps_=std::move(maps);hdrReport_.clear();diagnosticPreview_={};diagnosticInfo_.clear();emit diagnosticChanged();integrationReport_=integrationReport;rawPreview_=rawPreview;rawName_=rawRow["name"].toString();stacks_=std::move(results);stackAstrometry_=astrometry;groups_.clear();for(const auto& [group,image]:stacks_)groups_<<group;groupExposure_=exposures;groupCounts_=counts;exposureCount_=counts.begin()->second;resultFilters_={groups_.front()};totalExposure_=exposures.begin()->second;show(stacks_.begin()->second,true,display.preview,display.pixels,display.stretch,display.before);astrometry_=stackAstrometry_.begin()->second;const auto saved=projectOptions_["astrometry"].toMap();if(validAstrometryState(saved)&&saved["imageKey"].toString()==QString::fromLatin1(linearImageKey(*linear_))&&readWcs(saved["wcs"]))astrometry_=saved;progress_=100;stage_=tr("Complete");status_=summary.join("\n");emit changed();});
+        post([this,results=std::move(results),maps=std::move(maps),astrometry,exposures,counts,display,summary,integrationReport,exposure,rawRow,rawPreview,stop]()mutable{if(stop.stop_requested())return;compositionState_.clear();diagnosticMaps_=std::move(maps);hdrReport_.clear();diagnosticPreview_={};diagnosticInfo_.clear();emit diagnosticChanged();integrationReport_=integrationReport;rawPreview_=rawPreview;rawName_=rawRow["name"].toString();stacks_=std::move(results);stackAstrometry_=astrometry;groups_.clear();for(const auto& [group,image]:stacks_)groups_<<group;groupExposure_=exposures;groupCounts_=counts;exposureCount_=counts.begin()->second;resultFilters_={groups_.front()};totalExposure_=exposures.begin()->second;show(stacks_.begin()->second,true,display.preview,display.pixels,display.stretch,display.before);astrometry_=stackAstrometry_.begin()->second;const auto saved=projectOptions_["astrometry"].toMap();if(validAstrometryState(saved)&&saved["imageKey"].toString()==QString::fromLatin1(linearImageKey(*linear_))&&readWcs(saved["wcs"]))astrometry_=saved;progress_=100;stage_=tr("Complete");status_=summary.join("\n");emit changed();});
     });
 }
 
@@ -680,18 +681,67 @@ void DeepSkyController::mergeHdr(const QVariantList& sources,double transition,b
         QVariantList residuals;for(const auto& a:merged.alignments)residuals<<QVariantMap{{"matches",a.matches},{"residual",a.residual}};
         const QVariantMap report{{"sources",provenance},{"transition",transition},{"referenceExposure",referenceExposure},{"recovered",qulonglong(merged.recoveredPixels)},{"clipped",qulonglong(merged.clippedPixels)},{"pixels",qulonglong(std::size_t(image->width)*image->height)},{"alignments",residuals},{"imageKey",QString::fromLatin1(linearImageKey(*image))},{"filter",group}};
         checkpoint();post([this,stop,image,display,maps=std::move(maps),astrometry,report]()mutable{if(stop.stop_requested())return;
-            hdrReport_=report;projectOptions_["hdrOptions"]=QVariantMap{{"sources",report["sources"]},{"transition",report["transition"]}};emit projectOptionsChanged();integrationReport_.clear();diagnosticMaps_=std::move(maps);diagnosticPreview_={};diagnosticInfo_.clear();emit diagnosticChanged();stacks_.clear();stacks_["HDR"]=image;stackAstrometry_.clear();stackAstrometry_["HDR"]=astrometry;groups_={"HDR"};groupExposure_.clear();groupCounts_.clear();groupExposure_["HDR"]=0;groupCounts_["HDR"]=0;totalExposure_=0;exposureCount_=0;resultFilters_={report["filter"].toString()};rawPreview_={};rawName_.clear();show(image,true,display.preview,display.pixels,display.stretch,display.before);astrometry_=astrometry;
+            compositionState_.clear();hdrReport_=report;projectOptions_["hdrOptions"]=QVariantMap{{"sources",report["sources"]},{"transition",report["transition"]}};emit projectOptionsChanged();integrationReport_.clear();diagnosticMaps_=std::move(maps);diagnosticPreview_={};diagnosticInfo_.clear();emit diagnosticChanged();stacks_.clear();stacks_["HDR"]=image;stackAstrometry_.clear();stackAstrometry_["HDR"]=astrometry;groups_={"HDR"};groupExposure_.clear();groupCounts_.clear();groupExposure_["HDR"]=0;groupCounts_["HDR"]=0;totalExposure_=0;exposureCount_=0;resultFilters_={report["filter"].toString()};rawPreview_={};rawName_.clear();show(image,true,display.preview,display.pixels,display.stretch,display.before);astrometry_=astrometry;
             status_=tr("HDR complete: %1 pixels recovered, %2 still saturated. Output units match the longest individual exposure; total integration time is unknown.").arg(report["recovered"].toULongLong()).arg(report["clipped"].toULongLong());progress_=100;emit changed();
         });
     });
 }
-void DeepSkyController::selectResult(const QString& group){if(busy_)return;const auto found=stacks_.find(group);if(found==stacks_.end())return;const auto image=found->second;run(tr("Displaying integration…"),[this,image,group](std::stop_token stop){const auto display=prepare(*image,true,[stop]{check(stop);});check(stop);post([this,image,display,group,stop]{if(!stop.stop_requested()){totalExposure_=groupExposure_[group];exposureCount_=groupCounts_[group];resultFilters_={group};show(image,true,display.preview,display.pixels,display.stretch,display.before);astrometry_=stackAstrometry_[group];emit changed();}});});}
+void DeepSkyController::selectResult(const QString& group){if(busy_)return;const auto found=stacks_.find(group);if(found==stacks_.end())return;const auto image=found->second;run(tr("Displaying integration…"),[this,image,group](std::stop_token stop){const auto display=prepare(*image,true,[stop]{check(stop);});check(stop);post([this,image,display,group,stop]{if(!stop.stop_requested()){compositionState_.clear();totalExposure_=groupExposure_[group];exposureCount_=groupCounts_[group];resultFilters_={group};show(image,true,display.preview,display.pixels,display.stretch,display.before);astrometry_=stackAstrometry_[group];emit changed();}});});}
+QVariantMap DeepSkyController::compositionPlan(const QVariantMap& input) const {
+    const auto checked=checkedCompositionSettings(input);
+    QVariantMap plan{{"ready",false},{"missing",QStringList{}}};
+    if(!checked){plan["message"]=tr("Invalid channel composition settings.");return plan;}
+    auto settings=*checked;const auto palette=settings["palette"].toString();
+    if(palette!="Custom") {
+        const QStringList wanted=palette=="HOO"?QStringList{"HA","OIII","OIII",""}:
+            palette=="SHO"?QStringList{"SII","HA","OIII",""}:QStringList{"R","G","B",palette=="LRGB"?"L":""};
+        int index=0;for(const auto& key:{"red","green","blue","luminance"})settings[key]=wanted[index++];
+    }
+    QStringList missing;
+    for(const auto& key:{"red","green","blue","luminance"}) {
+        auto group=settings[key].toString();
+        if(group.isEmpty()&&QString(key)=="luminance")continue;
+        if(group.isEmpty()){missing<<(QString(key)=="red"?tr("Red channel"):QString(key)=="green"?tr("Green channel"):tr("Blue channel"));continue;}
+        // Resolve aliases only when exactly one integrated group matches.
+        QStringList matches;for(const auto& [name,image]:stacks_)if(groupName(name)==groupName(group))matches<<name;
+        if(matches.size()==1)settings[key]=matches.front();else missing<<group;
+    }
+    missing.removeDuplicates();plan["settings"]=settings;plan["missing"]=missing;
+    if(!missing.isEmpty()){plan["message"]=tr("Missing or ambiguous integrated filters: %1. Integrate these filters or choose Custom.").arg(missing.join(", "));return plan;}
+    const auto reference=stacks_.at(settings["red"].toString());
+    const auto pixels=std::uint64_t(reference->width)*reference->height;
+    try{domain::requireImageMemory(retainedImageBytes()+pixels*128);}
+    catch(const std::exception& e){plan["message"]=tr(e.what());return plan;}
+    std::set<const processing::FloatImage*> saved;std::uint64_t recovery=pixels*64;
+    for(const auto& images:{&stacks_,&diagnosticMaps_})for(const auto& [name,image]:*images)
+        if(image&&saved.insert(image.get()).second)recovery+=image->rgb.size()*4;
+    if(recovery>4ULL*1024*1024*1024){plan["message"]=tr("This composition exceeds the 4 GiB recovery limit. Reduce image size, groups or maps; previous results are preserved.");return plan;}
+    plan["ready"]=true;plan["message"]=tr("Filters ready. Channels will be aligned on their stars.");return plan;
+}
 void DeepSkyController::compose(const QString& red,const QString& green,const QString& blue,const QString& luminance) {
+    composeChannels({{"palette","Custom"},{"red",red},{"green",green},{"blue",blue},{"luminance",luminance},{"luminanceAmount",1.}});
+}
+void DeepSkyController::composeChannels(const QVariantMap& input) {
     if(busy_)return;
-    if(!stacks_.contains(red)||!stacks_.contains(green)||!stacks_.contains(blue)||(!luminance.isEmpty()&&!stacks_.contains(luminance))){status_=tr("Select integrated groups for each color channel.");emit changed();return;}
-    auto r=stacks_.at(red),g=stacks_.at(green),b=stacks_.at(blue),l=luminance.isEmpty()?nullptr:stacks_.at(luminance);
-    double exposure=0;int count=0;std::set<QString> selected{red,green,blue};if(!luminance.isEmpty())selected.insert(luminance);QStringList filters;for(const auto& name:selected){exposure+=groupExposure_[name];count+=groupCounts_[name];filters<<name;}
-    run(tr("Aligning and combining channels…"),[this,r,g,b,l,exposure,count,filters](std::stop_token stop){auto combined=std::make_shared<processing::FloatImage>(processing::combineChannels(*r,*g,*b,l.get(),[stop]{check(stop);}));const auto display=prepare(*combined,true,[stop]{check(stop);});check(stop);post([this,combined,display,exposure,count,filters,stop]{if(stop.stop_requested())return;totalExposure_=exposure;exposureCount_=count;resultFilters_=filters;show(combined,true,display.preview,display.pixels,display.stretch,display.before);status_=tr("Channels combined. Adjust the stretch, then export.");progress_=100;emit changed();});});
+    const auto plan=compositionPlan(input);
+    if(!plan["ready"].toBool()){status_=plan["message"].toString();emit changed();return;}
+    const auto settings=plan["settings"].toMap();
+    const auto red=settings["red"].toString(),green=settings["green"].toString(),blue=settings["blue"].toString(),luminance=settings["luminance"].toString();
+    const auto amount=settings["luminanceAmount"].toDouble();
+    auto r=stacks_.at(red),g=stacks_.at(green),b=stacks_.at(blue),l=luminance.isEmpty()||amount==0?nullptr:stacks_.at(luminance);
+    double exposure=0;int count=0;std::set<QString> selected{red,green,blue};if(l)selected.insert(luminance);QStringList filters;
+    for(const auto& name:selected){exposure+=groupExposure_[name];count+=groupCounts_[name];filters<<name;}
+    run(tr("Aligning and combining channels…"),[this,r,g,b,l,amount,exposure,count,filters,settings](std::stop_token stop){
+        const auto checkpoint=[stop]{check(stop);};
+        auto combined=std::make_shared<processing::FloatImage>(processing::combineChannels(*r,*g,*b,l.get(),checkpoint,amount));
+        const auto display=prepare(*combined,true,checkpoint);checkpoint();
+        auto state=settings;state["imageKey"]=QString::fromLatin1(linearImageKey(*combined));
+        post([this,combined,display,exposure,count,filters,state,stop]{if(stop.stop_requested())return;
+            totalExposure_=exposure;exposureCount_=count;resultFilters_=filters;astrometry_.clear();compositionState_=state;
+            show(combined,true,display.preview,display.pixels,display.stretch,display.before);
+            status_=tr("Channels combined. Adjust the stretch, then export.");progress_=100;emit changed();
+        });
+    });
 }
 void DeepSkyController::apply(const QVariantMap& options) {
     if(busy_){if(adjusting_){pendingAdjustments_=options;worker_.request_stop();}return;}
@@ -872,6 +922,7 @@ void DeepSkyController::loadProject(const QUrl& url) {
     auto frames=object["frames"].toArray().toVariantList();
     for(const auto& value:frames){const auto row=value.toMap();if(row["path"].toString().isEmpty()||!QStringList{"Light","Dark","Flat","Bias","DarkFlat","BadPixels"}.contains(row["role"].toString())){status_=tr("Project contains missing files or invalid roles.");emit changed();return;}}
     auto options=object["options"].toObject().toVariantMap();
+    if(options.contains("composition")&&!checkedCompositionSettings(options["composition"].toMap())){status_=tr("Invalid AstroCapture project.");emit changed();return;}
     if(options.contains("finish")) {
         auto finish=defaultDeepSkySettings();const auto saved=options["finish"].toMap();
         for(auto it=saved.cbegin();it!=saved.cend();++it)finish[it.key()]=it.value();

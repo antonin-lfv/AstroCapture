@@ -17,11 +17,34 @@ des planètes ou d’un objet fixe. Il est indépendant de **Ciel profond**.
 
 1. Choisissez une suggestion ou recherchez un nom / numéro NGC, IC ou Messier.
 2. Choisissez un lieu proposé ou recherchez une ville en ligne. Ses coordonnées
-   et son fuseau sont renseignés ; les options avancées permettent d’enregistrer
-   votre site précis en favori local.
+   et son fuseau sont renseignés. Le bouton **☆ Lieu favori** enregistre votre lieu ;
+   les options avancées permettent d’en préciser les coordonnées.
 3. Choisissez la date locale et une hauteur minimale. **30°** est un point de départ.
    Le ciel très sombre est proposé pour le ciel profond, le crépuscule pour la Lune
    et les planètes. Un seuil sans contrainte d’obscurité permet aussi d’explorer le jour.
+
+Enregistrez vos **objets favoris** avec l’étoile près de leur liste. La liste des
+favoris les retrouve sans connexion, y compris les coordonnées d’un objet trouvé
+en ligne. Les lieux favoris apparaissent avec une étoile dans la liste des lieux.
+Les favoris restent sur cet ordinateur (100 objets et 30 lieux au maximum).
+
+**Suggestions** compare les objets Messier inclus, quelques objets remarquables
+notamment de l’hémisphère Sud, la Lune, les planètes et vos favoris. Le lieu, la date
+locale et la hauteur minimale actualisent cette liste automatiquement. Jusqu’à
+4 cibles du Système solaire et 6 du ciel profond sont proposées, avec priorité aux
+favoris puis classement selon le temps au-dessus du seuil et la hauteur. Les filtres
+**Tout**, **Lune et planètes** et **Ciel profond** permettent de parcourir ces familles. Chaque résultat
+a au moins 20 minutes de créneau et indique ses propres critères : Soleil sous
+−18° pour les objets fixes, sous −6° pour le Système solaire. **Explorer** sélectionne
+la cible avec ces critères et ouvre sa courbe. La sélection n’est pas exhaustive ;
+le catalogue complet reste interrogeable. Les suggestions de Mercure et Vénus
+excluent les créneaux à moins de 30° du Soleil. Le matériel, la pollution lumineuse,
+la Lune et la météo peuvent rendre un objet difficile à observer.
+
+Le **lever et le coucher du Soleil** sont visibles immédiatement. Le détail
+**Jour, crépuscule et nuit** liste le jour, le crépuscule civil et la nuit astronomique.
+Un libellé indique aussi l’état à l’instant du curseur, avec les crépuscules civil,
+nautique et astronomique. Les périodes sans lever, coucher ou nuit sont explicites.
 
 **Nuit**, **Horizon** et **Monde** suivent le même curseur horaire. Les créneaux bleus
 respectent les seuils de hauteur et d’obscurité. Les heures locales et UTC sont
@@ -38,11 +61,22 @@ Le catalogue [OpenNGC](https://github.com/mattiaverga/OpenNGC) est inclus sans c
 Les autres noms d’objets fixes sont recherchés par [CDS Sesame](https://cds.unistra.fr/doc/sesame.htx),
 en envoyant uniquement le nom. La recherche de ville envoie seulement le texte saisi
 à [Open-Meteo / GeoNames](https://open-meteo.com/en/docs/geocoding-api).
+Un message indique l’absence ou la perte de connexion lorsque le système la
+signale, ainsi qu’un échec ou un délai dépassé des recherches en ligne. Un échec
+ne remplace pas les résultats précédents. Le rétablissement de la connexion
+permet de réessayer ; aucune recherche n’est relancée à votre insu. Les calculs,
+les suggestions, le catalogue et les favoris ne nécessitent pas Internet.
+
 Les éphémérides de la Lune et des planètes sont calculées localement avec
 [Astronomy Engine](https://github.com/cosinekitty/astronomy).
 
-Les calculs utilisent un horizon géométrique plat et le centre des astres, sans
-réfraction ni masque des obstacles. Les coordonnées fixes J2000 incluent précession
+Les calculs de position des cibles utilisent un horizon géométrique plat et le
+centre des astres, sans réfraction ni masque des obstacles. Le lever/coucher du
+Soleil utilise son bord supérieur, avec une réfraction atmosphérique standard de
+34 minutes d’arc au niveau de la mer, adaptée à l’altitude du lieu. L’observateur
+est supposé au sol ; le relief et l’abaissement de l’horizon ne sont pas modélisés.
+Les seuils de crépuscule (−6°, −12°, −18°) utilisent le centre géométrique du Soleil.
+Le temps réel peut varier avec les conditions atmosphériques et les obstacles. Les coordonnées fixes J2000 incluent précession
 et nutation, mais pas le mouvement propre ni l’aberration annuelle. Ce module vise
 la préparation à la minute d’arc, sans garantir une précision de pointage. Les créneaux
 sont recherchés par pas d’une minute et leurs limites affinées à la seconde ; de très
@@ -642,7 +676,7 @@ Les commandes propres à la caméra restent dans **Capture**. Les préférences 
 ## Périmètre actuel
 
 Le [bilan avant V2](docs/releases/V2_READINESS.md) centralise les travaux restants,
-les limites à qualifier et les pistes futures, dont la préparation des observations.
+les limites à qualifier et les pistes futures, dont les prolongements de la préparation des observations.
 
 AstroCapture propose un alignement global par translation et une correction locale des surfaces lunaires et solaires. Le mode Lune / Soleil peut sélectionner les meilleures prises indépendamment pour chaque zone. La qualité dépend du contraste, du bruit, du recouvrement entre prises et de l’intensité de la turbulence ; les zones sans détail fiable ne bénéficient pas d’un recalage local. La dérotation planétaire n’est pas disponible. Le ciel profond utilise son propre onglet avec les limites décrites plus haut. L’import AVI n’est pas disponible. La reprise de session restaure les résultats calculés, les réglages et les légendes ; elle ne relance pas une acquisition ou un calcul interrompu.
 

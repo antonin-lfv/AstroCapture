@@ -3824,6 +3824,26 @@ L’aperçu est automatiquement éclairci ; les données restent linéaires.</tr
         <source>Combine multiple filters as RGB, LRGB, SHO or HOO. Adjust color gains, saturation and smoothing manually. The initial gains estimate a neutral background; they are not photometric calibration. Gradient extraction uses independent color-channel polynomials (degrees 1 to 4), a configurable grid and manually editable sky samples. Optional degree-1 extraction can run on each calibrated, debayered exposure before stacking. Avoid fitting real nebulosity. Green noise reduction offers four SCNR protection methods and optional CIE lightness preservation. Use it after stretching and color balance; intentional green colors should be preserved. Advanced transformations provides GHS, circular-PSF Richardson-Lucy, multiscale wavelet denoising, generated masks and local matched-reference photometric colors. The Color family provides targeted WCS with Gaia DR3, PCC from stellar temperature models and SPCC from measured Gaia XP spectra. SPCC requires the measured equipment response. Verify the astrometric markers and calibration diagnostics; a distorted or unknown full-sky field may need an external solver. Export linear 32-bit FITS for further work. Classic export opens the shared editor with a choice of PNG, TIFF or JPEG and an optional caption. PNG and TIFF preserve 16-bit detail without lossy compression. The technical caption includes the accepted exposure count, total exposure time and filters. Deep-sky caption settings are saved in the project.</source>
         <translation>Combinez plusieurs filtres en RVB, LRGB, SHO ou HOO. Ajustez manuellement les gains de couleur, la saturation et le lissage. Les gains initiaux estiment un fond neutre ; ce n’est pas une calibration photométrique. L’extraction du gradient utilise des polynômes indépendants par canal (degrés 1 à 4), une grille configurable et des échantillons de ciel modifiables. Une extraction facultative de degré 1 peut précéder l’empilement de chaque pose calibrée et dématricée. Évitez de modéliser une vraie nébulosité. La réduction du bruit vert propose quatre méthodes de protection SCNR et la conservation facultative de la clarté CIE. Utilisez-la après l’étirement et l’équilibrage des couleurs ; préservez les couleurs vertes intentionnelles. Transformations avancées propose GHS, Richardson–Lucy avec PSF circulaire, débruitage par ondelettes, masques générés et couleurs photométriques par étoiles de référence locales. La famille Couleur propose le WCS ciblé avec Gaia DR3, la PCC à partir de températures stellaires et la SPCC à partir de spectres Gaia XP mesurés. La SPCC nécessite la réponse mesurée du matériel. Vérifiez les repères astrométriques et les diagnostics ; un champ déformé ou entièrement inconnu peut nécessiter une résolution externe. Exportez un FITS linéaire 32 bits pour poursuivre le travail. L’export classique ouvre l’éditeur commun avec PNG, TIFF ou JPEG et une légende facultative. PNG et TIFF conservent les détails en 16 bits sans compression avec perte. Les informations techniques comprennent le nombre de poses acceptées, la durée totale et les filtres. Les réglages de légende du ciel profond sont sauvegardés dans le projet.</translation>
     </message>
+    <message>
+        <source>Choose what to observe</source>
+        <translation>Choisir ce qu’on va observer</translation>
+    </message>
+    <message>
+        <source>Suggestions uses your place, local date and minimum height. It compares common objects and your favourites offline, showing actual time windows. Deep sky uses astronomical night (Sun below −18°); Solar System targets use the end of civil twilight (−6°). Explore a suggestion to see its curve. These suggestions do not account for weather or light pollution.</source>
+        <translation>Suggestions utilise votre lieu, la date locale et la hauteur minimale. Les objets courants et vos favoris sont comparés sans connexion, avec leurs vrais créneaux. Le ciel profond utilise la nuit astronomique (Soleil sous −18°), le Système solaire la fin du crépuscule civil (−6°). Explorez une suggestion pour voir sa courbe. La météo et la pollution lumineuse ne sont pas prises en compte.</translation>
+    </message>
+    <message>
+        <source>A target above the horizon can still be too low or in a bright sky. Very dark is suggested for deep sky, twilight for the Moon and planets. The lunar readout gives illuminated fraction, height and angular distance from your target. No weather, seeing, obstructions, reservations or camera control are included. Object positions use a flat geometric horizon without refraction. Sunrise and sunset use the upper edge of the Sun with standard atmospheric refraction; actual weather and obstacles can shift them.</source>
+        <translation>Une cible au-dessus de l’horizon peut rester trop basse ou dans un ciel trop clair. Le ciel très sombre est proposé pour le ciel profond, le crépuscule pour la Lune et les planètes. Les indications lunaires donnent la fraction éclairée, la hauteur et l’écart angulaire à la cible. Météo, turbulence, obstacles, réservations et commandes de caméra ne sont pas inclus. Les positions utilisent un horizon géométrique plat sans réfraction. Le lever et le coucher du Soleil utilisent son bord supérieur avec une réfraction standard ; la météo et les obstacles réels peuvent les décaler.</translation>
+    </message>
+    <message>
+        <source>Names and favourites</source>
+        <translation>Noms et favoris</translation>
+    </message>
+    <message>
+        <source>OpenNGC is available offline for NGC, IC and Messier identifiers. Other fixed-object names can be searched using CDS Sesame; only the name is sent. City search uses Open-Meteo / GeoNames and sends only the typed city name. The favourite buttons save objects and places on this computer; starred places appear in the location list. Advanced lets you enter exact site coordinates. Online failures and connection loss display a message while keeping your previous results. For moving bodies, use the Moon or planet entries instead of manual fixed coordinates.</source>
+        <translation>OpenNGC est disponible sans connexion pour les numéros NGC, IC et Messier. Les autres objets fixes sont recherchés par CDS Sesame ; seul le nom est envoyé. La recherche de ville utilise Open-Meteo / GeoNames et n’envoie que le texte saisi. Les boutons des favoris enregistrent les objets et les lieux sur cet ordinateur ; les lieux étoilés apparaissent dans la liste. Les options avancées permettent de saisir les coordonnées exactes. Un échec en ligne ou une perte de connexion affiche un message et conserve les résultats précédents. Pour les astres mobiles, utilisez les entrées Lune ou planète plutôt que des coordonnées fixes manuelles.</translation>
+    </message>
 </context>
     <context>
         <name>HistoryWorkspace</name>
@@ -8991,7 +9011,27 @@ Rejets : bords %7 · saturation %8 · signal faible %9 · incohérence %10</tran
             <source>In Astrometry, enter a catalogue name such as M42 or NGC 7000 and choose Search. CDS Sesame returns approximate J2000 coordinates; only the target name is sent. This fills the centre hint without replacing a verified WCS or changing the pixels. Set the sampling and solve to verify the image. Equipment profiles stores your imported measured RGB responses with camera, filters, source and notes. Use profile copies the curve into the project; run PCC/SPCC separately to recalibrate. Import/export library creates a local JSON backup. No manufacturer curve is inferred automatically. After a verified WCS, hover over the result to read ICRS RA in hours and Dec in degrees. The copy icon keeps the last image position and copies both sexagesimal and decimal coordinates. Crop, mirrors, rotation, resize and before/after comparison use the same sky position. Precision is limited by the WCS fit; source, mask and background-model previews have no readout.</source>
             <translation>Dans Astrométrie, saisissez un nom de catalogue, par exemple M42 ou NGC 7000, puis cliquez sur Rechercher. CDS Sesame propose des coordonnées J2000 ; seul le nom de cible est transmis. Ces coordonnées renseignent le centre de recherche sans remplacer le WCS vérifié ni modifier les pixels. Renseignez l’échantillonnage et résolvez l’image pour vérifier son champ. Profils de matériel conserve les réponses RVB mesurées que vous importez, avec caméra, filtres, source et notes. Utiliser copie la courbe dans le projet ; lancez ensuite PCC/SPCC pour recalibrer. Importer/Exporter permet de sauvegarder la bibliothèque en JSON. Aucune courbe de fabricant n’est déduite automatiquement. Après vérification du WCS, survolez le résultat : l’ascension droite ICRS est affichée en heures, la déclinaison en degrés. L’icône de copie reprend la dernière position pointée, en coordonnées sexagésimales et degrés décimaux. Recadrage, miroirs, rotation, changement d’échelle et comparaison avant/après suivent la même position céleste. La précision dépend de l’ajustement WCS ; les aperçus de source, masque et modèle de fond ne proposent pas ces coordonnées.</translation>
         </message>
-    </context>
+        <message>
+        <source>Choose what to observe</source>
+        <translation>Choisir ce qu’on va observer</translation>
+    </message>
+    <message>
+        <source>Suggestions uses your place, local date and minimum height. It compares common objects and your favourites offline, showing actual time windows. Deep sky uses astronomical night (Sun below −18°); Solar System targets use the end of civil twilight (−6°). Explore a suggestion to see its curve. These suggestions do not account for weather or light pollution.</source>
+        <translation>Suggestions utilise votre lieu, la date locale et la hauteur minimale. Les objets courants et vos favoris sont comparés sans connexion, avec leurs vrais créneaux. Le ciel profond utilise la nuit astronomique (Soleil sous −18°), le Système solaire la fin du crépuscule civil (−6°). Explorez une suggestion pour voir sa courbe. La météo et la pollution lumineuse ne sont pas prises en compte.</translation>
+    </message>
+    <message>
+        <source>A target above the horizon can still be too low or in a bright sky. Very dark is suggested for deep sky, twilight for the Moon and planets. The lunar readout gives illuminated fraction, height and angular distance from your target. No weather, seeing, obstructions, reservations or camera control are included. Object positions use a flat geometric horizon without refraction. Sunrise and sunset use the upper edge of the Sun with standard atmospheric refraction; actual weather and obstacles can shift them.</source>
+        <translation>Une cible au-dessus de l’horizon peut rester trop basse ou dans un ciel trop clair. Le ciel très sombre est proposé pour le ciel profond, le crépuscule pour la Lune et les planètes. Les indications lunaires donnent la fraction éclairée, la hauteur et l’écart angulaire à la cible. Météo, turbulence, obstacles, réservations et commandes de caméra ne sont pas inclus. Les positions utilisent un horizon géométrique plat sans réfraction. Le lever et le coucher du Soleil utilisent son bord supérieur avec une réfraction standard ; la météo et les obstacles réels peuvent les décaler.</translation>
+    </message>
+    <message>
+        <source>Names and favourites</source>
+        <translation>Noms et favoris</translation>
+    </message>
+    <message>
+        <source>OpenNGC is available offline for NGC, IC and Messier identifiers. Other fixed-object names can be searched using CDS Sesame; only the name is sent. City search uses Open-Meteo / GeoNames and sends only the typed city name. The favourite buttons save objects and places on this computer; starred places appear in the location list. Advanced lets you enter exact site coordinates. Online failures and connection loss display a message while keeping your previous results. For moving bodies, use the Moon or planet entries instead of manual fixed coordinates.</source>
+        <translation>OpenNGC est disponible sans connexion pour les numéros NGC, IC et Messier. Les autres objets fixes sont recherchés par CDS Sesame ; seul le nom est envoyé. La recherche de ville utilise Open-Meteo / GeoNames et n’envoie que le texte saisi. Les boutons des favoris enregistrent les objets et les lieux sur cet ordinateur ; les lieux étoilés apparaissent dans la liste. Les options avancées permettent de saisir les coordonnées exactes. Un échec en ligne ou une perte de connexion affiche un message et conserve les résultats précédents. Pour les astres mobiles, utilisez les entrées Lune ou planète plutôt que des coordonnées fixes manuelles.</translation>
+    </message>
+</context>
     <context>
         <name>MasterLibraryDialog</name>
         <message>
@@ -9510,7 +9550,27 @@ RMS normalisée moyenne %5</translation>
             <source>Enable separation in the Stars and background family on a linear recipe input, after gradient and color calibration and before stretch. Fit Gaussian or Moffat stellar profiles; inspect accepted/rejected counts and the residual background. Crowded, saturated or poorly fitted stars stay in the background: this is PSF subtraction, not complete star removal. A neutral setting reproduces the combined image. Adjust stellar brightness, saturation and midtones separately from background brightness, saturation and smoothing. Both layers share the main stretch. Inspect Combined, Stars and Background at 100%. Export each calculated layer as signed 32-bit FITS with the current geometry/WCS; their sum reconstructs the combined result. Main exports always save the combined image.</source>
             <translation>Activez la séparation dans Étoiles et fond sur une entrée de recette linéaire, après correction du gradient et calibration des couleurs, avant l’étirement. Ajustez des profils stellaires gaussiens ou Moffat ; inspectez les nombres acceptés/rejetés et le fond résiduel. Les étoiles proches, saturées ou mal ajustées restent dans le fond : il s’agit d’une soustraction de PSF, pas d’un retrait complet des étoiles. Des réglages neutres reproduisent l’image combinée. Réglez séparément luminosité, saturation et tons moyens des étoiles, puis luminosité, saturation et lissage du fond. Les deux couches partagent l’étirement principal. Inspectez Combiné, Étoiles et Fond à 100 %. Exportez chaque couche calculée en FITS 32 bits signé avec la géométrie et le WCS actuels : leur somme reconstitue le résultat combiné. Les exports principaux enregistrent toujours l’image combinée.</translation>
         </message>
-    </context>
+        <message>
+        <source>Choose what to observe</source>
+        <translation>Choisir ce qu’on va observer</translation>
+    </message>
+    <message>
+        <source>Suggestions uses your place, local date and minimum height. It compares common objects and your favourites offline, showing actual time windows. Deep sky uses astronomical night (Sun below −18°); Solar System targets use the end of civil twilight (−6°). Explore a suggestion to see its curve. These suggestions do not account for weather or light pollution.</source>
+        <translation>Suggestions utilise votre lieu, la date locale et la hauteur minimale. Les objets courants et vos favoris sont comparés sans connexion, avec leurs vrais créneaux. Le ciel profond utilise la nuit astronomique (Soleil sous −18°), le Système solaire la fin du crépuscule civil (−6°). Explorez une suggestion pour voir sa courbe. La météo et la pollution lumineuse ne sont pas prises en compte.</translation>
+    </message>
+    <message>
+        <source>A target above the horizon can still be too low or in a bright sky. Very dark is suggested for deep sky, twilight for the Moon and planets. The lunar readout gives illuminated fraction, height and angular distance from your target. No weather, seeing, obstructions, reservations or camera control are included. Object positions use a flat geometric horizon without refraction. Sunrise and sunset use the upper edge of the Sun with standard atmospheric refraction; actual weather and obstacles can shift them.</source>
+        <translation>Une cible au-dessus de l’horizon peut rester trop basse ou dans un ciel trop clair. Le ciel très sombre est proposé pour le ciel profond, le crépuscule pour la Lune et les planètes. Les indications lunaires donnent la fraction éclairée, la hauteur et l’écart angulaire à la cible. Météo, turbulence, obstacles, réservations et commandes de caméra ne sont pas inclus. Les positions utilisent un horizon géométrique plat sans réfraction. Le lever et le coucher du Soleil utilisent son bord supérieur avec une réfraction standard ; la météo et les obstacles réels peuvent les décaler.</translation>
+    </message>
+    <message>
+        <source>Names and favourites</source>
+        <translation>Noms et favoris</translation>
+    </message>
+    <message>
+        <source>OpenNGC is available offline for NGC, IC and Messier identifiers. Other fixed-object names can be searched using CDS Sesame; only the name is sent. City search uses Open-Meteo / GeoNames and sends only the typed city name. The favourite buttons save objects and places on this computer; starred places appear in the location list. Advanced lets you enter exact site coordinates. Online failures and connection loss display a message while keeping your previous results. For moving bodies, use the Moon or planet entries instead of manual fixed coordinates.</source>
+        <translation>OpenNGC est disponible sans connexion pour les numéros NGC, IC et Messier. Les autres objets fixes sont recherchés par CDS Sesame ; seul le nom est envoyé. La recherche de ville utilise Open-Meteo / GeoNames et n’envoie que le texte saisi. Les boutons des favoris enregistrent les objets et les lieux sur cet ordinateur ; les lieux étoilés apparaissent dans la liste. Les options avancées permettent de saisir les coordonnées exactes. Un échec en ligne ou une perte de connexion affiche un message et conserve les résultats précédents. Pour les astres mobiles, utilisez les entrées Lune ou planète plutôt que des coordonnées fixes manuelles.</translation>
+    </message>
+</context>
     <context>
         <name>GuideWorkspace</name>
     <message><source>Observation</source><translation>Observation</translation></message>
@@ -9531,7 +9591,27 @@ RMS normalisée moyenne %5</translation>
             <source>In Stack → Advanced stack settings, enable Drizzle · mono / RGB. It projects the original calibrated pixel footprints using their stellar alignment. Start at scale ×2 and pixel fraction 0.8 for undersampled data with varied subpixel shifts; many dithered exposures work better than two nearly identical poses. ×2 produces four times as many pixels, with more noise and storage, without creating new photons. Try ×1 when the sources are large. Review the output dimensions before crop and the final contributor counts. Fewer than three contributors cannot support robust rejection; uncovered pixels stop the operation. Sources and output remain limited to 32 MP. Bayer sources are debayered first; native CFA drizzle is not available. Keep ordinary stacking as a comparison.</source>
             <translation>Dans Empilement → Réglages avancés, activez Drizzle · mono / RVB. Il projette les empreintes des pixels calibrés originaux selon leur alignement stellaire. Commencez avec une échelle ×2 et une fraction de pixel de 0,8 pour des données sous-échantillonnées avec des décalages sous-pixel variés ; de nombreuses poses avec dithering sont préférables à deux poses presque identiques. ×2 produit quatre fois plus de pixels, avec davantage de bruit et de stockage, sans créer de nouveaux photons. Essayez ×1 pour les grandes sources. Vérifiez les dimensions avant recadrage et les nombres de poses contributrices du bilan. Moins de trois contributions ne permettent pas de rejet robuste ; des pixels sans couverture arrêtent l’opération. Sources et résultat restent limités à 32 MP. Les sources Bayer sont dématricées au préalable ; le drizzle CFA natif n’est pas disponible. Conservez un empilement ordinaire pour comparer.</translation>
         </message>
-    </context>
+        <message>
+        <source>Choose what to observe</source>
+        <translation>Choisir ce qu’on va observer</translation>
+    </message>
+    <message>
+        <source>Suggestions uses your place, local date and minimum height. It compares common objects and your favourites offline, showing actual time windows. Deep sky uses astronomical night (Sun below −18°); Solar System targets use the end of civil twilight (−6°). Explore a suggestion to see its curve. These suggestions do not account for weather or light pollution.</source>
+        <translation>Suggestions utilise votre lieu, la date locale et la hauteur minimale. Les objets courants et vos favoris sont comparés sans connexion, avec leurs vrais créneaux. Le ciel profond utilise la nuit astronomique (Soleil sous −18°), le Système solaire la fin du crépuscule civil (−6°). Explorez une suggestion pour voir sa courbe. La météo et la pollution lumineuse ne sont pas prises en compte.</translation>
+    </message>
+    <message>
+        <source>A target above the horizon can still be too low or in a bright sky. Very dark is suggested for deep sky, twilight for the Moon and planets. The lunar readout gives illuminated fraction, height and angular distance from your target. No weather, seeing, obstructions, reservations or camera control are included. Object positions use a flat geometric horizon without refraction. Sunrise and sunset use the upper edge of the Sun with standard atmospheric refraction; actual weather and obstacles can shift them.</source>
+        <translation>Une cible au-dessus de l’horizon peut rester trop basse ou dans un ciel trop clair. Le ciel très sombre est proposé pour le ciel profond, le crépuscule pour la Lune et les planètes. Les indications lunaires donnent la fraction éclairée, la hauteur et l’écart angulaire à la cible. Météo, turbulence, obstacles, réservations et commandes de caméra ne sont pas inclus. Les positions utilisent un horizon géométrique plat sans réfraction. Le lever et le coucher du Soleil utilisent son bord supérieur avec une réfraction standard ; la météo et les obstacles réels peuvent les décaler.</translation>
+    </message>
+    <message>
+        <source>Names and favourites</source>
+        <translation>Noms et favoris</translation>
+    </message>
+    <message>
+        <source>OpenNGC is available offline for NGC, IC and Messier identifiers. Other fixed-object names can be searched using CDS Sesame; only the name is sent. City search uses Open-Meteo / GeoNames and sends only the typed city name. The favourite buttons save objects and places on this computer; starred places appear in the location list. Advanced lets you enter exact site coordinates. Online failures and connection loss display a message while keeping your previous results. For moving bodies, use the Moon or planet entries instead of manual fixed coordinates.</source>
+        <translation>OpenNGC est disponible sans connexion pour les numéros NGC, IC et Messier. Les autres objets fixes sont recherchés par CDS Sesame ; seul le nom est envoyé. La recherche de ville utilise Open-Meteo / GeoNames et n’envoie que le texte saisi. Les boutons des favoris enregistrent les objets et les lieux sur cet ordinateur ; les lieux étoilés apparaissent dans la liste. Les options avancées permettent de saisir les coordonnées exactes. Un échec en ligne ou une perte de connexion affiche un message et conserve les résultats précédents. Pour les astres mobiles, utilisez les entrées Lune ou planète plutôt que des coordonnées fixes manuelles.</translation>
+    </message>
+</context>
     <context>
         <name>DeepSkyWorkspace</name>
         <message>
@@ -9732,7 +9812,27 @@ RMS normalisée moyenne %5</translation>
             <source>Enable Native Bayer / CFA only for single-channel sources that retain the sensor mosaic. Each calibrated pixel contributes only to its measured color; the color copy used for registration never supplies interpolated export pixels. Start at ×1 with pixel fraction 1, and use many poses with varied dither positions. Coverage and robust rejection are checked separately in R, G and B. Identical poses leave missing colors and stop stacking; the previous result is kept. Temporary projections use 24 bytes per output pixel per exposure, compared with 16 in mono / RGB. Leave Bayer pattern from metadata selected when the pattern is known. If a FITS only says VALID, explicitly select its verified stored-image pattern, including offsets and row order. The declaration also applies to selected single-channel calibrations and is saved in the project. Conflicting known patterns block stacking. Already debayered RGB data cannot use native Bayer.</source>
             <translation>Activez Bayer natif / CFA uniquement pour des sources à un canal conservant la matrice du capteur. Chaque pixel calibré contribue seulement à sa couleur mesurée ; la copie couleur servant à l’alignement ne fournit jamais de pixels interpolés à l’export. Commencez à ×1 avec une fraction de pixel de 1, et utilisez beaucoup de poses avec des positions de dithering variées. La couverture et le rejet robuste sont vérifiés séparément en R, V et B. Des poses identiques laissent des couleurs sans données et bloquent le calcul ; le résultat précédent est conservé. Les projections temporaires utilisent 24 octets par pixel de sortie et par pose, contre 16 en mono / RVB. Gardez Matrice Bayer des métadonnées lorsque la matrice est connue. Si un FITS indique seulement VALID, choisissez explicitement sa matrice vérifiée, en tenant compte des décalages et de l’ordre des lignes. La déclaration s’applique aussi aux calibrations sélectionnées à un canal et est sauvegardée dans le projet. Les matrices connues contradictoires bloquent l’empilement. Des données RVB déjà dématricées ne conviennent pas au mode Bayer natif.</translation>
         </message>
-    </context>
+        <message>
+        <source>Choose what to observe</source>
+        <translation>Choisir ce qu’on va observer</translation>
+    </message>
+    <message>
+        <source>Suggestions uses your place, local date and minimum height. It compares common objects and your favourites offline, showing actual time windows. Deep sky uses astronomical night (Sun below −18°); Solar System targets use the end of civil twilight (−6°). Explore a suggestion to see its curve. These suggestions do not account for weather or light pollution.</source>
+        <translation>Suggestions utilise votre lieu, la date locale et la hauteur minimale. Les objets courants et vos favoris sont comparés sans connexion, avec leurs vrais créneaux. Le ciel profond utilise la nuit astronomique (Soleil sous −18°), le Système solaire la fin du crépuscule civil (−6°). Explorez une suggestion pour voir sa courbe. La météo et la pollution lumineuse ne sont pas prises en compte.</translation>
+    </message>
+    <message>
+        <source>A target above the horizon can still be too low or in a bright sky. Very dark is suggested for deep sky, twilight for the Moon and planets. The lunar readout gives illuminated fraction, height and angular distance from your target. No weather, seeing, obstructions, reservations or camera control are included. Object positions use a flat geometric horizon without refraction. Sunrise and sunset use the upper edge of the Sun with standard atmospheric refraction; actual weather and obstacles can shift them.</source>
+        <translation>Une cible au-dessus de l’horizon peut rester trop basse ou dans un ciel trop clair. Le ciel très sombre est proposé pour le ciel profond, le crépuscule pour la Lune et les planètes. Les indications lunaires donnent la fraction éclairée, la hauteur et l’écart angulaire à la cible. Météo, turbulence, obstacles, réservations et commandes de caméra ne sont pas inclus. Les positions utilisent un horizon géométrique plat sans réfraction. Le lever et le coucher du Soleil utilisent son bord supérieur avec une réfraction standard ; la météo et les obstacles réels peuvent les décaler.</translation>
+    </message>
+    <message>
+        <source>Names and favourites</source>
+        <translation>Noms et favoris</translation>
+    </message>
+    <message>
+        <source>OpenNGC is available offline for NGC, IC and Messier identifiers. Other fixed-object names can be searched using CDS Sesame; only the name is sent. City search uses Open-Meteo / GeoNames and sends only the typed city name. The favourite buttons save objects and places on this computer; starred places appear in the location list. Advanced lets you enter exact site coordinates. Online failures and connection loss display a message while keeping your previous results. For moving bodies, use the Moon or planet entries instead of manual fixed coordinates.</source>
+        <translation>OpenNGC est disponible sans connexion pour les numéros NGC, IC et Messier. Les autres objets fixes sont recherchés par CDS Sesame ; seul le nom est envoyé. La recherche de ville utilise Open-Meteo / GeoNames et n’envoie que le texte saisi. Les boutons des favoris enregistrent les objets et les lieux sur cet ordinateur ; les lieux étoilés apparaissent dans la liste. Les options avancées permettent de saisir les coordonnées exactes. Un échec en ligne ou une perte de connexion affiche un message et conserve les résultats précédents. Pour les astres mobiles, utilisez les entrées Lune ou planète plutôt que des coordonnées fixes manuelles.</translation>
+    </message>
+</context>
     <context>
         <name>DeepSkyController</name>
         <message>
@@ -9819,6 +9919,26 @@ RMS normalisée moyenne %5</translation>
     <message><source>In Stack → Advanced stack settings, enable Keep weight and rejection maps before stacking. The optional RGB Float32 maps sum retained geometrical weights, count retained contributors, and count combined low/high rejected samples. They add about 36 bytes per output pixel per group to memory and projects. Inspect each color independently, especially with native Bayer. The preview scales zero to black and the maximum to white; it is reduced and is not a noise or confidence measure. Export maps as full-resolution floating-point FITS with the stack WCS, without stretch or caption. Existing projects without maps still open normally; stack again to create diagnostics.</source><translation>Dans Empilement → Réglages avancés, activez Conserver les cartes de poids et de rejet avant le calcul. Les cartes RVB Float32 facultatives additionnent les poids géométriques retenus, comptent les contributeurs après rejet et réunissent les rejets bas/hauts. Elles ajoutent environ 36 octets par pixel de sortie et par groupe à la mémoire et aux projets. Examinez chaque couleur, surtout en Bayer natif. L’aperçu réduit affiche zéro en noir et le maximum en blanc ; il ne mesure ni le bruit ni la confiance. Exportez en FITS flottant à pleine résolution, avec le WCS de l’empilement, sans étirement ni légende. Les anciens projets sans cartes restent compatibles ; relancez l’empilement pour créer les diagnostics.</translation></message>
     <message><source>Linear HDR: preserve bright cores</source><translation>HDR linéaire : préserver les zones brillantes</translation></message>
     <message><source>In Stack, choose Merge different exposures · HDR. Select 2–8 calibrated linear FITS lights in one filter group, ideally one mean stack per exposure duration. Calibrate each series separately with matching masters before merging; debayer CFA sources. Verify individual sub-exposure durations: EXPTIME in exported stacks can be total integration time. Verify identical camera, filter, gain, offset, binning and sample units; missing metadata is not proof. Set each input's measured saturation threshold: floating-point FITS has no universal clipping value. HDR aligns stars, scales by duration and combines with shared RGB weights proportional to exposure and a smooth saturation transition. Six star matches are required and residuals above one pixel block fusion. Unrecovered pixels retain the shortest available clipped sample and are marked in a map; no detail is invented. Output remains linear in the longest individual exposure's units and can exceed 1. Total integration time is unknown. Finish before classic export. The two binary HDR maps, settings, input paths and alignment report are saved in projects.</source><translation>Dans Empilement, choisissez Fusionner les expositions · HDR. Sélectionnez 2 à 8 Lights FITS linéaires calibrées d’un même filtre, idéalement un empilement moyen par durée. Calibrez chaque série séparément avec les masters correspondants, puis dématricez les sources CFA. Vérifiez les durées individuelles : EXPTIME peut contenir le temps cumulé d’un empilement exporté. Caméra, filtre, gain, offset, binning et unités doivent être identiques ; des métadonnées manquantes ne prouvent rien. Renseignez le seuil de saturation mesuré de chaque entrée : le FITS flottant n’a pas de seuil universel. Le HDR aligne les étoiles, normalise par la durée et combine les pixels avec un poids RVB commun proportionnel à la durée et un fondu sous la saturation. Il exige six correspondances stellaires ; un résidu supérieur à un pixel bloque la fusion. Les pixels non récupérables conservent l’échantillon saturé disponible le plus court et sont marqués dans une carte ; aucun détail n’est inventé. Le résultat reste linéaire dans les unités de la pose individuelle la plus longue et peut dépasser 1. Le temps total d’intégration est inconnu. Finalisez avant l’export classique. Les deux cartes binaires, paramètres, chemins sources et bilan d’alignement sont conservés dans les projets.</translation></message>
+    <message>
+        <source>Choose what to observe</source>
+        <translation>Choisir ce qu’on va observer</translation>
+    </message>
+    <message>
+        <source>Suggestions uses your place, local date and minimum height. It compares common objects and your favourites offline, showing actual time windows. Deep sky uses astronomical night (Sun below −18°); Solar System targets use the end of civil twilight (−6°). Explore a suggestion to see its curve. These suggestions do not account for weather or light pollution.</source>
+        <translation>Suggestions utilise votre lieu, la date locale et la hauteur minimale. Les objets courants et vos favoris sont comparés sans connexion, avec leurs vrais créneaux. Le ciel profond utilise la nuit astronomique (Soleil sous −18°), le Système solaire la fin du crépuscule civil (−6°). Explorez une suggestion pour voir sa courbe. La météo et la pollution lumineuse ne sont pas prises en compte.</translation>
+    </message>
+    <message>
+        <source>A target above the horizon can still be too low or in a bright sky. Very dark is suggested for deep sky, twilight for the Moon and planets. The lunar readout gives illuminated fraction, height and angular distance from your target. No weather, seeing, obstructions, reservations or camera control are included. Object positions use a flat geometric horizon without refraction. Sunrise and sunset use the upper edge of the Sun with standard atmospheric refraction; actual weather and obstacles can shift them.</source>
+        <translation>Une cible au-dessus de l’horizon peut rester trop basse ou dans un ciel trop clair. Le ciel très sombre est proposé pour le ciel profond, le crépuscule pour la Lune et les planètes. Les indications lunaires donnent la fraction éclairée, la hauteur et l’écart angulaire à la cible. Météo, turbulence, obstacles, réservations et commandes de caméra ne sont pas inclus. Les positions utilisent un horizon géométrique plat sans réfraction. Le lever et le coucher du Soleil utilisent son bord supérieur avec une réfraction standard ; la météo et les obstacles réels peuvent les décaler.</translation>
+    </message>
+    <message>
+        <source>Names and favourites</source>
+        <translation>Noms et favoris</translation>
+    </message>
+    <message>
+        <source>OpenNGC is available offline for NGC, IC and Messier identifiers. Other fixed-object names can be searched using CDS Sesame; only the name is sent. City search uses Open-Meteo / GeoNames and sends only the typed city name. The favourite buttons save objects and places on this computer; starred places appear in the location list. Advanced lets you enter exact site coordinates. Online failures and connection loss display a message while keeping your previous results. For moving bodies, use the Moon or planet entries instead of manual fixed coordinates.</source>
+        <translation>OpenNGC est disponible sans connexion pour les numéros NGC, IC et Messier. Les autres objets fixes sont recherchés par CDS Sesame ; seul le nom est envoyé. La recherche de ville utilise Open-Meteo / GeoNames et n’envoie que le texte saisi. Les boutons des favoris enregistrent les objets et les lieux sur cet ordinateur ; les lieux étoilés apparaissent dans la liste. Les options avancées permettent de saisir les coordonnées exactes. Un échec en ligne ou une perte de connexion affiche un message et conserve les résultats précédents. Pour les astres mobiles, utilisez les entrées Lune ou planète plutôt que des coordonnées fixes manuelles.</translation>
+    </message>
 </context>
 
 <context>
@@ -9877,7 +9997,27 @@ RMS normalisée moyenne %5</translation>
     <message><source>Go to Observation</source><translation>Aller à Observation</translation></message>
     <message><source>WCS / SIP: optical distortion during stacking</source><translation>WCS / SIP : distorsions optiques à l’empilement</translation></message>
     <message><source>In Stack → Advanced stack settings, enable WCS / SIP distortion projection only when each input FITS has a valid TAN or TAN-SIP solution for its stored pixels. Coordinates from a cropped, flipped or debayered image must describe that exact image. Solving the final stack alone is insufficient. The software compares relative stellar positions: at least 12 matches in four of nine regions, spanning 35% of each image dimension, and RMS at most 0.75 pixel of the original reference. Wrong or missing coordinates reject that source; there is no affine fallback, and at least two validated lights per group must remain. All sources, including the reference, are projected onto its TAN plane without SIP. Ordinary stacking uses bilinear sampling; drizzle uses adaptive curved pixel footprints (0.001 output-pixel subdivision tolerance), with separate measured Bayer colors if enabled. Borders are cropped to common coverage and unmeasured Bayer channels remain explicit. Float32 values retain the source intensity convention, not an absolute flux or pixel-area photometry calibration. Source WCS consistency does not prove absolute sky coordinates: solve the result against a catalogue before PCC/SPCC. Review each source's star count and RMS in the stack report. Disabled by default; existing projects keep their previous behavior.</source><translation>Dans Empilement → Réglages avancés, activez la projection des distorsions WCS / SIP seulement si chaque FITS possède une solution TAN ou TAN-SIP valide pour ses pixels enregistrés. Après recadrage, inversion ou dématriçage, les coordonnées doivent décrire exactement cette image. Résoudre seulement l’empilement final ne suffit pas. Le logiciel compare les positions relatives des étoiles : au moins 12 correspondances dans quatre des neuf régions, couvrant 35 % de chaque dimension, et un écart RMS maximal de 0,75 pixel de la référence initiale. Une solution absente ou incohérente écarte la pose ; aucun remplacement par un alignement affine, et au moins deux poses validées par filtre doivent rester. Toutes les poses, référence comprise, sont projetées sur son plan TAN sans SIP. L’empilement classique utilise une interpolation bilinéaire ; le drizzle utilise des empreintes courbes subdivisées selon une tolérance de 0,001 pixel de sortie, en conservant les couleurs mesurées du Bayer natif si activé. Les bords sont recadrés à la couverture commune ; les couleurs non mesurées restent explicites. Les valeurs Float32 conservent la convention d’intensité des sources : ce n’est ni une calibration de flux absolu, ni une correction photométrique de surface des pixels. La cohérence relative des WCS ne prouve pas les coordonnées absolues : résolvez le résultat avec un catalogue avant PCC/SPCC. Consultez le nombre d’étoiles et le RMS de chaque pose dans le bilan. Désactivé par défaut ; les anciens projets conservent leur comportement.</translation></message>
-  </context>
+      <message>
+        <source>Choose what to observe</source>
+        <translation>Choisir ce qu’on va observer</translation>
+    </message>
+    <message>
+        <source>Suggestions uses your place, local date and minimum height. It compares common objects and your favourites offline, showing actual time windows. Deep sky uses astronomical night (Sun below −18°); Solar System targets use the end of civil twilight (−6°). Explore a suggestion to see its curve. These suggestions do not account for weather or light pollution.</source>
+        <translation>Suggestions utilise votre lieu, la date locale et la hauteur minimale. Les objets courants et vos favoris sont comparés sans connexion, avec leurs vrais créneaux. Le ciel profond utilise la nuit astronomique (Soleil sous −18°), le Système solaire la fin du crépuscule civil (−6°). Explorez une suggestion pour voir sa courbe. La météo et la pollution lumineuse ne sont pas prises en compte.</translation>
+    </message>
+    <message>
+        <source>A target above the horizon can still be too low or in a bright sky. Very dark is suggested for deep sky, twilight for the Moon and planets. The lunar readout gives illuminated fraction, height and angular distance from your target. No weather, seeing, obstructions, reservations or camera control are included. Object positions use a flat geometric horizon without refraction. Sunrise and sunset use the upper edge of the Sun with standard atmospheric refraction; actual weather and obstacles can shift them.</source>
+        <translation>Une cible au-dessus de l’horizon peut rester trop basse ou dans un ciel trop clair. Le ciel très sombre est proposé pour le ciel profond, le crépuscule pour la Lune et les planètes. Les indications lunaires donnent la fraction éclairée, la hauteur et l’écart angulaire à la cible. Météo, turbulence, obstacles, réservations et commandes de caméra ne sont pas inclus. Les positions utilisent un horizon géométrique plat sans réfraction. Le lever et le coucher du Soleil utilisent son bord supérieur avec une réfraction standard ; la météo et les obstacles réels peuvent les décaler.</translation>
+    </message>
+    <message>
+        <source>Names and favourites</source>
+        <translation>Noms et favoris</translation>
+    </message>
+    <message>
+        <source>OpenNGC is available offline for NGC, IC and Messier identifiers. Other fixed-object names can be searched using CDS Sesame; only the name is sent. City search uses Open-Meteo / GeoNames and sends only the typed city name. The favourite buttons save objects and places on this computer; starred places appear in the location list. Advanced lets you enter exact site coordinates. Online failures and connection loss display a message while keeping your previous results. For moving bodies, use the Moon or planet entries instead of manual fixed coordinates.</source>
+        <translation>OpenNGC est disponible sans connexion pour les numéros NGC, IC et Messier. Les autres objets fixes sont recherchés par CDS Sesame ; seul le nom est envoyé. La recherche de ville utilise Open-Meteo / GeoNames et n’envoie que le texte saisi. Les boutons des favoris enregistrent les objets et les lieux sur cet ordinateur ; les lieux étoilés apparaissent dans la liste. Les options avancées permettent de saisir les coordonnées exactes. Un échec en ligne ou une perte de connexion affiche un message et conserve les résultats précédents. Pour les astres mobiles, utilisez les entrées Lune ou planète plutôt que des coordonnées fixes manuelles.</translation>
+    </message>
+</context>
   <context>
     <name>astro::app::DeepSkyController</name>
     <message><source>WCS projection requires at least two validated light frames per filter group.</source><translation>La projection WCS exige au moins deux poses validées par filtre.</translation></message>
@@ -9943,7 +10083,27 @@ RMS normalisée moyenne %5</translation>
     <message><source>Go to Observation</source><translation>Aller à Observation</translation></message>
     <message><source>Resources and temporary files</source><translation>Ressources et fichiers temporaires</translation></message>
     <message><source>Before stacking, review the memory estimate, safety budget, required temporary disk space and available space. Estimates use all selected lights on the full grid before cropping. Rejection reads bounded horizontal/vertical tiles: at most 64 MiB of float sample buffers, even with 500 exposures. Drizzle projection also accumulates in strips of at most 64 MiB. Outputs support up to 128 MP and 32,700 pixels per dimension. Scientific results and ordinary projection remain full images in memory. Metal finishing uses strips; CPU and advanced operations can require complete intermediates. Finishing checks the combined options and retained results before computation; an oversized request keeps the previous result. FITS and TIFF encode bounded blocks without a complete planar/file copy. WCS/SIP drizzle scans source rows for each strip to preserve curved footprints and can take longer. The memory model includes retained Deep sky images and native buffers, not an exact process measurement or other applications; budget is half physical RAM, capped at 8 GiB, with 2 GiB fallback. Disk uses 12 bytes per output pixel per exposure in ordinary stacking, 16 in mono/RGB drizzle and 24 in native Bayer, plus 256 MiB reserve. Filter groups run sequentially, so temporary projections are released between groups. Choose Temporary folder for a larger writable local disk; the preference stays on this computer, outside the project. Space is checked again by the engine; write or read failures stop the whole operation and keep the previous result. Private working files are removed on success, error and cancellation. Working data uses one anonymous or deleted-on-close archive per job; the operating system releases its contents if the process terminates. Automatic recovery remains limited to 4 GiB and 64 image references; disable maps or split filter groups when the planned results exceed these limits.</source><translation>Avant d’empiler, vérifiez la mémoire estimée, le budget et l’espace temporaire nécessaire/libre. Le rejet et la projection drizzle utilisent des bandes de 64 Mio au maximum. Les sorties acceptent jusqu’à 128 MP et 32 700 pixels par dimension. Les résultats scientifiques et la projection ordinaire restent des images complètes en mémoire. La finition Metal utilise des bandes ; les traitements avancés et certains calculs CPU ont besoin d’images intermédiaires complètes. Les combinaisons de réglages dépassant le budget sont refusées avant le calcul, en conservant le résultat précédent. FITS et TIFF sont encodés par blocs, sans copie complète supplémentaire. Le drizzle WCS/SIP parcourt les lignes source pour chaque bande afin de conserver les empreintes courbes et peut être plus lent. Le budget mémoire est la moitié de la RAM, plafonné à 8 Gio (2 Gio si inconnue), et inclut les résultats Ciel profond conservés : ce n’est pas une mesure exacte du processus ni des autres applications. Le disque utilise 12 octets par pixel de sortie et par pose en empilement ordinaire, 16 en drizzle mono/RVB et 24 en Bayer natif, plus 256 Mio de réserve. Les groupes sont calculés successivement et libèrent leurs projections entre les groupes. Choisissez Dossier temporaire pour un disque local plus grand. L’espace est vérifié pendant le calcul ; une erreur arrête l’opération et conserve le résultat précédent. Les fichiers privés sont libérés à la réussite, à l’erreur, à l’annulation et à la fermeture du processus. La reprise automatique reste limitée à 4 Gio et 64 références d’images : désactivez les cartes ou séparez les groupes si nécessaire.</translation></message>
-  </context>
+      <message>
+        <source>Choose what to observe</source>
+        <translation>Choisir ce qu’on va observer</translation>
+    </message>
+    <message>
+        <source>Suggestions uses your place, local date and minimum height. It compares common objects and your favourites offline, showing actual time windows. Deep sky uses astronomical night (Sun below −18°); Solar System targets use the end of civil twilight (−6°). Explore a suggestion to see its curve. These suggestions do not account for weather or light pollution.</source>
+        <translation>Suggestions utilise votre lieu, la date locale et la hauteur minimale. Les objets courants et vos favoris sont comparés sans connexion, avec leurs vrais créneaux. Le ciel profond utilise la nuit astronomique (Soleil sous −18°), le Système solaire la fin du crépuscule civil (−6°). Explorez une suggestion pour voir sa courbe. La météo et la pollution lumineuse ne sont pas prises en compte.</translation>
+    </message>
+    <message>
+        <source>A target above the horizon can still be too low or in a bright sky. Very dark is suggested for deep sky, twilight for the Moon and planets. The lunar readout gives illuminated fraction, height and angular distance from your target. No weather, seeing, obstructions, reservations or camera control are included. Object positions use a flat geometric horizon without refraction. Sunrise and sunset use the upper edge of the Sun with standard atmospheric refraction; actual weather and obstacles can shift them.</source>
+        <translation>Une cible au-dessus de l’horizon peut rester trop basse ou dans un ciel trop clair. Le ciel très sombre est proposé pour le ciel profond, le crépuscule pour la Lune et les planètes. Les indications lunaires donnent la fraction éclairée, la hauteur et l’écart angulaire à la cible. Météo, turbulence, obstacles, réservations et commandes de caméra ne sont pas inclus. Les positions utilisent un horizon géométrique plat sans réfraction. Le lever et le coucher du Soleil utilisent son bord supérieur avec une réfraction standard ; la météo et les obstacles réels peuvent les décaler.</translation>
+    </message>
+    <message>
+        <source>Names and favourites</source>
+        <translation>Noms et favoris</translation>
+    </message>
+    <message>
+        <source>OpenNGC is available offline for NGC, IC and Messier identifiers. Other fixed-object names can be searched using CDS Sesame; only the name is sent. City search uses Open-Meteo / GeoNames and sends only the typed city name. The favourite buttons save objects and places on this computer; starred places appear in the location list. Advanced lets you enter exact site coordinates. Online failures and connection loss display a message while keeping your previous results. For moving bodies, use the Moon or planet entries instead of manual fixed coordinates.</source>
+        <translation>OpenNGC est disponible sans connexion pour les numéros NGC, IC et Messier. Les autres objets fixes sont recherchés par CDS Sesame ; seul le nom est envoyé. La recherche de ville utilise Open-Meteo / GeoNames et n’envoie que le texte saisi. Les boutons des favoris enregistrent les objets et les lieux sur cet ordinateur ; les lieux étoilés apparaissent dans la liste. Les options avancées permettent de saisir les coordonnées exactes. Un échec en ligne ou une perte de connexion affiche un message et conserve les résultats précédents. Pour les astres mobiles, utilisez les entrées Lune ou planète plutôt que des coordonnées fixes manuelles.</translation>
+    </message>
+</context>
   <context>
     <name>BatchMasterPane</name>
     <message><source>%1 GiB</source><translation>%1 Gio</translation></message>
@@ -10017,7 +10177,27 @@ RMS normalisée moyenne %5</translation>
     <message><source>Go to Observation</source><translation>Aller à Observation</translation></message>
     <message><source>Create calibration masters in batches</source><translation>Créer des masters de calibration par lots</translation></message>
     <message><source>In Master library, choose Create masters in batches. Review the groups made from selected raw FITS or native RAW calibration files. Recorded camera, dimensions, channels, Bayer pattern, binning, gain, offset, temperature, exposure and input normalization units must be equal; flat filters remain separate. Unknown metadata is kept distinct and needs explicit review. Choose which groups to save and an optional name prefix. For each flat, select a matching dark-flat or bias; a unique dark-flat is proposed first, but ambiguity requires your choice. Compatible library masters are available directly, without applying them to lights. Raw correction groups can be used without saving a separate master. Pedestal is subtracted once and each flat is normalized before robust averaging. Groups run sequentially, with MAD rejection from three sources onward and no multi-frame noise reduction from one source. The temporary folder and memory budget are checked; full images support up to 128 MP and 32,700 pixels per dimension, within the memory budget. SHA-256 checks source changes and records source/correction provenance. Each completed master is published atomically; cancellation or the first failure stops the batch and reports unfinished groups, while completed entries remain. Creation does not change the image result or apply masters: return to Find a master, search name/camera/filter/settings, optionally hide known mismatches, inspect diagnostics, then explicitly use a compatible master. Heterogeneous light configurations still require separate integrations; this batch tool creates calibration masters, not a complete automated light/HDR pipeline.</source><translation>Dans Bibliothèque de masters, choisissez Créer des masters par lots. Vérifiez les groupes issus des fichiers FITS ou RAW natifs de calibration sélectionnés. Les valeurs enregistrées doivent être identiques : caméra, dimensions, canaux, motif Bayer, binning, gain, offset, température, durée et unités de normalisation ; les filtres des flats restent séparés. Les informations inconnues restent distinctes et demandent une vérification explicite. Choisissez les groupes à enregistrer et un préfixe facultatif. Pour chaque flat, choisissez un dark-flat ou un bias adapté ; un dark-flat unique est proposé en premier, mais les ambiguïtés demandent votre choix. Les masters compatibles de la bibliothèque sont proposés directement, sans les appliquer aux poses. Un correctif brut peut être utilisé sans enregistrer un master séparé. Le piédestal est soustrait une fois, puis chaque flat est normalisé avant la moyenne robuste. Les groupes sont calculés successivement, avec rejet MAD à partir de trois sources ; une seule source ne réduit pas le bruit. Dossier temporaire et budget mémoire sont contrôlés ; les images complètes restent limitées à 128 MP. Le SHA-256 détecte les changements des sources et conserve leur provenance ainsi que celle des correctifs. Chaque master terminé est publié atomiquement ; une annulation ou la première erreur arrête le lot et signale les groupes inachevés, en conservant les masters terminés. La création ne modifie pas le résultat de l’image et n’applique pas les masters : revenez dans Trouver un master, recherchez par nom, caméra, filtre ou réglages, masquez éventuellement les incompatibilités, inspectez les diagnostics puis utilisez explicitement un master compatible. Les poses de configurations différentes nécessitent encore des intégrations séparées ; ce lot crée les masters de calibration et n’automatise pas tout le traitement des poses ni le HDR. Limite : 32 700 pixels par dimension, selon les budgets mémoire et de reprise.</translation></message>
-  </context>
+      <message>
+        <source>Choose what to observe</source>
+        <translation>Choisir ce qu’on va observer</translation>
+    </message>
+    <message>
+        <source>Suggestions uses your place, local date and minimum height. It compares common objects and your favourites offline, showing actual time windows. Deep sky uses astronomical night (Sun below −18°); Solar System targets use the end of civil twilight (−6°). Explore a suggestion to see its curve. These suggestions do not account for weather or light pollution.</source>
+        <translation>Suggestions utilise votre lieu, la date locale et la hauteur minimale. Les objets courants et vos favoris sont comparés sans connexion, avec leurs vrais créneaux. Le ciel profond utilise la nuit astronomique (Soleil sous −18°), le Système solaire la fin du crépuscule civil (−6°). Explorez une suggestion pour voir sa courbe. La météo et la pollution lumineuse ne sont pas prises en compte.</translation>
+    </message>
+    <message>
+        <source>A target above the horizon can still be too low or in a bright sky. Very dark is suggested for deep sky, twilight for the Moon and planets. The lunar readout gives illuminated fraction, height and angular distance from your target. No weather, seeing, obstructions, reservations or camera control are included. Object positions use a flat geometric horizon without refraction. Sunrise and sunset use the upper edge of the Sun with standard atmospheric refraction; actual weather and obstacles can shift them.</source>
+        <translation>Une cible au-dessus de l’horizon peut rester trop basse ou dans un ciel trop clair. Le ciel très sombre est proposé pour le ciel profond, le crépuscule pour la Lune et les planètes. Les indications lunaires donnent la fraction éclairée, la hauteur et l’écart angulaire à la cible. Météo, turbulence, obstacles, réservations et commandes de caméra ne sont pas inclus. Les positions utilisent un horizon géométrique plat sans réfraction. Le lever et le coucher du Soleil utilisent son bord supérieur avec une réfraction standard ; la météo et les obstacles réels peuvent les décaler.</translation>
+    </message>
+    <message>
+        <source>Names and favourites</source>
+        <translation>Noms et favoris</translation>
+    </message>
+    <message>
+        <source>OpenNGC is available offline for NGC, IC and Messier identifiers. Other fixed-object names can be searched using CDS Sesame; only the name is sent. City search uses Open-Meteo / GeoNames and sends only the typed city name. The favourite buttons save objects and places on this computer; starred places appear in the location list. Advanced lets you enter exact site coordinates. Online failures and connection loss display a message while keeping your previous results. For moving bodies, use the Moon or planet entries instead of manual fixed coordinates.</source>
+        <translation>OpenNGC est disponible sans connexion pour les numéros NGC, IC et Messier. Les autres objets fixes sont recherchés par CDS Sesame ; seul le nom est envoyé. La recherche de ville utilise Open-Meteo / GeoNames et n’envoie que le texte saisi. Les boutons des favoris enregistrent les objets et les lieux sur cet ordinateur ; les lieux étoilés apparaissent dans la liste. Les options avancées permettent de saisir les coordonnées exactes. Un échec en ligne ou une perte de connexion affiche un message et conserve les résultats précédents. Pour les astres mobiles, utilisez les entrées Lune ou planète plutôt que des coordonnées fixes manuelles.</translation>
+    </message>
+</context>
   <context>
     <name>astro::app::DeepSkyController</name>
     <message><source>The master batch memory estimate exceeds the safety budget. Close other results or use smaller source images.</source><translation>La mémoire estimée du lot de masters dépasse le budget de sécurité. Fermez d’autres résultats ou utilisez des images sources plus petites.</translation></message>
@@ -10081,7 +10261,27 @@ RMS normalisée moyenne %5</translation>
     <message><source>Go to Observation</source><translation>Aller à Observation</translation></message>
         <message><source>Multifilter composition</source><translation>Composition multifiltre</translation></message>
         <message><source>In Finishing → Color, choose RGB, LRGB, HOO or SHO to assign integrated filters automatically. Missing or ambiguous filters are listed and prevent composition. Custom keeps manual channel assignment. Luminance contribution blends RGB brightness at 0% with aligned L brightness at 100%; it does not equalize exposure units or restore saturated detail. Click Compose image after changing the choices: until then, the previous composition remains displayed. Choices are saved in projects and recovery. Resolve WCS again for the composed image; PCC/SPCC applies to broadband RGB, not representative HOO/SHO palettes.</source><translation>Dans Finition → Couleur, choisissez RGB, LRGB, HOO ou SHO pour attribuer automatiquement les filtres empilés. Les filtres manquants ou ambigus sont indiqués et bloquent la composition. Personnalisée conserve le choix manuel de chaque canal. L’apport de luminance mélange la luminosité RGB à 0 % avec celle de L recalée à 100 % ; il n’égalise pas les unités d’exposition et ne restaure pas les détails saturés. Cliquez sur Composer l’image après modification : la composition précédente reste affichée jusque-là. Les choix sont conservés dans les projets et la reprise. Résolvez de nouveau le WCS sur l’image composée ; PCC/SPCC s’applique au RGB à large bande, pas aux palettes de représentation HOO/SHO.</translation></message>
-    </context>
+        <message>
+        <source>Choose what to observe</source>
+        <translation>Choisir ce qu’on va observer</translation>
+    </message>
+    <message>
+        <source>Suggestions uses your place, local date and minimum height. It compares common objects and your favourites offline, showing actual time windows. Deep sky uses astronomical night (Sun below −18°); Solar System targets use the end of civil twilight (−6°). Explore a suggestion to see its curve. These suggestions do not account for weather or light pollution.</source>
+        <translation>Suggestions utilise votre lieu, la date locale et la hauteur minimale. Les objets courants et vos favoris sont comparés sans connexion, avec leurs vrais créneaux. Le ciel profond utilise la nuit astronomique (Soleil sous −18°), le Système solaire la fin du crépuscule civil (−6°). Explorez une suggestion pour voir sa courbe. La météo et la pollution lumineuse ne sont pas prises en compte.</translation>
+    </message>
+    <message>
+        <source>A target above the horizon can still be too low or in a bright sky. Very dark is suggested for deep sky, twilight for the Moon and planets. The lunar readout gives illuminated fraction, height and angular distance from your target. No weather, seeing, obstructions, reservations or camera control are included. Object positions use a flat geometric horizon without refraction. Sunrise and sunset use the upper edge of the Sun with standard atmospheric refraction; actual weather and obstacles can shift them.</source>
+        <translation>Une cible au-dessus de l’horizon peut rester trop basse ou dans un ciel trop clair. Le ciel très sombre est proposé pour le ciel profond, le crépuscule pour la Lune et les planètes. Les indications lunaires donnent la fraction éclairée, la hauteur et l’écart angulaire à la cible. Météo, turbulence, obstacles, réservations et commandes de caméra ne sont pas inclus. Les positions utilisent un horizon géométrique plat sans réfraction. Le lever et le coucher du Soleil utilisent son bord supérieur avec une réfraction standard ; la météo et les obstacles réels peuvent les décaler.</translation>
+    </message>
+    <message>
+        <source>Names and favourites</source>
+        <translation>Noms et favoris</translation>
+    </message>
+    <message>
+        <source>OpenNGC is available offline for NGC, IC and Messier identifiers. Other fixed-object names can be searched using CDS Sesame; only the name is sent. City search uses Open-Meteo / GeoNames and sends only the typed city name. The favourite buttons save objects and places on this computer; starred places appear in the location list. Advanced lets you enter exact site coordinates. Online failures and connection loss display a message while keeping your previous results. For moving bodies, use the Moon or planet entries instead of manual fixed coordinates.</source>
+        <translation>OpenNGC est disponible sans connexion pour les numéros NGC, IC et Messier. Les autres objets fixes sont recherchés par CDS Sesame ; seul le nom est envoyé. La recherche de ville utilise Open-Meteo / GeoNames et n’envoie que le texte saisi. Les boutons des favoris enregistrent les objets et les lieux sur cet ordinateur ; les lieux étoilés apparaissent dans la liste. Les options avancées permettent de saisir les coordonnées exactes. Un échec en ligne ou une perte de connexion affiche un message et conserve les résultats précédents. Pour les astres mobiles, utilisez les entrées Lune ou planète plutôt que des coordonnées fixes manuelles.</translation>
+    </message>
+</context>
     <context>
         <name>astro::app::DeepSkyController</name>
         <message><source>Invalid channel composition settings.</source><translation>Réglages de composition des canaux invalides.</translation></message>
@@ -10098,6 +10298,12 @@ RMS normalisée moyenne %5</translation>
 
 <context>
     <name>ObservationWorkspace</name>
+    <message><source>All</source><translation>Tout</translation></message>
+    <message><source>Moon &amp; planets</source><translation>Lune et planètes</translation></message>
+    <message><source>Deep sky</source><translation>Ciel profond</translation></message>
+    <message><source>Selected category</source><translation>Catégorie sélectionnée</translation></message>
+    <message><source>★ Favourite place</source><translation>★ Lieu favori</translation></message>
+    <message><source>☆ Favourite place</source><translation>☆ Lieu favori</translation></message>
     <message><source>%1 results · choose an object</source><translation>%1 résultats · choisir un objet</translation></message>
     <message><source>Open the list to choose a suggestion or a search result. The selected object appears above the curve.</source><translation>Ouvrez la liste pour choisir une suggestion ou un résultat de recherche. L’objet choisi apparaît au-dessus de la courbe.</translation></message>
     <message><source>Another city…</source><translation>Autre ville…</translation></message>
@@ -10459,6 +10665,118 @@ RMS normalisée moyenne %5</translation>
         <source>OpenNGC: %1 objects with coordinates, plus Solar System targets. Positions include precession and nutation. Fixed objects omit proper motion and annual aberration. Astronomy Engine models moving bodies; planning precision is about one arcminute, not telescope pointing accuracy. Windows use one-minute bracketing; boundaries are refined to one second and displayed to the minute.</source>
         <translation>OpenNGC : %1 objets avec coordonnées, plus les cibles du Système solaire. Les positions incluent la précession et la nutation. Les objets fixes omettent le mouvement propre et l’aberration annuelle. Astronomy Engine modélise les astres mobiles ; la précision de préparation est de l’ordre d’une minute d’arc, pas celle d’un pointage de télescope. Les créneaux sont recherchés par pas d’une minute, leurs limites affinées à la seconde et affichées à la minute.</translation>
     </message>
+    <message>
+        <source>Sunset</source>
+        <translation>Coucher du Soleil</translation>
+    </message>
+    <message>
+        <source>Sunrise</source>
+        <translation>Lever du Soleil</translation>
+    </message>
+    <message>
+        <source>Suggestions</source>
+        <translation>Suggestions</translation>
+    </message>
+    <message>
+        <source>What can I observe?</source>
+        <translation>Qu’observer cette nuit ?</translation>
+    </message>
+    <message>
+        <source>For %1 · %2 · at least %3° above the horizon</source>
+        <translation>Pour %1 · %2 · hauteur d’au moins %3°</translation>
+    </message>
+    <message>
+        <source>Calculated offline from %1 common targets and your favourites. Up to 4 Solar System targets and 6 deep-sky objects, with favourites first, then ranked by available time and height. Each has at least 20 minutes with the displayed limits.</source>
+        <translation>Calcul local parmi %1 cibles courantes et vos favoris. Jusqu’à 4 cibles du Système solaire et 6 du ciel profond, avec priorité aux favoris, puis classement selon le temps disponible et la hauteur. Chacune offre au moins 20 minutes avec les seuils affichés.</translation>
+    </message>
+    <message>
+        <source>No suggestion meets these limits here on this date. Try lowering the minimum height or choosing another night. You can still search the complete catalogue.</source>
+        <translation>Aucune suggestion ne respecte ces seuils ici à cette date. Essayez une hauteur minimale plus basse ou une autre nuit. Le catalogue complet reste accessible par la recherche.</translation>
+    </message>
+    <message>
+        <source> · %1 min available</source>
+        <translation> · %1 min disponibles</translation>
+    </message>
+    <message>
+        <source>Explore</source>
+        <translation>Explorer</translation>
+    </message>
+    <message>
+        <source>Explore %1</source>
+        <translation>Explorer %1</translation>
+    </message>
+    <message>
+        <source>Highest within these windows: %1° · %2</source>
+        <translation>Au plus haut dans ces créneaux : %1° · %2</translation>
+    </message>
+    <message>
+        <source>Very dark sky · Sun below −18°</source>
+        <translation>Ciel très sombre · Soleil sous −18°</translation>
+    </message>
+    <message>
+        <source>After civil twilight · Sun below −6°</source>
+        <translation>Après le crépuscule civil · Soleil sous −6°</translation>
+    </message>
+    <message>
+        <source>Visibility does not guarantee easy viewing: equipment, light pollution and the Moon also matter. Uranus, Neptune and deep-sky objects generally need binoculars or a telescope. No weather forecast is included.</source>
+        <translation>La visibilité ne garantit pas une observation facile : le matériel, la pollution lumineuse et la Lune comptent aussi. Uranus, Neptune et les objets du ciel profond demandent généralement des jumelles ou un télescope. Aucune prévision météo n’est incluse.</translation>
+    </message>
+    <message>
+        <source>Day, twilight and night</source>
+        <translation>Jour, crépuscule et nuit</translation>
+    </message>
+    <message>
+        <source>Sunrise and sunset use the Sun&#x27;s upper edge with standard refraction at your elevation, over a flat horizon. Twilight and astronomical night use the geometric centre of the Sun at −6° and −18°. Mountains, buildings and actual weather can change the observed times.</source>
+        <translation>Le lever et le coucher utilisent le bord supérieur du Soleil, avec une réfraction standard à l’altitude du lieu et un horizon plat. Le crépuscule et la nuit astronomique utilisent son centre géométrique à −6° et −18°. Les montagnes, les bâtiments et la météo réelle peuvent décaler les heures observées.</translation>
+    </message>
+    <message>
+        <source>Daylight: %1 → %2</source>
+        <translation>Jour : %1 → %2</translation>
+    </message>
+    <message>
+        <source>Astronomical night: %1 → %2</source>
+        <translation>Nuit astronomique : %1 → %2</translation>
+    </message>
+    <message>
+        <source>★ Remove object from favourites</source>
+        <translation>★ Retirer l’objet des favoris</translation>
+    </message>
+    <message>
+        <source>☆ Save object to favourites</source>
+        <translation>☆ Ajouter l’objet aux favoris</translation>
+    </message>
+    <message>
+        <source>Keep this object on this computer. Saved coordinates remain available offline, including objects found online.</source>
+        <translation>Conservez cet objet sur cet ordinateur. Ses coordonnées restent disponibles sans connexion, y compris pour les objets trouvés en ligne.</translation>
+    </message>
+    <message>
+        <source>Favourite objects · %1</source>
+        <translation>Objets favoris · %1</translation>
+    </message>
+    <message>
+        <source>Choose a saved object. To remove it, select it and use the favourite button.</source>
+        <translation>Choisissez un objet enregistré. Pour le retirer, sélectionnez-le puis utilisez le bouton des favoris.</translation>
+    </message>
+    <message>
+        <source>Choose a city or enter coordinates in Advanced. Preset cities use approximate city centres at sea level; city search supplies its reported elevation. Save your actual observing site as a favourite.</source>
+        <translation>Choisissez une ville ou saisissez les coordonnées dans les options avancées. Les villes proposées utilisent leur centre approximatif au niveau de la mer ; la recherche fournit l’altitude répertoriée. Enregistrez votre lieu précis en favori.</translation>
+    </message>
+    <message>
+        <source>★ Favourite place · manage</source>
+        <translation>★ Lieu favori · gérer</translation>
+    </message>
+    <message>
+        <source>☆ Save place to favourites</source>
+        <translation>☆ Ajouter le lieu aux favoris</translation>
+    </message>
+    <message>
+        <source>Remove favourite</source>
+        <translation>Retirer le favori</translation>
+    </message>
+    <message>
+        <source>Height above sea level, −500 to 10000 metres. Sunrise uses standard refraction adjusted for this elevation. Terrain and horizon dip are not modelled.</source>
+        <translation>Hauteur au-dessus du niveau de la mer, de −500 à 10 000 mètres. Le lever du Soleil utilise une réfraction standard adaptée à cette altitude. Le relief et l’abaissement de l’horizon ne sont pas modélisés.</translation>
+    </message>
 </context>
 <context>
     <name>astro::app::ObservationController</name>
@@ -10655,6 +10973,114 @@ RMS normalisée moyenne %5</translation>
         <location filename="../src/ObservationController.cpp" line="77"/>
         <source>Map position</source>
         <translation>Position sur la carte</translation>
+    </message>
+    <message>
+        <source>Sunrise</source>
+        <translation>Lever du Soleil</translation>
+    </message>
+    <message>
+        <source>Sunset</source>
+        <translation>Coucher du Soleil</translation>
+    </message>
+    <message>
+        <source>End of civil twilight · Sun −6°</source>
+        <translation>Fin du crépuscule civil · Soleil à −6°</translation>
+    </message>
+    <message>
+        <source>Start of civil twilight · Sun −6°</source>
+        <translation>Début du crépuscule civil · Soleil à −6°</translation>
+    </message>
+    <message>
+        <source>Astronomical night begins · Sun −18°</source>
+        <translation>Début de la nuit astronomique · Soleil à −18°</translation>
+    </message>
+    <message>
+        <source>Astronomical night ends · Sun −18°</source>
+        <translation>Fin de la nuit astronomique · Soleil à −18°</translation>
+    </message>
+    <message>
+        <source>No sunrise in this period</source>
+        <translation>Pas de lever sur cette période</translation>
+    </message>
+    <message>
+        <source>No sunset in this period</source>
+        <translation>Pas de coucher sur cette période</translation>
+    </message>
+    <message>
+        <source>Sun stays above the horizon throughout this period</source>
+        <translation>Le Soleil reste au-dessus de l’horizon sur toute cette période</translation>
+    </message>
+    <message>
+        <source>Sun stays below the horizon throughout this period</source>
+        <translation>Le Soleil reste sous l’horizon sur toute cette période</translation>
+    </message>
+    <message>
+        <source>Day</source>
+        <translation>Jour</translation>
+    </message>
+    <message>
+        <source>Civil twilight</source>
+        <translation>Crépuscule civil</translation>
+    </message>
+    <message>
+        <source>Nautical twilight</source>
+        <translation>Crépuscule nautique</translation>
+    </message>
+    <message>
+        <source>Astronomical twilight</source>
+        <translation>Crépuscule astronomique</translation>
+    </message>
+    <message>
+        <source>Astronomical night</source>
+        <translation>Nuit astronomique</translation>
+    </message>
+    <message>
+        <source>Enter a favourite place name (maximum 100 characters).</source>
+        <translation>Saisissez un nom de lieu favori (100 caractères au maximum).</translation>
+    </message>
+    <message>
+        <source>30 favourite places already saved. Remove one before adding another.</source>
+        <translation>30 lieux favoris sont déjà enregistrés. Retirez-en un avant d’en ajouter un autre.</translation>
+    </message>
+    <message>
+        <source>Connection interrupted. Retry when Internet is available. Previous results and offline calculations are preserved.</source>
+        <translation>Connexion interrompue. Réessayez lorsque Internet sera disponible. Les résultats précédents et les calculs locaux sont conservés.</translation>
+    </message>
+    <message>
+        <source>No Internet connection. Online search is unavailable. The catalogue, favourites and calculations remain available offline.</source>
+        <translation>Pas de connexion Internet. La recherche en ligne est indisponible. Le catalogue, les favoris et les calculs restent accessibles sans connexion.</translation>
+    </message>
+    <message>
+        <source>Cannot reach the online service. Check your Internet connection and retry. Previous results are preserved.</source>
+        <translation>Impossible de joindre le service en ligne. Vérifiez votre connexion Internet puis réessayez. Les résultats précédents sont conservés.</translation>
+    </message>
+    <message>
+        <source>The online search timed out or was interrupted. Check your connection and retry. Previous results are preserved.</source>
+        <translation>La recherche en ligne a expiré ou a été interrompue. Vérifiez votre connexion puis réessayez. Les résultats précédents sont conservés.</translation>
+    </message>
+    <message>
+        <source>Online service unavailable. Retry later. Previous results and offline calculations are preserved.</source>
+        <translation>Service en ligne indisponible. Réessayez plus tard. Les résultats précédents et les calculs locaux sont conservés.</translation>
+    </message>
+    <message>
+        <source>Connection restored. You can retry the online search; offline results are unchanged.</source>
+        <translation>Connexion rétablie. Vous pouvez relancer la recherche en ligne ; les résultats locaux sont conservés.</translation>
+    </message>
+    <message>
+        <source>100 favourite objects already saved. Remove one before adding another.</source>
+        <translation>100 objets favoris sont déjà enregistrés. Retirez-en un avant d’en ajouter un autre.</translation>
+    </message>
+    <message>
+        <source>Planet</source>
+        <translation>Planète</translation>
+    </message>
+    <message>
+        <source>Deep sky</source>
+        <translation>Ciel profond</translation>
+    </message>
+    <message>
+        <source>Cannot calculate solar events.</source>
+        <translation>Impossible de calculer les horaires du Soleil.</translation>
     </message>
 </context>
 <context>

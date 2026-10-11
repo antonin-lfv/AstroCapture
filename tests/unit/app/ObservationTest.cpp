@@ -9,6 +9,8 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QNetworkInformation>
+#include <QNetworkReply>
 #include <QQmlComponent>
 #include <QQmlEngine>
 #include <QQuickWindow>
@@ -57,6 +59,48 @@ int main(int argc, char **argv) {
               << alt * 60 << " arcmin, azimuth error " << az * 60
               << " arcmin\n";
     ASTRO_TEST_CHECK(alt < 1.0 / 60 && az < 1.0 / 60);
+  }
+  QFile solarReferences(ASTRO_SOURCE_DIR
+                        "/tests/unit/app/observation-sun-usno.json");
+  ASTRO_TEST_CHECK(solarReferences.open(QIODevice::ReadOnly));
+  for (const auto &v :
+       QJsonDocument::fromJson(solarReferences.readAll()).array()) {
+    const auto reference = v.toObject();
+    const auto date =
+        QDate::fromString(reference["date"].toString(), Qt::ISODate);
+    const auto zone = QTimeZone::fromSecondsAheadOfUtc(
+        qRound(reference["offsetHours"].toDouble() * 3600));
+    const auto midnight = QDateTime(date, QTime(0, 0), zone).toSecsSinceEpoch();
+    const auto calculated =
+        observationSolarEvents({reference["latitude"].toDouble(),
+                                reference["longitude"].toDouble(), 0},
+                               midnight, midnight + 86400);
+    for (const auto &entry : reference["events"].toArray()) {
+      auto expected = entry.toObject();
+      const QString phenomenon = expected["phen"].toString();
+      QString kind = phenomenon == "Rise"                   ? "sunrise"
+                     : phenomenon == "Set"                  ? "sunset"
+                     : phenomenon == "Begin Civil Twilight" ? "civilDawn"
+                     : phenomenon == "End Civil Twilight"   ? "civilDusk"
+                                                            : "";
+      if (kind.isEmpty())
+        continue;
+      auto actual = std::find_if(calculated.begin(), calculated.end(),
+                                 [&](const auto &e) { return e.kind == kind; });
+      ASTRO_TEST_CHECK(actual != calculated.end());
+      const qint64 expectedUtc =
+          QDateTime(date,
+                    QTime::fromString(expected["time"].toString(), "HH:mm"),
+                    zone)
+              .toSecsSinceEpoch();
+      ASTRO_TEST_CHECK(std::abs(actual->utc - expectedUtc) < 90);
+    }
+    if (reference["latitude"].toDouble() > 69) {
+      ASTRO_TEST_CHECK(
+          std::none_of(calculated.begin(), calculated.end(), [](const auto &e) {
+            return e.kind == "sunrise" || e.kind == "sunset";
+          }));
+    }
   }
   auto spring = observationNoon("2026-03-28", "Europe/Paris"),
        fall = observationNoon("2026-10-24", "Europe/Paris");
@@ -130,6 +174,85 @@ int main(int argc, char **argv) {
         at.altitude >= 30 &&
         observationSunAltitude({48.8566, 2.3522, 0}, (begin + end) / 2) <= -18);
   }
+  ASTRO_TEST_CHECK(!controller.recommendations().isEmpty());
+  const auto winterSuggestions = controller.recommendations();
+  ASTRO_TEST_CHECK(controller.result()["recommendationPool"].toInt() > 100);
+  for (const auto &value : winterSuggestions) {
+    const auto suggestion = value.toMap();
+    ObservationTarget target{suggestion["id"].toString(),
+                             suggestion["name"].toString(),
+                             "test",
+                             suggestion["body"].toInt(),
+                             suggestion["ra"].toDouble(),
+                             suggestion["dec"].toDouble()};
+    ASTRO_TEST_CHECK(suggestion["minutes"].toInt() >= 20);
+    for (const auto &entry : suggestion["slots"].toList()) {
+      const auto w = entry.toMap();
+      const auto midpoint = (w["startUtcSeconds"].toLongLong() +
+                             w["endUtcSeconds"].toLongLong()) /
+                            2;
+      ASTRO_TEST_CHECK(
+          observationPosition(target, {48.8566, 2.3522, 0}, midpoint)
+              .altitude >= 30);
+      ASTRO_TEST_CHECK(observationSunAltitude({48.8566, 2.3522, 0}, midpoint) <=
+                       suggestion["sunLimit"].toDouble());
+    }
+  }
+  ASTRO_TEST_CHECK(!controller.result()["nightSlots"].toList().isEmpty());
+  ASTRO_TEST_CHECK(!controller.result()["daylightSlots"].toList().isEmpty());
+  ASTRO_TEST_CHECK(controller.result()["solarEvents"].toList().size() == 6);
+  controller.toggleFavoriteTarget();
+  ASTRO_TEST_CHECK(controller.targetFavorite());
+  ASTRO_TEST_CHECK(controller.favoriteTargets().size() == 1);
+  {
+    ObservationController reopened;
+    ASTRO_TEST_CHECK(reopened.targetFavorite());
+    ASTRO_TEST_CHECK(reopened.selectTarget("NGC1976"));
+  }
+  controller.toggleFavoriteTarget();
+  ASTRO_TEST_CHECK(!controller.targetFavorite());
+  auto manual = controller.settings();
+  manual["manual"] = true;
+  manual["ra"] = 42.125;
+  manual["dec"] = -12.25;
+  ASTRO_TEST_CHECK(controller.calculate(manual));
+  controller.toggleFavoriteTarget();
+  const auto manualId = controller.settings()["target"].toString();
+  {
+    ObservationController reopened;
+    ASTRO_TEST_CHECK(reopened.selectTarget(manualId));
+    ASTRO_TEST_CHECK(reopened.targetFavorite());
+    ASTRO_TEST_CHECK(reopened.settings()["ra"].toDouble() == 42.125);
+    ASTRO_TEST_CHECK(reopened.settings()["dec"].toDouble() == -12.25);
+  }
+  controller.toggleFavoriteTarget();
+  ASTRO_TEST_CHECK(controller.selectTarget("NGC1976"));
+  ASTRO_TEST_CHECK(controller.result()["recommendationPool"].toInt() > 100);
+  const auto beforeConnectionLoss = controller.result();
+  const auto previousSearch = controller.searchResults();
+  using Reachability = QNetworkInformation::Reachability;
+  auto reachability = [&](Reachability state) {
+    ASTRO_TEST_CHECK(QMetaObject::invokeMethod(
+        &controller, "updateReachability", Qt::DirectConnection,
+        Q_ARG(int, int(state))));
+  };
+  reachability(Reachability::Online);
+  reachability(Reachability::Unknown);
+  reachability(Reachability::Disconnected);
+  ASTRO_TEST_CHECK(controller.connectionStatus().contains("Pas de connexion"));
+  controller.searchCity("Paris");
+  controller.searchOnline("Vega");
+  ASTRO_TEST_CHECK(!controller.searching() && !controller.locating());
+  ASTRO_TEST_CHECK(controller.searchResults() == previousSearch);
+  reachability(Reachability::Online);
+  reachability(Reachability::Disconnected);
+  ASTRO_TEST_CHECK(controller.connectionStatus().contains("interrompue"));
+  ASTRO_TEST_CHECK(controller.result() == beforeConnectionLoss);
+  ASTRO_TEST_CHECK(ObservationController::networkFailure(
+                       QNetworkReply::TemporaryNetworkFailureError)
+                       .contains("interrompue"));
+  reachability(Reachability::Online);
+  ASTRO_TEST_CHECK(controller.connectionStatus().contains("rétablie"));
   auto old = controller.result();
   opts["latitude"] = 91;
   ASTRO_TEST_CHECK(!controller.calculate(opts));
@@ -140,10 +263,15 @@ int main(int argc, char **argv) {
   controller.chooseMapLocation(-33, 151);
   ASTRO_TEST_CHECK(controller.settings()["zone"] == "UTC");
   ASTRO_TEST_CHECK(controller.instant()["utcSeconds"].toLongLong() == utc);
+  ASTRO_TEST_CHECK(controller.recommendations() != winterSuggestions);
   ASTRO_TEST_CHECK(controller.saveSite("Mon jardin"));
+  const auto placeCount = controller.sites().size();
+  ASTRO_TEST_CHECK(controller.saveSite("Mon jardin renommé"));
+  ASTRO_TEST_CHECK(controller.sites().size() == placeCount);
   {
     ObservationController reopened;
-    ASTRO_TEST_CHECK(reopened.sites().last().toMap()["name"] == "Mon jardin");
+    ASTRO_TEST_CHECK(reopened.sites().last().toMap()["name"] ==
+                     "Mon jardin renommé");
   }
   controller.removeSite(controller.sites().size() - 1);
   opts = controller.sites()[0].toMap();
@@ -153,6 +281,14 @@ int main(int argc, char **argv) {
   ASTRO_TEST_CHECK(controller.calculate(opts));
   ASTRO_TEST_CHECK(controller.selectTarget("NGC1976"));
   controller.search("");
+  auto polarOptions = controller.settings();
+  polarOptions["latitude"] = 89.5;
+  polarOptions["date"] = "2026-06-21";
+  ASTRO_TEST_CHECK(controller.calculate(polarOptions));
+  ASTRO_TEST_CHECK(controller.recommendations().isEmpty());
+  ASTRO_TEST_CHECK(controller.result()["nightSlots"].toList().isEmpty());
+  ASTRO_TEST_CHECK(!controller.result()["polarSun"].toString().isEmpty());
+  ASTRO_TEST_CHECK(controller.calculate(opts));
   qmlRegisterType<ObservationController>("AstroCapture", 1, 0,
                                          "ObservationController");
   qmlRegisterType<ObservationPlot>("AstroCapture", 1, 0, "ObservationPlot");
@@ -171,6 +307,7 @@ int main(int argc, char **argv) {
     qWarning() << component.errors();
   ASTRO_TEST_CHECK(object);
   auto *root = qobject_cast<QQuickItem *>(object.get());
+  root->setProperty("viewMode", "night");
   QQuickWindow window;
   window.show();
   root->setParentItem(window.contentItem());
@@ -187,6 +324,23 @@ int main(int argc, char **argv) {
           qEnvironmentVariable("ASTRO_OBSERVATION_SCREENSHOTS") +
           QString("/night-%1.png").arg(size.width()));
   }
+  ASTRO_TEST_CHECK(!controller.targetFavorite());
+  auto *favouriteButton = item(root, "observationFavoriteTarget");
+  ASTRO_TEST_CHECK(favouriteButton);
+  ASTRO_TEST_CHECK(QMetaObject::invokeMethod(favouriteButton, "clicked"));
+  ASTRO_TEST_CHECK(controller.targetFavorite());
+  ASTRO_TEST_CHECK(QMetaObject::invokeMethod(favouriteButton, "clicked"));
+  ASTRO_TEST_CHECK(!controller.targetFavorite());
+  root->setProperty("viewMode", "suggestions");
+  const auto firstSuggestion = controller.recommendations().first().toMap();
+  auto *explore =
+      item(root, "observationSuggestion:" + firstSuggestion["id"].toString());
+  ASTRO_TEST_CHECK(explore);
+  ASTRO_TEST_CHECK(QMetaObject::invokeMethod(explore, "clicked"));
+  ASTRO_TEST_CHECK(root->property("viewMode") == "night");
+  ASTRO_TEST_CHECK(controller.settings()["target"] == firstSuggestion["id"]);
+  ASTRO_TEST_CHECK(controller.settings()["sunLimit"] ==
+                   firstSuggestion["sunLimit"]);
   root->setProperty("viewMode", "world");
   QCoreApplication::processEvents();
   if (!qEnvironmentVariable("ASTRO_OBSERVATION_SCREENSHOTS").isEmpty())
@@ -226,8 +380,13 @@ int main(int argc, char **argv) {
     }
     ASTRO_TEST_CHECK(!controller.searching());
     ASTRO_TEST_CHECK(!controller.searchResults().isEmpty());
-    ASTRO_TEST_CHECK(controller.selectTarget(
-        controller.searchResults().first().toMap()["id"].toString()));
+    const auto onlineId =
+        controller.searchResults().first().toMap()["id"].toString();
+    ASTRO_TEST_CHECK(controller.selectTarget(onlineId));
+    controller.toggleFavoriteTarget();
+    ObservationController reopened;
+    ASTRO_TEST_CHECK(reopened.selectTarget(onlineId));
+    ASTRO_TEST_CHECK(reopened.targetFavorite());
   }
 
   return 0;

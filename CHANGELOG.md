@@ -5,6 +5,10 @@
 - Add an independent Observation workspace before Guide, for the Moon, seven planets and fixed catalogue objects.
 - Bundle the OpenNGC catalogue and Astronomy Engine; provide offline identifier search, optional CDS Sesame name lookup, city presets, optional Open-Meteo / GeoNames city search and saved local sites.
 - Synchronize night altitude, horizon trajectory and regional world visibility with a local/UTC time slider. Show geometric centre rise/set, highest altitude, eligible intervals and lunar illumination/separation.
+- Save favourite objects and places locally, including coordinates resolved online; keep them directly accessible and restore them across launches.
+- Show solar rise/set (upper limb with standard refraction), daylight, civil twilight and astronomical-night intervals, plus the day/twilight/night state at the selected instant.
+- Recommend common targets and favourites from location, local date and minimum height, with validated observing windows and explicit per-target darkness criteria; support both hemispheres and polar cases offline.
+- Report absent, interrupted and restored connectivity and online search failures while preserving previous results.
 - Apply IANA time zones and daylight-saving changes; explain height, darkness, polar cases, data sources and planning limits in French and English. Preserve processing and project formats.
 - Verify five topocentric positions against independent NASA/JPL Horizons references, and cover hemispheres, polar conditions, date changes, 23/25-hour periods, invalid inputs, persistence and native QML composition.
 

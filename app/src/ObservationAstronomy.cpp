@@ -48,6 +48,66 @@ ObservationPosition observationPosition(const ObservationTarget &target,
 double observationSunAltitude(const ObservationSite &site, qint64 utc) {
   return observationPosition({{}, {}, {}, BODY_SUN}, site, utc).altitude;
 }
+bool observationSunIsUp(const ObservationSite &site, qint64 utc) {
+  valid(site, utc);
+  auto time = timeAt(utc);
+  auto observer =
+      Astronomy_MakeObserver(site.latitude, site.longitude, site.elevation);
+  auto eq =
+      Astronomy_Equator(BODY_SUN, &time, observer, EQUATOR_OF_DATE, ABERRATION);
+  if (eq.status != ASTRO_SUCCESS)
+    throw std::runtime_error("Cannot calculate solar events.");
+  auto atmosphere = Astronomy_Atmosphere(site.elevation);
+  return Astronomy_Horizon(&time, observer, eq.ra, eq.dec, REFRACTION_NONE)
+                 .altitude +
+             (34.0 / 60) * atmosphere.density +
+             std::asin(0.004650467260962157 / eq.dist) * RAD2DEG >=
+         0;
+}
+std::vector<ObservationSolarEvent>
+observationSolarEvents(const ObservationSite &site, qint64 start, qint64 end) {
+  valid(site, start);
+  if (end <= start || end - start > 26 * 3600)
+    throw std::runtime_error("Invalid observation period.");
+  auto observer =
+      Astronomy_MakeObserver(site.latitude, site.longitude, site.elevation);
+  std::vector<ObservationSolarEvent> events;
+  for (const double altitude : {0.0, -6.0, -18.0}) {
+    for (auto direction : {DIRECTION_RISE, DIRECTION_SET}) {
+      qint64 cursor = start;
+      // The local-noon period can contain two events of one type at extreme
+      // latitudes.
+      while (cursor < end) {
+        auto result = altitude == 0
+                          ? Astronomy_SearchRiseSet(
+                                BODY_SUN, observer, direction, timeAt(cursor),
+                                double(end - cursor) / 86400)
+                          : Astronomy_SearchAltitude(
+                                BODY_SUN, observer, direction, timeAt(cursor),
+                                double(end - cursor) / 86400, altitude);
+        if (result.status == ASTRO_SEARCH_FAILURE)
+          break;
+        if (result.status != ASTRO_SUCCESS)
+          throw std::runtime_error("Cannot calculate solar events.");
+        const qint64 utc = qRound64(result.time.ut * 86400 + 946728000);
+        if (utc >= end)
+          break;
+        if (utc < cursor)
+          break;
+        QString kind =
+            altitude == 0 ? (direction == DIRECTION_RISE ? "sunrise" : "sunset")
+            : altitude == -6
+                ? (direction == DIRECTION_RISE ? "civilDawn" : "civilDusk")
+                : (direction == DIRECTION_RISE ? "nightEnd" : "nightStart");
+        events.push_back({utc, kind});
+        cursor = utc + 2;
+      }
+    }
+  }
+  std::sort(events.begin(), events.end(),
+            [](const auto &a, const auto &b) { return a.utc < b.utc; });
+  return events;
+}
 double observationMoonFraction(qint64 utc) {
   const auto result = Astronomy_Illumination(BODY_MOON, timeAt(utc));
   if (result.status != ASTRO_SUCCESS)

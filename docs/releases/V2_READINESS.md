@@ -1,6 +1,6 @@
 # AstroCapture — bilan avant V2
 
-État du 11 octobre 2026, après les contrôles de la livraison 1.17.0.
+État du 11 octobre 2026, après les contrôles de la livraison 1.18.0.
 
 L’utilisateur réserve pour l’instant AstroCapture à son usage personnel.
 La qualification de distribution publique reste une étape ultérieure ; elle
@@ -121,11 +121,15 @@ Les automatismes doivent rester optionnels, contrôlables et réversibles. Prés
 les sources, la précision et le moteur indépendant ; ne pas annoncer de support
 matériel ou de justesse scientifique sans preuve.
 
-## Demande utilisateur conservée pour la planification
+## Préparation des observations — livrée en 1.18.0
 
-Entrer une position terrestre ou un objet, connaître sa visibilité depuis ce
-lieu et les régions du monde favorables : **à développer**, sans fonctionnalité
-livrée à ce stade. Il faudra préciser date/heure, horizon, altitude minimale,
-nuit astronomique et éventuellement influence de la Lune. Ce module peut suivre
-la stabilisation du traitement ; il n’est pas une condition de justesse des
-images déjà produites.
+L’onglet indépendant Observation couvre les objets OpenNGC, la Lune et sept
+planètes, le lieu et la date locale, les horaires du Soleil, les créneaux de nuit,
+la hauteur/obscurité, les favoris et des suggestions calculées sans connexion.
+Nuit, horizon et carte régionale partagent le même instant UTC ; les informations
+lunaires et les limites des calculs sont explicites. Les recherches de noms et de
+villes en ligne sont facultatives et signalent les échecs sans effacer les résultats.
+
+La météo, la pollution lumineuse, les masques d’obstacles locaux, les réservations
+et le pilotage d’acquisition restent des prolongements possibles. Le module n’est
+pas une condition de justesse des images déjà produites.

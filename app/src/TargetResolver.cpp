@@ -181,8 +181,7 @@ QVariantMap resolveTargetPosition(const QString &name, std::stop_token stop) {
   if (oversized)
     throw std::runtime_error("Invalid target resolver response.");
   if (reply->error() != QNetworkReply::NoError)
-    throw std::runtime_error("The CDS target resolver is unavailable. Retry or "
-                             "enter coordinates manually.");
+    throw TargetResolverNetworkError(int(reply->error()));
   const auto data = reply->readAll();
   const auto result = parseTargetPosition(data, name);
   check(stop);

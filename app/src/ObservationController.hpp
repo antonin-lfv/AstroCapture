@@ -23,6 +23,12 @@ class ObservationController : public QObject {
   Q_PROPERTY(bool locating READ locating NOTIFY sitesChanged)
   Q_PROPERTY(QString locationStatus READ locationStatus NOTIFY sitesChanged)
   Q_PROPERTY(QVariantList cityResults READ cityResults NOTIFY sitesChanged)
+  Q_PROPERTY(
+      QVariantList favoriteTargets READ favoriteTargets NOTIFY favoritesChanged)
+  Q_PROPERTY(bool targetFavorite READ targetFavorite NOTIFY favoritesChanged)
+  Q_PROPERTY(QVariantList recommendations READ recommendations NOTIFY changed)
+  Q_PROPERTY(
+      QString connectionStatus READ connectionStatus NOTIFY connectionChanged)
 public:
   explicit ObservationController(QObject *parent = nullptr);
   ~ObservationController() override;
@@ -36,10 +42,16 @@ public:
   QString error() const { return error_; }
   QString searchStatus() const { return searchStatus_; }
   bool searching() const { return searching_; }
-  int catalogCount() const { return int(catalog_.size()); }
+  int catalogCount() const { return catalogCount_; }
   bool locating() const { return locating_; }
   QString locationStatus() const { return locationStatus_; }
   QVariantList cityResults() const { return cityResults_; }
+  QVariantList favoriteTargets() const { return favoriteTargets_; }
+  bool targetFavorite() const;
+  QVariantList recommendations() const { return recommendations_; }
+  QString connectionStatus() const { return connectionStatus_; }
+  Q_INVOKABLE void toggleFavoriteTarget();
+  static QString networkFailure(int code, bool interrupted = false);
   Q_INVOKABLE void searchCity(const QString &name);
   Q_INVOKABLE bool selectCity(int index);
   Q_INVOKABLE void search(const QString &query);
@@ -55,12 +67,19 @@ signals:
   void instantChanged();
   void searchChanged();
   void sitesChanged();
+  void favoritesChanged();
+  void connectionChanged();
+
+private slots:
+  void updateReachability(int state);
 
 private:
   void loadCatalog();
   void updateInstant();
   void persist();
   QString localTime(qint64 utc) const;
+  void updateRecommendations();
+  void saveFavoriteTargets();
   ObservationTarget target_;
   ObservationSite site_;
   std::vector<ObservationTarget> catalog_;
@@ -75,5 +94,9 @@ private:
   bool locating_{};
   QString locationStatus_;
   QVariantList cityResults_;
+  QVariantList favoriteTargets_, recommendations_;
+  QString recommendationsKey_, connectionStatus_;
+  bool offline_{}, connectionLost_{};
+  int reachability_{}, recommendationPool_{}, catalogCount_{};
 };
 } // namespace astro::app

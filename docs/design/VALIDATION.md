@@ -999,3 +999,41 @@ volumes temporaires sont démontés. Aucun échec de chargement QML ; le seul
 diagnostic de démarrage concerne l’alias de police « Monospace ». Journaux :
 `build/composition-personal-validation.log` et
 `build/composition-personal-validation/`.
+
+
+## Lot 1.18.0 — Observation
+
+L’onglet natif **Observation**, indépendant de Ciel profond et placé avant Guide,
+a été contrôlé en français à 1440 × 960, 1100 × 800 et 900 × 700. Les captures
+`previews/native/observation/` montrent les calculs réels de M42 et de la Lune,
+les suggestions calculées et un état simulé de perte de connexion. Les composants
+Atelier partagés fournissent les commandes, aides, états de focus et contrôles ;
+les courbes et la carte utilisent les couleurs sémantiques. Les panneaux défilent
+sur la petite taille pour conserver l’accès aux réglages et aux détails horaires.
+
+- Catalogue OpenNGC inclus, Lune et sept planètes, recherche en ligne facultative.
+- Favoris d’objets et de lieux enregistrés localement et restaurés, y compris
+  les coordonnées d’objets trouvés en ligne ; noms personnalisables pour les lieux.
+- Suggestions pour le lieu et la date, avec créneaux, hauteur et obscurité explicites.
+  Les limites des suggestions et les critères propres à chaque famille sont affichés.
+- Horaires du Soleil, périodes de jour et de nuit astronomique, crépuscules et cas polaires.
+- Nuit, horizon et carte mondiale liés au même instant ; date locale, UTC, changement d’heure.
+- Messages d’absence/perte/rétablissement de connexion ; conservation des résultats en cas d’échec.
+
+Les positions topocentriques mobiles ont été comparées aux données indépendantes
+[NASA/JPL Horizons](https://ssd.jpl.nasa.gov/horizons/) pour cinq cas aux deux
+hémisphères et près du cercle polaire : écarts d’altitude et d’azimut inférieurs
+à une minute d’arc. Les horaires solaires ont été comparés à
+[l’API de l’US Naval Observatory](https://aa.usno.navy.mil/data/api) à Paris et Sydney,
+avec une tolérance de 90 secondes sur des valeurs arrondies à la minute ; le jour
+polaire à Tromsø a été vérifié. Les réponses de référence sont conservées dans les
+fixtures de tests. Ces contrôles ne garantissent pas le pointage du télescope ou
+les conditions météorologiques réelles.
+
+Les tests couvrent aussi les changements d’heure (23 et 25 heures), les positions
+invalides sans remplacement des résultats, les favoris persistants, les critères
+et l’actualisation des suggestions, les transitions de connexion simulées et les
+interfaces aux trois tailles. Les 51 tests de régression passent ; les tests ciblés
+d’Observation et de la fenêtre complète ont été relancés après les derniers ajustements.
+Les recherches réelles de Toulouse et de Vega sont
+vérifiées séparément ; les tests ordinaires restent indépendants d’Internet.

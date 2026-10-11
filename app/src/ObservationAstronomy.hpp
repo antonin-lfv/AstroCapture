@@ -21,6 +21,13 @@ struct ObservationSample {
 struct ObservationWindow {
   qint64 start{}, end{};
 };
+struct ObservationSolarEvent {
+  qint64 utc{};
+  QString kind;
+};
+std::vector<ObservationSolarEvent>
+observationSolarEvents(const ObservationSite &, qint64 start, qint64 end);
+bool observationSunIsUp(const ObservationSite &, qint64 utc);
 ObservationPosition observationPosition(const ObservationTarget &,
                                         const ObservationSite &, qint64 utc);
 double observationSunAltitude(const ObservationSite &, qint64 utc);

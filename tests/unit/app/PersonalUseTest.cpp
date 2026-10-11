@@ -160,10 +160,19 @@ static int workspace(const QString& directory,bool restore,bool faults=false) {
         auto settings=observation->settings();settings["date"]="2026-12-12";ASTRO_TEST_CHECK(observation->calculate(settings));
         ASTRO_TEST_CHECK(observation->selectTarget("NGC1976"));
         window->setProperty("currentTab","observation");
-        auto* workspace=window->findChild<QObject*>("observationWorkspace");ASTRO_TEST_CHECK(workspace);
+        auto* workspace=window->findChild<QObject*>("observationWorkspace");ASTRO_TEST_CHECK(workspace);workspace->setProperty("viewMode","night");
         for(const auto size:{QSize(1440,960),QSize(1100,800),QSize(900,700)}) {
             window->resize(size);capture(window,QString("observation-night-%1").arg(size.width()));
         }
+        if(!observation->targetFavorite())observation->toggleFavoriteTarget();ASTRO_TEST_CHECK(observation->saveSite("Mon jardin · Paris"));
+        workspace->setProperty("viewMode","suggestions");
+        for(const auto size:{QSize(1440,960),QSize(1100,800),QSize(900,700)}) {
+            window->resize(size);capture(window,QString("observation-suggestions-%1").arg(size.width()));
+        }
+        ASTRO_TEST_CHECK(QMetaObject::invokeMethod(observation,"updateReachability",Qt::DirectConnection,Q_ARG(int,4)));
+        ASTRO_TEST_CHECK(QMetaObject::invokeMethod(observation,"updateReachability",Qt::DirectConnection,Q_ARG(int,1)));
+        capture(window,"observation-connection-lost-900");
+        ASTRO_TEST_CHECK(QMetaObject::invokeMethod(observation,"updateReachability",Qt::DirectConnection,Q_ARG(int,4)));
         workspace->setProperty("viewMode","world");capture(window,"observation-world-900");
         settings=observation->settings();settings["date"]="2026-12-23";ASTRO_TEST_CHECK(observation->calculate(settings));
         ASTRO_TEST_CHECK(observation->selectTarget("moon"));observation->setFraction(.6);workspace->setProperty("viewMode","sky");capture(window,"observation-moon-horizon-900");

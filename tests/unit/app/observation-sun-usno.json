@@ -1,0 +1,88 @@
+[
+  {
+    "source": "https://aa.usno.navy.mil/api/rstt/oneday?date=2026-12-12&coords=48.8566,2.3522&tz=1.0",
+    "retrieved": "2026-10-11",
+    "latitude": 48.8566,
+    "longitude": 2.3522,
+    "date": "2026-12-12",
+    "offsetHours": 1.0,
+    "events": [
+      {
+        "phen": "Begin Civil Twilight",
+        "time": "07:58"
+      },
+      {
+        "phen": "Rise",
+        "time": "08:35"
+      },
+      {
+        "phen": "Upper Transit",
+        "time": "12:44"
+      },
+      {
+        "phen": "Set",
+        "time": "16:54"
+      },
+      {
+        "phen": "End Civil Twilight",
+        "time": "17:31"
+      }
+    ]
+  },
+  {
+    "source": "https://aa.usno.navy.mil/api/rstt/oneday?date=2026-12-12&coords=-33.8688,151.2093&tz=11.0",
+    "retrieved": "2026-10-11",
+    "latitude": -33.8688,
+    "longitude": 151.2093,
+    "date": "2026-12-12",
+    "offsetHours": 11.0,
+    "events": [
+      {
+        "phen": "Begin Civil Twilight",
+        "time": "05:09"
+      },
+      {
+        "phen": "Rise",
+        "time": "05:38"
+      },
+      {
+        "phen": "Upper Transit",
+        "time": "12:49"
+      },
+      {
+        "phen": "Set",
+        "time": "20:00"
+      },
+      {
+        "phen": "End Civil Twilight",
+        "time": "20:29"
+      }
+    ]
+  },
+  {
+    "source": "https://aa.usno.navy.mil/api/rstt/oneday?date=2026-06-21&coords=69.6492,18.9553&tz=2.0",
+    "retrieved": "2026-10-11",
+    "latitude": 69.6492,
+    "longitude": 18.9553,
+    "date": "2026-06-21",
+    "offsetHours": 2.0,
+    "events": [
+      {
+        "phen": "Object continuously above the Horizon",
+        "time": null
+      },
+      {
+        "phen": "Object continuously above the Twilight Limit",
+        "time": null
+      },
+      {
+        "phen": "Lower Transit",
+        "time": "00:46"
+      },
+      {
+        "phen": "Upper Transit",
+        "time": "12:46"
+      }
+    ]
+  }
+]

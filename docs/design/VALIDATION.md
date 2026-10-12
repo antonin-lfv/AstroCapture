@@ -1388,3 +1388,55 @@ L’installateur **AstroCapture-1.18.8.dmg** est généré et son intégrité es
 lecture seule réussit avec les préférences utilisateur protégées, sans erreur QML
 (`build/observation-polish-dmg-startup.log`). Le volume temporaire est détaché.
 SHA-256 : `1e7cd22fe8163a97cd0b9075a47d685f549a9248e356d90336a3998d29e99ac4`.
+
+## Lot 1.18.9 — heures concordantes et colonnes Observation
+
+Le lieu et le Mac affichent le **même instant choisi**, converti dans leurs fuseaux
+respectifs. Les clics sur les courbes de hauteur/nuages, le curseur continu et les
+changements de date/heure actualisent les deux affichages. Le bandeau Chez moi /
+Sur place reste visible au-dessus du défilement ; l’horloge réelle indépendante
+a été retirée. Maintenant conserve le suivi direct de l’instant réel. Changer
+de lieu conserve toujours l’UTC ; changer une heure locale convertit cet instant.
+
+Les prochains événements du Soleil, les créneaux de lancement et les fenêtres
+précises sont affichés à l’heure locale du Mac, sans suffixe GMT. Le repère local
+du télescope est ajouté si les fuseaux diffèrent. Les champs UTC et les anciens
+formats détaillés restent disponibles dans le contrôleur ; la conversion ne
+modifie ni les calculs ni la sélection du premier créneau restant après l’heure
+réelle. Les choix d’heures répétées et le refus d’heures inexistantes sont conservés.
+
+Sans recommandation, le menu affiche « Rien de visible à cette heure » ou « Rien
+de visible cette nuit » et se désactive. La cible précédente reste nommée Objet
+affiché, avec ses cartes, courbes et favoris. Le catalogue reste accessible ;
+l’absence de recommandation ne prétend pas décrire tous les objets du ciel.
+
+La colonne gauche contient lieu, heure et boussole sur 25 % de la largeur. La
+colonne droite contient jour/nuit, objet puis visibilité sur 75 %. Les courbes
+de hauteur et de nuages occupent chacune une moitié de la ligne suivante. Les
+messages de fuseau non confirmé restent explicites dans la fiche et le bandeau.
+
+Les contrôles natifs dans `previews/native/observation-shared-time/` vérifient
+la composition française aux trois tailles, les conversions Utah/Paris, les
+listes vides, la météo en cache et la perte de connexion. Le parcours sur Orion
+HDR vérifie pixels flottants, exports et reprise entre processus
+(`build/observation-shared-orion-native.log`). Les 517 messages actifs du
+contrôleur, de Main, d’Observation et du Guide sont présents dans le catalogue
+compilé (`build/observation-shared-translation.log`). Guide et README sont à jour.
+
+Le test de cadre AppKit attend les événements de redimensionnement et adapte
+sa taille à l’espace physique disponible : macOS limite ici une fenêtre demandée
+à 1440 × 960 à 1440 × 839. Le centrage est vérifié sur la taille native effective ;
+les captures QML vérifient 1440 × 960, 1100 × 800 et 900 × 700 exactement. Ce
+contrôle ne modifie pas le comportement de la fenêtre de l’application.
+
+Les **53 tests Release passent** (`build/observation-shared-tests.log`), dont les
+horloges pendant les vrais événements de souris, les clics des deux courbes,
+les conversions de dates et les deux modes de liste vide. Les **40 captures**
+documentent les trois tailles et les états décrits ci-dessus.
+
+L’installateur **AstroCapture-1.18.9.dmg** est généré, son intégrité est vérifiée
+et son démarrage depuis le volume en lecture seule réussit, avec préférences
+utilisateur protégées et sans erreur QML. Le volume temporaire est détaché.
+Journaux : `build/observation-shared-dmg-verify.log` et
+`build/observation-shared-dmg-startup.log`. SHA-256 :
+`a5883d65dfac4ed8bb46fdd3bf7e2f71107561515b36ac41410211a01c2fa671`.

@@ -3,8 +3,10 @@
 #import <AppKit/AppKit.h>
 #include <QColor>
 #include <QDir>
+#include <QElapsedTimer>
 #include <QGuiApplication>
 #include <QQuickWindow>
+#include <QScreen>
 #include <QThread>
 
 int main(int argc, char **argv) {
@@ -70,13 +72,31 @@ int main(int argc, char **argv) {
         writeToFile:[NSString stringWithUTF8String:path.constData()]
          atomically:YES]);
   }
-  for (const auto size : {QSize(1100, 800), QSize(1440, 960)}) {
+  for (const auto desired : {QSize(1100, 800), QSize(1440, 960)}) {
+    // macOS constrains native windows to the available display. The QML
+    // composition tests cover all requested sizes without that screen limit.
+    const auto margins = window.frameMargins();
+    const auto available = window.screen()->availableGeometry().size() -
+                           QSize(margins.left() + margins.right(),
+                                 margins.top() + margins.bottom());
+    const auto size = desired.boundedTo(available);
     window.resize(size);
-    app.processEvents();
+    // Cocoa posts resize events asynchronously; a previous resize can still
+    // be queued when the next requested size is applied.
+    QElapsedTimer resizeTimer;
+    resizeTimer.start();
+    do {
+      app.processEvents();
+      QThread::msleep(5);
+    } while (window.size() != size && resizeTimer.elapsed() < 1000);
     [frame layoutSubtreeIfNeeded];
     const auto resizedTitleRect = [title convertRect:title.bounds toView:frame];
     ASTRO_TEST_CHECK(std::abs(NSMidX(resizedTitleRect) - NSMidX(frame.bounds)) <
                      1);
+    if (window.size() != size)
+      std::cerr << "Requested native size " << size.width() << "x"
+                << size.height() << ", received " << window.width() << "x"
+                << window.height() << '\n';
     ASTRO_TEST_CHECK(window.size() == size);
   }
   // The title stays centred when a native window is resized.

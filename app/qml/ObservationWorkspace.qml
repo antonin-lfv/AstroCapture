@@ -11,7 +11,6 @@ Rectangle {
     property bool liveNow: true
     property bool autoSelectVisible: true
     property bool selectingVisible: false
-    property date pcNow: new Date()
     readonly property var sortedSites: controller.sites.map((value, index) => Object.assign({}, value, {
             sourceIndex: index
         })).sort((a, b) => Number(b.favorite) - Number(a.favorite) || a.name.localeCompare(b.name, Qt.locale().name.replace("_", "-"), {
@@ -61,7 +60,7 @@ Rectangle {
     }
     function pcSolar(kind) {
         const event = nextSolar(kind);
-        return event ? Qt.formatDateTime(new Date(Number(event.utc) * 1000), "dd/MM HH:mm t") : qsTr("none in the next day");
+        return event ? Qt.formatDateTime(new Date(Number(event.utc) * 1000), "dd/MM HH:mm") : qsTr("none in the next day");
     }
     function refreshSiteWeather() {
         if (autoLoadWeather) {
@@ -339,12 +338,7 @@ Rectangle {
         refreshSiteWeather();
         Qt.callLater(root.updateVisibleTarget);
     }
-    Timer {
-        interval: 30000
-        running: root.visible
-        repeat: true
-        onTriggered: root.pcNow = new Date()
-    }
+
     Timer {
         objectName: "observationLiveClock"
         interval: 30000
@@ -385,6 +379,38 @@ Rectangle {
             }
             HelpIcon {
                 text: qsTr("Choose a place on the day/night map or in the list, then a time and a visible object. Both maps, the compass and the curves follow the displayed instant. Coordinates, favourites and advanced settings open in dialogs. Now follows the real clock.")
+            }
+        }
+        RowLayout {
+            objectName: "observationSharedTime"
+            Layout.fillWidth: true
+            Layout.leftMargin: 20
+            Layout.rightMargin: 20
+            Layout.bottomMargin: 12
+            spacing: 16
+            Label {
+                objectName: "observationSharedPcClock"
+                text: qsTr("At home · %1").arg(root.controller.reference.homeLocalDisplay || "")
+                color: Atelier.accent
+                font.pixelSize: 14
+                font.weight: Font.Medium
+                wrapMode: Text.Wrap
+                Layout.fillWidth: true
+                Layout.minimumWidth: 0
+                Layout.preferredWidth: 1
+            }
+            Label {
+                objectName: "observationSharedSiteClock"
+                text: (root.controller.settings.mapZoneUnresolved ? qsTr("At the place · UTC until confirmed · %1") : qsTr("At the place · %1")).arg(root.controller.reference.siteLocalDisplay || "")
+                color: Atelier.secondary
+                font.pixelSize: 13
+                wrapMode: Text.Wrap
+                Layout.fillWidth: true
+                Layout.minimumWidth: 0
+                Layout.preferredWidth: 1
+            }
+            HelpIcon {
+                text: qsTr("Both clocks show the selected instant. At home uses this Mac's time zone (%1); at the place uses %2. Clicking a curve or moving the time slider updates both clocks. Now returns to the real current time.").arg(root.controller.reference.homeZone || "").arg(root.controller.reference.siteZone || "")
             }
         }
         Label {
@@ -431,7 +457,7 @@ Rectangle {
                                 Layout.fillWidth: true
                                 Layout.minimumWidth: 0
                                 title: qsTr("Observing place")
-                                help: qsTr("Choose a saved place or click the map. Favourites appear first, with alphabetical sorting in each group. The site clock follows the displayed time; the Mac clock always shows the real current time. Sunrise and sunset are shown in this Mac's time zone. Clouds are forecasts.")
+                                help: qsTr("Choose a saved place or click the map. Favourites appear first, with alphabetical sorting in each group. The site and Mac clocks both show the selected instant in their local time zones. Sunrise and sunset are shown in this Mac's time zone. Clouds are forecasts.")
                                 DarkComboBox {
                                     id: sitePicker
                                     objectName: "observationSite"
@@ -451,7 +477,7 @@ Rectangle {
                                 }
                                 Label {
                                     objectName: "observationSiteClock"
-                                    text: qsTr("At the place · displayed time\n%1").arg(root.controller.reference.siteDisplay || "")
+                                    text: (root.controller.settings.mapZoneUnresolved ? qsTr("At the place · UTC until confirmed\n%1") : qsTr("At the place · selected time\n%1")).arg(root.controller.reference.siteLocalDisplay || "")
                                     color: Atelier.text
                                     font.pixelSize: 12
                                     wrapMode: Text.Wrap
@@ -459,7 +485,7 @@ Rectangle {
                                 }
                                 Label {
                                     objectName: "observationPcClock"
-                                    text: qsTr("This Mac · now\n%1").arg(Qt.formatDateTime(root.pcNow, "dd/MM/yyyy HH:mm t"))
+                                    text: qsTr("This Mac · selected time\n%1").arg(root.controller.reference.homeLocalDisplay || "")
                                     color: Atelier.secondary
                                     font.pixelSize: 12
                                     wrapMode: Text.Wrap
@@ -582,7 +608,7 @@ Rectangle {
                                     objectName: "observationReferenceClock"
                                     Layout.fillWidth: true
                                     Layout.minimumWidth: 0
-                                    label: qsTr("Reference hour · HH:mm")
+                                    label: root.controller.reference.source === "site" ? qsTr("Hour at the place · HH:mm") : qsTr("Hour at home · HH:mm")
                                     help: qsTr("Enter the time in the selected reference time zone. The cursor, both maps and all curves move to the same instant. For example, 23:30. Clock-change gaps are rejected; repeated hours let you choose the offset.")
                                     onAccepted: root.applyReferenceTime()
                                     onTextEdited: {
@@ -592,7 +618,7 @@ Rectangle {
                                 }
                                 Label {
                                     objectName: "observationReferenceReadout"
-                                    text: (root.controller.reference.source === "site" ? qsTr("Telescope: %1") : qsTr("At home: %1")).arg(root.controller.reference.source === "site" ? root.controller.reference.siteDisplay || "" : root.controller.reference.homeDisplay || "")
+                                    text: (root.controller.reference.source === "site" ? qsTr("Telescope: %1") : qsTr("At home: %1")).arg(root.controller.reference.source === "site" ? root.controller.reference.siteLocalDisplay || "" : root.controller.reference.homeLocalDisplay || "")
                                     color: Atelier.secondary
                                     font.pixelSize: 12
                                     Layout.fillWidth: true
@@ -658,6 +684,37 @@ Rectangle {
                                         root.referenceClockEdited = false;
                                         referenceClock.text = root.controller.reference.clock;
                                     }
+                                }
+                            }
+                            ObservationCard {
+                                objectName: "observationSkyCard"
+                                Layout.fillWidth: true
+                                Layout.minimumWidth: 0
+                                title: qsTr("Where to look?")
+                                help: qsTr("A compass view of the sky around your place: north at the top, east on the right. The edge is the theoretical horizon (0°); the centre is overhead, the zenith (90°). The point shows the selected object at the cursor time; the line is its path over the night. Use the cardinal direction and height to know where to look. This is a diagram, not a globe, photograph or the actual terrain horizon.")
+                                Label {
+                                    text: qsTr("%1 · %2° above the horizon").arg(root.compassDirection(root.controller.instant.azimuth)).arg(Number(root.controller.instant.altitude || 0).toFixed(1))
+                                    color: Atelier.accent
+                                    font.pixelSize: 13
+                                    wrapMode: Text.Wrap
+                                    Layout.fillWidth: true
+                                }
+                                ObservationPlot {
+                                    objectName: "observationSkyPlot"
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: Math.max(210, width + 20)
+                                    controller: root.controller
+                                    mode: "sky"
+                                    colors: root.plotColors
+                                    Accessible.role: Accessible.Graphic
+                                    Accessible.name: qsTr("Object's trajectory above the horizon")
+                                }
+                                Label {
+                                    text: root.controller.instant.altitude < 0 ? qsTr("The object is below the horizon at this time.") : qsTr("Edge: horizon · centre: overhead")
+                                    color: Atelier.secondary
+                                    font.pixelSize: 12
+                                    wrapMode: Text.Wrap
+                                    Layout.fillWidth: true
                                 }
                             }
                         }
@@ -786,8 +843,9 @@ Rectangle {
                                             model: root.filteredSuggestions
                                             textRole: "name"
                                             Accessible.name: qsTr("Selected object")
+                                            enabled: root.filteredSuggestions.length > 0
                                             currentIndex: root.filteredSuggestions.findIndex(value => value.id === root.controller.settings.target)
-                                            displayText: root.controller.result.target || ""
+                                            displayText: root.filteredSuggestions.length ? root.controller.result.target || "" : root.suggestionPeriod === "instant" ? qsTr("Nothing visible at this time") : qsTr("Nothing visible during this night")
                                             onActivated: index => root.chooseTarget(root.filteredSuggestions[index].id)
                                         }
                                     }
@@ -797,7 +855,7 @@ Rectangle {
                                     Label {
                                         objectName: "observationSelectedTarget"
                                         readonly property var recommendation: root.filteredSuggestions.find(value => value.id === root.controller.settings.target)
-                                        text: root.controller.result.target || ""
+                                        text: root.filteredSuggestions.length ? root.controller.result.target || "" : qsTr("Displayed object: %1").arg(root.controller.result.target || "")
                                         color: Atelier.accent
                                         font.pixelSize: 14
                                         Layout.fillWidth: true
@@ -842,121 +900,87 @@ Rectangle {
                                     }
                                 }
                             }
-                        }
-                    }
+                            RowLayout {
+                                id: visibilityRow
+                                objectName: "observationVisibilityRow"
+                                Layout.fillWidth: true
+                                spacing: 16
+                                ObservationCard {
+                                    objectName: "observationWorldCard"
+                                    Layout.fillWidth: true
+                                    Layout.minimumWidth: 0
+                                    Layout.fillHeight: true
+                                    title: qsTr("Where is %1 visible?").arg((root.controller.result.target || "").split(" · ")[0])
+                                    help: qsTr("Day follows the Sun's upper edge with standard refraction at sea level; astronomical night starts below −18°. The maps use a regional 6° grid and the same displayed instant. Clicking selects a place without changing UTC. Its time zone is resolved online; if unavailable, Coordinates lets you set it.")
 
-                    RowLayout {
-                        id: visibilityRow
-                        objectName: "observationVisibilityRow"
-                        Layout.fillWidth: true
-                        spacing: 16
-                        ObservationCard {
-                            objectName: "observationWorldCard"
-                            Layout.preferredWidth: (visibilityRow.width - visibilityRow.spacing) * .75
-                            Layout.fillWidth: true
-                            Layout.minimumWidth: 0
-                            Layout.fillHeight: true
-                            title: qsTr("Where is %1 visible?").arg((root.controller.result.target || "").split(" · ")[0])
-                            help: qsTr("Day follows the Sun's upper edge with standard refraction at sea level; astronomical night starts below −18°. The maps use a regional 6° grid and the same displayed instant. Clicking selects a place without changing UTC. Its time zone is resolved online; if unavailable, Coordinates lets you set it.")
-
-                            Label {
-                                objectName: "observationVisibilityTime"
-                                text: root.controller.instant.utc || ""
-                                color: Atelier.secondary
-                                font.pixelSize: 12
-                                Layout.fillWidth: true
-                                wrapMode: Text.Wrap
-                            }
-                            ObservationPlot {
-                                objectName: "observationWorldPlot"
-                                Layout.fillWidth: true
-                                Layout.preferredHeight: Math.max(240, (width - 32) / 2 + 40)
-                                controller: root.controller
-                                mode: "world"
-                                HoverHandler {
-                                    cursorShape: Qt.CrossCursor
-                                }
-                                colors: root.plotColors
-                                Accessible.role: Accessible.Graphic
-                                Accessible.name: qsTr("World visibility map at the selected UTC instant")
-                                onLocationChosen: (latitude, longitude) => root.chooseSite(latitude, longitude)
-                            }
-                            Flow {
-                                Layout.fillWidth: true
-                                spacing: 12
-                                Repeater {
-                                    model: [
-                                        {
-                                            color: Atelier.primary,
-                                            label: qsTr("Limits met")
-                                        },
-                                        {
-                                            color: Atelier.warning,
-                                            label: qsTr("Too low")
-                                        },
-                                        {
-                                            color: Atelier.secondary,
-                                            label: qsTr("Sky too bright")
-                                        },
-                                        {
-                                            color: Atelier.image,
-                                            label: qsTr("Below horizon")
+                                    Label {
+                                        objectName: "observationVisibilityTime"
+                                        text: root.controller.instant.utc || ""
+                                        color: Atelier.secondary
+                                        font.pixelSize: 12
+                                        Layout.fillWidth: true
+                                        wrapMode: Text.Wrap
+                                    }
+                                    ObservationPlot {
+                                        objectName: "observationWorldPlot"
+                                        Layout.fillWidth: true
+                                        Layout.preferredHeight: Math.max(240, (width - 32) / 2 + 40)
+                                        controller: root.controller
+                                        mode: "world"
+                                        HoverHandler {
+                                            cursorShape: Qt.CrossCursor
                                         }
-                                    ]
-                                    Row {
-                                        required property var modelData
-                                        spacing: 6
-                                        Rectangle {
-                                            width: 10
-                                            height: 10
-                                            anchors.verticalCenter: parent.verticalCenter
-                                            color: modelData.color
-                                            border.color: Atelier.border
-                                            radius: 2
-                                        }
-                                        Label {
-                                            text: modelData.label
-                                            color: Atelier.secondary
-                                            font.pixelSize: 12
+                                        colors: root.plotColors
+                                        Accessible.role: Accessible.Graphic
+                                        Accessible.name: qsTr("World visibility map at the selected UTC instant")
+                                        onLocationChosen: (latitude, longitude) => root.chooseSite(latitude, longitude)
+                                    }
+                                    Flow {
+                                        Layout.fillWidth: true
+                                        spacing: 12
+                                        Repeater {
+                                            model: [
+                                                {
+                                                    color: Atelier.primary,
+                                                    label: qsTr("Limits met")
+                                                },
+                                                {
+                                                    color: Atelier.warning,
+                                                    label: qsTr("Too low")
+                                                },
+                                                {
+                                                    color: Atelier.secondary,
+                                                    label: qsTr("Sky too bright")
+                                                },
+                                                {
+                                                    color: Atelier.image,
+                                                    label: qsTr("Below horizon")
+                                                }
+                                            ]
+                                            Row {
+                                                required property var modelData
+                                                spacing: 6
+                                                Rectangle {
+                                                    width: 10
+                                                    height: 10
+                                                    anchors.verticalCenter: parent.verticalCenter
+                                                    color: modelData.color
+                                                    border.color: Atelier.border
+                                                    radius: 2
+                                                }
+                                                Label {
+                                                    text: modelData.label
+                                                    color: Atelier.secondary
+                                                    font.pixelSize: 12
+                                                }
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
-                        ObservationCard {
-                            objectName: "observationSkyCard"
-                            Layout.preferredWidth: (visibilityRow.width - visibilityRow.spacing) * .25
-                            Layout.fillWidth: true
-                            Layout.minimumWidth: 0
-                            Layout.fillHeight: true
-                            title: qsTr("Where to look?")
-                            help: qsTr("A compass view of the sky around your place: north at the top, east on the right. The edge is the theoretical horizon (0°); the centre is overhead, the zenith (90°). The point shows the selected object at the cursor time; the line is its path over the night. Use the cardinal direction and height to know where to look. This is a diagram, not a globe, photograph or the actual terrain horizon.")
-                            Label {
-                                text: qsTr("%1 · %2° above the horizon").arg(root.compassDirection(root.controller.instant.azimuth)).arg(Number(root.controller.instant.altitude || 0).toFixed(1))
-                                color: Atelier.accent
-                                font.pixelSize: 13
-                                wrapMode: Text.Wrap
-                                Layout.fillWidth: true
-                            }
-                            ObservationPlot {
-                                objectName: "observationSkyPlot"
-                                Layout.fillWidth: true
-                                Layout.preferredHeight: Math.max(210, width + 20)
-                                controller: root.controller
-                                mode: "sky"
-                                colors: root.plotColors
-                                Accessible.role: Accessible.Graphic
-                                Accessible.name: qsTr("Object's trajectory above the horizon")
-                            }
-                            Label {
-                                text: root.controller.instant.altitude < 0 ? qsTr("The object is below the horizon at this time.") : qsTr("Edge: horizon · centre: overhead")
-                                color: Atelier.secondary
-                                font.pixelSize: 12
-                                wrapMode: Text.Wrap
-                                Layout.fillWidth: true
-                            }
-                        }
                     }
+
                     RowLayout {
                         id: curvesRow
                         objectName: "observationCurvesRow"
@@ -1131,7 +1155,7 @@ Rectangle {
                         SettingLabel {
                             visible: !(history.checked && root.nightState.past)
                             text: qsTr("When to start recording?")
-                            explanation: qsTr("The first remaining window is chosen after the current real time, independently of the exploratory cursor. It meets the selected height and darkness limits. Start is rounded up to a full minute; end is rounded down. Reference time converts the same instants. Check weather, terrain and telescope setup separately.")
+                            explanation: qsTr("The first remaining window is chosen after the current real time, independently of the exploratory cursor. It meets the selected height and darkness limits. Start is rounded up to a full minute; end is rounded down. The main hours always use this Mac’s local time; telescope hours convert the same instants. Check weather, terrain and telescope setup separately.")
                         }
                         ColumnLayout {
                             visible: !(history.checked && root.nightState.past) && root.controller.reference.recording.available === true
@@ -1142,7 +1166,7 @@ Rectangle {
                                 spacing: 12
                                 Label {
                                     objectName: "observationRecordingStart"
-                                    text: (root.controller.reference.source === "site" ? qsTr("Telescope: from %1") : qsTr("At home: from %1")).arg(root.controller.reference.recording.start || "")
+                                    text: qsTr("At home: from %1").arg(root.controller.reference.recording.homeStartLocal || "")
                                     color: Atelier.text
                                     font.pixelSize: 16
                                     wrapMode: Text.Wrap
@@ -1155,7 +1179,8 @@ Rectangle {
                                 }
                             }
                             Label {
-                                text: qsTr("Until %1 · %2 min").arg(root.controller.reference.recording.end || "").arg(root.controller.reference.recording.minutes || 0)
+                                objectName: "observationRecordingEnd"
+                                text: qsTr("Until %1 · %2 min").arg(root.controller.reference.recording.homeEndLocal || "").arg(root.controller.reference.recording.minutes || 0)
                                 color: Atelier.secondary
                                 font.pixelSize: 12
                                 wrapMode: Text.Wrap
@@ -1163,7 +1188,8 @@ Rectangle {
                             }
                             Label {
                                 visible: root.controller.reference.differentZones
-                                text: (root.controller.reference.source === "site" ? qsTr("At home: %1 → %2") : qsTr("At the telescope: %1 → %2")).arg(root.controller.reference.source === "site" ? root.controller.reference.recording.homeStart || "" : root.controller.reference.recording.siteStart || "").arg(root.controller.reference.source === "site" ? root.controller.reference.recording.homeEnd || "" : root.controller.reference.recording.siteEnd || "")
+                                objectName: "observationRecordingSite"
+                                text: (root.controller.settings.mapZoneUnresolved ? qsTr("At the telescope · UTC until confirmed: %1 → %2") : qsTr("At the telescope: %1 → %2")).arg(root.controller.reference.recording.siteStartLocal || "").arg(root.controller.reference.recording.siteEndLocal || "")
                                 color: Atelier.secondary
                                 font.pixelSize: 12
                                 wrapMode: Text.Wrap
@@ -1181,7 +1207,7 @@ Rectangle {
                         InspectorFamily {
                             objectName: "observationAllWindows"
                             visible: true
-                            title: qsTr("All windows · %1").arg(root.controller.reference.zone || "")
+                            title: qsTr("All windows · Mac local time")
                             onActivated: expanded = !expanded
                             Label {
                                 visible: (root.controller.reference.slots || []).length === 0
@@ -1197,7 +1223,7 @@ Rectangle {
                                     Layout.fillWidth: true
                                     spacing: 4
                                     Label {
-                                        text: modelData.referenceStart + " → " + modelData.referenceEnd
+                                        text: modelData.homeStartLocal + " → " + modelData.homeEndLocal
                                         color: Atelier.text
                                         wrapMode: Text.Wrap
                                         Layout.fillWidth: true
@@ -1205,7 +1231,7 @@ Rectangle {
                                     }
                                     Label {
                                         visible: root.controller.reference.differentZones
-                                        text: (root.controller.reference.source === "site" ? qsTr("At home: %1 → %2") : qsTr("At the telescope: %1 → %2")).arg(root.controller.reference.source === "site" ? modelData.homeStart : modelData.siteStart).arg(root.controller.reference.source === "site" ? modelData.homeEnd : modelData.siteEnd)
+                                        text: (root.controller.settings.mapZoneUnresolved ? qsTr("At the telescope · UTC until confirmed: %1 → %2") : qsTr("At the telescope: %1 → %2")).arg(modelData.siteStartLocal).arg(modelData.siteEndLocal)
                                         color: Atelier.secondary
                                         wrapMode: Text.Wrap
                                         Layout.fillWidth: true

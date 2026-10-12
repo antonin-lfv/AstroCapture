@@ -1,6 +1,6 @@
 # AstroCapture — bilan avant V2
 
-État du 12 octobre 2026, après les contrôles de la livraison 1.18.8.
+État du 12 octobre 2026, après les contrôles de la livraison 1.18.9.
 
 L’utilisateur réserve pour l’instant AstroCapture à son usage personnel.
 La qualification de distribution publique reste une étape ultérieure ; elle
@@ -174,3 +174,11 @@ de travail contenant un projet, même après sauvegarde depuis Accueil. Le cadre
 macOS est sombre avec titre centré ; la version est au centre du pied de fenêtre.
 Les 53 tests Release, les vérifications françaises aux trois tailles et la reprise
 sur Orion passent. Les traitements et formats de projet restent compatibles.
+
+La 1.18.9 synchronise les deux heures affichées avec l’instant choisi sur les
+graphiques et les garde visibles au-dessus du défilement. Les créneaux utilisent
+l’heure locale du Mac en premier, sans suffixe GMT. L’absence de recommandation
+est indiquée dans le menu, sans effacer la cible affichée. La boussole rejoint
+le lieu et l’heure dans la colonne gauche ; jour/nuit, objet et visibilité
+occupent la colonne droite, puis hauteur/nuages prennent chacun une moitié de ligne.
+Les UTC exacts, règles de changement d’heure, calculs et projets restent conservés.

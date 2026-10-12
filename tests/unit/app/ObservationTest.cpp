@@ -660,6 +660,37 @@ int main(int argc, char **argv) {
   ASTRO_TEST_CHECK(!item(root, "observationInspector"));
   ASTRO_TEST_CHECK(root->property("suggestionPeriod") == "instant");
   ASTRO_TEST_CHECK(item(root, "observationSiteSummary"));
+  const auto assertSharedClocks = [&] {
+    const auto utc = controller.instant()["utcSeconds"].toLongLong();
+    const auto home =
+        QDateTime::fromSecsSinceEpoch(utc, QTimeZone::systemTimeZone())
+            .toString("dd/MM/yyyy HH:mm");
+    const auto site =
+        QDateTime::fromSecsSinceEpoch(
+            utc, QTimeZone(controller.settings()["zone"].toString().toUtf8()))
+            .toString("dd/MM/yyyy HH:mm");
+    for (const auto *name :
+         {"observationPcClock", "observationSharedPcClock"}) {
+      const auto text = item(root, name)->property("text").toString();
+      ASTRO_TEST_CHECK(text.endsWith(home));
+      ASTRO_TEST_CHECK(!text.contains("GMT"));
+    }
+    for (const auto *name :
+         {"observationSiteClock", "observationSharedSiteClock"})
+      ASTRO_TEST_CHECK(
+          item(root, name)->property("text").toString().endsWith(site));
+  };
+  assertSharedClocks();
+  for (const auto *name : {"observationPlot", "observationCloudPlot"}) {
+    const auto previous = item(root, "observationPcClock")->property("text");
+    const auto fraction = QString(name) == "observationPlot" ? .23 : .71;
+    ASTRO_TEST_CHECK(QMetaObject::invokeMethod(
+        item(root, name), "fractionChosen", Q_ARG(double, fraction)));
+    ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root, "finishTimeUpdate"));
+    ASTRO_TEST_CHECK(item(root, "observationPcClock")->property("text") !=
+                     previous);
+    assertSharedClocks();
+  }
   root->setProperty("autoSelectVisible", true);
   ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root, "updateVisibleTarget"));
   if (!controller.visibleTargets().isEmpty())
@@ -678,6 +709,7 @@ int main(int argc, char **argv) {
   item(root, "observationReferenceClock")->setProperty("text", "00:15");
   ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root, "applyReferenceTime"));
   ASTRO_TEST_CHECK(controller.reference()["clock"] == "00:15");
+  assertSharedClocks();
   QCoreApplication::processEvents();
   ASTRO_TEST_CHECK(
       item(root, "observationReferenceDay")->property("currentIndex").toInt() ==
@@ -694,6 +726,20 @@ int main(int argc, char **argv) {
   ASTRO_TEST_CHECK(controller.instant()["utcSeconds"] ==
                    controller.reference()["recording"].toMap()["startUtc"]);
   ASTRO_TEST_CHECK(root->property("referenceNotice").toString().isEmpty());
+  assertSharedClocks();
+  const auto recordingStart =
+      controller.reference()["recording"].toMap()["startUtc"].toLongLong();
+  const auto recordingClock =
+      QDateTime::fromSecsSinceEpoch(recordingStart, QTimeZone::systemTimeZone())
+          .toString("dd/MM/yyyy HH:mm");
+  ASTRO_TEST_CHECK(item(root, "observationRecordingStart")
+                       ->property("text")
+                       .toString()
+                       .endsWith(recordingClock));
+  ASTRO_TEST_CHECK(!item(root, "observationRecordingEnd")
+                        ->property("text")
+                        .toString()
+                        .contains("GMT"));
   controller.setFraction(.512345);
   const auto preciseUtc = controller.instant()["utcSeconds"];
   ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root, "applyReferenceTime"));
@@ -743,7 +789,7 @@ int main(int argc, char **argv) {
       const auto clock =
           QDateTime::fromSecsSinceEpoch(event["utc"].toLongLong())
               .toLocalTime()
-              .toString("dd/MM HH:mm t");
+              .toString("dd/MM HH:mm");
       ASTRO_TEST_CHECK(
           item(root, QString("observation") +
                          (QString(kind) == "sunset" ? "Sunset" : "Sunrise"))
@@ -799,8 +845,10 @@ int main(int argc, char **argv) {
   ASTRO_TEST_CHECK(
       QMetaObject::invokeMethod(root, "chooseTarget", Q_ARG(QVariant, "moon")));
   ASTRO_TEST_CHECK(controller.settings()["target"] == "moon");
-  ASTRO_TEST_CHECK(item(root, "observationSelectedTarget")->property("text") ==
-                   controller.result()["target"]);
+  ASTRO_TEST_CHECK(item(root, "observationSelectedTarget")
+                       ->property("text")
+                       .toString()
+                       .endsWith(controller.result()["target"].toString()));
   ASTRO_TEST_CHECK(controller.selectTarget(selectedId.toString()));
   QQuickWindow window;
   window.show();
@@ -818,7 +866,16 @@ int main(int argc, char **argv) {
     ASTRO_TEST_CHECK(std::abs(mapWidth / placeWidth - 3) < .02);
     const auto site = item(root, "observationSiteSummary");
     const auto time = item(root, "observationTimeCard");
+    const auto sky = item(root, "observationSkyCard");
     ASTRO_TEST_CHECK(std::abs(site->width() - time->width()) < 1);
+    ASTRO_TEST_CHECK(std::abs(sky->width() - time->width()) < 1);
+    ASTRO_TEST_CHECK(std::abs(sky->mapToItem(root, QPointF()).x() -
+                              time->mapToItem(root, QPointF()).x()) < 1);
+    ASTRO_TEST_CHECK(sky->mapToItem(root, QPointF()).y() >=
+                     time->mapToItem(root, QPointF()).y() + time->height() +
+                         15);
+    ASTRO_TEST_CHECK(std::abs(item(root, "observationWorldCard")->width() -
+                              item(root, "observationDayCard")->width()) < 1);
     ASTRO_TEST_CHECK(time->mapToItem(root, QPointF()).y() >=
                      site->mapToItem(root, QPointF()).y() + site->height() +
                          15);
@@ -899,6 +956,7 @@ int main(int argc, char **argv) {
       mouse(QEvent::MouseMove, last, Qt::NoButton, Qt::LeftButton);
       QCoreApplication::processEvents();
       QThread::msleep(6);
+      assertSharedClocks();
     }
     ASTRO_TEST_CHECK(slider->property("pressed").toBool());
     ASTRO_TEST_CHECK(updatesDuringDrag >= 3);
@@ -914,11 +972,50 @@ int main(int argc, char **argv) {
     window.grabWindow().save(
         qEnvironmentVariable("ASTRO_OBSERVATION_SCREENSHOTS") +
         "/world-900.png");
+  // The conversion remains visible when the top cards scroll out of view.
+  scroll->setProperty(
+      "contentY",
+      scroll->property("contentY").toDouble() +
+          item(root, "observationCurvesRow")->mapToItem(scroll, QPointF()).y());
+  QCoreApplication::processEvents();
+  auto *sharedClock = item(root, "observationSharedPcClock");
+  ASTRO_TEST_CHECK(sharedClock->isVisible() &&
+                   sharedClock->mapToScene(QPointF()).y() >= 0 &&
+                   sharedClock->mapToScene(QPointF()).y() < 120);
+  assertSharedClocks();
+  const auto savedSelection = controller.settings();
+  const auto savedTarget = controller.settings()["target"];
+  auto emptySelection = savedSelection;
+  emptySelection["minimum"] = 90;
+  ASTRO_TEST_CHECK(controller.calculate(emptySelection));
+  ASTRO_TEST_CHECK(controller.visibleTargets().isEmpty());
+  ASTRO_TEST_CHECK(controller.recommendations().isEmpty());
+  auto *targetMenu = item(root, "observationVisibleTarget");
+  for (const auto *period : {"instant", "night"}) {
+    root->setProperty("suggestionPeriod", period);
+    ASTRO_TEST_CHECK(root->property("filteredSuggestions")
+                         .value<QJSValue>()
+                         .toVariant()
+                         .toList()
+                         .isEmpty());
+    ASTRO_TEST_CHECK(!targetMenu->property("enabled").toBool());
+    const auto expected = QCoreApplication::translate(
+        "ObservationWorkspace", QString(period) == "instant"
+                                    ? "Nothing visible at this time"
+                                    : "Nothing visible during this night");
+    ASTRO_TEST_CHECK(targetMenu->property("displayText").toString() ==
+                     expected);
+    ASTRO_TEST_CHECK(controller.settings()["target"] == savedTarget);
+  }
+  ASTRO_TEST_CHECK(controller.calculate(savedSelection));
+  root->setProperty("suggestionPeriod", "instant");
+  assertSharedClocks();
   const auto locationUtc = controller.instant()["utcSeconds"];
   ASTRO_TEST_CHECK(QMetaObject::invokeMethod(
       item(root, "observationWorldPlot"), "locationChosen", Q_ARG(double, -33),
       Q_ARG(double, 151)));
   ASTRO_TEST_CHECK(controller.instant()["utcSeconds"] == locationUtc);
+  assertSharedClocks();
   root->setProperty("autoSelectVisible", false);
   reachability(Reachability::Disconnected);
   controller.resolveMapTimeZone();

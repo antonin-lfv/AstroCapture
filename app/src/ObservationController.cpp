@@ -760,6 +760,20 @@ QVariantMap ObservationController::recordingWindow(qint64 notBefore) const {
             {"homeEnd",
              QDateTime::fromSecsSinceEpoch(end, QTimeZone::systemTimeZone())
                  .toString("dd/MM/yyyy HH:mm t")},
+            {"homeStartLocal",
+             QDateTime::fromSecsSinceEpoch(start, QTimeZone::systemTimeZone())
+                 .toString("dd/MM/yyyy HH:mm")},
+            {"homeEndLocal",
+             QDateTime::fromSecsSinceEpoch(end, QTimeZone::systemTimeZone())
+                 .toString("dd/MM/yyyy HH:mm")},
+            {"siteStartLocal",
+             QDateTime::fromSecsSinceEpoch(
+                 start, QTimeZone(settings_.value("zone").toString().toUtf8()))
+                 .toString("dd/MM/yyyy HH:mm")},
+            {"siteEndLocal",
+             QDateTime::fromSecsSinceEpoch(
+                 end, QTimeZone(settings_.value("zone").toString().toUtf8()))
+                 .toString("dd/MM/yyyy HH:mm")},
             {"minutes", (end - start) / 60}};
   }
   return {{"available", false}};
@@ -799,22 +813,35 @@ void ObservationController::updateReference() {
                             .toString("dd/MM/yyyy HH:mm:ss t");
     slot["siteEnd"] = QDateTime::fromSecsSinceEpoch(end, siteZone)
                           .toString("dd/MM/yyyy HH:mm:ss t");
+    slot["homeStartLocal"] = QDateTime::fromSecsSinceEpoch(start, homeZone)
+                                 .toString("dd/MM/yyyy HH:mm:ss");
+    slot["homeEndLocal"] = QDateTime::fromSecsSinceEpoch(end, homeZone)
+                               .toString("dd/MM/yyyy HH:mm:ss");
+    slot["siteStartLocal"] = QDateTime::fromSecsSinceEpoch(start, siteZone)
+                                 .toString("dd/MM/yyyy HH:mm:ss");
+    slot["siteEndLocal"] = QDateTime::fromSecsSinceEpoch(end, siteZone)
+                               .toString("dd/MM/yyyy HH:mm:ss");
     referenceSlots.append(slot);
   }
-  reference_ = {{"source", source},
-                {"zone", QString::fromUtf8(zone.id())},
-                {"homeZone", QString::fromUtf8(homeZone.id())},
-                {"siteZone", QString::fromUtf8(siteZone.id())},
-                {"differentZones", homeZone.id() != siteZone.id()},
-                {"date", local.date().toString(Qt::ISODate)},
-                {"clock", local.time().toString("HH:mm")},
-                {"display", local.toString("dd/MM/yyyy HH:mm t")},
-                {"homeDisplay", QDateTime::fromSecsSinceEpoch(utc, homeZone)
-                                    .toString("dd/MM/yyyy HH:mm t")},
-                {"siteDisplay", QDateTime::fromSecsSinceEpoch(utc, siteZone)
-                                    .toString("dd/MM/yyyy HH:mm t")},
-                {"days", days},
-                {"slots", referenceSlots}};
+  reference_ = {
+      {"source", source},
+      {"zone", QString::fromUtf8(zone.id())},
+      {"homeZone", QString::fromUtf8(homeZone.id())},
+      {"siteZone", QString::fromUtf8(siteZone.id())},
+      {"differentZones", homeZone.id() != siteZone.id()},
+      {"date", local.date().toString(Qt::ISODate)},
+      {"clock", local.time().toString("HH:mm")},
+      {"display", local.toString("dd/MM/yyyy HH:mm t")},
+      {"homeDisplay", QDateTime::fromSecsSinceEpoch(utc, homeZone)
+                          .toString("dd/MM/yyyy HH:mm t")},
+      {"siteDisplay", QDateTime::fromSecsSinceEpoch(utc, siteZone)
+                          .toString("dd/MM/yyyy HH:mm t")},
+      {"homeLocalDisplay", QDateTime::fromSecsSinceEpoch(utc, homeZone)
+                               .toString("dd/MM/yyyy HH:mm")},
+      {"siteLocalDisplay", QDateTime::fromSecsSinceEpoch(utc, siteZone)
+                               .toString("dd/MM/yyyy HH:mm")},
+      {"days", days},
+      {"slots", referenceSlots}};
   reference_["recording"] = recordingWindow();
 }
 void ObservationController::updateInstant() {

@@ -15,17 +15,18 @@ AstroCapture réunit la capture vidéo et FITS, le traitement planétaire, la ca
 L’onglet **Observation**, placé avant **Guide**, prépare une observation de la Lune,
 des planètes ou d’un objet fixe. Il est indépendant de **Ciel profond**.
 
-Les blocs **Lieu d’observation** et **Choisir l’heure** sont empilés dans le quart
-gauche de la page. La carte jour/nuit et le choix de l’objet occupent les trois
-quarts droits. Vous pouvez utiliser n’importe quel lieu ; **T68 · Utah** est un simple
-lieu proposé avec coordonnées, altitude et fuseau, sans connexion à un opérateur.
+La colonne gauche (25 %) empile **Lieu d’observation**, **Choisir l’heure** et
+**Où regarder ?**. La colonne droite (75 %) contient la carte jour/nuit et le choix
+de l’objet, puis la grande carte de visibilité. Sous ces deux colonnes,
+les courbes de hauteur et de nuages prennent chacune une moitié de ligne.
 
-La carte de visibilité prend ensuite 75 % à gauche et **Où regarder ?** 25 % à droite.
-Les courbes de hauteur et de nuages prennent chacune 50 % de la ligne suivante.
-Toutes les vues sont sur la même page, sans sidebar. **Maintenant · en direct** suit
-l’heure réelle et actualise les vues toutes les 30 secondes tant que l’onglet est
-visible. Saisir une heure, choisir une date ou déplacer le curseur met ce suivi en
-pause. **Maintenant** y revient, même depuis une nuit future ou passée.
+**Chez moi** et **Sur place**, au-dessus des graphiques, montrent le même instant
+choisi dans les deux fuseaux. Ils restent visibles quand vous faites défiler la
+page et s’actualisent dès que vous cliquez sur une courbe, déplacez le curseur ou
+changez la date/l’heure. **Maintenant · en direct** revient à l’heure réelle et suit
+le temps toutes les 30 secondes tant que l’onglet est visible. Une exploration
+manuelle met ce suivi en pause. Tous les lieux fonctionnent de la même manière ;
+**T68 · Utah** est un simple lieu proposé, sans connexion à un opérateur.
 
 1. Le premier lancement utilise le **centre de Paris** (48,8566° N, 2,3522° E).
    Ensuite, le dernier lieu choisi est repris, sans géolocalisation automatique.
@@ -40,7 +41,11 @@ pause. **Maintenant** y revient, même depuis une nuit future ou passée.
    ou **Sur cette nuit**. Le menu **Objet sélectionné** montre la seule cible active.
    La première recommandation est sélectionnée par défaut à l’ouverture ou lors
    d’un changement de lieu. Votre choix explicite reste sélectionné quand vous
-   explorez les heures, même s’il quitte la liste des recommandations.
+   explorez les heures, même s’il quitte la liste des recommandations. Si la liste
+   est vide, le menu indique **Rien de visible à cette heure** ou **Rien de visible
+   cette nuit** et se désactive. La cible conservée est alors nommée **Objet affiché**
+   sous le menu ; ses cartes restent disponibles. Cette liste compare les objets
+   proposés selon les seuils choisis, pas tous les objets du ciel.
    **Préparer la nuit** place l’heure sur la nuit sombre en cours ou la suivante.
    **Catalogue et favoris…** ouvre la liste complète : taper filtre les résultats,
    cliquer sur un résultat le sélectionne, fermer la fenêtre conserve le choix.
@@ -102,13 +107,13 @@ sans clé est prévu ici pour l’usage personnel non commercial. Les données s
 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), avec attribution à Open-Meteo
 et valeurs affichées arrondies ; le cache ne contient ni nom d’objet ni identifiant personnel.
 
-La fiche du lieu distingue **Au lieu · heure affichée** de **Ce Mac · maintenant** :
-le Mac conserve son heure réelle locale même pendant l’exploration d’une nuit
-future ou passée. Les **prochains lever et coucher du Soleil** sont convertis dans
-le **fuseau du Mac**, avec date et fuseau affichés, même si le lieu d’observation
-est à l’étranger. Les événements sont relatifs à l’instant exploré ; le matin,
-le résumé peut donc annoncer le coucher de la nuit suivante. Le lieu indique aussi
-son état jour, crépuscule ou nuit. Les deux sections redondantes du bas ont été retirées.
+Les heures **Sur place** et **Chez moi** représentent toutes deux l’instant choisi,
+avec leur date locale. Le fuseau de **Chez moi** est celui du Mac. La conversion
+suit les clics et glissements sur les graphiques ; elle n’affiche pas une autre
+horloge réelle pendant l’exploration d’une nuit future ou passée.
+Les prochains lever et coucher du Soleil sont aussi à l’heure locale du Mac,
+sans suffixe GMT, et sont relatifs à l’instant exploré. Le lieu indique son état
+jour, crépuscule ou nuit. Un fuseau de point non confirmé reste marqué **UTC provisoire**.
 
 **Choisir l’heure**, sous le lieu, propose la saisie **HH:mm**, le curseur et
 **Date et fuseau…**. Cette fenêtre permet de choisir **Chez moi** (fuseau du Mac,
@@ -131,8 +136,9 @@ nouveau lieu. Par exemple, le 12 décembre à 18 h UTC correspond à 19 h à Par
 le curseur modifie volontairement l’instant.
 
 **Quand lancer l’enregistrement ?** indique le premier créneau
-restant après l’heure réelle actuelle dans le fuseau de référence, avec sa fin et
-sa durée. **Voir le début** place le curseur au début proposé. Pour rester dans les
+restant après l’heure réelle actuelle dans la nuit choisie, avec sa fin et
+sa durée. Les horaires principaux utilisent toujours la date et l’heure locales du
+Mac, sans suffixe GMT ; l’heure locale du télescope est ajoutée si son fuseau diffère. **Voir le début** place le curseur au début proposé. Pour rester dans les
 seuils choisis, le début est arrondi à la minute suivante et la fin à la précédente.
 **Tous les créneaux** conserve les limites précises à la seconde et les deux repères
 horaires. Une nuit passée ou sans créneau restant est explicite. Ce repère prépare

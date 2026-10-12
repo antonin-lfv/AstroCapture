@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.18.9 — 2026-10-12
+
+- Make both home and observing-site clocks follow the selected instant after every date, time, slider or chart change. Keep both conversions visible above the charts while scrolling.
+- Show recording windows first in the Mac's local date/time, with site time below when different. Remove GMT-offset suffixes from the primary clocks and preserve exact UTC/DST metadata.
+- Show an explicit disabled-menu message when no target is recommended at the selected time or night; retain the previously displayed target and catalogue access.
+- Stack the sky compass below place/time in the left quarter. Keep day/night, target selection and the large visibility map in the right three quarters, then equal height/cloud charts below both columns.
+- Preserve explicit UTC warnings for unresolved map points, ongoing-night guards, continuous updates, scientific calculations and saved projects. Update French help, Guide, README and native validation.
+
 ## 1.18.8 — 2026-10-12
 
 - Restore the last open project workspace when resuming a session, including sessions saved from Home and older sessions without workspace metadata.

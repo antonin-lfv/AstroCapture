@@ -170,28 +170,37 @@ static int workspace(const QString& directory,bool restore,bool faults=false) {
         auto* view=workspace->findChild<QObject*>("observationScroll");ASTRO_TEST_CHECK(view);auto* scroll=view->property("contentItem").value<QQuickItem*>();ASTRO_TEST_CHECK(scroll);
         auto scrollTo=[&](const QString& name){auto* card=qobject_cast<QQuickItem*>(workspace->findChild<QObject*>(name));ASTRO_TEST_CHECK(card);QCoreApplication::processEvents();scroll->setProperty("contentY",std::max(0.0,scroll->property("contentY").toDouble()+card->mapToItem(scroll,QPointF()).y()-16));};
         for(const auto size:{QSize(1440,960),QSize(1100,800),QSize(900,700)}) {
-            window->resize(size);scroll->setProperty("contentY",0);capture(window,QString("observation-polish-top-%1").arg(size.width()));
+            window->resize(size);scroll->setProperty("contentY",0);capture(window,QString("observation-shared-top-%1").arg(size.width()));
             const auto first=observation->visibleTargets();ASTRO_TEST_CHECK(!first.isEmpty());ASTRO_TEST_CHECK(observation->settings()["target"]==first.first().toMap()["id"]);
-            scrollTo("observationTimeCard");capture(window,QString("observation-polish-controls-%1").arg(size.width()));
-            scrollTo("observationVisibilityRow");capture(window,QString("observation-polish-visibility-%1").arg(size.width()));
-            scrollTo("observationCurvesRow");capture(window,QString("observation-polish-curves-%1").arg(size.width()));
+            scrollTo("observationSkyCard");capture(window,QString("observation-shared-compass-%1").arg(size.width()));
+            scrollTo("observationTimeCard");capture(window,QString("observation-shared-controls-%1").arg(size.width()));
+            scrollTo("observationVisibilityRow");capture(window,QString("observation-shared-visibility-%1").arg(size.width()));
+            scrollTo("observationCurvesRow");capture(window,QString("observation-shared-curves-%1").arg(size.width()));
         }
-        scrollTo("observationTimeCard");click(workspace,"observationTimeOptions");capture(window,"observation-polish-time-dialog-900");
+        scrollTo("observationTimeCard");click(workspace,"observationTimeOptions");capture(window,"observation-shared-time-dialog-900");
         auto* timeDialog=workspace->findChild<QObject*>("observationTimeDialog");ASTRO_TEST_CHECK(timeDialog);ASTRO_TEST_CHECK(QMetaObject::invokeMethod(timeDialog,"close"));
-        auto* period=workspace->findChild<QObject*>("observationSuggestionPeriod");ASTRO_TEST_CHECK(period);ASTRO_TEST_CHECK(QMetaObject::invokeMethod(period,"activated",Q_ARG(int,1)));scrollTo("observationObjectCard");capture(window,"observation-polish-night-choice-900");
+        auto* period=workspace->findChild<QObject*>("observationSuggestionPeriod");ASTRO_TEST_CHECK(period);ASTRO_TEST_CHECK(QMetaObject::invokeMethod(period,"activated",Q_ARG(int,1)));scrollTo("observationObjectCard");capture(window,"observation-shared-night-choice-900");
         ASTRO_TEST_CHECK(workspace->property("suggestionPeriod")=="night");ASTRO_TEST_CHECK(!observation->recommendations().isEmpty());
         ASTRO_TEST_CHECK(QMetaObject::invokeMethod(period,"activated",Q_ARG(int,0)));
         scroll->setProperty("contentY",0);click(workspace,"observationCoordinates");
         const auto originalLatitude=observation->settings()["latitude"];const auto coordinateUtc=observation->instant()["utcSeconds"];
         workspace->findChild<QObject*>("observationLatitude")->setProperty("text","37,7378");workspace->findChild<QObject*>("observationLongitude")->setProperty("text","-113,6975");workspace->findChild<QObject*>("observationElevation")->setProperty("text","1570");workspace->findChild<QObject*>("observationZone")->setProperty("text","America/Denver");
         ASTRO_TEST_CHECK(observation->settings()["latitude"]==originalLatitude);
-        capture(window,"observation-polish-coordinates-900");click(workspace,"observationApplyCoordinates");ASTRO_TEST_CHECK(observation->instant()["utcSeconds"]==coordinateUtc);
-        for(const auto size:{QSize(1440,960),QSize(1100,800),QSize(900,700)}) {window->resize(size);scroll->setProperty("contentY",0);capture(window,QString("observation-polish-utah-%1").arg(size.width()));}
+        capture(window,"observation-shared-coordinates-900");click(workspace,"observationApplyCoordinates");ASTRO_TEST_CHECK(observation->instant()["utcSeconds"]==coordinateUtc);
+        for(const auto size:{QSize(1440,960),QSize(1100,800),QSize(900,700)}) {window->resize(size);scroll->setProperty("contentY",0);capture(window,QString("observation-shared-utah-%1").arg(size.width()));}
+        scrollTo("observationObjectCard");capture(window,"observation-shared-no-target-now-900");
+        const auto originalPcTime=workspace->findChild<QObject*>("observationPcClock")->property("text");
+        auto* curve=workspace->findChild<QObject*>("observationPlot");ASTRO_TEST_CHECK(curve);ASTRO_TEST_CHECK(QMetaObject::invokeMethod(curve,"fractionChosen",Q_ARG(double,.8)));ASTRO_TEST_CHECK(QMetaObject::invokeMethod(workspace,"finishTimeUpdate"));
+        ASTRO_TEST_CHECK(workspace->findChild<QObject*>("observationPcClock")->property("text")!=originalPcTime);
+        scrollTo("observationCurvesRow");capture(window,"observation-shared-utah-cursor-900");
+        scrollTo("observationWindows");capture(window,"observation-shared-recording-900");
+        auto empty=observation->settings();empty["minimum"]=90;ASTRO_TEST_CHECK(observation->calculate(empty));workspace->setProperty("autoSelectVisible",false);workspace->setProperty("suggestionPeriod","night");scrollTo("observationObjectCard");capture(window,"observation-shared-no-target-night-900");
+        empty["minimum"]=30;ASTRO_TEST_CHECK(observation->calculate(empty));workspace->setProperty("suggestionPeriod","instant");workspace->setProperty("autoSelectVisible",true);
         const auto before=observation->instant()["utcSeconds"];observation->chooseMapLocation(37.7378,-113.6975);ASTRO_TEST_CHECK(observation->instant()["utcSeconds"]==before);ASTRO_TEST_CHECK(observation->saveSite("Mon lieu en Utah"));
-        auto* picker=workspace->findChild<QObject*>("observationSite");ASTRO_TEST_CHECK(picker);auto* popup=picker->property("popup").value<QObject*>();ASTRO_TEST_CHECK(popup);ASTRO_TEST_CHECK(QMetaObject::invokeMethod(popup,"open"));capture(window,"observation-polish-favourites-900");ASTRO_TEST_CHECK(QMetaObject::invokeMethod(popup,"close"));
+        auto* picker=workspace->findChild<QObject*>("observationSite");ASTRO_TEST_CHECK(picker);auto* popup=picker->property("popup").value<QObject*>();ASTRO_TEST_CHECK(popup);ASTRO_TEST_CHECK(QMetaObject::invokeMethod(popup,"open"));capture(window,"observation-shared-favourites-900");ASTRO_TEST_CHECK(QMetaObject::invokeMethod(popup,"close"));
         options=observation->sites()[0].toMap();options["date"]="2026-10-12";options["minimum"]=30;options["sunLimit"]=-18;ASTRO_TEST_CHECK(observation->calculate(options));observation->setFraction(.5);
-        for(const auto size:{QSize(1440,960),QSize(1100,800),QSize(900,700)}) {window->resize(size);scroll->setProperty("contentY",0);capture(window,QString("observation-polish-forecast-%1").arg(size.width()));scrollTo("observationCurvesRow");capture(window,QString("observation-polish-clouds-%1").arg(size.width()));}
-        ASTRO_TEST_CHECK(QMetaObject::invokeMethod(observation,"updateReachability",Qt::DirectConnection,Q_ARG(int,4)));ASTRO_TEST_CHECK(QMetaObject::invokeMethod(observation,"updateReachability",Qt::DirectConnection,Q_ARG(int,1)));observation->refreshWeather();scroll->setProperty("contentY",0);capture(window,"observation-polish-offline-900");
+        for(const auto size:{QSize(1440,960),QSize(1100,800),QSize(900,700)}) {window->resize(size);scroll->setProperty("contentY",0);capture(window,QString("observation-shared-forecast-%1").arg(size.width()));scrollTo("observationCurvesRow");capture(window,QString("observation-shared-clouds-%1").arg(size.width()));}
+        ASTRO_TEST_CHECK(QMetaObject::invokeMethod(observation,"updateReachability",Qt::DirectConnection,Q_ARG(int,4)));ASTRO_TEST_CHECK(QMetaObject::invokeMethod(observation,"updateReachability",Qt::DirectConnection,Q_ARG(int,1)));observation->refreshWeather();scroll->setProperty("contentY",0);capture(window,"observation-shared-offline-900");
         window->setProperty("quitApproved",true);return 0;
     }
 

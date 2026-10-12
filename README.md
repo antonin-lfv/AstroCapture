@@ -23,8 +23,12 @@ ensuite, selon la vue choisie.
    une liste unique avec recherche et favoris. Taper un nom filtre cette liste ;
    cliquer sur un résultat le sélectionne et ouvre sa courbe. Fermer la liste
    conserve le choix actuel.
-2. Choisissez un lieu proposé ou recherchez une ville en ligne. Ses coordonnées
-   et son fuseau sont renseignés. Le bouton **☆ Lieu favori** enregistre votre lieu ;
+2. Le premier lancement utilise le **centre de Paris** (48,8566° N, 2,3522° E).
+   Ensuite, le dernier lieu choisi est repris, sans géolocalisation automatique.
+   Choisissez un lieu proposé ou recherchez une ville en ligne. Ses coordonnées
+   et son fuseau sont renseignés. **Nommer le lieu…** enregistre un libellé
+   (Jardin, Balcon…), la position et le fuseau en favori, y compris pour un point choisi sur la carte. **Renommer…**
+   modifie ce libellé en conservant les coordonnées ;
    les options avancées permettent d’en préciser les coordonnées.
 3. Choisissez la date locale, ou **Nuit actuelle**. Une nuit terminée est refusée
    en préparation : la date valide est conservée et un message indique le problème.
@@ -82,12 +86,18 @@ sans clé est prévu ici pour l’usage personnel non commercial. Les données s
 et valeurs affichées arrondies ; le cache ne contient ni nom d’objet ni identifiant personnel.
 
 Le **lever et le coucher du Soleil** sont visibles sous les créneaux dans **Nuit**
-et **Horizon**. La section **Détails** conserve les informations lunaires, la direction,
+et **Ciel**. La section **Détails** conserve les informations lunaires, la direction,
 le jour, le crépuscule civil et la nuit astronomique.
 Un libellé indique aussi l’état à l’instant du curseur, avec les crépuscules civil,
 nautique et astronomique. Les périodes sans lever, coucher ou nuit sont explicites.
 
-**Nuit**, **Horizon** et **Monde** suivent le même curseur horaire. Les créneaux bleus
+**Nuit**, **Ciel**, **Monde** et **Nuages** suivent le même curseur horaire, avec
+actualisation pendant le glissement et valeur finale appliquée au relâchement.
+**Ciel** indique où regarder avec une vue boussole : nord en haut, est à droite,
+horizon théorique au bord (0°) et zénith au centre (90°). Le point indique l’objet
+à l’heure choisie ; la ligne montre son parcours sur la nuit. La direction
+cardinale et la hauteur sont affichées. Ce schéma ne montre ni le relief ni les
+obstacles de votre horizon réel. Les créneaux bleus
 respectent les seuils de hauteur et d’obscurité. Les heures locales et UTC sont
 affichées avec la date ; la période va de midi au midi suivant et peut durer 23 ou
 25 heures lors d’un changement d’heure. Le module indique aussi le lever/coucher
@@ -98,7 +108,7 @@ et sa distance angulaire à la cible.
 d’obscurité à l’instant UTC affiché. Sa courte légende distingue les seuils respectés,
 l’objet trop bas, le ciel trop clair et l’objet sous l’horizon. Elle ne représente
 ni les nuages ni simplement le jour et la nuit. Cette vue conserve seulement la carte,
-la légende et le curseur ; les horaires et détails du lieu restent dans Nuit/Horizon.
+la légende et le curseur ; les horaires et détails du lieu restent dans Nuit/Ciel.
 La carte est une vue régionale sur une grille de **6°**, calculée au même instant UTC.
 Un clic choisit un lieu et conserve cet instant, avec le fuseau initial **UTC** :
 choisissez le fuseau local dans les options avancées si nécessaire.

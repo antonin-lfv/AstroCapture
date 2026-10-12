@@ -14,6 +14,7 @@ Rectangle {
     readonly property var filteredSuggestions: controller.recommendations.filter(value => suggestionKind === "all" || (suggestionKind === "solar" ? value.body >= 0 : value.body < 0))
     property bool syncing: false
     property bool ready: false
+    property bool timeUpdatePending: false
     property bool manual: false
     property bool citySearchOpen: false
     property bool saveSiteOpen: false
@@ -32,8 +33,25 @@ Rectangle {
         }
         return -1;
     }
+    function compassDirection(degrees) {
+        const directions = [qsTr("North"), qsTr("North-east"), qsTr("East"), qsTr("South-east"), qsTr("South"), qsTr("South-west"), qsTr("West"), qsTr("North-west")];
+        return directions[Math.round(Number(degrees) / 45) % 8];
+    }
     function checkNight() {
         nightState = controller.planningNight(controller.settings);
+    }
+    function scheduleTimeUpdate() {
+        if (!timeUpdates.running) {
+            controller.setFraction(timeSlider.value);
+            timeUpdates.start();
+        } else {
+            timeUpdatePending = true;
+        }
+    }
+    function finishTimeUpdate() {
+        timeUpdates.stop();
+        timeUpdatePending = false;
+        controller.setFraction(timeSlider.value);
     }
     function applyOptions(options) {
         const state = controller.planningNight(options);
@@ -132,8 +150,12 @@ Rectangle {
             root.sync();
         }
     }
-    Component.onCompleted: { sync(); ready = true; }
-    onVisibleChanged: if (ready && visible) checkNight()
+    Component.onCompleted: {
+        sync();
+        ready = true;
+    }
+    onVisibleChanged: if (ready && visible)
+        checkNight()
     Timer {
         interval: 60000
         running: root.visible
@@ -141,9 +163,15 @@ Rectangle {
         onTriggered: root.checkNight()
     }
     Timer {
-        id: timeDebounce
-        interval: 120
-        onTriggered: root.controller.setFraction(timeSlider.value)
+        id: timeUpdates
+        interval: 32
+        onTriggered: {
+            if (root.timeUpdatePending) {
+                root.timeUpdatePending = false;
+                root.controller.setFraction(timeSlider.value);
+                restart();
+            }
+        }
     }
     ColumnLayout {
         anchors.fill: parent
@@ -293,7 +321,7 @@ Rectangle {
                                 },
                                 {
                                     key: "sky",
-                                    label: qsTr("Horizon")
+                                    label: qsTr("Sky")
                                 },
                                 {
                                     key: "world",
@@ -335,10 +363,10 @@ Rectangle {
                                 font.pixelSize: 18
                                 font.weight: Font.Medium
                                 color: Atelier.text
-                                text: root.viewMode === "suggestions" ? qsTr("What can I observe?") : root.viewMode === "world" ? qsTr("Where is %1 visible?").arg((root.controller.result.target || "").split(" · ")[0]) : root.viewMode === "clouds" ? qsTr("Clouds above %1").arg(root.controller.settings.name || "") : root.controller.result.target || ""
+                                text: root.viewMode === "suggestions" ? qsTr("What can I observe?") : root.viewMode === "world" ? qsTr("Where is %1 visible?").arg((root.controller.result.target || "").split(" · ")[0]) : root.viewMode === "sky" ? qsTr("Where to look for %1?").arg((root.controller.result.target || "").split(" · ")[0]) : root.viewMode === "clouds" ? qsTr("Clouds above %1").arg(root.controller.settings.name || "") : root.controller.result.target || ""
                             }
                             HelpIcon {
-                                text: root.viewMode === "suggestions" ? qsTr("Calculated offline from %1 common targets and your favourites. Up to 4 Solar System targets and 6 deep-sky objects, with favourites first, then ranked by available time and height. Each has at least 20 minutes with the displayed limits. Visibility does not guarantee easy viewing: equipment, light pollution and the Moon also matter.").arg(root.controller.result.recommendationPool || 0) : root.viewMode === "world" ? qsTr("This map shows the selected object's geometric visibility at one UTC instant. Height and sky brightness are checked at each grid point. It is not a day/night map or a cloud map. Resolution: 6°. Clicking chooses a place and keeps the instant, with UTC as its initial time zone.") : root.viewMode === "clouds" ? qsTr("0% means no clouds predicted in the model grid cell; 100% means complete coverage. Hourly values are forecasts, not live measurements. Cloud cover alone does not predict transparency or atmospheric turbulence.") : qsTr("Blue intervals meet the selected height and darkness limits. Drag the time slider or click the curve. Terrain and weather are not included in geometric visibility.")
+                                text: root.viewMode === "suggestions" ? qsTr("Calculated offline from %1 common targets and your favourites. Up to 4 Solar System targets and 6 deep-sky objects, with favourites first, then ranked by available time and height. Each has at least 20 minutes with the displayed limits. Visibility does not guarantee easy viewing: equipment, light pollution and the Moon also matter.").arg(root.controller.result.recommendationPool || 0) : root.viewMode === "world" ? qsTr("This map shows the selected object's geometric visibility at one UTC instant. Height and sky brightness are checked at each grid point. It is not a day/night map or a cloud map. Resolution: 6°. Clicking chooses a place and keeps the instant, with UTC as its initial time zone.") : root.viewMode === "clouds" ? qsTr("0% means no clouds predicted in the model grid cell; 100% means complete coverage. Hourly values are forecasts, not live measurements. Cloud cover alone does not predict transparency or atmospheric turbulence.") : root.viewMode === "sky" ? qsTr("A compass view of the sky around your place: north at the top, east on the right. The edge is the theoretical horizon (0°); the centre is overhead, the zenith (90°). The point shows the selected object at the cursor time; the line is its path over the night. Use the cardinal direction and height to know where to look. This is a diagram, not a globe, photograph or the actual terrain horizon.") : qsTr("Blue intervals meet the selected height and darkness limits. Drag the time slider or click the curve. Terrain and weather are not included in geometric visibility.")
                             }
                         }
                         Label {
@@ -356,6 +384,14 @@ Rectangle {
                             wrapMode: Text.Wrap
                             Layout.fillWidth: true
                             font.pixelSize: 13
+                        }
+                        Label {
+                            visible: root.viewMode === "sky"
+                            text: qsTr("Compass view · edge: horizon · centre: overhead")
+                            color: Atelier.secondary
+                            wrapMode: Text.Wrap
+                            font.pixelSize: 12
+                            Layout.fillWidth: true
                         }
                         Label {
                             visible: history.checked && root.nightState.past
@@ -491,7 +527,7 @@ Rectangle {
                         Layout.fillWidth: true
                         spacing: 16
                         Label {
-                            text: qsTr("Height: %1°").arg(Number(root.controller.instant.altitude || 0).toFixed(1))
+                            text: root.viewMode === "sky" ? (root.controller.instant.altitude < 0 ? qsTr("Below horizon") : qsTr("Look %1 · height %2°").arg(root.compassDirection(root.controller.instant.azimuth || 0)).arg(Number(root.controller.instant.altitude || 0).toFixed(1))) : qsTr("Height: %1°").arg(Number(root.controller.instant.altitude || 0).toFixed(1))
                             color: Atelier.text
                             font.pixelSize: 16
                         }
@@ -577,7 +613,7 @@ Rectangle {
                         Accessible.name: root.viewMode === "world" ? qsTr("World visibility map at the selected UTC instant") : root.viewMode === "sky" ? qsTr("Object's trajectory above the horizon") : root.viewMode === "clouds" ? qsTr("Hourly forecast cloud coverage from 0 to 100 percent over the selected period") : qsTr("Height curve over the chosen night, with eligible intervals in blue")
                         onFractionChosen: fraction => {
                             timeSlider.value = fraction;
-                            timeDebounce.restart();
+                            root.scheduleTimeUpdate();
                         }
                         onLocationChosen: (latitude, longitude) => {
                             root.manual = false;
@@ -672,8 +708,11 @@ Rectangle {
                             to: 1
                             value: .5
                             stepSize: 1 / 1440
+                            live: true
                             Accessible.name: qsTr("Explore the night")
-                            onMoved: timeDebounce.restart()
+                            onMoved: root.scheduleTimeUpdate()
+                            onPressedChanged: if (!pressed && root.ready)
+                                root.finishTimeUpdate()
                         }
                     }
                     ColumnLayout {
@@ -924,7 +963,7 @@ Rectangle {
                         }
                         SettingLabel {
                             text: qsTr("From where?")
-                            explanation: qsTr("Choose a city or enter coordinates in Advanced. Preset cities use approximate city centres at sea level; city search supplies its reported elevation. Save your actual observing site as a favourite.")
+                            explanation: qsTr("The first launch uses central Paris, then the last chosen place is restored. There is no automatic geolocation. Choose a city or enter coordinates in Advanced. Name this place saves its label, coordinates and time zone as a favourite; Rename changes an existing favourite.")
                         }
                         DarkComboBox {
                             id: sitePicker
@@ -945,11 +984,14 @@ Rectangle {
                             spacing: 8
                             IconButton {
                                 Layout.fillWidth: true
-                                text: root.favoriteSiteIndex() >= 0 ? qsTr("★ Favourite place") : qsTr("☆ Favourite place")
-                                Accessible.name: root.favoriteSiteIndex() >= 0 ? qsTr("★ Favourite place · manage") : qsTr("☆ Save place to favourites")
+                                text: root.favoriteSiteIndex() >= 0 ? qsTr("Rename…") : qsTr("Name this place…")
+                                objectName: "observationNamePlace"
+                                Accessible.name: root.favoriteSiteIndex() >= 0 ? qsTr("Rename this saved place") : qsTr("Name and save this place")
                                 onClicked: {
                                     root.saveSiteOpen = !root.saveSiteOpen;
                                     favoriteName.text = root.controller.settings.name || "";
+                                    if (root.saveSiteOpen)
+                                        favoriteName.focusInput(true);
                                 }
                             }
                             IconButton {
@@ -960,10 +1002,11 @@ Rectangle {
                         }
                         ObservationField {
                             id: favoriteName
+                            objectName: "observationPlaceName"
                             visible: root.saveSiteOpen
                             Layout.fillWidth: true
-                            label: qsTr("Favourite site name")
-                            help: qsTr("Give your observing site a name. Coordinates and time zone are kept on this computer.")
+                            label: qsTr("Place name")
+                            help: qsTr("For example Garden, Balcony or Mountain site. The name, coordinates and time zone are saved on this computer as a favourite, including points chosen on the map. Renaming keeps the same position.")
                         }
                         RowLayout {
                             visible: root.saveSiteOpen

@@ -211,7 +211,15 @@ static int workspace(const QString& directory,bool restore,bool faults=false) {
         ASTRO_TEST_CHECK(QMetaObject::invokeMethod(workspace,"calculate"));capture(window,"observation-past-night-900");
         ASTRO_TEST_CHECK(QMetaObject::invokeMethod(workspace,"currentNight"));
         settings=observation->settings();settings["date"]="2026-12-23";ASTRO_TEST_CHECK(observation->calculate(settings));
-        ASTRO_TEST_CHECK(observation->selectTarget("moon"));observation->setFraction(.6);workspace->setProperty("viewMode","sky");capture(window,"observation-moon-horizon-900");
+        ASTRO_TEST_CHECK(observation->selectTarget("moon"));observation->setFraction(.6);workspace->setProperty("viewMode","sky");
+        for(const auto size:{QSize(1440,960),QSize(1100,800),QSize(900,700)}) {
+            window->resize(size);capture(window,QString("observation-sky-%1").arg(size.width()));
+        }
+        auto* nameButton=workspace->findChild<QObject*>("observationNamePlace");ASTRO_TEST_CHECK(nameButton);ASTRO_TEST_CHECK(QMetaObject::invokeMethod(nameButton,"clicked"));
+        auto* placeName=workspace->findChild<QObject*>("observationPlaceName");ASTRO_TEST_CHECK(placeName);placeName->setProperty("text","Jardin des étoiles");
+        for(const auto size:{QSize(1440,960),QSize(1100,800),QSize(900,700)}) {
+            window->resize(size);capture(window,QString("observation-name-place-%1").arg(size.width()));
+        }
         window->setProperty("quitApproved",true);return 0;
     }
 

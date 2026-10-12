@@ -9,6 +9,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QMouseEvent>
 #include <QNetworkInformation>
 #include <QNetworkReply>
 #include <QQmlComponent>
@@ -471,6 +472,49 @@ int main(int argc, char **argv) {
   QCoreApplication::processEvents();
   ASTRO_TEST_CHECK(!item(root, "observationWindows")->isVisible());
   ASTRO_TEST_CHECK(!item(root, "observationDetails")->isVisible());
+  // Keep the mouse down and move continuously: the chart's instant must update
+  // before release, rather than waiting for a quiet interval after dragging.
+  auto *slider = item(root, "observationTime");
+  auto mouse = [&](QEvent::Type type, QPointF position, Qt::MouseButton button,
+                   Qt::MouseButtons buttons) {
+    QMouseEvent event(type, position, window.mapToGlobal(position.toPoint()),
+                      button, buttons, Qt::NoModifier);
+    QCoreApplication::sendEvent(&window, &event);
+  };
+  for (const auto mode : {"night", "sky", "world", "clouds"}) {
+    root->setProperty("viewMode", mode);
+    slider->setProperty("value", .2);
+    controller.setFraction(.2);
+    QCoreApplication::processEvents();
+    auto *handle = slider->property("handle").value<QQuickItem *>();
+    ASTRO_TEST_CHECK(handle);
+    const auto position =
+        handle->mapToScene(QPointF(handle->width() / 2, handle->height() / 2));
+    int updatesDuringDrag = 0;
+    auto connection = QObject::connect(
+        &controller, &ObservationController::instantChanged, [&] {
+          if (slider->property("pressed").toBool())
+            ++updatesDuringDrag;
+        });
+    mouse(QEvent::MouseButtonPress, position, Qt::LeftButton, Qt::LeftButton);
+    ASTRO_TEST_CHECK(slider->property("pressed").toBool());
+    QPointF last;
+    for (int i = 1; i <= 40; ++i) {
+      last = position + QPointF(slider->width() * .6 * i / 40, 0);
+      mouse(QEvent::MouseMove, last, Qt::NoButton, Qt::LeftButton);
+      QCoreApplication::processEvents();
+      QThread::msleep(6);
+    }
+    ASTRO_TEST_CHECK(slider->property("pressed").toBool());
+    ASTRO_TEST_CHECK(updatesDuringDrag >= 3);
+    ASTRO_TEST_CHECK(controller.instant()["fraction"].toDouble() > .5);
+    mouse(QEvent::MouseButtonRelease, last, Qt::LeftButton, Qt::NoButton);
+    ASTRO_TEST_CHECK(!slider->property("pressed").toBool());
+    ASTRO_TEST_CHECK(std::abs(controller.instant()["fraction"].toDouble() -
+                              slider->property("value").toDouble()) < 1e-6);
+    QObject::disconnect(connection);
+  }
+  root->setProperty("viewMode", "world");
   if (!qEnvironmentVariable("ASTRO_OBSERVATION_SCREENSHOTS").isEmpty())
     window.grabWindow().save(
         qEnvironmentVariable("ASTRO_OBSERVATION_SCREENSHOTS") +

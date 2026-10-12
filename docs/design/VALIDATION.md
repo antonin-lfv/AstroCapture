@@ -1103,3 +1103,35 @@ du Soleil dans quatre fuseaux, les changements d’heure et le cas polaire.
 Les traductions actives d’Observation et du Guide sont présentes dans le catalogue
 français compilé. Les traitements et les formats des projets restent couverts
 par les tests existants.
+
+## Lot 1.18.3 — curseur continu, ciel et noms de lieux
+
+Le curseur transmet une première valeur immédiatement, puis regroupe les valeurs
+intermédiaires à un rythme de 32 ms sans repousser chaque actualisation après la
+fin du glissement. Le relâchement applique la valeur finale immédiatement. La
+courbe, le point dans le ciel, la carte et la prévision partagent toujours le même
+instant calculé ; la précision et les données scientifiques sont conservées.
+
+L’ancienne vue Horizon porte le nom **Ciel**. Le titre, la direction cardinale et
+la hauteur répondent à la question « où regarder ». Une phrase précise la
+convention boussole : nord en haut, est à droite, bord pour l’horizon théorique,
+centre au-dessus de la tête. L’aide explique le point, la trajectoire, les angles
+0°/90° et l’absence du relief réel. Il ne s’agit pas d’un globe ou d’une photographie.
+
+L’aide du lieu et le Guide indiquent le centre de Paris au premier lancement,
+puis le dernier lieu choisi, sans géolocalisation automatique. **Nommer le lieu**
+et **Renommer** ouvrent une saisie explicite et gardent les coordonnées et le
+fuseau des favoris. Le nom actuel est présélectionné pour faciliter sa correction.
+Les points choisis sur la carte suivent le même parcours de nomination.
+
+Les 52 tests passent. Un test envoie de vrais événements de souris à la fenêtre,
+maintient le bouton enfoncé et déplace le curseur dans Nuit, Ciel, Monde et Nuages :
+plusieurs changements d’instant surviennent avant le relâchement, puis la valeur
+finale du contrôleur correspond exactement à celle du curseur. Les tests existants
+couvrent aussi la nomination/renomination d’un point de carte et sa persistance.
+
+Les captures `previews/native/observation-live/` montrent la fenêtre native en
+français aux trois tailles, notamment la Lune, la direction où regarder et la
+saisie « Jardin des étoiles ». Le curseur reste visible ; les autres réglages
+restent disponibles par défilement. Le Guide, le README et les traductions
+compilées suivent les nouveaux libellés.

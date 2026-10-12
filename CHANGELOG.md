@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.18.3 — 2026-10-12
+
+- Update the Observation time cursor continuously during dragging, coalescing intermediate changes without postponing every update until release; apply the final slider value immediately.
+- Rename Horizon to Sky and explain its compass projection, theoretical horizon, zenith, selected point and nightly path; show the direction to look alongside object height.
+- Explain that a first launch uses central Paris and subsequent launches restore the last location, without automatic geolocation.
+- Make place naming and renaming explicit, retaining favourite coordinates and time zones, including map positions.
+- Verify actual mouse drags in all four time views, preserve final cursor accuracy, and update French help, the guide and README.
+
 ## 1.18.2 — 2026-10-12
 
 - Make the active Observation target explicit and group catalogue search and favourites in one chooser; filtering leaves the selected target unchanged until a result is chosen.

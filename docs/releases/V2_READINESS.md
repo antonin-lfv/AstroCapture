@@ -1,6 +1,6 @@
 # AstroCapture — bilan avant V2
 
-État du 12 octobre 2026, après les contrôles de la livraison 1.18.2.
+État du 12 octobre 2026, après les contrôles de la livraison 1.18.3.
 
 L’utilisateur réserve pour l’instant AstroCapture à son usage personnel.
 La qualification de distribution publique reste une étape ultérieure ; elle
@@ -140,3 +140,6 @@ pas une condition de justesse des images déjà produites.
 La 1.18.2 simplifie le parcours Observation : sélection unique, accueil progressif,
 protection contre les nuits terminées et vue Monde centrée sur la visibilité de
 l’objet. La consultation des dates passées et tous les détails restent accessibles.
+
+La 1.18.3 actualise les vues pendant le glissement du curseur, précise la vue
+Ciel et le lieu par défaut, et rend la nomination des positions explicite.

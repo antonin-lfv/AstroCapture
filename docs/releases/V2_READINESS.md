@@ -1,6 +1,6 @@
 # AstroCapture — bilan avant V2
 
-État du 12 octobre 2026, après les contrôles de la livraison 1.18.7.
+État du 12 octobre 2026, après les contrôles de la livraison 1.18.8.
 
 L’utilisateur réserve pour l’instant AstroCapture à son usage personnel.
 La qualification de distribution publique reste une étape ultérieure ; elle
@@ -165,3 +165,12 @@ de lieux passent en premier, avec tri alphabétique. Les coordonnées, la recher
 de ville et les réglages avancés utilisent des fenêtres. Les points de carte
 recherchent leur fuseau en ligne, avec UTC conservé et repli explicite en cas
 d’échec ; l’horloge réelle du Mac reste distincte de l’heure explorée.
+
+La 1.18.8 empile le lieu et l’heure à gauche de la carte jour/nuit, rassemble les
+recommandations instantanées et de toute la nuit dans le choix de l’objet, puis
+supprime les deux sections redondantes du bas. Les prochains lever/coucher sont
+affichés dans le fuseau du Mac. La reprise d’une session ouvre le dernier espace
+de travail contenant un projet, même après sauvegarde depuis Accueil. Le cadre
+macOS est sombre avec titre centré ; la version est au centre du pied de fenêtre.
+Les 53 tests Release, les vérifications françaises aux trois tailles et la reprise
+sur Orion passent. Les traitements et formats de projet restent compatibles.

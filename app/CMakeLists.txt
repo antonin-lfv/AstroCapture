@@ -175,10 +175,11 @@ qt_add_resources(AstroCapture observation_data PREFIX "/observation" BASE "${PRO
 
 if(APPLE)
     find_library(AVFOUNDATION_FRAMEWORK AVFoundation REQUIRED)
-    target_sources(AstroCapture PRIVATE src/CameraPermission.hpp src/CameraPermission.mm)
-    target_link_libraries(AstroCapture PRIVATE ${AVFOUNDATION_FRAMEWORK})
+    find_library(APPKIT_FRAMEWORK AppKit REQUIRED)
+    target_sources(AstroCapture PRIVATE src/CameraPermission.hpp src/CameraPermission.mm src/WindowAppearance.hpp src/WindowAppearance.mm)
+    target_link_libraries(AstroCapture PRIVATE ${AVFOUNDATION_FRAMEWORK} ${APPKIT_FRAMEWORK})
 else()
-    target_sources(AstroCapture PRIVATE src/CameraPermission.hpp src/CameraPermission.cpp)
+    target_sources(AstroCapture PRIVATE src/CameraPermission.hpp src/CameraPermission.cpp src/WindowAppearance.hpp src/WindowAppearance.cpp)
 endif()
 
 if(ASTRO_ENABLE_MOCK_CAMERA)

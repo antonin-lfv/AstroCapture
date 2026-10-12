@@ -17,7 +17,7 @@ ApplicationWindow {
     minimumHeight: 700
     visible: true
     font.pixelSize: 13
-    title: "AstroCapture" + (Qt.application.version ? " · " + Qt.application.version : "")
+    title: "AstroCapture"
     color: Atelier.canvas
     palette.window: Atelier.canvas
     palette.windowText: Atelier.text
@@ -123,6 +123,17 @@ ApplicationWindow {
     }
 
     property string currentTab: "home"
+    property string lastWorkTab: ""
+    onCurrentTabChanged: if (["processing", "deepSky", "mosaic"].indexOf(currentTab) >= 0)
+        lastWorkTab = currentTab
+    function restoredWorkTab(state) {
+        const open = {
+            processing: processingController.loaded || processingController.stillImage || processingController.hasResult,
+            deepSky: deepSkyController.frames.length > 0 || deepSkyController.hasResult,
+            mosaic: mosaicController.files.length > 0 || mosaicController.hasResult
+        };
+        return [state.workTab, state.tab, "deepSky", "processing", "mosaic"].find(tab => open[tab]) || "home";
+    }
     readonly property bool textEditing: activeFocusItem instanceof TextInput || activeFocusItem instanceof TextEdit
     readonly property bool processingMode: currentTab === "processing"
     AppLibrary { id: appLibrary; objectName: "appLibrary" }
@@ -142,12 +153,12 @@ ApplicationWindow {
     SessionController {
         id:sessionController;objectName:"sessionController"
         processing:processingController;deepSky:deepSkyController;mosaic:mosaicController
-        uiState:({tab:window.currentTab, processing:processingWorkspace.sessionState, deepSky:deepSkyWorkspace.sessionState, mosaic:mosaicWorkspace.sessionState})
+        uiState:({tab:window.currentTab, workTab:window.lastWorkTab, processing:processingWorkspace.sessionState, deepSky:deepSkyWorkspace.sessionState, mosaic:mosaicWorkspace.sessionState})
         onSessionRestored: state => {
             processingWorkspace.restoreSessionState(state.processing || {});
             deepSkyWorkspace.restoreSessionState(state.deepSky || {});
             mosaicWorkspace.restoreSessionState(state.mosaic || {});
-            window.currentTab=["home","processing","deepSky","mosaic","history","observation","guide","settings"].indexOf(state.tab)>=0?state.tab:"home";
+            window.currentTab = window.restoredWorkTab(state);
         }
         onSaveFinished: success => {
             if(!window.quitAfterSessionSave)return;
@@ -172,10 +183,14 @@ ApplicationWindow {
         height:24;color:Atelier.canvas
         Rectangle {anchors.top:parent.top;width:parent.width;height:1;color:Atelier.border}
         RowLayout {
-            anchors.fill:parent;anchors.leftMargin:20;anchors.rightMargin:16;spacing:8
-            Rectangle {Layout.preferredWidth:6;Layout.preferredHeight:6;radius:3;color:window.activityTab.length>0?Atelier.accent:Atelier.success}
-            Label {text:window.activityText||sessionController.status||qsTr("Ready");color:Atelier.secondary;font.pixelSize:12;Layout.fillWidth:true;elide:Text.ElideRight}
-            Label {text:previewController.connected?previewController.cameraName:qsTr("Camera not connected");color:Atelier.secondary;font.pixelSize:12;elide:Text.ElideRight;Layout.maximumWidth:window.width*.3}
+            anchors.fill:parent;anchors.leftMargin:20;anchors.rightMargin:20;spacing:8
+            RowLayout {
+                Layout.fillWidth:true;Layout.preferredWidth:1;Layout.minimumWidth:0;spacing:8
+                Rectangle {Layout.preferredWidth:6;Layout.preferredHeight:6;radius:3;color:window.activityTab.length>0?Atelier.accent:Atelier.success}
+                Label {text:window.activityText||sessionController.status||qsTr("Ready");color:Atelier.secondary;font.pixelSize:12;Layout.fillWidth:true;elide:Text.ElideRight}
+            }
+            Label {objectName:"applicationVersion";text:Qt.application.version;color:Atelier.muted;font.pixelSize:11}
+            Label {text:previewController.connected?previewController.cameraName:qsTr("Camera not connected");color:Atelier.secondary;font.pixelSize:12;elide:Text.ElideRight;Layout.fillWidth:true;Layout.preferredWidth:1;Layout.minimumWidth:0;horizontalAlignment:Text.AlignRight}
         }
     }
     HomeWorkspace {

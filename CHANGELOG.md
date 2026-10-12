@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.18.8 — 2026-10-12
+
+- Restore the last open project workspace when resuming a session, including sessions saved from Home and older sessions without workspace metadata.
+- Stack the observing place and time controls to the left of the day/night map; move reference-date and time-zone options into a dialog and align the recommendation and object menus.
+- Show the next sunset and sunrise in the Mac's local time, with the date and zone. Preserve the shared UTC instant and site time on chart axes.
+- Remove the redundant lunar/solar detail and bottom target sections; keep instant and whole-night recommendations in the single object chooser, plus catalogue, favourites and recording windows.
+- Fix saved-place removal when the menu sorts favourites before the built-in places.
+- Match the native macOS title bar to the dark canvas, retain native window buttons, centre the AstroCapture title and display the version at the centre of the footer.
+- Update French labels, Guide, README and native validation.
+
 ## 1.18.7 — 2026-10-12
 
 - Remove the Observation sidebar and use the central page throughout: place/day-night map at 25/75, time and target controls, visibility map/sky compass at 75/25, then height/cloud curves at 50/50.

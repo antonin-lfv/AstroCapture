@@ -15,21 +15,17 @@ AstroCapture réunit la capture vidéo et FITS, le traitement planétaire, la ca
 L’onglet **Observation**, placé avant **Guide**, prépare une observation de la Lune,
 des planètes ou d’un objet fixe. Il est indépendant de **Ciel profond**.
 
-L’accueil commence par **le lieu choisi** : son heure, le jour ou la nuit, les
-nuages prévus et les prochains lever/coucher du Soleil.
-Les **cibles à cette heure** viennent ensuite, avant la courbe de l’objet sélectionné.
-Vous pouvez utiliser n’importe quel lieu ; **T68 · Utah** est un simple lieu proposé
-avec coordonnées, altitude et fuseau, sans connexion à un opérateur de télescopes.
+Les blocs **Lieu d’observation** et **Choisir l’heure** sont empilés dans le quart
+gauche de la page. La carte jour/nuit et le choix de l’objet occupent les trois
+quarts droits. Vous pouvez utiliser n’importe quel lieu ; **T68 · Utah** est un simple
+lieu proposé avec coordonnées, altitude et fuseau, sans connexion à un opérateur.
 
-La courbe de hauteur, la boussole du ciel, la carte mondiale et les nuages sont
-réunis sur **une seule page**, sans sidebar. La fiche du lieu prend 25 % de la
-première ligne et la carte jour/nuit 75 %. Sous **Heure et objet**, la carte de
-visibilité prend 75 % à gauche et **Où regarder ?** 25 % à droite. Les courbes de
-hauteur et de nuages prennent chacune 50 % de la ligne suivante. Le bloc **Heure et objet** rassemble les commandes
-horaires et le choix de la cible. **Maintenant · en direct** suit
-l’heure réelle et actualise les graphiques toutes les 30 secondes tant que l’onglet
-est visible. Saisir une heure, choisir une date ou déplacer le curseur met ce suivi
-en pause. **Maintenant** y revient, même depuis une nuit future ou passée.
+La carte de visibilité prend ensuite 75 % à gauche et **Où regarder ?** 25 % à droite.
+Les courbes de hauteur et de nuages prennent chacune 50 % de la ligne suivante.
+Toutes les vues sont sur la même page, sans sidebar. **Maintenant · en direct** suit
+l’heure réelle et actualise les vues toutes les 30 secondes tant que l’onglet est
+visible. Saisir une heure, choisir une date ou déplacer le curseur met ce suivi en
+pause. **Maintenant** y revient, même depuis une nuit future ou passée.
 
 1. Le premier lancement utilise le **centre de Paris** (48,8566° N, 2,3522° E).
    Ensuite, le dernier lieu choisi est repris, sans géolocalisation automatique.
@@ -40,15 +36,16 @@ en pause. **Maintenant** y revient, même depuis une nuit future ou passée.
    modifie ce libellé en conservant les coordonnées ;
    **Coordonnées…** ouvre latitude, longitude, altitude et fuseau dans une fenêtre ;
    la position ne change qu’après **Appliquer la position**.
-2. Consultez la situation à l’heure affichée et les recommandations, ou utilisez
-   **Préparer la nuit** pour la nuit sombre en cours ou la suivante. Le menu **Choisir un objet visible** propose les cibles à cet instant : la première
-   est sélectionnée par défaut lors de l’ouverture ou d’un changement de lieu. Votre
-   choix explicite reste sélectionné quand vous explorez les heures. **Explorer**
-   sélectionne une recommandation et montre ses cartes et sa courbe. Le nom affiché près de l’étoile indique
-   la seule cible active. **Catalogue et favoris…** ouvre une liste unique avec recherche
-   et favoris. Taper un nom filtre cette liste ; cliquer sur un résultat le sélectionne.
-   Fermer la liste conserve le choix actuel.
-3. Pour une autre nuit, choisissez la date locale, ou **Nuit actuelle**. Une nuit terminée est refusée
+2. Sous la carte, choisissez la période des **Recommandations** : **À l’heure affichée**
+   ou **Sur cette nuit**. Le menu **Objet sélectionné** montre la seule cible active.
+   La première recommandation est sélectionnée par défaut à l’ouverture ou lors
+   d’un changement de lieu. Votre choix explicite reste sélectionné quand vous
+   explorez les heures, même s’il quitte la liste des recommandations.
+   **Préparer la nuit** place l’heure sur la nuit sombre en cours ou la suivante.
+   **Catalogue et favoris…** ouvre la liste complète : taper filtre les résultats,
+   cliquer sur un résultat le sélectionne, fermer la fenêtre conserve le choix.
+3. Pour une autre nuit, ouvrez **Date et fuseau…**, puis choisissez la date locale
+   ou **Nuit actuelle**. Une nuit terminée est refusée
    en préparation : la date valide est conservée et un message indique le problème.
    Avant le lever du Soleil, la nuit en cours peut porter la date d’hier. Le contrôle
    utilise le lever du Soleil et le fuseau du lieu ; sans lever, la limite est le midi
@@ -73,16 +70,13 @@ ce mode ne garantit pas une durée d’observation. **Sur cette nuit** compare l
 créneaux sur la nuit choisie, avec au moins 20 minutes par résultat. Jusqu’à 4 cibles
 du Système solaire et 6 du ciel profond sont proposées, avec priorité aux favoris
 puis classement selon la hauteur à l’instant choisi, ou selon la durée et la hauteur
-sur la nuit. Les filtres **Tout**, **Lune et planètes** et **Ciel profond** permettent
-de parcourir ces familles. Les critères sont accessibles dans l’aide : Soleil sous
-−18° pour les objets fixes, sous −6° pour le Système solaire. **Explorer** sélectionne
-la cible avec ces critères et revient à sa courbe, sur la même page. « Suggestions sur la nuit » ouvre les créneaux détaillés ; trois cartes sont
-affichées d’abord, puis un bouton ouvre les suivantes. La section peut se refermer. La sélection n’est pas exhaustive ;
+sur la nuit. Sélectionner un objet applique ses critères : Soleil sous −18° pour
+les objets fixes, sous −6° pour le Système solaire. La durée disponible sur la nuit
+est indiquée sous le choix et les créneaux détaillés restent accessibles sous les
+courbes. La sélection n’est pas exhaustive ;
 le catalogue complet reste interrogeable. Les suggestions de Mercure et Vénus
 excluent les créneaux à moins de 30° du Soleil. Le matériel, la pollution lumineuse,
-la Lune et la météo peuvent rendre un objet difficile à observer. Les prévisions
-nuageuses chargées ajoutent leurs valeurs horaires disponibles dans chaque créneau,
-sans modifier le classement géométrique.
+la Lune et la météo peuvent rendre un objet difficile à observer. Les prévisions nuageuses ne modifient pas le classement géométrique.
 
 **Nuages** affiche les prévisions horaires [Open-Meteo](https://open-meteo.com/en/docs)
 de couverture totale, basse, moyenne et haute. La prévision se charge automatiquement
@@ -110,20 +104,18 @@ et valeurs affichées arrondies ; le cache ne contient ni nom d’objet ni ident
 
 La fiche du lieu distingue **Au lieu · heure affichée** de **Ce Mac · maintenant** :
 le Mac conserve son heure réelle locale même pendant l’exploration d’une nuit
-future ou passée. Le résumé du lieu indique les **prochains lever et coucher du Soleil**, y compris
-la nuit suivante lorsque l’on consulte le matin. Les horaires de la nuit choisie
-restent visibles sous les créneaux d’observation. La section **Détails** conserve les informations lunaires, la direction,
-le jour, le crépuscule civil et la nuit astronomique.
-Un libellé indique aussi l’état à l’instant du curseur, avec les crépuscules civil,
-nautique et astronomique. Les périodes sans lever, coucher ou nuit sont explicites.
+future ou passée. Les **prochains lever et coucher du Soleil** sont convertis dans
+le **fuseau du Mac**, avec date et fuseau affichés, même si le lieu d’observation
+est à l’étranger. Les événements sont relatifs à l’instant exploré ; le matin,
+le résumé peut donc annoncer le coucher de la nuit suivante. Le lieu indique aussi
+son état jour, crépuscule ou nuit. Les deux sections redondantes du bas ont été retirées.
 
-**Heure et objet** permet de choisir le fuseau de référence : **Chez moi** (le fuseau
-de ce Mac, par défaut) ou **Au télescope** (le fuseau configuré pour le lieu). Les deux
-heures sont affichées quand les fuseaux diffèrent, avec la date et le décalage UTC.
-Choisissez le jour dans ce fuseau et saisissez **HH:mm** : le curseur et les quatre
-graphiques se placent au même instant. La conversion ne change ni le lieu ni la nuit.
-Les axes des courbes, les horaires du Soleil et l’heure de la prévision restent
-à l’heure du télescope ; leur fuseau est indiqué quand il diffère de chez vous.
+**Choisir l’heure**, sous le lieu, propose la saisie **HH:mm**, le curseur et
+**Date et fuseau…**. Cette fenêtre permet de choisir **Chez moi** (fuseau du Mac,
+par défaut) ou **Au télescope** (fuseau du lieu), ainsi que le jour dans ce fuseau.
+Toutes les vues se placent au même instant UTC. La conversion ne change ni le lieu
+ni la nuit. Les axes des courbes et les prévisions restent à l’heure du lieu ;
+les levers et couchers dans la fiche restent toujours à l’heure du Mac.
 Un point de carte recherche automatiquement son fuseau en ligne auprès d’Open-Meteo,
 en envoyant les coordonnées, après un bref délai qui regroupe les glissements.
 L’instant UTC reste fixe pendant la résolution. En cas d’échec ou sans connexion,
@@ -779,7 +771,7 @@ Les paramètres globaux centralisent :
 - **Le dossier d’export du traitement** : images produites après empilement et finition, ainsi que les mosaïques.
 - **L’ajout automatique à l’historique**, activable indépendamment de l’ajout manuel.
 
-Les commandes propres à la caméra restent dans **Capture**. Les préférences et les préréglages persistent après un redémarrage ou une mise à jour. La session de Traitement, Ciel profond et Mosaïque est sauvegardée automatiquement deux secondes après une modification stable. Elle conserve les sources référencées, les résultats en flottants, les réglages et les légendes. **Accueil → Reprendre la session** restaure le travail ; les résultats restent exportables si une source a été déplacée. **Sauvegarder la session et quitter** attend la fin de la sauvegarde avant la fermeture. Une session existante n’est pas chargée par-dessus un travail ouvert. La pile des annulations n’est pas conservée après redémarrage ; les versions A/B le sont. Les acquisitions de caméra restent des fichiers de capture, sans relance automatique de la caméra.
+Les commandes propres à la caméra restent dans **Capture**. Les préférences et les préréglages persistent après un redémarrage ou une mise à jour. La session de Traitement, Ciel profond et Mosaïque est sauvegardée automatiquement deux secondes après une modification stable. Elle conserve les sources référencées, les résultats en flottants, les réglages et les légendes. **Accueil → Reprendre la session** restaure le travail et ouvre le dernier espace de travail du projet, même après une sauvegarde depuis l’accueil ; les résultats restent exportables si une source a été déplacée. **Sauvegarder la session et quitter** attend la fin de la sauvegarde avant la fermeture. Une session existante n’est pas chargée par-dessus un travail ouvert. La pile des annulations n’est pas conservée après redémarrage ; les versions A/B le sont. Les acquisitions de caméra restent des fichiers de capture, sans relance automatique de la caméra.
 
 ## Navigation
 
@@ -798,6 +790,10 @@ Les commandes propres à la caméra restent dans **Capture**. Les préférences 
 
 À 100 %, un pixel de l’image correspond à un pixel physique de l’écran, y compris sur un écran Retina. Les raccourcis de navigation sont suspendus pendant la saisie de texte.
 
+Sur macOS, la barre de titre suit le thème sombre du logiciel et conserve les
+boutons natifs de fermeture, réduction et agrandissement. **AstroCapture** est
+centré dans cette barre ; le numéro de version est au centre du pied de fenêtre.
+
 ## Périmètre actuel
 
 Le [bilan avant V2](docs/releases/V2_READINESS.md) centralise les travaux restants,
@@ -815,7 +811,7 @@ préréglages CMake indiqués dans CONTRIBUTING.md. Les bibliothèques requises 
 leurs notices sont intégrées au paquet macOS ; elles ne doivent pas être
 installées séparément pour utiliser le DMG.
 
-Le numéro de version est visible dans le titre de la fenêtre et les paramètres.
+Le numéro de version est visible au centre du pied de fenêtre et dans les paramètres.
 Le bouton **Signaler un bug** prépare un e-mail vers antoninlefevre45@gmail.com
 avec la version et les étapes de reproduction, à relire avant envoi.
 

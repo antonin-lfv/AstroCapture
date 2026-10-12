@@ -1,5 +1,14 @@
 find_package(Threads REQUIRED)
 
+if(APPLE)
+    astro_add_unit_test(astro_app_window_appearance_test
+        SOURCES app/WindowAppearanceTest.mm ../../app/src/WindowAppearance.mm
+        LIBS Qt6::Quick Qt6::Gui ${APPKIT_FRAMEWORK})
+    target_include_directories(astro_app_window_appearance_test PRIVATE ../../app/src)
+    set_tests_properties(astro_app_window_appearance_test PROPERTIES
+        ENVIRONMENT "QT_QPA_PLATFORM=cocoa;QT_QUICK_BACKEND=software" TIMEOUT 15 RUN_SERIAL TRUE)
+endif()
+
 astro_add_unit_test(astro_domain_frame_descriptor_test
     SOURCES domain/FrameDescriptorTest.cpp
     LIBS astro::domain
@@ -356,6 +365,10 @@ if(ASTRO_ENABLE_MOCK_CAMERA)
         LIBS Qt6::Quick Qt6::Gui Qt6::Network astro::processing astro::recording
             astro::driver::mock Threads::Threads ZLIB::ZLIB
     )
+    if(APPLE)
+        target_sources(astro_app_personal_use_test PRIVATE ../../app/src/WindowAppearance.mm)
+        target_link_libraries(astro_app_personal_use_test PRIVATE ${APPKIT_FRAMEWORK})
+    endif()
     set_target_properties(astro_app_personal_use_test PROPERTIES AUTOMOC ON)
     target_link_libraries(astro_app_personal_use_test PRIVATE astro_observation_ephemeris)
     qt_add_resources(astro_app_personal_use_test observation_data PREFIX "/observation" BASE "${PROJECT_SOURCE_DIR}/app/data"

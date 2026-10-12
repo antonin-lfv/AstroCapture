@@ -1339,3 +1339,52 @@ utilisateur protégées et sans erreur de chargement QML. Le volume temporaire e
 détaché. Journaux : `build/observation-layout-dmg-verify.log` et
 `build/observation-layout-dmg-startup.log`. SHA-256 :
 `d03b2bd50e17ebe3738cddb4d0550df810b80a74de0faf700c1f694982b5cb6c`.
+
+## Lot 1.18.8 — Observation simplifiée, reprise et cadre macOS
+
+Le lieu et l’heure sont deux blocs empilés dans le quart gauche, à côté de la carte
+jour/nuit. Date, jour dans le fuseau de référence et choix Mac/télescope utilisent
+une fenêtre dédiée. Les menus Recommandations et Objet sélectionné sont alignés
+sous la carte : instant affiché et nuit entière restent disponibles au même endroit.
+La sélection explicite est conservée pendant le déplacement du curseur. Les
+sections « Détails · Lune, direction et horaires du Soleil » et « Cibles à cette
+heure » ont été retirées ; le catalogue, les favoris, les critères avancés, les
+créneaux d’enregistrement et la source météo restent accessibles.
+
+Les prochains coucher et lever du Soleil sont formatés depuis leurs instants UTC
+dans le fuseau local du Mac, avec date et zone. Les axes des courbes et les
+prévisions conservent le fuseau du lieu. Le retrait d’un lieu favori utilise son
+indice réel, indépendamment du tri alphabétique et du placement des favoris.
+
+La session conserve le dernier espace de travail du projet. La reprise choisit
+un espace effectivement chargé, y compris avec un ancien manifeste sans cette
+information. Le test sauvegarde depuis Accueil puis vérifie la navigation vers
+Ciel profond, ainsi que l’intégrité des résultats flottants et des exports.
+
+Sur macOS, AppKit applique l’apparence sombre et la couleur de fond sémantique de
+la fenêtre. Un titre natif non interactif est centré dans le cadre, sans couvrir
+la navigation Qt ; les boutons et le déplacement natifs restent disponibles. Le
+centrage est vérifié après redimensionnement. Le numéro **1.18.8** est centré dans
+le pied de fenêtre, avec zones gauche/droite de largeur égale et textes élidés.
+
+Les **53 tests Release passent** (`build/observation-polish-tests.log`). Les
+contrôles couvrent la reprise depuis Accueil, la compatibilité des anciens
+états d’interface, les heures solaires Mac pour une position distante, la
+suppression du bon favori et le curseur actualisé pendant le glissement. Le test
+AppKit lit le rendu du cadre et vérifie le centrage aux trois tailles. Le parcours
+Orion HDR vérifie les pixels, exports et reprise entre processus
+(`build/observation-polish-orion-native.log`). Les **510 messages actifs** sont
+présents dans la traduction française compilée
+(`build/observation-polish-translation.log`). Guide et README sont à jour.
+
+Les **34 captures** dans `previews/native/observation-polish/` vérifient la
+composition française à **1440 × 960, 1100 × 800 et 900 × 700**, les fenêtres,
+le lieu distant, la météo en cache, la perte de connexion et Orion. La capture
+du cadre AppKit utilise une fenêtre unie ; les captures du contenu viennent des
+composants QML réels. Aucun chevauchement ni commande coupée n’a été relevé.
+
+L’installateur **AstroCapture-1.18.8.dmg** est généré et son intégrité est vérifiée
+(`build/observation-polish-dmg-verify.log`). Le démarrage depuis le volume en
+lecture seule réussit avec les préférences utilisateur protégées, sans erreur QML
+(`build/observation-polish-dmg-startup.log`). Le volume temporaire est détaché.
+SHA-256 : `1e7cd22fe8163a97cd0b9075a47d685f549a9248e356d90336a3998d29e99ac4`.

@@ -727,7 +727,32 @@ int main(int argc, char **argv) {
   pickSite(0);
   pickSite(savedSite);
   ASTRO_TEST_CHECK(controller.instant()["utcSeconds"] == preciseUtc);
-  controller.removeSite(savedSite);
+  QVariant favoriteIndex;
+  ASTRO_TEST_CHECK(QMetaObject::invokeMethod(
+      root, "favoriteSiteIndex", Q_RETURN_ARG(QVariant, favoriteIndex)));
+  ASTRO_TEST_CHECK(favoriteIndex.toInt() == savedSite);
+  controller.removeSite(favoriteIndex.toInt());
+  ASTRO_TEST_CHECK(controller.sites().size() == savedSite);
+  for (const char *kind : {"sunset", "sunrise"}) {
+    for (const auto &value : controller.result()["siteSolarEvents"].toList()) {
+      const auto event = value.toMap();
+      if (event["kind"] != kind ||
+          event["utc"].toLongLong() <=
+              controller.instant()["utcSeconds"].toLongLong())
+        continue;
+      const auto clock =
+          QDateTime::fromSecsSinceEpoch(event["utc"].toLongLong())
+              .toLocalTime()
+              .toString("dd/MM HH:mm t");
+      ASTRO_TEST_CHECK(
+          item(root, QString("observation") +
+                         (QString(kind) == "sunset" ? "Sunset" : "Sunrise"))
+              ->property("text")
+              .toString()
+              .contains(clock));
+      break;
+    }
+  }
   // Exact coordinates and a manually selected time zone share the same rule.
   item(root, "observationLatitude")->setProperty("text", "-34.25");
   item(root, "observationElevation")->setProperty("text", "120");
@@ -791,6 +816,15 @@ int main(int argc, char **argv) {
     const auto placeWidth = item(root, "observationSiteSummary")->width();
     const auto mapWidth = item(root, "observationDayCard")->width();
     ASTRO_TEST_CHECK(std::abs(mapWidth / placeWidth - 3) < .02);
+    const auto site = item(root, "observationSiteSummary");
+    const auto time = item(root, "observationTimeCard");
+    ASTRO_TEST_CHECK(std::abs(site->width() - time->width()) < 1);
+    ASTRO_TEST_CHECK(time->mapToItem(root, QPointF()).y() >=
+                     site->mapToItem(root, QPointF()).y() + site->height() +
+                         15);
+    ASTRO_TEST_CHECK(
+        std::abs(item(root, "observationSuggestionPeriod")->height() -
+                 item(root, "observationVisibleTarget")->height()) < 1);
     ASTRO_TEST_CHECK(std::abs(item(root, "observationHeightCard")->width() -
                               item(root, "observationCloudCard")->width()) < 1);
     if (!qEnvironmentVariable("ASTRO_OBSERVATION_SCREENSHOTS").isEmpty())
@@ -806,14 +840,13 @@ int main(int argc, char **argv) {
   ASTRO_TEST_CHECK(QMetaObject::invokeMethod(favouriteButton, "clicked"));
   ASTRO_TEST_CHECK(!controller.targetFavorite());
   root->setProperty("suggestionPeriod", "night");
-  item(root, "observationSuggestions")->setProperty("expanded", true);
+  ASTRO_TEST_CHECK(!item(root, "observationSuggestions"));
+  ASTRO_TEST_CHECK(!item(root, "observationDetails"));
   const auto firstSuggestion = controller.recommendations().first().toMap();
-  auto *explore =
-      item(root, "observationSuggestion:" + firstSuggestion["id"].toString());
-  ASTRO_TEST_CHECK(explore);
-  ASTRO_TEST_CHECK(QMetaObject::invokeMethod(explore, "clicked"));
+  auto *recommended = item(root, "observationVisibleTarget");
+  ASTRO_TEST_CHECK(recommended);
   ASTRO_TEST_CHECK(
-      !item(root, "observationSuggestions")->property("expanded").toBool());
+      QMetaObject::invokeMethod(recommended, "activated", Q_ARG(int, 0)));
   ASTRO_TEST_CHECK(controller.settings()["target"] == firstSuggestion["id"]);
   ASTRO_TEST_CHECK(controller.settings()["sunLimit"] ==
                    firstSuggestion["sunLimit"]);

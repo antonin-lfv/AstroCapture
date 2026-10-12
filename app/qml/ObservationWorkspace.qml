@@ -20,7 +20,7 @@ Rectangle {
     function updateVisibleTarget() {
         if (!ready || !autoSelectVisible || selectingVisible || !visible)
             return;
-        const targets = controller.visibleTargets;
+        const targets = filteredSuggestions;
         if (targets.length && targets[0].id !== controller.settings.target) {
             selectingVisible = true;
             manual = false;
@@ -59,6 +59,10 @@ Rectangle {
     function nextSolar(kind) {
         return (controller.result.siteSolarEvents || []).find(event => event.kind === kind && event.utc > controller.instant.utcSeconds);
     }
+    function pcSolar(kind) {
+        const event = nextSolar(kind);
+        return event ? Qt.formatDateTime(new Date(Number(event.utc) * 1000), "dd/MM HH:mm t") : qsTr("none in the next day");
+    }
     function refreshSiteWeather() {
         if (autoLoadWeather) {
             weatherRefresh.restart();
@@ -83,16 +87,10 @@ Rectangle {
             controller.setReferenceUtc(now);
         }
         suggestionPeriod = "night";
-        suggestionsSection.expanded = true;
         mainScroll.contentItem.contentY = 0;
     }
-    function findSuggestions() {
-        suggestionsSection.expanded = true;
-        mainScroll.contentItem.contentY = Math.max(0, suggestionsSection.y - 16);
-    }
-    property string suggestionKind: "all"
-    property int suggestionLimit: 3
     property string suggestionPeriod: "instant"
+    onSuggestionPeriodChanged: Qt.callLater(root.updateVisibleTarget)
     property bool autoLoadWeather: true
     Timer {
         id: weatherRefresh
@@ -100,7 +98,7 @@ Rectangle {
         onTriggered: if (root.autoLoadWeather)
             root.controller.refreshWeather(false)
     }
-    readonly property var filteredSuggestions: (suggestionPeriod === "instant" ? controller.visibleTargets : controller.recommendations).filter(value => suggestionKind === "all" || (suggestionKind === "solar" ? value.body >= 0 : value.body < 0))
+    readonly property var filteredSuggestions: suggestionPeriod === "instant" ? controller.visibleTargets : controller.recommendations
     property bool syncing: false
     property bool ready: false
     property bool timeUpdatePending: false
@@ -164,7 +162,7 @@ Rectangle {
         for (let i = 0; i < sortedSites.length; i++) {
             const site = sortedSites[i];
             if (site.favorite && Number(site.latitude) === Number(current.latitude) && Number(site.longitude) === Number(current.longitude) && Number(site.elevation) === Number(current.elevation) && site.zone === current.zone)
-                return i;
+                return site.sourceIndex;
         }
         return -1;
     }
@@ -298,8 +296,6 @@ Rectangle {
         manual = false;
         if (controller.selectTarget(id)) {
             objectChooser.close();
-            suggestionsSection.expanded = false;
-            mainScroll.contentItem.contentY = Math.max(0, timeCard.y - 16);
             return true;
         }
         return false;
@@ -423,326 +419,384 @@ Rectangle {
                         objectName: "observationSiteRow"
                         Layout.fillWidth: true
                         spacing: 16
-                        ObservationCard {
-                            id: siteCard
-                            objectName: "observationSiteSummary"
+                        ColumnLayout {
                             Layout.fillWidth: true
-                            Layout.fillHeight: true
                             Layout.minimumWidth: 0
                             Layout.preferredWidth: (siteRow.width - siteRow.spacing) * .25
-                            title: qsTr("Observing place")
-                            help: qsTr("Choose a saved place or click the map. Favourites appear first, with alphabetical sorting in each group. The site clock follows the displayed time; the Mac clock always shows the real current time. Sunrise and sunset are calculated locally. Clouds are forecasts.")
-                            DarkComboBox {
-                                id: sitePicker
-                                objectName: "observationSite"
+                            Layout.alignment: Qt.AlignTop
+                            spacing: 16
+                            ObservationCard {
+                                id: siteCard
+                                objectName: "observationSiteSummary"
                                 Layout.fillWidth: true
-                                model: root.sortedSites
-                                textRole: "label"
-                                displayText: root.controller.settings.name || qsTr("Custom location")
-                                explanation: qsTr("The city's time zone follows local daylight-saving rules. Changing place keeps the UTC instant; local times and the night date are converted. A map point resolves its local time zone online; if unavailable, Coordinates lets you set it.")
-                                onActivated: index => {
-                                    root.manual = false;
-                                    let s = Object.assign({}, root.controller.settings, root.sortedSites[index], {
-                                        mapZoneUnresolved: root.sortedSites[index].mapZoneUnresolved === true
-                                    });
-                                    delete s.sourceIndex;
-                                    root.applyOptions(s);
+                                Layout.minimumWidth: 0
+                                title: qsTr("Observing place")
+                                help: qsTr("Choose a saved place or click the map. Favourites appear first, with alphabetical sorting in each group. The site clock follows the displayed time; the Mac clock always shows the real current time. Sunrise and sunset are shown in this Mac's time zone. Clouds are forecasts.")
+                                DarkComboBox {
+                                    id: sitePicker
+                                    objectName: "observationSite"
+                                    Layout.fillWidth: true
+                                    model: root.sortedSites
+                                    textRole: "label"
+                                    displayText: root.controller.settings.name || qsTr("Custom location")
+                                    explanation: qsTr("The city's time zone follows local daylight-saving rules. Changing place keeps the UTC instant; local times and the night date are converted. A map point resolves its local time zone online; if unavailable, Coordinates lets you set it.")
+                                    onActivated: index => {
+                                        root.manual = false;
+                                        let s = Object.assign({}, root.controller.settings, root.sortedSites[index], {
+                                            mapZoneUnresolved: root.sortedSites[index].mapZoneUnresolved === true
+                                        });
+                                        delete s.sourceIndex;
+                                        root.applyOptions(s);
+                                    }
                                 }
-                            }
-                            Label {
-                                text: root.controller.settings.name || ""
-                                color: Atelier.text
-                                font.pixelSize: 16
-                                font.weight: Font.Medium
-                                wrapMode: Text.Wrap
-                                Layout.fillWidth: true
-                            }
-                            Label {
-                                objectName: "observationSiteClock"
-                                text: qsTr("At the place · displayed time\n%1").arg(root.controller.reference.siteDisplay || "")
-                                color: Atelier.text
-                                font.pixelSize: 12
-                                wrapMode: Text.Wrap
-                                Layout.fillWidth: true
-                            }
-                            Label {
-                                objectName: "observationPcClock"
-                                text: qsTr("This Mac · now\n%1").arg(Qt.formatDateTime(root.pcNow, "dd/MM/yyyy HH:mm t"))
-                                color: Atelier.secondary
-                                font.pixelSize: 12
-                                wrapMode: Text.Wrap
-                                Layout.fillWidth: true
-                            }
-                            Label {
-                                objectName: "observationSitePhase"
-                                text: root.controller.instant.solarPhase || ""
-                                color: Atelier.accent
-                                font.pixelSize: 14
-                                wrapMode: Text.Wrap
-                                Layout.fillWidth: true
-                            }
-                            Label {
-                                text: qsTr("Next sunset: %1").arg(root.nextSolar("sunset") ? root.nextSolar("sunset").time : qsTr("none in the next day"))
-                                color: Atelier.secondary
-                                font.pixelSize: 12
-                                wrapMode: Text.Wrap
-                                Layout.fillWidth: true
-                            }
-                            Label {
-                                text: qsTr("Next sunrise: %1").arg(root.nextSolar("sunrise") ? root.nextSolar("sunrise").time : qsTr("none in the next day"))
-                                color: Atelier.secondary
-                                font.pixelSize: 12
-                                wrapMode: Text.Wrap
-                                Layout.fillWidth: true
-                            }
-                            RowLayout {
-                                Layout.fillWidth: true
                                 Label {
-                                    objectName: "observationSiteClouds"
-                                    text: root.controller.weather.busy ? qsTr("Loading…") : qsTr("Clouds: %1").arg(root.cloudPercent(root.controller.weather.cloud_cover))
-                                    color: root.controller.weather.stale || root.controller.weather.failed ? Atelier.warning : Atelier.text
-                                    font.pixelSize: 13
+                                    objectName: "observationSiteClock"
+                                    text: qsTr("At the place · displayed time\n%1").arg(root.controller.reference.siteDisplay || "")
+                                    color: Atelier.text
+                                    font.pixelSize: 12
+                                    wrapMode: Text.Wrap
+                                    Layout.fillWidth: true
+                                }
+                                Label {
+                                    objectName: "observationPcClock"
+                                    text: qsTr("This Mac · now\n%1").arg(Qt.formatDateTime(root.pcNow, "dd/MM/yyyy HH:mm t"))
+                                    color: Atelier.secondary
+                                    font.pixelSize: 12
+                                    wrapMode: Text.Wrap
+                                    Layout.fillWidth: true
+                                }
+                                Label {
+                                    objectName: "observationSitePhase"
+                                    text: root.controller.instant.solarPhase || ""
+                                    color: Atelier.accent
+                                    font.pixelSize: 14
+                                    wrapMode: Text.Wrap
+                                    Layout.fillWidth: true
+                                }
+                                Label {
+                                    objectName: "observationSunset"
+                                    text: qsTr("Next sunset · Mac\n%1").arg(root.pcSolar("sunset"))
+                                    color: Atelier.secondary
+                                    font.pixelSize: 12
+                                    wrapMode: Text.Wrap
+                                    Layout.fillWidth: true
+                                }
+                                Label {
+                                    objectName: "observationSunrise"
+                                    text: qsTr("Next sunrise · Mac\n%1").arg(root.pcSolar("sunrise"))
+                                    color: Atelier.secondary
+                                    font.pixelSize: 12
+                                    wrapMode: Text.Wrap
+                                    Layout.fillWidth: true
+                                }
+                                RowLayout {
+                                    Layout.fillWidth: true
+                                    Label {
+                                        objectName: "observationSiteClouds"
+                                        text: root.controller.weather.busy ? qsTr("Loading…") : qsTr("Clouds: %1").arg(root.cloudPercent(root.controller.weather.cloud_cover))
+                                        color: root.controller.weather.stale || root.controller.weather.failed ? Atelier.warning : Atelier.text
+                                        font.pixelSize: 13
+                                        wrapMode: Text.Wrap
+                                        Layout.fillWidth: true
+                                    }
+                                    IconButton {
+                                        text: qsTr("Refresh")
+                                        busy: root.controller.weather.busy
+                                        enabled: root.controller.weather.canRefresh
+                                        Accessible.name: qsTr("Refresh the cloud forecast for this site")
+                                        onClicked: {
+                                            root.controller.refreshWeather();
+                                            if (root.controller.settings.mapZoneUnresolved)
+                                                root.controller.resolveMapTimeZone();
+                                        }
+                                    }
+                                }
+                                Label {
+                                    visible: !root.controller.weather.available || root.controller.weather.stale || root.controller.weather.failed
+                                    text: root.controller.weather.failed || root.controller.weather.stale ? root.controller.weather.status : qsTr("No cloud forecast for this time.")
+                                    color: root.controller.weather.failed || root.controller.weather.stale ? Atelier.warning : Atelier.secondary
+                                    font.pixelSize: 11
+                                    wrapMode: Text.Wrap
+                                    Layout.fillWidth: true
+                                }
+                                Label {
+                                    visible: root.controller.mapTimeZoneStatus.length > 0
+                                    text: root.controller.mapTimeZoneStatus
+                                    color: Atelier.warning
+                                    font.pixelSize: 11
                                     wrapMode: Text.Wrap
                                     Layout.fillWidth: true
                                 }
                                 IconButton {
-                                    text: qsTr("Refresh")
-                                    busy: root.controller.weather.busy
-                                    enabled: root.controller.weather.canRefresh
-                                    Accessible.name: qsTr("Refresh the cloud forecast for this site")
-                                    onClicked: {
-                                        root.controller.refreshWeather();
-                                        if (root.controller.settings.mapZoneUnresolved)
-                                            root.controller.resolveMapTimeZone();
-                                    }
-                                }
-                            }
-                            Label {
-                                visible: !root.controller.weather.available || root.controller.weather.stale || root.controller.weather.failed
-                                text: root.controller.weather.status || qsTr("Cloud forecast unavailable for this instant.")
-                                color: root.controller.weather.failed || root.controller.weather.stale ? Atelier.warning : Atelier.secondary
-                                font.pixelSize: 11
-                                wrapMode: Text.Wrap
-                                Layout.fillWidth: true
-                            }
-                            Label {
-                                visible: root.controller.mapTimeZoneStatus.length > 0
-                                text: root.controller.mapTimeZoneStatus
-                                color: Atelier.warning
-                                font.pixelSize: 11
-                                wrapMode: Text.Wrap
-                                Layout.fillWidth: true
-                            }
-                            IconButton {
-                                Layout.fillWidth: true
-                                enabled: !root.controller.mapTimeZoneBusy
-                                text: root.favoriteSiteIndex() >= 0 ? qsTr("Rename…") : qsTr("Save place…")
-                                objectName: "observationNamePlace"
-                                Accessible.name: root.favoriteSiteIndex() >= 0 ? qsTr("Rename this saved place") : qsTr("Name and save this place")
-                                onClicked: {
-                                    root.saveSiteOpen = true;
-                                    nameDialog.open();
-                                    favoriteName.text = root.controller.settings.name || "";
-                                }
-                            }
-                            RowLayout {
-                                Layout.fillWidth: true
-                                IconButton {
-                                    text: qsTr("City…")
                                     Layout.fillWidth: true
+                                    enabled: !root.controller.mapTimeZoneBusy
+                                    text: root.favoriteSiteIndex() >= 0 ? qsTr("Rename…") : qsTr("Save place…")
+                                    objectName: "observationNamePlace"
+                                    Accessible.name: root.favoriteSiteIndex() >= 0 ? qsTr("Rename this saved place") : qsTr("Name and save this place")
                                     onClicked: {
-                                        root.citySearchOpen = true;
-                                        cityDialog.open();
+                                        root.saveSiteOpen = true;
+                                        nameDialog.open();
+                                        favoriteName.text = root.controller.settings.name || "";
                                     }
                                 }
-                                IconButton {
-                                    objectName: "observationCoordinates"
-                                    text: qsTr("Coordinates…")
+                                GridLayout {
                                     Layout.fillWidth: true
-                                    onClicked: {
-                                        root.sync();
-                                        siteDialog.open();
-                                    }
-                                }
-                            }
-                        }
-                        ObservationCard {
-                            objectName: "observationDayCard"
-                            Layout.preferredWidth: (siteRow.width - siteRow.spacing) * .75
-                            Layout.fillWidth: true
-                            Layout.minimumWidth: 0
-                            Layout.fillHeight: true
-                            title: qsTr("Day and night around the world")
-                            help: qsTr("Day follows the Sun's upper edge with standard refraction at sea level; astronomical night starts below −18°. The maps use a regional 6° grid and the same displayed instant. Clicking selects a place without changing UTC. Its time zone is resolved online; if unavailable, Coordinates lets you set it.")
-
-                            Label {
-                                objectName: "observationMapTime"
-                                text: root.controller.instant.utc || ""
-                                color: Atelier.secondary
-                                font.pixelSize: 12
-                                Layout.fillWidth: true
-                                wrapMode: Text.Wrap
-                            }
-                            ObservationPlot {
-                                objectName: "observationDayPlot"
-                                Layout.fillWidth: true
-                                Layout.preferredHeight: Math.max(240, (width - 32) / 2 + 40)
-                                controller: root.controller
-                                mode: "daylight"
-                                HoverHandler {
-                                    cursorShape: Qt.CrossCursor
-                                }
-                                colors: root.plotColors
-                                Accessible.role: Accessible.Graphic
-                                Accessible.name: qsTr("World day, twilight and night map at the shared UTC instant")
-                                onLocationChosen: (latitude, longitude) => root.chooseSite(latitude, longitude)
-                            }
-                            Flow {
-                                Layout.fillWidth: true
-                                spacing: 12
-                                Repeater {
-                                    model: [
-                                        {
-                                            color: Atelier.warning,
-                                            label: qsTr("Day")
-                                        },
-                                        {
-                                            color: Atelier.primary,
-                                            label: qsTr("Twilight")
-                                        },
-                                        {
-                                            color: Atelier.image,
-                                            label: qsTr("Night")
-                                        }
-                                    ]
-                                    Row {
-                                        required property var modelData
-                                        spacing: 6
-                                        Rectangle {
-                                            width: 10
-                                            height: 10
-                                            anchors.verticalCenter: parent.verticalCenter
-                                            color: modelData.color
-                                            border.color: Atelier.border
-                                            radius: 2
-                                        }
-                                        Label {
-                                            text: modelData.label
-                                            color: Atelier.secondary
-                                            font.pixelSize: 12
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    ObservationCard {
-                        id: timeCard
-                        objectName: "observationTimeCard"
-                        Layout.fillWidth: true
-                        title: qsTr("Time and object")
-                        GridLayout {
-                            columns: 2
-                            columnSpacing: 24
-                            rowSpacing: 12
-                            Layout.fillWidth: true
-                            ColumnLayout {
-                                Layout.fillWidth: true
-                                Layout.minimumWidth: 0
-                                Layout.preferredWidth: 1
-                                Layout.alignment: Qt.AlignTop
-                                spacing: 8
-                                RowLayout {
-                                    Layout.fillWidth: true
-                                    Label {
-                                        text: qsTr("Choose the time")
-                                        color: Atelier.text
-                                        font.pixelSize: 14
+                                    columns: siteCard.width >= 290 ? 2 : 1
+                                    columnSpacing: 8
+                                    rowSpacing: 8
+                                    IconButton {
+                                        text: qsTr("City…")
                                         Layout.fillWidth: true
+                                        onClicked: {
+                                            root.citySearchOpen = true;
+                                            cityDialog.open();
+                                        }
                                     }
                                     IconButton {
-                                        objectName: "observationNow"
-                                        text: root.liveNow ? qsTr("Now · live") : qsTr("Now")
-                                        borderColor: root.liveNow ? Atelier.accent : Atelier.border
-                                        onClicked: root.goNow()
-                                        Accessible.description: root.liveNow ? qsTr("Live time is active") : qsTr("Return to the current time")
-                                    }
-                                }
-                                DarkComboBox {
-                                    id: referencePicker
-                                    objectName: "observationReferenceZone"
-                                    Layout.fillWidth: true
-                                    model: [qsTr("At home · %1").arg(root.controller.reference.homeZone || ""), qsTr("Telescope · %1").arg(root.controller.reference.siteZone || "")]
-                                    Accessible.name: qsTr("Reference time zone")
-                                    onActivated: index => {
-                                        root.referenceChoices = [];
-                                        root.referenceNotice = "";
-                                        root.controller.setReferenceZone(index === 1 ? "site" : "system");
-                                    }
-                                }
-                                RowLayout {
-                                    Layout.fillWidth: true
-                                    spacing: 8
-                                    DarkComboBox {
-                                        id: referenceDay
-                                        objectName: "observationReferenceDay"
+                                        objectName: "observationCoordinates"
+                                        text: qsTr("Coordinates…")
                                         Layout.fillWidth: true
-                                        Layout.minimumWidth: 0
-                                        model: root.controller.reference.days || []
-                                        textRole: "label"
-                                        Accessible.name: qsTr("Date in the reference time zone")
-                                        explanation: qsTr("Choose the calendar day in the reference time zone. A night can cross midnight and a time-zone conversion can change the date.")
-                                        onActivated: root.applyReferenceTime()
-                                    }
-                                    ObservationField {
-                                        id: referenceClock
-                                        objectName: "observationReferenceClock"
-                                        Layout.preferredWidth: 150
-                                        Layout.minimumWidth: 100
-                                        label: qsTr("Reference hour · HH:mm")
-                                        help: qsTr("Enter the time in the selected reference time zone. The cursor, both maps and all curves move to the same instant. For example, 23:30. Clock-change gaps are rejected; repeated hours let you choose the offset.")
-                                        onAccepted: root.applyReferenceTime()
-                                        onTextEdited: {
-                                            root.liveNow = false;
-                                            root.referenceClockEdited = true;
+                                        onClicked: {
+                                            root.sync();
+                                            siteDialog.open();
                                         }
+                                    }
+                                }
+                            }
+                            ObservationCard {
+                                id: timeCard
+                                objectName: "observationTimeCard"
+                                Layout.fillWidth: true
+                                Layout.minimumWidth: 0
+                                title: qsTr("Choose the time")
+                                IconButton {
+                                    objectName: "observationNow"
+                                    Layout.fillWidth: true
+                                    text: root.liveNow ? qsTr("Now · live") : qsTr("Now")
+                                    borderColor: root.liveNow ? Atelier.accent : Atelier.border
+                                    onClicked: root.goNow()
+                                    Accessible.description: root.liveNow ? qsTr("Live time is active") : qsTr("Return to the current time")
+                                }
+                                ObservationField {
+                                    id: referenceClock
+                                    objectName: "observationReferenceClock"
+                                    Layout.fillWidth: true
+                                    Layout.minimumWidth: 0
+                                    label: qsTr("Reference hour · HH:mm")
+                                    help: qsTr("Enter the time in the selected reference time zone. The cursor, both maps and all curves move to the same instant. For example, 23:30. Clock-change gaps are rejected; repeated hours let you choose the offset.")
+                                    onAccepted: root.applyReferenceTime()
+                                    onTextEdited: {
+                                        root.liveNow = false;
+                                        root.referenceClockEdited = true;
                                     }
                                 }
                                 Label {
                                     objectName: "observationReferenceReadout"
-                                    text: qsTr("At home: %1").arg(root.controller.reference.homeDisplay || "") + "\n" + qsTr("At the telescope: %1").arg(root.controller.reference.siteDisplay || "")
+                                    text: (root.controller.reference.source === "site" ? qsTr("Telescope: %1") : qsTr("At home: %1")).arg(root.controller.reference.source === "site" ? root.controller.reference.siteDisplay || "" : root.controller.reference.homeDisplay || "")
                                     color: Atelier.secondary
                                     font.pixelSize: 12
                                     Layout.fillWidth: true
                                     wrapMode: Text.Wrap
                                 }
-                            }
-                            ColumnLayout {
-                                Layout.fillWidth: true
-                                Layout.minimumWidth: 0
-                                Layout.preferredWidth: 1
-                                Layout.alignment: Qt.AlignTop
-                                spacing: 8
+                                AtelierSlider {
+                                    id: timeSlider
+                                    objectName: "observationTime"
+                                    Layout.fillWidth: true
+                                    from: 0
+                                    to: 1
+                                    value: .5
+                                    stepSize: 1 / 1440
+                                    live: true
+                                    Accessible.name: qsTr("Explore the night")
+                                    onMoved: root.scheduleTimeUpdate()
+                                    onPressedChanged: if (!pressed && root.ready)
+                                        root.finishTimeUpdate()
+                                }
+
+                                IconButton {
+                                    objectName: "observationTimeOptions"
+                                    Layout.fillWidth: true
+                                    text: qsTr("Date and time zone…")
+                                    onClicked: timeDialog.open()
+                                }
+                                IconButton {
+                                    objectName: "observationPrepareNight"
+                                    Layout.fillWidth: true
+                                    text: qsTr("Prepare this night")
+                                    onClicked: root.prepareNight()
+                                }
                                 Label {
-                                    text: qsTr("Choose a visible object")
-                                    color: Atelier.text
-                                    font.pixelSize: 14
+                                    objectName: "observationDateNotice"
+                                    visible: root.dateNotice.length > 0 || (root.nightState.past && !history.checked && !root.liveNow)
+                                    text: root.dateNotice.length ? root.dateNotice : qsTr("This night has ended. Choose Current night to continue planning.")
+                                    color: Atelier.warning
+                                    Layout.fillWidth: true
+                                    wrapMode: Text.Wrap
+                                    font.pixelSize: 12
+                                }
+                                Label {
+                                    visible: root.referenceNotice.length > 0
+                                    text: root.referenceNotice
+                                    color: Atelier.warning
+                                    Layout.fillWidth: true
+                                    wrapMode: Text.Wrap
+                                    font.pixelSize: 12
                                 }
                                 DarkComboBox {
-                                    objectName: "observationVisibleTarget"
+                                    visible: root.referenceChoices.length > 1
+                                    objectName: "observationReferenceOccurrence"
                                     Layout.fillWidth: true
-                                    Layout.minimumWidth: 0
-                                    model: root.controller.visibleTargets
-                                    textRole: "name"
-                                    Accessible.name: qsTr("Objects visible at the displayed time")
-                                    currentIndex: root.controller.visibleTargets.findIndex(value => value.id === root.controller.settings.target)
-                                    displayText: root.controller.visibleTargets.length ? (root.controller.result.target || "") : qsTr("No visible recommendation at this time")
-                                    onActivated: index => root.chooseTarget(root.controller.visibleTargets[index].id)
+                                    model: root.referenceChoices
+                                    textRole: "label"
+                                    displayText: qsTr("Choose the occurrence of this hour")
+                                    Accessible.name: qsTr("Choose the UTC offset for the repeated hour")
+                                    onActivated: index => {
+                                        root.liveNow = false;
+                                        root.controller.setReferenceUtc(root.referenceChoices[index].utc);
+                                        root.referenceChoices = [];
+                                        root.referenceNotice = "";
+                                        root.referenceClockEdited = false;
+                                        referenceClock.text = root.controller.reference.clock;
+                                    }
+                                }
+                            }
+                        }
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            Layout.alignment: Qt.AlignTop
+                            Layout.minimumWidth: 0
+                            Layout.preferredWidth: (siteRow.width - siteRow.spacing) * .75
+                            spacing: 16
+                            ObservationCard {
+                                objectName: "observationDayCard"
+                                Layout.fillWidth: true
+                                Layout.minimumWidth: 0
+                                title: qsTr("Day and night around the world")
+                                help: qsTr("Day follows the Sun's upper edge with standard refraction at sea level; astronomical night starts below −18°. The maps use a regional 6° grid and the same displayed instant. Clicking selects a place without changing UTC. Its time zone is resolved online; if unavailable, Coordinates lets you set it.")
+
+                                Label {
+                                    objectName: "observationMapTime"
+                                    text: root.controller.instant.utc || ""
+                                    color: Atelier.secondary
+                                    font.pixelSize: 12
+                                    Layout.fillWidth: true
+                                    wrapMode: Text.Wrap
+                                }
+                                ObservationPlot {
+                                    objectName: "observationDayPlot"
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: Math.max(240, (width - 32) / 2 + 40)
+                                    controller: root.controller
+                                    mode: "daylight"
+                                    HoverHandler {
+                                        cursorShape: Qt.CrossCursor
+                                    }
+                                    colors: root.plotColors
+                                    Accessible.role: Accessible.Graphic
+                                    Accessible.name: qsTr("World day, twilight and night map at the shared UTC instant")
+                                    onLocationChosen: (latitude, longitude) => root.chooseSite(latitude, longitude)
+                                }
+                                Flow {
+                                    Layout.fillWidth: true
+                                    spacing: 12
+                                    Repeater {
+                                        model: [
+                                            {
+                                                color: Atelier.warning,
+                                                label: qsTr("Day")
+                                            },
+                                            {
+                                                color: Atelier.primary,
+                                                label: qsTr("Twilight")
+                                            },
+                                            {
+                                                color: Atelier.image,
+                                                label: qsTr("Night")
+                                            }
+                                        ]
+                                        Row {
+                                            required property var modelData
+                                            spacing: 6
+                                            Rectangle {
+                                                width: 10
+                                                height: 10
+                                                anchors.verticalCenter: parent.verticalCenter
+                                                color: modelData.color
+                                                border.color: Atelier.border
+                                                radius: 2
+                                            }
+                                            Label {
+                                                text: modelData.label
+                                                color: Atelier.secondary
+                                                font.pixelSize: 12
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            ObservationCard {
+                                id: objectCard
+                                objectName: "observationObjectCard"
+                                Layout.fillWidth: true
+                                Layout.minimumWidth: 0
+                                title: qsTr("Choose an object")
+                                GridLayout {
+                                    columns: objectCard.width >= 560 ? 2 : 1
+                                    columnSpacing: 16
+                                    rowSpacing: 12
+                                    Layout.fillWidth: true
+                                    ColumnLayout {
+                                        Layout.fillWidth: true
+                                        Layout.minimumWidth: 0
+                                        Layout.preferredWidth: 1
+                                        spacing: 5
+                                        SettingLabel {
+                                            text: qsTr("Recommendations")
+                                            Layout.fillWidth: true
+                                        }
+                                        DarkComboBox {
+                                            objectName: "observationSuggestionPeriod"
+                                            Layout.fillWidth: true
+                                            model: [qsTr("At the displayed time"), qsTr("Over this night")]
+                                            Accessible.name: qsTr("Recommendation period")
+                                            currentIndex: root.suggestionPeriod === "instant" ? 0 : 1
+                                            onActivated: index => {
+                                                root.autoSelectVisible = true;
+                                                if (index === 1 && root.liveNow)
+                                                    root.prepareNight();
+                                                else
+                                                    root.suggestionPeriod = index === 0 ? "instant" : "night";
+                                                root.updateVisibleTarget();
+                                            }
+                                        }
+                                    }
+                                    ColumnLayout {
+                                        Layout.fillWidth: true
+                                        Layout.minimumWidth: 0
+                                        Layout.preferredWidth: 1
+                                        spacing: 5
+                                        SettingLabel {
+                                            text: qsTr("Selected object")
+                                            Layout.fillWidth: true
+                                        }
+                                        DarkComboBox {
+                                            objectName: "observationVisibleTarget"
+                                            Layout.fillWidth: true
+                                            Layout.minimumWidth: 0
+                                            model: root.filteredSuggestions
+                                            textRole: "name"
+                                            Accessible.name: qsTr("Selected object")
+                                            currentIndex: root.filteredSuggestions.findIndex(value => value.id === root.controller.settings.target)
+                                            displayText: root.controller.result.target || ""
+                                            onActivated: index => root.chooseTarget(root.filteredSuggestions[index].id)
+                                        }
+                                    }
                                 }
                                 RowLayout {
                                     Layout.fillWidth: true
                                     Label {
                                         objectName: "observationSelectedTarget"
+                                        readonly property var recommendation: root.filteredSuggestions.find(value => value.id === root.controller.settings.target)
                                         text: root.controller.result.target || ""
                                         color: Atelier.accent
                                         font.pixelSize: 14
@@ -752,14 +806,23 @@ Rectangle {
                                     IconButton {
                                         objectName: "observationFavoriteTarget"
                                         text: root.controller.targetFavorite ? "★" : "☆"
-                                        Layout.preferredWidth: 36
+                                        Layout.preferredWidth: 32
                                         Accessible.name: root.controller.targetFavorite ? qsTr("★ Remove object from favourites") : qsTr("☆ Save object to favourites")
                                         onClicked: root.controller.toggleFavoriteTarget()
                                     }
                                 }
                                 Label {
-                                    visible: !root.controller.visibleTargets.length
-                                    text: qsTr("No recommendation meets the limits at this time. Prepare the night or choose an object from the catalogue.")
+                                    readonly property var recommendation: root.filteredSuggestions.find(value => value.id === root.controller.settings.target)
+                                    visible: recommendation !== undefined
+                                    text: !recommendation ? "" : recommendation.altitude !== undefined ? qsTr("Height now: %1°").arg(Number(recommendation.altitude).toFixed(1)) : qsTr("%1 min available during this night").arg(recommendation.minutes)
+                                    color: Atelier.secondary
+                                    font.pixelSize: 12
+                                    Layout.fillWidth: true
+                                    wrapMode: Text.Wrap
+                                }
+                                Label {
+                                    visible: !root.filteredSuggestions.length
+                                    text: root.suggestionPeriod === "instant" ? qsTr("No recommendation meets the limits at this time. Prepare the night or choose an object from the catalogue.") : qsTr("No suggestion meets these limits here on this date. Try lowering the minimum height or choosing another night. You can still search the complete catalogue.")
                                     color: Atelier.warning
                                     font.pixelSize: 12
                                     wrapMode: Text.Wrap
@@ -780,103 +843,8 @@ Rectangle {
                                 }
                             }
                         }
-                        AtelierSlider {
-                            id: timeSlider
-                            objectName: "observationTime"
-                            Layout.fillWidth: true
-                            from: 0
-                            to: 1
-                            value: .5
-                            stepSize: 1 / 1440
-                            live: true
-                            Accessible.name: qsTr("Explore the night")
-                            onMoved: root.scheduleTimeUpdate()
-                            onPressedChanged: if (!pressed && root.ready)
-                                root.finishTimeUpdate()
-                        }
-                        RowLayout {
-                            Layout.fillWidth: true
-                            spacing: 12
-                            ObservationField {
-                                id: dateInput
-                                objectName: "observationDate"
-                                Layout.fillWidth: true
-                                Layout.minimumWidth: 120
-                                label: qsTr("Local date · YYYY-MM-DD")
-                                onTextEdited: root.liveNow = false
-                                help: qsTr("Choose an upcoming night or use Current night. Past dates can be explored in Advanced.")
-                                onAccepted: root.calculate()
-                            }
-                            IconButton {
-                                objectName: "observationPreviousNight"
-                                text: "‹"
-                                Layout.preferredWidth: 32
-                                Accessible.name: qsTr("Previous night")
-                                enabled: history.checked || !root.controller.planningNight(Object.assign({}, root.controller.settings, {
-                                    date: root.shiftedDate(-1)
-                                })).past
-                                onClicked: root.stepDay(-1)
-                            }
-                            IconButton {
-                                text: "›"
-                                Layout.preferredWidth: 32
-                                Accessible.name: qsTr("Next night")
-                                onClicked: root.stepDay(1)
-                            }
-                            IconButton {
-                                objectName: "observationCurrentNight"
-                                text: qsTr("Current night")
-                                onClicked: root.currentNight()
-                            }
-                            IconButton {
-                                objectName: "observationPrepareNight"
-                                text: qsTr("Prepare this night")
-                                onClicked: root.prepareNight()
-                            }
-                            IconButton {
-                                objectName: "observationStartSuggestions"
-                                text: qsTr("Night suggestions")
-                                onClicked: {
-                                    root.suggestionPeriod = "night";
-                                    root.findSuggestions();
-                                }
-                            }
-                        }
-                        Label {
-                            objectName: "observationDateNotice"
-                            visible: root.dateNotice.length > 0 || (root.nightState.past && !history.checked && !root.liveNow)
-                            text: root.dateNotice.length ? root.dateNotice : qsTr("This night has ended. Choose Current night to continue planning.")
-                            color: Atelier.warning
-                            Layout.fillWidth: true
-                            wrapMode: Text.Wrap
-                            font.pixelSize: 12
-                        }
-                        Label {
-                            visible: root.referenceNotice.length > 0
-                            text: root.referenceNotice
-                            color: Atelier.warning
-                            Layout.fillWidth: true
-                            wrapMode: Text.Wrap
-                            font.pixelSize: 12
-                        }
-                        DarkComboBox {
-                            visible: root.referenceChoices.length > 1
-                            objectName: "observationReferenceOccurrence"
-                            Layout.fillWidth: true
-                            model: root.referenceChoices
-                            textRole: "label"
-                            displayText: qsTr("Choose the occurrence of this hour")
-                            Accessible.name: qsTr("Choose the UTC offset for the repeated hour")
-                            onActivated: index => {
-                                root.liveNow = false;
-                                root.controller.setReferenceUtc(root.referenceChoices[index].utc);
-                                root.referenceChoices = [];
-                                root.referenceNotice = "";
-                                root.referenceClockEdited = false;
-                                referenceClock.text = root.controller.reference.clock;
-                            }
-                        }
                     }
+
                     RowLayout {
                         id: visibilityRow
                         objectName: "observationVisibilityRow"
@@ -1246,250 +1214,98 @@ Rectangle {
                                 }
                             }
                         }
-                        RowLayout {
-                            Layout.fillWidth: true
-                            spacing: 12
-                            Label {
-                                text: (root.controller.reference.differentZones ? qsTr("Sunset at telescope: %1") : qsTr("Sunset: %1")).arg(root.controller.result.sunset || "")
-                                color: Atelier.secondary
-                                font.pixelSize: 12
-                                wrapMode: Text.Wrap
-                                Layout.fillWidth: true
-                            }
-                            Label {
-                                text: (root.controller.reference.differentZones ? qsTr("Sunrise at telescope: %1") : qsTr("Sunrise: %1")).arg(root.controller.result.sunrise || "")
-                                color: Atelier.secondary
-                                font.pixelSize: 12
-                                wrapMode: Text.Wrap
-                                Layout.fillWidth: true
-                            }
-                        }
-                        InspectorFamily {
-                            objectName: "observationDetails"
-                            title: qsTr("Details · Moon, direction & solar times")
-                            onActivated: expanded = !expanded
-                            Label {
-                                text: root.controller.instant.solarPhase || ""
-                                color: Atelier.accent
-                                wrapMode: Text.Wrap
-                                Layout.fillWidth: true
-                            }
-                            Label {
-                                text: qsTr("Direction: %1° from north").arg(Number(root.controller.instant.azimuth || 0).toFixed(1))
-                                color: Atelier.secondary
-                                font.pixelSize: 12
-                                wrapMode: Text.Wrap
-                                Layout.fillWidth: true
-                            }
-                            Label {
-                                text: qsTr("Highest in this period: %1 · %2°").arg(root.controller.result.peakTime || "").arg(Number(root.controller.result.peakAltitude || 0).toFixed(1))
-                                color: Atelier.secondary
-                                Layout.fillWidth: true
-                                wrapMode: Text.Wrap
-                            }
-                            Label {
-                                text: root.controller.result.period || ""
-                                color: Atelier.secondary
-                                Layout.fillWidth: true
-                                wrapMode: Text.Wrap
-                            }
-                            Repeater {
-                                model: root.controller.result.events || []
-                                Label {
-                                    required property var modelData
-                                    text: modelData.name + " · " + modelData.time
-                                    color: Atelier.secondary
-                                    Layout.fillWidth: true
-                                    wrapMode: Text.Wrap
-                                }
-                            }
-                            Label {
-                                visible: root.controller.result.noAstronomicalNight || false
-                                text: qsTr("There is no astronomical night during this period (Sun never below −18°).")
-                                color: Atelier.warning
-                                Layout.fillWidth: true
-                                wrapMode: Text.Wrap
-                            }
-                            Label {
-                                text: root.controller.result.moonTarget ? qsTr("Moon: %1% illuminated · height %2°").arg(Number(root.controller.instant.moonFraction || 0).toFixed(0)).arg(Number(root.controller.instant.moonAltitude || 0).toFixed(1)) : qsTr("Moon: %1% illuminated · height %2° · %3° from the target").arg(Number(root.controller.instant.moonFraction || 0).toFixed(0)).arg(Number(root.controller.instant.moonAltitude || 0).toFixed(1)).arg(Number(root.controller.instant.moonSeparation || 0).toFixed(1))
-                                color: Atelier.secondary
-                                wrapMode: Text.Wrap
-                                Layout.fillWidth: true
-                            }
-                            SettingLabel {
-                                text: qsTr("Day, twilight and night")
-                                explanation: qsTr("Sunrise and sunset use the Sun's upper edge with standard refraction at your elevation, over a flat horizon. Twilight and astronomical night use the geometric centre of the Sun at −6° and −18°. Mountains, buildings and actual weather can change the observed times.")
-                            }
-                            Repeater {
-                                model: root.controller.result.daylightSlots || []
-                                Label {
-                                    required property var modelData
-                                    text: qsTr("Daylight: %1 → %2").arg(modelData.start).arg(modelData.end)
-                                    color: Atelier.secondary
-                                    wrapMode: Text.Wrap
-                                    Layout.fillWidth: true
-                                    font.pixelSize: 12
-                                }
-                            }
-                            Repeater {
-                                model: root.controller.result.nightSlots || []
-                                Label {
-                                    required property var modelData
-                                    text: qsTr("Astronomical night: %1 → %2").arg(modelData.start).arg(modelData.end)
-                                    color: Atelier.accent
-                                    wrapMode: Text.Wrap
-                                    Layout.fillWidth: true
-                                    font.pixelSize: 12
-                                }
-                            }
-                            Repeater {
-                                model: root.controller.result.solarEvents || []
-                                Label {
-                                    required property var modelData
-                                    text: modelData.name + " · " + modelData.time
-                                    color: Atelier.secondary
-                                    wrapMode: Text.Wrap
-                                    Layout.fillWidth: true
-                                    font.pixelSize: 12
-                                }
-                            }
-                        }
-                    }
-                    InspectorFamily {
-                        id: suggestionsSection
-                        objectName: "observationSuggestions"
-                        title: root.suggestionPeriod === "instant" ? qsTr("Targets at this time") : qsTr("Targets for this night")
-                        expanded: false
-                        onActivated: expanded = !expanded
-                        Layout.fillWidth: true
-                        spacing: 12
-                        DarkComboBox {
-                            objectName: "observationSuggestionPeriod"
-                            Layout.fillWidth: true
-                            model: [qsTr("At the displayed time"), qsTr("Over this night")]
-                            Accessible.name: qsTr("Recommendation period")
-                            currentIndex: root.suggestionPeriod === "instant" ? 0 : 1
-                            onActivated: index => {
-                                root.suggestionPeriod = index === 0 ? "instant" : "night";
-                                root.suggestionLimit = 3;
-                                if (index === 1 && root.liveNow)
-                                    root.prepareNight();
-                            }
-                        }
-                        RowLayout {
-                            Layout.fillWidth: true
-                            spacing: 8
-                            Repeater {
-                                model: [
-                                    {
-                                        key: "all",
-                                        label: qsTr("All")
-                                    },
-                                    {
-                                        key: "solar",
-                                        label: qsTr("Moon & planets")
-                                    },
-                                    {
-                                        key: "fixed",
-                                        label: qsTr("Deep sky")
-                                    }
-                                ]
-                                IconButton {
-                                    required property var modelData
-                                    Layout.fillWidth: true
-                                    text: (root.suggestionKind === modelData.key ? "✓ " : "") + modelData.label
-                                    checkable: true
-                                    checked: root.suggestionKind === modelData.key
-                                    borderColor: root.suggestionKind === modelData.key ? Atelier.accent : Atelier.border
-                                    onClicked: {
-                                        root.suggestionKind = modelData.key;
-                                        root.suggestionLimit = 3;
-                                    }
-                                    Accessible.description: root.suggestionKind === modelData.key ? qsTr("Selected category") : ""
-                                }
-                            }
-                        }
-                        Label {
-                            visible: root.filteredSuggestions.length === 0
-                            text: root.suggestionPeriod === "instant" ? qsTr("No recommendation meets the height and darkness limits at this time. Prepare the next night or search the complete catalogue.") : qsTr("No suggestion meets these limits here on this date. Try lowering the minimum height or choosing another night. You can still search the complete catalogue.")
-                            color: Atelier.warning
-                            wrapMode: Text.Wrap
-                            Layout.fillWidth: true
-                        }
-                        Repeater {
-                            model: root.filteredSuggestions.slice(0, root.suggestionLimit)
-                            Rectangle {
-                                required property var modelData
-                                readonly property var clouds: root.controller.recommendationWeather[modelData.id] || ({})
-                                Layout.fillWidth: true
-                                implicitHeight: suggestionContent.implicitHeight + 24
-                                color: Atelier.surface
-                                radius: Atelier.controlRadius
-                                border.color: Atelier.border
-                                ColumnLayout {
-                                    id: suggestionContent
-                                    anchors.left: parent.left
-                                    anchors.right: parent.right
-                                    anchors.top: parent.top
-                                    anchors.margins: 12
-                                    spacing: 6
-                                    RowLayout {
-                                        Layout.fillWidth: true
-                                        spacing: 12
-                                        ColumnLayout {
-                                            Layout.fillWidth: true
-                                            spacing: 4
-                                            Label {
-                                                text: modelData.name
-                                                color: Atelier.text
-                                                font.pixelSize: 14
-                                                font.weight: Font.Medium
-                                                wrapMode: Text.Wrap
-                                                Layout.fillWidth: true
-                                            }
-                                            Label {
-                                                text: modelData.category + (modelData.altitude !== undefined ? qsTr(" · height %1°").arg(Number(modelData.altitude).toFixed(1)) : qsTr(" · %1 min available").arg(modelData.minutes))
-                                                color: Atelier.accent
-                                                font.pixelSize: 12
-                                                wrapMode: Text.Wrap
-                                                Layout.fillWidth: true
-                                            }
-                                        }
-                                        IconButton {
-                                            objectName: "observationSuggestion:" + modelData.id
-                                            text: qsTr("Explore")
-                                            helpText: qsTr("Minimum height: %1°").arg(modelData.minimum) + "\n" + (modelData.sunLimit === -18 ? qsTr("Very dark sky · Sun below −18°") : qsTr("After civil twilight · Sun below −6°")) + (modelData.altitude !== undefined ? "" : "\n" + qsTr("Highest within these windows: %1° · %2").arg(Number(modelData.peakAltitude).toFixed(1)).arg(modelData.peakTime))
-                                            Accessible.name: qsTr("Explore %1").arg(modelData.name)
-                                            onClicked: root.chooseTarget(modelData.id)
-                                        }
-                                    }
-                                    Label {
-                                        visible: modelData.slots !== undefined
-                                        text: (modelData.slots || []).map(slot => slot.start + " → " + slot.end).join(" · ")
-                                        color: Atelier.text
-                                        font.pixelSize: 12
-                                        wrapMode: Text.Wrap
-                                        Layout.fillWidth: true
-                                    }
-                                    Label {
-                                        visible: root.suggestionPeriod === "night" && clouds.available === true
-                                        text: qsTr("Forecast clouds: %1–%2%").arg(Math.round(clouds.minimum || 0)).arg(Math.round(clouds.maximum || 0)) + (root.controller.weather.stale ? qsTr(" · old forecast") : "")
-                                        color: root.controller.weather.stale ? Atelier.warning : Atelier.secondary
-                                        font.pixelSize: 12
-                                        wrapMode: Text.Wrap
-                                        Layout.fillWidth: true
-                                    }
-                                }
-                            }
-                        }
-                        IconButton {
-                            visible: root.filteredSuggestions.length > root.suggestionLimit
-                            text: qsTr("Show %1 more suggestions").arg(root.filteredSuggestions.length - root.suggestionLimit)
-                            Layout.fillWidth: true
-                            onClicked: root.suggestionLimit = 100
-                        }
                     }
                 }
+            }
+        }
+    }
+    DarkDialog {
+        id: timeDialog
+        objectName: "observationTimeDialog"
+        title: qsTr("Date and reference time")
+        modal: true
+        parent: Overlay.overlay
+        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+        width: Math.min(560, root.width - 48)
+        height: Math.min(430, root.height - 48)
+        x: parent ? (parent.width - width) / 2 : 0
+        y: parent ? (parent.height - height) / 2 : 0
+        contentItem: ColumnLayout {
+            spacing: 12
+            SettingLabel {
+                text: qsTr("Reference time zone")
+                Layout.fillWidth: true
+            }
+            DarkComboBox {
+                id: referencePicker
+                objectName: "observationReferenceZone"
+                Layout.fillWidth: true
+                model: [qsTr("At home · %1").arg(root.controller.reference.homeZone || ""), qsTr("Telescope · %1").arg(root.controller.reference.siteZone || "")]
+                Accessible.name: qsTr("Reference time zone")
+                onActivated: index => {
+                    root.referenceChoices = [];
+                    root.referenceNotice = "";
+                    root.controller.setReferenceZone(index === 1 ? "site" : "system");
+                }
+            }
+
+            SettingLabel {
+                text: qsTr("Date in the reference time zone")
+                Layout.fillWidth: true
+            }
+            DarkComboBox {
+                id: referenceDay
+                objectName: "observationReferenceDay"
+                Layout.fillWidth: true
+                Layout.minimumWidth: 0
+                model: root.controller.reference.days || []
+                textRole: "label"
+                Accessible.name: qsTr("Date in the reference time zone")
+                explanation: qsTr("Choose the calendar day in the reference time zone. A night can cross midnight and a time-zone conversion can change the date.")
+                onActivated: root.applyReferenceTime()
+            }
+
+            ObservationField {
+                id: dateInput
+                objectName: "observationDate"
+                Layout.fillWidth: true
+                Layout.minimumWidth: 120
+                label: qsTr("Local date · YYYY-MM-DD")
+                onTextEdited: root.liveNow = false
+                help: qsTr("Choose an upcoming night or use Current night. Past dates can be explored in Advanced.")
+                onAccepted: root.calculate()
+            }
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 8
+                IconButton {
+                    objectName: "observationPreviousNight"
+                    text: "‹"
+                    Layout.preferredWidth: 32
+                    Accessible.name: qsTr("Previous night")
+                    enabled: history.checked || !root.controller.planningNight(Object.assign({}, root.controller.settings, {
+                        date: root.shiftedDate(-1)
+                    })).past
+                    onClicked: root.stepDay(-1)
+                }
+                IconButton {
+                    text: "›"
+                    Layout.preferredWidth: 32
+                    Accessible.name: qsTr("Next night")
+                    onClicked: root.stepDay(1)
+                }
+                IconButton {
+                    Layout.fillWidth: true
+                    objectName: "observationCurrentNight"
+                    text: qsTr("Current night")
+                    onClicked: root.currentNight()
+                }
+            }
+
+            IconButton {
+                Layout.fillWidth: true
+                text: qsTr("Done")
+                onClicked: timeDialog.close()
             }
         }
     }

@@ -121,7 +121,7 @@ static int workspace(const QString& directory,bool restore,bool faults=false) {
     QSettings().setValue("application/integrationTemporaryDirectory",directory);
     QTranslator translator;ASTRO_TEST_CHECK(translator.load(ASTRO_TRANSLATION_PATH));
     QCoreApplication::installTranslator(&translator);
-    if(qEnvironmentVariableIsSet("ASTRO_OBSERVATION_WEATHER_WINDOW")) {
+    if(qEnvironmentVariableIsSet("ASTRO_OBSERVATION_WEATHER_WINDOW") || qEnvironmentVariableIsSet("ASTRO_OBSERVATION_LAYOUT_WINDOW")) {
         QSettings().setValue("observation/weatherCache",QVariantMap{{"data",bytes(ASTRO_SOURCE_DIR "/tests/unit/app/observation-weather.json")},{"latitude",48.8566},{"longitude",2.3522},{"receivedUtc",QDateTime::currentSecsSinceEpoch()}});
     }
     registerTypes();QQmlEngine engine;
@@ -158,6 +158,33 @@ static int workspace(const QString& directory,bool restore,bool faults=false) {
     ASTRO_TEST_CHECK(deep->projectCacheDirectory()==directory+"/projects");
     QuitGuard guard(window);QCoreApplication::instance()->installEventFilter(&guard);
     auto* quit=window->findChild<QObject*>("quitConfirmation");ASTRO_TEST_CHECK(quit);
+
+    if(qEnvironmentVariableIsSet("ASTRO_OBSERVATION_LAYOUT_WINDOW")) {
+        auto* observation=window->findChild<ObservationController*>("observationController");ASTRO_TEST_CHECK(observation);
+        auto* workspace=window->findChild<QObject*>("observationWorkspace");ASTRO_TEST_CHECK(workspace);workspace->setProperty("liveNow",false);workspace->setProperty("autoLoadWeather",false);
+        auto options=observation->sites()[0].toMap();options["date"]="2026-12-12";options["minimum"]=30;options["sunLimit"]=-18;ASTRO_TEST_CHECK(observation->calculate(options));observation->setFraction(.5);
+        window->setProperty("currentTab","observation");
+        auto* view=workspace->findChild<QObject*>("observationScroll");ASTRO_TEST_CHECK(view);auto* scroll=view->property("contentItem").value<QQuickItem*>();ASTRO_TEST_CHECK(scroll);
+        auto scrollTo=[&](const QString& name){auto* card=qobject_cast<QQuickItem*>(workspace->findChild<QObject*>(name));ASTRO_TEST_CHECK(card);QCoreApplication::processEvents();scroll->setProperty("contentY",std::max(0.0,scroll->property("contentY").toDouble()+card->mapToItem(scroll,QPointF()).y()-16));};
+        for(const auto size:{QSize(1440,960),QSize(1100,800),QSize(900,700)}) {
+            window->resize(size);scroll->setProperty("contentY",0);capture(window,QString("observation-central-top-%1").arg(size.width()));
+            const auto first=observation->visibleTargets();ASTRO_TEST_CHECK(!first.isEmpty());ASTRO_TEST_CHECK(observation->settings()["target"]==first.first().toMap()["id"]);
+            scrollTo("observationTimeCard");capture(window,QString("observation-central-controls-%1").arg(size.width()));
+            scrollTo("observationVisibilityRow");capture(window,QString("observation-central-visibility-%1").arg(size.width()));
+            scrollTo("observationCurvesRow");capture(window,QString("observation-central-curves-%1").arg(size.width()));
+        }
+        scroll->setProperty("contentY",0);click(workspace,"observationCoordinates");
+        const auto originalLatitude=observation->settings()["latitude"];const auto coordinateUtc=observation->instant()["utcSeconds"];
+        workspace->findChild<QObject*>("observationLatitude")->setProperty("text","37,7378");workspace->findChild<QObject*>("observationLongitude")->setProperty("text","-113,6975");workspace->findChild<QObject*>("observationElevation")->setProperty("text","1570");workspace->findChild<QObject*>("observationZone")->setProperty("text","America/Denver");
+        ASTRO_TEST_CHECK(observation->settings()["latitude"]==originalLatitude);
+        capture(window,"observation-central-coordinates-900");click(workspace,"observationApplyCoordinates");ASTRO_TEST_CHECK(observation->instant()["utcSeconds"]==coordinateUtc);
+        const auto before=observation->instant()["utcSeconds"];observation->chooseMapLocation(37.7378,-113.6975);ASTRO_TEST_CHECK(observation->instant()["utcSeconds"]==before);ASTRO_TEST_CHECK(observation->saveSite("Mon lieu en Utah"));
+        auto* picker=workspace->findChild<QObject*>("observationSite");ASTRO_TEST_CHECK(picker);auto* popup=picker->property("popup").value<QObject*>();ASTRO_TEST_CHECK(popup);ASTRO_TEST_CHECK(QMetaObject::invokeMethod(popup,"open"));capture(window,"observation-central-favourites-900");ASTRO_TEST_CHECK(QMetaObject::invokeMethod(popup,"close"));
+        options=observation->sites()[0].toMap();options["date"]="2026-10-12";options["minimum"]=30;options["sunLimit"]=-18;ASTRO_TEST_CHECK(observation->calculate(options));observation->setFraction(.5);
+        for(const auto size:{QSize(1440,960),QSize(1100,800),QSize(900,700)}) {window->resize(size);scroll->setProperty("contentY",0);capture(window,QString("observation-central-forecast-%1").arg(size.width()));scrollTo("observationCurvesRow");capture(window,QString("observation-central-clouds-%1").arg(size.width()));}
+        ASTRO_TEST_CHECK(QMetaObject::invokeMethod(observation,"updateReachability",Qt::DirectConnection,Q_ARG(int,4)));ASTRO_TEST_CHECK(QMetaObject::invokeMethod(observation,"updateReachability",Qt::DirectConnection,Q_ARG(int,1)));observation->refreshWeather();scroll->setProperty("contentY",0);capture(window,"observation-central-offline-900");
+        window->setProperty("quitApproved",true);return 0;
+    }
 
     if(qEnvironmentVariableIsSet("ASTRO_OBSERVATION_SITE_WINDOW")) {
         auto* observation=window->findChild<ObservationController*>("observationController");ASTRO_TEST_CHECK(observation);
@@ -210,13 +237,13 @@ static int workspace(const QString& directory,bool restore,bool faults=false) {
             scrollTo("observationSkyCard");capture(window,QString("observation-overview-sky-%1").arg(size.width()));
             scrollTo("observationWorldCard");capture(window,QString("observation-overview-map-%1").arg(size.width()));
         }
-        auto* layer=workspace->findChild<QObject*>("observationMapLayer");ASTRO_TEST_CHECK(layer);ASTRO_TEST_CHECK(QMetaObject::invokeMethod(layer,"activated",Q_ARG(int,1)));capture(window,"observation-overview-object-map-900");ASTRO_TEST_CHECK(QMetaObject::invokeMethod(layer,"activated",Q_ARG(int,0)));
+        capture(window,"observation-overview-object-map-900");
         ASTRO_TEST_CHECK(QMetaObject::invokeMethod(workspace,"goNow"));ASTRO_TEST_CHECK(workspace->property("liveNow").toBool());
         for(const auto size:{QSize(1440,960),QSize(1100,800),QSize(900,700)}) {
             window->resize(size);scrollTo("observationWorldCard");capture(window,QString("observation-overview-now-map-%1").arg(size.width()));
         }
         workspace->setProperty("liveNow",false);workspace->setProperty("autoLoadWeather",false);ASTRO_TEST_CHECK(observation->calculate(settings));ASTRO_TEST_CHECK(observation->setReferenceUtc(QDateTime(QDate(2026,12,12),QTime(18,0),QTimeZone::UTC).toSecsSinceEpoch()));
-        const auto anchor=observation->instant()["utcSeconds"];auto* sitePicker=workspace->findChild<QObject*>("observationSite");ASTRO_TEST_CHECK(sitePicker);ASTRO_TEST_CHECK(QMetaObject::invokeMethod(sitePicker,"activated",Q_ARG(int,4)));ASTRO_TEST_CHECK(observation->instant()["utcSeconds"]==anchor);
+        const auto anchor=observation->instant()["utcSeconds"];auto* sitePicker=workspace->findChild<QObject*>("observationSite");ASTRO_TEST_CHECK(sitePicker);ASTRO_TEST_CHECK(QMetaObject::invokeMethod(sitePicker,"activated",Q_ARG(int,evaluate(workspace,"sortedSites.findIndex(s => s.sourceIndex === 4)").toInt())));ASTRO_TEST_CHECK(observation->instant()["utcSeconds"]==anchor);
         for(const auto size:{QSize(1440,960),QSize(1100,800),QSize(900,700)}) {
             window->resize(size);scroll->setProperty("contentY",0);capture(window,QString("observation-overview-remote-%1").arg(size.width()));
         }

@@ -41,6 +41,8 @@ class ObservationController : public QObject {
       QVariantList weatherSamples READ weatherSamples NOTIFY weatherChanged)
   Q_PROPERTY(QVariantMap recommendationWeather READ recommendationWeather NOTIFY
                  weatherChanged)
+  Q_PROPERTY(QString mapTimeZoneStatus READ mapTimeZoneStatus NOTIFY changed)
+  Q_PROPERTY(bool mapTimeZoneBusy READ mapTimeZoneBusy NOTIFY changed)
 public:
   explicit ObservationController(QObject *parent = nullptr);
   ~ObservationController() override;
@@ -67,6 +69,16 @@ public:
   QVariantMap weather() const;
   QVariantList weatherSamples() const;
   QVariantMap recommendationWeather() const;
+  QString mapTimeZoneStatus() const {
+    return settings_.value("mapZoneUnresolved").toBool()
+               ? (mapZoneStatus_.isEmpty()
+                      ? tr("Time zone not determined · UTC until confirmed.")
+                      : mapZoneStatus_)
+               : QString();
+  }
+  bool mapTimeZoneBusy() const {
+    return settings_.value("mapZoneUnresolved").toBool() && mapZoneBusy_;
+  }
   Q_INVOKABLE void refreshWeather(bool force = true);
   Q_INVOKABLE void toggleFavoriteTarget();
   static QString networkFailure(int code, bool interrupted = false);
@@ -86,6 +98,7 @@ public:
   Q_INVOKABLE bool showNow();
   Q_INVOKABLE QVariantMap recordingWindow(qint64 notBefore = 0) const;
   Q_INVOKABLE void chooseMapLocation(double latitude, double longitude);
+  Q_INVOKABLE void resolveMapTimeZone();
   Q_INVOKABLE bool saveSite(const QString &name);
   Q_INVOKABLE void removeSite(int index);
 signals:
@@ -100,6 +113,7 @@ signals:
 
 private slots:
   void updateReachability(int state);
+  void fetchMapTimeZone();
 
 private:
   void loadCatalog();
@@ -107,6 +121,7 @@ private:
   bool calculateAtUtc(const QVariantMap &options, qint64 utc);
   void updateReference();
   void persist();
+  void confirmMapSites();
   QString localTime(qint64 utc) const;
   void updateRecommendations();
   void saveFavoriteTargets();
@@ -141,5 +156,10 @@ private:
   QTimer weatherDebounce_, weatherAgeTimer_;
   QNetworkAccessManager *weatherNetwork_{};
   QPointer<QNetworkReply> weatherReply_;
+  QTimer mapZoneDebounce_;
+  QPointer<QNetworkReply> mapZoneReply_;
+  QString mapZoneStatus_;
+  bool mapZoneBusy_{};
+  int mapZoneGeneration_{};
 };
 } // namespace astro::app

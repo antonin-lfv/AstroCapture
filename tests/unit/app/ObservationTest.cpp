@@ -6,6 +6,7 @@
 #include <QElapsedTimer>
 #include <QFile>
 #include <QGuiApplication>
+#include <QJSValue>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -29,7 +30,7 @@ static QQuickItem *item(QQuickItem *root, const QString &name) {
   for (auto *child : root->childItems())
     if (auto *found = item(child, name))
       return found;
-  return nullptr;
+  return root->findChild<QQuickItem *>(name);
 }
 int main(int argc, char **argv) {
   QGuiApplication app(argc, argv);
@@ -649,20 +650,22 @@ int main(int argc, char **argv) {
   std::unique_ptr<QObject> object(component.createWithInitialProperties(
       {{"controller", QVariant::fromValue(&controller)},
        {"liveNow", false},
-       {"autoLoadWeather", false}}));
+       {"autoLoadWeather", false},
+       {"autoSelectVisible", false}}));
   if (!object)
     qWarning() << component.errors();
   ASTRO_TEST_CHECK(object);
   auto *root = qobject_cast<QQuickItem *>(object.get());
   ASTRO_TEST_CHECK(!root->property("liveNow").toBool());
-  ASTRO_TEST_CHECK(root->property("mapLayer") == "daylight");
+  ASTRO_TEST_CHECK(!item(root, "observationInspector"));
   ASTRO_TEST_CHECK(root->property("suggestionPeriod") == "instant");
   ASTRO_TEST_CHECK(item(root, "observationSiteSummary"));
-  const auto initialVisible = controller.visibleTargets();
-  for (int i = 0; i < std::min(3, int(initialVisible.size())); ++i)
-    ASTRO_TEST_CHECK(
-        item(root, "observationSuggestion:" +
-                       initialVisible[i].toMap()["id"].toString()));
+  root->setProperty("autoSelectVisible", true);
+  ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root, "updateVisibleTarget"));
+  if (!controller.visibleTargets().isEmpty())
+    ASTRO_TEST_CHECK(controller.settings()["target"] ==
+                     controller.visibleTargets().first().toMap()["id"]);
+  root->setProperty("autoSelectVisible", false);
   ASTRO_TEST_CHECK(controller.setReferenceZone("site"));
   const auto referenceDays = controller.reference()["days"].toList();
   int followingDay = -1;
@@ -697,16 +700,32 @@ int main(int argc, char **argv) {
   ASTRO_TEST_CHECK(controller.instant()["utcSeconds"] == preciseUtc);
   ASTRO_TEST_CHECK(controller.setReferenceZone("system"));
   auto *sitePicker = item(root, "observationSite");
-  ASTRO_TEST_CHECK(
-      QMetaObject::invokeMethod(sitePicker, "activated", Q_ARG(int, 4)));
+  auto pickSite = [&](int sourceIndex) {
+    const auto sorted =
+        root->property("sortedSites").value<QJSValue>().toVariant().toList();
+    int sortedIndex = -1;
+    bool seenOrdinary = false;
+    for (int i = 0; i < sorted.size(); ++i) {
+      const auto value = sorted[i].toMap();
+      if (value["sourceIndex"].toInt() == sourceIndex)
+        sortedIndex = i;
+      if (!value["favorite"].toBool())
+        seenOrdinary = true;
+      else
+        ASTRO_TEST_CHECK(!seenOrdinary);
+    }
+    ASTRO_TEST_CHECK(sortedIndex >= 0);
+    ASTRO_TEST_CHECK(QMetaObject::invokeMethod(sitePicker, "activated",
+                                               Q_ARG(int, sortedIndex)));
+    root->setProperty("autoSelectVisible", false);
+  };
+  pickSite(4);
   ASTRO_TEST_CHECK(controller.settings()["zone"] == "Australia/Sydney");
   ASTRO_TEST_CHECK(controller.instant()["utcSeconds"] == preciseUtc);
   ASTRO_TEST_CHECK(controller.saveSite("Test remote telescope"));
   const int savedSite = controller.sites().size() - 1;
-  ASTRO_TEST_CHECK(
-      QMetaObject::invokeMethod(sitePicker, "activated", Q_ARG(int, 0)));
-  ASTRO_TEST_CHECK(QMetaObject::invokeMethod(sitePicker, "activated",
-                                             Q_ARG(int, savedSite)));
+  pickSite(0);
+  pickSite(savedSite);
   ASTRO_TEST_CHECK(controller.instant()["utcSeconds"] == preciseUtc);
   controller.removeSite(savedSite);
   // Exact coordinates and a manually selected time zone share the same rule.
@@ -718,8 +737,7 @@ int main(int argc, char **argv) {
   ASTRO_TEST_CHECK(controller.settings()["elevation"].toDouble() == 120);
   ASTRO_TEST_CHECK(controller.settings()["zone"] == "Australia/Perth");
   ASTRO_TEST_CHECK(controller.instant()["utcSeconds"] == preciseUtc);
-  ASTRO_TEST_CHECK(
-      QMetaObject::invokeMethod(sitePicker, "activated", Q_ARG(int, 0)));
+  pickSite(0);
   ASTRO_TEST_CHECK(controller.instant()["utcSeconds"] == preciseUtc);
   ASTRO_TEST_CHECK(item(root, "observationPlot")->isVisible());
   ASTRO_TEST_CHECK(item(root, "observationWindows")->isVisible());
@@ -769,7 +787,12 @@ int main(int argc, char **argv) {
     QCoreApplication::processEvents();
     QThread::msleep(120);
     QCoreApplication::processEvents();
-    ASTRO_TEST_CHECK(item(root, "observationPlot")->width() > 400);
+    ASTRO_TEST_CHECK(item(root, "observationPlot")->width() > 320);
+    const auto placeWidth = item(root, "observationSiteSummary")->width();
+    const auto mapWidth = item(root, "observationDayCard")->width();
+    ASTRO_TEST_CHECK(std::abs(mapWidth / placeWidth - 3) < .02);
+    ASTRO_TEST_CHECK(std::abs(item(root, "observationHeightCard")->width() -
+                              item(root, "observationCloudCard")->width()) < 1);
     if (!qEnvironmentVariable("ASTRO_OBSERVATION_SCREENSHOTS").isEmpty())
       window.grabWindow().save(
           qEnvironmentVariable("ASTRO_OBSERVATION_SCREENSHOTS") +
@@ -796,18 +819,23 @@ int main(int argc, char **argv) {
                    firstSuggestion["sunLimit"]);
   QCoreApplication::processEvents();
   const auto mapUtc = controller.instant()["utcSeconds"];
-  ASTRO_TEST_CHECK(QMetaObject::invokeMethod(item(root, "observationMapLayer"),
-                                             "activated", Q_ARG(int, 1)));
+  ASTRO_TEST_CHECK(item(root, "observationDayPlot")->property("mode") ==
+                   "daylight");
   ASTRO_TEST_CHECK(item(root, "observationWorldPlot")->property("mode") ==
                    "world");
-  ASTRO_TEST_CHECK(QMetaObject::invokeMethod(item(root, "observationMapLayer"),
-                                             "activated", Q_ARG(int, 0)));
-  ASTRO_TEST_CHECK(item(root, "observationWorldPlot")->property("mode") ==
-                   "daylight");
   ASTRO_TEST_CHECK(controller.instant()["utcSeconds"] == mapUtc);
   ASTRO_TEST_CHECK(item(root, "observationWindows")->isVisible());
   // Keep the mouse down and move continuously: the chart's instant must update
   // before release, rather than waiting for a quiet interval after dragging.
+  auto *scroll = item(root, "observationScroll")
+                     ->property("contentItem")
+                     .value<QQuickItem *>();
+  auto *timeCard = item(root, "observationTimeCard");
+  QCoreApplication::processEvents();
+  scroll->setProperty("contentY",
+                      scroll->property("contentY").toDouble() +
+                          timeCard->mapToItem(scroll, QPointF()).y() - 16);
+  QCoreApplication::processEvents();
   auto *slider = item(root, "observationTime");
   auto mouse = [&](QEvent::Type type, QPointF position, Qt::MouseButton button,
                    Qt::MouseButtons buttons) {
@@ -824,6 +852,7 @@ int main(int argc, char **argv) {
     const auto position =
         handle->mapToScene(QPointF(handle->width() / 2, handle->height() / 2));
     int updatesDuringDrag = 0;
+    root->setProperty("autoSelectVisible", true);
     auto connection = QObject::connect(
         &controller, &ObservationController::instantChanged, [&] {
           if (slider->property("pressed").toBool())
@@ -846,6 +875,7 @@ int main(int argc, char **argv) {
     ASTRO_TEST_CHECK(std::abs(controller.instant()["fraction"].toDouble() -
                               slider->property("value").toDouble()) < 1e-6);
     QObject::disconnect(connection);
+    root->setProperty("autoSelectVisible", false);
   }
   if (!qEnvironmentVariable("ASTRO_OBSERVATION_SCREENSHOTS").isEmpty())
     window.grabWindow().save(
@@ -855,6 +885,14 @@ int main(int argc, char **argv) {
   ASTRO_TEST_CHECK(QMetaObject::invokeMethod(
       item(root, "observationWorldPlot"), "locationChosen", Q_ARG(double, -33),
       Q_ARG(double, 151)));
+  ASTRO_TEST_CHECK(controller.instant()["utcSeconds"] == locationUtc);
+  root->setProperty("autoSelectVisible", false);
+  reachability(Reachability::Disconnected);
+  controller.resolveMapTimeZone();
+  ASTRO_TEST_CHECK(QMetaObject::invokeMethod(&controller, "fetchMapTimeZone",
+                                             Qt::DirectConnection));
+  ASTRO_TEST_CHECK(!controller.mapTimeZoneBusy());
+  ASTRO_TEST_CHECK(!controller.mapTimeZoneStatus().isEmpty());
   ASTRO_TEST_CHECK(controller.instant()["utcSeconds"] == locationUtc);
   const auto futureSettings = controller.settings();
   reachability(Reachability::Disconnected);
@@ -971,6 +1009,42 @@ int main(int argc, char **argv) {
     ObservationController reopened;
     ASTRO_TEST_CHECK(reopened.selectTarget(onlineId));
     ASTRO_TEST_CHECK(reopened.targetFavorite());
+  }
+
+  if (qEnvironmentVariableIsSet("ASTRO_OBSERVATION_MAP_ZONE")) {
+    reachability(Reachability::Online);
+    root->setProperty("autoSelectVisible", false);
+    const auto utc = controller.instant()["utcSeconds"];
+    controller.chooseMapLocation(48.8566, 2.3522);
+    ASTRO_TEST_CHECK(controller.saveSite("Unconfirmed map test"));
+    const auto savedIndex = controller.sites().size() - 1;
+    controller.resolveMapTimeZone();
+    QElapsedTimer timeout;
+    timeout.start();
+    while (controller.mapTimeZoneBusy() && timeout.elapsed() < 20000) {
+      QCoreApplication::processEvents();
+      QThread::msleep(10);
+    }
+    ASTRO_TEST_CHECK(!controller.mapTimeZoneBusy());
+    ASTRO_TEST_CHECK(controller.settings()["zone"] == "Europe/Paris");
+    ASTRO_TEST_CHECK(controller.mapTimeZoneStatus().isEmpty());
+    ASTRO_TEST_CHECK(controller.instant()["utcSeconds"] == utc);
+    ASTRO_TEST_CHECK(controller.sites()[savedIndex].toMap()["zone"] ==
+                     "Europe/Paris");
+    ASTRO_TEST_CHECK(
+        !controller.sites()[savedIndex].toMap()["mapZoneUnresolved"].toBool());
+    // A later explicit site choice cancels application of an old map lookup.
+    controller.chooseMapLocation(37.7378, -113.6975);
+    controller.resolveMapTimeZone();
+    auto explicitSite = controller.settings();
+    explicitSite["zone"] = "America/Denver";
+    explicitSite["mapZoneUnresolved"] = false;
+    ASTRO_TEST_CHECK(controller.changeSite(explicitSite));
+    QThread::msleep(650);
+    QCoreApplication::processEvents();
+    ASTRO_TEST_CHECK(!controller.mapTimeZoneBusy());
+    ASTRO_TEST_CHECK(controller.settings()["zone"] == "America/Denver");
+    ASTRO_TEST_CHECK(controller.instant()["utcSeconds"] == utc);
   }
 
   return 0;

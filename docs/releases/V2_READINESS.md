@@ -1,6 +1,6 @@
 # AstroCapture — bilan avant V2
 
-État du 12 octobre 2026, après les contrôles de la livraison 1.18.6.
+État du 12 octobre 2026, après les contrôles de la livraison 1.18.7.
 
 L’utilisateur réserve pour l’instant AstroCapture à son usage personnel.
 La qualification de distribution publique reste une étape ultérieure ; elle
@@ -157,3 +157,11 @@ l’instant affiché de la nuit entière ; une commande prépare la nuit sombre 
 ou la suivante. Tous les lieux restent utilisables. T68 · Utah est seulement un
 préréglage géographique, sans intégration avec un opérateur. L’ajout de liens
 personnels sur les lieux reste une possibilité ultérieure.
+
+La 1.18.7 supprime la sidebar d’Observation. La fiche du lieu et la carte jour/nuit
+occupent 25/75 de la première ligne ; les commandes d’heure et d’objet viennent
+ensuite, puis visibilité/boussole en 75/25 et hauteur/nuages en 50/50. Les favoris
+de lieux passent en premier, avec tri alphabétique. Les coordonnées, la recherche
+de ville et les réglages avancés utilisent des fenêtres. Les points de carte
+recherchent leur fuseau en ligne, avec UTC conservé et repli explicite en cas
+d’échec ; l’horloge réelle du Mac reste distincte de l’heure explorée.

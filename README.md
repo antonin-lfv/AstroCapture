@@ -16,45 +16,52 @@ L’onglet **Observation**, placé avant **Guide**, prépare une observation de 
 des planètes ou d’un objet fixe. Il est indépendant de **Ciel profond**.
 
 L’accueil commence par **le lieu choisi** : son heure, le jour ou la nuit, les
-nuages prévus, les prochains lever/coucher du Soleil et la prochaine nuit sombre.
+nuages prévus et les prochains lever/coucher du Soleil.
 Les **cibles à cette heure** viennent ensuite, avant la courbe de l’objet sélectionné.
 Vous pouvez utiliser n’importe quel lieu ; **T68 · Utah** est un simple lieu proposé
 avec coordonnées, altitude et fuseau, sans connexion à un opérateur de télescopes.
 
 La courbe de hauteur, la boussole du ciel, la carte mondiale et les nuages sont
-réunis sur **une seule page**, avec les réglages à droite. La commande horaire
-commune reste visible pendant le défilement. **Maintenant · en direct** suit
+réunis sur **une seule page**, sans sidebar. La fiche du lieu prend 25 % de la
+première ligne et la carte jour/nuit 75 %. Sous **Heure et objet**, la carte de
+visibilité prend 75 % à gauche et **Où regarder ?** 25 % à droite. Les courbes de
+hauteur et de nuages prennent chacune 50 % de la ligne suivante. Le bloc **Heure et objet** rassemble les commandes
+horaires et le choix de la cible. **Maintenant · en direct** suit
 l’heure réelle et actualise les graphiques toutes les 30 secondes tant que l’onglet
 est visible. Saisir une heure, choisir une date ou déplacer le curseur met ce suivi
 en pause. **Maintenant** y revient, même depuis une nuit future ou passée.
 
 1. Le premier lancement utilise le **centre de Paris** (48,8566° N, 2,3522° E).
    Ensuite, le dernier lieu choisi est repris, sans géolocalisation automatique.
-   Choisissez un lieu proposé ou recherchez une ville en ligne. Ses coordonnées
-   et son fuseau sont renseignés. **Nommer le lieu…** enregistre un libellé
+   Le menu trie les favoris en premier, puis les noms alphabétiquement dans chaque
+   groupe. Choisissez un lieu proposé ou utilisez **Ville…** pour rechercher en ligne. Ses coordonnées
+   et son fuseau sont renseignés. **Enregistrer le lieu…** ouvre une fenêtre pour enregistrer un libellé
    (Jardin, Balcon…), la position et le fuseau en favori, y compris pour un point choisi sur la carte. **Renommer…**
    modifie ce libellé en conservant les coordonnées ;
-   les options avancées permettent d’en préciser les coordonnées.
+   **Coordonnées…** ouvre latitude, longitude, altitude et fuseau dans une fenêtre ;
+   la position ne change qu’après **Appliquer la position**.
 2. Consultez la situation à l’heure affichée et les recommandations, ou utilisez
-   **Préparer la nuit** pour la nuit sombre en cours ou la suivante. **Explorer**
-   sélectionne une recommandation et ouvre sa courbe. **Objet sélectionné** indique
-   la seule cible active. **Changer d’objet…** ouvre une liste unique avec recherche
+   **Préparer la nuit** pour la nuit sombre en cours ou la suivante. Le menu **Choisir un objet visible** propose les cibles à cet instant : la première
+   est sélectionnée par défaut lors de l’ouverture ou d’un changement de lieu. Votre
+   choix explicite reste sélectionné quand vous explorez les heures. **Explorer**
+   sélectionne une recommandation et montre ses cartes et sa courbe. Le nom affiché près de l’étoile indique
+   la seule cible active. **Catalogue et favoris…** ouvre une liste unique avec recherche
    et favoris. Taper un nom filtre cette liste ; cliquer sur un résultat le sélectionne.
    Fermer la liste conserve le choix actuel.
 3. Pour une autre nuit, choisissez la date locale, ou **Nuit actuelle**. Une nuit terminée est refusée
    en préparation : la date valide est conservée et un message indique le problème.
    Avant le lever du Soleil, la nuit en cours peut porter la date d’hier. Le contrôle
    utilise le lever du Soleil et le fuseau du lieu ; sans lever, la limite est le midi
-   suivant. **Options avancées → Consulter des dates passées** permet de revoir une
+   suivant. **Réglages de visibilité… → Avancé → Consulter des dates passées** permet de revoir une
    observation, avec un repère explicite de consultation.
 
-Les **Réglages de visibilité** se déplient à la demande. **30°** est une hauteur
+**Réglages de visibilité…** ouvre les seuils et les options avancées dans une fenêtre. **30°** est une hauteur
 minimale de départ ; le ciel très sombre est proposé pour le ciel profond,
 le crépuscule pour la Lune et les planètes. Un seuil sans contrainte d’obscurité
 permet aussi d’explorer le jour.
 
 Enregistrez l’**objet sélectionné** avec l’étoile à côté de son nom. Retrouvez-le
-ensuite dans **Changer d’objet… → Favoris**. Les lieux favoris apparaissent avec
+ensuite dans **Catalogue et favoris… → Favoris**. Les lieux favoris apparaissent avec
 une étoile dans la liste des lieux.
 Les favoris restent sur cet ordinateur (100 objets et 30 lieux au maximum).
 
@@ -69,7 +76,8 @@ puis classement selon la hauteur à l’instant choisi, ou selon la durée et la
 sur la nuit. Les filtres **Tout**, **Lune et planètes** et **Ciel profond** permettent
 de parcourir ces familles. Les critères sont accessibles dans l’aide : Soleil sous
 −18° pour les objets fixes, sous −6° pour le Système solaire. **Explorer** sélectionne
-la cible avec ces critères et revient à sa courbe, sur la même page. Trois suggestions sont affichées au départ ; un bouton ouvre les suivantes. La section peut se refermer. La sélection n’est pas exhaustive ;
+la cible avec ces critères et revient à sa courbe, sur la même page. « Suggestions sur la nuit » ouvre les créneaux détaillés ; trois cartes sont
+affichées d’abord, puis un bouton ouvre les suivantes. La section peut se refermer. La sélection n’est pas exhaustive ;
 le catalogue complet reste interrogeable. Les suggestions de Mercure et Vénus
 excluent les créneaux à moins de 30° du Soleil. Le matériel, la pollution lumineuse,
 la Lune et la météo peuvent rendre un objet difficile à observer. Les prévisions
@@ -100,22 +108,27 @@ sans clé est prévu ici pour l’usage personnel non commercial. Les données s
 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), avec attribution à Open-Meteo
 et valeurs affichées arrondies ; le cache ne contient ni nom d’objet ni identifiant personnel.
 
-Le résumé du lieu indique les **prochains lever et coucher du Soleil**, y compris
+La fiche du lieu distingue **Au lieu · heure affichée** de **Ce Mac · maintenant** :
+le Mac conserve son heure réelle locale même pendant l’exploration d’une nuit
+future ou passée. Le résumé du lieu indique les **prochains lever et coucher du Soleil**, y compris
 la nuit suivante lorsque l’on consulte le matin. Les horaires de la nuit choisie
 restent visibles sous les créneaux d’observation. La section **Détails** conserve les informations lunaires, la direction,
 le jour, le crépuscule civil et la nuit astronomique.
 Un libellé indique aussi l’état à l’instant du curseur, avec les crépuscules civil,
 nautique et astronomique. Les périodes sans lever, coucher ou nuit sont explicites.
 
-**Heure de référence**, dans les réglages, permet de choisir **Chez moi** (le fuseau
+**Heure et objet** permet de choisir le fuseau de référence : **Chez moi** (le fuseau
 de ce Mac, par défaut) ou **Au télescope** (le fuseau configuré pour le lieu). Les deux
 heures sont affichées quand les fuseaux diffèrent, avec la date et le décalage UTC.
 Choisissez le jour dans ce fuseau et saisissez **HH:mm** : le curseur et les quatre
 graphiques se placent au même instant. La conversion ne change ni le lieu ni la nuit.
 Les axes des courbes, les horaires du Soleil et l’heure de la prévision restent
 à l’heure du télescope ; leur fuseau est indiqué quand il diffère de chez vous.
-Un point de carte utilise initialement UTC comme fuseau du télescope : précisez-le
-dans les options avancées ou choisissez une ville. Une heure inexistante au passage
+Un point de carte recherche automatiquement son fuseau en ligne auprès d’Open-Meteo,
+en envoyant les coordonnées, après un bref délai qui regroupe les glissements.
+L’instant UTC reste fixe pendant la résolution. En cas d’échec ou sans connexion,
+**Fuseau à préciser · UTC en attendant** est explicite ; **Coordonnées…** permet
+de saisir le fuseau. Les villes et lieux enregistrés gardent leur fuseau configuré. Une heure inexistante au passage
 à l’heure d’été est refusée ; une heure répétée propose les deux décalages UTC.
 Le choix du repère Mac/télescope est conservé après réouverture.
 
@@ -147,25 +160,25 @@ affichées avec la date ; la période va de midi au midi suivant et peut durer 2
 du centre, le point le plus haut dans cette période, la fraction éclairée de la Lune
 et sa distance angulaire à la cible.
 
-La carte **Jour et nuit dans le monde** utilise par défaut la couche **Jour et
+La carte **Jour et nuit dans le monde** utilise par défaut la vue **Jour et
 nuit** : jour, crépuscule et nuit astronomique sont calculés localement, sans
 connexion et indépendamment de l’objet sélectionné. Le jour correspond au bord
 supérieur du Soleil au-dessus de l’horizon avec réfraction standard au niveau de
 la mer. La nuit astronomique commence lorsque son centre est sous −18°.
 Le fuseau UTC de l’instant commun est affiché au-dessus de la carte.
 
-La couche **Visibilité de l’objet** montre plutôt où l’**objet sélectionné**
+La seconde carte, **Où observer cet objet ?**, montre où l’**objet sélectionné**
 respecte les seuils de hauteur et d’obscurité. La légende distingue les seuils
 respectés, l’objet trop bas, le ciel trop clair et l’objet sous l’horizon.
-Les deux couches donnent une vue régionale sur une grille de **6°**.
-Un clic choisit un lieu et conserve l’instant, avec le fuseau initial **UTC** :
-choisissez le fuseau local dans les options avancées si nécessaire.
+Les deux cartes donnent une vue régionale sur une grille de **6°**.
+Un clic choisit un lieu et conserve l’instant ; la recherche du fuseau local est
+indépendante des prévisions nuageuses et peut fonctionner pour une date future.
 
 **Maintenant** peut montrer le jour et les heures qui suivent le lever du Soleil
 sur la période locale de midi à midi contenant l’instant actuel. **Nuit actuelle**
 prépare une nuit d’observation. **Préparer la nuit** revient à la nuit sombre en
 cours ou au début de la suivante et affiche les recommandations sur cette nuit.
-**Trouver un objet visible** déplie les recommandations sur la même page. Les détails du Soleil, de la Lune et de la météo restent
+**Suggestions sur la nuit** déplie les recommandations sur la même page. Les détails du Soleil, de la Lune et de la météo restent
 dépliables.
 
 Le catalogue [OpenNGC](https://github.com/mattiaverga/OpenNGC) est inclus sans connexion.

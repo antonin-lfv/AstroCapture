@@ -1281,3 +1281,61 @@ utilisateur protégées. Aucun défaut de chargement QML n’est signalé ; le v
 temporaire est détaché. Journaux : `build/observation-site-dmg-verify.log` et
 `build/observation-site-dmg-startup.log`. SHA-256 :
 `41722fa1ad7d85ee484fe166b3331ef66b215894140fb6b6f2881b273c38fd3e`.
+
+## Lot 1.18.7 — page Observation centrale
+
+La sidebar est supprimée. La première ligne place la fiche du lieu sur 25 % à
+gauche et la carte jour/nuit sur 75 % à droite. Le bloc **Heure et objet** vient
+ensuite. La ligne suivante conserve 75 % pour la carte de visibilité et 25 % pour
+**Où regarder ?**. Les graphiques de hauteur et de nuages occupent chacun 50 %.
+Les proportions sont contrôlées aux trois tailles ; les deux cartes sont présentes
+ensemble et gardent leur rôle, sans sélecteur de couche.
+
+Le menu des lieux place les favoris d’abord, puis trie les noms dans chaque groupe.
+La nomination, la recherche de ville, les coordonnées et les options avancées
+utilisent les composants QML communs et des fenêtres modales. Les coordonnées
+restent un brouillon jusqu’à **Appliquer la position** ; annuler restaure les champs
+du lieu. Les mises à jour du modèle ne remplacent pas une saisie de coordonnées
+en cours. Le premier objet recommandé visible est choisi par défaut ; un choix
+explicite conserve la cible pendant l’exploration. Catalogue, favoris, fenêtres
+d’enregistrement, critères et détails scientifiques restent accessibles.
+
+**Au lieu · heure affichée** suit le curseur ; **Ce Mac · maintenant** suit
+l’horloge réelle, même pour une nuit future. Les points de carte recherchent
+leur fuseau IANA auprès d’Open-Meteo. Les requêtes sont regroupées après 600 ms,
+avec délai maximal, taille bornée et contrôle de génération/position. Une réponse
+ne peut pas remplacer un choix de lieu ou de fuseau devenu différent. La conversion
+conserve l’UTC courant. Le repli UTC est marqué comme fuseau à préciser ; la saisie
+manuelle reste disponible sans réseau. Les favoris conservent ce statut quand le
+fuseau n’est pas encore confirmé. Les prévisions nuageuses restent indépendantes
+de cette résolution et de la visibilité géométrique.
+
+Un favori créé avant confirmation du fuseau est actualisé quand le point obtient
+son fuseau, automatiquement ou par saisie explicite. Les lieux dont le fuseau est
+déjà configuré sont conservés. Le test en ligne vérifie aussi cette persistance
+sur un lieu enregistré pendant le repli UTC.
+
+Les **52 tests Release passent** (`build/observation-layout-ctest.log`). Le test
+d’Observation contrôle aussi l’absence de sidebar, les proportions, le menu des
+lieux, la sélection par défaut, les deux cartes fixes et le glissement continu
+du curseur avec vrais événements de souris. Les tests scientifiques, changements
+d’heure, pôles, cache nuageux et protections des fichiers restent valides.
+Le test en ligne supplémentaire (`build/observation-layout-zone-test.log`)
+récupère Europe/Paris pour un point de carte sans changer l’UTC et contrôle qu’un
+choix explicite ultérieur empêche l’application d’une ancienne résolution.
+
+Les captures `previews/native/observation-central/` vérifient le français et la
+composition à **1440 × 960, 1100 × 800 et 900 × 700** : blocs centraux, coordonnées,
+favoris, modèle nuageux enregistré et connexion interrompue. La boussole utilise
+des lettres cardinales dans les rendus étroits pour garder le cercle lisible.
+Le parcours sur Orion HDR conserve les pixels flottants, exports, sauvegarde et
+reprise entre processus (`build/observation-layout-orion-native.log`). Les messages
+actifs du contrôleur, de la page et du Guide ont tous leur traduction compilée
+(`build/observation-layout-translation.log`). Guide et README décrivent la page livrée.
+
+L’installateur **AstroCapture-1.18.7.dmg** est généré, son intégrité est vérifiée
+et le démarrage depuis le volume en lecture seule réussit, avec les préférences
+utilisateur protégées et sans erreur de chargement QML. Le volume temporaire est
+détaché. Journaux : `build/observation-layout-dmg-verify.log` et
+`build/observation-layout-dmg-startup.log`. SHA-256 :
+`d03b2bd50e17ebe3738cddb4d0550df810b80a74de0faf700c1f694982b5cb6c`.

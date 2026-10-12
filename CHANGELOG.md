@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.18.7 — 2026-10-12
+
+- Remove the Observation sidebar and use the central page throughout: place/day-night map at 25/75, time and target controls, visibility map/sky compass at 75/25, then height/cloud curves at 50/50.
+- Sort place favourites first and names alphabetically within each group. Open naming, city search, exact coordinates and advanced options in dialogs; apply coordinate drafts only on confirmation.
+- Offer visible recommendations in a target menu and select the first one by default. Preserve explicit target choices while exploring, full catalogue/favourite search, recording windows and scientific details.
+- Distinguish the observing place's displayed time from the Mac's actual local clock. Resolve map points' IANA time zones through Open-Meteo while preserving UTC; debounce map requests and report unresolved/offline states with a manual override.
+- Keep continuous slider updates and both maps synchronized. Fit the compass labels at small widths, preserve missing-cloud and connection-loss states, and update French help, Guide, README and native validation.
+
 ## 1.18.6 — 2026-10-12
 
 - Start Observation with the selected place: local clock, day/twilight/night, cloud forecast and upcoming solar events; put the place selector first and recommendations before the target curve.

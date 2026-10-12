@@ -79,6 +79,10 @@ bool recommendationTarget(const ObservationTarget &target, bool favorite) {
 } // namespace
 ObservationController::ObservationController(QObject *parent)
     : QObject(parent) {
+  mapZoneDebounce_.setSingleShot(true);
+  mapZoneDebounce_.setInterval(600);
+  connect(&mapZoneDebounce_, &QTimer::timeout, this,
+          &ObservationController::fetchMapTimeZone);
   loadCatalog();
   catalogCount_ = int(catalog_.size());
   sites_ = {
@@ -617,6 +621,7 @@ bool ObservationController::calculate(const QVariantMap &options) {
     updateInstant();
     updateRecommendations();
     updateWeatherContext();
+    confirmMapSites();
     emit favoritesChanged();
     emit changed();
     emit weatherChanged();
@@ -870,7 +875,121 @@ void ObservationController::chooseMapLocation(double lat, double lon) {
   s["longitude"] = lon;
   s["elevation"] = 0;
   s["zone"] = "UTC";
+  s["mapZoneUnresolved"] = true;
+  mapZoneStatus_ = tr("Time zone not determined · UTC until confirmed.");
   changeSite(s);
+}
+void ObservationController::resolveMapTimeZone() {
+  if (!settings_.value("mapZoneUnresolved").toBool())
+    return;
+  ++mapZoneGeneration_;
+  if (mapZoneReply_)
+    mapZoneReply_->abort();
+  mapZoneBusy_ = true;
+  mapZoneStatus_ = tr("Finding this point's local time zone…");
+  mapZoneDebounce_.start();
+  emit changed();
+}
+void ObservationController::fetchMapTimeZone() {
+  if (!settings_.value("mapZoneUnresolved").toBool()) {
+    mapZoneBusy_ = false;
+    return;
+  }
+  if (offline_) {
+    mapZoneBusy_ = false;
+    mapZoneStatus_ =
+        networkFailure(QNetworkReply::NetworkSessionFailedError,
+                       connectionLost_) +
+        " " + tr("Set the time zone in Coordinates; UTC is shown meanwhile.");
+    emit changed();
+    return;
+  }
+  if (!weatherNetwork_)
+    weatherNetwork_ = new QNetworkAccessManager(this);
+  const auto latitude = site_.latitude, longitude = site_.longitude;
+  QUrl url("https://api.open-meteo.com/v1/forecast");
+  QUrlQuery query;
+  query.addQueryItem("latitude", QString::number(latitude, 'g', 17));
+  query.addQueryItem("longitude", QString::number(longitude, 'g', 17));
+  query.addQueryItem("timezone", "auto");
+  query.addQueryItem("forecast_days", "1");
+  url.setQuery(query);
+  QNetworkRequest request(url);
+  request.setTransferTimeout(12000);
+  request.setAttribute(QNetworkRequest::RedirectPolicyAttribute,
+                       QNetworkRequest::NoLessSafeRedirectPolicy);
+  auto *reply = weatherNetwork_->get(request);
+  mapZoneReply_ = reply;
+  const auto generation = mapZoneGeneration_;
+  connect(reply, &QNetworkReply::readyRead, reply, [reply] {
+    if (reply->bytesAvailable() > 8192)
+      reply->abort();
+  });
+  QTimer::singleShot(15000, reply, [reply] {
+    if (!reply->isFinished())
+      reply->abort();
+  });
+  connect(
+      reply, &QNetworkReply::finished, this,
+      [this, reply, generation, latitude, longitude] {
+        if (generation != mapZoneGeneration_) {
+          reply->deleteLater();
+          return;
+        }
+        mapZoneBusy_ = false;
+        mapZoneReply_ = nullptr;
+        if (site_.latitude != latitude || site_.longitude != longitude ||
+            !settings_.value("mapZoneUnresolved").toBool()) {
+          reply->deleteLater();
+          return;
+        }
+        const auto zone = QJsonDocument::fromJson(reply->readAll())
+                              .object()
+                              .value("timezone")
+                              .toString();
+        if (reply->error() == QNetworkReply::NoError &&
+            QTimeZone(zone.toUtf8()).isValid()) {
+          auto options = settings_;
+          options["zone"] = zone;
+          options["mapZoneUnresolved"] = false;
+          if (changeSite(options))
+            mapZoneStatus_.clear();
+        } else {
+          mapZoneStatus_ =
+              (reply->error() == QNetworkReply::NoError
+                   ? tr("The local time zone could not be determined.")
+                   : networkFailure(int(reply->error()), connectionLost_)) +
+              " " +
+              tr("Set the time zone in Coordinates; UTC is shown meanwhile.");
+          emit changed();
+        }
+        reply->deleteLater();
+      });
+}
+void ObservationController::confirmMapSites() {
+  if (settings_.value("mapZoneUnresolved").toBool())
+    return;
+  bool updated = false;
+  for (auto &value : sites_) {
+    auto saved = value.toMap();
+    if (!saved.value("favorite").toBool() ||
+        !saved.value("mapZoneUnresolved").toBool() ||
+        saved.value("latitude").toDouble() != site_.latitude ||
+        saved.value("longitude").toDouble() != site_.longitude)
+      continue;
+    saved["zone"] = settings_.value("zone");
+    saved["mapZoneUnresolved"] = false;
+    value = saved;
+    updated = true;
+  }
+  if (updated) {
+    QVariantList favorites;
+    for (const auto &value : sites_)
+      if (value.toMap().value("favorite").toBool())
+        favorites.append(value);
+    QSettings().setValue("observation/favorites", favorites);
+    emit sitesChanged();
+  }
 }
 bool ObservationController::saveSite(const QString &name) {
   if (name.trimmed().isEmpty() || name.size() > 100) {
@@ -881,6 +1000,7 @@ bool ObservationController::saveSite(const QString &name) {
   auto s = site(name.trimmed(), site_.latitude, site_.longitude,
                 settings_["zone"].toString());
   s["elevation"] = site_.elevation;
+  s["mapZoneUnresolved"] = settings_.value("mapZoneUnresolved", false);
   s["source"] = settings_.value("source");
   s["name"] = name.trimmed();
   s["favorite"] = true;

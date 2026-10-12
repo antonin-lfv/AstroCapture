@@ -200,7 +200,12 @@ void ObservationPlot::paint(QPainter *p) {
   }
   if (mode_ == "sky") {
     const QPointF center(width() / 2, height() / 2);
-    const double radius = std::min(width() / 2 - 45, height() / 2 - 28);
+    const bool compact = width() < 240;
+    const double radius =
+        std::min(width() / 2 - (compact ? 25 : 45), height() / 2 - 28);
+    const auto direction = [compact](const QString &name) {
+      return compact ? name.left(1) : name;
+    };
     p->setPen(QPen(border, 1));
     p->setBrush(surface);
     p->drawEllipse(center, radius, radius);
@@ -237,13 +242,15 @@ void ObservationPlot::paint(QPainter *p) {
     }
     p->setPen(secondary);
     p->drawText(QRectF(center.x() - 40, center.y() - radius - 25, 80, 20),
-                Qt::AlignCenter, tr("North"));
+                Qt::AlignCenter, direction(tr("North")));
     p->drawText(QRectF(center.x() - 40, center.y() + radius + 3, 80, 20),
-                Qt::AlignCenter, tr("South"));
-    p->drawText(QRectF(center.x() - radius - 36, center.y() - 10, 30, 20),
-                Qt::AlignCenter, tr("West"));
-    p->drawText(QRectF(center.x() + radius + 6, center.y() - 10, 30, 20),
-                Qt::AlignCenter, tr("East"));
+                Qt::AlignCenter, direction(tr("South")));
+    p->drawText(QRectF(center.x() - radius - (compact ? 22 : 44),
+                       center.y() - 10, compact ? 20 : 40, 20),
+                Qt::AlignCenter, direction(tr("West")));
+    p->drawText(QRectF(center.x() + radius + (compact ? 2 : 6), center.y() - 10,
+                       compact ? 20 : 40, 20),
+                Qt::AlignCenter, direction(tr("East")));
     return;
   }
   auto x = [&](double fraction) {

@@ -1,10 +1,14 @@
 #pragma once
 #include "ObservationAstronomy.hpp"
 #include <QObject>
+#include <QPointer>
+#include <QTimer>
 #include <QVariantList>
 #include <QVariantMap>
 #include <QtQml/qqmlregistration.h>
 #include <thread>
+class QNetworkAccessManager;
+class QNetworkReply;
 namespace astro::app {
 class ObservationController : public QObject {
   Q_OBJECT
@@ -29,6 +33,11 @@ class ObservationController : public QObject {
   Q_PROPERTY(QVariantList recommendations READ recommendations NOTIFY changed)
   Q_PROPERTY(
       QString connectionStatus READ connectionStatus NOTIFY connectionChanged)
+  Q_PROPERTY(QVariantMap weather READ weather NOTIFY weatherChanged)
+  Q_PROPERTY(
+      QVariantList weatherSamples READ weatherSamples NOTIFY weatherChanged)
+  Q_PROPERTY(QVariantMap recommendationWeather READ recommendationWeather NOTIFY
+                 weatherChanged)
 public:
   explicit ObservationController(QObject *parent = nullptr);
   ~ObservationController() override;
@@ -50,6 +59,10 @@ public:
   bool targetFavorite() const;
   QVariantList recommendations() const { return recommendations_; }
   QString connectionStatus() const { return connectionStatus_; }
+  QVariantMap weather() const;
+  QVariantList weatherSamples() const;
+  QVariantMap recommendationWeather() const;
+  Q_INVOKABLE void refreshWeather(bool force = true);
   Q_INVOKABLE void toggleFavoriteTarget();
   static QString networkFailure(int code, bool interrupted = false);
   Q_INVOKABLE void searchCity(const QString &name);
@@ -69,6 +82,7 @@ signals:
   void sitesChanged();
   void favoritesChanged();
   void connectionChanged();
+  void weatherChanged();
 
 private slots:
   void updateReachability(int state);
@@ -80,6 +94,8 @@ private:
   QString localTime(qint64 utc) const;
   void updateRecommendations();
   void saveFavoriteTargets();
+  void updateWeatherContext();
+  bool weatherPeriodSupported() const;
   ObservationTarget target_;
   ObservationSite site_;
   std::vector<ObservationTarget> catalog_;
@@ -98,5 +114,12 @@ private:
   QString recommendationsKey_, connectionStatus_;
   bool offline_{}, connectionLost_{};
   int reachability_{}, recommendationPool_{}, catalogCount_{};
+  QVariantMap weatherForecast_;
+  QString weatherStatus_, weatherContext_;
+  bool weatherBusy_{}, weatherEnabled_{}, weatherFailed_{};
+  int weatherGeneration_{};
+  QTimer weatherDebounce_, weatherAgeTimer_;
+  QNetworkAccessManager *weatherNetwork_{};
+  QPointer<QNetworkReply> weatherReply_;
 };
 } // namespace astro::app

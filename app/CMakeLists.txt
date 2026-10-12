@@ -122,6 +122,7 @@ qt_add_qml_module(AstroCapture
         src/TargetResolver.cpp src/TargetResolver.hpp src/EquipmentProfile.hpp
         src/ObservationAstronomy.cpp src/ObservationAstronomy.hpp
         src/ObservationController.cpp src/ObservationController.hpp
+        src/ObservationWeather.cpp src/ObservationWeather.hpp
         src/ObservationPlot.cpp src/ObservationPlot.hpp
         src/SessionController.hpp
         src/SessionController.cpp

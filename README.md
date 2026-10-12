@@ -39,7 +39,32 @@ a au moins 20 minutes de créneau et indique ses propres critères : Soleil sous
 la cible avec ces critères et ouvre sa courbe. La sélection n’est pas exhaustive ;
 le catalogue complet reste interrogeable. Les suggestions de Mercure et Vénus
 excluent les créneaux à moins de 30° du Soleil. Le matériel, la pollution lumineuse,
-la Lune et la météo peuvent rendre un objet difficile à observer.
+la Lune et la météo peuvent rendre un objet difficile à observer. Les prévisions
+nuageuses chargées ajoutent leurs valeurs horaires disponibles dans chaque créneau,
+sans modifier le classement géométrique.
+
+**Nuages** affiche les prévisions horaires [Open-Meteo](https://open-meteo.com/en/docs)
+de couverture totale, basse, moyenne et haute. **Charger** transmet les coordonnées
+du lieu ; le curseur indique la prévision horaire la plus proche (à 30 minutes au
+maximum), avec son heure locale et UTC. 0 % signifie aucun nuage prévu dans la
+maille du modèle, 100 % une couverture complète. Les couches peuvent se superposer
+et ne s’additionnent pas. Ces données sont des **prévisions de modèles**, pas une
+mesure en direct, une probabilité de ciel dégagé ou un indice de turbulence.
+
+La source, l’heure de récupération et les coordonnées de la maille du modèle sont
+affichées. La période doit être couverte par l’horizon disponible (au maximum
+16 jours à venir, avec les données de la veille). Les données manquantes, nulles ou
+hors période sont explicites ; elles ne valent jamais 0 %. Aucun pourcentage n’est
+extrapolé hors des heures retournées. **Actualiser** renouvelle la prévision.
+Une fois chargée, une modification de lieu/date réutilise les données récentes ou
+charge le nouveau lieu après un bref délai. Le curseur ne déclenche aucune requête.
+
+La dernière prévision valide est conservée localement, y compris après réouverture,
+et marquée comme **ancienne après une heure**. Un échec n’efface pas cette prévision ;
+les données d’un autre lieu ne sont pas affichées sur le lieu courant. Le service
+sans clé est prévu ici pour l’usage personnel non commercial. Les données sont sous
+[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), avec attribution à Open-Meteo
+et valeurs affichées arrondies ; le cache ne contient ni nom d’objet ni identifiant personnel.
 
 Le **lever et le coucher du Soleil** sont visibles immédiatement. Le détail
 **Jour, crépuscule et nuit** liste le jour, le crépuscule civil et la nuit astronomique.
@@ -64,7 +89,7 @@ en envoyant uniquement le nom. La recherche de ville envoie seulement le texte s
 Un message indique l’absence ou la perte de connexion lorsque le système la
 signale, ainsi qu’un échec ou un délai dépassé des recherches en ligne. Un échec
 ne remplace pas les résultats précédents. Le rétablissement de la connexion
-permet de réessayer ; aucune recherche n’est relancée à votre insu. Les calculs,
+permet de réessayer ; les recherches de noms ne sont pas relancées automatiquement. Les calculs,
 les suggestions, le catalogue et les favoris ne nécessitent pas Internet.
 
 Les éphémérides de la Lune et des planètes sont calculées localement avec
@@ -80,8 +105,9 @@ Le temps réel peut varier avec les conditions atmosphériques et les obstacles.
 et nutation, mais pas le mouvement propre ni l’aberration annuelle. Ce module vise
 la préparation à la minute d’arc, sans garantir une précision de pointage. Les créneaux
 sont recherchés par pas d’une minute et leurs limites affinées à la seconde ; de très
-brèves fenêtres tangentes peuvent échapper au pas de recherche. **La météo, la
-turbulence, les réservations et le pilotage d’acquisition ne sont pas inclus.**
+brèves fenêtres tangentes peuvent échapper au pas de recherche. **La turbulence,
+les réservations et le pilotage d’acquisition ne sont pas inclus.** Les nuages sont
+prévus séparément ; les calculs de visibilité ne garantissent pas les conditions réelles.
 
 ## Installer sur macOS
 

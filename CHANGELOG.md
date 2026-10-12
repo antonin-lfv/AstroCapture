@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.18.1 — 2026-10-12
+
+- Add an hourly cloud forecast view to Observation, using Open-Meteo total/low/mid/high cloud coverage for the selected coordinates, synchronized with the local/UTC time cursor.
+- Show forecast instants, retrieval time, source attribution and model grid coordinates; summarize available hourly cloud values within each suggested object's windows without changing geometric ranking.
+- Keep a validated local forecast cache on network failure; mark forecasts older than one hour, reject invalid responses and never treat missing data or another location's forecast as clear sky.
+- Load forecasts on request, reuse fresh data and update after a selected place/date change. Clearly identify dates outside the up-to-16-day horizon. Forecast values are model predictions, not live measurements or a transparency/seeing estimate.
+- Verify recorded real API data, zero versus null values, forecast-hour selection, invalid responses, location changes, stale/offline cache handling, live retrieval and native French layouts.
+
 ## 1.18.0 — 2026-10-11
 
 - Add an independent Observation workspace before Guide, for the Moon, seven planets and fixed catalogue objects.

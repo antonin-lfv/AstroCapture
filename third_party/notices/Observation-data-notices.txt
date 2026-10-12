@@ -14,3 +14,12 @@ Natural Earth: https://www.naturalearthdata.com/about/terms-of-use/
 Astronomy Engine: https://github.com/cosinekitty/astronomy
 Optional city lookup: GeoNames through Open-Meteo,
 https://open-meteo.com/en/docs/geocoding-api (non-commercial service for personal use).
+
+Optional hourly cloud forecasts: Open-Meteo (https://open-meteo.com/),
+https://open-meteo.com/en/docs. API data are offered under CC BY 4.0:
+https://creativecommons.org/licenses/by/4.0/ (https://open-meteo.com/en/licence).
+Displayed source links identify Open-Meteo. Percentages are unmodified model
+outputs; display rounding, selection by hour, and range summaries are performed
+by AstroCapture. The non-commercial endpoint is used for personal use.
+Weather test fixture: verbatim hourly slice retrieved 2026-10-12; source URL and
+licence are retained in tests/unit/app/observation-weather.json.

@@ -37,6 +37,8 @@ void ObservationPlot::setController(ObservationController *c) {
     connect(c, &ObservationController::changed, this, [this] { update(); });
     connect(c, &ObservationController::instantChanged, this,
             [this] { update(); });
+    connect(c, &ObservationController::weatherChanged, this,
+            [this] { update(); });
     connect(c, &QObject::destroyed, this, [this] {
       controller_ = nullptr;
       update();
@@ -64,6 +66,88 @@ void ObservationPlot::paint(QPainter *p) {
   const auto settings = controller_->settings();
   auto rect = frame(width(), height());
   p->fillRect(boundingRect(), image);
+  if (mode_ == "clouds") {
+    auto x = [&](double fraction) {
+      return rect.left() + fraction * rect.width();
+    };
+    auto y = [&](double cloud) {
+      return rect.bottom() - cloud / 100 * rect.height();
+    };
+    for (int cloud : {0, 25, 50, 75, 100}) {
+      p->setPen(QPen(border, 1));
+      p->drawLine(QPointF(rect.left(), y(cloud)),
+                  QPointF(rect.right(), y(cloud)));
+      p->setPen(secondary);
+      p->drawText(QRectF(0, y(cloud) - 10, 40, 20),
+                  Qt::AlignRight | Qt::AlignVCenter,
+                  QString::number(cloud) + "%");
+    }
+    for (int i = 0; i <= 4 && !samples.isEmpty(); ++i) {
+      auto sample = samples[qRound((samples.size() - 1) * i / 4.0)].toMap();
+      p->drawText(QRectF(x(i / 4.0) - (i == 0   ? 0
+                                       : i == 4 ? 48
+                                                : 24),
+                         rect.bottom() + 8, 48, 20),
+                  i == 0   ? Qt::AlignLeft
+                  : i == 4 ? Qt::AlignRight
+                           : Qt::AlignCenter,
+                  sample["time"].toString());
+    }
+    p->save();
+    p->setClipRect(rect);
+    const auto forecast = controller_->weatherSamples();
+    QPainterPath curve;
+    bool first = true, any = false;
+    qint64 previous = 0;
+    for (const auto &value : forecast) {
+      auto sample = value.toMap();
+      if (!sample.value("available").toBool()) {
+        first = true;
+        continue;
+      }
+      const auto utc = sample.value("utc").toLongLong();
+      if (!first && utc - previous != 3600)
+        first = true;
+      previous = utc;
+      any = true;
+      const QPointF point(x(sample.value("fraction").toDouble()),
+                          y(sample.value("cloud_cover").toDouble()));
+      if (first)
+        curve.moveTo(point);
+      else
+        curve.lineTo(point);
+      first = false;
+      p->setPen(Qt::NoPen);
+      p->setBrush(accent);
+      p->drawEllipse(point, 3, 3);
+    }
+    p->setPen(QPen(accent, 2));
+    p->setBrush(Qt::NoBrush);
+    p->drawPath(curve);
+    const auto weather = controller_->weather();
+    const double cursor = x(instant.value("fraction").toDouble());
+    p->setPen(QPen(secondary, 1));
+    p->drawLine(QPointF(cursor, rect.top()), QPointF(cursor, rect.bottom()));
+    if (weather.value("available").toBool()) {
+      const auto
+          start = controller_->result().value("startUtcSeconds").toLongLong(),
+          end = controller_->result().value("endUtcSeconds").toLongLong();
+      const double selected =
+          x(double(weather.value("utc").toLongLong() - start) / (end - start));
+      p->setBrush(accent);
+      p->setPen(QPen(text, 1));
+      p->drawEllipse(
+          QPointF(selected, y(weather.value("cloud_cover").toDouble())), 5, 5);
+    }
+    if (!any) {
+      p->setPen(secondary);
+      p->drawText(rect.adjusted(12, 12, -12, -12),
+                  Qt::AlignCenter | Qt::TextWordWrap,
+                  tr("No hourly cloud data for this period"));
+    }
+    p->restore();
+    return;
+  }
   if (mode_ == "world") {
     rect = worldFrame(width(), height());
     auto project = [&](double lon, double lat) {
@@ -239,7 +323,7 @@ void ObservationPlot::choose(QPointF pos) {
     if (r.contains(pos))
       emit locationChosen(90 - (pos.y() - r.top()) / r.height() * 180,
                           (pos.x() - r.left()) / r.width() * 360 - 180);
-  } else if (mode_ == "night") {
+  } else if (mode_ == "night" || mode_ == "clouds") {
     auto r = frame(width(), height());
     emit fractionChosen(std::clamp((pos.x() - r.left()) / r.width(), 0.0, 1.0));
   }
@@ -249,7 +333,8 @@ void ObservationPlot::mousePressEvent(QMouseEvent *e) {
   e->accept();
 }
 void ObservationPlot::mouseMoveEvent(QMouseEvent *e) {
-  if (mode_ == "night" && (e->buttons() & Qt::LeftButton))
+  if ((mode_ == "night" || mode_ == "clouds") &&
+      (e->buttons() & Qt::LeftButton))
     choose(e->position());
   e->accept();
 }

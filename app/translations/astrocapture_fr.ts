@@ -3844,6 +3844,22 @@ L’aperçu est automatiquement éclairci ; les données restent linéaires.</tr
         <source>OpenNGC is available offline for NGC, IC and Messier identifiers. Other fixed-object names can be searched using CDS Sesame; only the name is sent. City search uses Open-Meteo / GeoNames and sends only the typed city name. The favourite buttons save objects and places on this computer; starred places appear in the location list. Advanced lets you enter exact site coordinates. Online failures and connection loss display a message while keeping your previous results. For moving bodies, use the Moon or planet entries instead of manual fixed coordinates.</source>
         <translation>OpenNGC est disponible sans connexion pour les numéros NGC, IC et Messier. Les autres objets fixes sont recherchés par CDS Sesame ; seul le nom est envoyé. La recherche de ville utilise Open-Meteo / GeoNames et n’envoie que le texte saisi. Les boutons des favoris enregistrent les objets et les lieux sur cet ordinateur ; les lieux étoilés apparaissent dans la liste. Les options avancées permettent de saisir les coordonnées exactes. Un échec en ligne ou une perte de connexion affiche un message et conserve les résultats précédents. Pour les astres mobiles, utilisez les entrées Lune ou planète plutôt que des coordonnées fixes manuelles.</translation>
     </message>
+    <message>
+        <source>Suggestions uses your place, local date and minimum height. It compares common objects and your favourites offline, showing actual time windows. Deep sky uses astronomical night (Sun below −18°); Solar System targets use the end of civil twilight (−6°). Explore a suggestion to see its curve. The ranking uses geometric visibility. Loaded cloud forecasts add the predicted cloud range at available hourly instants; they do not guarantee clear sky or account for light pollution.</source>
+        <translation>Suggestions utilise votre lieu, la date locale et la hauteur minimale. Les objets courants et vos favoris sont comparés sans connexion, avec leurs vrais créneaux. Le ciel profond utilise la nuit astronomique (Soleil sous −18°), le Système solaire la fin du crépuscule civil (−6°). Explorez une suggestion pour voir sa courbe. Le classement utilise la visibilité géométrique. Les prévisions chargées ajoutent la couverture nuageuse aux heures disponibles ; elles ne garantissent pas un ciel dégagé et n’intègrent pas la pollution lumineuse.</translation>
+    </message>
+    <message>
+        <source>A target above the horizon can still be too low or in a bright sky. Very dark is suggested for deep sky, twilight for the Moon and planets. The lunar readout gives illuminated fraction, height and angular distance from your target. Cloud forecasts are available in the Clouds view, separately from geometric visibility. Seeing, obstructions, reservations and camera control are not included. Object positions use a flat geometric horizon without refraction. Sunrise and sunset use the upper edge of the Sun with standard atmospheric refraction; actual weather and obstacles can shift them.</source>
+        <translation>Une cible au-dessus de l’horizon peut rester trop basse ou dans un ciel trop clair. Le ciel très sombre est proposé pour le ciel profond, le crépuscule pour la Lune et les planètes. Les indications lunaires donnent la fraction éclairée, la hauteur et l’écart angulaire à la cible. Les prévisions nuageuses se trouvent dans la vue Nuages, séparément de la visibilité géométrique. Turbulence, obstacles, réservations et commandes de caméra ne sont pas inclus. Les positions utilisent un horizon géométrique plat sans réfraction. Le lever et le coucher du Soleil utilisent son bord supérieur avec une réfraction standard ; la météo et les obstacles réels peuvent les décaler.</translation>
+    </message>
+    <message>
+        <source>Check the clouds</source>
+        <translation>Vérifier les nuages</translation>
+    </message>
+    <message>
+        <source>Clouds loads Open-Meteo&#x27;s hourly model forecast for your coordinates. Use the time slider to compare cloud coverage with your observing windows. The exact forecast hour, retrieval time and model grid cell are shown. Low, mid and high cloud layers overlap. Forecasts extend at most 16 days; unavailable dates or missing values never mean clear sky. The last valid forecast is kept on failure, marked as old after one hour, and can be refreshed. Once loaded, a change of place or date reuses fresh data or loads the new place&#x27;s forecast.</source>
+        <translation>Nuages charge la prévision horaire des modèles Open-Meteo pour vos coordonnées. Parcourez les heures pour comparer les nuages aux créneaux d’observation. L’heure exacte de la prévision, l’heure de récupération et la maille du modèle sont affichées. Les nuages bas, moyens et hauts peuvent se superposer. Les prévisions s’étendent au maximum sur 16 jours ; une date indisponible ou une valeur manquante ne signifie jamais un ciel dégagé. La dernière prévision valide est conservée en cas d’échec, marquée ancienne après une heure et peut être actualisée. Une fois chargée, un changement de lieu ou de date réutilise les données récentes ou charge la prévision du nouveau lieu.</translation>
+    </message>
 </context>
     <context>
         <name>HistoryWorkspace</name>
@@ -9031,6 +9047,22 @@ Rejets : bords %7 · saturation %8 · signal faible %9 · incohérence %10</tran
         <source>OpenNGC is available offline for NGC, IC and Messier identifiers. Other fixed-object names can be searched using CDS Sesame; only the name is sent. City search uses Open-Meteo / GeoNames and sends only the typed city name. The favourite buttons save objects and places on this computer; starred places appear in the location list. Advanced lets you enter exact site coordinates. Online failures and connection loss display a message while keeping your previous results. For moving bodies, use the Moon or planet entries instead of manual fixed coordinates.</source>
         <translation>OpenNGC est disponible sans connexion pour les numéros NGC, IC et Messier. Les autres objets fixes sont recherchés par CDS Sesame ; seul le nom est envoyé. La recherche de ville utilise Open-Meteo / GeoNames et n’envoie que le texte saisi. Les boutons des favoris enregistrent les objets et les lieux sur cet ordinateur ; les lieux étoilés apparaissent dans la liste. Les options avancées permettent de saisir les coordonnées exactes. Un échec en ligne ou une perte de connexion affiche un message et conserve les résultats précédents. Pour les astres mobiles, utilisez les entrées Lune ou planète plutôt que des coordonnées fixes manuelles.</translation>
     </message>
+    <message>
+        <source>Suggestions uses your place, local date and minimum height. It compares common objects and your favourites offline, showing actual time windows. Deep sky uses astronomical night (Sun below −18°); Solar System targets use the end of civil twilight (−6°). Explore a suggestion to see its curve. The ranking uses geometric visibility. Loaded cloud forecasts add the predicted cloud range at available hourly instants; they do not guarantee clear sky or account for light pollution.</source>
+        <translation>Suggestions utilise votre lieu, la date locale et la hauteur minimale. Les objets courants et vos favoris sont comparés sans connexion, avec leurs vrais créneaux. Le ciel profond utilise la nuit astronomique (Soleil sous −18°), le Système solaire la fin du crépuscule civil (−6°). Explorez une suggestion pour voir sa courbe. Le classement utilise la visibilité géométrique. Les prévisions chargées ajoutent la couverture nuageuse aux heures disponibles ; elles ne garantissent pas un ciel dégagé et n’intègrent pas la pollution lumineuse.</translation>
+    </message>
+    <message>
+        <source>A target above the horizon can still be too low or in a bright sky. Very dark is suggested for deep sky, twilight for the Moon and planets. The lunar readout gives illuminated fraction, height and angular distance from your target. Cloud forecasts are available in the Clouds view, separately from geometric visibility. Seeing, obstructions, reservations and camera control are not included. Object positions use a flat geometric horizon without refraction. Sunrise and sunset use the upper edge of the Sun with standard atmospheric refraction; actual weather and obstacles can shift them.</source>
+        <translation>Une cible au-dessus de l’horizon peut rester trop basse ou dans un ciel trop clair. Le ciel très sombre est proposé pour le ciel profond, le crépuscule pour la Lune et les planètes. Les indications lunaires donnent la fraction éclairée, la hauteur et l’écart angulaire à la cible. Les prévisions nuageuses se trouvent dans la vue Nuages, séparément de la visibilité géométrique. Turbulence, obstacles, réservations et commandes de caméra ne sont pas inclus. Les positions utilisent un horizon géométrique plat sans réfraction. Le lever et le coucher du Soleil utilisent son bord supérieur avec une réfraction standard ; la météo et les obstacles réels peuvent les décaler.</translation>
+    </message>
+    <message>
+        <source>Check the clouds</source>
+        <translation>Vérifier les nuages</translation>
+    </message>
+    <message>
+        <source>Clouds loads Open-Meteo&#x27;s hourly model forecast for your coordinates. Use the time slider to compare cloud coverage with your observing windows. The exact forecast hour, retrieval time and model grid cell are shown. Low, mid and high cloud layers overlap. Forecasts extend at most 16 days; unavailable dates or missing values never mean clear sky. The last valid forecast is kept on failure, marked as old after one hour, and can be refreshed. Once loaded, a change of place or date reuses fresh data or loads the new place&#x27;s forecast.</source>
+        <translation>Nuages charge la prévision horaire des modèles Open-Meteo pour vos coordonnées. Parcourez les heures pour comparer les nuages aux créneaux d’observation. L’heure exacte de la prévision, l’heure de récupération et la maille du modèle sont affichées. Les nuages bas, moyens et hauts peuvent se superposer. Les prévisions s’étendent au maximum sur 16 jours ; une date indisponible ou une valeur manquante ne signifie jamais un ciel dégagé. La dernière prévision valide est conservée en cas d’échec, marquée ancienne après une heure et peut être actualisée. Une fois chargée, un changement de lieu ou de date réutilise les données récentes ou charge la prévision du nouveau lieu.</translation>
+    </message>
 </context>
     <context>
         <name>MasterLibraryDialog</name>
@@ -9570,6 +9602,22 @@ RMS normalisée moyenne %5</translation>
         <source>OpenNGC is available offline for NGC, IC and Messier identifiers. Other fixed-object names can be searched using CDS Sesame; only the name is sent. City search uses Open-Meteo / GeoNames and sends only the typed city name. The favourite buttons save objects and places on this computer; starred places appear in the location list. Advanced lets you enter exact site coordinates. Online failures and connection loss display a message while keeping your previous results. For moving bodies, use the Moon or planet entries instead of manual fixed coordinates.</source>
         <translation>OpenNGC est disponible sans connexion pour les numéros NGC, IC et Messier. Les autres objets fixes sont recherchés par CDS Sesame ; seul le nom est envoyé. La recherche de ville utilise Open-Meteo / GeoNames et n’envoie que le texte saisi. Les boutons des favoris enregistrent les objets et les lieux sur cet ordinateur ; les lieux étoilés apparaissent dans la liste. Les options avancées permettent de saisir les coordonnées exactes. Un échec en ligne ou une perte de connexion affiche un message et conserve les résultats précédents. Pour les astres mobiles, utilisez les entrées Lune ou planète plutôt que des coordonnées fixes manuelles.</translation>
     </message>
+    <message>
+        <source>Suggestions uses your place, local date and minimum height. It compares common objects and your favourites offline, showing actual time windows. Deep sky uses astronomical night (Sun below −18°); Solar System targets use the end of civil twilight (−6°). Explore a suggestion to see its curve. The ranking uses geometric visibility. Loaded cloud forecasts add the predicted cloud range at available hourly instants; they do not guarantee clear sky or account for light pollution.</source>
+        <translation>Suggestions utilise votre lieu, la date locale et la hauteur minimale. Les objets courants et vos favoris sont comparés sans connexion, avec leurs vrais créneaux. Le ciel profond utilise la nuit astronomique (Soleil sous −18°), le Système solaire la fin du crépuscule civil (−6°). Explorez une suggestion pour voir sa courbe. Le classement utilise la visibilité géométrique. Les prévisions chargées ajoutent la couverture nuageuse aux heures disponibles ; elles ne garantissent pas un ciel dégagé et n’intègrent pas la pollution lumineuse.</translation>
+    </message>
+    <message>
+        <source>A target above the horizon can still be too low or in a bright sky. Very dark is suggested for deep sky, twilight for the Moon and planets. The lunar readout gives illuminated fraction, height and angular distance from your target. Cloud forecasts are available in the Clouds view, separately from geometric visibility. Seeing, obstructions, reservations and camera control are not included. Object positions use a flat geometric horizon without refraction. Sunrise and sunset use the upper edge of the Sun with standard atmospheric refraction; actual weather and obstacles can shift them.</source>
+        <translation>Une cible au-dessus de l’horizon peut rester trop basse ou dans un ciel trop clair. Le ciel très sombre est proposé pour le ciel profond, le crépuscule pour la Lune et les planètes. Les indications lunaires donnent la fraction éclairée, la hauteur et l’écart angulaire à la cible. Les prévisions nuageuses se trouvent dans la vue Nuages, séparément de la visibilité géométrique. Turbulence, obstacles, réservations et commandes de caméra ne sont pas inclus. Les positions utilisent un horizon géométrique plat sans réfraction. Le lever et le coucher du Soleil utilisent son bord supérieur avec une réfraction standard ; la météo et les obstacles réels peuvent les décaler.</translation>
+    </message>
+    <message>
+        <source>Check the clouds</source>
+        <translation>Vérifier les nuages</translation>
+    </message>
+    <message>
+        <source>Clouds loads Open-Meteo&#x27;s hourly model forecast for your coordinates. Use the time slider to compare cloud coverage with your observing windows. The exact forecast hour, retrieval time and model grid cell are shown. Low, mid and high cloud layers overlap. Forecasts extend at most 16 days; unavailable dates or missing values never mean clear sky. The last valid forecast is kept on failure, marked as old after one hour, and can be refreshed. Once loaded, a change of place or date reuses fresh data or loads the new place&#x27;s forecast.</source>
+        <translation>Nuages charge la prévision horaire des modèles Open-Meteo pour vos coordonnées. Parcourez les heures pour comparer les nuages aux créneaux d’observation. L’heure exacte de la prévision, l’heure de récupération et la maille du modèle sont affichées. Les nuages bas, moyens et hauts peuvent se superposer. Les prévisions s’étendent au maximum sur 16 jours ; une date indisponible ou une valeur manquante ne signifie jamais un ciel dégagé. La dernière prévision valide est conservée en cas d’échec, marquée ancienne après une heure et peut être actualisée. Une fois chargée, un changement de lieu ou de date réutilise les données récentes ou charge la prévision du nouveau lieu.</translation>
+    </message>
 </context>
     <context>
         <name>GuideWorkspace</name>
@@ -9610,6 +9658,22 @@ RMS normalisée moyenne %5</translation>
     <message>
         <source>OpenNGC is available offline for NGC, IC and Messier identifiers. Other fixed-object names can be searched using CDS Sesame; only the name is sent. City search uses Open-Meteo / GeoNames and sends only the typed city name. The favourite buttons save objects and places on this computer; starred places appear in the location list. Advanced lets you enter exact site coordinates. Online failures and connection loss display a message while keeping your previous results. For moving bodies, use the Moon or planet entries instead of manual fixed coordinates.</source>
         <translation>OpenNGC est disponible sans connexion pour les numéros NGC, IC et Messier. Les autres objets fixes sont recherchés par CDS Sesame ; seul le nom est envoyé. La recherche de ville utilise Open-Meteo / GeoNames et n’envoie que le texte saisi. Les boutons des favoris enregistrent les objets et les lieux sur cet ordinateur ; les lieux étoilés apparaissent dans la liste. Les options avancées permettent de saisir les coordonnées exactes. Un échec en ligne ou une perte de connexion affiche un message et conserve les résultats précédents. Pour les astres mobiles, utilisez les entrées Lune ou planète plutôt que des coordonnées fixes manuelles.</translation>
+    </message>
+    <message>
+        <source>Suggestions uses your place, local date and minimum height. It compares common objects and your favourites offline, showing actual time windows. Deep sky uses astronomical night (Sun below −18°); Solar System targets use the end of civil twilight (−6°). Explore a suggestion to see its curve. The ranking uses geometric visibility. Loaded cloud forecasts add the predicted cloud range at available hourly instants; they do not guarantee clear sky or account for light pollution.</source>
+        <translation>Suggestions utilise votre lieu, la date locale et la hauteur minimale. Les objets courants et vos favoris sont comparés sans connexion, avec leurs vrais créneaux. Le ciel profond utilise la nuit astronomique (Soleil sous −18°), le Système solaire la fin du crépuscule civil (−6°). Explorez une suggestion pour voir sa courbe. Le classement utilise la visibilité géométrique. Les prévisions chargées ajoutent la couverture nuageuse aux heures disponibles ; elles ne garantissent pas un ciel dégagé et n’intègrent pas la pollution lumineuse.</translation>
+    </message>
+    <message>
+        <source>A target above the horizon can still be too low or in a bright sky. Very dark is suggested for deep sky, twilight for the Moon and planets. The lunar readout gives illuminated fraction, height and angular distance from your target. Cloud forecasts are available in the Clouds view, separately from geometric visibility. Seeing, obstructions, reservations and camera control are not included. Object positions use a flat geometric horizon without refraction. Sunrise and sunset use the upper edge of the Sun with standard atmospheric refraction; actual weather and obstacles can shift them.</source>
+        <translation>Une cible au-dessus de l’horizon peut rester trop basse ou dans un ciel trop clair. Le ciel très sombre est proposé pour le ciel profond, le crépuscule pour la Lune et les planètes. Les indications lunaires donnent la fraction éclairée, la hauteur et l’écart angulaire à la cible. Les prévisions nuageuses se trouvent dans la vue Nuages, séparément de la visibilité géométrique. Turbulence, obstacles, réservations et commandes de caméra ne sont pas inclus. Les positions utilisent un horizon géométrique plat sans réfraction. Le lever et le coucher du Soleil utilisent son bord supérieur avec une réfraction standard ; la météo et les obstacles réels peuvent les décaler.</translation>
+    </message>
+    <message>
+        <source>Check the clouds</source>
+        <translation>Vérifier les nuages</translation>
+    </message>
+    <message>
+        <source>Clouds loads Open-Meteo&#x27;s hourly model forecast for your coordinates. Use the time slider to compare cloud coverage with your observing windows. The exact forecast hour, retrieval time and model grid cell are shown. Low, mid and high cloud layers overlap. Forecasts extend at most 16 days; unavailable dates or missing values never mean clear sky. The last valid forecast is kept on failure, marked as old after one hour, and can be refreshed. Once loaded, a change of place or date reuses fresh data or loads the new place&#x27;s forecast.</source>
+        <translation>Nuages charge la prévision horaire des modèles Open-Meteo pour vos coordonnées. Parcourez les heures pour comparer les nuages aux créneaux d’observation. L’heure exacte de la prévision, l’heure de récupération et la maille du modèle sont affichées. Les nuages bas, moyens et hauts peuvent se superposer. Les prévisions s’étendent au maximum sur 16 jours ; une date indisponible ou une valeur manquante ne signifie jamais un ciel dégagé. La dernière prévision valide est conservée en cas d’échec, marquée ancienne après une heure et peut être actualisée. Une fois chargée, un changement de lieu ou de date réutilise les données récentes ou charge la prévision du nouveau lieu.</translation>
     </message>
 </context>
     <context>
@@ -9832,6 +9896,22 @@ RMS normalisée moyenne %5</translation>
         <source>OpenNGC is available offline for NGC, IC and Messier identifiers. Other fixed-object names can be searched using CDS Sesame; only the name is sent. City search uses Open-Meteo / GeoNames and sends only the typed city name. The favourite buttons save objects and places on this computer; starred places appear in the location list. Advanced lets you enter exact site coordinates. Online failures and connection loss display a message while keeping your previous results. For moving bodies, use the Moon or planet entries instead of manual fixed coordinates.</source>
         <translation>OpenNGC est disponible sans connexion pour les numéros NGC, IC et Messier. Les autres objets fixes sont recherchés par CDS Sesame ; seul le nom est envoyé. La recherche de ville utilise Open-Meteo / GeoNames et n’envoie que le texte saisi. Les boutons des favoris enregistrent les objets et les lieux sur cet ordinateur ; les lieux étoilés apparaissent dans la liste. Les options avancées permettent de saisir les coordonnées exactes. Un échec en ligne ou une perte de connexion affiche un message et conserve les résultats précédents. Pour les astres mobiles, utilisez les entrées Lune ou planète plutôt que des coordonnées fixes manuelles.</translation>
     </message>
+    <message>
+        <source>Suggestions uses your place, local date and minimum height. It compares common objects and your favourites offline, showing actual time windows. Deep sky uses astronomical night (Sun below −18°); Solar System targets use the end of civil twilight (−6°). Explore a suggestion to see its curve. The ranking uses geometric visibility. Loaded cloud forecasts add the predicted cloud range at available hourly instants; they do not guarantee clear sky or account for light pollution.</source>
+        <translation>Suggestions utilise votre lieu, la date locale et la hauteur minimale. Les objets courants et vos favoris sont comparés sans connexion, avec leurs vrais créneaux. Le ciel profond utilise la nuit astronomique (Soleil sous −18°), le Système solaire la fin du crépuscule civil (−6°). Explorez une suggestion pour voir sa courbe. Le classement utilise la visibilité géométrique. Les prévisions chargées ajoutent la couverture nuageuse aux heures disponibles ; elles ne garantissent pas un ciel dégagé et n’intègrent pas la pollution lumineuse.</translation>
+    </message>
+    <message>
+        <source>A target above the horizon can still be too low or in a bright sky. Very dark is suggested for deep sky, twilight for the Moon and planets. The lunar readout gives illuminated fraction, height and angular distance from your target. Cloud forecasts are available in the Clouds view, separately from geometric visibility. Seeing, obstructions, reservations and camera control are not included. Object positions use a flat geometric horizon without refraction. Sunrise and sunset use the upper edge of the Sun with standard atmospheric refraction; actual weather and obstacles can shift them.</source>
+        <translation>Une cible au-dessus de l’horizon peut rester trop basse ou dans un ciel trop clair. Le ciel très sombre est proposé pour le ciel profond, le crépuscule pour la Lune et les planètes. Les indications lunaires donnent la fraction éclairée, la hauteur et l’écart angulaire à la cible. Les prévisions nuageuses se trouvent dans la vue Nuages, séparément de la visibilité géométrique. Turbulence, obstacles, réservations et commandes de caméra ne sont pas inclus. Les positions utilisent un horizon géométrique plat sans réfraction. Le lever et le coucher du Soleil utilisent son bord supérieur avec une réfraction standard ; la météo et les obstacles réels peuvent les décaler.</translation>
+    </message>
+    <message>
+        <source>Check the clouds</source>
+        <translation>Vérifier les nuages</translation>
+    </message>
+    <message>
+        <source>Clouds loads Open-Meteo&#x27;s hourly model forecast for your coordinates. Use the time slider to compare cloud coverage with your observing windows. The exact forecast hour, retrieval time and model grid cell are shown. Low, mid and high cloud layers overlap. Forecasts extend at most 16 days; unavailable dates or missing values never mean clear sky. The last valid forecast is kept on failure, marked as old after one hour, and can be refreshed. Once loaded, a change of place or date reuses fresh data or loads the new place&#x27;s forecast.</source>
+        <translation>Nuages charge la prévision horaire des modèles Open-Meteo pour vos coordonnées. Parcourez les heures pour comparer les nuages aux créneaux d’observation. L’heure exacte de la prévision, l’heure de récupération et la maille du modèle sont affichées. Les nuages bas, moyens et hauts peuvent se superposer. Les prévisions s’étendent au maximum sur 16 jours ; une date indisponible ou une valeur manquante ne signifie jamais un ciel dégagé. La dernière prévision valide est conservée en cas d’échec, marquée ancienne après une heure et peut être actualisée. Une fois chargée, un changement de lieu ou de date réutilise les données récentes ou charge la prévision du nouveau lieu.</translation>
+    </message>
 </context>
     <context>
         <name>DeepSkyController</name>
@@ -9939,6 +10019,22 @@ RMS normalisée moyenne %5</translation>
         <source>OpenNGC is available offline for NGC, IC and Messier identifiers. Other fixed-object names can be searched using CDS Sesame; only the name is sent. City search uses Open-Meteo / GeoNames and sends only the typed city name. The favourite buttons save objects and places on this computer; starred places appear in the location list. Advanced lets you enter exact site coordinates. Online failures and connection loss display a message while keeping your previous results. For moving bodies, use the Moon or planet entries instead of manual fixed coordinates.</source>
         <translation>OpenNGC est disponible sans connexion pour les numéros NGC, IC et Messier. Les autres objets fixes sont recherchés par CDS Sesame ; seul le nom est envoyé. La recherche de ville utilise Open-Meteo / GeoNames et n’envoie que le texte saisi. Les boutons des favoris enregistrent les objets et les lieux sur cet ordinateur ; les lieux étoilés apparaissent dans la liste. Les options avancées permettent de saisir les coordonnées exactes. Un échec en ligne ou une perte de connexion affiche un message et conserve les résultats précédents. Pour les astres mobiles, utilisez les entrées Lune ou planète plutôt que des coordonnées fixes manuelles.</translation>
     </message>
+    <message>
+        <source>Suggestions uses your place, local date and minimum height. It compares common objects and your favourites offline, showing actual time windows. Deep sky uses astronomical night (Sun below −18°); Solar System targets use the end of civil twilight (−6°). Explore a suggestion to see its curve. The ranking uses geometric visibility. Loaded cloud forecasts add the predicted cloud range at available hourly instants; they do not guarantee clear sky or account for light pollution.</source>
+        <translation>Suggestions utilise votre lieu, la date locale et la hauteur minimale. Les objets courants et vos favoris sont comparés sans connexion, avec leurs vrais créneaux. Le ciel profond utilise la nuit astronomique (Soleil sous −18°), le Système solaire la fin du crépuscule civil (−6°). Explorez une suggestion pour voir sa courbe. Le classement utilise la visibilité géométrique. Les prévisions chargées ajoutent la couverture nuageuse aux heures disponibles ; elles ne garantissent pas un ciel dégagé et n’intègrent pas la pollution lumineuse.</translation>
+    </message>
+    <message>
+        <source>A target above the horizon can still be too low or in a bright sky. Very dark is suggested for deep sky, twilight for the Moon and planets. The lunar readout gives illuminated fraction, height and angular distance from your target. Cloud forecasts are available in the Clouds view, separately from geometric visibility. Seeing, obstructions, reservations and camera control are not included. Object positions use a flat geometric horizon without refraction. Sunrise and sunset use the upper edge of the Sun with standard atmospheric refraction; actual weather and obstacles can shift them.</source>
+        <translation>Une cible au-dessus de l’horizon peut rester trop basse ou dans un ciel trop clair. Le ciel très sombre est proposé pour le ciel profond, le crépuscule pour la Lune et les planètes. Les indications lunaires donnent la fraction éclairée, la hauteur et l’écart angulaire à la cible. Les prévisions nuageuses se trouvent dans la vue Nuages, séparément de la visibilité géométrique. Turbulence, obstacles, réservations et commandes de caméra ne sont pas inclus. Les positions utilisent un horizon géométrique plat sans réfraction. Le lever et le coucher du Soleil utilisent son bord supérieur avec une réfraction standard ; la météo et les obstacles réels peuvent les décaler.</translation>
+    </message>
+    <message>
+        <source>Check the clouds</source>
+        <translation>Vérifier les nuages</translation>
+    </message>
+    <message>
+        <source>Clouds loads Open-Meteo&#x27;s hourly model forecast for your coordinates. Use the time slider to compare cloud coverage with your observing windows. The exact forecast hour, retrieval time and model grid cell are shown. Low, mid and high cloud layers overlap. Forecasts extend at most 16 days; unavailable dates or missing values never mean clear sky. The last valid forecast is kept on failure, marked as old after one hour, and can be refreshed. Once loaded, a change of place or date reuses fresh data or loads the new place&#x27;s forecast.</source>
+        <translation>Nuages charge la prévision horaire des modèles Open-Meteo pour vos coordonnées. Parcourez les heures pour comparer les nuages aux créneaux d’observation. L’heure exacte de la prévision, l’heure de récupération et la maille du modèle sont affichées. Les nuages bas, moyens et hauts peuvent se superposer. Les prévisions s’étendent au maximum sur 16 jours ; une date indisponible ou une valeur manquante ne signifie jamais un ciel dégagé. La dernière prévision valide est conservée en cas d’échec, marquée ancienne après une heure et peut être actualisée. Une fois chargée, un changement de lieu ou de date réutilise les données récentes ou charge la prévision du nouveau lieu.</translation>
+    </message>
 </context>
 
 <context>
@@ -10016,6 +10112,22 @@ RMS normalisée moyenne %5</translation>
     <message>
         <source>OpenNGC is available offline for NGC, IC and Messier identifiers. Other fixed-object names can be searched using CDS Sesame; only the name is sent. City search uses Open-Meteo / GeoNames and sends only the typed city name. The favourite buttons save objects and places on this computer; starred places appear in the location list. Advanced lets you enter exact site coordinates. Online failures and connection loss display a message while keeping your previous results. For moving bodies, use the Moon or planet entries instead of manual fixed coordinates.</source>
         <translation>OpenNGC est disponible sans connexion pour les numéros NGC, IC et Messier. Les autres objets fixes sont recherchés par CDS Sesame ; seul le nom est envoyé. La recherche de ville utilise Open-Meteo / GeoNames et n’envoie que le texte saisi. Les boutons des favoris enregistrent les objets et les lieux sur cet ordinateur ; les lieux étoilés apparaissent dans la liste. Les options avancées permettent de saisir les coordonnées exactes. Un échec en ligne ou une perte de connexion affiche un message et conserve les résultats précédents. Pour les astres mobiles, utilisez les entrées Lune ou planète plutôt que des coordonnées fixes manuelles.</translation>
+    </message>
+    <message>
+        <source>Suggestions uses your place, local date and minimum height. It compares common objects and your favourites offline, showing actual time windows. Deep sky uses astronomical night (Sun below −18°); Solar System targets use the end of civil twilight (−6°). Explore a suggestion to see its curve. The ranking uses geometric visibility. Loaded cloud forecasts add the predicted cloud range at available hourly instants; they do not guarantee clear sky or account for light pollution.</source>
+        <translation>Suggestions utilise votre lieu, la date locale et la hauteur minimale. Les objets courants et vos favoris sont comparés sans connexion, avec leurs vrais créneaux. Le ciel profond utilise la nuit astronomique (Soleil sous −18°), le Système solaire la fin du crépuscule civil (−6°). Explorez une suggestion pour voir sa courbe. Le classement utilise la visibilité géométrique. Les prévisions chargées ajoutent la couverture nuageuse aux heures disponibles ; elles ne garantissent pas un ciel dégagé et n’intègrent pas la pollution lumineuse.</translation>
+    </message>
+    <message>
+        <source>A target above the horizon can still be too low or in a bright sky. Very dark is suggested for deep sky, twilight for the Moon and planets. The lunar readout gives illuminated fraction, height and angular distance from your target. Cloud forecasts are available in the Clouds view, separately from geometric visibility. Seeing, obstructions, reservations and camera control are not included. Object positions use a flat geometric horizon without refraction. Sunrise and sunset use the upper edge of the Sun with standard atmospheric refraction; actual weather and obstacles can shift them.</source>
+        <translation>Une cible au-dessus de l’horizon peut rester trop basse ou dans un ciel trop clair. Le ciel très sombre est proposé pour le ciel profond, le crépuscule pour la Lune et les planètes. Les indications lunaires donnent la fraction éclairée, la hauteur et l’écart angulaire à la cible. Les prévisions nuageuses se trouvent dans la vue Nuages, séparément de la visibilité géométrique. Turbulence, obstacles, réservations et commandes de caméra ne sont pas inclus. Les positions utilisent un horizon géométrique plat sans réfraction. Le lever et le coucher du Soleil utilisent son bord supérieur avec une réfraction standard ; la météo et les obstacles réels peuvent les décaler.</translation>
+    </message>
+    <message>
+        <source>Check the clouds</source>
+        <translation>Vérifier les nuages</translation>
+    </message>
+    <message>
+        <source>Clouds loads Open-Meteo&#x27;s hourly model forecast for your coordinates. Use the time slider to compare cloud coverage with your observing windows. The exact forecast hour, retrieval time and model grid cell are shown. Low, mid and high cloud layers overlap. Forecasts extend at most 16 days; unavailable dates or missing values never mean clear sky. The last valid forecast is kept on failure, marked as old after one hour, and can be refreshed. Once loaded, a change of place or date reuses fresh data or loads the new place&#x27;s forecast.</source>
+        <translation>Nuages charge la prévision horaire des modèles Open-Meteo pour vos coordonnées. Parcourez les heures pour comparer les nuages aux créneaux d’observation. L’heure exacte de la prévision, l’heure de récupération et la maille du modèle sont affichées. Les nuages bas, moyens et hauts peuvent se superposer. Les prévisions s’étendent au maximum sur 16 jours ; une date indisponible ou une valeur manquante ne signifie jamais un ciel dégagé. La dernière prévision valide est conservée en cas d’échec, marquée ancienne après une heure et peut être actualisée. Une fois chargée, un changement de lieu ou de date réutilise les données récentes ou charge la prévision du nouveau lieu.</translation>
     </message>
 </context>
   <context>
@@ -10102,6 +10214,22 @@ RMS normalisée moyenne %5</translation>
     <message>
         <source>OpenNGC is available offline for NGC, IC and Messier identifiers. Other fixed-object names can be searched using CDS Sesame; only the name is sent. City search uses Open-Meteo / GeoNames and sends only the typed city name. The favourite buttons save objects and places on this computer; starred places appear in the location list. Advanced lets you enter exact site coordinates. Online failures and connection loss display a message while keeping your previous results. For moving bodies, use the Moon or planet entries instead of manual fixed coordinates.</source>
         <translation>OpenNGC est disponible sans connexion pour les numéros NGC, IC et Messier. Les autres objets fixes sont recherchés par CDS Sesame ; seul le nom est envoyé. La recherche de ville utilise Open-Meteo / GeoNames et n’envoie que le texte saisi. Les boutons des favoris enregistrent les objets et les lieux sur cet ordinateur ; les lieux étoilés apparaissent dans la liste. Les options avancées permettent de saisir les coordonnées exactes. Un échec en ligne ou une perte de connexion affiche un message et conserve les résultats précédents. Pour les astres mobiles, utilisez les entrées Lune ou planète plutôt que des coordonnées fixes manuelles.</translation>
+    </message>
+    <message>
+        <source>Suggestions uses your place, local date and minimum height. It compares common objects and your favourites offline, showing actual time windows. Deep sky uses astronomical night (Sun below −18°); Solar System targets use the end of civil twilight (−6°). Explore a suggestion to see its curve. The ranking uses geometric visibility. Loaded cloud forecasts add the predicted cloud range at available hourly instants; they do not guarantee clear sky or account for light pollution.</source>
+        <translation>Suggestions utilise votre lieu, la date locale et la hauteur minimale. Les objets courants et vos favoris sont comparés sans connexion, avec leurs vrais créneaux. Le ciel profond utilise la nuit astronomique (Soleil sous −18°), le Système solaire la fin du crépuscule civil (−6°). Explorez une suggestion pour voir sa courbe. Le classement utilise la visibilité géométrique. Les prévisions chargées ajoutent la couverture nuageuse aux heures disponibles ; elles ne garantissent pas un ciel dégagé et n’intègrent pas la pollution lumineuse.</translation>
+    </message>
+    <message>
+        <source>A target above the horizon can still be too low or in a bright sky. Very dark is suggested for deep sky, twilight for the Moon and planets. The lunar readout gives illuminated fraction, height and angular distance from your target. Cloud forecasts are available in the Clouds view, separately from geometric visibility. Seeing, obstructions, reservations and camera control are not included. Object positions use a flat geometric horizon without refraction. Sunrise and sunset use the upper edge of the Sun with standard atmospheric refraction; actual weather and obstacles can shift them.</source>
+        <translation>Une cible au-dessus de l’horizon peut rester trop basse ou dans un ciel trop clair. Le ciel très sombre est proposé pour le ciel profond, le crépuscule pour la Lune et les planètes. Les indications lunaires donnent la fraction éclairée, la hauteur et l’écart angulaire à la cible. Les prévisions nuageuses se trouvent dans la vue Nuages, séparément de la visibilité géométrique. Turbulence, obstacles, réservations et commandes de caméra ne sont pas inclus. Les positions utilisent un horizon géométrique plat sans réfraction. Le lever et le coucher du Soleil utilisent son bord supérieur avec une réfraction standard ; la météo et les obstacles réels peuvent les décaler.</translation>
+    </message>
+    <message>
+        <source>Check the clouds</source>
+        <translation>Vérifier les nuages</translation>
+    </message>
+    <message>
+        <source>Clouds loads Open-Meteo&#x27;s hourly model forecast for your coordinates. Use the time slider to compare cloud coverage with your observing windows. The exact forecast hour, retrieval time and model grid cell are shown. Low, mid and high cloud layers overlap. Forecasts extend at most 16 days; unavailable dates or missing values never mean clear sky. The last valid forecast is kept on failure, marked as old after one hour, and can be refreshed. Once loaded, a change of place or date reuses fresh data or loads the new place&#x27;s forecast.</source>
+        <translation>Nuages charge la prévision horaire des modèles Open-Meteo pour vos coordonnées. Parcourez les heures pour comparer les nuages aux créneaux d’observation. L’heure exacte de la prévision, l’heure de récupération et la maille du modèle sont affichées. Les nuages bas, moyens et hauts peuvent se superposer. Les prévisions s’étendent au maximum sur 16 jours ; une date indisponible ou une valeur manquante ne signifie jamais un ciel dégagé. La dernière prévision valide est conservée en cas d’échec, marquée ancienne après une heure et peut être actualisée. Une fois chargée, un changement de lieu ou de date réutilise les données récentes ou charge la prévision du nouveau lieu.</translation>
     </message>
 </context>
   <context>
@@ -10197,6 +10325,22 @@ RMS normalisée moyenne %5</translation>
         <source>OpenNGC is available offline for NGC, IC and Messier identifiers. Other fixed-object names can be searched using CDS Sesame; only the name is sent. City search uses Open-Meteo / GeoNames and sends only the typed city name. The favourite buttons save objects and places on this computer; starred places appear in the location list. Advanced lets you enter exact site coordinates. Online failures and connection loss display a message while keeping your previous results. For moving bodies, use the Moon or planet entries instead of manual fixed coordinates.</source>
         <translation>OpenNGC est disponible sans connexion pour les numéros NGC, IC et Messier. Les autres objets fixes sont recherchés par CDS Sesame ; seul le nom est envoyé. La recherche de ville utilise Open-Meteo / GeoNames et n’envoie que le texte saisi. Les boutons des favoris enregistrent les objets et les lieux sur cet ordinateur ; les lieux étoilés apparaissent dans la liste. Les options avancées permettent de saisir les coordonnées exactes. Un échec en ligne ou une perte de connexion affiche un message et conserve les résultats précédents. Pour les astres mobiles, utilisez les entrées Lune ou planète plutôt que des coordonnées fixes manuelles.</translation>
     </message>
+    <message>
+        <source>Suggestions uses your place, local date and minimum height. It compares common objects and your favourites offline, showing actual time windows. Deep sky uses astronomical night (Sun below −18°); Solar System targets use the end of civil twilight (−6°). Explore a suggestion to see its curve. The ranking uses geometric visibility. Loaded cloud forecasts add the predicted cloud range at available hourly instants; they do not guarantee clear sky or account for light pollution.</source>
+        <translation>Suggestions utilise votre lieu, la date locale et la hauteur minimale. Les objets courants et vos favoris sont comparés sans connexion, avec leurs vrais créneaux. Le ciel profond utilise la nuit astronomique (Soleil sous −18°), le Système solaire la fin du crépuscule civil (−6°). Explorez une suggestion pour voir sa courbe. Le classement utilise la visibilité géométrique. Les prévisions chargées ajoutent la couverture nuageuse aux heures disponibles ; elles ne garantissent pas un ciel dégagé et n’intègrent pas la pollution lumineuse.</translation>
+    </message>
+    <message>
+        <source>A target above the horizon can still be too low or in a bright sky. Very dark is suggested for deep sky, twilight for the Moon and planets. The lunar readout gives illuminated fraction, height and angular distance from your target. Cloud forecasts are available in the Clouds view, separately from geometric visibility. Seeing, obstructions, reservations and camera control are not included. Object positions use a flat geometric horizon without refraction. Sunrise and sunset use the upper edge of the Sun with standard atmospheric refraction; actual weather and obstacles can shift them.</source>
+        <translation>Une cible au-dessus de l’horizon peut rester trop basse ou dans un ciel trop clair. Le ciel très sombre est proposé pour le ciel profond, le crépuscule pour la Lune et les planètes. Les indications lunaires donnent la fraction éclairée, la hauteur et l’écart angulaire à la cible. Les prévisions nuageuses se trouvent dans la vue Nuages, séparément de la visibilité géométrique. Turbulence, obstacles, réservations et commandes de caméra ne sont pas inclus. Les positions utilisent un horizon géométrique plat sans réfraction. Le lever et le coucher du Soleil utilisent son bord supérieur avec une réfraction standard ; la météo et les obstacles réels peuvent les décaler.</translation>
+    </message>
+    <message>
+        <source>Check the clouds</source>
+        <translation>Vérifier les nuages</translation>
+    </message>
+    <message>
+        <source>Clouds loads Open-Meteo&#x27;s hourly model forecast for your coordinates. Use the time slider to compare cloud coverage with your observing windows. The exact forecast hour, retrieval time and model grid cell are shown. Low, mid and high cloud layers overlap. Forecasts extend at most 16 days; unavailable dates or missing values never mean clear sky. The last valid forecast is kept on failure, marked as old after one hour, and can be refreshed. Once loaded, a change of place or date reuses fresh data or loads the new place&#x27;s forecast.</source>
+        <translation>Nuages charge la prévision horaire des modèles Open-Meteo pour vos coordonnées. Parcourez les heures pour comparer les nuages aux créneaux d’observation. L’heure exacte de la prévision, l’heure de récupération et la maille du modèle sont affichées. Les nuages bas, moyens et hauts peuvent se superposer. Les prévisions s’étendent au maximum sur 16 jours ; une date indisponible ou une valeur manquante ne signifie jamais un ciel dégagé. La dernière prévision valide est conservée en cas d’échec, marquée ancienne après une heure et peut être actualisée. Une fois chargée, un changement de lieu ou de date réutilise les données récentes ou charge la prévision du nouveau lieu.</translation>
+    </message>
 </context>
   <context>
     <name>astro::app::DeepSkyController</name>
@@ -10281,6 +10425,22 @@ RMS normalisée moyenne %5</translation>
         <source>OpenNGC is available offline for NGC, IC and Messier identifiers. Other fixed-object names can be searched using CDS Sesame; only the name is sent. City search uses Open-Meteo / GeoNames and sends only the typed city name. The favourite buttons save objects and places on this computer; starred places appear in the location list. Advanced lets you enter exact site coordinates. Online failures and connection loss display a message while keeping your previous results. For moving bodies, use the Moon or planet entries instead of manual fixed coordinates.</source>
         <translation>OpenNGC est disponible sans connexion pour les numéros NGC, IC et Messier. Les autres objets fixes sont recherchés par CDS Sesame ; seul le nom est envoyé. La recherche de ville utilise Open-Meteo / GeoNames et n’envoie que le texte saisi. Les boutons des favoris enregistrent les objets et les lieux sur cet ordinateur ; les lieux étoilés apparaissent dans la liste. Les options avancées permettent de saisir les coordonnées exactes. Un échec en ligne ou une perte de connexion affiche un message et conserve les résultats précédents. Pour les astres mobiles, utilisez les entrées Lune ou planète plutôt que des coordonnées fixes manuelles.</translation>
     </message>
+    <message>
+        <source>Suggestions uses your place, local date and minimum height. It compares common objects and your favourites offline, showing actual time windows. Deep sky uses astronomical night (Sun below −18°); Solar System targets use the end of civil twilight (−6°). Explore a suggestion to see its curve. The ranking uses geometric visibility. Loaded cloud forecasts add the predicted cloud range at available hourly instants; they do not guarantee clear sky or account for light pollution.</source>
+        <translation>Suggestions utilise votre lieu, la date locale et la hauteur minimale. Les objets courants et vos favoris sont comparés sans connexion, avec leurs vrais créneaux. Le ciel profond utilise la nuit astronomique (Soleil sous −18°), le Système solaire la fin du crépuscule civil (−6°). Explorez une suggestion pour voir sa courbe. Le classement utilise la visibilité géométrique. Les prévisions chargées ajoutent la couverture nuageuse aux heures disponibles ; elles ne garantissent pas un ciel dégagé et n’intègrent pas la pollution lumineuse.</translation>
+    </message>
+    <message>
+        <source>A target above the horizon can still be too low or in a bright sky. Very dark is suggested for deep sky, twilight for the Moon and planets. The lunar readout gives illuminated fraction, height and angular distance from your target. Cloud forecasts are available in the Clouds view, separately from geometric visibility. Seeing, obstructions, reservations and camera control are not included. Object positions use a flat geometric horizon without refraction. Sunrise and sunset use the upper edge of the Sun with standard atmospheric refraction; actual weather and obstacles can shift them.</source>
+        <translation>Une cible au-dessus de l’horizon peut rester trop basse ou dans un ciel trop clair. Le ciel très sombre est proposé pour le ciel profond, le crépuscule pour la Lune et les planètes. Les indications lunaires donnent la fraction éclairée, la hauteur et l’écart angulaire à la cible. Les prévisions nuageuses se trouvent dans la vue Nuages, séparément de la visibilité géométrique. Turbulence, obstacles, réservations et commandes de caméra ne sont pas inclus. Les positions utilisent un horizon géométrique plat sans réfraction. Le lever et le coucher du Soleil utilisent son bord supérieur avec une réfraction standard ; la météo et les obstacles réels peuvent les décaler.</translation>
+    </message>
+    <message>
+        <source>Check the clouds</source>
+        <translation>Vérifier les nuages</translation>
+    </message>
+    <message>
+        <source>Clouds loads Open-Meteo&#x27;s hourly model forecast for your coordinates. Use the time slider to compare cloud coverage with your observing windows. The exact forecast hour, retrieval time and model grid cell are shown. Low, mid and high cloud layers overlap. Forecasts extend at most 16 days; unavailable dates or missing values never mean clear sky. The last valid forecast is kept on failure, marked as old after one hour, and can be refreshed. Once loaded, a change of place or date reuses fresh data or loads the new place&#x27;s forecast.</source>
+        <translation>Nuages charge la prévision horaire des modèles Open-Meteo pour vos coordonnées. Parcourez les heures pour comparer les nuages aux créneaux d’observation. L’heure exacte de la prévision, l’heure de récupération et la maille du modèle sont affichées. Les nuages bas, moyens et hauts peuvent se superposer. Les prévisions s’étendent au maximum sur 16 jours ; une date indisponible ou une valeur manquante ne signifie jamais un ciel dégagé. La dernière prévision valide est conservée en cas d’échec, marquée ancienne après une heure et peut être actualisée. Une fois chargée, un changement de lieu ou de date réutilise les données récentes ou charge la prévision du nouveau lieu.</translation>
+    </message>
 </context>
     <context>
         <name>astro::app::DeepSkyController</name>
@@ -10298,6 +10458,7 @@ RMS normalisée moyenne %5</translation>
 
 <context>
     <name>ObservationWorkspace</name>
+    <message><source>Open the cloud forecast source, Open-Meteo</source><translation>Ouvrir la source des prévisions nuageuses, Open-Meteo</translation></message>
     <message><source>All</source><translation>Tout</translation></message>
     <message><source>Moon &amp; planets</source><translation>Lune et planètes</translation></message>
     <message><source>Deep sky</source><translation>Ciel profond</translation></message>
@@ -10777,6 +10938,90 @@ RMS normalisée moyenne %5</translation>
         <source>Height above sea level, −500 to 10000 metres. Sunrise uses standard refraction adjusted for this elevation. Terrain and horizon dip are not modelled.</source>
         <translation>Hauteur au-dessus du niveau de la mer, de −500 à 10 000 mètres. Le lever du Soleil utilise une réfraction standard adaptée à cette altitude. Le relief et l’abaissement de l’horizon ne sont pas modélisés.</translation>
     </message>
+    <message>
+        <source>Cloud forecast: %1 · %2</source>
+        <translation>Nuages prévus : %1 · %2</translation>
+    </message>
+    <message>
+        <source>No cloud forecast for this date</source>
+        <translation>Pas de prévision nuageuse pour cette date</translation>
+    </message>
+    <message>
+        <source>No cloud data at this hour</source>
+        <translation>Pas de données nuageuses à cette heure</translation>
+    </message>
+    <message>
+        <source>Cloud forecast not loaded</source>
+        <translation>Prévision nuageuse non chargée</translation>
+    </message>
+    <message>
+        <source>Loading…</source>
+        <translation>Chargement…</translation>
+    </message>
+    <message>
+        <source>Refresh clouds</source>
+        <translation>Actualiser</translation>
+    </message>
+    <message>
+        <source>Load clouds</source>
+        <translation>Charger</translation>
+    </message>
+    <message>
+        <source>Load or refresh the cloud forecast for this place</source>
+        <translation>Charger ou actualiser la prévision nuageuse pour ce lieu</translation>
+    </message>
+    <message>
+        <source>Clouds</source>
+        <translation>Nuages</translation>
+    </message>
+    <message>
+        <source>Clouds forecast at the available hourly instants: %1–%2% · %3 values</source>
+        <translation>Nuages prévus aux heures disponibles : %1–%2 % · %3 valeurs</translation>
+    </message>
+    <message>
+        <source> · old forecast</source>
+        <translation> · prévision ancienne</translation>
+    </message>
+    <message>
+        <source>Visibility does not guarantee easy viewing: equipment, light pollution and the Moon also matter. Uranus, Neptune and deep-sky objects generally need binoculars or a telescope. Cloud forecasts can be loaded separately; missing cloud data never means a clear sky.</source>
+        <translation>La visibilité ne garantit pas une observation facile : le matériel, la pollution lumineuse et la Lune comptent aussi. Uranus, Neptune et les objets du ciel profond demandent généralement des jumelles ou un télescope. Les prévisions nuageuses se chargent séparément ; une donnée manquante ne signifie jamais un ciel dégagé.</translation>
+    </message>
+    <message>
+        <source>Hourly cloud forecast</source>
+        <translation>Prévision nuageuse heure par heure</translation>
+    </message>
+    <message>
+        <source>0% means no clouds predicted in the model grid cell; 100% means complete coverage. Low, mid and high layers overlap and must not be added. The hourly model values are forecasts, not live measurements. Cloud cover alone does not predict transparency or atmospheric turbulence.</source>
+        <translation>0 % signifie aucun nuage prévu dans la maille du modèle ; 100 % une couverture complète. Les nuages bas, moyens et hauts peuvent se superposer : leurs pourcentages ne s’additionnent pas. Ce sont des prévisions horaires, pas des mesures en direct. La couverture nuageuse ne prédit pas à elle seule la transparence du ciel ou la turbulence atmosphérique.</translation>
+    </message>
+    <message>
+        <source>Forecast instant: %1</source>
+        <translation>Heure de la prévision : %1</translation>
+    </message>
+    <message>
+        <source>Low: %1 · mid: %2 · high: %3</source>
+        <translation>Bas : %1 · moyens : %2 · hauts : %3</translation>
+    </message>
+    <message>
+        <source>This forecast was retrieved more than an hour ago. Refresh it before relying on the cloud percentages.</source>
+        <translation>Cette prévision a été récupérée il y a plus d’une heure. Actualisez-la avant de vous appuyer sur ces pourcentages.</translation>
+    </message>
+    <message>
+        <source>Hourly forecast cloud coverage from 0 to 100 percent over the selected period</source>
+        <translation>Couverture nuageuse prévue heure par heure, de 0 à 100 %, sur la période choisie</translation>
+    </message>
+    <message>
+        <source>Each point is an hourly forecast. The cursor shows the nearest available hour, within 30 minutes. Gaps mean missing data. No cloud percentage is extrapolated outside the returned forecast.</source>
+        <translation>Chaque point est une prévision horaire. Le curseur affiche l’heure disponible la plus proche, à 30 minutes au maximum. Les interruptions correspondent à des données manquantes. Aucun pourcentage n’est extrapolé hors de la prévision reçue.</translation>
+    </message>
+    <message>
+        <source>Retrieved: %1 · model cell: %2°, %3°</source>
+        <translation>Récupérée le %1 · maille du modèle : %2°, %3°</translation>
+    </message>
+    <message>
+        <source>Source: &lt;a href=&#x27;https://open-meteo.com/en/docs&#x27;&gt;Open-Meteo&lt;/a&gt; · &lt;a href=&#x27;https://creativecommons.org/licenses/by/4.0/&#x27;&gt;CC BY 4.0&lt;/a&gt;. Only this place&#x27;s coordinates are sent when loading a forecast.</source>
+        <translation>Source : &lt;a href=&#x27;https://open-meteo.com/en/docs&#x27;&gt;Open-Meteo&lt;/a&gt; · &lt;a href=&#x27;https://creativecommons.org/licenses/by/4.0/&#x27;&gt;CC BY 4.0&lt;/a&gt;. Seules les coordonnées du lieu sont envoyées lors du chargement d’une prévision.</translation>
+    </message>
 </context>
 <context>
     <name>astro::app::ObservationController</name>
@@ -11082,6 +11327,26 @@ RMS normalisée moyenne %5</translation>
         <source>Cannot calculate solar events.</source>
         <translation>Impossible de calculer les horaires du Soleil.</translation>
     </message>
+    <message>
+        <source>No cloud forecast for this date. Forecasts cover at most the next 16 days; the complete observing period must be covered.</source>
+        <translation>Pas de prévision nuageuse pour cette date. Les prévisions couvrent au maximum les 16 prochains jours ; toute la période d’observation doit être couverte.</translation>
+    </message>
+    <message>
+        <source>Loading the hourly cloud forecast…</source>
+        <translation>Chargement de la prévision nuageuse horaire…</translation>
+    </message>
+    <message>
+        <source>Hourly forecast loaded. Percentages are model predictions, not a live measurement.</source>
+        <translation>Prévision horaire chargée. Les pourcentages proviennent de modèles météo, pas d’une mesure en direct.</translation>
+    </message>
+    <message>
+        <source>Invalid weather location.</source>
+        <translation>Lieu invalide pour la prévision météo.</translation>
+    </message>
+    <message>
+        <source>Invalid cloud forecast response. Previous forecasts are preserved.</source>
+        <translation>Réponse météo invalide. Les prévisions précédentes sont conservées.</translation>
+    </message>
 </context>
 <context>
     <name>astro::app::ObservationPlot</name>
@@ -11109,6 +11374,10 @@ RMS normalisée moyenne %5</translation>
         <location filename="../src/ObservationPlot.cpp" line="31"/>
         <source>East</source>
         <translation>Est</translation>
+    </message>
+    <message>
+        <source>No hourly cloud data for this period</source>
+        <translation>Pas de données nuageuses horaires pour cette période</translation>
     </message>
 </context>
 </TS>

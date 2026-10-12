@@ -373,6 +373,7 @@ endif()
 astro_add_unit_test(astro_app_observation_test
     SOURCES app/ObservationTest.cpp ../../app/src/ObservationAstronomy.cpp
         ../../app/src/ObservationController.cpp ../../app/src/ObservationController.hpp
+        ../../app/src/ObservationWeather.cpp ../../app/src/ObservationWeather.hpp
         ../../app/src/ObservationPlot.cpp ../../app/src/ObservationPlot.hpp ../../app/src/TargetResolver.cpp
     LIBS Qt6::Quick Qt6::Gui Qt6::Network astro_observation_ephemeris Threads::Threads)
 set_target_properties(astro_app_observation_test PROPERTIES AUTOMOC ON)
@@ -381,6 +382,12 @@ target_compile_definitions(astro_app_observation_test PRIVATE ASTRO_SOURCE_DIR="
 qt_add_resources(astro_app_observation_test observation_data PREFIX "/observation" BASE "${PROJECT_SOURCE_DIR}/app/data"
     FILES ../../app/data/NGC.csv ../../app/data/NGC-addendum.csv ../../app/data/world-land.json)
 set_tests_properties(astro_app_observation_test PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_BACKEND=software" TIMEOUT 90)
+
+astro_add_unit_test(astro_app_observation_weather_test
+    SOURCES app/ObservationWeatherTest.cpp ../../app/src/ObservationWeather.cpp
+    LIBS Qt6::Core Qt6::Network)
+target_include_directories(astro_app_observation_weather_test PRIVATE ../../app/src)
+target_compile_definitions(astro_app_observation_weather_test PRIVATE ASTRO_SOURCE_DIR="${PROJECT_SOURCE_DIR}")
 
 # App settings and session validators share domain image bounds.
 get_directory_property(astro_unit_targets BUILDSYSTEM_TARGETS)

@@ -1,6 +1,6 @@
 # AstroCapture — bilan avant V2
 
-État du 11 octobre 2026, après les contrôles de la livraison 1.18.0.
+État du 11 octobre 2026, après les contrôles de la livraison 1.18.1.
 
 L’utilisateur réserve pour l’instant AstroCapture à son usage personnel.
 La qualification de distribution publique reste une étape ultérieure ; elle
@@ -130,6 +130,9 @@ Nuit, horizon et carte régionale partagent le même instant UTC ; les informati
 lunaires et les limites des calculs sont explicites. Les recherches de noms et de
 villes en ligne sont facultatives et signalent les échecs sans effacer les résultats.
 
-La météo, la pollution lumineuse, les masques d’obstacles locaux, les réservations
+La 1.18.1 ajoute les prévisions nuageuses horaires Open-Meteo, avec cache, attribution,
+fraîcheur et états de connexion. Les nuages sont une prévision de modèle distincte
+des calculs géométriques. Les autres données météo, la turbulence, la pollution
+lumineuse, les masques d’obstacles locaux, les réservations
 et le pilotage d’acquisition restent des prolongements possibles. Le module n’est
 pas une condition de justesse des images déjà produites.

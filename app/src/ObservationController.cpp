@@ -1,4 +1,5 @@
 #include "ObservationController.hpp"
+#include "ObservationWeather.hpp"
 #include "TargetResolver.hpp"
 #include "astronomy.h"
 #include <QFile>
@@ -159,6 +160,29 @@ ObservationController::ObservationController(QObject *parent)
     s["label"] = (s.value("favorite").toBool() ? QString("★ ") : QString()) +
                  s.value("name").toString();
     sites_[i] = s;
+  }
+  weatherAgeTimer_.setInterval(60000);
+  connect(&weatherAgeTimer_, &QTimer::timeout, this, [this] {
+    if (!weatherForecast_.isEmpty())
+      emit weatherChanged();
+  });
+  weatherAgeTimer_.start();
+  weatherDebounce_.setSingleShot(true);
+  weatherDebounce_.setInterval(600);
+  connect(&weatherDebounce_, &QTimer::timeout, this,
+          [this] { refreshWeather(false); });
+  const auto cachedWeather =
+      QSettings().value("observation/weatherCache").toMap();
+  const auto cachedAt = cachedWeather.value("receivedUtc").toLongLong();
+  if (cachedAt > 0 && cachedAt <= QDateTime::currentSecsSinceEpoch() + 60 &&
+      QDateTime::currentSecsSinceEpoch() - cachedAt < 7 * 86400) {
+    try {
+      weatherForecast_ = parseObservationWeather(
+          cachedWeather.value("data").toByteArray(),
+          cachedWeather.value("latitude", NAN).toDouble(),
+          cachedWeather.value("longitude", NAN).toDouble(), cachedAt);
+    } catch (const std::exception &) {
+    }
   }
   calculate(settings_);
   search("");
@@ -427,6 +451,8 @@ bool ObservationController::calculate(const QVariantMap &options) {
           {"endFraction", double(w.end - start_) / (end_ - start_)},
           {"minutes", (w.end - w.start) / 60}});
     result_ = {
+        {"startUtcSeconds", start_},
+        {"endUtcSeconds", end_},
         {"target", t.name},
         {"source", t.source},
         {"moving", t.body >= 0},
@@ -514,8 +540,10 @@ bool ObservationController::calculate(const QVariantMap &options) {
     persist();
     updateInstant();
     updateRecommendations();
+    updateWeatherContext();
     emit favoritesChanged();
     emit changed();
+    emit weatherChanged();
     return true;
   } catch (const std::exception &e) {
     error_ = tr(e.what());
@@ -570,6 +598,7 @@ void ObservationController::updateInstant() {
       world_.append(QVariantMap{{"lat", lat}, {"lon", lon}, {"state", state}});
     }
   emit instantChanged();
+  emit weatherChanged();
 }
 void ObservationController::chooseMapLocation(double lat, double lon) {
   auto s = settings_;
@@ -766,6 +795,7 @@ void ObservationController::updateReachability(int state) {
   }
   reachability_ = state;
   emit connectionChanged();
+  emit weatherChanged();
 }
 bool ObservationController::targetFavorite() const {
   return std::any_of(favoriteTargets_.begin(), favoriteTargets_.end(),
@@ -779,6 +809,7 @@ void ObservationController::saveFavoriteTargets() {
   updateRecommendations();
   emit favoritesChanged();
   emit changed();
+  emit weatherChanged();
 }
 void ObservationController::toggleFavoriteTarget() {
   error_.clear();
@@ -943,5 +974,185 @@ void ObservationController::updateRecommendations() {
   recommendationsKey_ = key;
   recommendationPool_ = pool;
   result_["recommendationPool"] = pool;
+}
+bool ObservationController::weatherPeriodSupported() const {
+  const auto day = QDateTime::currentDateTimeUtc().date();
+  const auto first = QDateTime(day.addDays(-1), QTime(0, 0), QTimeZone::UTC)
+                         .toSecsSinceEpoch();
+  const auto last = QDateTime(day.addDays(16), QTime(0, 0), QTimeZone::UTC)
+                        .toSecsSinceEpoch();
+  return start_ >= first && end_ < last;
+}
+QVariantList ObservationController::weatherSamples() const {
+  QVariantList samples;
+  if (!observationWeatherMatches(weatherForecast_, site_.latitude,
+                                 site_.longitude) ||
+      !start_)
+    return samples;
+  for (const auto &value : weatherForecast_.value("samples").toList()) {
+    auto sample = value.toMap();
+    const auto utc = sample.value("utc").toLongLong();
+    if (utc < start_ || utc > end_)
+      continue;
+    sample["fraction"] = double(utc - start_) / (end_ - start_);
+    sample["time"] = localTime(utc);
+    samples.append(sample);
+  }
+  return samples;
+}
+QVariantMap ObservationController::weather() const {
+  const bool matches = observationWeatherMatches(
+      weatherForecast_, site_.latitude, site_.longitude);
+  auto sample =
+      matches ? observationWeatherAt(weatherForecast_,
+                                     instant_.value("utcSeconds").toLongLong())
+              : QVariantMap();
+  const bool stale =
+      matches && QDateTime::currentSecsSinceEpoch() -
+                         weatherForecast_.value("receivedUtc").toLongLong() >
+                     3600;
+  sample["available"] = sample.value("available", false);
+  sample["hasForecast"] = !weatherSamples().isEmpty();
+  sample["busy"] = weatherBusy_;
+  sample["failed"] = weatherFailed_;
+  sample["supported"] = weatherPeriodSupported();
+  sample["canRefresh"] = !weatherBusy_ && !offline_ && weatherPeriodSupported();
+  sample["stale"] = stale;
+  sample["status"] =
+      weatherStatus_.isEmpty() && !weatherPeriodSupported()
+          ? tr("No cloud forecast for this date. Forecasts cover at most the "
+               "next 16 days; the complete observing period must be covered.")
+          : weatherStatus_;
+  if (matches) {
+    sample["received"] =
+        localTime(weatherForecast_.value("receivedUtc").toLongLong());
+    sample["gridLatitude"] = weatherForecast_.value("gridLatitude");
+    sample["gridLongitude"] = weatherForecast_.value("gridLongitude");
+  }
+  if (sample.contains("utc"))
+    sample["validTime"] = localTime(sample.value("utc").toLongLong());
+  return sample;
+}
+QVariantMap ObservationController::recommendationWeather() const {
+  QVariantMap result;
+  if (!observationWeatherMatches(weatherForecast_, site_.latitude,
+                                 site_.longitude))
+    return result;
+  for (const auto &value : recommendations_) {
+    const auto recommendation = value.toMap();
+    result[recommendation.value("id").toString()] = observationWeatherRange(
+        weatherForecast_, recommendation.value("slots").toList());
+  }
+  return result;
+}
+void ObservationController::updateWeatherContext() {
+  const QString key = QString::number(site_.latitude, 'g', 17) + ":" +
+                      QString::number(site_.longitude, 'g', 17) + ":" +
+                      QString::number(start_) + ":" + QString::number(end_) +
+                      ":" + settings_.value("zone").toString();
+  if (key == weatherContext_)
+    return;
+  weatherContext_ = key;
+  weatherStatus_.clear();
+  weatherFailed_ = false;
+  ++weatherGeneration_;
+  weatherBusy_ = false;
+  if (weatherReply_)
+    weatherReply_->abort();
+  if (weatherEnabled_)
+    weatherDebounce_.start();
+  emit weatherChanged();
+}
+void ObservationController::refreshWeather(bool force) {
+  weatherDebounce_.stop();
+  if (weatherBusy_)
+    return;
+  if (!weatherPeriodSupported()) {
+    weatherStatus_ =
+        tr("No cloud forecast for this date. Forecasts cover at most the next "
+           "16 days; the complete observing period must be covered.");
+    emit weatherChanged();
+    return;
+  }
+  weatherFailed_ = false;
+  if (!force &&
+      observationWeatherMatches(weatherForecast_, site_.latitude,
+                                site_.longitude) &&
+      QDateTime::currentSecsSinceEpoch() -
+              weatherForecast_.value("receivedUtc").toLongLong() <=
+          3600) {
+    const auto series = weatherForecast_.value("samples").toList();
+    if (!series.isEmpty() &&
+        series.first().toMap().value("utc").toLongLong() <= start_ &&
+        series.last().toMap().value("utc").toLongLong() >= end_) {
+      weatherEnabled_ = true;
+      weatherStatus_.clear();
+      emit weatherChanged();
+      return;
+    }
+  }
+  if (offline_) {
+    weatherFailed_ = true;
+    weatherStatus_ = networkFailure(QNetworkReply::NetworkSessionFailedError,
+                                    connectionLost_);
+    emit weatherChanged();
+    return;
+  }
+  weatherEnabled_ = true;
+  if (!weatherNetwork_)
+    weatherNetwork_ = new QNetworkAccessManager(this);
+  const double latitude = site_.latitude, longitude = site_.longitude;
+  QNetworkRequest request(observationWeatherUrl(latitude, longitude));
+  request.setTransferTimeout(12000);
+  request.setAttribute(QNetworkRequest::RedirectPolicyAttribute,
+                       QNetworkRequest::NoLessSafeRedirectPolicy);
+  auto *reply = weatherNetwork_->get(request);
+  weatherReply_ = reply;
+  weatherBusy_ = true;
+  weatherStatus_ = tr("Loading the hourly cloud forecast…");
+  const int generation = ++weatherGeneration_;
+  emit weatherChanged();
+  connect(reply, &QNetworkReply::readyRead, reply, [reply] {
+    if (reply->bytesAvailable() > 256 * 1024)
+      reply->abort();
+  });
+  QTimer::singleShot(20000, reply, [reply] {
+    if (!reply->isFinished())
+      reply->abort();
+  });
+  connect(
+      reply, &QNetworkReply::finished, this,
+      [this, reply, generation, latitude, longitude] {
+        if (generation != weatherGeneration_) {
+          reply->deleteLater();
+          return;
+        }
+        weatherBusy_ = false;
+        weatherReply_ = nullptr;
+        if (reply->error() != QNetworkReply::NoError) {
+          weatherFailed_ = true;
+          weatherStatus_ = networkFailure(int(reply->error()), connectionLost_);
+        } else {
+          const auto data = reply->readAll();
+          const auto received = QDateTime::currentSecsSinceEpoch();
+          try {
+            auto forecast =
+                parseObservationWeather(data, latitude, longitude, received);
+            weatherForecast_ = forecast;
+            QSettings().setValue("observation/weatherCache",
+                                 QVariantMap{{"data", data},
+                                             {"latitude", latitude},
+                                             {"longitude", longitude},
+                                             {"receivedUtc", received}});
+            weatherStatus_ = tr("Hourly forecast loaded. Percentages are model "
+                                "predictions, not a live measurement.");
+          } catch (const std::exception &e) {
+            weatherFailed_ = true;
+            weatherStatus_ = tr(e.what());
+          }
+        }
+        reply->deleteLater();
+        emit weatherChanged();
+      });
 }
 } // namespace astro::app

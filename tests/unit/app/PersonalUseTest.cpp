@@ -120,6 +120,9 @@ static int workspace(const QString& directory,bool restore,bool faults=false) {
     QSettings().setValue("application/integrationTemporaryDirectory",directory);
     QTranslator translator;ASTRO_TEST_CHECK(translator.load(ASTRO_TRANSLATION_PATH));
     QCoreApplication::installTranslator(&translator);
+    if(qEnvironmentVariableIsSet("ASTRO_OBSERVATION_WEATHER_WINDOW")) {
+        QSettings().setValue("observation/weatherCache",QVariantMap{{"data",bytes(ASTRO_SOURCE_DIR "/tests/unit/app/observation-weather.json")},{"latitude",48.8566},{"longitude",2.3522},{"receivedUtc",QDateTime::currentSecsSinceEpoch()}});
+    }
     registerTypes();QQmlEngine engine;
     engine.rootContext()->setContextProperty("validationDirectory",directory);
     const QDir sourceDirectory(QStringLiteral(ASTRO_SOURCE_DIR "/app/qml"));
@@ -154,6 +157,23 @@ static int workspace(const QString& directory,bool restore,bool faults=false) {
     ASTRO_TEST_CHECK(deep->projectCacheDirectory()==directory+"/projects");
     QuitGuard guard(window);QCoreApplication::instance()->installEventFilter(&guard);
     auto* quit=window->findChild<QObject*>("quitConfirmation");ASTRO_TEST_CHECK(quit);
+
+    if(qEnvironmentVariableIsSet("ASTRO_OBSERVATION_WEATHER_WINDOW")) {
+        auto* observation=window->findChild<ObservationController*>("observationController");ASTRO_TEST_CHECK(observation);
+        auto settings=observation->sites()[0].toMap();settings["date"]="2026-10-12";settings["minimum"]=30;settings["sunLimit"]=-18;ASTRO_TEST_CHECK(observation->calculate(settings));
+        ASTRO_TEST_CHECK(observation->selectTarget("NGC1976"));observation->setFraction(.5);
+        window->setProperty("currentTab","observation");
+        auto* workspace=window->findChild<QObject*>("observationWorkspace");ASTRO_TEST_CHECK(workspace);workspace->setProperty("viewMode","clouds");
+        for(const auto size:{QSize(1440,960),QSize(1100,800),QSize(900,700)}) {
+            window->resize(size);capture(window,QString("observation-clouds-%1").arg(size.width()));
+        }
+        workspace->setProperty("viewMode","suggestions");capture(window,"observation-clouds-suggestions-900");
+        settings=observation->settings();settings["longitude"]=-71.25;settings["latitude"]=-29.9;settings["name"]="La Serena";ASTRO_TEST_CHECK(observation->calculate(settings));
+        ASTRO_TEST_CHECK(!observation->weather()["available"].toBool());workspace->setProperty("viewMode","clouds");capture(window,"observation-clouds-other-place-900");
+        settings=observation->sites()[0].toMap();settings["date"]="2026-12-12";settings["minimum"]=30;settings["sunLimit"]=-18;ASTRO_TEST_CHECK(observation->calculate(settings));
+        capture(window,"observation-clouds-unavailable-date-900");
+        window->setProperty("quitApproved",true);return 0;
+    }
 
     if(qEnvironmentVariableIsSet("ASTRO_OBSERVATION_WINDOW")) {
         auto* observation=window->findChild<ObservationController*>("observationController");ASTRO_TEST_CHECK(observation);

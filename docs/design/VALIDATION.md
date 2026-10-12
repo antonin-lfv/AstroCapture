@@ -1037,3 +1037,32 @@ interfaces aux trois tailles. Les 51 tests de régression passent ; les tests ci
 d’Observation et de la fenêtre complète ont été relancés après les derniers ajustements.
 Les recherches réelles de Toulouse et de Vega sont
 vérifiées séparément ; les tests ordinaires restent indépendants d’Internet.
+
+
+## Lot 1.18.1 — prévisions nuageuses
+
+La vue native **Nuages** utilise les vrais pourcentages horaires Open-Meteo pour
+Paris, récupérés le 12 octobre 2026. La fixture conserve les valeurs du service
+sans modification ; le cache de validation évite toute dépendance à Internet dans
+les rendus ordinaires. Les captures `previews/native/observation/observation-clouds-*`
+montrent l’application en français aux trois tailles, les suggestions complétées,
+un autre lieu sans donnée associée et une date hors horizon.
+
+- Couverture totale et couches basse/moyenne/haute ; pourcentages non additionnés.
+- Heure de prévision distincte de l’heure de récupération ; IANA/UTC et choix de
+  l’heure la plus proche, à 30 minutes au maximum, sans extrapolation.
+- Courbe horaire interactive, curseur commun, source accessible au clavier et
+  notice CC BY 4.0 ; graphique compact à 900 × 700, détails conservés par défilement.
+- Cache validé après réouverture, marqueur « ancien » après une heure, conservation
+  sur erreur et rejet des données nulles/invalides ou d’un autre lieu.
+- Chargement explicite ; actualisation lors d’un changement de lieu/date après
+  activation, avec réutilisation du cache récent et rejet des réponses devenues obsolètes.
+- Suggestions gardant leur classement géométrique, enrichies du minimum/maximum
+  nuageux aux seuls instants horaires disponibles dans les fenêtres.
+
+Les tests couvrent un vrai échantillon d’API conservé avec sa provenance, 0 %
+distinct d’une valeur absente, unités et horaires invalides, dates hors horizon,
+localisations différentes, sélection horaire, cache ancien et perte de connexion.
+Les 52 tests de régression passent. Un contrôle en ligne séparé vérifie une
+récupération réelle des prévisions, en plus des recherches de ville et d’objet.
+La prévision n’est ni une mesure en direct, ni un indice de transparence ou de turbulence.

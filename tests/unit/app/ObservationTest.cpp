@@ -143,9 +143,59 @@ int main(int argc, char **argv) {
   QTranslator translator;
   ASTRO_TEST_CHECK(translator.load(ASTRO_TRANSLATION_PATH));
   app.installTranslator(&translator);
+  QFile weatherFile(ASTRO_SOURCE_DIR
+                    "/tests/unit/app/observation-weather.json");
+  ASTRO_TEST_CHECK(weatherFile.open(QIODevice::ReadOnly));
+  const auto weatherBytes = weatherFile.readAll();
+  const auto weatherCache =
+      QVariantMap{{"data", weatherBytes},
+                  {"latitude", 48.8566},
+                  {"longitude", 2.3522},
+                  {"receivedUtc", QDateTime::currentSecsSinceEpoch() - 7200}};
+  QSettings().setValue("observation/weatherCache", weatherCache);
   ObservationController controller;
   ASTRO_TEST_CHECK(controller.catalogCount() > 13000);
   ASTRO_TEST_CHECK(controller.error().isEmpty());
+  auto cloudyNight = controller.settings();
+  cloudyNight["date"] = "2026-10-12";
+  ASTRO_TEST_CHECK(controller.calculate(cloudyNight));
+  controller.setFraction(.5);
+  ASTRO_TEST_CHECK(controller.weather()["available"].toBool());
+  ASTRO_TEST_CHECK(controller.weather()["cloud_cover"].toInt() == 100);
+  ASTRO_TEST_CHECK(controller.weather()["stale"].toBool());
+  ASTRO_TEST_CHECK(!controller.weatherSamples().isEmpty());
+  controller.setFraction(0);
+  ASTRO_TEST_CHECK(controller.weather()["cloud_cover"].toInt() == 60);
+  controller.setFraction(.5);
+  {
+    ObservationController reopened;
+    ASTRO_TEST_CHECK(!reopened.weather()["busy"].toBool());
+    auto options = reopened.settings();
+    options["date"] = "2026-10-12";
+    ASTRO_TEST_CHECK(reopened.calculate(options));
+    ASTRO_TEST_CHECK(reopened.weather()["available"].toBool());
+  }
+  auto reachablePeriod = controller.settings();
+  reachablePeriod["date"] =
+      QDateTime::currentDateTimeUtc().date().toString(Qt::ISODate);
+  ASTRO_TEST_CHECK(controller.calculate(reachablePeriod));
+  const auto cacheBeforeFailure = QSettings().value("observation/weatherCache");
+  ASTRO_TEST_CHECK(QMetaObject::invokeMethod(
+      &controller, "updateReachability", Qt::DirectConnection,
+      Q_ARG(int, int(QNetworkInformation::Reachability::Online))));
+  ASTRO_TEST_CHECK(QMetaObject::invokeMethod(
+      &controller, "updateReachability", Qt::DirectConnection,
+      Q_ARG(int, int(QNetworkInformation::Reachability::Disconnected))));
+  controller.refreshWeather();
+  ASTRO_TEST_CHECK(controller.weather()["failed"].toBool());
+  ASTRO_TEST_CHECK(!controller.weather()["busy"].toBool());
+  ASTRO_TEST_CHECK(
+      controller.weather()["status"].toString().contains("interrompue"));
+  ASTRO_TEST_CHECK(QSettings().value("observation/weatherCache") ==
+                   cacheBeforeFailure);
+  ASTRO_TEST_CHECK(QMetaObject::invokeMethod(
+      &controller, "updateReachability", Qt::DirectConnection,
+      Q_ARG(int, int(QNetworkInformation::Reachability::Online))));
   controller.search("M42");
   ASTRO_TEST_CHECK(
       controller.searchResults().first().toMap()["id"].toString() == "NGC1976");
@@ -262,6 +312,8 @@ int main(int argc, char **argv) {
   const auto utc = controller.instant()["utcSeconds"].toLongLong();
   controller.chooseMapLocation(-33, 151);
   ASTRO_TEST_CHECK(controller.settings()["zone"] == "UTC");
+  ASTRO_TEST_CHECK(!controller.weather()["available"].toBool());
+  ASTRO_TEST_CHECK(controller.weatherSamples().isEmpty());
   ASTRO_TEST_CHECK(controller.instant()["utcSeconds"].toLongLong() == utc);
   ASTRO_TEST_CHECK(controller.recommendations() != winterSuggestions);
   ASTRO_TEST_CHECK(controller.saveSite("Mon jardin"));
@@ -288,6 +340,14 @@ int main(int argc, char **argv) {
   ASTRO_TEST_CHECK(controller.recommendations().isEmpty());
   ASTRO_TEST_CHECK(controller.result()["nightSlots"].toList().isEmpty());
   ASTRO_TEST_CHECK(!controller.result()["polarSun"].toString().isEmpty());
+  ASTRO_TEST_CHECK(controller.calculate(opts));
+  auto unavailableDate = controller.settings();
+  unavailableDate["date"] =
+      QDateTime::currentDateTimeUtc().date().addDays(45).toString(Qt::ISODate);
+  ASTRO_TEST_CHECK(controller.calculate(unavailableDate));
+  controller.refreshWeather();
+  ASTRO_TEST_CHECK(!controller.weather()["busy"].toBool());
+  ASTRO_TEST_CHECK(!controller.weather()["supported"].toBool());
   ASTRO_TEST_CHECK(controller.calculate(opts));
   qmlRegisterType<ObservationController>("AstroCapture", 1, 0,
                                          "ObservationController");
@@ -360,6 +420,21 @@ int main(int argc, char **argv) {
         qEnvironmentVariable("ASTRO_OBSERVATION_SCREENSHOTS") +
         "/moon-horizon-900.png");
   if (qEnvironmentVariableIsSet("ASTRO_OBSERVATION_ONLINE")) {
+    auto today = controller.settings();
+    today["date"] =
+        QDateTime::currentDateTimeUtc().date().toString(Qt::ISODate);
+    ASTRO_TEST_CHECK(controller.calculate(today));
+    controller.refreshWeather();
+    QElapsedTimer weatherTimeout;
+    weatherTimeout.start();
+    while (controller.weather()["busy"].toBool() &&
+           weatherTimeout.elapsed() < 25000) {
+      QCoreApplication::processEvents();
+      QThread::msleep(10);
+    }
+    ASTRO_TEST_CHECK(!controller.weather()["busy"].toBool());
+    ASTRO_TEST_CHECK(controller.weather()["hasForecast"].toBool());
+    ASTRO_TEST_CHECK(controller.weather()["available"].toBool());
     controller.searchCity("Toulouse, France");
     QElapsedTimer timeout;
     timeout.start();

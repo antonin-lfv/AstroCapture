@@ -14,6 +14,7 @@ Rectangle {
     property bool manual: false
     property bool citySearchOpen: false
     property bool saveSiteOpen: false
+    function cloudPercent(value) {return value===undefined || value===null ? "—" : Math.round(Number(value))+" %";}
     function favoriteSiteIndex() {
         const current=controller.settings;
         for(let i=0;i<controller.sites.length;i++) {
@@ -92,9 +93,18 @@ Rectangle {
                             Label {text:root.controller.result.sunrise || "";color:Atelier.text;font.pixelSize:13;wrapMode:Text.Wrap;Layout.fillWidth:true}
                         }
                     }
+                    RowLayout {
+                        Layout.leftMargin:20;Layout.rightMargin:20;Layout.fillWidth:true;spacing:12
+                        Label {
+                            Layout.fillWidth:true;wrapMode:Text.Wrap;color:root.controller.weather.stale?Atelier.warning:Atelier.secondary;font.pixelSize:12
+                            text:root.controller.weather.available?qsTr("Cloud forecast: %1 · %2").arg(root.cloudPercent(root.controller.weather.cloud_cover)).arg(root.controller.weather.validTime || ""):!root.controller.weather.supported?qsTr("No cloud forecast for this date"):root.controller.weather.hasForecast?qsTr("No cloud data at this hour"):qsTr("Cloud forecast not loaded")
+                        }
+                        IconButton {visible:root.controller.weather.hasForecast;text:"Open-Meteo";ghost:true;Accessible.name:qsTr("Open the cloud forecast source, Open-Meteo");onClicked:Qt.openUrlExternally("https://open-meteo.com/")}
+                        IconButton {objectName:"observationLoadWeather";text:root.controller.weather.busy?qsTr("Loading…"):root.controller.weather.hasForecast?qsTr("Refresh clouds"):qsTr("Load clouds");busy:root.controller.weather.busy;enabled:root.controller.weather.canRefresh;Accessible.name:qsTr("Load or refresh the cloud forecast for this place");onClicked:{root.viewMode="clouds";root.controller.refreshWeather();}}
+                    }
                     Label {Layout.leftMargin:20;Layout.rightMargin:20;Layout.fillWidth:true;text:root.controller.result.polarSun || "";visible:text.length>0;color:Atelier.warning;wrapMode:Text.Wrap;font.pixelSize:12}
                     RowLayout {
-                        visible:root.viewMode!=="suggestions";Layout.leftMargin:20;Layout.rightMargin:20;Layout.fillWidth:true;spacing:24
+                        visible:root.viewMode!=="suggestions" && root.viewMode!=="clouds";Layout.leftMargin:20;Layout.rightMargin:20;Layout.fillWidth:true;spacing:24
                         ColumnLayout {spacing:4
                             SettingLabel {text:qsTr("Height above the horizon");explanation:qsTr("0° is the horizon; 90° is directly overhead. A higher object usually crosses less atmosphere. Buildings and mountains are not included.")}
                             Label {text:Number(root.controller.instant.altitude || 0).toFixed(1)+"°";color:Atelier.text;font.pixelSize:24}
@@ -104,11 +114,11 @@ Rectangle {
                             Label {text:Number(root.controller.instant.azimuth || 0).toFixed(1)+"°";color:Atelier.text;font.pixelSize:24}
                         }
                     }
-                    Label {Layout.leftMargin:20;Layout.rightMargin:20;Layout.fillWidth:true;visible:root.viewMode!=="suggestions";text:root.controller.instant.status || "";color:Atelier.accent;wrapMode:Text.Wrap;font.pixelSize:13;Accessible.role:Accessible.StaticText}
+                    Label {Layout.leftMargin:20;Layout.rightMargin:20;Layout.fillWidth:true;visible:root.viewMode!=="suggestions" && root.viewMode!=="clouds";text:root.controller.instant.status || "";color:Atelier.accent;wrapMode:Text.Wrap;font.pixelSize:13;Accessible.role:Accessible.StaticText}
                     RowLayout {
                         Layout.leftMargin:20;Layout.rightMargin:20;spacing:8
-                        Repeater {model:[{key:"suggestions",label:qsTr("Suggestions")},{key:"night",label:qsTr("Night")},{key:"sky",label:qsTr("Horizon")},{key:"world",label:qsTr("World")}]
-                            IconButton {required property var modelData;text:(root.viewMode===modelData.key?"✓ ":"")+modelData.label;checkable:true;checked:root.viewMode===modelData.key;borderColor:root.viewMode===modelData.key?Atelier.accent:Atelier.border;onClicked:root.viewMode=modelData.key;Accessible.description:root.viewMode===modelData.key?qsTr("Selected view"):""}
+                        Repeater {model:[{key:"suggestions",label:qsTr("Suggestions")},{key:"night",label:qsTr("Night")},{key:"sky",label:qsTr("Horizon")},{key:"world",label:qsTr("World")},{key:"clouds",label:qsTr("Clouds")}]
+                            IconButton {required property var modelData;text:(root.viewMode===modelData.key?"✓ ":"")+modelData.label;checkable:true;checked:root.viewMode===modelData.key;borderColor:root.viewMode===modelData.key?Atelier.accent:Atelier.border;onClicked:{root.viewMode=modelData.key;if(modelData.key==="clouds")root.controller.refreshWeather(false);}Accessible.description:root.viewMode===modelData.key?qsTr("Selected view"):""}
                         }
                     }
                     ColumnLayout {
@@ -126,6 +136,7 @@ Rectangle {
                             model:root.filteredSuggestions
                             Rectangle {
                                 required property var modelData
+                                readonly property var clouds: root.controller.recommendationWeather[modelData.id] || ({})
                                 Layout.fillWidth:true;implicitHeight:suggestionContent.implicitHeight+24
                                 color:Atelier.surface;radius:Atelier.controlRadius;border.color:Atelier.border
                                 ColumnLayout {
@@ -141,21 +152,32 @@ Rectangle {
                                         Label {required property var modelData;text:modelData.start+" → "+modelData.end;color:Atelier.text;font.pixelSize:12;wrapMode:Text.Wrap;Layout.fillWidth:true}
                                     }
                                     Label {text:qsTr("Highest within these windows: %1° · %2").arg(Number(modelData.peakAltitude).toFixed(1)).arg(modelData.peakTime);color:Atelier.secondary;font.pixelSize:12;wrapMode:Text.Wrap;Layout.fillWidth:true}
+                                    Label {visible:clouds.available===true;text:qsTr("Clouds forecast at the available hourly instants: %1–%2% · %3 values").arg(Math.round(clouds.minimum || 0)).arg(Math.round(clouds.maximum || 0)).arg(clouds.hours || 0)+(root.controller.weather.stale?qsTr(" · old forecast"):"");color:root.controller.weather.stale?Atelier.warning:Atelier.secondary;font.pixelSize:12;wrapMode:Text.Wrap;Layout.fillWidth:true}
                                     Label {text:modelData.sunLimit===-18?qsTr("Very dark sky · Sun below −18°"):qsTr("After civil twilight · Sun below −6°");color:Atelier.secondary;font.pixelSize:12;wrapMode:Text.Wrap;Layout.fillWidth:true}
                                 }
                             }
                         }
-                        Label {text:qsTr("Visibility does not guarantee easy viewing: equipment, light pollution and the Moon also matter. Uranus, Neptune and deep-sky objects generally need binoculars or a telescope. No weather forecast is included.");color:Atelier.secondary;font.pixelSize:12;wrapMode:Text.Wrap;Layout.fillWidth:true;Layout.bottomMargin:20}
+                        Label {text:qsTr("Visibility does not guarantee easy viewing: equipment, light pollution and the Moon also matter. Uranus, Neptune and deep-sky objects generally need binoculars or a telescope. Cloud forecasts can be loaded separately; missing cloud data never means a clear sky.");color:Atelier.secondary;font.pixelSize:12;wrapMode:Text.Wrap;Layout.fillWidth:true;Layout.bottomMargin:20}
                     }
+                    ColumnLayout {
+                        visible:root.viewMode==="clouds";Layout.fillWidth:true;Layout.leftMargin:20;Layout.rightMargin:20;spacing:10
+                        SettingLabel {text:qsTr("Hourly cloud forecast");explanation:qsTr("0% means no clouds predicted in the model grid cell; 100% means complete coverage. Low, mid and high layers overlap and must not be added. The hourly model values are forecasts, not live measurements. Cloud cover alone does not predict transparency or atmospheric turbulence.")}
+                        Label {text:root.controller.weather.available?root.cloudPercent(root.controller.weather.cloud_cover):"—";color:Atelier.text;font.pixelSize:28}
+                        Label {visible:root.controller.weather.available;text:qsTr("Forecast instant: %1").arg(root.controller.weather.validTime || "");color:Atelier.secondary;font.pixelSize:12;wrapMode:Text.Wrap;Layout.fillWidth:true}
+                        Label {visible:root.controller.weather.available;text:qsTr("Low: %1 · mid: %2 · high: %3").arg(root.cloudPercent(root.controller.weather.cloud_cover_low)).arg(root.cloudPercent(root.controller.weather.cloud_cover_mid)).arg(root.cloudPercent(root.controller.weather.cloud_cover_high));color:Atelier.secondary;wrapMode:Text.Wrap;Layout.fillWidth:true;font.pixelSize:13}
+                    }
+                    Label {visible:root.controller.weather.failed && root.viewMode!=="clouds" && root.controller.connectionStatus.length===0;text:root.controller.weather.status;Layout.fillWidth:true;Layout.leftMargin:20;Layout.rightMargin:20;wrapMode:Text.Wrap;color:Atelier.warning;font.pixelSize:12;Accessible.role:Accessible.AlertMessage}
+                    Label {visible:root.viewMode==="clouds" && root.controller.weather.status.length>0;text:root.controller.weather.status;Layout.fillWidth:true;Layout.leftMargin:20;Layout.rightMargin:20;wrapMode:Text.Wrap;color:root.controller.weather.failed?Atelier.warning:Atelier.secondary;font.pixelSize:12;Accessible.role:root.controller.weather.failed?Accessible.AlertMessage:Accessible.StaticText}
+                    Label {visible:root.controller.weather.stale && root.controller.weather.hasForecast;text:qsTr("This forecast was retrieved more than an hour ago. Refresh it before relying on the cloud percentages.");Layout.fillWidth:true;Layout.leftMargin:20;Layout.rightMargin:20;wrapMode:Text.Wrap;color:Atelier.warning;font.pixelSize:12}
                     ObservationPlot {
                         visible:root.viewMode!=="suggestions"
                         id:plot;objectName:"observationPlot"
-                        Layout.fillWidth:true;Layout.preferredHeight:root.viewMode==="world"?260:250
+                        Layout.fillWidth:true;Layout.preferredHeight:root.viewMode==="world"?260:root.viewMode==="clouds" && root.width<1100?170:250
                         Layout.leftMargin:12;Layout.rightMargin:12
                         controller:root.controller;mode:root.viewMode
                         colors:({text:Atelier.text,secondary:Atelier.secondary,border:Atelier.border,accent:Atelier.accent,surface:Atelier.surface,image:Atelier.image,primary:Atelier.primary,warning:Atelier.warning})
                         Accessible.role:Accessible.Graphic
-                        Accessible.name:root.viewMode==="world"?qsTr("World visibility map at the selected UTC instant"):root.viewMode==="sky"?qsTr("Object's trajectory above the horizon"):qsTr("Height curve over the chosen night, with eligible intervals in blue")
+                        Accessible.name:root.viewMode==="world"?qsTr("World visibility map at the selected UTC instant"):root.viewMode==="sky"?qsTr("Object's trajectory above the horizon"):root.viewMode==="clouds"?qsTr("Hourly forecast cloud coverage from 0 to 100 percent over the selected period"):qsTr("Height curve over the chosen night, with eligible intervals in blue")
                         onFractionChosen:fraction=>{timeSlider.value=fraction;timeDebounce.restart();}
                         onLocationChosen:(latitude,longitude)=>{root.manual=false;root.controller.chooseMapLocation(latitude,longitude);}
                     }
@@ -168,9 +190,14 @@ Rectangle {
                         AtelierSlider {id:timeSlider;objectName:"observationTime";Layout.fillWidth:true;from:0;to:1;value:.5;stepSize:1/1440;Accessible.name:qsTr("Explore the night");onMoved:timeDebounce.restart()}
                         Label {text:qsTr("Curve times are local. Each date covers noon to the following noon, including clock changes.");color:Atelier.secondary;Layout.fillWidth:true;wrapMode:Text.Wrap;font.pixelSize:12}
                     }
+                    ColumnLayout {visible:root.viewMode==="clouds";Layout.fillWidth:true;Layout.leftMargin:20;Layout.rightMargin:20;spacing:8
+                        Label {text:qsTr("Each point is an hourly forecast. The cursor shows the nearest available hour, within 30 minutes. Gaps mean missing data. No cloud percentage is extrapolated outside the returned forecast.");color:Atelier.secondary;wrapMode:Text.Wrap;Layout.fillWidth:true;font.pixelSize:12}
+                        Label {visible:root.controller.weather.received!==undefined;text:qsTr("Retrieved: %1 · model cell: %2°, %3°").arg(root.controller.weather.received || "").arg(Number(root.controller.weather.gridLatitude || 0).toFixed(3)).arg(Number(root.controller.weather.gridLongitude || 0).toFixed(3));color:Atelier.secondary;wrapMode:Text.Wrap;Layout.fillWidth:true;font.pixelSize:12}
+                        Label {text:qsTr("Source: <a href='https://open-meteo.com/en/docs'>Open-Meteo</a> · <a href='https://creativecommons.org/licenses/by/4.0/'>CC BY 4.0</a>. Only this place's coordinates are sent when loading a forecast.");textFormat:Text.RichText;linkColor:Atelier.accent;color:Atelier.secondary;wrapMode:Text.Wrap;Layout.fillWidth:true;font.pixelSize:12;onLinkActivated:link=>Qt.openUrlExternally(link)}
+                    }
                     Rectangle {visible:root.viewMode!=="suggestions";Layout.fillWidth:true;Layout.leftMargin:20;Layout.rightMargin:20;height:1;color:Atelier.border}
                     ColumnLayout {
-                        visible:root.viewMode!=="suggestions";Layout.fillWidth:true;Layout.leftMargin:20;Layout.rightMargin:20;spacing:10
+                        visible:root.viewMode!=="suggestions" && root.viewMode!=="clouds";Layout.fillWidth:true;Layout.leftMargin:20;Layout.rightMargin:20;spacing:10
                         Label {text:qsTr("Observation windows");color:Atelier.text;font.pixelSize:14;font.weight:Font.Medium}
                         Label {visible:(root.controller.result.slots || []).length===0;text:root.controller.result.noDarkness?qsTr("No period is dark enough for the selected limit. For the Moon or a planet, try a brighter-sky limit."):qsTr("No window with these limits. Try a different date, location or minimum height.");color:Atelier.secondary;wrapMode:Text.Wrap;Layout.fillWidth:true}
                         Repeater {model:root.controller.result.slots || []

@@ -15,17 +15,32 @@ AstroCapture réunit la capture vidéo et FITS, le traitement planétaire, la ca
 L’onglet **Observation**, placé avant **Guide**, prépare une observation de la Lune,
 des planètes ou d’un objet fixe. Il est indépendant de **Ciel profond**.
 
-1. Choisissez une suggestion ou recherchez un nom / numéro NGC, IC ou Messier.
+L’ouverture présente deux actions : **Trouver un objet visible** pour obtenir des
+idées, ou **Étudier** la cible actuelle. Les courbes et les détails apparaissent
+ensuite, selon la vue choisie.
+
+1. **Objet sélectionné** indique la seule cible active. **Changer d’objet…** ouvre
+   une liste unique avec recherche et favoris. Taper un nom filtre cette liste ;
+   cliquer sur un résultat le sélectionne et ouvre sa courbe. Fermer la liste
+   conserve le choix actuel.
 2. Choisissez un lieu proposé ou recherchez une ville en ligne. Ses coordonnées
    et son fuseau sont renseignés. Le bouton **☆ Lieu favori** enregistre votre lieu ;
    les options avancées permettent d’en préciser les coordonnées.
-3. Choisissez la date locale et une hauteur minimale. **30°** est un point de départ.
-   Le ciel très sombre est proposé pour le ciel profond, le crépuscule pour la Lune
-   et les planètes. Un seuil sans contrainte d’obscurité permet aussi d’explorer le jour.
+3. Choisissez la date locale, ou **Nuit actuelle**. Une nuit terminée est refusée
+   en préparation : la date valide est conservée et un message indique le problème.
+   Avant le lever du Soleil, la nuit en cours peut porter la date d’hier. Le contrôle
+   utilise le lever du Soleil et le fuseau du lieu ; sans lever, la limite est le midi
+   suivant. **Options avancées → Consulter des dates passées** permet de revoir une
+   observation, avec un repère explicite de consultation.
 
-Enregistrez vos **objets favoris** avec l’étoile près de leur liste. La liste des
-favoris les retrouve sans connexion, y compris les coordonnées d’un objet trouvé
-en ligne. Les lieux favoris apparaissent avec une étoile dans la liste des lieux.
+Les **Réglages de visibilité** se déplient à la demande. **30°** est une hauteur
+minimale de départ ; le ciel très sombre est proposé pour le ciel profond,
+le crépuscule pour la Lune et les planètes. Un seuil sans contrainte d’obscurité
+permet aussi d’explorer le jour.
+
+Enregistrez l’**objet sélectionné** avec l’étoile à côté de son nom. Retrouvez-le
+ensuite dans **Changer d’objet… → Favoris**. Les lieux favoris apparaissent avec
+une étoile dans la liste des lieux.
 Les favoris restent sur cet ordinateur (100 objets et 30 lieux au maximum).
 
 **Suggestions** compare les objets Messier inclus, quelques objets remarquables
@@ -34,9 +49,9 @@ locale et la hauteur minimale actualisent cette liste automatiquement. Jusqu’�
 4 cibles du Système solaire et 6 du ciel profond sont proposées, avec priorité aux
 favoris puis classement selon le temps au-dessus du seuil et la hauteur. Les filtres
 **Tout**, **Lune et planètes** et **Ciel profond** permettent de parcourir ces familles. Chaque résultat
-a au moins 20 minutes de créneau et indique ses propres critères : Soleil sous
+a au moins 20 minutes de créneau. Ses critères sont accessibles dans son aide : Soleil sous
 −18° pour les objets fixes, sous −6° pour le Système solaire. **Explorer** sélectionne
-la cible avec ces critères et ouvre sa courbe. La sélection n’est pas exhaustive ;
+la cible avec ces critères et ouvre sa courbe. Quatre suggestions sont affichées au départ ; un bouton ouvre les suivantes. La sélection n’est pas exhaustive ;
 le catalogue complet reste interrogeable. Les suggestions de Mercure et Vénus
 excluent les créneaux à moins de 30° du Soleil. Le matériel, la pollution lumineuse,
 la Lune et la météo peuvent rendre un objet difficile à observer. Les prévisions
@@ -51,8 +66,8 @@ maille du modèle, 100 % une couverture complète. Les couches peuvent se superp
 et ne s’additionnent pas. Ces données sont des **prévisions de modèles**, pas une
 mesure en direct, une probabilité de ciel dégagé ou un indice de turbulence.
 
-La source, l’heure de récupération et les coordonnées de la maille du modèle sont
-affichées. La période doit être couverte par l’horizon disponible (au maximum
+La source, l’heure de récupération, les couches nuageuses et les coordonnées de la
+maille du modèle sont accessibles dans **Détails de la prévision et source**. La période doit être couverte par l’horizon disponible (au maximum
 16 jours à venir, avec les données de la veille). Les données manquantes, nulles ou
 hors période sont explicites ; elles ne valent jamais 0 %. Aucun pourcentage n’est
 extrapolé hors des heures retournées. **Actualiser** renouvelle la prévision.
@@ -66,8 +81,9 @@ sans clé est prévu ici pour l’usage personnel non commercial. Les données s
 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), avec attribution à Open-Meteo
 et valeurs affichées arrondies ; le cache ne contient ni nom d’objet ni identifiant personnel.
 
-Le **lever et le coucher du Soleil** sont visibles immédiatement. Le détail
-**Jour, crépuscule et nuit** liste le jour, le crépuscule civil et la nuit astronomique.
+Le **lever et le coucher du Soleil** sont visibles sous les créneaux dans **Nuit**
+et **Horizon**. La section **Détails** conserve les informations lunaires, la direction,
+le jour, le crépuscule civil et la nuit astronomique.
 Un libellé indique aussi l’état à l’instant du curseur, avec les crépuscules civil,
 nautique et astronomique. Les périodes sans lever, coucher ou nuit sont explicites.
 
@@ -78,6 +94,11 @@ affichées avec la date ; la période va de midi au midi suivant et peut durer 2
 du centre, le point le plus haut dans cette période, la fraction éclairée de la Lune
 et sa distance angulaire à la cible.
 
+**Monde** montre où l’**objet sélectionné** respecte les seuils de hauteur et
+d’obscurité à l’instant UTC affiché. Sa courte légende distingue les seuils respectés,
+l’objet trop bas, le ciel trop clair et l’objet sous l’horizon. Elle ne représente
+ni les nuages ni simplement le jour et la nuit. Cette vue conserve seulement la carte,
+la légende et le curseur ; les horaires et détails du lieu restent dans Nuit/Horizon.
 La carte est une vue régionale sur une grille de **6°**, calculée au même instant UTC.
 Un clic choisit un lieu et conserve cet instant, avec le fuseau initial **UTC** :
 choisissez le fuseau local dans les options avancées si nécessaire.

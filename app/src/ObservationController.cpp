@@ -130,7 +130,11 @@ ObservationController::ObservationController(QObject *parent)
   settings_ = QSettings().value("observation/settings").toMap();
   if (settings_.isEmpty())
     settings_ = sites_[0].toMap();
-  settings_["date"] = QDate::currentDate().toString(Qt::ISODate);
+  auto initialPlanning = settings_;
+  initialPlanning.remove("date");
+  const auto planning = planningNight(initialPlanning);
+  settings_["date"] =
+      planning.value("currentDate", QDate::currentDate().toString(Qt::ISODate));
   settings_["minimum"] = settings_.value("minimum", 30);
   settings_["sunLimit"] = settings_.value("sunLimit", -18);
   target_ = catalog_[0];
@@ -352,6 +356,31 @@ void ObservationController::persist() {
   s["ra"] = target_.ra;
   s["dec"] = target_.dec;
   prefs.setValue("observation/settings", s);
+}
+QVariantMap
+ObservationController::planningNight(const QVariantMap &options) const {
+  try {
+    auto number = [&](const char *key) {
+      bool ok = false;
+      const double value = QString(options.value(key).toString())
+                               .replace(',', '.')
+                               .toDouble(&ok);
+      if (!ok || !std::isfinite(value))
+        throw std::runtime_error("Enter valid numerical values.");
+      return value;
+    };
+    const ObservationSite site{number("latitude"), number("longitude"),
+                               number("elevation")};
+    const QString zone = options.value("zone").toString();
+    const auto now = QDateTime::currentSecsSinceEpoch();
+    const auto currentDate = observationPlanningDate(site, zone, now);
+    const auto date = options.value("date", currentDate).toString();
+    const auto end = observationNightEnd(site, date, zone);
+    return {
+        {"past", end <= now}, {"currentDate", currentDate}, {"endUtc", end}};
+  } catch (const std::exception &e) {
+    return {{"error", tr(e.what())}};
+  }
 }
 bool ObservationController::calculate(const QVariantMap &options) {
   try {

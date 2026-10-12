@@ -128,6 +128,40 @@ QDateTime observationNoon(const QString &date, const QString &zone) {
     throw std::runtime_error("Enter a valid date (1900–2100) and time zone.");
   return QDateTime(d, QTime(12, 0), z);
 }
+qint64 observationNightEnd(const ObservationSite &site, const QString &date,
+                           const QString &zone) {
+  const auto start = observationNoon(date, zone);
+  const auto end =
+      QDateTime(start.date().addDays(1), QTime(12, 0), start.timeZone())
+          .toSecsSinceEpoch();
+  // The last interval with the Sun below the horizon is the chosen night.
+  // Polar nights and periods without a sunset keep the local-noon boundary.
+  bool night = !observationSunIsUp(site, start.toSecsSinceEpoch());
+  qint64 nightEnd = end;
+  for (const auto &event :
+       observationSolarEvents(site, start.toSecsSinceEpoch(), end)) {
+    if (event.kind == "sunset") {
+      night = true;
+      nightEnd = end;
+    } else if (event.kind == "sunrise" && night) {
+      night = false;
+      nightEnd = event.utc;
+    }
+  }
+  return nightEnd;
+}
+QString observationPlanningDate(const ObservationSite &site,
+                                const QString &zone, qint64 now) {
+  const QTimeZone timeZone(zone.toUtf8());
+  if (!timeZone.isValid())
+    throw std::runtime_error("Enter a valid date (1900–2100) and time zone.");
+  const auto local = QDateTime::fromSecsSinceEpoch(now, timeZone);
+  const auto previous = local.date().addDays(-1).toString(Qt::ISODate);
+  if (local.time() < QTime(12, 0) &&
+      observationNightEnd(site, previous, zone) > now)
+    return previous;
+  return local.date().toString(Qt::ISODate);
+}
 std::vector<ObservationSample> observationSamples(const ObservationTarget &t,
                                                   const ObservationSite &s,
                                                   qint64 start, qint64 end) {

@@ -128,6 +128,36 @@ int main(int argc, char **argv) {
   }
   ASTRO_TEST_CHECK(rejected);
   const qint64 start = observationNoon("2026-10-11", "UTC").toSecsSinceEpoch();
+  // An ongoing night remains selectable after midnight, but ends at sunrise,
+  // rather than at UTC midnight or the following local noon.
+  for (const auto &place : std::vector<std::pair<ObservationSite, QString>>{
+           {{48.8566, 2.3522, 0}, "Europe/Paris"},
+           {{-33.8688, 151.2093, 0}, "Australia/Sydney"},
+           {{40.7128, -74.006, 0}, "America/New_York"},
+           {{1.87, -157.43, 0}, "Pacific/Kiritimati"}}) {
+    const auto ending =
+        observationNightEnd(place.first, "2026-10-11", place.second);
+    ASTRO_TEST_CHECK(!observationSunIsUp(place.first, ending - 2));
+    ASTRO_TEST_CHECK(observationSunIsUp(place.first, ending + 2));
+    ASTRO_TEST_CHECK(observationPlanningDate(place.first, place.second,
+                                             ending - 1) == "2026-10-11");
+    ASTRO_TEST_CHECK(observationPlanningDate(place.first, place.second,
+                                             ending) == "2026-10-12");
+  }
+  for (const auto date : {"2026-03-28", "2026-10-24"}) {
+    const auto ending =
+        observationNightEnd({48.8566, 2.3522, 0}, date, "Europe/Paris");
+    ASTRO_TEST_CHECK(observationPlanningDate({48.8566, 2.3522, 0},
+                                             "Europe/Paris",
+                                             ending - 1) == date);
+    ASTRO_TEST_CHECK(
+        observationPlanningDate({48.8566, 2.3522, 0}, "Europe/Paris",
+                                ending + 1) ==
+        QDate::fromString(date, Qt::ISODate).addDays(1).toString(Qt::ISODate));
+  }
+  ASTRO_TEST_CHECK(
+      observationNightEnd({69.6492, 18.9553, 0}, "2026-12-12", "Europe/Oslo") ==
+      observationNoon("2026-12-13", "Europe/Oslo").toSecsSinceEpoch());
   const ObservationTarget polar{"polar", "polar", "test", -1, 0, 89};
   const ObservationTarget south{"south", "south", "test", -1, 0, -89};
   for (const auto &v :
@@ -367,6 +397,42 @@ int main(int argc, char **argv) {
     qWarning() << component.errors();
   ASTRO_TEST_CHECK(object);
   auto *root = qobject_cast<QQuickItem *>(object.get());
+  ASTRO_TEST_CHECK(root->property("viewMode") == "prepare");
+  ASTRO_TEST_CHECK(!item(root, "observationPlot")->isVisible());
+  ASTRO_TEST_CHECK(!item(root, "observationWindows")->isVisible());
+  const auto validSettings = controller.settings();
+  auto *dateField = item(root, "observationDate");
+  dateField->setProperty(
+      "text", QDate::currentDate().addDays(-7).toString(Qt::ISODate));
+  ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root, "calculate"));
+  ASTRO_TEST_CHECK(controller.settings() == validSettings);
+  ASTRO_TEST_CHECK(dateField->property("text") == validSettings["date"]);
+  ASTRO_TEST_CHECK(!root->property("dateNotice").toString().isEmpty());
+  auto *history = item(root, "observationHistory");
+  history->setProperty("checked", true);
+  dateField->setProperty(
+      "text", QDate::currentDate().addDays(-7).toString(Qt::ISODate));
+  ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root, "calculate"));
+  ASTRO_TEST_CHECK(controller.settings()["date"] ==
+                   QDate::currentDate().addDays(-7).toString(Qt::ISODate));
+  ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root, "currentNight"));
+  ASTRO_TEST_CHECK(!history->property("checked").toBool());
+  ASTRO_TEST_CHECK(
+      !controller.planningNight(controller.settings())["past"].toBool());
+  ASTRO_TEST_CHECK(root->property("dateNotice").toString().isEmpty());
+  auto invalidPlanning = controller.settings();
+  invalidPlanning["latitude"] = "not a number";
+  ASTRO_TEST_CHECK(controller.planningNight(invalidPlanning).contains("error"));
+  ASTRO_TEST_CHECK(controller.calculate(validSettings));
+  const auto selectedId = controller.settings()["target"];
+  controller.search("moon");
+  ASTRO_TEST_CHECK(controller.settings()["target"] == selectedId);
+  ASTRO_TEST_CHECK(
+      QMetaObject::invokeMethod(root, "chooseTarget", Q_ARG(QVariant, "moon")));
+  ASTRO_TEST_CHECK(controller.settings()["target"] == "moon");
+  ASTRO_TEST_CHECK(item(root, "observationSelectedTarget")->property("text") ==
+                   controller.result()["target"]);
+  ASTRO_TEST_CHECK(controller.selectTarget(selectedId.toString()));
   root->setProperty("viewMode", "night");
   QQuickWindow window;
   window.show();
@@ -403,6 +469,8 @@ int main(int argc, char **argv) {
                    firstSuggestion["sunLimit"]);
   root->setProperty("viewMode", "world");
   QCoreApplication::processEvents();
+  ASTRO_TEST_CHECK(!item(root, "observationWindows")->isVisible());
+  ASTRO_TEST_CHECK(!item(root, "observationDetails")->isVisible());
   if (!qEnvironmentVariable("ASTRO_OBSERVATION_SCREENSHOTS").isEmpty())
     window.grabWindow().save(
         qEnvironmentVariable("ASTRO_OBSERVATION_SCREENSHOTS") +

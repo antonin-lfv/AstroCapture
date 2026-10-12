@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.18.2 — 2026-10-12
+
+- Make the active Observation target explicit and group catalogue search and favourites in one chooser; filtering leaves the selected target unchanged until a result is chosen.
+- Start with two clear actions and reveal charts, suggestions, visibility settings and detailed solar/lunar/weather information progressively. Show four suggestions initially, with more available on request.
+- Reject ended nights when planning, using the observing site’s local time and sunrise; retain an ongoing night after midnight and support explicit past-observation review in Advanced.
+- Give World a target-specific title, compact visibility legend and time slider; keep local observing windows and solar/lunar details in Night and Horizon.
+- Update French help, the integrated guide and README; verify selection, past-date protection, time zones, sunrise boundaries, clock changes and native layouts.
+
 ## 1.18.1 — 2026-10-12
 
 - Add an hourly cloud forecast view to Observation, using Open-Meteo total/low/mid/high cloud coverage for the selected coordinates, synchronized with the local/UTC time cursor.

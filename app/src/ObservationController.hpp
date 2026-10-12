@@ -71,6 +71,7 @@ public:
   Q_INVOKABLE void searchOnline(const QString &query);
   Q_INVOKABLE bool selectTarget(const QString &id);
   Q_INVOKABLE bool calculate(const QVariantMap &options);
+  Q_INVOKABLE QVariantMap planningNight(const QVariantMap &options) const;
   Q_INVOKABLE void setFraction(double value);
   Q_INVOKABLE void chooseMapLocation(double latitude, double longitude);
   Q_INVOKABLE bool saveSite(const QString &name);

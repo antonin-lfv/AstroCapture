@@ -180,7 +180,12 @@ static int workspace(const QString& directory,bool restore,bool faults=false) {
         auto settings=observation->settings();settings["date"]="2026-12-12";ASTRO_TEST_CHECK(observation->calculate(settings));
         ASTRO_TEST_CHECK(observation->selectTarget("NGC1976"));
         window->setProperty("currentTab","observation");
-        auto* workspace=window->findChild<QObject*>("observationWorkspace");ASTRO_TEST_CHECK(workspace);workspace->setProperty("viewMode","night");
+        auto* workspace=window->findChild<QObject*>("observationWorkspace");ASTRO_TEST_CHECK(workspace);
+        ASTRO_TEST_CHECK(workspace->property("viewMode")=="prepare");
+        for(const auto size:{QSize(1440,960),QSize(1100,800),QSize(900,700)}) {
+            window->resize(size);capture(window,QString("observation-welcome-%1").arg(size.width()));
+        }
+        workspace->setProperty("viewMode","night");
         for(const auto size:{QSize(1440,960),QSize(1100,800),QSize(900,700)}) {
             window->resize(size);capture(window,QString("observation-night-%1").arg(size.width()));
         }
@@ -193,7 +198,18 @@ static int workspace(const QString& directory,bool restore,bool faults=false) {
         ASTRO_TEST_CHECK(QMetaObject::invokeMethod(observation,"updateReachability",Qt::DirectConnection,Q_ARG(int,1)));
         capture(window,"observation-connection-lost-900");
         ASTRO_TEST_CHECK(QMetaObject::invokeMethod(observation,"updateReachability",Qt::DirectConnection,Q_ARG(int,4)));
-        workspace->setProperty("viewMode","world");capture(window,"observation-world-900");
+        workspace->setProperty("viewMode","world");
+        for(const auto size:{QSize(1440,960),QSize(1100,800),QSize(900,700)}) {
+            window->resize(size);capture(window,QString("observation-world-%1").arg(size.width()));
+        }
+        ASTRO_TEST_CHECK(QMetaObject::invokeMethod(workspace,"openObjectChooser"));
+        for(const auto size:{QSize(1440,960),QSize(1100,800),QSize(900,700)}) {
+            window->resize(size);capture(window,QString("observation-object-chooser-%1").arg(size.width()));
+        }
+        auto* chooser=workspace->findChild<QObject*>("observationObjectChooser");ASTRO_TEST_CHECK(chooser);ASTRO_TEST_CHECK(QMetaObject::invokeMethod(chooser,"close"));
+        auto* date=workspace->findChild<QObject*>("observationDate");ASTRO_TEST_CHECK(date);date->setProperty("text",QDate::currentDate().addDays(-7).toString(Qt::ISODate));
+        ASTRO_TEST_CHECK(QMetaObject::invokeMethod(workspace,"calculate"));capture(window,"observation-past-night-900");
+        ASTRO_TEST_CHECK(QMetaObject::invokeMethod(workspace,"currentNight"));
         settings=observation->settings();settings["date"]="2026-12-23";ASTRO_TEST_CHECK(observation->calculate(settings));
         ASTRO_TEST_CHECK(observation->selectTarget("moon"));observation->setFraction(.6);workspace->setProperty("viewMode","sky");capture(window,"observation-moon-horizon-900");
         window->setProperty("quitApproved",true);return 0;

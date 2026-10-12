@@ -9,6 +9,7 @@ ColumnLayout {
     property alias text: input.text
     property alias validator: input.validator
     signal accepted()
+    function focusInput() { input.forceActiveFocus(); }
     spacing: 5
     SettingLabel {text: root.label; explanation: root.help; Layout.fillWidth: true}
     TextField {

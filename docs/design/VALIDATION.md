@@ -1066,3 +1066,40 @@ localisations différentes, sélection horaire, cache ancien et perte de connexi
 Les 52 tests de régression passent. Un contrôle en ligne séparé vérifie une
 récupération réelle des prévisions, en plus des recherches de ville et d’objet.
 La prévision n’est ni une mesure en direct, ni un indice de transparence ou de turbulence.
+
+## Lot 1.18.2 — clarté du parcours Observation
+
+L’accueil propose deux actions avant d’afficher des résultats : trouver un objet
+visible ou étudier la cible actuelle. **Objet sélectionné** nomme la seule cible
+active. La fenêtre **Changer d’objet** regroupe Catalogue et Favoris ; une recherche
+filtre les résultats sans changer le choix. Une coche identifie la sélection.
+
+La préparation vérifie la fin de la nuit au lieu choisi, au lever du Soleil et
+selon son fuseau. La nuit encore en cours après minuit reste sélectionnable ; les
+changements d’heure et le passage de la ligne de date sont couverts. Sans lever,
+le midi suivant sert de limite. Une date terminée est refusée sans remplacer les
+calculs ni la date valide. La consultation historique reste accessible explicitement
+dans les options avancées. La vérification se renouvelle à l’ouverture de l’onglet
+et chaque minute pendant son affichage.
+
+**Monde** précise qu’il montre la visibilité de l’objet sélectionné au même instant
+UTC, avec quatre états et un curseur horaire. Les créneaux du lieu, les horaires du
+Soleil et les détails lunaires restent dans Nuit/Horizon. Les détails de visibilité,
+de la Lune et de la prévision se déplient à la demande. Les suggestions présentent
+quatre objets au départ ; les suivants et les critères précis restent accessibles.
+
+Les captures `previews/native/observation-clarity/` proviennent de la fenêtre native
+en français, avec les calculs de M42, la trajectoire lunaire et les vraies données
+horaires Open-Meteo conservées dans la fixture de validation. Accueil, Nuit,
+Suggestions, Monde, choix d’objet et Nuages ont été inspectés à 1440 × 960,
+1100 × 800 et 900 × 700. Le curseur de la carte est entièrement visible aux trois
+tailles ; les sections supplémentaires défilent dans les vues plus détaillées.
+Les captures montrent aussi une date refusée et les messages de connexion.
+
+Les 52 tests de régression passent. Les ajouts vérifient la sélection unique,
+la conservation du choix pendant une recherche, la protection des dates passées,
+la consultation historique, le retour à la nuit actuelle, les frontières du lever
+du Soleil dans quatre fuseaux, les changements d’heure et le cas polaire.
+Les traductions actives d’Observation et du Guide sont présentes dans le catalogue
+français compilé. Les traitements et les formats des projets restent couverts
+par les tests existants.

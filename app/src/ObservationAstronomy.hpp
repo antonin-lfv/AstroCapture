@@ -41,4 +41,8 @@ std::vector<ObservationWindow>
 observationWindows(const ObservationTarget &, const ObservationSite &,
                    qint64 start, qint64 end, double minimum, double sunLimit);
 QDateTime observationNoon(const QString &date, const QString &zone);
+qint64 observationNightEnd(const ObservationSite &, const QString &date,
+                           const QString &zone);
+QString observationPlanningDate(const ObservationSite &, const QString &zone,
+                                qint64 now);
 } // namespace astro::app

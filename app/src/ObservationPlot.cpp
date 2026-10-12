@@ -190,9 +190,6 @@ void ObservationPlot::paint(QPainter *p) {
     p->setPen(QPen(text, 2));
     p->setBrush(primary);
     p->drawEllipse(pos, 5, 5);
-    p->setPen(secondary);
-    p->drawText(QRectF(16, height() - 22, width() - 32, 20), Qt::AlignLeft,
-                tr("Click a location · UTC is kept for map positions"));
     return;
   }
   if (mode_ == "sky") {

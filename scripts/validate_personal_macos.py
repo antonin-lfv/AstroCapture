@@ -130,7 +130,16 @@ def main():
                 assert error not in log, log
             print("read-only DMG startup with protected user preferences: passed", flush=True)
         finally:
-            run(["hdiutil", "detach", str(mount)])
+            # macOS can briefly retain a newly launched bundle after its
+            # process exits. Let those read-only handles close before cleanup.
+            for attempt in range(5):
+                try:
+                    run(["hdiutil", "detach", str(mount)])
+                    break
+                except RuntimeError:
+                    if attempt == 4:
+                        raise
+                    time.sleep(0.5)
     print("Requested checks passed; temporary volumes detached.", flush=True)
 
 

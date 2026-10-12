@@ -1221,3 +1221,11 @@ boussole et carte, carte à l’heure réelle, Sydney avec deux dates différent
 prévision horaire enregistrée et absence de connexion. La commande horaire reste
 visible lors du défilement. Guide et README décrivent la page commune ; toutes
 les traductions actives sont présentes dans le catalogue français compilé.
+
+L’installateur **AstroCapture-1.18.5.dmg** est généré et sa somme de contrôle est
+vérifiée. Le démarrage natif depuis le DMG en lecture seule réussit, avec les
+préférences utilisateur protégées, sans erreur de chargement QML. Le validateur
+réessaie brièvement le démontage si macOS conserve un accès après la fermeture
+du processus ; les volumes temporaires sont ensuite détachés. Journaux :
+`build/observation-overview-dmg-verify.log` et
+`build/observation-overview-dmg-startup.log`.

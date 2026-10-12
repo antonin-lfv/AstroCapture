@@ -68,6 +68,14 @@ QVariantMap site(QString name, double lat, double lon, QString zone) {
   return {{"name", name},   {"latitude", lat}, {"longitude", lon},
           {"elevation", 0}, {"zone", zone},    {"favorite", false}};
 }
+bool recommendationTarget(const ObservationTarget &target, bool favorite) {
+  static const QStringList extra = {"NGC3372", "NGC5139", "NGC5128",
+                                    "NGC0104", "NGC2070", "NGC0253",
+                                    "NGC7000", "NGC0869", "NGC0884"};
+  static const QRegularExpression messier("^M[0-9]+");
+  return target.body >= 0 || favorite || extra.contains(target.id) ||
+         (target.name.startsWith('M') && messier.match(target.name).hasMatch());
+}
 } // namespace
 ObservationController::ObservationController(QObject *parent)
     : QObject(parent) {
@@ -83,6 +91,13 @@ ObservationController::ObservationController(QObject *parent)
       site(tr("New York"), 40.7128, -74.006, "America/New_York"),
       site(tr("Tromsø"), 69.6492, 18.9553, "Europe/Oslo"),
       site(tr("Cape Town"), -33.9249, 18.4241, "Africa/Johannesburg")};
+  // Published T68 location, checked 2026-10-12:
+  // https://support.itelescope.net/support/solutions/articles/245471-telescope-t68
+  // This is a geographic preset only; it has no provider integration.
+  auto t68 = site(tr("T68 · Utah"), 37.7378, -113.6975, "America/Denver");
+  t68["elevation"] = 1570;
+  sites_.append(t68);
+  builtinSiteCount_ = sites_.size();
   const auto stored = QSettings().value("observation/favorites").toList();
   for (const auto &value : stored) {
     auto s = value.toMap();
@@ -93,7 +108,8 @@ ObservationController::ObservationController(QObject *parent)
         std::abs(s.value("longitude").toDouble()) > 180 ||
         !std::isfinite(s.value("elevation").toDouble()) ||
         s.value("elevation").toDouble() < -500 ||
-        s.value("elevation").toDouble() > 10000 || sites_.size() >= 39)
+        s.value("elevation").toDouble() > 10000 ||
+        sites_.size() >= builtinSiteCount_ + 30)
       continue;
     s["favorite"] = true;
     sites_.append(s);
@@ -427,9 +443,21 @@ bool ObservationController::calculate(const QVariantMap &options) {
                            end.toSecsSinceEpoch(), minimum, sunLimit);
     const auto solar = observationSolarEvents(s, start.toSecsSinceEpoch(),
                                               end.toSecsSinceEpoch());
+    auto siteSolar = solar;
+    const auto followingEnd = end.toSecsSinceEpoch() + 86400;
+    if (QDateTime::fromSecsSinceEpoch(followingEnd, QTimeZone::UTC)
+            .date()
+            .year() <= 2100) {
+      const auto following =
+          observationSolarEvents(s, end.toSecsSinceEpoch(), followingEnd);
+      siteSolar.insert(siteSolar.end(), following.begin(), following.end());
+    }
     target_ = t;
     site_ = s;
     settings_ = options;
+    settings_["latitude"] = s.latitude;
+    settings_["longitude"] = s.longitude;
+    settings_["elevation"] = s.elevation;
     settings_["referenceZone"] = referenceSource;
     settings_.remove("manual");
     settings_["target"] = t.id;
@@ -564,6 +592,12 @@ bool ObservationController::calculate(const QVariantMap &options) {
       daylightList.append(QVariantMap{{"start", localTime(dayBegin)},
                                       {"end", localTime(end_)}});
     result_["solarEvents"] = solarList;
+    QVariantList siteEvents;
+    for (const auto &event : siteSolar)
+      siteEvents.append(QVariantMap{{"kind", event.kind},
+                                    {"utc", event.utc},
+                                    {"time", localTime(event.utc)}});
+    result_["siteSolarEvents"] = siteEvents;
     result_["sunrise"] =
         sunrise.isEmpty() ? tr("No sunrise in this period") : sunrise;
     result_["sunset"] =
@@ -863,7 +897,7 @@ bool ObservationController::saveSite(const QString &name) {
       break;
     }
   }
-  if (existing < 0 && sites_.size() >= 39) {
+  if (existing < 0 && sites_.size() >= builtinSiteCount_ + 30) {
     error_ = tr(
         "30 favourite places already saved. Remove one before adding another.");
     emit changed();
@@ -977,7 +1011,7 @@ bool ObservationController::selectCity(int index) {
   const auto s = cityResults_[index].toMap();
   for (auto it = s.begin(); it != s.end(); ++it)
     options[it.key()] = it.value();
-  return calculate(options);
+  return changeSite(options);
 }
 QString ObservationController::networkFailure(int code, bool interrupted) {
   if (interrupted || code == QNetworkReply::RemoteHostClosedError ||
@@ -1032,6 +1066,7 @@ void ObservationController::saveFavoriteTargets() {
   recommendationsKey_.clear();
   updateRecommendations();
   emit favoritesChanged();
+  emit instantChanged();
   emit changed();
   emit weatherChanged();
 }
@@ -1080,9 +1115,6 @@ void ObservationController::updateRecommendations() {
     return;
   }
   const double minimum = settings_["minimum"].toDouble();
-  const QStringList extra = {"NGC3372", "NGC5139", "NGC5128",
-                             "NGC0104", "NGC2070", "NGC0253",
-                             "NGC7000", "NGC0869", "NGC0884"};
   struct Candidate {
     ObservationTarget target;
     double score, limit;
@@ -1097,14 +1129,7 @@ void ObservationController::updateRecommendations() {
         favoriteTargets_.begin(), favoriteTargets_.end(), [&](const auto &v) {
           return v.toMap().value("id").toString() == t.id;
         });
-    if (t.body < 0 && !t.name.startsWith('M') && !extra.contains(t.id) &&
-        !favorite)
-      continue;
-    // All built-in Messier designations start with M<number>; exclude unrelated
-    // common names.
-    if (t.body < 0 &&
-        !QRegularExpression("^M[0-9]+").match(t.name).hasMatch() &&
-        !extra.contains(t.id) && !favorite)
+    if (!recommendationTarget(t, favorite))
       continue;
     ++pool;
     const double limit = t.body >= 0 ? -6 : -18;
@@ -1198,6 +1223,63 @@ void ObservationController::updateRecommendations() {
   recommendationsKey_ = key;
   recommendationPool_ = pool;
   result_["recommendationPool"] = pool;
+}
+QVariantList ObservationController::visibleTargets() const {
+  if (!start_)
+    return {};
+  const auto utc = instant_.value("utcSeconds").toLongLong();
+  const auto sun = instant_.value("sun").toDouble();
+  const auto minimum = settings_.value("minimum").toDouble();
+  QSet<QString> favorites;
+  for (const auto &value : favoriteTargets_)
+    favorites.insert(value.toMap().value("id").toString());
+  struct Candidate {
+    QVariantMap data;
+    double score;
+  };
+  std::vector<Candidate> candidates;
+  for (const auto &target : catalog_) {
+    const bool favorite = favorites.contains(target.id);
+    if (!recommendationTarget(target, favorite))
+      continue;
+    const double limit = target.body >= 0 ? -6 : -18;
+    if (sun > limit)
+      continue;
+    const auto position = observationPosition(target, site_, utc);
+    if (position.altitude < minimum)
+      continue;
+    if ((target.body == BODY_MERCURY || target.body == BODY_VENUS) &&
+        observationSeparation(
+            position, observationPosition({{}, {}, {}, BODY_SUN}, site_, utc)) <
+            30)
+      continue;
+    candidates.push_back({{{"id", target.id},
+                           {"name", target.name},
+                           {"body", target.body},
+                           {"category", target.body == BODY_MOON ? tr("Moon")
+                                        : target.body >= 0 ? tr("Planet")
+                                                           : tr("Deep sky")},
+                           {"altitude", position.altitude},
+                           {"azimuth", position.azimuth},
+                           {"sunLimit", limit},
+                           {"minimum", minimum},
+                           {"ra", target.ra},
+                           {"dec", target.dec}},
+                          position.altitude + (favorite ? 10000 : 0)});
+  }
+  std::stable_sort(
+      candidates.begin(), candidates.end(),
+      [](const auto &a, const auto &b) { return a.score > b.score; });
+  QVariantList targets;
+  int moving = 0, fixed = 0;
+  for (const auto &candidate : candidates) {
+    const bool body = candidate.data.value("body").toInt() >= 0;
+    if (body ? moving >= 4 : fixed >= 6)
+      continue;
+    targets.append(candidate.data);
+    body ? ++moving : ++fixed;
+  }
+  return targets;
 }
 bool ObservationController::weatherPeriodSupported() const {
   const auto day = QDateTime::currentDateTimeUtc().date();

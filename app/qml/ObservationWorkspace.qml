@@ -32,15 +32,42 @@ Rectangle {
         dateNotice = "";
         liveNow = controller.showNow();
     }
+    function nextSolar(kind) {
+        return (controller.result.siteSolarEvents || []).find(event => event.kind === kind && event.utc > controller.instant.utcSeconds);
+    }
+    function refreshSiteWeather() {
+        if (autoLoadWeather)
+            controller.refreshWeather(false);
+    }
+    function prepareNight() {
+        goNow();
+        liveNow = false;
+        const now = controller.instant.utcSeconds;
+        const dark = controller.instant.sun <= -18;
+        const upcoming = nextSolar("nightStart");
+        // Copy the UTC value before changing the period and its event model.
+        const upcomingUtc = upcoming ? Number(upcoming.utc) : 0;
+        currentNight();
+        if (!dark && upcomingUtc) {
+            if (upcomingUtc > controller.result.endUtcSeconds)
+                stepDay(1);
+            controller.setReferenceUtc(upcomingUtc);
+        } else if (now >= controller.result.startUtcSeconds && now <= controller.result.endUtcSeconds) {
+            controller.setReferenceUtc(now);
+        }
+        suggestionPeriod = "night";
+        suggestionsSection.expanded = true;
+        mainScroll.contentItem.contentY = 0;
+    }
     function findSuggestions() {
-        if (nightState.past && !history.checked)
-            currentNight();
         suggestionsSection.expanded = true;
         mainScroll.contentItem.contentY = Math.max(0, suggestionsSection.y - 16);
     }
     property string suggestionKind: "all"
-    property int suggestionLimit: 4
-    readonly property var filteredSuggestions: controller.recommendations.filter(value => suggestionKind === "all" || (suggestionKind === "solar" ? value.body >= 0 : value.body < 0))
+    property int suggestionLimit: 3
+    property string suggestionPeriod: "instant"
+    property bool autoLoadWeather: true
+    readonly property var filteredSuggestions: (suggestionPeriod === "instant" ? controller.visibleTargets : controller.recommendations).filter(value => suggestionKind === "all" || (suggestionKind === "solar" ? value.body >= 0 : value.body < 0))
     property bool syncing: false
     property bool ready: false
     property bool timeUpdatePending: false
@@ -136,7 +163,10 @@ Rectangle {
         const moved = Number(options.latitude) !== Number(current.latitude) || Number(options.longitude) !== Number(current.longitude) || Number(options.elevation) !== Number(current.elevation) || options.zone !== current.zone;
         if (moved && options.date === current.date) {
             dateNotice = "";
-            return controller.changeSite(options);
+            const applied = controller.changeSite(options);
+            if (applied)
+                refreshSiteWeather();
+            return applied;
         }
         if (options.date !== current.date)
             liveNow = false;
@@ -152,7 +182,10 @@ Rectangle {
             return false;
         }
         dateNotice = "";
-        return controller.calculate(options);
+        const applied = controller.calculate(options);
+        if (applied)
+            refreshSiteWeather();
+        return applied;
     }
     function sync() {
         if (controller.error.length)
@@ -223,7 +256,7 @@ Rectangle {
         if (controller.selectTarget(id)) {
             objectChooser.close();
             suggestionsSection.expanded = false;
-            mainScroll.contentItem.contentY = 0;
+            mainScroll.contentItem.contentY = Math.max(0, targetHeader.y - 16);
             return true;
         }
         return false;
@@ -250,11 +283,14 @@ Rectangle {
         ready = true;
         if (visible && liveNow)
             goNow();
+        if (visible)
+            refreshSiteWeather();
     }
     onVisibleChanged: if (ready && visible) {
         checkNight();
         if (liveNow)
             goNow();
+        refreshSiteWeather();
     }
     Timer {
         objectName: "observationLiveClock"
@@ -394,7 +430,221 @@ Rectangle {
                             Layout.fillWidth: true
                             Layout.margins: 16
                             spacing: 16
+                            ObservationCard {
+                                objectName: "observationSiteSummary"
+                                Layout.fillWidth: true
+                                title: qsTr("Sky at %1").arg(root.controller.settings.name || "")
+                                help: qsTr("This summary describes any selected place at the shared time. Day and twilight are calculated locally. Cloud cover is a model forecast, not a live camera measurement. The recommendations below use this place and time.")
+                                Label {
+                                    objectName: "observationSiteClock"
+                                    text: qsTr("At the telescope: %1").arg(root.controller.reference.siteDisplay || "")
+                                    color: Atelier.text
+                                    font.pixelSize: 15
+                                    wrapMode: Text.Wrap
+                                    Layout.fillWidth: true
+                                }
+                                RowLayout {
+                                    Layout.fillWidth: true
+                                    spacing: 16
+                                    Label {
+                                        objectName: "observationSitePhase"
+                                        text: root.controller.instant.solarPhase || ""
+                                        color: Atelier.accent
+                                        font.pixelSize: 16
+                                        Layout.fillWidth: true
+                                        wrapMode: Text.Wrap
+                                    }
+                                    Label {
+                                        objectName: "observationSiteClouds"
+                                        text: root.controller.weather.busy ? qsTr("Cloud forecast: loading…") : qsTr("Forecast clouds: %1").arg(root.cloudPercent(root.controller.weather.cloud_cover))
+                                        color: root.controller.weather.stale || root.controller.weather.failed ? Atelier.warning : Atelier.text
+                                        font.pixelSize: 13
+                                        Layout.fillWidth: true
+                                        wrapMode: Text.Wrap
+                                    }
+                                    IconButton {
+                                        text: qsTr("Refresh")
+                                        enabled: root.controller.weather.canRefresh
+                                        busy: root.controller.weather.busy
+                                        Accessible.name: qsTr("Refresh the cloud forecast for this site")
+                                        onClicked: root.controller.refreshWeather()
+                                    }
+                                }
+                                Label {
+                                    visible: !root.controller.weather.available || root.controller.weather.stale || root.controller.weather.failed
+                                    text: root.controller.weather.status || qsTr("Cloud forecast unavailable for this instant.")
+                                    color: root.controller.weather.failed || root.controller.weather.stale ? Atelier.warning : Atelier.secondary
+                                    font.pixelSize: 12
+                                    Layout.fillWidth: true
+                                    wrapMode: Text.Wrap
+                                }
+                                Label {
+                                    visible: root.controller.weather.available
+                                    text: qsTr("Forecast instant at the telescope: %1").arg(root.controller.weather.validTime || "") + (root.controller.weather.stale ? qsTr(" · old forecast") : "")
+                                    color: root.controller.weather.stale ? Atelier.warning : Atelier.secondary
+                                    font.pixelSize: 12
+                                    Layout.fillWidth: true
+                                    wrapMode: Text.Wrap
+                                }
+                                Label {
+                                    text: qsTr("Next sunset: %1 · sunrise: %2").arg(root.nextSolar("sunset") ? root.nextSolar("sunset").time : qsTr("none in the next day")).arg(root.nextSolar("sunrise") ? root.nextSolar("sunrise").time : qsTr("none in the next day"))
+                                    color: Atelier.secondary
+                                    font.pixelSize: 12
+                                    Layout.fillWidth: true
+                                    wrapMode: Text.Wrap
+                                }
+                                RowLayout {
+                                    Layout.fillWidth: true
+                                    Label {
+                                        text: root.controller.instant.sun <= -18 ? (root.nextSolar("nightEnd") ? qsTr("Astronomical night until %1").arg(root.nextSolar("nightEnd").time) : qsTr("Astronomical night throughout the next day")) : qsTr("Next astronomical night: %1").arg(root.nextSolar("nightStart") ? root.nextSolar("nightStart").time : qsTr("none in the next day"))
+                                        color: Atelier.secondary
+                                        font.pixelSize: 12
+                                        Layout.fillWidth: true
+                                        wrapMode: Text.Wrap
+                                    }
+                                    IconButton {
+                                        objectName: "observationPrepareNight"
+                                        text: qsTr("Prepare this night")
+                                        onClicked: root.prepareNight()
+                                    }
+                                }
+                            }
+                            InspectorFamily {
+                                id: suggestionsSection
+                                objectName: "observationSuggestions"
+                                title: root.suggestionPeriod === "instant" ? qsTr("Targets at this time") : qsTr("Targets for this night")
+                                expanded: true
+                                onActivated: expanded = !expanded
+                                Layout.fillWidth: true
+                                spacing: 12
+                                DarkComboBox {
+                                    objectName: "observationSuggestionPeriod"
+                                    Layout.fillWidth: true
+                                    model: [qsTr("At the displayed time"), qsTr("Over this night")]
+                                    Accessible.name: qsTr("Recommendation period")
+                                    currentIndex: root.suggestionPeriod === "instant" ? 0 : 1
+                                    onActivated: index => {
+                                        root.suggestionPeriod = index === 0 ? "instant" : "night";
+                                        root.suggestionLimit = 3;
+                                        if (index === 1 && root.liveNow)
+                                            root.prepareNight();
+                                    }
+                                }
+                                RowLayout {
+                                    Layout.fillWidth: true
+                                    spacing: 8
+                                    Repeater {
+                                        model: [
+                                            {
+                                                key: "all",
+                                                label: qsTr("All")
+                                            },
+                                            {
+                                                key: "solar",
+                                                label: qsTr("Moon & planets")
+                                            },
+                                            {
+                                                key: "fixed",
+                                                label: qsTr("Deep sky")
+                                            }
+                                        ]
+                                        IconButton {
+                                            required property var modelData
+                                            Layout.fillWidth: true
+                                            text: (root.suggestionKind === modelData.key ? "✓ " : "") + modelData.label
+                                            checkable: true
+                                            checked: root.suggestionKind === modelData.key
+                                            borderColor: root.suggestionKind === modelData.key ? Atelier.accent : Atelier.border
+                                            onClicked: {
+                                                root.suggestionKind = modelData.key;
+                                                root.suggestionLimit = 3;
+                                            }
+                                            Accessible.description: root.suggestionKind === modelData.key ? qsTr("Selected category") : ""
+                                        }
+                                    }
+                                }
+                                Label {
+                                    visible: root.filteredSuggestions.length === 0
+                                    text: root.suggestionPeriod === "instant" ? qsTr("No recommendation meets the height and darkness limits at this time. Prepare the next night or search the complete catalogue.") : qsTr("No suggestion meets these limits here on this date. Try lowering the minimum height or choosing another night. You can still search the complete catalogue.")
+                                    color: Atelier.warning
+                                    wrapMode: Text.Wrap
+                                    Layout.fillWidth: true
+                                }
+                                Repeater {
+                                    model: root.filteredSuggestions.slice(0, root.suggestionLimit)
+                                    Rectangle {
+                                        required property var modelData
+                                        readonly property var clouds: root.controller.recommendationWeather[modelData.id] || ({})
+                                        Layout.fillWidth: true
+                                        implicitHeight: suggestionContent.implicitHeight + 24
+                                        color: Atelier.surface
+                                        radius: Atelier.controlRadius
+                                        border.color: Atelier.border
+                                        ColumnLayout {
+                                            id: suggestionContent
+                                            anchors.left: parent.left
+                                            anchors.right: parent.right
+                                            anchors.top: parent.top
+                                            anchors.margins: 12
+                                            spacing: 6
+                                            RowLayout {
+                                                Layout.fillWidth: true
+                                                spacing: 12
+                                                ColumnLayout {
+                                                    Layout.fillWidth: true
+                                                    spacing: 4
+                                                    Label {
+                                                        text: modelData.name
+                                                        color: Atelier.text
+                                                        font.pixelSize: 14
+                                                        font.weight: Font.Medium
+                                                        wrapMode: Text.Wrap
+                                                        Layout.fillWidth: true
+                                                    }
+                                                    Label {
+                                                        text: modelData.category + (modelData.altitude !== undefined ? qsTr(" · height %1°").arg(Number(modelData.altitude).toFixed(1)) : qsTr(" · %1 min available").arg(modelData.minutes))
+                                                        color: Atelier.accent
+                                                        font.pixelSize: 12
+                                                        wrapMode: Text.Wrap
+                                                        Layout.fillWidth: true
+                                                    }
+                                                }
+                                                IconButton {
+                                                    objectName: "observationSuggestion:" + modelData.id
+                                                    text: qsTr("Explore")
+                                                    helpText: qsTr("Minimum height: %1°").arg(modelData.minimum) + "\n" + (modelData.sunLimit === -18 ? qsTr("Very dark sky · Sun below −18°") : qsTr("After civil twilight · Sun below −6°")) + (modelData.altitude !== undefined ? "" : "\n" + qsTr("Highest within these windows: %1° · %2").arg(Number(modelData.peakAltitude).toFixed(1)).arg(modelData.peakTime))
+                                                    Accessible.name: qsTr("Explore %1").arg(modelData.name)
+                                                    onClicked: root.chooseTarget(modelData.id)
+                                                }
+                                            }
+                                            Label {
+                                                visible: modelData.slots !== undefined
+                                                text: (modelData.slots || []).map(slot => slot.start + " → " + slot.end).join(" · ")
+                                                color: Atelier.text
+                                                font.pixelSize: 12
+                                                wrapMode: Text.Wrap
+                                                Layout.fillWidth: true
+                                            }
+                                            Label {
+                                                visible: root.suggestionPeriod === "night" && clouds.available === true
+                                                text: qsTr("Forecast clouds: %1–%2%").arg(Math.round(clouds.minimum || 0)).arg(Math.round(clouds.maximum || 0)) + (root.controller.weather.stale ? qsTr(" · old forecast") : "")
+                                                color: root.controller.weather.stale ? Atelier.warning : Atelier.secondary
+                                                font.pixelSize: 12
+                                                wrapMode: Text.Wrap
+                                                Layout.fillWidth: true
+                                            }
+                                        }
+                                    }
+                                }
+                                IconButton {
+                                    visible: root.filteredSuggestions.length > root.suggestionLimit
+                                    text: qsTr("Show %1 more suggestions").arg(root.filteredSuggestions.length - root.suggestionLimit)
+                                    Layout.fillWidth: true
+                                    onClicked: root.suggestionLimit = 100
+                                }
+                            }
                             RowLayout {
+                                id: targetHeader
                                 Layout.fillWidth: true
                                 ColumnLayout {
                                     Layout.fillWidth: true
@@ -732,6 +982,7 @@ Rectangle {
                                         onLocationChosen: (latitude, longitude) => {
                                             root.manual = false;
                                             root.controller.chooseMapLocation(latitude, longitude);
+                                            root.refreshSiteWeather();
                                         }
                                     }
                                     Flow {
@@ -907,126 +1158,6 @@ Rectangle {
                                     onLinkActivated: link => Qt.openUrlExternally(link)
                                 }
                             }
-
-                            InspectorFamily {
-                                id: suggestionsSection
-                                objectName: "observationSuggestions"
-                                title: qsTr("Objects to observe")
-                                onActivated: expanded = !expanded
-                                Layout.fillWidth: true
-                                spacing: 12
-                                RowLayout {
-                                    Layout.fillWidth: true
-                                    spacing: 8
-                                    Repeater {
-                                        model: [
-                                            {
-                                                key: "all",
-                                                label: qsTr("All")
-                                            },
-                                            {
-                                                key: "solar",
-                                                label: qsTr("Moon & planets")
-                                            },
-                                            {
-                                                key: "fixed",
-                                                label: qsTr("Deep sky")
-                                            }
-                                        ]
-                                        IconButton {
-                                            required property var modelData
-                                            Layout.fillWidth: true
-                                            text: (root.suggestionKind === modelData.key ? "✓ " : "") + modelData.label
-                                            checkable: true
-                                            checked: root.suggestionKind === modelData.key
-                                            borderColor: root.suggestionKind === modelData.key ? Atelier.accent : Atelier.border
-                                            onClicked: {
-                                                root.suggestionKind = modelData.key;
-                                                root.suggestionLimit = 4;
-                                            }
-                                            Accessible.description: root.suggestionKind === modelData.key ? qsTr("Selected category") : ""
-                                        }
-                                    }
-                                }
-                                Label {
-                                    visible: root.filteredSuggestions.length === 0
-                                    text: qsTr("No suggestion meets these limits here on this date. Try lowering the minimum height or choosing another night. You can still search the complete catalogue.")
-                                    color: Atelier.warning
-                                    wrapMode: Text.Wrap
-                                    Layout.fillWidth: true
-                                }
-                                Repeater {
-                                    model: root.filteredSuggestions.slice(0, root.suggestionLimit)
-                                    Rectangle {
-                                        required property var modelData
-                                        readonly property var clouds: root.controller.recommendationWeather[modelData.id] || ({})
-                                        Layout.fillWidth: true
-                                        implicitHeight: suggestionContent.implicitHeight + 24
-                                        color: Atelier.surface
-                                        radius: Atelier.controlRadius
-                                        border.color: Atelier.border
-                                        ColumnLayout {
-                                            id: suggestionContent
-                                            anchors.left: parent.left
-                                            anchors.right: parent.right
-                                            anchors.top: parent.top
-                                            anchors.margins: 12
-                                            spacing: 6
-                                            RowLayout {
-                                                Layout.fillWidth: true
-                                                spacing: 12
-                                                ColumnLayout {
-                                                    Layout.fillWidth: true
-                                                    spacing: 4
-                                                    Label {
-                                                        text: modelData.name
-                                                        color: Atelier.text
-                                                        font.pixelSize: 14
-                                                        font.weight: Font.Medium
-                                                        wrapMode: Text.Wrap
-                                                        Layout.fillWidth: true
-                                                    }
-                                                    Label {
-                                                        text: modelData.category + qsTr(" · %1 min available").arg(modelData.minutes)
-                                                        color: Atelier.accent
-                                                        font.pixelSize: 12
-                                                        wrapMode: Text.Wrap
-                                                        Layout.fillWidth: true
-                                                    }
-                                                }
-                                                IconButton {
-                                                    objectName: "observationSuggestion:" + modelData.id
-                                                    text: qsTr("Explore")
-                                                    helpText: qsTr("Minimum height: %1°").arg(modelData.minimum) + "\n" + (modelData.sunLimit === -18 ? qsTr("Very dark sky · Sun below −18°") : qsTr("After civil twilight · Sun below −6°")) + "\n" + qsTr("Highest within these windows: %1° · %2").arg(Number(modelData.peakAltitude).toFixed(1)).arg(modelData.peakTime)
-                                                    Accessible.name: qsTr("Explore %1").arg(modelData.name)
-                                                    onClicked: root.chooseTarget(modelData.id)
-                                                }
-                                            }
-                                            Label {
-                                                text: modelData.slots.map(slot => slot.start + " → " + slot.end).join(" · ")
-                                                color: Atelier.text
-                                                font.pixelSize: 12
-                                                wrapMode: Text.Wrap
-                                                Layout.fillWidth: true
-                                            }
-                                            Label {
-                                                visible: clouds.available === true
-                                                text: qsTr("Forecast clouds: %1–%2%").arg(Math.round(clouds.minimum || 0)).arg(Math.round(clouds.maximum || 0)) + (root.controller.weather.stale ? qsTr(" · old forecast") : "")
-                                                color: root.controller.weather.stale ? Atelier.warning : Atelier.secondary
-                                                font.pixelSize: 12
-                                                wrapMode: Text.Wrap
-                                                Layout.fillWidth: true
-                                            }
-                                        }
-                                    }
-                                }
-                                IconButton {
-                                    visible: root.filteredSuggestions.length > root.suggestionLimit
-                                    text: qsTr("Show %1 more suggestions").arg(root.filteredSuggestions.length - root.suggestionLimit)
-                                    Layout.fillWidth: true
-                                    onClicked: root.suggestionLimit = 100
-                                }
-                            }
                         }
                     }
                 }
@@ -1050,40 +1181,6 @@ Rectangle {
                     ColumnLayout {
                         width: inspector.availableWidth
                         spacing: 14
-                        SettingLabel {
-                            text: qsTr("Selected object")
-                            explanation: qsTr("This is the only active target. Search and favourites are grouped in Change object. Typing filters the list; choosing a row changes the target.")
-                        }
-                        RowLayout {
-                            Layout.fillWidth: true
-                            spacing: 8
-                            Label {
-                                objectName: "observationSelectedTarget"
-                                text: root.controller.result.target || ""
-                                color: Atelier.text
-                                font.pixelSize: 14
-                                font.weight: Font.Medium
-                                wrapMode: Text.Wrap
-                                Layout.fillWidth: true
-                            }
-                            IconButton {
-                                objectName: "observationFavoriteTarget"
-                                text: root.controller.targetFavorite ? "★" : "☆"
-                                Layout.preferredWidth: 36
-                                Accessible.name: root.controller.targetFavorite ? qsTr("★ Remove object from favourites") : qsTr("☆ Save object to favourites")
-                                onClicked: root.controller.toggleFavoriteTarget()
-                                DarkToolTip {
-                                    visible: parent.hovered || parent.activeFocus
-                                    text: parent.Accessible.name
-                                }
-                            }
-                        }
-                        IconButton {
-                            objectName: "observationChooseTarget"
-                            text: qsTr("Change object…")
-                            Layout.fillWidth: true
-                            onClicked: root.openObjectChooser()
-                        }
                         SettingLabel {
                             text: qsTr("From where?")
                             explanation: qsTr("The first launch uses central Paris, then the last chosen place is restored. There is no automatic geolocation. Choose a city or enter coordinates in Advanced. Name this place saves its label, coordinates and time zone as a favourite; Rename changes an existing favourite.")
@@ -1190,6 +1287,40 @@ Rectangle {
                                         root.citySearchOpen = false;
                                 }
                             }
+                        }
+                        SettingLabel {
+                            text: qsTr("Selected object")
+                            explanation: qsTr("This is the only active target. Search and favourites are grouped in Change object. Typing filters the list; choosing a row changes the target.")
+                        }
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 8
+                            Label {
+                                objectName: "observationSelectedTarget"
+                                text: root.controller.result.target || ""
+                                color: Atelier.text
+                                font.pixelSize: 14
+                                font.weight: Font.Medium
+                                wrapMode: Text.Wrap
+                                Layout.fillWidth: true
+                            }
+                            IconButton {
+                                objectName: "observationFavoriteTarget"
+                                text: root.controller.targetFavorite ? "★" : "☆"
+                                Layout.preferredWidth: 36
+                                Accessible.name: root.controller.targetFavorite ? qsTr("★ Remove object from favourites") : qsTr("☆ Save object to favourites")
+                                onClicked: root.controller.toggleFavoriteTarget()
+                                DarkToolTip {
+                                    visible: parent.hovered || parent.activeFocus
+                                    text: parent.Accessible.name
+                                }
+                            }
+                        }
+                        IconButton {
+                            objectName: "observationChooseTarget"
+                            text: qsTr("Change object…")
+                            Layout.fillWidth: true
+                            onClicked: root.openObjectChooser()
                         }
                         SettingLabel {
                             text: qsTr("Which night?")

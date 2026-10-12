@@ -33,6 +33,8 @@ class ObservationController : public QObject {
   Q_PROPERTY(bool targetFavorite READ targetFavorite NOTIFY favoritesChanged)
   Q_PROPERTY(QVariantList recommendations READ recommendations NOTIFY changed)
   Q_PROPERTY(
+      QVariantList visibleTargets READ visibleTargets NOTIFY instantChanged)
+  Q_PROPERTY(
       QString connectionStatus READ connectionStatus NOTIFY connectionChanged)
   Q_PROPERTY(QVariantMap weather READ weather NOTIFY weatherChanged)
   Q_PROPERTY(
@@ -60,6 +62,7 @@ public:
   QVariantList favoriteTargets() const { return favoriteTargets_; }
   bool targetFavorite() const;
   QVariantList recommendations() const { return recommendations_; }
+  QVariantList visibleTargets() const;
   QString connectionStatus() const { return connectionStatus_; }
   QVariantMap weather() const;
   QVariantList weatherSamples() const;
@@ -129,7 +132,8 @@ private:
   QVariantList favoriteTargets_, recommendations_;
   QString recommendationsKey_, connectionStatus_;
   bool offline_{}, connectionLost_{};
-  int reachability_{}, recommendationPool_{}, catalogCount_{};
+  int reachability_{}, recommendationPool_{}, catalogCount_{},
+      builtinSiteCount_{};
   QVariantMap weatherForecast_;
   QString weatherStatus_, weatherContext_;
   bool weatherBusy_{}, weatherEnabled_{}, weatherFailed_{};

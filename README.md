@@ -15,6 +15,12 @@ AstroCapture réunit la capture vidéo et FITS, le traitement planétaire, la ca
 L’onglet **Observation**, placé avant **Guide**, prépare une observation de la Lune,
 des planètes ou d’un objet fixe. Il est indépendant de **Ciel profond**.
 
+L’accueil commence par **le lieu choisi** : son heure, le jour ou la nuit, les
+nuages prévus, les prochains lever/coucher du Soleil et la prochaine nuit sombre.
+Les **cibles à cette heure** viennent ensuite, avant la courbe de l’objet sélectionné.
+Vous pouvez utiliser n’importe quel lieu ; **T68 · Utah** est un simple lieu proposé
+avec coordonnées, altitude et fuseau, sans connexion à un opérateur de télescopes.
+
 La courbe de hauteur, la boussole du ciel, la carte mondiale et les nuages sont
 réunis sur **une seule page**, avec les réglages à droite. La commande horaire
 commune reste visible pendant le défilement. **Maintenant · en direct** suit
@@ -22,18 +28,20 @@ l’heure réelle et actualise les graphiques toutes les 30 secondes tant que l�
 est visible. Saisir une heure, choisir une date ou déplacer le curseur met ce suivi
 en pause. **Maintenant** y revient, même depuis une nuit future ou passée.
 
-1. **Objet sélectionné** indique la seule cible active. **Changer d’objet…** ouvre
-   une liste unique avec recherche et favoris. Taper un nom filtre cette liste ;
-   cliquer sur un résultat le sélectionne et ouvre sa courbe. Fermer la liste
-   conserve le choix actuel.
-2. Le premier lancement utilise le **centre de Paris** (48,8566° N, 2,3522° E).
+1. Le premier lancement utilise le **centre de Paris** (48,8566° N, 2,3522° E).
    Ensuite, le dernier lieu choisi est repris, sans géolocalisation automatique.
    Choisissez un lieu proposé ou recherchez une ville en ligne. Ses coordonnées
    et son fuseau sont renseignés. **Nommer le lieu…** enregistre un libellé
    (Jardin, Balcon…), la position et le fuseau en favori, y compris pour un point choisi sur la carte. **Renommer…**
    modifie ce libellé en conservant les coordonnées ;
    les options avancées permettent d’en préciser les coordonnées.
-3. Choisissez la date locale, ou **Nuit actuelle**. Une nuit terminée est refusée
+2. Consultez la situation à l’heure affichée et les recommandations, ou utilisez
+   **Préparer la nuit** pour la nuit sombre en cours ou la suivante. **Explorer**
+   sélectionne une recommandation et ouvre sa courbe. **Objet sélectionné** indique
+   la seule cible active. **Changer d’objet…** ouvre une liste unique avec recherche
+   et favoris. Taper un nom filtre cette liste ; cliquer sur un résultat le sélectionne.
+   Fermer la liste conserve le choix actuel.
+3. Pour une autre nuit, choisissez la date locale, ou **Nuit actuelle**. Une nuit terminée est refusée
    en préparation : la date valide est conservée et un message indique le problème.
    Avant le lever du Soleil, la nuit en cours peut porter la date d’hier. Le contrôle
    utilise le lever du Soleil et le fuseau du lieu ; sans lever, la limite est le midi
@@ -50,15 +58,18 @@ ensuite dans **Changer d’objet… → Favoris**. Les lieux favoris apparaissen
 une étoile dans la liste des lieux.
 Les favoris restent sur cet ordinateur (100 objets et 30 lieux au maximum).
 
-La section dépliable **Objets à observer** compare les objets Messier inclus, quelques objets remarquables
-notamment de l’hémisphère Sud, la Lune, les planètes et vos favoris. Le lieu, la date
-locale et la hauteur minimale actualisent cette liste automatiquement. Jusqu’à
-4 cibles du Système solaire et 6 du ciel profond sont proposées, avec priorité aux
-favoris puis classement selon le temps au-dessus du seuil et la hauteur. Les filtres
-**Tout**, **Lune et planètes** et **Ciel profond** permettent de parcourir ces familles. Chaque résultat
-a au moins 20 minutes de créneau. Ses critères sont accessibles dans son aide : Soleil sous
+Les recommandations comparent les objets Messier inclus, quelques objets remarquables
+notamment de l’hémisphère Sud, la Lune, les planètes et vos favoris. Le lieu et la
+hauteur minimale actualisent cette liste automatiquement. **À l’heure affichée**
+ne propose que les cibles respectant les seuils à cet instant, avec leur hauteur ;
+ce mode ne garantit pas une durée d’observation. **Sur cette nuit** compare leurs
+créneaux sur la nuit choisie, avec au moins 20 minutes par résultat. Jusqu’à 4 cibles
+du Système solaire et 6 du ciel profond sont proposées, avec priorité aux favoris
+puis classement selon la hauteur à l’instant choisi, ou selon la durée et la hauteur
+sur la nuit. Les filtres **Tout**, **Lune et planètes** et **Ciel profond** permettent
+de parcourir ces familles. Les critères sont accessibles dans l’aide : Soleil sous
 −18° pour les objets fixes, sous −6° pour le Système solaire. **Explorer** sélectionne
-la cible avec ces critères et revient à sa courbe, sur la même page. Quatre suggestions sont affichées au départ ; un bouton ouvre les suivantes. La sélection n’est pas exhaustive ;
+la cible avec ces critères et revient à sa courbe, sur la même page. Trois suggestions sont affichées au départ ; un bouton ouvre les suivantes. La section peut se refermer. La sélection n’est pas exhaustive ;
 le catalogue complet reste interrogeable. Les suggestions de Mercure et Vénus
 excluent les créneaux à moins de 30° du Soleil. Le matériel, la pollution lumineuse,
 la Lune et la météo peuvent rendre un objet difficile à observer. Les prévisions
@@ -66,8 +77,9 @@ nuageuses chargées ajoutent leurs valeurs horaires disponibles dans chaque cré
 sans modifier le classement géométrique.
 
 **Nuages** affiche les prévisions horaires [Open-Meteo](https://open-meteo.com/en/docs)
-de couverture totale, basse, moyenne et haute. **Charger** transmet les coordonnées
-du lieu ; le curseur indique la prévision horaire la plus proche (à 30 minutes au
+de couverture totale, basse, moyenne et haute. La prévision se charge automatiquement
+à l’ouverture d’Observation et lors d’un changement de lieu ou de date, en transmettant
+les coordonnées du lieu. Le curseur indique la prévision horaire la plus proche (à 30 minutes au
 maximum), avec son heure locale et UTC. 0 % signifie aucun nuage prévu dans la
 maille du modèle, 100 % une couverture complète. Les couches peuvent se superposer
 et ne s’additionnent pas. Ces données sont des **prévisions de modèles**, pas une
@@ -88,7 +100,9 @@ sans clé est prévu ici pour l’usage personnel non commercial. Les données s
 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), avec attribution à Open-Meteo
 et valeurs affichées arrondies ; le cache ne contient ni nom d’objet ni identifiant personnel.
 
-Le **lever et le coucher du Soleil** sont visibles sous les créneaux d’observation. La section **Détails** conserve les informations lunaires, la direction,
+Le résumé du lieu indique les **prochains lever et coucher du Soleil**, y compris
+la nuit suivante lorsque l’on consulte le matin. Les horaires de la nuit choisie
+restent visibles sous les créneaux d’observation. La section **Détails** conserve les informations lunaires, la direction,
 le jour, le crépuscule civil et la nuit astronomique.
 Un libellé indique aussi l’état à l’instant du curseur, avec les crépuscules civil,
 nautique et astronomique. Les périodes sans lever, coucher ou nuit sont explicites.
@@ -149,9 +163,9 @@ choisissez le fuseau local dans les options avancées si nécessaire.
 
 **Maintenant** peut montrer le jour et les heures qui suivent le lever du Soleil
 sur la période locale de midi à midi contenant l’instant actuel. **Nuit actuelle**
-prépare une nuit d’observation. **Trouver un objet visible** déplie les
-recommandations sur la même page et passe à la prochaine nuit si la précédente
-est déjà terminée. Les détails du Soleil, de la Lune et de la météo restent
+prépare une nuit d’observation. **Préparer la nuit** revient à la nuit sombre en
+cours ou au début de la suivante et affiche les recommandations sur cette nuit.
+**Trouver un objet visible** déplie les recommandations sur la même page. Les détails du Soleil, de la Lune et de la météo restent
 dépliables.
 
 Le catalogue [OpenNGC](https://github.com/mattiaverga/OpenNGC) est inclus sans connexion.

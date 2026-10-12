@@ -1,6 +1,6 @@
 # AstroCapture — bilan avant V2
 
-État du 12 octobre 2026, après les contrôles de la livraison 1.18.5.
+État du 12 octobre 2026, après les contrôles de la livraison 1.18.6.
 
 L’utilisateur réserve pour l’instant AstroCapture à son usage personnel.
 La qualification de distribution publique reste une étape ultérieure ; elle
@@ -150,3 +150,10 @@ manuel ; elle n’ajoute pas de programmation ou de pilotage du télescope.
 
 La 1.18.5 réunit Observation sur une page et ajoute la carte jour/crépuscule/nuit
 hors connexion, avec suivi de l’heure réelle et couche de visibilité de l’objet.
+
+La 1.18.6 commence par la situation du lieu choisi : heure, jour/nuit, prévision
+nuageuse et prochains événements solaires. Les recommandations distinguent
+l’instant affiché de la nuit entière ; une commande prépare la nuit sombre en cours
+ou la suivante. Tous les lieux restent utilisables. T68 · Utah est seulement un
+préréglage géographique, sans intégration avec un opérateur. L’ajout de liens
+personnels sur les lieux reste une possibilité ultérieure.

@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.18.6 — 2026-10-12
+
+- Start Observation with the selected place: local clock, day/twilight/night, cloud forecast and upcoming solar events; put the place selector first and recommendations before the target curve.
+- Recommend targets at the shared instant, including height and darkness criteria, or compare observing windows over the selected night. Show three suggestions initially and preserve catalogue search, favourites and geometric limits.
+- Prepare the current dark night or the next one, including the interval between astronomical dawn and sunrise. Cache upcoming solar events beyond local noon for the morning summary.
+- Load the generic Open-Meteo forecast on entry and place/date changes, retaining offline, stale, missing-data and failure states. Add T68 in Utah as a geographic preset only, usable alongside any custom place.
+- Preserve UTC during city selection and normalize validated coordinates entered with decimal commas. Update the French Guide, README and native visual checks.
+
 ## 1.18.5 — 2026-10-12
 
 - Combine the height curve, sky compass, world map and clouds on one scrolling Observation page, with a shared time control that stays visible. Keep recommendations and scientific details expandable.

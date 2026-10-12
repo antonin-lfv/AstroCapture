@@ -365,6 +365,74 @@ int main(int argc, char **argv) {
   ASTRO_TEST_CHECK(controller.selectTarget("NGC1976"));
   controller.search("");
   {
+    const auto previous = controller.settings();
+    auto utah = controller.sites()[9].toMap();
+    ASTRO_TEST_CHECK(utah["zone"] == "America/Denver");
+    ASTRO_TEST_CHECK(utah["elevation"].toInt() == 1570);
+    for (auto it = previous.cbegin(); it != previous.cend(); ++it)
+      if (!utah.contains(it.key()))
+        utah[it.key()] = it.value();
+    utah["latitude"] = "37,7378";
+    utah["longitude"] = "-113,6975";
+    const auto unchangedUtc = controller.instant()["utcSeconds"];
+    ASTRO_TEST_CHECK(controller.changeSite(utah));
+    ASTRO_TEST_CHECK(controller.instant()["utcSeconds"] == unchangedUtc);
+    ASTRO_TEST_CHECK(controller.settings()["latitude"].typeId() ==
+                     QMetaType::Double);
+    ASTRO_TEST_CHECK(controller.settings()["longitude"].toDouble() ==
+                     -113.6975);
+    utah = controller.settings();
+    utah["date"] = "2026-12-12";
+    ASTRO_TEST_CHECK(controller.calculate(utah));
+    const auto night = QDateTime(QDate(2026, 12, 13), QTime(0, 30),
+                                 QTimeZone("America/Denver"))
+                           .toSecsSinceEpoch();
+    ASTRO_TEST_CHECK(controller.setReferenceUtc(night));
+    controller.toggleFavoriteTarget();
+    const auto currentTargets = controller.visibleTargets();
+    ASTRO_TEST_CHECK(!currentTargets.isEmpty());
+    ASTRO_TEST_CHECK(currentTargets.first().toMap()["id"] == "NGC1976");
+    for (const auto &value : currentTargets) {
+      const auto candidate = value.toMap();
+      const ObservationTarget target{candidate["id"].toString(),
+                                     candidate["name"].toString(),
+                                     "test",
+                                     candidate["body"].toInt(),
+                                     candidate["ra"].toDouble(),
+                                     candidate["dec"].toDouble()};
+      ASTRO_TEST_CHECK(
+          observationPosition(target, {37.7378, -113.6975, 1570}, night)
+              .altitude >= 30);
+      ASTRO_TEST_CHECK(
+          observationSunAltitude({37.7378, -113.6975, 1570}, night) <=
+          candidate["sunLimit"].toDouble());
+    }
+    controller.toggleFavoriteTarget();
+    const auto afternoon = QDateTime(QDate(2026, 12, 12), QTime(13, 0),
+                                     QTimeZone("America/Denver"))
+                               .toSecsSinceEpoch();
+    ASTRO_TEST_CHECK(controller.setReferenceUtc(afternoon));
+    ASTRO_TEST_CHECK(controller.visibleTargets().isEmpty());
+    const auto morning = QDateTime(QDate(2026, 12, 13), QTime(10, 0),
+                                   QTimeZone("America/Denver"))
+                             .toSecsSinceEpoch();
+    ASTRO_TEST_CHECK(controller.setReferenceUtc(morning));
+    const auto solar = controller.result()["siteSolarEvents"].toList();
+    const auto next =
+        std::find_if(solar.begin(), solar.end(), [&](const auto &value) {
+          const auto event = value.toMap();
+          return event["kind"] == "nightStart" &&
+                 event["utc"].toLongLong() > morning;
+        });
+    ASTRO_TEST_CHECK(next != solar.end());
+    ASTRO_TEST_CHECK(
+        QDateTime::fromSecsSinceEpoch(next->toMap()["utc"].toLongLong(),
+                                      QTimeZone("America/Denver"))
+            .date() == QDate(2026, 12, 13));
+    ASTRO_TEST_CHECK(controller.calculate(previous));
+    controller.setFraction(.5);
+  }
+  {
     const auto savedOptions = controller.settings();
     const auto utcBefore = controller.instant()["utcSeconds"];
     ASTRO_TEST_CHECK(controller.reference()["source"] == "system");
@@ -579,13 +647,22 @@ int main(int argc, char **argv) {
     qWarning() << component.errors();
   ASTRO_TEST_CHECK(component.isReady());
   std::unique_ptr<QObject> object(component.createWithInitialProperties(
-      {{"controller", QVariant::fromValue(&controller)}, {"liveNow", false}}));
+      {{"controller", QVariant::fromValue(&controller)},
+       {"liveNow", false},
+       {"autoLoadWeather", false}}));
   if (!object)
     qWarning() << component.errors();
   ASTRO_TEST_CHECK(object);
   auto *root = qobject_cast<QQuickItem *>(object.get());
   ASTRO_TEST_CHECK(!root->property("liveNow").toBool());
   ASTRO_TEST_CHECK(root->property("mapLayer") == "daylight");
+  ASTRO_TEST_CHECK(root->property("suggestionPeriod") == "instant");
+  ASTRO_TEST_CHECK(item(root, "observationSiteSummary"));
+  const auto initialVisible = controller.visibleTargets();
+  for (int i = 0; i < std::min(3, int(initialVisible.size())); ++i)
+    ASTRO_TEST_CHECK(
+        item(root, "observationSuggestion:" +
+                       initialVisible[i].toMap()["id"].toString()));
   ASTRO_TEST_CHECK(controller.setReferenceZone("site"));
   const auto referenceDays = controller.reference()["days"].toList();
   int followingDay = -1;
@@ -705,6 +782,7 @@ int main(int argc, char **argv) {
   ASTRO_TEST_CHECK(controller.targetFavorite());
   ASTRO_TEST_CHECK(QMetaObject::invokeMethod(favouriteButton, "clicked"));
   ASTRO_TEST_CHECK(!controller.targetFavorite());
+  root->setProperty("suggestionPeriod", "night");
   item(root, "observationSuggestions")->setProperty("expanded", true);
   const auto firstSuggestion = controller.recommendations().first().toMap();
   auto *explore =
@@ -811,6 +889,32 @@ int main(int argc, char **argv) {
   ASTRO_TEST_CHECK(!root->findChild<QObject *>("observationLiveClock")
                         ->property("running")
                         .toBool());
+  {
+    auto utah = controller.settings();
+    const auto preset = controller.sites()[9].toMap();
+    for (auto it = preset.cbegin(); it != preset.cend(); ++it)
+      utah[it.key()] = it.value();
+    ASTRO_TEST_CHECK(controller.changeSite(utah));
+    ASTRO_TEST_CHECK(controller.showNow());
+    const auto actual = controller.instant()["utcSeconds"].toLongLong();
+    const bool dark = controller.instant()["sun"].toDouble() <= -18;
+    qint64 upcoming = 0;
+    for (const auto &value : controller.result()["siteSolarEvents"].toList()) {
+      const auto event = value.toMap();
+      if (event["kind"] == "nightStart" && event["utc"].toLongLong() > actual) {
+        upcoming = event["utc"].toLongLong();
+        break;
+      }
+    }
+    ASTRO_TEST_CHECK(upcoming > 0);
+    ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root, "prepareNight"));
+    QThread::msleep(50);
+    QCoreApplication::processEvents();
+    ASTRO_TEST_CHECK(!root->property("liveNow").toBool());
+    ASTRO_TEST_CHECK(root->property("suggestionPeriod") == "night");
+    ASTRO_TEST_CHECK(std::abs(controller.instant()["utcSeconds"].toLongLong() -
+                              (dark ? actual : upcoming)) <= 2);
+  }
   ASTRO_TEST_CHECK(controller.calculate(futureSettings));
   ASTRO_TEST_CHECK(controller.selectTarget("moon"));
   auto lunar1 = controller.instant()["altitude"].toDouble();

@@ -1229,3 +1229,55 @@ réessaie brièvement le démontage si macOS conserve un accès après la fermet
 du processus ; les volumes temporaires sont ensuite détachés. Journaux :
 `build/observation-overview-dmg-verify.log` et
 `build/observation-overview-dmg-startup.log`.
+
+## Lot 1.18.6 — situation du lieu et cibles à l’instant choisi
+
+L’accueil commence par le lieu : heure locale, jour/crépuscule/nuit, couverture
+nuageuse prévue et prochains événements solaires. Les recommandations sont
+visibles avant la courbe et distinguent **À l’heure affichée** de **Sur cette nuit**.
+Le premier mode vérifie hauteur et obscurité à l’instant partagé et classe par
+hauteur ; le second conserve les créneaux d’au moins 20 minutes et le classement
+par durée et hauteur. Les favoris passent en premier dans les deux modes. Trois
+résultats apparaissent initialement, avec accès aux suivants et au catalogue complet.
+
+Le chargement Open-Meteo est automatique à l’ouverture et lors d’un changement
+de lieu/date ; le curseur ne lance aucune requête. Cache, données manquantes,
+prévision ancienne, échec et absence/perte de connexion restent explicites.
+Une prévision conservée après échec garde son heure exacte et son avertissement.
+Le résumé ne transforme pas ces données de modèle en mesure de caméra.
+
+T68 · Utah est seulement un préréglage géographique, avec America/Denver et
+une altitude de 1570 m. Tous les lieux personnalisés utilisent le même parcours ;
+aucun compte, commande, lien d’accès ou état d’opérateur n’est ajouté. La source
+géographique est documentée dans le README des captures. Les liens personnels
+sur les lieux restent différés conformément à la demande utilisateur.
+
+**Préparer la nuit** revient à la nuit sombre en cours ou au début de la suivante.
+Le cas entre aube astronomique et lever du Soleil est contrôlé. Le cache solaire
+du résumé couvre également les événements suivant le midi de fin de période.
+La valeur UTC du prochain début est copiée avant toute modification du modèle
+d’événements ; une mise à jour différée du curseur est annulée avant la préparation.
+La sélection publique d’une ville conserve aussi l’UTC. Les coordonnées numériques
+validées, notamment saisies avec une virgule, sont conservées comme nombres.
+
+Les **52 tests Release passent** (`build/observation-site-ctest.log`). Le test
+d’Observation vérifie les recommandations instantanées en Utah la nuit et le jour,
+les favoris, les coordonnées décimales, la conservation UTC, les prochains
+événements solaires au matin, les commandes QML et le glissement continu du curseur.
+Les références JPL/USNO, les changements d’heure, les pôles, la météo et les
+traitements restent couverts par les contrôles existants.
+
+Les captures `previews/native/observation-site/` vérifient les trois tailles
+en français, les deux modes de recommandation, la prévision enregistrée et la
+connexion interrompue. Le parcours sur Orion HDR, issu de l’image réelle,
+vérifie aussi exports, sauvegarde et reprise des pixels entre processus
+(`build/observation-site-orion-native.log`). Toutes les traductions actives
+d’Observation, du contrôleur et du Guide sont présentes dans le catalogue français
+compilé (`build/observation-site-translation.log`). Guide et README sont à jour.
+
+L’installateur **AstroCapture-1.18.6.dmg** est généré, son intégrité est vérifiée
+et son démarrage depuis le volume en lecture seule réussit, avec les préférences
+utilisateur protégées. Aucun défaut de chargement QML n’est signalé ; le volume
+temporaire est détaché. Journaux : `build/observation-site-dmg-verify.log` et
+`build/observation-site-dmg-startup.log`. SHA-256 :
+`41722fa1ad7d85ee484fe166b3331ef66b215894140fb6b6f2881b273c38fd3e`.

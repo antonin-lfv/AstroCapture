@@ -11,6 +11,7 @@
 #include <QNetworkInformation>
 #include <QNetworkReply>
 #include <QRegularExpression>
+#include <QSet>
 #include <QSettings>
 #include <QTimeZone>
 #include <QUrlQuery>
@@ -137,6 +138,8 @@ ObservationController::ObservationController(QObject *parent)
       planning.value("currentDate", QDate::currentDate().toString(Qt::ISODate));
   settings_["minimum"] = settings_.value("minimum", 30);
   settings_["sunLimit"] = settings_.value("sunLimit", -18);
+  if (settings_.value("referenceZone").toString() != "site")
+    settings_["referenceZone"] = "system";
   target_ = catalog_[0];
   const QString targetId = settings_.value("target", "NGC1976").toString();
   for (const auto &t : catalog_)
@@ -169,6 +172,8 @@ ObservationController::ObservationController(QObject *parent)
   connect(&weatherAgeTimer_, &QTimer::timeout, this, [this] {
     if (!weatherForecast_.isEmpty())
       emit weatherChanged();
+    updateReference();
+    emit referenceChanged();
   });
   weatherAgeTimer_.start();
   weatherDebounce_.setSingleShot(true);
@@ -402,6 +407,11 @@ bool ObservationController::calculate(const QVariantMap &options) {
     ObservationSite s{number("latitude"), number("longitude"),
                       number("elevation")};
     const double minimum = number("minimum"), sunLimit = number("sunLimit");
+    const auto referenceSource =
+        options.value("referenceZone", "system").toString();
+    if (referenceSource != "system" && referenceSource != "site")
+      throw std::runtime_error(
+          "Choose this Mac or the telescope for the reference time zone.");
     ObservationTarget t = target_;
     if (options.value("manual").toBool())
       t = {"manual",
@@ -420,6 +430,7 @@ bool ObservationController::calculate(const QVariantMap &options) {
     target_ = t;
     site_ = s;
     settings_ = options;
+    settings_["referenceZone"] = referenceSource;
     settings_.remove("manual");
     settings_["target"] = t.id;
     settings_["targetName"] = t.name;
@@ -476,6 +487,8 @@ bool ObservationController::calculate(const QVariantMap &options) {
       windowsList.append(QVariantMap{
           {"start", localTime(w.start)},
           {"end", localTime(w.end)},
+          {"startUtc", w.start},
+          {"endUtc", w.end},
           {"startFraction", double(w.start - start_) / (end_ - start_)},
           {"endFraction", double(w.end - start_) / (end_ - start_)},
           {"minutes", (w.end - w.start) / 60}});
@@ -580,11 +593,181 @@ bool ObservationController::calculate(const QVariantMap &options) {
     return false;
   }
 }
+bool ObservationController::changeSite(const QVariantMap &options) {
+  if (!start_)
+    return calculate(options);
+  const auto utc = instant_.value("utcSeconds").toLongLong();
+  const double previousFraction = fraction_;
+  try {
+    const QTimeZone zone(options.value("zone").toString().toUtf8());
+    if (!zone.isValid())
+      throw std::runtime_error("Enter a valid date (1900–2100) and time zone.");
+    const auto local = QDateTime::fromSecsSinceEpoch(utc, zone);
+    const auto date =
+        local.time() < QTime(12, 0) ? local.date().addDays(-1) : local.date();
+    auto anchored = options;
+    anchored["date"] = date.toString(Qt::ISODate);
+    const auto begin = observationNoon(anchored["date"].toString(),
+                                       anchored["zone"].toString());
+    const auto end = QDateTime(begin.date().addDays(1), QTime(12, 0), zone);
+    // Set the new fraction before calculate publishes any instant: every view
+    // and signal observes the same UTC time throughout a location change.
+    fraction_ = double(utc - begin.toSecsSinceEpoch()) / begin.secsTo(end);
+    if (calculate(anchored))
+      return true;
+  } catch (const std::exception &e) {
+    error_ = tr(e.what());
+    emit changed();
+  }
+  fraction_ = previousFraction;
+  return false;
+}
 void ObservationController::setFraction(double value) {
   if (!std::isfinite(value) || !start_)
     return;
   fraction_ = std::clamp(value, 0.0, 1.0);
   updateInstant();
+}
+bool ObservationController::setReferenceZone(const QString &source) {
+  if (source != "system" && source != "site")
+    return false;
+  settings_["referenceZone"] = source;
+  persist();
+  updateReference();
+  emit changed();
+  emit referenceChanged();
+  return true;
+}
+QVariantMap
+ObservationController::referenceTimeChoices(const QString &dateText,
+                                            const QString &clockText) const {
+  const auto date = QDate::fromString(dateText, Qt::ISODate);
+  auto time = QTime::fromString(clockText.trimmed(), "HH:mm");
+  if (!time.isValid())
+    time = QTime::fromString(clockText.trimmed(), "H:mm");
+  if (!date.isValid() || !time.isValid())
+    return {{"error", tr("Enter a valid reference date and time (HH:mm).")}};
+  const QTimeZone zone(reference_.value("zone").toString().toUtf8());
+  const auto wallClock =
+      QDateTime(date, time, QTimeZone::UTC).toSecsSinceEpoch();
+  QSet<int> offsets;
+  const auto start = QDateTime::fromSecsSinceEpoch(start_, QTimeZone::UTC);
+  const auto end = QDateTime::fromSecsSinceEpoch(end_, QTimeZone::UTC);
+  offsets.insert(zone.offsetFromUtc(start));
+  offsets.insert(zone.offsetFromUtc(end));
+  for (const auto &transition : zone.transitions(start, end))
+    offsets.insert(transition.offsetFromUtc);
+  std::vector<qint64> candidates;
+  for (const auto offset : offsets) {
+    const auto utc = wallClock - offset;
+    const auto local = QDateTime::fromSecsSinceEpoch(utc, zone);
+    if (utc >= start_ && utc <= end_ && local.date() == date &&
+        local.time() == time)
+      candidates.push_back(utc);
+  }
+  std::sort(candidates.begin(), candidates.end());
+  QVariantList choices;
+  for (const auto utc : candidates)
+    choices.append(
+        QVariantMap{{"utc", utc},
+                    {"label", QDateTime::fromSecsSinceEpoch(utc, zone).toString(
+                                  "dd/MM/yyyy HH:mm t")}});
+  if (choices.isEmpty())
+    return {{"error", tr("This time is outside the chosen night, or does not "
+                         "exist because of a clock change.")}};
+  return {{"choices", choices}};
+}
+bool ObservationController::setReferenceUtc(qint64 utc) {
+  if (!start_ || utc < start_ || utc > end_)
+    return false;
+  setFraction(double(utc - start_) / (end_ - start_));
+  return true;
+}
+QVariantMap ObservationController::recordingWindow(qint64 notBefore) const {
+  if (!notBefore)
+    notBefore = QDateTime::currentSecsSinceEpoch();
+  const QTimeZone zone(reference_.value("zone").toString().toUtf8());
+  for (const auto &value : result_.value("slots").toList()) {
+    const auto slot = value.toMap();
+    const auto begin = std::max(notBefore, slot.value("startUtc").toLongLong());
+    // Recording times are whole minutes inside the geometric interval: never
+    // present a rounded start before the object's height/darkness limits hold.
+    const auto start = qint64(std::ceil(begin / 60.0)) * 60;
+    const auto end =
+        qint64(std::floor(slot.value("endUtc").toLongLong() / 60.0)) * 60;
+    if (end <= start)
+      continue;
+    return {{"available", true},
+            {"startUtc", start},
+            {"endUtc", end},
+            {"start", QDateTime::fromSecsSinceEpoch(start, zone)
+                          .toString("dd/MM/yyyy HH:mm t")},
+            {"end", QDateTime::fromSecsSinceEpoch(end, zone).toString(
+                        "dd/MM/yyyy HH:mm t")},
+            {"siteStart", localTime(start)},
+            {"siteEnd", localTime(end)},
+            {"homeStart",
+             QDateTime::fromSecsSinceEpoch(start, QTimeZone::systemTimeZone())
+                 .toString("dd/MM/yyyy HH:mm t")},
+            {"homeEnd",
+             QDateTime::fromSecsSinceEpoch(end, QTimeZone::systemTimeZone())
+                 .toString("dd/MM/yyyy HH:mm t")},
+            {"minutes", (end - start) / 60}};
+  }
+  return {{"available", false}};
+}
+void ObservationController::updateReference() {
+  if (!start_ || !instant_.contains("utcSeconds"))
+    return;
+  const auto source = settings_.value("referenceZone", "system").toString();
+  const QTimeZone siteZone(settings_.value("zone").toString().toUtf8());
+  const auto homeZone = QTimeZone::systemTimeZone();
+  if (!siteZone.isValid() || !homeZone.isValid())
+    return;
+  const auto zone = source == "site" ? siteZone : homeZone;
+  const auto utc = instant_.value("utcSeconds").toLongLong();
+  const auto local = QDateTime::fromSecsSinceEpoch(utc, zone);
+  const auto first = QDateTime::fromSecsSinceEpoch(start_, zone).date();
+  const auto last = QDateTime::fromSecsSinceEpoch(end_, zone).date();
+  QVariantList days, referenceSlots;
+  for (auto date = first; date <= last; date = date.addDays(1))
+    days.append(QVariantMap{{"date", date.toString(Qt::ISODate)},
+                            {"label", date.toString("dd/MM/yyyy")}});
+  for (const auto &value : result_.value("slots").toList()) {
+    auto slot = value.toMap();
+    slot["referenceStart"] =
+        QDateTime::fromSecsSinceEpoch(slot.value("startUtc").toLongLong(), zone)
+            .toString("dd/MM/yyyy HH:mm:ss t");
+    slot["referenceEnd"] =
+        QDateTime::fromSecsSinceEpoch(slot.value("endUtc").toLongLong(), zone)
+            .toString("dd/MM/yyyy HH:mm:ss t");
+    const auto start = slot.value("startUtc").toLongLong(),
+               end = slot.value("endUtc").toLongLong();
+    slot["homeStart"] = QDateTime::fromSecsSinceEpoch(start, homeZone)
+                            .toString("dd/MM/yyyy HH:mm:ss t");
+    slot["homeEnd"] = QDateTime::fromSecsSinceEpoch(end, homeZone)
+                          .toString("dd/MM/yyyy HH:mm:ss t");
+    slot["siteStart"] = QDateTime::fromSecsSinceEpoch(start, siteZone)
+                            .toString("dd/MM/yyyy HH:mm:ss t");
+    slot["siteEnd"] = QDateTime::fromSecsSinceEpoch(end, siteZone)
+                          .toString("dd/MM/yyyy HH:mm:ss t");
+    referenceSlots.append(slot);
+  }
+  reference_ = {{"source", source},
+                {"zone", QString::fromUtf8(zone.id())},
+                {"homeZone", QString::fromUtf8(homeZone.id())},
+                {"siteZone", QString::fromUtf8(siteZone.id())},
+                {"differentZones", homeZone.id() != siteZone.id()},
+                {"date", local.date().toString(Qt::ISODate)},
+                {"clock", local.time().toString("HH:mm")},
+                {"display", local.toString("dd/MM/yyyy HH:mm t")},
+                {"homeDisplay", QDateTime::fromSecsSinceEpoch(utc, homeZone)
+                                    .toString("dd/MM/yyyy HH:mm t")},
+                {"siteDisplay", QDateTime::fromSecsSinceEpoch(utc, siteZone)
+                                    .toString("dd/MM/yyyy HH:mm t")},
+                {"days", days},
+                {"slots", referenceSlots}};
+  reference_["recording"] = recordingWindow();
 }
 void ObservationController::updateInstant() {
   const qint64 utc = start_ + qRound64(fraction_ * (end_ - start_));
@@ -626,7 +809,9 @@ void ObservationController::updateInstant() {
       int state = alt < 0 ? 0 : alt < minimum ? 1 : solar > limit ? 2 : 3;
       world_.append(QVariantMap{{"lat", lat}, {"lon", lon}, {"state", state}});
     }
+  updateReference();
   emit instantChanged();
+  emit referenceChanged();
   emit weatherChanged();
 }
 void ObservationController::chooseMapLocation(double lat, double lon) {
@@ -636,12 +821,7 @@ void ObservationController::chooseMapLocation(double lat, double lon) {
   s["longitude"] = lon;
   s["elevation"] = 0;
   s["zone"] = "UTC";
-  const auto utc = instant_.value("utcSeconds").toLongLong();
-  const auto d = QDateTime::fromSecsSinceEpoch(utc, QTimeZone::UTC);
-  s["date"] = (d.time().hour() < 12 ? d.date().addDays(-1) : d.date())
-                  .toString(Qt::ISODate);
-  if (calculate(s))
-    setFraction(double(utc - start_) / (end_ - start_));
+  changeSite(s);
 }
 bool ObservationController::saveSite(const QString &name) {
   if (name.trimmed().isEmpty() || name.size() > 100) {

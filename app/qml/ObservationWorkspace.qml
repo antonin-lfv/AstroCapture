@@ -19,6 +19,51 @@ Rectangle {
     property bool citySearchOpen: false
     property bool saveSiteOpen: false
     property string dateNotice: ""
+    property string referenceNotice: ""
+    property var referenceChoices: []
+    property bool referenceClockEdited: false
+    function syncReference() {
+        const ref = controller.reference;
+        referencePicker.currentIndex = ref.source === "site" ? 1 : 0;
+        if (!timeSlider.pressed && !timeUpdatePending)
+            timeSlider.value = controller.instant.fraction || 0;
+        if (!referenceClock.editing && !referenceNotice.length && !referenceChoices.length) {
+            referenceClock.text = ref.clock || "";
+            referenceDay.currentIndex = (ref.days || []).findIndex(day => day.date === ref.date);
+            referenceClockEdited = false;
+        }
+    }
+    function applyReferenceTime() {
+        const day = (controller.reference.days || [])[referenceDay.currentIndex];
+        if (!day)
+            return;
+        if (!referenceClockEdited && !referenceNotice.length && !referenceChoices.length && day.date === controller.reference.date && referenceClock.text.trim() === controller.reference.clock)
+            return;
+        timeUpdates.stop();
+        timeUpdatePending = false;
+        const answer = controller.referenceTimeChoices(day.date, referenceClock.text);
+        referenceChoices = answer.choices || [];
+        referenceNotice = answer.error || "";
+        if (referenceChoices.length === 1) {
+            controller.setReferenceUtc(referenceChoices[0].utc);
+            referenceChoices = [];
+            referenceClockEdited = false;
+            referenceClock.text = controller.reference.clock;
+        } else if (referenceChoices.length > 1) {
+            referenceNotice = qsTr("This hour occurs twice. Choose the UTC offset below.");
+        }
+    }
+    function showRecordingWindow() {
+        const plan = controller.recordingWindow();
+        if (plan.available) {
+            timeUpdates.stop();
+            timeUpdatePending = false;
+            referenceNotice = "";
+            referenceChoices = [];
+            controller.setReferenceUtc(plan.startUtc);
+            timeSlider.value = controller.instant.fraction;
+        }
+    }
     property var nightState: ({})
     readonly property bool hasPlot: ["night", "sky", "world", "clouds"].indexOf(viewMode) >= 0
     function cloudPercent(value) {
@@ -41,6 +86,8 @@ Rectangle {
         nightState = controller.planningNight(controller.settings);
     }
     function scheduleTimeUpdate() {
+        referenceNotice = "";
+        referenceChoices = [];
         if (!timeUpdates.running) {
             controller.setFraction(timeSlider.value);
             timeUpdates.start();
@@ -54,6 +101,12 @@ Rectangle {
         controller.setFraction(timeSlider.value);
     }
     function applyOptions(options) {
+        const current = controller.settings;
+        const moved = Number(options.latitude) !== Number(current.latitude) || Number(options.longitude) !== Number(current.longitude) || Number(options.elevation) !== Number(current.elevation) || options.zone !== current.zone;
+        if (moved && options.date === current.date) {
+            dateNotice = "";
+            return controller.changeSite(options);
+        }
         const state = controller.planningNight(options);
         if (state.error) {
             dateNotice = state.error;
@@ -93,6 +146,7 @@ Rectangle {
         timeSlider.value = controller.instant.fraction || 0;
         syncing = false;
         checkNight();
+        syncReference();
     }
     function calculate() {
         if (syncing)
@@ -147,7 +201,12 @@ Rectangle {
     Connections {
         target: root.controller
         function onChanged() {
+            root.referenceNotice = "";
+            root.referenceChoices = [];
             root.sync();
+        }
+        function onReferenceChanged() {
+            root.syncReference();
         }
     }
     Component.onCompleted: {
@@ -386,6 +445,14 @@ Rectangle {
                             font.pixelSize: 13
                         }
                         Label {
+                            visible: root.controller.reference.differentZones && (root.viewMode === "night" || root.viewMode === "clouds")
+                            text: qsTr("Chart hours: %1 (telescope)").arg(root.controller.reference.siteZone || "")
+                            color: Atelier.secondary
+                            font.pixelSize: 12
+                            wrapMode: Text.Wrap
+                            Layout.fillWidth: true
+                        }
+                        Label {
                             visible: root.viewMode === "sky"
                             text: qsTr("Compass view · edge: horizon · centre: overhead")
                             color: Atelier.secondary
@@ -565,7 +632,7 @@ Rectangle {
                         }
                         Label {
                             visible: root.controller.weather.available
-                            text: qsTr("Forecast instant: %1").arg(root.controller.weather.validTime || "")
+                            text: qsTr("Forecast instant at the telescope: %1").arg(root.controller.weather.validTime || "")
                             color: Atelier.secondary
                             font.pixelSize: 12
                             wrapMode: Text.Wrap
@@ -594,7 +661,7 @@ Rectangle {
                         visible: root.hasPlot
                         objectName: "observationPlot"
                         Layout.fillWidth: true
-                        Layout.preferredHeight: root.viewMode === "world" ? Math.min((mainScroll.availableWidth - 32) / 2 + 40, Math.max(200, root.height - (root.controller.connectionStatus.length > 0 ? 370 : 340))) : root.viewMode === "clouds" && root.width < 1100 ? 170 : 250
+                        Layout.preferredHeight: root.viewMode === "world" ? Math.min((mainScroll.availableWidth - 32) / 2 + 40, Math.max(200, root.height - (root.controller.connectionStatus.length > 0 ? 370 : 340) - (root.controller.reference.differentZones ? 24 : 0))) : root.viewMode === "clouds" && root.width < 1100 ? 170 : root.viewMode === "night" && root.width < 1100 ? (root.controller.reference.differentZones ? 170 : 220) : 250
                         Layout.leftMargin: 12
                         Layout.rightMargin: 12
                         controller: root.controller
@@ -674,12 +741,12 @@ Rectangle {
                             Layout.fillWidth: true
                             spacing: 8
                             Label {
-                                text: root.controller.instant.local || ""
+                                objectName: "observationReferenceReadout"
+                                text: (root.controller.reference.source === "site" ? qsTr("At the telescope: %1") : qsTr("At home: %1")).arg(root.controller.reference.display || "")
                                 color: Atelier.text
                                 font.pixelSize: 13
                                 Layout.fillWidth: true
                                 wrapMode: Text.Wrap
-                                visible: root.viewMode !== "world"
                             }
                             Label {
                                 text: root.controller.instant.solarPhase || ""
@@ -687,18 +754,18 @@ Rectangle {
                                 font.pixelSize: 12
                                 visible: root.viewMode === "night" || root.viewMode === "sky"
                             }
-                            Label {
-                                text: root.controller.instant.utc || ""
-                                color: root.viewMode === "world" ? Atelier.text : Atelier.secondary
-                                font.pixelSize: 12
-                                visible: root.viewMode !== "world"
-                            }
-                            SettingLabel {
+                            HelpIcon {
                                 visible: root.viewMode === "world"
-                                text: qsTr("Move the time to compare visibility")
-                                explanation: qsTr("The whole map uses the same UTC instant. Moving the slider changes when the selected object can meet your height and darkness limits around the world.")
-                                Layout.fillWidth: true
+                                text: qsTr("The whole map uses the same UTC instant. Moving the slider changes when the selected object can meet your height and darkness limits around the world.")
                             }
+                        }
+                        Label {
+                            visible: root.controller.reference.differentZones === true
+                            text: (root.controller.reference.source === "site" ? qsTr("At home: %1") : qsTr("At the telescope: %1")).arg(root.controller.reference.source === "site" ? root.controller.reference.homeDisplay || "" : root.controller.reference.siteDisplay || "")
+                            color: Atelier.secondary
+                            font.pixelSize: 12
+                            wrapMode: Text.Wrap
+                            Layout.fillWidth: true
                         }
                         AtelierSlider {
                             id: timeSlider
@@ -722,42 +789,104 @@ Rectangle {
                         Layout.leftMargin: 20
                         Layout.rightMargin: 20
                         spacing: 8
-                        Label {
-                            text: qsTr("Observation windows")
-                            color: Atelier.text
-                            font.pixelSize: 14
-                            font.weight: Font.Medium
+                        SettingLabel {
+                            visible: root.viewMode === "night" && !(history.checked && root.nightState.past)
+                            text: qsTr("When to start recording?")
+                            explanation: qsTr("The first remaining window is chosen after the current real time, independently of the exploratory cursor. It meets the selected height and darkness limits. Start is rounded up to a full minute; end is rounded down. Reference time converts the same instants. Check weather, terrain and telescope setup separately.")
                         }
-                        Label {
-                            visible: (root.controller.result.slots || []).length === 0
-                            text: root.controller.result.noDarkness ? qsTr("No period is dark enough for the selected limit. For the Moon or a planet, try a brighter-sky limit.") : qsTr("No window with these limits. Try a different date, location or minimum height.")
-                            color: Atelier.secondary
-                            wrapMode: Text.Wrap
+                        ColumnLayout {
+                            visible: root.viewMode === "night" && !(history.checked && root.nightState.past) && root.controller.reference.recording.available === true
                             Layout.fillWidth: true
-                        }
-                        Repeater {
-                            model: root.controller.result.slots || []
-                            Label {
-                                required property var modelData
-                                text: modelData.start + " → " + modelData.end + qsTr(" · %1 min").arg(modelData.minutes)
-                                color: Atelier.text
-                                wrapMode: Text.Wrap
+                            spacing: 6
+                            RowLayout {
                                 Layout.fillWidth: true
-                                font.pixelSize: 13
+                                spacing: 12
+                                Label {
+                                    objectName: "observationRecordingStart"
+                                    text: (root.controller.reference.source === "site" ? qsTr("Telescope: from %1") : qsTr("At home: from %1")).arg(root.controller.reference.recording.start || "")
+                                    color: Atelier.text
+                                    font.pixelSize: 16
+                                    wrapMode: Text.Wrap
+                                    Layout.fillWidth: true
+                                }
+                                IconButton {
+                                    objectName: "observationShowRecordingWindow"
+                                    text: qsTr("Show start")
+                                    onClicked: root.showRecordingWindow()
+                                }
                             }
-                        }
-                        RowLayout {
-                            Layout.fillWidth: true
-                            spacing: 12
                             Label {
-                                text: qsTr("Sunset: %1").arg(root.controller.result.sunset || "")
+                                text: qsTr("Until %1 · %2 min").arg(root.controller.reference.recording.end || "").arg(root.controller.reference.recording.minutes || 0)
                                 color: Atelier.secondary
                                 font.pixelSize: 12
                                 wrapMode: Text.Wrap
                                 Layout.fillWidth: true
                             }
                             Label {
-                                text: qsTr("Sunrise: %1").arg(root.controller.result.sunrise || "")
+                                visible: root.controller.reference.differentZones
+                                text: (root.controller.reference.source === "site" ? qsTr("At home: %1 → %2") : qsTr("At the telescope: %1 → %2")).arg(root.controller.reference.source === "site" ? root.controller.reference.recording.homeStart || "" : root.controller.reference.recording.siteStart || "").arg(root.controller.reference.source === "site" ? root.controller.reference.recording.homeEnd || "" : root.controller.reference.recording.siteEnd || "")
+                                color: Atelier.secondary
+                                font.pixelSize: 12
+                                wrapMode: Text.Wrap
+                                Layout.fillWidth: true
+                            }
+                        }
+                        Label {
+                            visible: root.viewMode === "night" && !(history.checked && root.nightState.past) && !root.controller.reference.recording.available
+                            text: qsTr("No remaining recording window in this night with the selected limits.")
+                            color: Atelier.secondary
+                            wrapMode: Text.Wrap
+                            Layout.fillWidth: true
+                            font.pixelSize: 12
+                        }
+                        InspectorFamily {
+                            objectName: "observationAllWindows"
+                            visible: root.viewMode === "night" || history.checked
+                            title: qsTr("All windows · %1").arg(root.controller.reference.zone || "")
+                            onActivated: expanded = !expanded
+                            Label {
+                                visible: (root.controller.reference.slots || []).length === 0
+                                text: qsTr("No window with these limits. Try a different date, location or minimum height.")
+                                color: Atelier.secondary
+                                wrapMode: Text.Wrap
+                                Layout.fillWidth: true
+                            }
+                            Repeater {
+                                model: root.controller.reference.slots || []
+                                ColumnLayout {
+                                    required property var modelData
+                                    Layout.fillWidth: true
+                                    spacing: 4
+                                    Label {
+                                        text: modelData.referenceStart + " → " + modelData.referenceEnd
+                                        color: Atelier.text
+                                        wrapMode: Text.Wrap
+                                        Layout.fillWidth: true
+                                        font.pixelSize: 13
+                                    }
+                                    Label {
+                                        visible: root.controller.reference.differentZones
+                                        text: (root.controller.reference.source === "site" ? qsTr("At home: %1 → %2") : qsTr("At the telescope: %1 → %2")).arg(root.controller.reference.source === "site" ? modelData.homeStart : modelData.siteStart).arg(root.controller.reference.source === "site" ? modelData.homeEnd : modelData.siteEnd)
+                                        color: Atelier.secondary
+                                        wrapMode: Text.Wrap
+                                        Layout.fillWidth: true
+                                        font.pixelSize: 12
+                                    }
+                                }
+                            }
+                        }
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 12
+                            Label {
+                                text: (root.controller.reference.differentZones ? qsTr("Sunset at telescope: %1") : qsTr("Sunset: %1")).arg(root.controller.result.sunset || "")
+                                color: Atelier.secondary
+                                font.pixelSize: 12
+                                wrapMode: Text.Wrap
+                                Layout.fillWidth: true
+                            }
+                            Label {
+                                text: (root.controller.reference.differentZones ? qsTr("Sunrise at telescope: %1") : qsTr("Sunrise: %1")).arg(root.controller.result.sunrise || "")
                                 color: Atelier.secondary
                                 font.pixelSize: 12
                                 wrapMode: Text.Wrap
@@ -920,6 +1049,7 @@ Rectangle {
                 color: Atelier.surface
                 ScrollView {
                     id: inspector
+                    objectName: "observationInspector"
                     anchors.fill: parent
                     anchors.margins: 16
                     contentWidth: availableWidth
@@ -972,7 +1102,7 @@ Rectangle {
                             model: root.controller.sites
                             textRole: "label"
                             displayText: root.controller.settings.name || qsTr("Custom location")
-                            explanation: qsTr("The city's time zone follows local daylight-saving rules. A map click uses UTC until you choose a time zone in Advanced.")
+                            explanation: qsTr("The city's time zone follows local daylight-saving rules. Changing place keeps the UTC instant; local times and the night date are converted. A map click initially uses UTC.")
                             onActivated: index => {
                                 root.manual = false;
                                 let s = Object.assign({}, root.controller.settings, root.controller.sites[index]);
@@ -1117,6 +1247,96 @@ Rectangle {
                             Accessible.role: Accessible.AlertMessage
                         }
                         InspectorFamily {
+                            id: referenceSection
+                            objectName: "observationReferenceSection"
+                            title: qsTr("Reference time · %1").arg(root.controller.reference.clock || "—")
+                            onActivated: expanded = !expanded
+                            SettingLabel {
+                                text: qsTr("Time zone for the reference hour")
+                                explanation: qsTr("At home follows this Mac's time zone. At the telescope follows the observing place. Changing this choice converts times without moving the site, changing the night or changing the UTC instant.")
+                                Layout.fillWidth: true
+                            }
+                            DarkComboBox {
+                                id: referencePicker
+                                objectName: "observationReferenceZone"
+                                Layout.fillWidth: true
+                                model: [qsTr("At home · %1").arg(root.controller.reference.homeZone || ""), qsTr("Telescope · %1").arg(root.controller.reference.siteZone || "")]
+                                Accessible.name: qsTr("Reference time zone")
+                                onActivated: index => {
+                                    root.referenceChoices = [];
+                                    root.referenceNotice = "";
+                                    root.controller.setReferenceZone(index === 1 ? "site" : "system");
+                                }
+                            }
+                            DarkComboBox {
+                                id: referenceDay
+                                objectName: "observationReferenceDay"
+                                Layout.fillWidth: true
+                                model: root.controller.reference.days || []
+                                textRole: "label"
+                                Accessible.name: qsTr("Date in the reference time zone")
+                                explanation: qsTr("Choose the calendar day in the reference time zone. A night can cross midnight and a time-zone conversion can change the date.")
+                                onActivated: root.applyReferenceTime()
+                            }
+                            ObservationField {
+                                id: referenceClock
+                                objectName: "observationReferenceClock"
+                                Layout.fillWidth: true
+                                label: qsTr("Reference hour · HH:mm")
+                                help: qsTr("Enter the time in the selected reference time zone. The cursor and all four views move to the same instant. For example, 23:30. Clock-change gaps are rejected; repeated hours let you choose the offset.")
+                                onAccepted: root.applyReferenceTime()
+                                onTextEdited: root.referenceClockEdited = true
+                            }
+                            Label {
+                                visible: root.referenceNotice.length > 0
+                                text: root.referenceNotice
+                                Layout.fillWidth: true
+                                wrapMode: Text.Wrap
+                                color: Atelier.warning
+                                font.pixelSize: 12
+                                Accessible.role: Accessible.AlertMessage
+                            }
+                            DarkComboBox {
+                                visible: root.referenceChoices.length > 1
+                                objectName: "observationReferenceOccurrence"
+                                Layout.fillWidth: true
+                                model: root.referenceChoices
+                                textRole: "label"
+                                displayText: qsTr("Choose the occurrence of this hour")
+                                Accessible.name: qsTr("Choose the UTC offset for the repeated hour")
+                                onActivated: index => {
+                                    root.controller.setReferenceUtc(root.referenceChoices[index].utc);
+                                    root.referenceChoices = [];
+                                    root.referenceNotice = "";
+                                    root.referenceClockEdited = false;
+                                    referenceClock.text = root.controller.reference.clock;
+                                }
+                            }
+                            Label {
+                                text: qsTr("At home: %1").arg(root.controller.reference.homeDisplay || "")
+                                color: Atelier.text
+                                font.pixelSize: 12
+                                wrapMode: Text.Wrap
+                                Layout.fillWidth: true
+                            }
+                            Label {
+                                text: qsTr("At the telescope: %1").arg(root.controller.reference.siteDisplay || "")
+                                color: Atelier.secondary
+                                font.pixelSize: 12
+                                wrapMode: Text.Wrap
+                                Layout.fillWidth: true
+                            }
+                            IconButton {
+                                text: qsTr("Show first remaining window")
+                                Layout.fillWidth: true
+                                enabled: root.controller.reference.recording.available === true
+                                onClicked: {
+                                    root.showRecordingWindow();
+                                    root.viewMode = "night";
+                                }
+                            }
+                        }
+                        InspectorFamily {
                             title: qsTr("Visibility settings")
                             objectName: "observationCriteria"
                             onActivated: expanded = !expanded
@@ -1194,6 +1414,7 @@ Rectangle {
                                 }
                                 ObservationField {
                                     id: elevation
+                                    objectName: "observationElevation"
                                     Layout.fillWidth: true
                                     label: qsTr("Elevation · metres")
                                     help: qsTr("Height above sea level, −500 to 10000 metres. Sunrise uses standard refraction adjusted for this elevation. Terrain and horizon dip are not modelled.")
@@ -1201,6 +1422,7 @@ Rectangle {
                                 }
                                 ObservationField {
                                     id: timezone
+                                    objectName: "observationZone"
                                     Layout.fillWidth: true
                                     label: qsTr("Time zone")
                                     help: qsTr("Use an IANA name such as Europe/Paris, America/Santiago or UTC. Clock changes are applied automatically.")

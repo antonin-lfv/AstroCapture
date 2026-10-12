@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.18.4 — 2026-10-12
+
+- Add a reference clock using the Mac’s time zone by default or the telescope site’s configured zone, with both local dates/times displayed when they differ.
+- Let the user choose a reference calendar day and enter an hour to synchronize the cursor and all four views; reject nonexistent hours and offer both UTC offsets for repeated hours.
+- Show the first remaining recording window in Night, converted to the reference zone, with a direct action to inspect its start. Round starts up and ends down to whole minutes inside the height/darkness window; retain precise intervals in expandable details.
+- Preserve observing-site coordinates, the chosen night and UTC instant when switching reference zones, and persist the preferred reference. Clearly identify chart, solar and forecast times at the telescope.
+- Preserve the exact UTC instant throughout city, favourite, coordinate, time-zone and map location changes; select the local noon-to-noon period containing it, without publishing a transient shifted instant.
+- Verify timezone conversions, midnight dates, persistence, clock changes, recording-window bounds and synchronization; update French help, Guide and README.
+
 ## 1.18.3 — 2026-10-12
 
 - Update the Observation time cursor continuously during dragging, coalescing intermediate changes without postponing every update until release; apply the final slider value immediately.

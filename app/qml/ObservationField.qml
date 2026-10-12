@@ -8,7 +8,9 @@ ColumnLayout {
     property string help: ""
     property alias text: input.text
     property alias validator: input.validator
+    readonly property bool editing: input.activeFocus
     signal accepted()
+    signal textEdited()
     function focusInput(selectText) { input.forceActiveFocus(); if(selectText) input.selectAll(); }
     spacing: 5
     SettingLabel {text: root.label; explanation: root.help; Layout.fillWidth: true}
@@ -23,5 +25,6 @@ ColumnLayout {
         Accessible.description: root.help
         background: Rectangle {radius: Atelier.controlRadius; color: Atelier.field; border.color: input.activeFocus ? Atelier.accent : Atelier.border}
         onEditingFinished: root.accepted()
+        onTextEdited: root.textEdited()
     }
 }

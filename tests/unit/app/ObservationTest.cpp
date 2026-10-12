@@ -364,6 +364,178 @@ int main(int argc, char **argv) {
   ASTRO_TEST_CHECK(controller.calculate(opts));
   ASTRO_TEST_CHECK(controller.selectTarget("NGC1976"));
   controller.search("");
+  {
+    const auto savedOptions = controller.settings();
+    const auto utcBefore = controller.instant()["utcSeconds"];
+    ASTRO_TEST_CHECK(controller.reference()["source"] == "system");
+    ASTRO_TEST_CHECK(controller.reference()["zone"] ==
+                     QString::fromUtf8(QTimeZone::systemTimeZone().id()));
+    ASTRO_TEST_CHECK(controller.setReferenceZone("site"));
+    ASTRO_TEST_CHECK(controller.instant()["utcSeconds"] == utcBefore);
+    ASTRO_TEST_CHECK(controller.settings()["latitude"] ==
+                     savedOptions["latitude"]);
+    ASTRO_TEST_CHECK(controller.settings()["date"] == savedOptions["date"]);
+    ASTRO_TEST_CHECK(!controller.setReferenceZone("invalid"));
+    const auto choice =
+        controller.referenceTimeChoices("2026-12-13", "00:15")["choices"]
+            .toList();
+    ASTRO_TEST_CHECK(choice.size() == 1);
+    const auto selectedUtc = choice.first().toMap()["utc"].toLongLong();
+    ASTRO_TEST_CHECK(selectedUtc == QDateTime(QDate(2026, 12, 13), QTime(0, 15),
+                                              QTimeZone("Europe/Paris"))
+                                        .toSecsSinceEpoch());
+    ASTRO_TEST_CHECK(controller.setReferenceUtc(selectedUtc));
+    ASTRO_TEST_CHECK(controller.instant()["utcSeconds"] == selectedUtc);
+    ASTRO_TEST_CHECK(controller.referenceTimeChoices("2026-12-13", "25:00")
+                         .contains("error"));
+    ASTRO_TEST_CHECK(controller.referenceTimeChoices("2026-12-14", "00:15")
+                         .contains("error"));
+    ASTRO_TEST_CHECK(!controller.setReferenceUtc(
+        controller.result()["startUtcSeconds"].toLongLong() - 1));
+    ASTRO_TEST_CHECK(controller.instant()["utcSeconds"] == selectedUtc);
+    const auto windows = controller.result()["slots"].toList();
+    ASTRO_TEST_CHECK(!windows.isEmpty());
+    const auto plan = controller.recordingWindow(
+        controller.result()["startUtcSeconds"].toLongLong());
+    ASTRO_TEST_CHECK(plan["available"].toBool());
+    const auto begin = plan["startUtc"].toLongLong(),
+               end = plan["endUtc"].toLongLong();
+    ASTRO_TEST_CHECK(begin % 60 == 0 && end % 60 == 0);
+    ASTRO_TEST_CHECK(begin >= windows.first().toMap()["startUtc"].toLongLong());
+    ASTRO_TEST_CHECK(end <= windows.first().toMap()["endUtc"].toLongLong());
+    const ObservationTarget target{"NGC1976",
+                                   "M42",
+                                   "test",
+                                   -1,
+                                   savedOptions["ra"].toDouble(),
+                                   savedOptions["dec"].toDouble()};
+    for (const auto utc : {begin, end}) {
+      ASTRO_TEST_CHECK(
+          observationPosition(target, {48.8566, 2.3522, 0}, utc).altitude >=
+          30);
+      ASTRO_TEST_CHECK(observationSunAltitude({48.8566, 2.3522, 0}, utc) <=
+                       -18);
+    }
+    ASTRO_TEST_CHECK(
+        !controller
+             .recordingWindow(windows.last().toMap()["endUtc"].toLongLong() +
+                              1)["available"]
+             .toBool());
+    auto otherSite = savedOptions;
+    const auto sydney = controller.sites()[4].toMap();
+    for (auto it = sydney.cbegin(); it != sydney.cend(); ++it)
+      otherSite[it.key()] = it.value();
+    ASTRO_TEST_CHECK(controller.calculate(otherSite));
+    ASTRO_TEST_CHECK(controller.setReferenceZone("system"));
+    const auto evening =
+        QDateTime(QDate(2026, 12, 12), QTime(18, 0), QTimeZone::UTC)
+            .toSecsSinceEpoch();
+    ASTRO_TEST_CHECK(controller.setReferenceUtc(evening));
+    ASTRO_TEST_CHECK(
+        controller.reference()["siteDisplay"] ==
+        QDateTime::fromSecsSinceEpoch(evening, QTimeZone("Australia/Sydney"))
+            .toString("dd/MM/yyyy HH:mm t"));
+    ASTRO_TEST_CHECK(
+        controller.reference()["homeDisplay"] ==
+        QDateTime::fromSecsSinceEpoch(evening, QTimeZone::systemTimeZone())
+            .toString("dd/MM/yyyy HH:mm t"));
+    ASTRO_TEST_CHECK(controller.setReferenceZone("site"));
+    {
+      ObservationController reopened;
+      ASTRO_TEST_CHECK(reopened.reference()["source"] == "site");
+      ASTRO_TEST_CHECK(reopened.settings()["zone"] == "Australia/Sydney");
+    }
+    auto spring = savedOptions;
+    spring["date"] = "2026-03-28";
+    spring["referenceZone"] = "site";
+    ASTRO_TEST_CHECK(controller.calculate(spring));
+    ASTRO_TEST_CHECK(controller.referenceTimeChoices("2026-03-29", "02:30")
+                         .contains("error"));
+    ASTRO_TEST_CHECK(
+        controller.referenceTimeChoices("2026-03-29", "03:30")["choices"]
+            .toList()
+            .size() == 1);
+    auto autumn = spring;
+    autumn["date"] = "2026-10-24";
+    ASTRO_TEST_CHECK(controller.calculate(autumn));
+    const auto repeated =
+        controller.referenceTimeChoices("2026-10-25", "02:30")["choices"]
+            .toList();
+    ASTRO_TEST_CHECK(repeated.size() == 2);
+    ASTRO_TEST_CHECK(repeated[1].toMap()["utc"].toLongLong() -
+                         repeated[0].toMap()["utc"].toLongLong() ==
+                     3600);
+    ASTRO_TEST_CHECK(repeated[0].toMap()["label"] !=
+                     repeated[1].toMap()["label"]);
+    for (const auto &value : repeated) {
+      ASTRO_TEST_CHECK(
+          controller.setReferenceUtc(value.toMap()["utc"].toLongLong()));
+      ASTRO_TEST_CHECK(controller.reference()["clock"] == "02:30");
+    }
+    ASTRO_TEST_CHECK(controller.calculate(savedOptions));
+    ASTRO_TEST_CHECK(controller.setReferenceZone("system"));
+    controller.setFraction(.5);
+  }
+  {
+    const auto paris = controller.settings();
+    const auto anchor =
+        QDateTime(QDate(2026, 12, 13), QTime(10, 15, 37), QTimeZone::UTC)
+            .toSecsSinceEpoch();
+    ASTRO_TEST_CHECK(controller.setReferenceUtc(anchor));
+    const auto home = controller.reference()["homeDisplay"];
+    int updates = 0;
+    const auto connection = QObject::connect(
+        &controller, &ObservationController::instantChanged, [&] {
+          ++updates;
+          // Observers must never receive a transient, shifted UTC instant.
+          ASTRO_TEST_CHECK(controller.instant()["utcSeconds"] == anchor);
+          ASTRO_TEST_CHECK(controller.reference()["homeDisplay"] == home);
+        });
+    auto sydney = paris;
+    const auto city = controller.sites()[4].toMap();
+    for (auto it = city.cbegin(); it != city.cend(); ++it)
+      sydney[it.key()] = it.value();
+    ASTRO_TEST_CHECK(controller.changeSite(sydney));
+    ASTRO_TEST_CHECK(controller.settings()["date"] == "2026-12-13");
+    ASTRO_TEST_CHECK(
+        controller.reference()["siteDisplay"] ==
+        QDateTime::fromSecsSinceEpoch(anchor, QTimeZone("Australia/Sydney"))
+            .toString("dd/MM/yyyy HH:mm t"));
+    const auto valid = controller.settings(), result = controller.result(),
+               instant = controller.instant();
+    auto invalid = valid;
+    invalid["latitude"] = 91;
+    ASTRO_TEST_CHECK(!controller.changeSite(invalid));
+    invalid["latitude"] = valid["latitude"];
+    invalid["zone"] = "Invalid/Zone";
+    ASTRO_TEST_CHECK(!controller.changeSite(invalid));
+    ASTRO_TEST_CHECK(controller.settings() == valid);
+    ASTRO_TEST_CHECK(controller.result() == result);
+    ASTRO_TEST_CHECK(controller.instant() == instant);
+    controller.chooseMapLocation(-33, 151);
+    ASTRO_TEST_CHECK(controller.settings()["date"] == "2026-12-12");
+    ASTRO_TEST_CHECK(controller.changeSite(paris));
+    ASTRO_TEST_CHECK(controller.settings()["date"] == "2026-12-12");
+    ASTRO_TEST_CHECK(updates == 3);
+    QObject::disconnect(connection);
+    // Returning to Paris on a clock-change night also preserves seconds.
+    for (const auto date : {QDate(2026, 3, 29), QDate(2026, 10, 25)}) {
+      auto dst = paris;
+      dst["date"] = date.addDays(-1).toString(Qt::ISODate);
+      ASTRO_TEST_CHECK(controller.calculate(dst));
+      const auto utc =
+          QDateTime(date, QTime(1, 30, 43), QTimeZone::UTC).toSecsSinceEpoch();
+      ASTRO_TEST_CHECK(controller.setReferenceUtc(utc));
+      ASTRO_TEST_CHECK(controller.changeSite(sydney));
+      ASTRO_TEST_CHECK(controller.changeSite(dst));
+      ASTRO_TEST_CHECK(controller.instant()["utcSeconds"] == utc);
+      const auto seconds = controller.result()["endUtcSeconds"].toLongLong() -
+                           controller.result()["startUtcSeconds"].toLongLong();
+      ASTRO_TEST_CHECK(seconds == (date.month() == 3 ? 23 : 25) * 3600);
+    }
+    ASTRO_TEST_CHECK(controller.calculate(paris));
+    controller.setFraction(.5);
+  }
   auto polarOptions = controller.settings();
   polarOptions["latitude"] = 89.5;
   polarOptions["date"] = "2026-06-21";
@@ -399,6 +571,64 @@ int main(int argc, char **argv) {
   ASTRO_TEST_CHECK(object);
   auto *root = qobject_cast<QQuickItem *>(object.get());
   ASTRO_TEST_CHECK(root->property("viewMode") == "prepare");
+  ASTRO_TEST_CHECK(controller.setReferenceZone("site"));
+  const auto referenceDays = controller.reference()["days"].toList();
+  int followingDay = -1;
+  for (int i = 0; i < referenceDays.size(); ++i)
+    if (referenceDays[i].toMap()["date"] == "2026-12-13")
+      followingDay = i;
+  ASTRO_TEST_CHECK(followingDay >= 0);
+  item(root, "observationReferenceDay")
+      ->setProperty("currentIndex", followingDay);
+  item(root, "observationReferenceClock")->setProperty("text", "00:15");
+  ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root, "applyReferenceTime"));
+  ASTRO_TEST_CHECK(controller.reference()["clock"] == "00:15");
+  QCoreApplication::processEvents();
+  ASTRO_TEST_CHECK(
+      item(root, "observationReferenceDay")->property("currentIndex").toInt() ==
+      followingDay);
+  ASTRO_TEST_CHECK(
+      std::abs(item(root, "observationTime")->property("value").toDouble() -
+               controller.instant()["fraction"].toDouble()) < 1e-6);
+  const auto referenceUtc = controller.instant()["utcSeconds"];
+  item(root, "observationReferenceClock")->setProperty("text", "25:00");
+  ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root, "applyReferenceTime"));
+  ASTRO_TEST_CHECK(controller.instant()["utcSeconds"] == referenceUtc);
+  ASTRO_TEST_CHECK(!root->property("referenceNotice").toString().isEmpty());
+  ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root, "showRecordingWindow"));
+  ASTRO_TEST_CHECK(controller.instant()["utcSeconds"] ==
+                   controller.reference()["recording"].toMap()["startUtc"]);
+  ASTRO_TEST_CHECK(root->property("referenceNotice").toString().isEmpty());
+  controller.setFraction(.512345);
+  const auto preciseUtc = controller.instant()["utcSeconds"];
+  ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root, "applyReferenceTime"));
+  ASTRO_TEST_CHECK(controller.instant()["utcSeconds"] == preciseUtc);
+  ASTRO_TEST_CHECK(controller.setReferenceZone("system"));
+  auto *sitePicker = item(root, "observationSite");
+  ASTRO_TEST_CHECK(
+      QMetaObject::invokeMethod(sitePicker, "activated", Q_ARG(int, 4)));
+  ASTRO_TEST_CHECK(controller.settings()["zone"] == "Australia/Sydney");
+  ASTRO_TEST_CHECK(controller.instant()["utcSeconds"] == preciseUtc);
+  ASTRO_TEST_CHECK(controller.saveSite("Test remote telescope"));
+  const int savedSite = controller.sites().size() - 1;
+  ASTRO_TEST_CHECK(
+      QMetaObject::invokeMethod(sitePicker, "activated", Q_ARG(int, 0)));
+  ASTRO_TEST_CHECK(QMetaObject::invokeMethod(sitePicker, "activated",
+                                             Q_ARG(int, savedSite)));
+  ASTRO_TEST_CHECK(controller.instant()["utcSeconds"] == preciseUtc);
+  controller.removeSite(savedSite);
+  // Exact coordinates and a manually selected time zone share the same rule.
+  item(root, "observationLatitude")->setProperty("text", "-34.25");
+  item(root, "observationElevation")->setProperty("text", "120");
+  item(root, "observationZone")->setProperty("text", "Australia/Perth");
+  ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root, "calculate"));
+  ASTRO_TEST_CHECK(controller.settings()["latitude"].toDouble() == -34.25);
+  ASTRO_TEST_CHECK(controller.settings()["elevation"].toDouble() == 120);
+  ASTRO_TEST_CHECK(controller.settings()["zone"] == "Australia/Perth");
+  ASTRO_TEST_CHECK(controller.instant()["utcSeconds"] == preciseUtc);
+  ASTRO_TEST_CHECK(
+      QMetaObject::invokeMethod(sitePicker, "activated", Q_ARG(int, 0)));
+  ASTRO_TEST_CHECK(controller.instant()["utcSeconds"] == preciseUtc);
   ASTRO_TEST_CHECK(!item(root, "observationPlot")->isVisible());
   ASTRO_TEST_CHECK(!item(root, "observationWindows")->isVisible());
   const auto validSettings = controller.settings();

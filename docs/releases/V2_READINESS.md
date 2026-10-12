@@ -1,6 +1,6 @@
 # AstroCapture — bilan avant V2
 
-État du 12 octobre 2026, après les contrôles de la livraison 1.18.3.
+État du 12 octobre 2026, après les contrôles de la livraison 1.18.4.
 
 L’utilisateur réserve pour l’instant AstroCapture à son usage personnel.
 La qualification de distribution publique reste une étape ultérieure ; elle
@@ -143,3 +143,7 @@ l’objet. La consultation des dates passées et tous les détails restent acces
 
 La 1.18.3 actualise les vues pendant le glissement du curseur, précise la vue
 Ciel et le lieu par défaut, et rend la nomination des positions explicite.
+
+La 1.18.4 ajoute l’heure de référence Mac/télescope, la conversion des créneaux
+d’enregistrement et la saisie d’un instant partagé. Elle prépare un lancement
+manuel ; elle n’ajoute pas de programmation ou de pilotage du télescope.

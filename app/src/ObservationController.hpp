@@ -20,6 +20,7 @@ class ObservationController : public QObject {
   Q_PROPERTY(QVariantList searchResults READ searchResults NOTIFY searchChanged)
   Q_PROPERTY(QVariantList world READ world NOTIFY instantChanged)
   Q_PROPERTY(QVariantMap instant READ instant NOTIFY instantChanged)
+  Q_PROPERTY(QVariantMap reference READ reference NOTIFY referenceChanged)
   Q_PROPERTY(QString error READ error NOTIFY changed)
   Q_PROPERTY(QString searchStatus READ searchStatus NOTIFY searchChanged)
   Q_PROPERTY(bool searching READ searching NOTIFY searchChanged)
@@ -48,6 +49,7 @@ public:
   QVariantList searchResults() const { return searchResults_; }
   QVariantList world() const { return world_; }
   QVariantMap instant() const { return instant_; }
+  QVariantMap reference() const { return reference_; }
   QString error() const { return error_; }
   QString searchStatus() const { return searchStatus_; }
   bool searching() const { return searching_; }
@@ -71,14 +73,21 @@ public:
   Q_INVOKABLE void searchOnline(const QString &query);
   Q_INVOKABLE bool selectTarget(const QString &id);
   Q_INVOKABLE bool calculate(const QVariantMap &options);
+  Q_INVOKABLE bool changeSite(const QVariantMap &options);
   Q_INVOKABLE QVariantMap planningNight(const QVariantMap &options) const;
   Q_INVOKABLE void setFraction(double value);
+  Q_INVOKABLE bool setReferenceZone(const QString &source);
+  Q_INVOKABLE QVariantMap referenceTimeChoices(const QString &date,
+                                               const QString &clock) const;
+  Q_INVOKABLE bool setReferenceUtc(qint64 utc);
+  Q_INVOKABLE QVariantMap recordingWindow(qint64 notBefore = 0) const;
   Q_INVOKABLE void chooseMapLocation(double latitude, double longitude);
   Q_INVOKABLE bool saveSite(const QString &name);
   Q_INVOKABLE void removeSite(int index);
 signals:
   void changed();
   void instantChanged();
+  void referenceChanged();
   void searchChanged();
   void sitesChanged();
   void favoritesChanged();
@@ -91,6 +100,7 @@ private slots:
 private:
   void loadCatalog();
   void updateInstant();
+  void updateReference();
   void persist();
   QString localTime(qint64 utc) const;
   void updateRecommendations();
@@ -101,6 +111,9 @@ private:
   ObservationSite site_;
   std::vector<ObservationTarget> catalog_;
   QVariantMap result_, settings_, instant_;
+  QVariantMap reference_{{"recording", QVariantMap{{"available", false}}},
+                         {"days", QVariantList{}},
+                         {"slots", QVariantList{}}};
   QVariantList samples_, sites_, searchResults_, world_;
   QString error_, searchStatus_;
   bool searching_{};

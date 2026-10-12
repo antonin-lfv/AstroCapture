@@ -1135,3 +1135,48 @@ français aux trois tailles, notamment la Lune, la direction où regarder et la
 saisie « Jardin des étoiles ». Le curseur reste visible ; les autres réglages
 restent disponibles par défilement. Le Guide, le README et les traductions
 compilées suivent les nouveaux libellés.
+
+## Lot 1.18.4 — heure de référence et créneaux d’enregistrement
+
+L’utilisateur a choisi « Chez moi » avec le fuseau du Mac par défaut, en gardant
+un repère séparé pour le lieu du télescope. La section dépliable Heure de référence
+permet de sélectionner Mac/télescope, le jour correspondant et une heure HH:mm.
+Le curseur, le ciel, la carte et les nuages partagent l’instant UTC choisi. Changer
+le repère horaire ne modifie ni les coordonnées, ni la nuit, ni cet instant.
+Les deux dates/heures et leurs décalages sont affichés quand les fuseaux diffèrent.
+Les heures des axes, du Soleil et des prévisions au télescope sont explicites.
+
+Un changement de position (ville, favori, coordonnées, fuseau ou carte) conserve
+l’instant UTC à la seconde. La nuit locale, de midi à midi, est recalée pour le
+contenir au nouveau lieu. Aucun signal ne publie un instant intermédiaire déplacé.
+Une modification explicite de la date ou de l’heure garde son effet sur l’instant.
+
+La saisie recherche les instants UTC correspondant réellement à l’heure civile
+pendant la période sélectionnée. Une heure inexistante n’est pas normalisée ;
+elle est refusée. Une heure répétée propose les deux décalages et laisse le choix
+à l’utilisateur. Une simple sortie du champ sans modification conserve aussi les
+secondes précises du curseur. Le repère Mac/télescope est conservé après réouverture.
+
+Nuit présente le premier créneau restant après l’heure réelle actuelle, avec son
+début, sa fin et sa durée dans le repère choisi. Le début est arrondi vers la minute
+suivante, la fin vers la précédente, pour rester dans les seuils géométriques.
+Voir le début consulte de nouveau l’heure actuelle et place le curseur à ce début.
+Tous les créneaux, à la seconde et dans les deux repères, restent dépliables.
+Ce parcours prépare un lancement manuel ; il n’ajoute aucun pilotage ou déclenchement.
+
+Les 52 tests passent : conversions et dates de Sydney/Mac, invariance UTC lors
+d’un changement de repère, saisie horaire, rejet des instants hors période, passage
+à l’heure d’été et deux occurrences à l’heure d’hiver, persistance, conservation
+au focus et synchronisation du curseur. Les bornes arrondies sont vérifiées avec
+les calculs réels de hauteur et d’obscurité. Le glissement continu reste couvert.
+Les changements de lieu sont vérifiés dans le contrôleur et par les commandes QML,
+avec favoris, coordonnées exactes et fuseau manuel, dates locales différentes,
+retour sur les périodes de 23/25 heures et refus d’un lieu invalide sans mutation.
+Les traductions actives d’Observation et du Guide sont présentes dans le catalogue
+français compilé ; README et Guide décrivent la même utilisation.
+
+Les captures `previews/native/observation-reference/` montrent l’accueil et les vues
+natives, la saisie 23:30 et Sydney avec une date différente au télescope, à
+1440 × 960, 1100 × 800 et 900 × 700. La courbe est compacte en petite fenêtre pour
+garder visibles l’heure chez soi, l’heure au télescope et le début d’enregistrement.
+Les détails et réglages supplémentaires restent accessibles par défilement.

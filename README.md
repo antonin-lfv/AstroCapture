@@ -85,11 +85,38 @@ sans clé est prévu ici pour l’usage personnel non commercial. Les données s
 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), avec attribution à Open-Meteo
 et valeurs affichées arrondies ; le cache ne contient ni nom d’objet ni identifiant personnel.
 
-Le **lever et le coucher du Soleil** sont visibles sous les créneaux dans **Nuit**
+Le **lever et le coucher du Soleil** sont visibles dans **Nuit**
 et **Ciel**. La section **Détails** conserve les informations lunaires, la direction,
 le jour, le crépuscule civil et la nuit astronomique.
 Un libellé indique aussi l’état à l’instant du curseur, avec les crépuscules civil,
 nautique et astronomique. Les périodes sans lever, coucher ou nuit sont explicites.
+
+**Heure de référence**, dans les réglages, permet de choisir **Chez moi** (le fuseau
+de ce Mac, par défaut) ou **Au télescope** (le fuseau configuré pour le lieu). Les deux
+heures sont affichées quand les fuseaux diffèrent, avec la date et le décalage UTC.
+Choisissez le jour dans ce fuseau et saisissez **HH:mm** : le curseur et les quatre
+vues se placent au même instant. La conversion ne change ni le lieu ni la nuit.
+Les axes des courbes, les horaires du Soleil et l’heure de la prévision restent
+à l’heure du télescope ; leur fuseau est indiqué quand il diffère de chez vous.
+Un point de carte utilise initialement UTC comme fuseau du télescope : précisez-le
+dans les options avancées ou choisissez une ville. Une heure inexistante au passage
+à l’heure d’été est refusée ; une heure répétée propose les deux décalages UTC.
+Le choix du repère Mac/télescope est conservé après réouverture.
+
+**Changer de position conserve l’instant UTC**, commun à tous les lieux. Les heures
+locales sont converties et la date de la nuit s’ajuste pour contenir cet instant au
+nouveau lieu. Par exemple, le 12 décembre à 18 h UTC correspond à 19 h à Paris et
+à 5 h le 13 décembre à Sydney. Choisir une autre nuit, saisir une heure ou déplacer
+le curseur modifie volontairement l’instant.
+
+Dans **Nuit**, **Quand lancer l’enregistrement ?** indique le premier créneau
+restant après l’heure réelle actuelle dans le fuseau de référence, avec sa fin et
+sa durée. **Voir le début** place le curseur au début proposé. Pour rester dans les
+seuils choisis, le début est arrondi à la minute suivante et la fin à la précédente.
+**Tous les créneaux** conserve les limites précises à la seconde et les deux repères
+horaires. Une nuit passée ou sans créneau restant est explicite. Ce repère prépare
+un lancement manuel ; il ne déclenche pas l’acquisition et ne garantit pas la météo
+ou l’absence d’obstacles.
 
 **Nuit**, **Ciel**, **Monde** et **Nuages** suivent le même curseur horaire, avec
 actualisation pendant le glissement et valeur finale appliquée au relâchement.

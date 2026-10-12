@@ -29,6 +29,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QProcess>
+#include <QTimeZone>
 #include <QQmlComponent>
 #include <QQmlContext>
 #include <QQmlEngine>
@@ -178,6 +179,7 @@ static int workspace(const QString& directory,bool restore,bool faults=false) {
     if(qEnvironmentVariableIsSet("ASTRO_OBSERVATION_WINDOW")) {
         auto* observation=window->findChild<ObservationController*>("observationController");ASTRO_TEST_CHECK(observation);
         auto settings=observation->settings();settings["date"]="2026-12-12";ASTRO_TEST_CHECK(observation->calculate(settings));
+        ASTRO_TEST_CHECK(observation->setReferenceZone("system"));
         ASTRO_TEST_CHECK(observation->selectTarget("NGC1976"));
         window->setProperty("currentTab","observation");
         auto* workspace=window->findChild<QObject*>("observationWorkspace");ASTRO_TEST_CHECK(workspace);
@@ -189,6 +191,19 @@ static int workspace(const QString& directory,bool restore,bool faults=false) {
         for(const auto size:{QSize(1440,960),QSize(1100,800),QSize(900,700)}) {
             window->resize(size);capture(window,QString("observation-night-%1").arg(size.width()));
         }
+        auto* referenceSection=workspace->findChild<QObject*>("observationReferenceSection");ASTRO_TEST_CHECK(referenceSection);referenceSection->setProperty("expanded",true);
+        auto* inspector=workspace->findChild<QObject*>("observationInspector");ASTRO_TEST_CHECK(inspector);auto* scroll=inspector->property("contentItem").value<QQuickItem*>();ASTRO_TEST_CHECK(scroll);
+        auto* referenceDay=workspace->findChild<QObject*>("observationReferenceDay");auto* referenceClock=workspace->findChild<QObject*>("observationReferenceClock");ASTRO_TEST_CHECK(referenceDay&&referenceClock);referenceDay->setProperty("currentIndex",0);referenceClock->setProperty("text","23:30");ASTRO_TEST_CHECK(QMetaObject::invokeMethod(workspace,"applyReferenceTime"));
+        for(const auto size:{QSize(1440,960),QSize(1100,800),QSize(900,700)}) {
+            window->resize(size);scroll->setProperty("contentY",300);capture(window,QString("observation-reference-%1").arg(size.width()));
+        }
+        const auto anchor=observation->instant()["utcSeconds"];auto* sitePicker=workspace->findChild<QObject*>("observationSite");ASTRO_TEST_CHECK(sitePicker);ASTRO_TEST_CHECK(QMetaObject::invokeMethod(sitePicker,"activated",Q_ARG(int,4)));ASTRO_TEST_CHECK(observation->instant()["utcSeconds"]==anchor);ASTRO_TEST_CHECK(observation->settings()["zone"]=="Australia/Sydney");
+        capture(window,"observation-location-same-instant-900");
+        ASTRO_TEST_CHECK(observation->setReferenceUtc(QDateTime(QDate(2026,12,12),QTime(18,0),QTimeZone::UTC).toSecsSinceEpoch()));
+        for(const auto size:{QSize(1440,960),QSize(1100,800),QSize(900,700)}) {
+            window->resize(size);scroll->setProperty("contentY",300);capture(window,QString("observation-reference-remote-%1").arg(size.width()));
+        }
+        ASTRO_TEST_CHECK(observation->calculate(settings));referenceSection->setProperty("expanded",false);scroll->setProperty("contentY",0);
         if(!observation->targetFavorite())observation->toggleFavoriteTarget();ASTRO_TEST_CHECK(observation->saveSite("Mon jardin · Paris"));
         workspace->setProperty("viewMode","suggestions");
         for(const auto size:{QSize(1440,960),QSize(1100,800),QSize(900,700)}) {

@@ -15,9 +15,12 @@ AstroCapture réunit la capture vidéo et FITS, le traitement planétaire, la ca
 L’onglet **Observation**, placé avant **Guide**, prépare une observation de la Lune,
 des planètes ou d’un objet fixe. Il est indépendant de **Ciel profond**.
 
-L’ouverture présente deux actions : **Trouver un objet visible** pour obtenir des
-idées, ou **Étudier** la cible actuelle. Les courbes et les détails apparaissent
-ensuite, selon la vue choisie.
+La courbe de hauteur, la boussole du ciel, la carte mondiale et les nuages sont
+réunis sur **une seule page**, avec les réglages à droite. La commande horaire
+commune reste visible pendant le défilement. **Maintenant · en direct** suit
+l’heure réelle et actualise les graphiques toutes les 30 secondes tant que l’onglet
+est visible. Saisir une heure, choisir une date ou déplacer le curseur met ce suivi
+en pause. **Maintenant** y revient, même depuis une nuit future ou passée.
 
 1. **Objet sélectionné** indique la seule cible active. **Changer d’objet…** ouvre
    une liste unique avec recherche et favoris. Taper un nom filtre cette liste ;
@@ -47,7 +50,7 @@ ensuite dans **Changer d’objet… → Favoris**. Les lieux favoris apparaissen
 une étoile dans la liste des lieux.
 Les favoris restent sur cet ordinateur (100 objets et 30 lieux au maximum).
 
-**Suggestions** compare les objets Messier inclus, quelques objets remarquables
+La section dépliable **Objets à observer** compare les objets Messier inclus, quelques objets remarquables
 notamment de l’hémisphère Sud, la Lune, les planètes et vos favoris. Le lieu, la date
 locale et la hauteur minimale actualisent cette liste automatiquement. Jusqu’à
 4 cibles du Système solaire et 6 du ciel profond sont proposées, avec priorité aux
@@ -55,7 +58,7 @@ favoris puis classement selon le temps au-dessus du seuil et la hauteur. Les fil
 **Tout**, **Lune et planètes** et **Ciel profond** permettent de parcourir ces familles. Chaque résultat
 a au moins 20 minutes de créneau. Ses critères sont accessibles dans son aide : Soleil sous
 −18° pour les objets fixes, sous −6° pour le Système solaire. **Explorer** sélectionne
-la cible avec ces critères et ouvre sa courbe. Quatre suggestions sont affichées au départ ; un bouton ouvre les suivantes. La sélection n’est pas exhaustive ;
+la cible avec ces critères et revient à sa courbe, sur la même page. Quatre suggestions sont affichées au départ ; un bouton ouvre les suivantes. La sélection n’est pas exhaustive ;
 le catalogue complet reste interrogeable. Les suggestions de Mercure et Vénus
 excluent les créneaux à moins de 30° du Soleil. Le matériel, la pollution lumineuse,
 la Lune et la météo peuvent rendre un objet difficile à observer. Les prévisions
@@ -85,8 +88,7 @@ sans clé est prévu ici pour l’usage personnel non commercial. Les données s
 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), avec attribution à Open-Meteo
 et valeurs affichées arrondies ; le cache ne contient ni nom d’objet ni identifiant personnel.
 
-Le **lever et le coucher du Soleil** sont visibles dans **Nuit**
-et **Ciel**. La section **Détails** conserve les informations lunaires, la direction,
+Le **lever et le coucher du Soleil** sont visibles sous les créneaux d’observation. La section **Détails** conserve les informations lunaires, la direction,
 le jour, le crépuscule civil et la nuit astronomique.
 Un libellé indique aussi l’état à l’instant du curseur, avec les crépuscules civil,
 nautique et astronomique. Les périodes sans lever, coucher ou nuit sont explicites.
@@ -95,7 +97,7 @@ nautique et astronomique. Les périodes sans lever, coucher ou nuit sont explici
 de ce Mac, par défaut) ou **Au télescope** (le fuseau configuré pour le lieu). Les deux
 heures sont affichées quand les fuseaux diffèrent, avec la date et le décalage UTC.
 Choisissez le jour dans ce fuseau et saisissez **HH:mm** : le curseur et les quatre
-vues se placent au même instant. La conversion ne change ni le lieu ni la nuit.
+graphiques se placent au même instant. La conversion ne change ni le lieu ni la nuit.
 Les axes des courbes, les horaires du Soleil et l’heure de la prévision restent
 à l’heure du télescope ; leur fuseau est indiqué quand il diffère de chez vous.
 Un point de carte utilise initialement UTC comme fuseau du télescope : précisez-le
@@ -109,7 +111,7 @@ nouveau lieu. Par exemple, le 12 décembre à 18 h UTC correspond à 19 h à Par
 à 5 h le 13 décembre à Sydney. Choisir une autre nuit, saisir une heure ou déplacer
 le curseur modifie volontairement l’instant.
 
-Dans **Nuit**, **Quand lancer l’enregistrement ?** indique le premier créneau
+**Quand lancer l’enregistrement ?** indique le premier créneau
 restant après l’heure réelle actuelle dans le fuseau de référence, avec sa fin et
 sa durée. **Voir le début** place le curseur au début proposé. Pour rester dans les
 seuils choisis, le début est arrondi à la minute suivante et la fin à la précédente.
@@ -118,9 +120,9 @@ horaires. Une nuit passée ou sans créneau restant est explicite. Ce repère pr
 un lancement manuel ; il ne déclenche pas l’acquisition et ne garantit pas la météo
 ou l’absence d’obstacles.
 
-**Nuit**, **Ciel**, **Monde** et **Nuages** suivent le même curseur horaire, avec
+La **courbe**, la **boussole**, la **carte** et les **nuages** suivent le même curseur horaire, avec
 actualisation pendant le glissement et valeur finale appliquée au relâchement.
-**Ciel** indique où regarder avec une vue boussole : nord en haut, est à droite,
+**Où regarder ?** indique où regarder avec une vue boussole : nord en haut, est à droite,
 horizon théorique au bord (0°) et zénith au centre (90°). Le point indique l’objet
 à l’heure choisie ; la ligne montre son parcours sur la nuit. La direction
 cardinale et la hauteur sont affichées. Ce schéma ne montre ni le relief ni les
@@ -131,14 +133,26 @@ affichées avec la date ; la période va de midi au midi suivant et peut durer 2
 du centre, le point le plus haut dans cette période, la fraction éclairée de la Lune
 et sa distance angulaire à la cible.
 
-**Monde** montre où l’**objet sélectionné** respecte les seuils de hauteur et
-d’obscurité à l’instant UTC affiché. Sa courte légende distingue les seuils respectés,
-l’objet trop bas, le ciel trop clair et l’objet sous l’horizon. Elle ne représente
-ni les nuages ni simplement le jour et la nuit. Cette vue conserve seulement la carte,
-la légende et le curseur ; les horaires et détails du lieu restent dans Nuit/Ciel.
-La carte est une vue régionale sur une grille de **6°**, calculée au même instant UTC.
-Un clic choisit un lieu et conserve cet instant, avec le fuseau initial **UTC** :
+La carte **Jour et nuit dans le monde** utilise par défaut la couche **Jour et
+nuit** : jour, crépuscule et nuit astronomique sont calculés localement, sans
+connexion et indépendamment de l’objet sélectionné. Le jour correspond au bord
+supérieur du Soleil au-dessus de l’horizon avec réfraction standard au niveau de
+la mer. La nuit astronomique commence lorsque son centre est sous −18°.
+Le fuseau UTC de l’instant commun est affiché au-dessus de la carte.
+
+La couche **Visibilité de l’objet** montre plutôt où l’**objet sélectionné**
+respecte les seuils de hauteur et d’obscurité. La légende distingue les seuils
+respectés, l’objet trop bas, le ciel trop clair et l’objet sous l’horizon.
+Les deux couches donnent une vue régionale sur une grille de **6°**.
+Un clic choisit un lieu et conserve l’instant, avec le fuseau initial **UTC** :
 choisissez le fuseau local dans les options avancées si nécessaire.
+
+**Maintenant** peut montrer le jour et les heures qui suivent le lever du Soleil
+sur la période locale de midi à midi contenant l’instant actuel. **Nuit actuelle**
+prépare une nuit d’observation. **Trouver un objet visible** déplie les
+recommandations sur la même page et passe à la prochaine nuit si la précédente
+est déjà terminée. Les détails du Soleil, de la Lune et de la météo restent
+dépliables.
 
 Le catalogue [OpenNGC](https://github.com/mattiaverga/OpenNGC) est inclus sans connexion.
 Les autres noms d’objets fixes sont recherchés par [CDS Sesame](https://cds.unistra.fr/doc/sesame.htx),

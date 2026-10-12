@@ -148,7 +148,7 @@ void ObservationPlot::paint(QPainter *p) {
     p->restore();
     return;
   }
-  if (mode_ == "world") {
+  if (mode_ == "world" || mode_ == "daylight") {
     rect = worldFrame(width(), height());
     auto project = [&](double lon, double lat) {
       return QPointF(rect.left() + (lon + 180) / 360 * rect.width(),
@@ -157,15 +157,21 @@ void ObservationPlot::paint(QPainter *p) {
     p->fillRect(rect, surface);
     for (const auto &v : controller_->world()) {
       auto c = v.toMap();
-      const int state = c["state"].toInt();
-      QColor color = state == 0   ? image
-                     : state == 1 ? warning
-                     : state == 2 ? secondary
-                                  : primary;
-      color.setAlpha(state == 0   ? 255
-                     : state == 3 ? 160
-                     : state == 1 ? 70
-                                  : 45);
+      const int state = c[mode_ == "daylight" ? "solarState" : "state"].toInt();
+      QColor color = mode_ == "daylight" ? (state == 0   ? warning
+                                            : state == 1 ? primary
+                                                         : image)
+                     : state == 0        ? image
+                     : state == 1        ? warning
+                     : state == 2        ? secondary
+                                         : primary;
+      color.setAlpha(mode_ == "daylight" ? (state == 0   ? 180
+                                            : state == 1 ? 140
+                                                         : 255)
+                     : state == 0        ? 255
+                     : state == 3        ? 160
+                     : state == 1        ? 70
+                                         : 45);
       auto a = project(c["lon"].toDouble() - 3, c["lat"].toDouble() + 3);
       p->fillRect(
           QRectF(a, QSizeF(rect.width() / 60 + .4, rect.height() / 30 + .4)),
@@ -315,7 +321,7 @@ void ObservationPlot::paint(QPainter *p) {
   p->restore();
 }
 void ObservationPlot::choose(QPointF pos) {
-  if (mode_ == "world") {
+  if (mode_ == "world" || mode_ == "daylight") {
     auto r = worldFrame(width(), height());
     if (r.contains(pos))
       emit locationChosen(90 - (pos.y() - r.top()) / r.height() * 180,

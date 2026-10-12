@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.18.5 — 2026-10-12
+
+- Combine the height curve, sky compass, world map and clouds on one scrolling Observation page, with a shared time control that stays visible. Keep recommendations and scientific details expandable.
+- Add an offline day, twilight and astronomical-night map, independent of the target, alongside the existing object-visibility layer. Both share the same UTC instant; map clicks preserve it.
+- Follow the real clock with Now, refreshing every 30 seconds while visible. Date/hour/slider edits pause live time; Now returns from another night to the local noon-to-noon period containing the actual instant. Preserve observing-night guards and home/telescope reference clocks.
+- Use a common Observation card and responsive columns, retain cloud cache/source/network states and update French help, Guide and README.
+
 ## 1.18.4 — 2026-10-12
 
 - Add a reference clock using the Mac’s time zone by default or the telescope site’s configured zone, with both local dates/times displayed when they differ.

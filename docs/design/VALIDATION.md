@@ -1180,3 +1180,44 @@ natives, la saisie 23:30 et Sydney avec une date différente au télescope, à
 1440 × 960, 1100 × 800 et 900 × 700. La courbe est compacte en petite fenêtre pour
 garder visibles l’heure chez soi, l’heure au télescope et le début d’enregistrement.
 Les détails et réglages supplémentaires restent accessibles par défilement.
+
+
+## Lot 1.18.5 — Observation réunie et carte jour/nuit
+
+La courbe de hauteur, la boussole « Où regarder ? », la carte mondiale et les
+nuages partagent une page défilante et une commande horaire fixe. Les cartes
+boussole/monde utilisent un composant QML commun avec les couleurs Atelier.
+Les colonnes s’adaptent à la largeur ; les détails scientifiques et les
+recommandations restent dépliables. Les réglages précis, favoris, recherche,
+créneaux d’enregistrement et repères Mac/télescope sont conservés.
+
+La couche Jour et nuit classe chaque point régional de 6° à partir du Soleil,
+indépendamment de la cible. Le jour utilise son bord supérieur avec réfraction
+standard au niveau de la mer ; le crépuscule va jusqu’à −18° pour son centre,
+puis commence la nuit astronomique. La couche Visibilité de l’objet conserve
+les seuils de hauteur et d’obscurité. Le titre et la légende suivent la couche.
+Les deux couches affichent l’UTC partagé et fonctionnent hors connexion.
+
+Maintenant rejoint l’heure réelle et la période locale de midi à midi qui la
+contient. Le suivi s’actualise toutes les 30 secondes uniquement quand la page
+est visible. Les choix de date, les déplacements du curseur et la saisie horaire
+le mettent en pause ; une erreur de saisie reste visible, jusqu’à sa correction
+ou un retour explicite à Maintenant. La préparation des nuits passées garde
+ses contrôles. Un changement de lieu conserve toujours l’UTC à la seconde.
+
+Les **52 tests Release passent** (`build/observation-overview-ctest.log`).
+Le test d’Observation final couvre aussi la saisie invalide en mode direct puis
+le retour à Maintenant (`build/observation-overview-final-observation.log`).
+Les contrôles incluent le jour polaire au Nord et la nuit astronomique au Sud
+en juin, l’indépendance de la couche solaire par rapport à la cible, le retour
+d’une nuit future à l’horloge réelle hors connexion, les couches de la carte,
+la sélection d’un point sans déplacement de l’UTC et un vrai glissement continu.
+Les vérifications antérieures JPL/Horizons, lever/coucher, périodes de 23/25 h,
+saisie d’heure ambiguë/inexistante, précision, favoris et cache nuageux passent.
+
+Les captures françaises `previews/native/observation-overview/` vérifient la
+composition à **1440 × 960**, **1100 × 800** et **900 × 700** : courbe et créneaux,
+boussole et carte, carte à l’heure réelle, Sydney avec deux dates différentes,
+prévision horaire enregistrée et absence de connexion. La commande horaire reste
+visible lors du défilement. Guide et README décrivent la page commune ; toutes
+les traductions actives sont présentes dans le catalogue français compilé.

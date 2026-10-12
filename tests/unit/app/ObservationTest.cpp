@@ -543,6 +543,20 @@ int main(int argc, char **argv) {
   ASTRO_TEST_CHECK(controller.recommendations().isEmpty());
   ASTRO_TEST_CHECK(controller.result()["nightSlots"].toList().isEmpty());
   ASTRO_TEST_CHECK(!controller.result()["polarSun"].toString().isEmpty());
+  QVariantList daylightBefore;
+  for (const auto &entry : controller.world()) {
+    const auto cell = entry.toMap();
+    daylightBefore.append(cell["solarState"]);
+    if (cell["lat"].toInt() == 87)
+      ASTRO_TEST_CHECK(cell["solarState"].toInt() == 0);
+    if (cell["lat"].toInt() == -87)
+      ASTRO_TEST_CHECK(cell["solarState"].toInt() == 2);
+  }
+  ASTRO_TEST_CHECK(controller.selectTarget("moon"));
+  const auto solarWorld = controller.world();
+  for (int i = 0; i < solarWorld.size(); ++i)
+    ASTRO_TEST_CHECK(solarWorld[i].toMap()["solarState"] == daylightBefore[i]);
+  ASTRO_TEST_CHECK(controller.selectTarget("NGC1976"));
   ASTRO_TEST_CHECK(controller.calculate(opts));
   auto unavailableDate = controller.settings();
   unavailableDate["date"] =
@@ -565,12 +579,13 @@ int main(int argc, char **argv) {
     qWarning() << component.errors();
   ASTRO_TEST_CHECK(component.isReady());
   std::unique_ptr<QObject> object(component.createWithInitialProperties(
-      {{"controller", QVariant::fromValue(&controller)}}));
+      {{"controller", QVariant::fromValue(&controller)}, {"liveNow", false}}));
   if (!object)
     qWarning() << component.errors();
   ASTRO_TEST_CHECK(object);
   auto *root = qobject_cast<QQuickItem *>(object.get());
-  ASTRO_TEST_CHECK(root->property("viewMode") == "prepare");
+  ASTRO_TEST_CHECK(!root->property("liveNow").toBool());
+  ASTRO_TEST_CHECK(root->property("mapLayer") == "daylight");
   ASTRO_TEST_CHECK(controller.setReferenceZone("site"));
   const auto referenceDays = controller.reference()["days"].toList();
   int followingDay = -1;
@@ -629,8 +644,11 @@ int main(int argc, char **argv) {
   ASTRO_TEST_CHECK(
       QMetaObject::invokeMethod(sitePicker, "activated", Q_ARG(int, 0)));
   ASTRO_TEST_CHECK(controller.instant()["utcSeconds"] == preciseUtc);
-  ASTRO_TEST_CHECK(!item(root, "observationPlot")->isVisible());
-  ASTRO_TEST_CHECK(!item(root, "observationWindows")->isVisible());
+  ASTRO_TEST_CHECK(item(root, "observationPlot")->isVisible());
+  ASTRO_TEST_CHECK(item(root, "observationWindows")->isVisible());
+  ASTRO_TEST_CHECK(item(root, "observationSkyPlot")->isVisible());
+  ASTRO_TEST_CHECK(item(root, "observationWorldPlot")->isVisible());
+  ASTRO_TEST_CHECK(item(root, "observationCloudCard")->isVisible());
   const auto validSettings = controller.settings();
   auto *dateField = item(root, "observationDate");
   dateField->setProperty(
@@ -664,7 +682,6 @@ int main(int argc, char **argv) {
   ASTRO_TEST_CHECK(item(root, "observationSelectedTarget")->property("text") ==
                    controller.result()["target"]);
   ASTRO_TEST_CHECK(controller.selectTarget(selectedId.toString()));
-  root->setProperty("viewMode", "night");
   QQuickWindow window;
   window.show();
   root->setParentItem(window.contentItem());
@@ -688,20 +705,29 @@ int main(int argc, char **argv) {
   ASTRO_TEST_CHECK(controller.targetFavorite());
   ASTRO_TEST_CHECK(QMetaObject::invokeMethod(favouriteButton, "clicked"));
   ASTRO_TEST_CHECK(!controller.targetFavorite());
-  root->setProperty("viewMode", "suggestions");
+  item(root, "observationSuggestions")->setProperty("expanded", true);
   const auto firstSuggestion = controller.recommendations().first().toMap();
   auto *explore =
       item(root, "observationSuggestion:" + firstSuggestion["id"].toString());
   ASTRO_TEST_CHECK(explore);
   ASTRO_TEST_CHECK(QMetaObject::invokeMethod(explore, "clicked"));
-  ASTRO_TEST_CHECK(root->property("viewMode") == "night");
+  ASTRO_TEST_CHECK(
+      !item(root, "observationSuggestions")->property("expanded").toBool());
   ASTRO_TEST_CHECK(controller.settings()["target"] == firstSuggestion["id"]);
   ASTRO_TEST_CHECK(controller.settings()["sunLimit"] ==
                    firstSuggestion["sunLimit"]);
-  root->setProperty("viewMode", "world");
   QCoreApplication::processEvents();
-  ASTRO_TEST_CHECK(!item(root, "observationWindows")->isVisible());
-  ASTRO_TEST_CHECK(!item(root, "observationDetails")->isVisible());
+  const auto mapUtc = controller.instant()["utcSeconds"];
+  ASTRO_TEST_CHECK(QMetaObject::invokeMethod(item(root, "observationMapLayer"),
+                                             "activated", Q_ARG(int, 1)));
+  ASTRO_TEST_CHECK(item(root, "observationWorldPlot")->property("mode") ==
+                   "world");
+  ASTRO_TEST_CHECK(QMetaObject::invokeMethod(item(root, "observationMapLayer"),
+                                             "activated", Q_ARG(int, 0)));
+  ASTRO_TEST_CHECK(item(root, "observationWorldPlot")->property("mode") ==
+                   "daylight");
+  ASTRO_TEST_CHECK(controller.instant()["utcSeconds"] == mapUtc);
+  ASTRO_TEST_CHECK(item(root, "observationWindows")->isVisible());
   // Keep the mouse down and move continuously: the chart's instant must update
   // before release, rather than waiting for a quiet interval after dragging.
   auto *slider = item(root, "observationTime");
@@ -711,8 +737,7 @@ int main(int argc, char **argv) {
                       button, buttons, Qt::NoModifier);
     QCoreApplication::sendEvent(&window, &event);
   };
-  for (const auto mode : {"night", "sky", "world", "clouds"}) {
-    root->setProperty("viewMode", mode);
+  {
     slider->setProperty("value", .2);
     controller.setFraction(.2);
     QCoreApplication::processEvents();
@@ -744,24 +769,62 @@ int main(int argc, char **argv) {
                               slider->property("value").toDouble()) < 1e-6);
     QObject::disconnect(connection);
   }
-  root->setProperty("viewMode", "world");
   if (!qEnvironmentVariable("ASTRO_OBSERVATION_SCREENSHOTS").isEmpty())
     window.grabWindow().save(
         qEnvironmentVariable("ASTRO_OBSERVATION_SCREENSHOTS") +
         "/world-900.png");
+  const auto locationUtc = controller.instant()["utcSeconds"];
+  ASTRO_TEST_CHECK(QMetaObject::invokeMethod(
+      item(root, "observationWorldPlot"), "locationChosen", Q_ARG(double, -33),
+      Q_ARG(double, 151)));
+  ASTRO_TEST_CHECK(controller.instant()["utcSeconds"] == locationUtc);
+  const auto futureSettings = controller.settings();
+  reachability(Reachability::Disconnected);
+  const auto beforeNow = QDateTime::currentSecsSinceEpoch();
+  ASTRO_TEST_CHECK(
+      QMetaObject::invokeMethod(item(root, "observationNow"), "clicked"));
+  const auto actualNow = controller.instant()["utcSeconds"].toLongLong();
+  ASTRO_TEST_CHECK(actualNow >= beforeNow &&
+                   actualNow <= QDateTime::currentSecsSinceEpoch());
+  ASTRO_TEST_CHECK(root->property("liveNow").toBool());
+  ASTRO_TEST_CHECK(root->findChild<QObject *>("observationLiveClock")
+                       ->property("running")
+                       .toBool());
+  ASTRO_TEST_CHECK(controller.settings()["latitude"] ==
+                   futureSettings["latitude"]);
+  ASTRO_TEST_CHECK(controller.settings()["zone"] == futureSettings["zone"]);
+  ASTRO_TEST_CHECK(controller.result()["startUtcSeconds"].toLongLong() <=
+                   actualNow);
+  ASTRO_TEST_CHECK(controller.result()["endUtcSeconds"].toLongLong() >
+                   actualNow);
+  item(root, "observationReferenceClock")->setProperty("text", "25:00");
+  ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root, "applyReferenceTime"));
+  ASTRO_TEST_CHECK(!root->property("liveNow").toBool());
+  ASTRO_TEST_CHECK(!root->property("referenceNotice").toString().isEmpty());
+  ASTRO_TEST_CHECK(controller.instant()["utcSeconds"] == actualNow);
+  ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root, "goNow"));
+  ASTRO_TEST_CHECK(root->property("liveNow").toBool());
+  ASTRO_TEST_CHECK(root->property("referenceNotice").toString().isEmpty());
+  ASTRO_TEST_CHECK(
+      QMetaObject::invokeMethod(root, "chooseFraction", Q_ARG(QVariant, .4)));
+  ASTRO_TEST_CHECK(!root->property("liveNow").toBool());
+  ASTRO_TEST_CHECK(!root->findChild<QObject *>("observationLiveClock")
+                        ->property("running")
+                        .toBool());
+  ASTRO_TEST_CHECK(controller.calculate(futureSettings));
   ASTRO_TEST_CHECK(controller.selectTarget("moon"));
   auto lunar1 = controller.instant()["altitude"].toDouble();
   controller.setFraction(.8);
   ASTRO_TEST_CHECK(
       std::abs(controller.instant()["altitude"].toDouble() - lunar1) > 1);
   ASTRO_TEST_CHECK(controller.settings()["sunLimit"].toInt() == -6);
-  root->setProperty("viewMode", "sky");
   QCoreApplication::processEvents();
   if (!qEnvironmentVariable("ASTRO_OBSERVATION_SCREENSHOTS").isEmpty())
     window.grabWindow().save(
         qEnvironmentVariable("ASTRO_OBSERVATION_SCREENSHOTS") +
         "/moon-horizon-900.png");
   if (qEnvironmentVariableIsSet("ASTRO_OBSERVATION_ONLINE")) {
+    reachability(Reachability::Online);
     auto today = controller.settings();
     today["date"] =
         QDateTime::currentDateTimeUtc().date().toString(Qt::ISODate);

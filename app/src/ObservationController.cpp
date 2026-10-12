@@ -596,7 +596,16 @@ bool ObservationController::calculate(const QVariantMap &options) {
 bool ObservationController::changeSite(const QVariantMap &options) {
   if (!start_)
     return calculate(options);
-  const auto utc = instant_.value("utcSeconds").toLongLong();
+  return calculateAtUtc(options, instant_.value("utcSeconds").toLongLong());
+}
+bool ObservationController::showNow() {
+  const auto utc = QDateTime::currentSecsSinceEpoch();
+  if (utc >= start_ && utc < end_)
+    return setReferenceUtc(utc);
+  return calculateAtUtc(settings_, utc);
+}
+bool ObservationController::calculateAtUtc(const QVariantMap &options,
+                                           qint64 utc) {
   const double previousFraction = fraction_;
   try {
     const QTimeZone zone(options.value("zone").toString().toUtf8());
@@ -807,7 +816,13 @@ void ObservationController::updateInstant() {
       const double alt = observationPosition(target_, s, utc).altitude,
                    solar = observationSunAltitude(s, utc);
       int state = alt < 0 ? 0 : alt < minimum ? 1 : solar > limit ? 2 : 3;
-      world_.append(QVariantMap{{"lat", lat}, {"lon", lon}, {"state", state}});
+      const int solarState = observationSunIsUp(s, utc) ? 0
+                             : solar > -18              ? 1
+                                                        : 2;
+      world_.append(QVariantMap{{"lat", lat},
+                                {"lon", lon},
+                                {"state", state},
+                                {"solarState", solarState}});
     }
   updateReference();
   emit instantChanged();

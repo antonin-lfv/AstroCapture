@@ -92,6 +92,7 @@ qt_add_qml_module(AstroCapture
         qml/GuideWorkspace.qml
         qml/ObservationWorkspace.qml
         qml/ObservationField.qml
+        qml/ObservationCard.qml
         qml/Icon.qml
         qml/IconButton.qml
         qml/IconAction.qml

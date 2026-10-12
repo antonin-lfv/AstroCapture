@@ -80,6 +80,7 @@ public:
   Q_INVOKABLE QVariantMap referenceTimeChoices(const QString &date,
                                                const QString &clock) const;
   Q_INVOKABLE bool setReferenceUtc(qint64 utc);
+  Q_INVOKABLE bool showNow();
   Q_INVOKABLE QVariantMap recordingWindow(qint64 notBefore = 0) const;
   Q_INVOKABLE void chooseMapLocation(double latitude, double longitude);
   Q_INVOKABLE bool saveSite(const QString &name);
@@ -100,6 +101,7 @@ private slots:
 private:
   void loadCatalog();
   void updateInstant();
+  bool calculateAtUtc(const QVariantMap &options, qint64 utc);
   void updateReference();
   void persist();
   QString localTime(qint64 utc) const;

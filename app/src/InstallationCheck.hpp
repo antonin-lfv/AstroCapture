@@ -12,6 +12,7 @@
 #include <QQuickWindow>
 #include <QTimer>
 #include <QTimeZone>
+#include <QSslSocket>
 #include <iostream>
 #include <memory>
 #include "ProcessingController.hpp"
@@ -23,7 +24,8 @@ inline void scheduleInstallationCheck(QGuiApplication &app, QQuickWindow *window
     QTimer::singleShot(0, &app, [&app, window] {
         const auto readers = QImageReader::supportedImageFormats();
         const bool timeZones = QTimeZone::systemTimeZone().isValid() && QTimeZone("Europe/Paris").isValid();
-        const bool complete = window && timeZones && readers.contains("png") &&
+        const bool https = QSslSocket::supportsSsl();
+        const bool complete = window && timeZones && https && readers.contains("png") &&
             (readers.contains("jpg") || readers.contains("jpeg")) &&
             (readers.contains("tif") || readers.contains("tiff"));
         QJsonArray formats;
@@ -43,7 +45,7 @@ inline void scheduleInstallationCheck(QGuiApplication &app, QQuickWindow *window
 #endif
         QJsonObject result{{"ok", complete}, {"version", QCoreApplication::applicationVersion()},
             {"qt", QString::fromLatin1(qVersion())}, {"platform", QGuiApplication::platformName()},
-            {"imageFormats", formats}, {"cameraDrivers", cameras}, {"timeZones", timeZones}};
+            {"imageFormats", formats}, {"cameraDrivers", cameras}, {"timeZones", timeZones}, {"https", https}};
         auto finish = [&app, result](bool ok) mutable {
             result["ok"] = ok;
             std::cout << QJsonDocument(result).toJson(QJsonDocument::Compact).constData() << std::endl;

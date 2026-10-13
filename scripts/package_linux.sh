@@ -74,14 +74,15 @@ export VERSION="$ASTRO_PACKAGE_VERSION"
 export OUTPUT="${BUILD_DIR}/AstroCapture-${ASTRO_PACKAGE_VERSION}-x86_64.AppImage"
 LIBUSB_RUNTIME="$(pkg-config --variable=libdir libusb-1.0)/libusb-1.0.so.0"
 OPENGL_RUNTIME="$(ldconfig -p | awk '$1 == "libOpenGL.so.0" && !found {print $NF; found=1}')"
-[[ -f "$LIBUSB_RUNTIME" && -f "$OPENGL_RUNTIME" ]] || { echo "USB/OpenGL runtime libraries are missing." >&2; exit 1; }
+SSL_RUNTIME="$(ldconfig -p | awk '$1 == "libssl.so.3" && !found {print $NF; found=1}')"
+[[ -f "$LIBUSB_RUNTIME" && -f "$OPENGL_RUNTIME" && -f "$SSL_RUNTIME" ]] || { echo "USB/OpenGL/HTTPS runtime libraries are missing." >&2; exit 1; }
 # linuxdeploy normally excludes these as system libraries. They are not
 # guaranteed on a desktop without other Qt/camera applications installed.
 "${TOOLS_DIR}/linuxdeploy-x86_64.AppImage" --appdir "$APPDIR" \
     --desktop-file "${APPDIR}/usr/share/applications/astrocapture.desktop" \
     --icon-file "${APPDIR}/usr/share/icons/hicolor/256x256/apps/astrocapture.png" \
     --executable "${APPDIR}/usr/bin/AstroCapture" \
-    --library "$LIBUSB_RUNTIME" --library "$OPENGL_RUNTIME" --plugin qt --output appimage
+    --library "$LIBUSB_RUNTIME" --library "$OPENGL_RUNTIME" --library "$SSL_RUNTIME" --plugin qt --output appimage
 
 ACCESS_DIR="${BUILD_DIR}/linux-camera-access"
 mkdir -p "$ACCESS_DIR"

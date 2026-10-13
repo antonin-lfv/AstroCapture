@@ -70,7 +70,7 @@ jobs:
           docker run --rm -v "$PWD/build/release-linux:/package:ro" ubuntu:24.04 bash -lc '
             set -e
             apt-get update > /tmp/apt-update.log 2>&1
-            DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends tzdata libgl1 libegl1 libfontconfig1 libx11-xcb1 libxkbcommon-x11-0 libxcb-cursor0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-render-util0 libxcb-xinerama0 libxcb-randr0 libxcb-shape0 libxcb-xfixes0 libxcb-sync1 fonts-dejavu-core > /tmp/apt-install.log 2>&1
+            DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends ca-certificates tzdata libgl1 libegl1 libfontconfig1 libx11-xcb1 libxkbcommon-x11-0 libxcb-cursor0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-render-util0 libxcb-xinerama0 libxcb-randr0 libxcb-shape0 libxcb-xfixes0 libxcb-sync1 fonts-dejavu-core > /tmp/apt-install.log 2>&1
             export LANG=C.UTF-8 QT_QPA_PLATFORM=offscreen QT_QUICK_BACKEND=software APPIMAGE_EXTRACT_AND_RUN=1
             timeout 30 /package/AstroCapture-*-x86_64.AppImage --check-installation
           '

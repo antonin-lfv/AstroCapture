@@ -232,10 +232,19 @@ qt_add_translations(AstroCapture
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     include(GNUInstallDirs)
+    add_executable(astro_linux_icon_generator "${PROJECT_SOURCE_DIR}/packaging/linux/GenerateIcon.cpp")
+    target_link_libraries(astro_linux_icon_generator PRIVATE Qt6::Gui)
+    set(linux_icon "${CMAKE_CURRENT_BINARY_DIR}/astrocapture.png")
+    add_custom_command(OUTPUT "${linux_icon}"
+        COMMAND "$<TARGET_FILE:astro_linux_icon_generator>" "${CMAKE_CURRENT_SOURCE_DIR}/qml/assets/logo.png" "${linux_icon}"
+        DEPENDS astro_linux_icon_generator qml/assets/logo.png
+        COMMENT "Generating the Linux desktop icon from the existing logo" VERBATIM)
+    add_custom_target(astro_linux_icon DEPENDS "${linux_icon}")
+    add_dependencies(AstroCapture astro_linux_icon)
     install(TARGETS AstroCapture RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT AstroCapture)
     install(FILES "${PROJECT_SOURCE_DIR}/packaging/linux/astrocapture.desktop"
         DESTINATION ${CMAKE_INSTALL_DATADIR}/applications COMPONENT AstroCapture)
-    install(FILES qml/assets/logo.png DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/256x256/apps
+    install(FILES "${linux_icon}" DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/256x256/apps
         RENAME astrocapture.png COMPONENT AstroCapture)
     install(FILES "${ASTRO_VISION_NOTICES}" DESTINATION ${CMAKE_INSTALL_DATADIR}/licenses/AstroCapture COMPONENT AstroCapture)
     install(DIRECTORY "${PROJECT_SOURCE_DIR}/third_party/notices/"

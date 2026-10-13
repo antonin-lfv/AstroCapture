@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="logo.png" alt="AstroCapture" width="128">
+  <img src="logo.png" alt="AstroCapture" width="256">
 </p>
 
 # AstroCapture
@@ -157,7 +157,5 @@ essayer la capture avec la caméra simulée proposée dans l’application.
 
 Pour approfondir :
 
-- [Documentation interne détaillée](docs/README_INTERNE.md) : fonctions, formats,
-  réglages avancés et limites techniques, conservés depuis l’ancien README.
 - [Évolutions du logiciel](CHANGELOG.md).
 - [Développement et contribution](CONTRIBUTING.md).

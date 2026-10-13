@@ -31,3 +31,5 @@ __pycache__/
 /.private/
 
 /docs/
+docs/README_INTERNE.md
+docs/VALIDATION_SIRIL.md

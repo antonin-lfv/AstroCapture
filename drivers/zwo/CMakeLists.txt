@@ -33,6 +33,11 @@ endif()
 
 add_library(ASICamera2 SHARED IMPORTED GLOBAL)
 set_target_properties(ASICamera2 PROPERTIES IMPORTED_LOCATION "${ZWO_LIB_PATCHED}")
+if(NOT APPLE)
+    # The upstream ELF library has no SONAME. Link by library name so the
+    # executable does not record a path relative to the build directory.
+    set_target_properties(ASICamera2 PROPERTIES IMPORTED_NO_SONAME TRUE)
+endif()
 
 add_library(astro_driver_zwo STATIC
     src/ZwoCameraBackend.cpp

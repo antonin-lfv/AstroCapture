@@ -6,7 +6,7 @@ Comment[fr]=Préparer ses observations, photographier le ciel et traiter ses ima
 Exec=AstroCapture
 Icon=astrocapture
 Terminal=false
-Categories=Education;Science;Astronomy;
+Categories=Science;Astronomy;
 StartupWMClass=AstroCapture
 Keywords=astronomy;astrophotography;FITS;SER;
 

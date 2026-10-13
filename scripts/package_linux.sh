@@ -73,7 +73,7 @@ export APPIMAGE_EXTRACT_AND_RUN=1
 export VERSION="$ASTRO_PACKAGE_VERSION"
 export OUTPUT="${BUILD_DIR}/AstroCapture-${ASTRO_PACKAGE_VERSION}-x86_64.AppImage"
 LIBUSB_RUNTIME="$(pkg-config --variable=libdir libusb-1.0)/libusb-1.0.so.0"
-OPENGL_RUNTIME="$(ldconfig -p | awk '$1 == "libOpenGL.so.0" {print $NF; exit}')"
+OPENGL_RUNTIME="$(ldconfig -p | awk '$1 == "libOpenGL.so.0" && !found {print $NF; found=1}')"
 [[ -f "$LIBUSB_RUNTIME" && -f "$OPENGL_RUNTIME" ]] || { echo "USB/OpenGL runtime libraries are missing." >&2; exit 1; }
 # linuxdeploy normally excludes these as system libraries. They are not
 # guaranteed on a desktop without other Qt/camera applications installed.

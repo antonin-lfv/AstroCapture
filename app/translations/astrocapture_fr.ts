@@ -3395,13 +3395,13 @@ L’aperçu est automatiquement éclairci ; les données restent linéaires.</tr
         </message>
         <message>
             <location filename="../qml/GuideWorkspace.qml" line="52" />
-            <source>Apple Silicon acceleration</source>
-            <translation>Accélération Apple Silicon</translation>
+            <source>Processing acceleration</source>
+            <translation>Accélération des traitements</translation>
         </message>
         <message>
             <location filename="../qml/GuideWorkspace.qml" line="52" />
-            <source>Large images use automatic GPU acceleration for stretch, color, smoothing and wavelets. Smaller images and unsupported operations keep the CPU. Original data and export precision stay unchanged. No extra setting is required.</source>
-            <translation>Les grandes images utilisent automatiquement le processeur graphique pour l’étirement, les couleurs, le lissage et les ondelettes. Les petites images et les opérations non prises en charge restent sur le processeur central. Les originaux et la précision des exports sont préservés. Aucun réglage supplémentaire n’est nécessaire.</translation>
+            <source>Supported Apple Silicon Macs can use automatic GPU acceleration for large images. Linux uses the CPU. Original data and export precision stay unchanged. No extra setting is required.</source>
+            <translation>Les Mac Apple Silicon compatibles peuvent accélérer les grandes images avec le processeur graphique. Linux utilise le processeur. Les données d’origine et la précision des exports restent conservées. Aucun réglage supplémentaire n’est nécessaire.</translation>
         </message>
         <message>
             <location filename="../qml/GuideWorkspace.qml" line="53" />
@@ -7984,12 +7984,12 @@ Résultat obtenu :
             <translation>Le rouge protège l’image. Le blanc applique le traitement ; le noir protège. Annuler annule le dernier trait.</translation>
         </message>
         <message>
-            <source>The mask contains 200 strokes. %1 a stroke before painting more.</source>
-            <translation>Le masque contient 200 traits. Annulez un trait pour continuer à peindre.</translation>
+            <source>The mask contains 200 strokes. Use %1 to undo a stroke before painting more.</source>
+            <translation>Le masque contient 200 traits. Utilisez %1 pour annuler un trait avant de continuer à peindre.</translation>
         </message>
         <message>
-            <source>The mask reached its point limit. %1 a stroke before painting more.</source>
-            <translation>Le masque a atteint sa limite de points. Annulez un trait pour continuer.</translation>
+            <source>The mask reached its point limit. Use %1 to undo a stroke before painting more.</source>
+            <translation>Le masque a atteint sa limite de points. Utilisez %1 pour annuler un trait avant de continuer à peindre.</translation>
         </message>
         <message>
             <source>Protect · black brush</source>

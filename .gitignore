@@ -28,6 +28,8 @@ __pycache__/
 .env
 
 # Local working documents, internal documentation and prototypes
+/AGENT.md
+/AGENTS.md
 /.private/
 /docs/
 /work/

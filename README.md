@@ -13,7 +13,7 @@
 <p align="center">
   <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/version-1.19.0-d4af37" alt="Version 1.19.0"></a>
   <a href="#installer-sur-mac"><img src="https://img.shields.io/badge/macOS-Apple_Silicon-7897c5" alt="macOS : Apple Silicon"></a>
-  <a href="#installer-sur-linux-mint"><img src="https://img.shields.io/badge/Linux-Mint_%C2%B7_Ubuntu-87b07c" alt="Linux : Mint et Ubuntu"></a>
+  <a href="#installer-sur-linux"><img src="https://img.shields.io/badge/Linux-Ubuntu_%C2%B7_Mint-87b07c" alt="Linux : Ubuntu et Mint"></a>
   <img src="https://img.shields.io/badge/langues-FR_%C2%B7_EN-b69ad4" alt="Langues : français et anglais">
 </p>
 
@@ -50,7 +50,7 @@ observation ou traiter vos images.**
 
 ### Installer sur Mac
 
-Le paquet actuel est prévu pour les **Mac Apple Silicon**, équipés d’une puce de
+Le paquet actuel pour Mac est prévu pour les **Mac Apple Silicon**, équipés d’une puce de
 la famille M.
 
 1. Ouvrez le fichier `AstroCapture-<version>.dmg`.
@@ -63,11 +63,11 @@ même façon. Vos préférences, préréglages et historique sont conservés.
 Le paquet n’est pas encore certifié par Apple : macOS peut demander une
 autorisation d’ouverture.
 
-### Installer sur Linux Mint
+### Installer sur Linux
 
-La version Linux est une **AppImage pour PC 64 bits**. Elle vise Linux Mint 21 et
-22, notamment **Mint 22.3 Cinnamon**, et Ubuntu 22.04 ou plus récent. Qt et les
-bibliothèques de traitement sont inclus : pas besoin de les installer séparément.
+La version Linux est une **AppImage pour PC 64 bits (x86-64)**, compatible avec
+**Ubuntu 22.04 ou plus récent** et **Linux Mint 21 et 22**. Qt et les bibliothèques
+de traitement sont inclus : pas besoin de les installer séparément.
 
 1. Ouvrez les [téléchargements Linux](https://github.com/antonin-lfv/AstroCapture/actions/workflows/linux.yml),
    choisissez une compilation réussie, puis récupérez **AstroCapture-Linux-x86_64**
@@ -80,36 +80,6 @@ et préférences restent conservés.
 
 Les pilotes de capture ZWO ASI, NexImage/TIS et UVC sont inclus. **La capture avec
 une vraie caméra reste à valider sur Linux.**
-
-<details>
-<summary><strong>Un problème au lancement ou une caméra non détectée ?</strong></summary>
-
-Si un message mentionne **FUSE**, ouvrez un terminal dans le dossier de l’AppImage
-et lancez-la ainsi, en remplaçant `<version>` par le numéro du fichier :
-
-```sh
-./AstroCapture-<version>-x86_64.AppImage --appimage-extract-and-run
-```
-
-Si la caméra n’est pas détectée, ouvrez un terminal dans le dossier
-`linux-camera-access` du paquet et lancez :
-
-```sh
-sudo ./install_linux_camera_rules.sh
-```
-
-Rebranchez ensuite la caméra.
-
-</details>
-
-<details>
-<summary><strong>Traitement et outils complémentaires sur Linux</strong></summary>
-
-Les traitements Linux utilisent le processeur. Pour l’identification astrométrique
-aveugle, l’outil facultatif **Astrometry.net** peut être installé depuis le
-gestionnaire de logiciels ; les autres traitements ne le nécessitent pas.
-
-</details>
 
 ## Premiers pas
 

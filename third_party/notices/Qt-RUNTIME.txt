@@ -1,0 +1,13 @@
+AstroCapture uses the unmodified Qt 6 shared libraries and QML modules.
+Copyright (C) The Qt Company Ltd and other contributors.
+These libraries and their use are covered by the GNU LGPL version 3.
+The LGPL and the accompanying GPL text are included in Qt-LGPL-3.0.txt
+and Qt-GPL-3.0.txt. Module-specific third-party notices remain in Qt's source.
+
+The Linux distribution build uses Qt 6.9.3. Corresponding upstream source:
+https://download.qt.io/archive/qt/6.9/6.9.3/single/qt-everywhere-src-6.9.3.tar.xz
+https://code.qt.io/cgit/qt/
+
+The AppImage can be extracted with --appimage-extract. Its shared Qt libraries
+are in the resulting AppDir/usr/lib directory; compatible modified libraries
+can replace them in this extracted copy. Run AppRun to use the extracted copy.

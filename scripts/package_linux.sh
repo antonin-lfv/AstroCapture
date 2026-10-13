@@ -45,6 +45,15 @@ fetch_tool linuxdeploy-plugin-qt-x86_64.AppImage \
 # Only our install component: do not ship OpenCV's build headers/static archives.
 rm -rf "$APPDIR"
 DESTDIR="$APPDIR" cmake --install "$BUILD_DIR" --prefix /usr --component AstroCapture
+# Preserve the distribution's copyright and license notices for the image/USB
+# libraries that linuxdeploy collects from system packages.
+NOTICES_DIR="${APPDIR}/usr/share/licenses/AstroCapture"
+for package in libcfitsio10 libraw20 libusb-1.0-0 libuvc0 libjpeg-turbo8; do
+    notice="/usr/share/doc/${package}/copyright"
+    if [[ -f "$notice" ]]; then
+        cp "$notice" "${NOTICES_DIR}/${package}-copyright.txt"
+    fi
+done
 desktop-file-validate "${APPDIR}/usr/share/applications/astrocapture.desktop"
 export QMAKE="${QMAKE:-$(command -v qmake6 || command -v qmake)}"
 QT_LIB_DIR="$("$QMAKE" -query QT_INSTALL_LIBS)"

@@ -1,22 +1,54 @@
+<h1 align="center">
+  <br>
+  🔭 AstroCapture
+  <br>
+</h1>
+
+<h4 align="center">Préparez vos observations, capturez le ciel et révélez vos images.</h4>
+
 <p align="center">
-  <img src="logo.png" alt="AstroCapture" width="256">
+  Votre atelier d’astrophotographie sur Mac et Linux, en français et en anglais.
 </p>
 
-# AstroCapture
+<p align="center">
+  <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/version-1.19.0-d4af37" alt="Version 1.19.0"></a>
+  <a href="#installer-sur-mac"><img src="https://img.shields.io/badge/macOS-Apple_Silicon-7897c5" alt="macOS : Apple Silicon"></a>
+  <a href="#installer-sur-linux-mint"><img src="https://img.shields.io/badge/Linux-Mint_%C2%B7_Ubuntu-87b07c" alt="Linux : Mint et Ubuntu"></a>
+  <img src="https://img.shields.io/badge/langues-FR_%C2%B7_EN-b69ad4" alt="Langues : français et anglais">
+</p>
 
-**Préparez vos observations, photographiez le ciel et traitez vos images sur Mac ou Linux.**
+<p align="center">
+  <a href="#ce-que-vous-pouvez-faire">Découvrir</a> •
+  <a href="#installation">Installer</a> •
+  <a href="#premiers-pas">Premiers pas</a> •
+  <a href="#garder-son-travail-et-partager-une-image">Sauvegarder et exporter</a> •
+  <a href="#aide-et-documentation">Aide</a>
+</p>
 
-AstroCapture rassemble les outils pour travailler sur la Lune, les planètes, les
-nébuleuses et les galaxies : enregistrer des prises de vue, combiner les meilleures
-images, ajuster le résultat et l’exporter.
+<p align="center">
+  <img src="logo.png" alt="Logo AstroCapture" width="280">
+</p>
+
+## Ce que vous pouvez faire
+
+De la Lune aux galaxies, AstroCapture vous accompagne de la préparation d’une
+observation jusqu’à l’image finale. Chaque page correspond à une étape :
+
+| Page | Votre prochaine étape |
+| --- | --- |
+| 🌍 **Observation** | Choisissez un lieu et une heure, trouvez les objets visibles et consultez les prévisions de nuages. |
+| 📷 **Capture** | Enregistrez les images d’une caméra connectée à votre télescope. |
+| 🪐 **Traitement** | Combinez les meilleures images d’une vidéo de la Lune ou d’une planète, puis faites ressortir les détails. |
+| ✨ **Ciel profond** | Alignez et combinez vos photos de nébuleuses ou de galaxies, puis ajustez les couleurs et le fond de ciel. |
+| 🧩 **Mosaïque** | Raccordez plusieurs vues pour réunir la Lune ou le Soleil dans une seule image. |
 
 Vous pouvez aussi partir de vidéos ou de photos déjà prises avec votre matériel
-ou un télescope distant. Le traitement fonctionne sans caméra connectée.
-L’application est disponible en français et en anglais.
+ou un télescope distant. **Pas besoin de caméra connectée pour préparer une
+observation ou traiter vos images.**
 
-[Installation Mac](#installer-sur-mac) · [Installation Linux](#installer-sur-linux-mint) · [Premiers pas](#premiers-pas) · [Sauvegarde et export](#garder-son-travail-et-partager-une-image) · [Documentation](#aide-et-documentation)
+## Installation
 
-## Installer sur Mac
+### Installer sur Mac
 
 Le paquet actuel est prévu pour les **Mac Apple Silicon**, équipés d’une puce de
 la famille M.
@@ -31,48 +63,62 @@ même façon. Vos préférences, préréglages et historique sont conservés.
 Le paquet n’est pas encore certifié par Apple : macOS peut demander une
 autorisation d’ouverture.
 
-## Installer sur Linux Mint
+### Installer sur Linux Mint
 
 La version Linux est une **AppImage pour PC 64 bits**. Elle vise Linux Mint 21 et
 22, notamment **Mint 22.3 Cinnamon**, et Ubuntu 22.04 ou plus récent. Qt et les
 bibliothèques de traitement sont inclus : pas besoin de les installer séparément.
 
-1. Téléchargez le paquet **AstroCapture-Linux-x86_64** dans les résultats de
-   [compilation Linux](https://github.com/antonin-lfv/AstroCapture/actions/workflows/linux.yml), puis décompressez-le.
+1. Ouvrez les [téléchargements Linux](https://github.com/antonin-lfv/AstroCapture/actions/workflows/linux.yml),
+   choisissez une compilation réussie, puis récupérez **AstroCapture-Linux-x86_64**
+   dans la section **Artifacts**, en bas de la page. Décompressez le paquet.
 2. Dans les propriétés du fichier `.AppImage`, autorisez son exécution comme programme.
 3. Double-cliquez dessus pour lancer AstroCapture.
 
-Si un message mentionne **FUSE**, lancez le fichier depuis un terminal avec
-`./AstroCapture-<version>-x86_64.AppImage --appimage-extract-and-run`.
 Pour une mise à jour, quittez l’application et remplacez l’AppImage ; vos projets
 et préférences restent conservés.
 
-**Observation et les traitements fonctionnent sans caméra.** Pour la capture,
-les pilotes ZWO ASI, NexImage/TIS et UVC sont inclus. Si la caméra n’est pas
-détectée, ouvrez le dossier `linux-camera-access` du paquet et lancez
-`sudo ./install_linux_camera_rules.sh`, puis rebranchez la caméra. Le support
-matériel Linux doit encore être confirmé avec une vraie caméra.
+Les pilotes de capture ZWO ASI, NexImage/TIS et UVC sont inclus. **La capture avec
+une vraie caméra reste à valider sur Linux.**
+
+<details>
+<summary><strong>Un problème au lancement ou une caméra non détectée ?</strong></summary>
+
+Si un message mentionne **FUSE**, ouvrez un terminal dans le dossier de l’AppImage
+et lancez-la ainsi, en remplaçant `<version>` par le numéro du fichier :
+
+```sh
+./AstroCapture-<version>-x86_64.AppImage --appimage-extract-and-run
+```
+
+Si la caméra n’est pas détectée, ouvrez un terminal dans le dossier
+`linux-camera-access` du paquet et lancez :
+
+```sh
+sudo ./install_linux_camera_rules.sh
+```
+
+Rebranchez ensuite la caméra.
+
+</details>
+
+<details>
+<summary><strong>Traitement et outils complémentaires sur Linux</strong></summary>
 
 Les traitements Linux utilisent le processeur. Pour l’identification astrométrique
 aveugle, l’outil facultatif **Astrometry.net** peut être installé depuis le
 gestionnaire de logiciels ; les autres traitements ne le nécessitent pas.
 
+</details>
+
 ## Premiers pas
 
-L’**Accueil** permet de retrouver vos projets et vidéos récents. Choisissez
-ensuite la page qui correspond à ce que vous voulez faire :
+L’**Accueil** permet de retrouver vos projets et vidéos récents. Pour commencer,
+ouvrez la page correspondant à votre objectif et suivez les étapes ci-dessous.
+Vous pouvez aussi ouvrir une image PNG ou TIFF directement dans **Traitement**.
+Vos images exportées se retrouvent dans **Historique**.
 
-| Vous voulez… | Ouvrez… |
-| --- | --- |
-| Trouver un objet à observer et le bon moment | **Observation** |
-| Enregistrer les images d’une caméra | **Capture** |
-| Traiter une vidéo de la Lune ou d’une planète | **Traitement** |
-| Combiner des photos d’une nébuleuse ou d’une galaxie | **Ciel profond** |
-| Retoucher directement une image PNG ou TIFF | **Traitement** |
-| Assembler plusieurs vues de la Lune ou du Soleil | **Mosaïque** |
-| Retrouver vos images exportées | **Historique** |
-
-### Préparer une observation
+### 🌍 Préparer une observation
 
 Dans **Observation**, choisissez votre lieu, une date et un objet. Le premier
 lancement utilise Paris ; vous pouvez sélectionner une ville, saisir des
@@ -97,7 +143,7 @@ affiché à l’heure de votre ordinateur pour votre lancement manuel.
 Les nuages sont une prévision météo. La visibilité calculée ne tient pas compte
 d’un arbre, d’un bâtiment ou du relief devant votre télescope.
 
-### Traiter une nébuleuse ou une galaxie
+### ✨ Traiter une nébuleuse ou une galaxie
 
 Dans **Ciel profond**, le parcours suit trois étapes : **Images → Empilement →
 Finition**. Empiler consiste à combiner plusieurs photos du même objet pour
@@ -125,7 +171,7 @@ Les formats acceptés comprennent **FITS, RAW à matrice Bayer, PNG et TIFF**.
 Les outils avancés, comme la composition de plusieurs filtres, les masques et
 les réglages séparés des étoiles et du fond, restent disponibles dans Finition.
 
-### Traiter la Lune ou une planète
+### 🪐 Traiter la Lune ou une planète
 
 Dans **Traitement**, ouvrez votre vidéo **SER**, un format courant en
 astrophotographie planétaire.
@@ -138,7 +184,7 @@ astrophotographie planétaire.
 
 ![Traitement : Saturne dans le fichier jupyter.ser, avec 2 246 images conservées sur 8 984](assets/screenshots/readme-processing.png)
 
-### Assembler une mosaïque
+### 🧩 Assembler une mosaïque
 
 Pour assembler plusieurs portions de la Lune, traitez d’abord chaque vidéo,
 puis ouvrez les images obtenues dans **Mosaïque** et cliquez sur

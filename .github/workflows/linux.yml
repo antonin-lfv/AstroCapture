@@ -1,0 +1,66 @@
+name: Linux package
+
+on:
+  push:
+    branches: [main, 'codex/linux-mint-support']
+    paths-ignore: ['README.md', 'CHANGELOG.md', 'CONTRIBUTING.md', 'assets/**', '.gitignore']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: linux-package-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  appimage:
+    # Mint 21 uses Ubuntu 22.04; building here also covers newer Mint bases.
+    name: Linux x86-64 / Mint
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7
+      - uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.9.3'
+          modules: qtimageformats
+          cache: true
+      - name: Install build and display dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build pkg-config libcfitsio-dev libraw-dev libusb-1.0-0-dev libuvc-dev libgl1-mesa-dev libxcb-cursor0 libxkbcommon-x11-0 xvfb desktop-file-utils
+      - name: Configure
+        run: cmake --preset release-linux
+      - name: Build
+        run: cmake --build --preset release-linux --parallel 2
+      - name: Test
+        run: ctest --preset release-linux
+      - name: Build AppImage
+        run: scripts/package_linux.sh --skip-build
+      - name: Check installed codecs and QML over X11
+        run: |
+          mkdir -p build/linux-smoke/config build/linux-smoke/data build/linux-smoke/cache
+          export XDG_CONFIG_HOME="$PWD/build/linux-smoke/config"
+          export XDG_DATA_HOME="$PWD/build/linux-smoke/data"
+          export XDG_CACHE_HOME="$PWD/build/linux-smoke/cache"
+          export QT_QUICK_BACKEND=software
+          APPIMAGE_EXTRACT_AND_RUN=1 xvfb-run -a build/release-linux/AstroCapture-*-x86_64.AppImage --check-installation | tee build/release-linux/installation-check.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          result = json.loads(Path('build/release-linux/installation-check.json').read_text())
+          assert result['ok']
+          assert set(result['cameraDrivers']) == {'mock', 'uvc', 'euvc', 'zwo'}
+          PY
+      - name: Upload Linux distribution
+        uses: actions/upload-artifact@v4
+        with:
+          name: AstroCapture-Linux-x86_64
+          path: |
+            build/release-linux/AstroCapture-*-x86_64.AppImage
+            build/release-linux/SHA256SUMS
+            build/release-linux/installation-check.json
+            build/release-linux/linux-camera-access/
+          if-no-files-found: error
+          retention-days: 30

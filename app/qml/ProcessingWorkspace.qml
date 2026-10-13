@@ -160,7 +160,7 @@ Rectangle {
             spacing: 12
             Label { text: qsTr("Processing presets"); color: Atelier.text; font.pixelSize: 18 }
             Label { text: qsTr("Save your wavelets, denoise, color and gamma settings. Loading a preset can be undone."); color: Atelier.secondary; wrapMode: Text.WordWrap; Layout.fillWidth: true }
-            DarkComboBox {explanation: qsTr("Loads all detail, denoise, color, gamma and geometry settings together. It does not select or stack video frames. Cmd+Z restores the previous adjustments after loading."); id:presetChooser;objectName:"processingPresetChooser";Layout.fillWidth:true;model:root.library.processingPresetNames;displayText:currentIndex>=0?currentText:qsTr("Processing presets");onActivated:presetName.text=currentText}
+            DarkComboBox {explanation: qsTr("Loads all detail, denoise, color, gamma and geometry settings together. It does not select or stack video frames. Undo restores the previous adjustments after loading."); id:presetChooser;objectName:"processingPresetChooser";Layout.fillWidth:true;model:root.library.processingPresetNames;displayText:currentIndex>=0?currentText:qsTr("Processing presets");onActivated:presetName.text=currentText}
             IconButton {text:qsTr("Load");Layout.fillWidth:true;enabled:presetChooser.currentIndex>=0 && root.canEdit;onClicked:{edits.applyValues(root.library.processingPreset(presetChooser.currentText));presetPopup.close()}}
             SettingLabel {text:qsTr("Preset name");explanation:qsTr("Name used to save this complete set of adjustments locally. A new name creates a separate preset; saving an existing name replaces its settings. The source image files are not included.")}
             TextField { id: presetName; objectName: "processingPresetName"; Layout.fillWidth: true; placeholderText: qsTr("Preset name"); maximumLength: 80; color: Atelier.text; background: Rectangle { color: Atelier.field; radius: 4; border.color: Atelier.border } }
@@ -690,7 +690,7 @@ Rectangle {
                         Adjustment {help: qsTr("Applies output = input^(1/gamma) after color gains. 1 is neutral; above 1 brightens midtones, below 1 darkens them. Brightening also reveals noise and does not recover clipped highlights.");  settingKey: "gamma"; label: qsTr("Gamma") }
                         RowLayout {
                             Caption { text: root.adjustmentsDirty ? ((adjustmentTimer.running || root.controller.adjusting) ? qsTr("Updating preview…") : qsTr("Preview paused · adjust a slider to resume")) : qsTr("Automatic preview") }
-                            Label {text:"⌘ Z";color:Atelier.muted;font.pixelSize:11}
+                            Label {text:Atelier.undoShortcutName(Qt.platform.os);color:Atelier.muted;font.pixelSize:11}
                         }
                         RowLayout {
                             enabled: !root.controlsBusy && !root.adjustmentsDirty

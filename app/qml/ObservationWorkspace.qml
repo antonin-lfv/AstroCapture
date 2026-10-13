@@ -410,7 +410,7 @@ Rectangle {
                 Layout.preferredWidth: 1
             }
             HelpIcon {
-                text: qsTr("Both clocks show the selected instant. At home uses this Mac's time zone (%1); at the place uses %2. Clicking a curve or moving the time slider updates both clocks. Now returns to the real current time.").arg(root.controller.reference.homeZone || "").arg(root.controller.reference.siteZone || "")
+                text: qsTr("Both clocks show the selected instant. At home uses this computer's time zone (%1); at the place uses %2. Clicking a curve or moving the time slider updates both clocks. Now returns to the real current time.").arg(root.controller.reference.homeZone || "").arg(root.controller.reference.siteZone || "")
             }
         }
         Label {
@@ -457,7 +457,7 @@ Rectangle {
                                 Layout.fillWidth: true
                                 Layout.minimumWidth: 0
                                 title: qsTr("Observing place")
-                                help: qsTr("Choose a saved place or click the map. Favourites appear first, with alphabetical sorting in each group. The site and Mac clocks both show the selected instant in their local time zones. Sunrise and sunset are shown in this Mac's time zone. Clouds are forecasts.")
+                                help: qsTr("Choose a saved place or click the map. Favourites appear first, with alphabetical sorting in each group. The site and home clocks both show the selected instant in their local time zones. Sunrise and sunset are shown in this computer's time zone. Clouds are forecasts.")
                                 DarkComboBox {
                                     id: sitePicker
                                     objectName: "observationSite"
@@ -485,7 +485,7 @@ Rectangle {
                                 }
                                 Label {
                                     objectName: "observationPcClock"
-                                    text: qsTr("This Mac · selected time\n%1").arg(root.controller.reference.homeLocalDisplay || "")
+                                    text: qsTr("At home · selected time\n%1").arg(root.controller.reference.homeLocalDisplay || "")
                                     color: Atelier.secondary
                                     font.pixelSize: 12
                                     wrapMode: Text.Wrap
@@ -501,7 +501,7 @@ Rectangle {
                                 }
                                 Label {
                                     objectName: "observationSunset"
-                                    text: qsTr("Next sunset · Mac\n%1").arg(root.pcSolar("sunset"))
+                                    text: qsTr("Next sunset · at home\n%1").arg(root.pcSolar("sunset"))
                                     color: Atelier.secondary
                                     font.pixelSize: 12
                                     wrapMode: Text.Wrap
@@ -509,7 +509,7 @@ Rectangle {
                                 }
                                 Label {
                                     objectName: "observationSunrise"
-                                    text: qsTr("Next sunrise · Mac\n%1").arg(root.pcSolar("sunrise"))
+                                    text: qsTr("Next sunrise · at home\n%1").arg(root.pcSolar("sunrise"))
                                     color: Atelier.secondary
                                     font.pixelSize: 12
                                     wrapMode: Text.Wrap
@@ -1155,7 +1155,7 @@ Rectangle {
                         SettingLabel {
                             visible: !(history.checked && root.nightState.past)
                             text: qsTr("When to start recording?")
-                            explanation: qsTr("The first remaining window is chosen after the current real time, independently of the exploratory cursor. It meets the selected height and darkness limits. Start is rounded up to a full minute; end is rounded down. The main hours always use this Mac’s local time; telescope hours convert the same instants. Check weather, terrain and telescope setup separately.")
+                            explanation: qsTr("The first remaining window is chosen after the current real time, independently of the exploratory cursor. It meets the selected height and darkness limits. Start is rounded up to a full minute; end is rounded down. The main hours always use this computer’s local time; telescope hours convert the same instants. Check weather, terrain and telescope setup separately.")
                         }
                         ColumnLayout {
                             visible: !(history.checked && root.nightState.past) && root.controller.reference.recording.available === true
@@ -1207,7 +1207,7 @@ Rectangle {
                         InspectorFamily {
                             objectName: "observationAllWindows"
                             visible: true
-                            title: qsTr("All windows · Mac local time")
+                            title: qsTr("All windows · home local time")
                             onActivated: expanded = !expanded
                             Label {
                                 visible: (root.controller.reference.slots || []).length === 0

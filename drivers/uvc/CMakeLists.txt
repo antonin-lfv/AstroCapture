@@ -12,5 +12,5 @@ target_include_directories(astro_driver_uvc
 
 target_link_libraries(astro_driver_uvc
     PUBLIC astro::domain
-    PRIVATE LibUVC::UVCStatic
+    PRIVATE ${ASTRO_UVC_TARGET}
 )

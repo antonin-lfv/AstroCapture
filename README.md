@@ -4,7 +4,7 @@
 
 # AstroCapture
 
-**Préparez vos observations, photographiez le ciel et traitez vos images sur Mac.**
+**Préparez vos observations, photographiez le ciel et traitez vos images sur Mac ou Linux.**
 
 AstroCapture rassemble les outils pour travailler sur la Lune, les planètes, les
 nébuleuses et les galaxies : enregistrer des prises de vue, combiner les meilleures
@@ -14,7 +14,7 @@ Vous pouvez aussi partir de vidéos ou de photos déjà prises avec votre matér
 ou un télescope distant. Le traitement fonctionne sans caméra connectée.
 L’application est disponible en français et en anglais.
 
-[Installation](#installer-sur-mac) · [Premiers pas](#premiers-pas) · [Sauvegarde et export](#garder-son-travail-et-partager-une-image) · [Documentation](#aide-et-documentation)
+[Installation Mac](#installer-sur-mac) · [Installation Linux](#installer-sur-linux-mint) · [Premiers pas](#premiers-pas) · [Sauvegarde et export](#garder-son-travail-et-partager-une-image) · [Documentation](#aide-et-documentation)
 
 ## Installer sur Mac
 
@@ -30,6 +30,32 @@ même façon. Vos préférences, préréglages et historique sont conservés.
 
 Le paquet n’est pas encore certifié par Apple : macOS peut demander une
 autorisation d’ouverture.
+
+## Installer sur Linux Mint
+
+La version Linux est une **AppImage pour PC 64 bits**. Elle vise Linux Mint 21 et
+22, notamment **Mint 22.3 Cinnamon**, et Ubuntu 22.04 ou plus récent. Qt et les
+bibliothèques de traitement sont inclus : pas besoin de les installer séparément.
+
+1. Téléchargez le paquet **AstroCapture-Linux-x86_64** dans les résultats de
+   [compilation Linux](https://github.com/antonin-lfv/AstroCapture/actions/workflows/linux.yml), puis décompressez-le.
+2. Dans les propriétés du fichier `.AppImage`, autorisez son exécution comme programme.
+3. Double-cliquez dessus pour lancer AstroCapture.
+
+Si un message mentionne **FUSE**, lancez le fichier depuis un terminal avec
+`./AstroCapture-<version>-x86_64.AppImage --appimage-extract-and-run`.
+Pour une mise à jour, quittez l’application et remplacez l’AppImage ; vos projets
+et préférences restent conservés.
+
+**Observation et les traitements fonctionnent sans caméra.** Pour la capture,
+les pilotes ZWO ASI, NexImage/TIS et UVC sont inclus. Si la caméra n’est pas
+détectée, ouvrez le dossier `linux-camera-access` du paquet et lancez
+`sudo ./install_linux_camera_rules.sh`, puis rebranchez la caméra. Le support
+matériel Linux doit encore être confirmé avec une vraie caméra.
+
+Les traitements Linux utilisent le processeur. Pour l’identification astrométrique
+aveugle, l’outil facultatif **Astrometry.net** peut être installé depuis le
+gestionnaire de logiciels ; les autres traitements ne le nécessitent pas.
 
 ## Premiers pas
 
@@ -64,9 +90,9 @@ La page vous montre :
 
 Les cartes et graphiques suivent la même heure. **Sur place** indique l’heure au
 lieu d’observation ; **Chez moi** indique à quelle heure cet instant correspond
-sur votre Mac. C’est utile pour préparer une prise de vue depuis un télescope
+sur votre ordinateur. C’est utile pour préparer une prise de vue depuis un télescope
 situé dans un autre pays. **Quand lancer l’enregistrement ?** propose un créneau,
-affiché à l’heure de votre Mac pour votre lancement manuel.
+affiché à l’heure de votre ordinateur pour votre lancement manuel.
 
 Les nuages sont une prévision météo. La visibilité calculée ne tient pas compte
 d’un arbre, d’un bâtiment ou du relief devant votre télescope.
@@ -144,7 +170,7 @@ profond que vous souhaitez retrouver ou déplacer.
 
 L’onglet **Guide** explique les étapes dans l’application, même sans connexion.
 Les aides **?** près des réglages décrivent leur effet et donnent des repères
-pour commencer. Vous pouvez annuler un réglage avec **⌘ Z**.
+pour commencer. Vous pouvez annuler un réglage avec **⌘ Z sur Mac** ou **Ctrl+Z sur Linux**.
 
 Les images et les traitements restent sur votre ordinateur. Internet sert aux
 prévisions météo et à certaines recherches de villes ou d’objets. Les cartes

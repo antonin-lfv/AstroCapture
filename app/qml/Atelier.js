@@ -27,3 +27,7 @@ var compactInspectorWidth = 320;
 // Must match astro/domain/ImageLimits.hpp.
 var maximumImagePixels = 128000000;
 var maximumImageDimension = 32700;
+
+function undoShortcutName(platform) {
+    return platform === "osx" ? "⌘ Z" : "Ctrl+Z";
+}

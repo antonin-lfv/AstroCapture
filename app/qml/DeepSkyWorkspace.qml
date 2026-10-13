@@ -586,7 +586,7 @@ DropArea {
                 ColumnLayout {visible:root.workflowStep===6;Layout.fillWidth:true;spacing:8
                     RowLayout {Layout.fillWidth:true
                         Label {text:qsTr("Comparison");color:Atelier.text;font.weight:Font.Medium;Layout.fillWidth:true}
-                        Label {text:"⌘ Z";font.pixelSize:11;color:Atelier.muted}
+                        Label {text:Atelier.undoShortcutName(Qt.platform.os);font.pixelSize:11;color:Atelier.muted}
                         IconAction {text:qsTr("Compare a source exposure");iconName:"folder";onClicked:rawComparePopup.open()}
                     }
                     RowLayout {Layout.fillWidth:true;spacing:2;enabled:controller.hasFinishComparison&&!controller.busy&&controller.displayingResult&&!controller.showingMask&&!controller.showingBackgroundModel
@@ -594,7 +594,7 @@ DropArea {
                             delegate:IconButton {required property var modelData;objectName:"deepSkyCompare_"+modelData.key;text:modelData.label;ghost:root.comparisonMode!==modelData.key;Layout.fillWidth:true;borderColor:root.comparisonMode===modelData.key?Atelier.border:"transparent";onClicked:{if(controller.starLayerView)controller.starLayerView=0;root.comparisonMode=modelData.key;}Accessible.description:modelData.key==="before"?qsTr("Stack before finishing, displayed without stretch"):""}
                         }
                     }
-                    IconButton {objectName:"deepSkyResetFamily";text:qsTr("Delete adjustments: %1").arg(root.familyNames[root.finishingTool]);Layout.fillWidth:true;enabled:root.finishEditable&&root.expandedFamilies.length>0;active:true;onClicked:root.resetFamily();Accessible.description:qsTr("Reset the selected family. Cmd+Z restores its settings.")}
+                    IconButton {objectName:"deepSkyResetFamily";text:qsTr("Delete adjustments: %1").arg(root.familyNames[root.finishingTool]);Layout.fillWidth:true;enabled:root.finishEditable&&root.expandedFamilies.length>0;active:true;onClicked:root.resetFamily();Accessible.description:qsTr("Reset the selected family. Undo restores its settings.")}
                 }
             }
         }
@@ -841,7 +841,7 @@ ParameterControl {id:black;label:qsTr("Black level");textIsValue:true;text:"0";f
                 DarkComboBox {explanation: qsTr("Rotates the finished image clockwise in 90° steps without interpolating the pixel values. Mirrors are applied after this rotation; crop and free geometry come afterwards."); id:rotation;objectName:"deepSkyRotation";Layout.fillWidth:true;model:[qsTr("Original orientation"),"90°","180°","270°"];enabled:root.finishEditable;onActivated:root.previewAdjustments()}
                 HelpCheckBox {explanation: qsTr("Swaps left and right after rotation. Useful for matching the orientation of an optical setup. It only changes the finished image; the original linear integration remains unchanged."); id:mirrorHorizontal;text:qsTr("Mirror horizontally");enabled:root.finishEditable;onClicked:root.previewAdjustments()}
                 IconButton {text:qsTr("Crop, rotate and resize");Layout.fillWidth:true;enabled:root.finishEditable;onClicked:geometryEditor.edit(controller.geometryImage,root.geometry)}
-                HelpCheckBox {explanation: qsTr("Swaps top and bottom after rotation. It only changes the finished image and can be undone with Cmd+Z."); id:mirrorVertical;text:qsTr("Mirror vertically");enabled:root.finishEditable;onClicked:root.previewAdjustments()}
+                HelpCheckBox {explanation: qsTr("Swaps top and bottom after rotation. It only changes the finished image and can be undone with Undo."); id:mirrorVertical;text:qsTr("Mirror vertically");enabled:root.finishEditable;onClicked:root.previewAdjustments()}
                 }
                 InspectorFamily {id:family4;objectName:"deepSkyFamily4";title:root.familyNames[4];expanded:root.familyOpen(4);current:root.finishingTool===4;onActivated:root.toggleFamily(4);onInteracted:root.finishingTool=4
                 DeepSkyAdvancedTools {
@@ -903,7 +903,7 @@ ParameterControl {id:black;label:qsTr("Black level");textIsValue:true;text:"0";f
         ColumnLayout {
             width:parent.width;spacing:12
             Label {text:qsTr("Name this finish for your camera, filters or intent. Use a new name to duplicate it. Presets are kept locally across updates.");color:Atelier.secondary;wrapMode:Text.Wrap;Layout.fillWidth:true}
-            ParameterLabel {label:qsTr("Saved presets");explanation:qsTr("A preset replaces the complete finishing recipe and all adjustment families, including advanced tools. It does not change the imported files or stacking settings. Cmd+Z restores the previous finish.")}
+            ParameterLabel {label:qsTr("Saved presets");explanation:qsTr("A preset replaces the complete finishing recipe and all adjustment families, including advanced tools. It does not change the imported files or stacking settings. Undo restores the previous finish.")}
             DarkComboBox {id:presetChooser;objectName:"deepSkyPresetChooser";Layout.fillWidth:true;model:root.library.deepSkyPresetNames;displayText:currentIndex>=0?currentText:qsTr("Your presets");onActivated:presetName.text=currentText}
             IconButton {text:qsTr("Restore entire finish");Layout.fillWidth:true;enabled:root.finishEditable && presetChooser.currentIndex>=0;onClicked:{if(root.setFinish(root.library.deepSkyPreset(presetChooser.currentText)))presetDialog.close()}}
             Rectangle {Layout.fillWidth:true;Layout.preferredHeight:1;color:Atelier.border}

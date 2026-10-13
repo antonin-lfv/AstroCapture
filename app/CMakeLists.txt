@@ -229,3 +229,17 @@ qt_add_translations(AstroCapture
     TS_FILES translations/astrocapture_fr.ts
     RESOURCE_PREFIX "/i18n"
 )
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    include(GNUInstallDirs)
+    install(TARGETS AstroCapture RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT AstroCapture)
+    install(FILES "${PROJECT_SOURCE_DIR}/packaging/linux/astrocapture.desktop"
+        DESTINATION ${CMAKE_INSTALL_DATADIR}/applications COMPONENT AstroCapture)
+    install(FILES qml/assets/logo.png DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/256x256/apps
+        RENAME astrocapture.png COMPONENT AstroCapture)
+    install(FILES "${ASTRO_VISION_NOTICES}" DESTINATION ${CMAKE_INSTALL_DATADIR}/licenses/AstroCapture COMPONENT AstroCapture)
+    install(DIRECTORY "${PROJECT_SOURCE_DIR}/third_party/notices/"
+        DESTINATION ${CMAKE_INSTALL_DATADIR}/licenses/AstroCapture COMPONENT AstroCapture)
+    install(FILES "${PROJECT_SOURCE_DIR}/third_party/zwo-sdk/LICENSE.txt"
+        DESTINATION ${CMAKE_INSTALL_DATADIR}/licenses/AstroCapture RENAME ZWO-LICENSE.txt COMPONENT AstroCapture)
+endif()

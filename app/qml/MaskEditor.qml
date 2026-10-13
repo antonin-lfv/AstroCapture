@@ -33,7 +33,7 @@ Popup {
             Label {text:qsTr("Paint the mask");font.pixelSize:20;color:Atelier.text;Layout.fillWidth:true}
             IconButton {text:qsTr("Close");ghost:true;onClicked:root.close()}
         }
-        Label {text:qsTr("The preview stretch reveals faint detail without changing pixels. Red protects the image. Cmd+Z removes the last stroke.");color:Atelier.secondary;wrapMode:Text.Wrap;Layout.fillWidth:true}
+        Label {text:qsTr("The preview stretch reveals faint detail without changing pixels. Red protects the image. Undo removes the last stroke.");color:Atelier.secondary;wrapMode:Text.Wrap;Layout.fillWidth:true}
         ImageViewport {
             id:view;Layout.fillWidth:true;Layout.fillHeight:true;Layout.minimumHeight:120
             sourceWidth:pixels.sourceWidth;sourceHeight:pixels.sourceHeight

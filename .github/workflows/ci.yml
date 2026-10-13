@@ -44,6 +44,7 @@ jobs:
         with:
           version: "6.9.*"
           cache: true
+          modules: qtimageformats
 
       # Every job here must stay hardware-independent: only the mock camera
       # backend is exercised (RELEASE_AND_PACKAGING.md section 3).
@@ -53,7 +54,7 @@ jobs:
 
       - name: Install astronomical image libraries (Linux)
         if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y libcfitsio-dev libraw-dev
+        run: sudo apt-get update && sudo apt-get install -y libcfitsio-dev libraw-dev libusb-1.0-0-dev libuvc-dev
 
       - name: Install astronomical image libraries (Windows)
         if: runner.os == 'Windows'

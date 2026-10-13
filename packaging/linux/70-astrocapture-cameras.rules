@@ -1,0 +1,6 @@
+# Grant access to the active local desktop user, without world-writable USB devices.
+# ZWO ASI and Celestron/The Imaging Source USB cameras.
+SUBSYSTEM=="usb", ATTR{idVendor}=="03c3", TAG+="uaccess"
+SUBSYSTEM=="usb", ATTR{idVendor}=="199e", TAG+="uaccess"
+# UVC video control interfaces (raw access through libuvc).
+SUBSYSTEM=="usb", ENV{ID_USB_INTERFACES}=="*:0e01??:*", TAG+="uaccess"

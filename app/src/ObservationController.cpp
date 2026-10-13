@@ -431,7 +431,7 @@ bool ObservationController::calculate(const QVariantMap &options) {
         options.value("referenceZone", "system").toString();
     if (referenceSource != "system" && referenceSource != "site")
       throw std::runtime_error(
-          "Choose this Mac or the telescope for the reference time zone.");
+          "Choose this computer or the telescope for the reference time zone.");
     ObservationTarget t = target_;
     if (options.value("manual").toBool())
       t = {"manual",

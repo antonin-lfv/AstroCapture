@@ -6,6 +6,7 @@
 #include "src/AppLibrary.hpp"
 #include "src/QuitGuard.hpp"
 #include "src/WindowAppearance.hpp"
+#include "src/InstallationCheck.hpp"
 #include <QColor>
 
 int main(int argc, char* argv[]) {
@@ -14,12 +15,15 @@ int main(int argc, char* argv[]) {
     // QSettings needs these to resolve a native storage location
     // (~/Library/Preferences/... on macOS) before any Settings use.
     QCoreApplication::setOrganizationName("AstroCapture");
+    const bool installationCheck = app.arguments().contains("--check-installation");
 #ifdef ASTRO_ENABLE_DEVTOOLS
     // Keep UI validation and development preferences out of the installed app.
     QCoreApplication::setApplicationName("AstroCapture Development");
 #else
     QCoreApplication::setApplicationName("AstroCapture");
 #endif
+    if (installationCheck)
+        QCoreApplication::setApplicationName("AstroCapture Installation Check");
     QGuiApplication::setWindowIcon(QIcon(QStringLiteral(":/qt/qml/AstroCapture/qml/assets/logo.png")));
 
     QTranslator translator;
@@ -28,12 +32,18 @@ int main(int argc, char* argv[]) {
         if (language == "fr" && translator.load(":/i18n/astrocapture_fr.qm"))
             app.installTranslator(&translator);
     };
-    applyLanguage(QSettings().value("application/language", "en").toString());
+    applyLanguage(installationCheck ? QStringLiteral("fr") : QSettings().value("application/language", "en").toString());
     QQmlApplicationEngine engine;
     QObject::connect(
         &engine, &QQmlApplicationEngine::objectCreationFailed, &app,
         []() { QCoreApplication::exit(-1); }, Qt::QueuedConnection);
     engine.loadFromModule("AstroCapture", "Main");
+
+    if (installationCheck) {
+        astro::app::scheduleInstallationCheck(app, engine.rootObjects().isEmpty() ? nullptr :
+            qobject_cast<QQuickWindow*>(engine.rootObjects().first()));
+        return app.exec();
+    }
 
     if (!engine.rootObjects().isEmpty()) {
         auto* root = engine.rootObjects().first();

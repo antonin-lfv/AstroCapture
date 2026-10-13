@@ -27,6 +27,16 @@
       }
     },
     {
+      "name": "release-linux",
+      "inherits": "release",
+      "displayName": "Release (Linux / Mint)",
+      "description": "Linux x86-64 distribution build with CPU processing and camera drivers.",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/release-linux",
+      "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Linux" },
+      "cacheVariables": { "ASTRO_ENABLE_METAL": "OFF" }
+    },
+    {
       "name": "ci-macos",
       "displayName": "CI (macOS)",
       "description": "Hardware-independent build/test job for the macOS CI runner.",
@@ -66,6 +76,7 @@
   "buildPresets": [
     { "name": "dev", "configurePreset": "dev", "configuration": "Debug" },
     { "name": "release", "configurePreset": "release", "configuration": "Release" },
+    { "name": "release-linux", "configurePreset": "release-linux", "configuration": "Release" },
     { "name": "ci-macos", "configurePreset": "ci-macos", "configuration": "Debug" },
     { "name": "ci-windows", "configurePreset": "ci-windows", "configuration": "Debug" },
     { "name": "ci-linux", "configurePreset": "ci-linux", "configuration": "Debug" }
@@ -80,6 +91,12 @@
     {
       "name": "release",
       "configurePreset": "release",
+      "configuration": "Release",
+      "output": { "outputOnFailure": true }
+    },
+    {
+      "name": "release-linux",
+      "configurePreset": "release-linux",
       "configuration": "Release",
       "output": { "outputOnFailure": true }
     },

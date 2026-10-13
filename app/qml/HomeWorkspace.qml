@@ -70,7 +70,7 @@ Rectangle {
                 ColumnLayout {
                     id:recoveryContent;anchors.left:parent.left;anchors.right:parent.right;anchors.margins:16;anchors.verticalCenter:parent.verticalCenter;spacing:8
                     Label {text:qsTr("Your previous session is available");color:Atelier.text;font.pixelSize:15;Layout.fillWidth:true;wrapMode:Text.Wrap}
-                    Label {text:qsTr("Restore the images, calculated results, settings and captions saved on this Mac.");color:Atelier.secondary;Layout.fillWidth:true;wrapMode:Text.Wrap}
+                    Label {text:qsTr("Restore the images, calculated results, settings and captions saved on this computer.");color:Atelier.secondary;Layout.fillWidth:true;wrapMode:Text.Wrap}
                     Label {text:root.session?root.session.status:"";visible:text.length>0;color:Atelier.secondary;Layout.fillWidth:true;wrapMode:Text.Wrap}
                     RowLayout {
                         IconButton {objectName:"homeRestoreSession";text:qsTr("Restore session");primary:true;enabled:!!root.session && !root.session.busy;onClicked:root.session.restoreLast()}

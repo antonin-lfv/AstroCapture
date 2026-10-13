@@ -187,6 +187,11 @@ std::unique_ptr<ICameraDevice> EuvcCameraBackend::open(const CameraId& id) {
         return nullptr;
     }
 
+#ifdef __linux__
+    // Reattach a kernel driver automatically when our claimed interface closes.
+    libusb_set_auto_detach_kernel_driver(handle, 1);
+#endif
+
     CameraDescriptor descriptor;
     descriptor.id = id;
     descriptor.displayName = "Celestron/TIS USB2 camera";

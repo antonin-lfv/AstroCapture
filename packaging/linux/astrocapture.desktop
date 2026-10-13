@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=AstroCapture
+Comment=Prepare observations, capture the sky and process astronomical images
+Comment[fr]=Préparer ses observations, photographier le ciel et traiter ses images
+Exec=AstroCapture
+Icon=astrocapture
+Terminal=false
+Categories=Education;Science;Astronomy;
+StartupWMClass=AstroCapture
+Keywords=astronomy;astrophotography;FITS;SER;
+

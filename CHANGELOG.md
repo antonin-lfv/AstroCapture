@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.19.0 — 2026-10-13
+
+- Add a Linux x86-64 AppImage build for Mint 21/22 and Ubuntu 22.04+, with Qt/QML runtime deployment, desktop integration, dependency notices and optional USB access rules.
+- Enable the vendored ZWO ASI SDK on Linux x86-64 and detect distro libuvc through its CMake or pkg-config targets. Keep CPU processing and the macOS Metal path intact; Linux hardware capture still requires physical validation.
+- Install Qt image-format plugins in automated builds so TIFF reading and export verification use the same capabilities as the distributed application.
+- Use computer-neutral observing clocks and help, French labels and platform-appropriate undo shortcut hints.
+- Add an installation check that loads the real QML interface and reports required image codecs and compiled camera drivers, with optional private visual checks at the three supported window sizes.
+- Document installation, updates and camera access on Linux Mint.
+
 ## 1.18.9 — 2026-10-12
 
 - Make both home and observing-site clocks follow the selected instant after every date, time, slider or chart change. Keep both conversions visible above the charts while scrolling.

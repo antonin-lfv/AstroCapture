@@ -20,3 +20,29 @@ Pull requests should explain:
 - platform impact;
 - hardware used for validation if relevant;
 - screenshots/video for UI changes where useful.
+
+## Linux builds
+
+The AppImage targets x86-64 Linux Mint 21/22 and Ubuntu 22.04 or newer. Use Qt 6.5+
+with Qt Quick, Network, LinguistTools and **qtimageformats** (required for TIFF).
+The automated distribution build uses Qt 6.9.3 on Ubuntu 22.04.
+
+On Mint/Ubuntu, install the build dependencies:
+
+```sh
+sudo apt-get install build-essential cmake ninja-build pkg-config libcfitsio-dev libraw-dev libusb-1.0-0-dev libuvc-dev libgl1-mesa-dev desktop-file-utils
+```
+
+Install a suitable Qt SDK and put its `bin` directory on `PATH`, then run:
+
+```sh
+cmake --preset release-linux
+cmake --build --preset release-linux --parallel 2
+ctest --preset release-linux
+scripts/package_linux.sh --skip-build
+```
+
+The package is created in `build/release-linux`. Packaging tools are downloaded
+from pinned releases and verified with SHA-256. The installed AppImage is checked
+over X11 with its own QML and image plugins, including TIFF. Camera drivers are
+compiled; physical capture must be validated separately on Linux hardware.

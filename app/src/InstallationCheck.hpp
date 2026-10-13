@@ -11,6 +11,7 @@
 #include <QJsonObject>
 #include <QQuickWindow>
 #include <QTimer>
+#include <QTimeZone>
 #include <iostream>
 #include <memory>
 #include "ProcessingController.hpp"
@@ -21,7 +22,8 @@ namespace astro::app {
 inline void scheduleInstallationCheck(QGuiApplication &app, QQuickWindow *window) {
     QTimer::singleShot(0, &app, [&app, window] {
         const auto readers = QImageReader::supportedImageFormats();
-        const bool complete = window && readers.contains("png") &&
+        const bool timeZones = QTimeZone::systemTimeZone().isValid() && QTimeZone("Europe/Paris").isValid();
+        const bool complete = window && timeZones && readers.contains("png") &&
             (readers.contains("jpg") || readers.contains("jpeg")) &&
             (readers.contains("tif") || readers.contains("tiff"));
         QJsonArray formats;
@@ -41,7 +43,7 @@ inline void scheduleInstallationCheck(QGuiApplication &app, QQuickWindow *window
 #endif
         QJsonObject result{{"ok", complete}, {"version", QCoreApplication::applicationVersion()},
             {"qt", QString::fromLatin1(qVersion())}, {"platform", QGuiApplication::platformName()},
-            {"imageFormats", formats}, {"cameraDrivers", cameras}};
+            {"imageFormats", formats}, {"cameraDrivers", cameras}, {"timeZones", timeZones}};
         auto finish = [&app, result](bool ok) mutable {
             result["ok"] = ok;
             std::cout << QJsonDocument(result).toJson(QJsonDocument::Compact).constData() << std::endl;

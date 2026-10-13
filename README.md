@@ -53,9 +53,11 @@ observation ou traiter vos images.**
 Le paquet actuel pour Mac est prévu pour les **Mac Apple Silicon**, équipés d’une puce de
 la famille M.
 
-1. Ouvrez le fichier `AstroCapture-<version>.dmg`.
-2. Glissez **AstroCapture** dans le dossier **Applications**.
-3. Lancez l’application depuis ce dossier.
+1. Ouvrez la page des [Releases GitHub](https://github.com/antonin-lfv/AstroCapture/releases/latest).
+   Dans la section **Assets**, téléchargez le fichier `AstroCapture-<version>.dmg`.
+2. Ouvrez le fichier téléchargé.
+3. Glissez **AstroCapture** dans le dossier **Applications**.
+4. Lancez l’application depuis ce dossier.
 
 Pour une mise à jour, quittez AstroCapture, puis remplacez l’application de la
 même façon. Vos préférences, préréglages et historique sont conservés.
@@ -69,9 +71,9 @@ La version Linux est une **AppImage pour PC 64 bits (x86-64)**, compatible avec
 **Ubuntu 22.04 ou plus récent** et **Linux Mint 21 et 22**. Qt et les bibliothèques
 de traitement sont inclus : pas besoin de les installer séparément.
 
-1. Ouvrez les [téléchargements Linux](https://github.com/antonin-lfv/AstroCapture/actions/workflows/linux.yml),
-   choisissez une compilation réussie, puis récupérez **AstroCapture-Linux-x86_64**
-   dans la section **Artifacts**, en bas de la page. Décompressez le paquet.
+1. Ouvrez la page des [Releases GitHub](https://github.com/antonin-lfv/AstroCapture/releases/latest).
+   Dans la section **Assets**, téléchargez le fichier
+   `AstroCapture-<version>-Linux-x86_64.zip`, puis décompressez-le.
 2. Dans les propriétés du fichier `.AppImage`, autorisez son exécution comme programme.
 3. Double-cliquez dessus pour lancer AstroCapture.
 

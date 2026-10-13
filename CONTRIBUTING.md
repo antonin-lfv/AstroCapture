@@ -12,6 +12,9 @@
 Keep completed milestones in [CHANGELOG.md](CHANGELOG.md), and include relevant
 validation evidence with the pull request.
 
+Builds, tests and installer packaging are run manually. Distribute finished
+installers through [GitHub Releases](https://github.com/antonin-lfv/AstroCapture/releases).
+
 Pull requests should explain:
 
 - problem being solved;
@@ -25,7 +28,7 @@ Pull requests should explain:
 
 The AppImage targets x86-64 Linux Mint 21/22 and Ubuntu 22.04 or newer. Use Qt 6.5+
 with Qt Quick, Network, LinguistTools and **qtimageformats** (required for TIFF).
-The automated distribution build uses Qt 6.9.3 on Ubuntu 22.04.
+The AppImage distribution was validated with Qt 6.9.3 on Ubuntu 22.04.
 
 On Mint/Ubuntu, install the build dependencies:
 
@@ -43,6 +46,12 @@ scripts/package_linux.sh --skip-build
 ```
 
 The package is created in `build/release-linux`. Packaging tools are downloaded
-from pinned releases and verified with SHA-256. The installed AppImage is checked
-over X11 with its own QML and image plugins, including TIFF. Camera drivers are
-compiled; physical capture must be validated separately on Linux hardware.
+from pinned releases and verified with SHA-256. Check the installed AppImage over
+X11 with its own QML and image plugins, including TIFF:
+
+```sh
+APPIMAGE_EXTRACT_AND_RUN=1 ./build/release-linux/AstroCapture-*-x86_64.AppImage --check-installation
+```
+
+Camera drivers are compiled; physical capture must be validated separately on
+Linux hardware.

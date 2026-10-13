@@ -1,6 +1,7 @@
 # Contributing
 
-1. Read `README.md` for the project scope and build instructions.
+1. Read [README.md](README.md) for the user overview and the
+   [internal documentation](docs/README_INTERNE.md#développement) for build dependencies.
 2. Build and test using CMake presets.
 3. Prefer mock/replay camera tests for reproducibility.
 4. Keep platform/vendor dependencies behind interfaces.

@@ -14,8 +14,6 @@ Vous pouvez aussi partir de vidéos ou de photos déjà prises avec votre matér
 ou un télescope distant. Le traitement fonctionne sans caméra connectée.
 L’application est disponible en français et en anglais.
 
-![Traitement de la nébuleuse d’Orion dans AstroCapture](assets/screenshots/deep-sky.png)
-
 [Installation](#installer-sur-mac) · [Premiers pas](#premiers-pas) · [Sauvegarde et export](#garder-son-travail-et-partager-une-image) · [Documentation](#aide-et-documentation)
 
 ## Installer sur Mac
@@ -55,6 +53,8 @@ lancement utilise Paris ; vous pouvez sélectionner une ville, saisir des
 coordonnées ou cliquer sur la carte. Enregistrez vos lieux et objets habituels
 en favoris pour les retrouver rapidement.
 
+![Observation : préparer M42 depuis l’Utah, avec les heures sur place et chez soi](assets/screenshots/readme-observation.png)
+
 La page vous montre :
 
 - où il fait jour ou nuit, ainsi que les horaires du Soleil ;
@@ -90,6 +90,8 @@ atténuer le bruit, ce grain qui masque les détails faibles.
 4. **Sauvegardez le projet et exportez votre image.** Vous pourrez reprendre
    les réglages plus tard et ajouter une légende à l’export.
 
+![Ciel profond : finition de M42 à partir de dix poses de 30 secondes prises avec le T68](assets/screenshots/readme-deep-sky.png)
+
 Une image astronomique peut paraître très sombre avant l’étirement : c’est
 normal. L’étirement rend les détails faibles visibles.
 
@@ -108,9 +110,16 @@ astrophotographie planétaire.
    l’avant et l’après.
 4. Exportez le résultat en PNG, TIFF ou JPEG.
 
+![Traitement : Saturne dans le fichier jupyter.ser, avec 2 246 images conservées sur 8 984](assets/screenshots/readme-processing.png)
+
+### Assembler une mosaïque
+
 Pour assembler plusieurs portions de la Lune, traitez d’abord chaque vidéo,
-puis ouvrez les images obtenues dans **Mosaïque**. Les vues doivent partager
-une zone commune pour pouvoir être raccordées.
+puis ouvrez les images obtenues dans **Mosaïque** et cliquez sur
+**Assembler automatiquement**. Les vues doivent partager une zone commune
+pour pouvoir être raccordées.
+
+![Mosaïque : la Lune assemblée à partir des 70 vues du 30 mai 2023](assets/screenshots/readme-mosaic.png)
 
 ## Garder son travail et partager une image
 

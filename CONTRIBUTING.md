@@ -1,8 +1,7 @@
 # Contributing
 
-1. Read [README.md](README.md) for the user overview and the
-   [internal documentation](docs/README_INTERNE.md#développement) for build dependencies.
-2. Build and test using CMake presets.
+1. Read [README.md](README.md) for the user overview.
+2. Build and test using the configurations in [CMakePresets.json](CMakePresets.json).
 3. Prefer mock/replay camera tests for reproducibility.
 4. Keep platform/vendor dependencies behind interfaces.
 5. Add tests for behavior and regression fixtures where appropriate.
@@ -10,9 +9,8 @@
 7. Use an ADR for costly cross-cutting decisions.
 8. Never claim hardware support without physical validation evidence.
 
-Use [the V2 readiness report](docs/releases/V2_READINESS.md) for current priorities
-and remaining work. Keep completed milestones in the changelog, ADRs and
-validation records; update the report instead of adding another progress list.
+Keep completed milestones in [CHANGELOG.md](CHANGELOG.md), and include relevant
+validation evidence with the pull request.
 
 Pull requests should explain:
 

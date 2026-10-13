@@ -27,9 +27,14 @@ __pycache__/
 # Local secrets / env
 .env
 
-# Local working documents and conversation notes
+# Local working documents, internal documentation and prototypes
 /.private/
-
 /docs/
-docs/README_INTERNE.md
-docs/VALIDATION_SIRIL.md
+/work/
+
+# Screenshots stay private unless explicitly used by the public README
+/assets/screenshots/*
+!/assets/screenshots/readme-deep-sky.png
+!/assets/screenshots/readme-mosaic.png
+!/assets/screenshots/readme-observation.png
+!/assets/screenshots/readme-processing.png

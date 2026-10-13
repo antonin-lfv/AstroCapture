@@ -405,8 +405,8 @@ Télescope · caméra · accessoires</translation>
         </message>
         <message>
             <location filename="../qml/DeepSkyAdvancedTools.qml" line="250" />
-            <source>Inverse reverses the scalar curve. It cannot recover clipped values or undo a mask or shared-luminance color blending. Use Undo to restore the exact previous settings.</source>
-            <translation>L’inverse renverse la courbe scalaire. Il ne récupère pas les valeurs écrêtées et n’annule ni un masque ni le mélange de couleurs en luminance commune. Utilisez Annuler pour restaurer exactement les réglages précédents.</translation>
+            <source>Inverse reverses the scalar curve. It cannot recover clipped values or undo a mask or shared-luminance color blending. Use %1 to restore the exact previous settings.</source>
+            <translation>L’inverse renverse la courbe scalaire. Il ne récupère pas les valeurs écrêtées et n’annule ni un masque ni le mélange de couleurs en luminance commune. Utilisez %1 pour restaurer exactement les réglages précédents.</translation>
         </message>
         <message>
             <location filename="../qml/DeepSkyAdvancedTools.qml" line="257" />
@@ -917,8 +917,8 @@ Télescope · caméra · accessoires</translation>
         <translation>Remplace la courbe des tons moyens ou asinh par GHS quand l’étirement est activé. Faites de petits changements de force pour révéler les détails faibles ; l’histogramme montre la même courbe. Une force nulle est neutre.</translation>
     </message>
     <message>
-        <source>Reverses the scalar GHS curve. It cannot restore clipped signal or undo mask blending or shared-luminance color blending. Use Undo to restore the previous settings exactly.</source>
-        <translation>Inverse la courbe scalaire GHS. Ne restaure pas le signal écrêté et n’annule pas les mélanges du masque ou de luminance partagée. Annuler restaure exactement les réglages précédents.</translation>
+        <source>Reverses the scalar GHS curve. It cannot restore clipped signal or undo mask blending or shared-luminance color blending. Use %1 to restore the previous settings exactly.</source>
+        <translation>Inverse la courbe scalaire GHS. Ne restaure pas le signal écrêté et n’annule pas les mélanges du masque ou de luminance partagée. %1 restaure exactement les réglages précédents.</translation>
     </message>
     <message>
         <source>Attempts to reduce blur using the chosen PSF on linear data. Can sharpen stars and fine detail, but can amplify noise or create rings. Inspect at 100% and reduce amount or iterations if artifacts appear.</source>
@@ -2400,8 +2400,8 @@ L’aperçu est automatiquement éclairci ; les données restent linéaires.</tr
             <translation>Ajoutez des poses pour commencer\nL’aperçu est étiré automatiquement ; les pixels source restent linéaires.</translation>
         </message>
         <message>
-            <source>A preset replaces the complete finishing recipe and all adjustment families, including advanced tools. It does not change the imported files or stacking settings. Undo restores the previous finish.</source>
-            <translation>Un préréglage remplace toute la finition et les réglages de toutes les familles, y compris les outils avancés. Les fichiers importés et les réglages d’empilement restent identiques. Annuler restaure la finition précédente.</translation>
+            <source>A preset replaces the complete finishing recipe and all adjustment families, including advanced tools. It does not change the imported files or stacking settings. %1 restores the previous finish.</source>
+            <translation>Un préréglage remplace toute la finition et les réglages de toutes les familles, y compris les outils avancés. Les fichiers importés et les réglages d’empilement restent identiques. %1 restaure la finition précédente.</translation>
         </message>
         <message>
             <source>Linear FITS preserves the original stack. Classic export lets you choose the image format and an optional caption.</source>
@@ -2508,8 +2508,8 @@ L’aperçu est automatiquement éclairci ; les données restent linéaires.</tr
             <translation>Empilement avant finition, affiché sans étirement</translation>
         </message>
         <message>
-            <source>Reset the selected family. Undo restores its settings.</source>
-            <translation>Supprime les réglages de la famille sélectionnée. Annuler les rétablit.</translation>
+            <source>Reset the selected family. %1 restores its settings.</source>
+            <translation>Supprime les réglages de la famille sélectionnée. %1 les rétablit.</translation>
         </message>
         <message>
             <source>Enable stretch</source>
@@ -2588,8 +2588,8 @@ L’aperçu est automatiquement éclairci ; les données restent linéaires.</tr
         <translation>Échange gauche et droite après la rotation. Utile pour retrouver l’orientation d’un montage optique. Seul le résultat fini change ; l’intégration linéaire d’origine est conservée.</translation>
     </message>
     <message>
-        <source>Swaps top and bottom after rotation. It only changes the finished image and can be undone with Undo.</source>
-        <translation>Échange haut et bas après la rotation. Seul le résultat fini change ; Annuler permet de l’annuler.</translation>
+        <source>Swaps top and bottom after rotation. It only changes the finished image and can be undone with %1.</source>
+        <translation>Échange haut et bas après la rotation. Seul le résultat fini change ; %1 permet de l’annuler.</translation>
     </message>
     <message>
         <source>Rotates the finished image clockwise in 90° steps without interpolating the pixel values. Mirrors are applied after this rotation; crop and free geometry come afterwards.</source>
@@ -3717,8 +3717,8 @@ L’aperçu est automatiquement éclairci ; les données restent linéaires.</tr
             <translation>Augmentez les ondelettes progressivement, ajustez la couleur et comparez avant / après. Exportez en PNG ou TIFF 16 bits. Conservez le SER original pour pouvoir essayer une autre sélection plus tard.</translation>
         </message>
         <message>
-            <source>Finishing presets in the project gear save or restore all finishing families. Use Undo to undo. Export offers Linear FITS for the original integration and Classic export for PNG, TIFF or JPEG with an optional caption. PNG and TIFF preserve 16-bit detail without lossy compression.</source>
-            <translation>Préréglages de finition, dans le rouage du projet, enregistre ou restaure toutes les familles. Utilisez Annuler pour annuler. Exporter propose FITS linéaire pour l’intégration originale et Export classique pour un PNG, TIFF ou JPEG avec une légende facultative. PNG et TIFF conservent les détails en 16 bits sans compression destructive.</translation>
+            <source>Finishing presets in the project gear save or restore all finishing families. Use %1 to undo. Export offers Linear FITS for the original integration and Classic export for PNG, TIFF or JPEG with an optional caption. PNG and TIFF preserve 16-bit detail without lossy compression.</source>
+            <translation>Préréglages de finition, dans le rouage du projet, enregistre ou restaure toutes les familles. Utilisez %1 pour annuler. Exporter propose FITS linéaire pour l’intégration originale et Export classique pour un PNG, TIFF ou JPEG avec une légende facultative. PNG et TIFF conservent les détails en 16 bits sans compression destructive.</translation>
         </message>
         <message>
             <source>Resume returns to the current session without loading files again. Open reloads a saved deep-sky project; recreate its stack to restore the saved finish. Keep its source files in place. Settings is a workspace in the top navigation. The deep-sky gear manages the project and finishing presets.</source>
@@ -3789,8 +3789,8 @@ L’aperçu est automatiquement éclairci ; les données restent linéaires.</tr
             <translation>Masques locaux</translation>
         </message>
         <message>
-            <source>Advanced transformations offers automatic, painted and imported masks. White applies the treatment, black protects the input, gray blends. Red shows protected areas. Choose the mask scope. Undo removes a brush stroke while the editor is open. Imported masks must match the recipe input dimensions.</source>
-            <translation>Transformations avancées propose des masques automatiques, peints et importés. Le blanc applique le traitement, le noir protège l’entrée et le gris mélange. Le rouge montre les zones protégées. Choisissez la portée du masque. Annuler annule un trait dans l’éditeur. Un masque importé doit avoir les dimensions de l’entrée de la recette.</translation>
+            <source>Advanced transformations offers automatic, painted and imported masks. White applies the treatment, black protects the input, gray blends. Red shows protected areas. Choose the mask scope. %1 removes a brush stroke while the editor is open. Imported masks must match the recipe input dimensions.</source>
+            <translation>Transformations avancées propose des masques automatiques, peints et importés. Le blanc applique le traitement, le noir protège l’entrée et le gris mélange. Le rouge montre les zones protégées. Choisissez la portée du masque. %1 annule un trait dans l’éditeur. Un masque importé doit avoir les dimensions de l’entrée de la recette.</translation>
         </message>
         <message>
             <source>Check the parameter units</source>
@@ -5563,8 +5563,8 @@ Télescope · caméra · accessoires</translation>
         <translation>Taille des zones d’alignement</translation>
     </message>
     <message>
-        <source>Loads all detail, denoise, color, gamma and geometry settings together. It does not select or stack video frames. Undo restores the previous adjustments after loading.</source>
-        <translation>Charge ensemble les réglages de détails, débruitage, couleurs, gamma et géométrie. Ne sélectionne ni n’empile les images vidéo. Annuler restaure les réglages précédents après chargement.</translation>
+        <source>Loads all detail, denoise, color, gamma and geometry settings together. It does not select or stack video frames. %1 restores the previous adjustments after loading.</source>
+        <translation>Charge ensemble les réglages de détails, débruitage, couleurs, gamma et géométrie. Ne sélectionne ni n’empile les images vidéo. %1 restaure les réglages précédents après chargement.</translation>
     </message>
     <message>
         <source>Name used to save this complete set of adjustments locally. A new name creates a separate preset; saving an existing name replaces its settings. The source image files are not included.</source>
@@ -7984,11 +7984,11 @@ Résultat obtenu :
             <translation>Le rouge protège l’image. Le blanc applique le traitement ; le noir protège. Annuler annule le dernier trait.</translation>
         </message>
         <message>
-            <source>The mask contains 200 strokes. Undo a stroke before painting more.</source>
+            <source>The mask contains 200 strokes. %1 a stroke before painting more.</source>
             <translation>Le masque contient 200 traits. Annulez un trait pour continuer à peindre.</translation>
         </message>
         <message>
-            <source>The mask reached its point limit. Undo a stroke before painting more.</source>
+            <source>The mask reached its point limit. %1 a stroke before painting more.</source>
             <translation>Le masque a atteint sa limite de points. Annulez un trait pour continuer.</translation>
         </message>
         <message>
@@ -8052,8 +8052,8 @@ Résultat obtenu :
             <translation>Appliquer le masque</translation>
         </message>
         <message>
-            <source>The preview stretch reveals faint detail without changing pixels. Red protects the image. Undo removes the last stroke.</source>
-            <translation>L’aperçu étiré révèle les détails faibles sans modifier les pixels. Le rouge protège l’image. Annuler annule le dernier trait.</translation>
+            <source>The preview stretch reveals faint detail without changing pixels. Red protects the image. %1 removes the last stroke.</source>
+            <translation>L’aperçu étiré révèle les détails faibles sans modifier les pixels. Le rouge protège l’image. %1 annule le dernier trait.</translation>
         </message>
         <message>
         <source>Black protects the painted region from the selected treatment; white lets it act. Gray applies only part of the effect. The red overlay shows protection.</source>
@@ -9535,16 +9535,16 @@ RMS normalisée moyenne %5</translation>
             <translation>Traitement et Ciel profond exportent en PNG ou TIFF RVB 16 bits sans compression destructive. Le JPEG est un format 8 bits compressé pour le partage : conservez un PNG, TIFF ou FITS linéaire comme original de travail. Mosaïque exporte en TIFF, ou transfère son résultat vers Traitement pour les autres formats. Un fichier 16 bits ne récupère pas les informations absentes d’un original 8 bits. Le JPEG ne s’ouvre pas directement dans Traitement.</translation>
         </message>
         <message>
-            <source>Open Stretch, Background, Color, Geometry, Advanced transformations, or Stars and background. Each family opens and closes independently, including in smaller windows; several may stay open and all may be closed. Changes apply automatically. Delete these adjustments resets the selected family. Undo restores previous settings. The project gear contains presets for the entire finish. Projects preserve all finishing settings.</source>
-            <translation>Ouvrez Étirement, Fond de ciel, Couleur, Géométrie, Transformations avancées ou Étoiles et fond. Chaque famille s’ouvre et se ferme indépendamment, même dans une petite fenêtre : plusieurs peuvent rester ouvertes, ou toutes être fermées. Les modifications s’appliquent automatiquement. Supprimer ces réglages réinitialise la famille choisie. Annuler restaure les réglages précédents. Le rouage du projet contient les préréglages de toute la finition. Les projets conservent l’ensemble de ces réglages.</translation>
+            <source>Open Stretch, Background, Color, Geometry, Advanced transformations, or Stars and background. Each family opens and closes independently, including in smaller windows; several may stay open and all may be closed. Changes apply automatically. Delete these adjustments resets the selected family. %1 restores previous settings. The project gear contains presets for the entire finish. Projects preserve all finishing settings.</source>
+            <translation>Ouvrez Étirement, Fond de ciel, Couleur, Géométrie, Transformations avancées ou Étoiles et fond. Chaque famille s’ouvre et se ferme indépendamment, même dans une petite fenêtre : plusieurs peuvent rester ouvertes, ou toutes être fermées. Les modifications s’appliquent automatiquement. Supprimer ces réglages réinitialise la famille choisie. %1 restaure les réglages précédents. Le rouage du projet contient les préréglages de toute la finition. Les projets conservent l’ensemble de ces réglages.</translation>
         </message>
         <message>
             <source>Combine filters as RGB, LRGB, SHO or HOO. Start with gradient correction, then verify WCS and calibrate colors on the linear image before stretching. Gradient extraction fits each color channel with a polynomial of degree 1 to 4; edit the sky samples and inspect the model so that real nebulosity is not removed. Initial automatic color gains only estimate a neutral background. After stretch, SCNR offers four green-protection methods and optional CIE lightness preservation. Inspect at 100% and compare. Linear FITS preserves the original 32-bit integration. Classic export saves the finished image as PNG, TIFF or JPEG with an optional caption.</source>
             <translation>Combinez les filtres en RVB, LRVB, SHO ou HOO. Commencez par corriger le gradient, puis vérifiez le WCS et calibrez les couleurs sur l’image linéaire avant de l’étirer. L’extraction du fond ajuste chaque canal avec un polynôme de degré 1 à 4 : modifiez les échantillons de ciel et inspectez le modèle pour éviter de retirer une vraie nébulosité. Les gains initiaux estiment seulement un fond neutre. Après étirement, SCNR propose quatre protections du vert et une préservation optionnelle de la clarté CIE. Inspectez à 100 % et comparez. FITS linéaire conserve l’intégration originale en 32 bits. L’export classique enregistre l’image terminée en PNG, TIFF ou JPEG avec une légende optionnelle.</translation>
         </message>
         <message>
-            <source>Multiscale denoising uses B3-spline à trous wavelets and per-scale MAD soft thresholds. Start with 3 scales, threshold 3, and luminance/chroma strengths 0.5. Prefer it before stretch and restoration. Advanced transformations offers automatic luminance, radial and detected-star masks, plus painted and imported masks. White applies treatment, black protects, gray blends; red previews protected areas. Choose all finishing adjustments, denoising only, deconvolution only, or stretch/color only. Imported masks must match the recipe input size. In the painting editor, Undo removes a stroke and Apply confirms the mask. Automatic masks regenerate from each operation input; painted/imported masks and their settings are saved with the project.</source>
-            <translation>Le débruitage multiéchelle utilise des ondelettes B3-spline à trous et des seuils doux estimés par MAD à chaque échelle. Commencez avec 3 échelles, un seuil de 3 et des forces luminance/chrominance de 0,5. Préférez-le avant l’étirement et la restauration. Transformations avancées propose des masques automatiques de luminance, radiaux et d’étoiles détectées, ainsi que des masques peints et importés. Le blanc traite, le noir protège, le gris mélange ; le rouge indique les zones protégées. Choisissez la portée du masque : toute la finition, débruitage seul, déconvolution seule ou étirement/couleur seuls. Un masque importé doit avoir les dimensions de l’entrée de la recette. Dans l’éditeur de peinture, Annuler annule un trait et Appliquer valide le masque. Les masques automatiques sont recalculés sur l’entrée de chaque opération ; les masques peints/importés et leurs réglages sont sauvegardés avec le projet.</translation>
+            <source>Multiscale denoising uses B3-spline à trous wavelets and per-scale MAD soft thresholds. Start with 3 scales, threshold 3, and luminance/chroma strengths 0.5. Prefer it before stretch and restoration. Advanced transformations offers automatic luminance, radial and detected-star masks, plus painted and imported masks. White applies treatment, black protects, gray blends; red previews protected areas. Choose all finishing adjustments, denoising only, deconvolution only, or stretch/color only. Imported masks must match the recipe input size. In the painting editor, %1 removes a stroke and Apply confirms the mask. Automatic masks regenerate from each operation input; painted/imported masks and their settings are saved with the project.</source>
+            <translation>Le débruitage multiéchelle utilise des ondelettes B3-spline à trous et des seuils doux estimés par MAD à chaque échelle. Commencez avec 3 échelles, un seuil de 3 et des forces luminance/chrominance de 0,5. Préférez-le avant l’étirement et la restauration. Transformations avancées propose des masques automatiques de luminance, radiaux et d’étoiles détectées, ainsi que des masques peints et importés. Le blanc traite, le noir protège, le gris mélange ; le rouge indique les zones protégées. Choisissez la portée du masque : toute la finition, débruitage seul, déconvolution seule ou étirement/couleur seuls. Un masque importé doit avoir les dimensions de l’entrée de la recette. Dans l’éditeur de peinture, %1 annule un trait et Appliquer valide le masque. Les masques automatiques sont recalculés sur l’entrée de chaque opération ; les masques peints/importés et leurs réglages sont sauvegardés avec le projet.</translation>
         </message>
         <message>
             <source>Open Color → Astrometry · PCC / SPCC. Guided solving uses approximate ICRS RA/Dec in degrees and sampling in arcsec/pixel, pre-filled from FITS when available. Blind solving uses local Astrometry.net indexes without a starting position: install index 4109 for wide fields or choose suitable indexes. No image is uploaded. Check independent Gaia matches, RMS and field coverage. SIP orders 2–5 model optical distortion; start at 3 and increase only with sufficient reference stars. Gaia may be online or supplied as a local CSV. Verified WCS follows crop, rotation, mirroring and resize, and is saved in floating-point FITS and projects.</source>

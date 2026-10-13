@@ -241,12 +241,12 @@ Control {
                     Explanation {
                         text: qsTr("Shared luminance multiplies RGB by one factor. If a channel would exceed 1, RGB blending mixes in the independent-channel result to stay bounded. This can change color ratios near highlights.")
                     }
-                    Toggle {explanation: qsTr("Reverses the scalar GHS curve. It cannot restore clipped signal or undo mask blending or shared-luminance color blending. Use Undo to restore the previous settings exactly.");
+                    Toggle {explanation: qsTr("Reverses the scalar GHS curve. It cannot restore clipped signal or undo mask blending or shared-luminance color blending. Use %1 to restore the previous settings exactly.").arg(Atelier.undoShortcutName(Qt.platform.os));
                         key: "ghsInverse"
                         text: qsTr("Inverse curve")
                     }
                     Explanation {
-                        text: qsTr("Inverse reverses the scalar curve. It cannot recover clipped values or undo a mask or shared-luminance color blending. Use Undo to restore the exact previous settings.")
+                        text: qsTr("Inverse reverses the scalar curve. It cannot recover clipped values or undo a mask or shared-luminance color blending. Use %1 to restore the exact previous settings.").arg(Atelier.undoShortcutName(Qt.platform.os))
                     }
                 }
                 ColumnLayout {

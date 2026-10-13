@@ -29,11 +29,23 @@ jobs:
       - name: Install build and display dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y ninja-build pkg-config libcfitsio-dev libraw-dev libusb-1.0-0-dev libuvc-dev libgl1-mesa-dev libxcb-cursor0 libxkbcommon-x11-0 xvfb desktop-file-utils
+          sudo apt-get install -y ninja-build ccache pkg-config libcfitsio-dev libraw-dev libusb-1.0-0-dev libuvc-dev libgl1-mesa-dev libxcb-cursor0 libxkbcommon-x11-0 xvfb desktop-file-utils
+      - name: Restore compiler cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/.cache/ccache
+          key: mint-qt693-${{ hashFiles('cmake/AstroVision.cmake') }}-${{ github.sha }}
+          restore-keys: mint-qt693-${{ hashFiles('cmake/AstroVision.cmake') }}-
       - name: Configure
-        run: cmake --preset release-linux
+        run: cmake --preset release-linux -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
       - name: Build
-        run: cmake --build --preset release-linux --parallel 2
+        run: cmake --build --preset release-linux --parallel 4
+      - name: Save compiler cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: ~/.cache/ccache
+          key: mint-qt693-${{ hashFiles('cmake/AstroVision.cmake') }}-${{ github.sha }}
       - name: Test
         run: ctest --preset release-linux
       - name: Build AppImage

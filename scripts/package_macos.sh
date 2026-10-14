@@ -17,13 +17,22 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 BUILD_DIR="${REPO_ROOT}/build/release"
 APP_NAME="AstroCapture"
-APP_BUNDLE="${BUILD_DIR}/bin/${APP_NAME}.app"
+SOURCE_BUNDLE="${BUILD_DIR}/bin/${APP_NAME}.app"
+# Deploy into a fresh copy. Rewriting Qt load paths inside the build bundle
+# makes later incremental builds depend on stale, already-deployed libraries.
+mkdir -p "$BUILD_DIR"
+PACKAGE_STAGING="$(mktemp -d "${BUILD_DIR}/macos-package.XXXXXX")"
+DMG_STAGING=""
+DMG_TEMP=""
+trap 'rm -rf "${PACKAGE_STAGING}" "${DMG_STAGING}"; [[ -z "${DMG_TEMP}" ]] || rm -f "${DMG_TEMP}"' EXIT
+APP_BUNDLE="${PACKAGE_STAGING}/${APP_NAME}.app"
 EXECUTABLE="${APP_BUNDLE}/Contents/MacOS/${APP_NAME}"
 FRAMEWORKS_DIR="${APP_BUNDLE}/Contents/Frameworks"
 
 echo "==> Configuring + building the release preset"
 cmake --preset release "${REPO_ROOT}"
 cmake --build "${BUILD_DIR}" --target "${APP_NAME}"
+cp -R "${SOURCE_BUNDLE}" "${APP_BUNDLE}"
 
 if ! command -v macdeployqt >/dev/null 2>&1; then
     echo "macdeployqt not found on PATH (expected alongside the Homebrew Qt6 install)" >&2
@@ -244,19 +253,16 @@ spctl --assess --type execute "${APP_BUNDLE}" || echo "  (expected without a Dev
 
 echo "==> Creating DMG"
 DMG_STAGING="$(mktemp -d)"
-trap 'rm -rf "${DMG_STAGING}"' EXIT
 cp -R "${APP_BUNDLE}" "${DMG_STAGING}/"
 ln -s /Applications "${DMG_STAGING}/Applications"
 APP_VERSION="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "${APP_BUNDLE}/Contents/Info.plist")"
 [[ "${APP_VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "Invalid app version for packaging" >&2; exit 1; }
 DMG_PATH="${BUILD_DIR}/${APP_NAME}-${APP_VERSION}.dmg"
-rm -f "${DMG_PATH}"
-hdiutil create -volname "${APP_NAME}" -srcfolder "${DMG_STAGING}" -ov -format UDZO "${DMG_PATH}"
-
-# Keep the previous installer until creation succeeds, then retain only this one.
-for previous_dmg in "${BUILD_DIR}/${APP_NAME}.dmg" "${BUILD_DIR}/${APP_NAME}-"*.dmg; do
-    [[ -f "${previous_dmg}" && "${previous_dmg}" != "${DMG_PATH}" ]] || continue
-    rm -f "${previous_dmg}"
-done
+DMG_TEMP="${PACKAGE_STAGING}/${APP_NAME}-${APP_VERSION}.dmg"
+hdiutil create -volname "${APP_NAME}" -srcfolder "${DMG_STAGING}" -ov -format UDZO "${DMG_TEMP}"
+hdiutil verify "${DMG_TEMP}"
+# Replace only this version, after successful creation; retain older installers.
+mv -f "${DMG_TEMP}" "${DMG_PATH}"
+DMG_TEMP=""
 
 echo "==> Done: ${DMG_PATH}"

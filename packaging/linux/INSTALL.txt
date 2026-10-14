@@ -1,0 +1,40 @@
+AstroCapture — Linux x86-64
+
+FRANÇAIS
+
+Ubuntu 22.04 ou plus récent ; Linux Mint 21 et 22. PC x86-64 uniquement.
+
+1. Décompressez toute l’archive dans un dossier de votre choix.
+2. Dans les propriétés du fichier .AppImage, autorisez son exécution.
+3. Double-cliquez sur l’AppImage pour lancer AstroCapture.
+
+Si FUSE n’est pas disponible, ouvrez un terminal dans ce dossier et lancez :
+  ./AstroCapture-<version>-x86_64.AppImage --appimage-extract-and-run
+Remplacez <version> par le numéro du fichier téléchargé.
+
+Pour vérifier le téléchargement depuis ce dossier : sha256sum -c SHA256SUMS
+
+Si une caméra USB n’est pas accessible, le dossier linux-camera-access contient
+un installateur facultatif des règles d’accès. Il demande les droits administrateur :
+  sudo bash linux-camera-access/install_linux_camera_rules.sh
+Débranchez et rebranchez ensuite la caméra. La capture avec une vraie caméra
+Linux reste à valider ; la présence du pilote ne garantit pas tous les modèles.
+
+Pour mettre à jour, quittez AstroCapture et remplacez l’AppImage. Vos préférences
+et projets sont conservés. Gardez l’ancienne AppImage pour revenir en arrière.
+
+ENGLISH
+
+Ubuntu 22.04 or newer; Linux Mint 21 and 22. x86-64 PCs only.
+
+Extract the whole archive, allow the .AppImage to run as a program in its file
+properties, then double-click it. If FUSE is unavailable, run the AppImage with
+--appimage-extract-and-run. Verify the download with: sha256sum -c SHA256SUMS
+
+Optional USB camera access rules are in linux-camera-access. Run
+sudo bash linux-camera-access/install_linux_camera_rules.sh
+then reconnect the camera. Physical camera capture on Linux still requires
+validation. Compiled drivers do not guarantee support for every camera model.
+
+Quit the application before replacing the AppImage to update. Projects and
+preferences are kept. Keep the previous AppImage if you need to revert.

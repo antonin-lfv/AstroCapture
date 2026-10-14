@@ -45,7 +45,7 @@ ctest --preset release-linux
 scripts/package_linux.sh --skip-build
 ```
 
-The package is created in `build/release-linux`. Packaging tools are downloaded
+The AppImage and ready-to-extract `AstroCapture-<version>-Linux-x86_64.zip` are created in `build/release-linux`. The ZIP includes bilingual installation instructions, optional camera access rules and the AppImage SHA-256 checksum. Python 3 is required for archive verification. Packaging tools are downloaded
 from pinned releases and verified with SHA-256. Check the installed AppImage over
 X11 with its own QML and image plugins, including TIFF:
 

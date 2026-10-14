@@ -93,4 +93,31 @@ chmod +x "${ACCESS_DIR}/install_linux_camera_rules.sh"
     cd "$BUILD_DIR"
     sha256sum "$(basename "$OUTPUT")" > SHA256SUMS
 )
-echo "Linux package ready: $OUTPUT"
+# Publish a ready-to-extract archive only after all entries were written and
+# verified. ZipFile preserves the executable bits on the AppImage and helper.
+python3 - "$BUILD_DIR" "$ASTRO_PACKAGE_VERSION" "$REPO_ROOT" <<'PY'
+from pathlib import Path
+import sys
+import tempfile
+import zipfile
+
+build, version, repo = Path(sys.argv[1]), sys.argv[2], Path(sys.argv[3])
+name = f"AstroCapture-{version}-Linux-x86_64"
+entries = [build / f"AstroCapture-{version}-x86_64.AppImage", build / "SHA256SUMS"]
+entries.extend(sorted((build / "linux-camera-access").iterdir()))
+with tempfile.NamedTemporaryFile(prefix=name + "-", suffix=".zip", dir=build, delete=False) as output:
+    temporary = Path(output.name)
+try:
+    with zipfile.ZipFile(temporary, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=6) as archive:
+        for entry in entries:
+            archive.write(entry, Path(name) / entry.relative_to(build))
+        archive.write(repo / "packaging/linux/INSTALL.txt", Path(name) / "INSTALL.txt")
+    with zipfile.ZipFile(temporary) as archive:
+        if archive.testzip() is not None:
+            raise RuntimeError("Linux archive verification failed")
+    temporary.chmod(0o644)
+    temporary.replace(build / (name + ".zip"))
+finally:
+    temporary.unlink(missing_ok=True)
+PY
+echo "Linux packages ready: $OUTPUT and ${BUILD_DIR}/AstroCapture-${ASTRO_PACKAGE_VERSION}-Linux-x86_64.zip"

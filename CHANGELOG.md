@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Cache object search keys, replace the full catalogue sort with bounded ranked results, debounce typing and require a number for bare catalogue prefixes. Show at most 25 local results, retaining exact matches first and explicit online search.
+- Add direct place favourite and delete controls. Keep saved places when their star is removed, support preset favourites and deletion, migrate existing favourites and preserve the selected position and UTC instant.
+- Update French labels, the Observation Guide and README.
+
 ## 1.19.0 — 2026-10-13
 
 - Add a Linux x86-64 AppImage build for Mint 21/22 and Ubuntu 22.04+, with Qt/QML runtime deployment, desktop integration, dependency notices and optional USB access rules.

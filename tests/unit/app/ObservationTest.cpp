@@ -238,6 +238,34 @@ int main(int argc, char **argv) {
   controller.search("Lune");
   ASTRO_TEST_CHECK(
       controller.searchResults().first().toMap()["id"].toString() == "moon");
+  const auto targetBeforeSearch = controller.settings()["target"];
+  controller.search(" NGC ");
+  ASTRO_TEST_CHECK(controller.searchResults().isEmpty());
+  ASTRO_TEST_CHECK(controller.searchStatus().contains("numéro"));
+  for (const auto *prefix : {"IC", "M", "n"}) {
+    controller.search(prefix);
+    ASTRO_TEST_CHECK(controller.searchResults().isEmpty());
+    ASTRO_TEST_CHECK(!controller.searchStatus().isEmpty());
+  }
+  controller.search("NGC 1");
+  ASTRO_TEST_CHECK(controller.searchResults().size() == 25);
+  ASTRO_TEST_CHECK(controller.searchResults().first().toMap()["id"] ==
+                   "NGC0001");
+  ASTRO_TEST_CHECK(controller.searchStatus().contains("25"));
+  controller.search("ngc 5078");
+  ASTRO_TEST_CHECK(controller.searchResults().first().toMap()["id"] ==
+                   "NGC5078");
+  controller.search("M1");
+  ASTRO_TEST_CHECK(controller.searchResults().first().toMap()["id"] ==
+                   "NGC1952");
+  QElapsedTimer searchTimer;
+  searchTimer.start();
+  for (int i = 0; i < 100; ++i)
+    controller.search(i % 2 ? "NGC" : "NGC 1");
+  std::cout << "100 broad catalogue searches: " << searchTimer.elapsed()
+            << " ms\n";
+  ASTRO_TEST_CHECK(searchTimer.elapsed() < 2000);
+  ASTRO_TEST_CHECK(controller.settings()["target"] == targetBeforeSearch);
   auto opts = controller.settings();
   opts["date"] = "2026-12-12";
   opts["minimum"] = 30;
@@ -777,8 +805,29 @@ int main(int argc, char **argv) {
   ASTRO_TEST_CHECK(QMetaObject::invokeMethod(
       root, "favoriteSiteIndex", Q_RETURN_ARG(QVariant, favoriteIndex)));
   ASTRO_TEST_CHECK(favoriteIndex.toInt() == savedSite);
-  controller.removeSite(favoriteIndex.toInt());
+  const auto beforeSiteActions = controller.instant()["utcSeconds"];
+  auto *placeStar = item(root, "observationFavoritePlace");
+  ASTRO_TEST_CHECK(placeStar->property("checked").toBool());
+  ASTRO_TEST_CHECK(QMetaObject::invokeMethod(placeStar, "clicked"));
+  ASTRO_TEST_CHECK(!controller.sites()[savedSite].toMap()["favorite"].toBool());
+  ASTRO_TEST_CHECK(controller.sites().size() == savedSite + 1);
+  ASTRO_TEST_CHECK(!placeStar->property("checked").toBool());
+  ASTRO_TEST_CHECK(controller.saveSite("Lieu renommé sans étoile"));
+  ASTRO_TEST_CHECK(!controller.sites()[savedSite].toMap()["favorite"].toBool());
+  {
+    ObservationController reopened;
+    ASTRO_TEST_CHECK(reopened.sites().last().toMap()["name"] ==
+                     "Lieu renommé sans étoile");
+    ASTRO_TEST_CHECK(!reopened.sites().last().toMap()["favorite"].toBool());
+  }
+  ASTRO_TEST_CHECK(QMetaObject::invokeMethod(placeStar, "clicked"));
+  ASTRO_TEST_CHECK(controller.sites()[savedSite].toMap()["favorite"].toBool());
+  ASTRO_TEST_CHECK(QMetaObject::invokeMethod(
+      item(root, "observationDeletePlace"), "clicked"));
   ASTRO_TEST_CHECK(controller.sites().size() == savedSite);
+  ASTRO_TEST_CHECK(controller.instant()["utcSeconds"] == beforeSiteActions);
+  ASTRO_TEST_CHECK(root->property("selectedSiteIndex").toInt() == -1);
+  ASTRO_TEST_CHECK(!item(root, "observationDeletePlace")->isVisible());
   for (const char *kind : {"sunset", "sunrise"}) {
     for (const auto &value : controller.result()["siteSolarEvents"].toList()) {
       const auto event = value.toMap();
@@ -853,6 +902,26 @@ int main(int argc, char **argv) {
   QQuickWindow window;
   window.show();
   root->setParentItem(window.contentItem());
+  ASTRO_TEST_CHECK(QMetaObject::invokeMethod(root, "openObjectChooser"));
+  auto *searchField = item(root, "observationSearch");
+  int searches = 0;
+  const auto searchConnection = QObject::connect(
+      &controller, &ObservationController::searchChanged, [&] { ++searches; });
+  for (const auto *text : {"N", "NG", "NGC", "NGC 5", "NGC 50", "NGC 5078"})
+    searchField->setProperty("text", text);
+  ASTRO_TEST_CHECK(searches == 0);
+  QElapsedTimer debounceTimer;
+  debounceTimer.start();
+  while (searches == 0 && debounceTimer.elapsed() < 1000) {
+    QCoreApplication::processEvents();
+    QThread::msleep(5);
+  }
+  ASTRO_TEST_CHECK(searches == 1);
+  ASTRO_TEST_CHECK(controller.searchResults().first().toMap()["id"] ==
+                   "NGC5078");
+  QObject::disconnect(searchConnection);
+  ASTRO_TEST_CHECK(QMetaObject::invokeMethod(
+      root->findChild<QObject *>("observationObjectChooser"), "close"));
   for (const QSize size :
        {QSize(1440, 960), QSize(1100, 800), QSize(900, 700)}) {
     window.resize(size);
@@ -1177,5 +1246,37 @@ int main(int argc, char **argv) {
     ASTRO_TEST_CHECK(controller.instant()["utcSeconds"] == utc);
   }
 
+  // Exercise legacy migration and preset deletion in a separate settings file.
+  const auto applicationName = app.applicationName();
+  app.setApplicationName("ObservationPlacesMigration");
+  QSettings().setValue("observation/favorites", QVariantList{QVariantMap{
+      {"name", "Ancien jardin"}, {"latitude", 45.0}, {"longitude", 3.0},
+      {"elevation", 100.0}, {"zone", "Europe/Paris"}}});
+  {
+    ObservationController places;
+    ASTRO_TEST_CHECK(places.sites().size() == 11);
+    ASTRO_TEST_CHECK(places.sites().last().toMap()["favorite"].toBool());
+    places.toggleFavoriteSite(10);
+    places.toggleFavoriteSite(0);
+    places.removeSite(1);
+    ObservationController reopened;
+    ASTRO_TEST_CHECK(reopened.sites().size() == 10);
+    ASTRO_TEST_CHECK(reopened.sites().first().toMap()["favorite"].toBool());
+    ASTRO_TEST_CHECK(!reopened.sites().last().toMap()["favorite"].toBool());
+    for (const auto &value : reopened.sites())
+      ASTRO_TEST_CHECK(value.toMap()["presetId"] != "lyon");
+    reopened.removeSite(9);
+    for (int i = 8; i >= 0; --i)
+      reopened.removeSite(i);
+    ObservationController empty;
+    ASTRO_TEST_CHECK(empty.sites().isEmpty());
+    ASTRO_TEST_CHECK(empty.error().isEmpty());
+    ASTRO_TEST_CHECK(empty.saveSite("Nouveau jardin"));
+    ASTRO_TEST_CHECK(empty.sites().size() == 1);
+    empty.removeSite(-1);
+    empty.toggleFavoriteSite(20);
+    ASTRO_TEST_CHECK(empty.sites().size() == 1);
+  }
+  app.setApplicationName(applicationName);
   return 0;
 }

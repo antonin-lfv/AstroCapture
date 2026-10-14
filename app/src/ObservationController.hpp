@@ -1,6 +1,7 @@
 #pragma once
 #include "ObservationAstronomy.hpp"
 #include <QObject>
+#include <QHash>
 #include <QPointer>
 #include <QTimer>
 #include <QVariantList>
@@ -100,6 +101,7 @@ public:
   Q_INVOKABLE void chooseMapLocation(double latitude, double longitude);
   Q_INVOKABLE void resolveMapTimeZone();
   Q_INVOKABLE bool saveSite(const QString &name);
+  Q_INVOKABLE void toggleFavoriteSite(int index);
   Q_INVOKABLE void removeSite(int index);
 signals:
   void changed();
@@ -121,6 +123,7 @@ private:
   bool calculateAtUtc(const QVariantMap &options, qint64 utc);
   void updateReference();
   void persist();
+  void persistSites();
   void confirmMapSites();
   QString localTime(qint64 utc) const;
   void updateRecommendations();
@@ -130,6 +133,10 @@ private:
   ObservationTarget target_;
   ObservationSite site_;
   std::vector<ObservationTarget> catalog_;
+  struct SearchKeys {
+    QString name, designation, id, firstName;
+  };
+  QHash<QString, SearchKeys> searchKeys_;
   QVariantMap result_, settings_, instant_;
   QVariantMap reference_{{"recording", QVariantMap{{"available", false}}},
                          {"days", QVariantList{}},
@@ -147,8 +154,7 @@ private:
   QVariantList favoriteTargets_, recommendations_;
   QString recommendationsKey_, connectionStatus_;
   bool offline_{}, connectionLost_{};
-  int reachability_{}, recommendationPool_{}, catalogCount_{},
-      builtinSiteCount_{};
+  int reachability_{}, recommendationPool_{}, catalogCount_{};
   QVariantMap weatherForecast_;
   QString weatherStatus_, weatherContext_;
   bool weatherBusy_{}, weatherEnabled_{}, weatherFailed_{};

@@ -156,14 +156,25 @@ Rectangle {
     function cloudPercent(value) {
         return value === undefined || value === null ? "—" : Math.round(Number(value)) + " %";
     }
-    function favoriteSiteIndex() {
+    readonly property int selectedSiteIndex: currentSiteIndex()
+    readonly property var selectedSite: selectedSiteIndex >= 0 ? controller.sites[selectedSiteIndex] || ({}) : ({})
+    function currentSiteIndex() {
         const current = controller.settings;
         for (let i = 0; i < sortedSites.length; i++) {
             const site = sortedSites[i];
-            if (site.favorite && Number(site.latitude) === Number(current.latitude) && Number(site.longitude) === Number(current.longitude) && Number(site.elevation) === Number(current.elevation) && site.zone === current.zone)
+            if (site.name === current.name && Number(site.latitude) === Number(current.latitude) && Number(site.longitude) === Number(current.longitude) && Number(site.elevation) === Number(current.elevation) && site.zone === current.zone)
                 return site.sourceIndex;
         }
         return -1;
+    }
+    function favoriteSiteIndex() {
+        return selectedSite.favorite ? selectedSiteIndex : -1;
+    }
+    function nameCurrentSite(addToFavourites = false) {
+        saveSiteOpen = true;
+        nameDialog.addToFavourites = addToFavourites;
+        nameDialog.open();
+        favoriteName.text = controller.settings.name || "";
     }
     function compassDirection(degrees) {
         const directions = [qsTr("North"), qsTr("North-east"), qsTr("East"), qsTr("South-east"), qsTr("South"), qsTr("South-west"), qsTr("West"), qsTr("North-west")];
@@ -300,9 +311,11 @@ Rectangle {
         return false;
     }
     function openObjectChooser() {
+        objectSearchDelay.stop();
         query.text = "";
         objectChooser.favouritesOnly = false;
         controller.search("");
+        objectSearchDelay.stop();
         objectChooser.open();
     }
     Connections {
@@ -553,16 +566,49 @@ Rectangle {
                                     wrapMode: Text.Wrap
                                     Layout.fillWidth: true
                                 }
-                                IconButton {
+                                RowLayout {
                                     Layout.fillWidth: true
-                                    enabled: !root.controller.mapTimeZoneBusy
-                                    text: root.favoriteSiteIndex() >= 0 ? qsTr("Rename…") : qsTr("Save place…")
-                                    objectName: "observationNamePlace"
-                                    Accessible.name: root.favoriteSiteIndex() >= 0 ? qsTr("Rename this saved place") : qsTr("Name and save this place")
-                                    onClicked: {
-                                        root.saveSiteOpen = true;
-                                        nameDialog.open();
-                                        favoriteName.text = root.controller.settings.name || "";
+                                    spacing: 8
+                                    IconButton {
+                                        Layout.fillWidth: true
+                                        Layout.minimumWidth: 0
+                                        enabled: !root.controller.mapTimeZoneBusy
+                                        text: root.selectedSite.saved ? qsTr("Rename…") : qsTr("Save place…")
+                                        objectName: "observationNamePlace"
+                                        Accessible.name: root.selectedSite.saved ? qsTr("Rename this saved place") : qsTr("Name and save this place")
+                                        onClicked: root.nameCurrentSite()
+                                    }
+                                    IconButton {
+                                        objectName: "observationFavoritePlace"
+                                        Layout.preferredWidth: 32
+                                        Layout.minimumWidth: 32
+                                        text: root.selectedSite.favorite ? "★" : "☆"
+                                        checkable: true
+                                        checked: root.selectedSite.favorite === true
+                                        borderColor: checked ? Atelier.accent : Atelier.border
+                                        enabled: !root.controller.mapTimeZoneBusy
+                                        Accessible.name: root.selectedSite.favorite ? qsTr("Remove this place from favourites") : qsTr("Add this place to favourites")
+                                        ToolTip.text: Accessible.name
+                                        ToolTip.visible: hovered
+                                        ToolTip.delay: 450
+                                        onClicked: {
+                                            if (root.selectedSiteIndex >= 0)
+                                                root.controller.toggleFavoriteSite(root.selectedSiteIndex);
+                                            else
+                                                root.nameCurrentSite(true);
+                                        }
+                                    }
+                                    IconButton {
+                                        objectName: "observationDeletePlace"
+                                        Layout.preferredWidth: 32
+                                        Layout.minimumWidth: 32
+                                        visible: root.selectedSiteIndex >= 0
+                                        iconName: "trash"
+                                        Accessible.name: qsTr("Delete this place from the list")
+                                        ToolTip.text: Accessible.name
+                                        ToolTip.visible: hovered
+                                        ToolTip.delay: 450
+                                        onClicked: root.controller.removeSite(root.selectedSiteIndex)
                                     }
                                 }
                                 GridLayout {
@@ -1410,7 +1456,8 @@ Rectangle {
     DarkDialog {
         id: nameDialog
         objectName: "observationNameDialog"
-        title: qsTr("Favourite place")
+        property bool addToFavourites: false
+        title: qsTr("Place name")
         modal: true
         parent: Overlay.overlay
         closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
@@ -1433,7 +1480,7 @@ Rectangle {
 
                     Layout.fillWidth: true
                     label: qsTr("Place name")
-                    help: qsTr("For example Garden, Balcony or Mountain site. The name, coordinates and time zone are saved on this computer as a favourite, including points chosen on the map. Renaming keeps the same position.")
+                    help: qsTr("For example Garden, Balcony or Mountain site. The name, coordinates and time zone are saved on this computer. New places are added to favourites; the star can be turned off without deleting the place. Renaming keeps the same position.")
                 }
                 Label {
                     text: qsTr("%1°, %2° · %3").arg(root.controller.settings.latitude).arg(root.controller.settings.longitude).arg(root.controller.settings.zone)
@@ -1445,16 +1492,12 @@ Rectangle {
                     text: qsTr("Save this site")
                     enabled: favoriteName.text.trim().length > 0
                     Layout.fillWidth: true
-                    onClicked: if (root.controller.saveSite(favoriteName.text))
-                        nameDialog.close()
-                }
-                IconButton {
-                    text: qsTr("Remove favourite")
-                    visible: root.favoriteSiteIndex() >= 0
-                    Layout.fillWidth: true
                     onClicked: {
-                        root.controller.removeSite(root.favoriteSiteIndex());
-                        nameDialog.close();
+                        if (root.controller.saveSite(favoriteName.text)) {
+                            if (nameDialog.addToFavourites && !root.selectedSite.favorite)
+                                root.controller.toggleFavoriteSite(root.selectedSiteIndex);
+                            nameDialog.close();
+                        }
                     }
                 }
                 Label {
@@ -1673,6 +1716,12 @@ Rectangle {
         id: objectChooser
         objectName: "observationObjectChooser"
         property bool favouritesOnly: false
+        onFavouritesOnlyChanged: {
+            if (favouritesOnly)
+                objectSearchDelay.stop();
+            else if (visible)
+                objectSearchDelay.restart();
+        }
         modal: true
         closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
         parent: Overlay.overlay
@@ -1687,6 +1736,13 @@ Rectangle {
             border.color: Atelier.border
         }
         onOpened: query.focusInput()
+        onClosed: objectSearchDelay.stop()
+        Timer {
+            id: objectSearchDelay
+            interval: 200
+            onTriggered: if (objectChooser.visible && !objectChooser.favouritesOnly)
+                root.controller.search(query.text)
+        }
         contentItem: ColumnLayout {
             spacing: 12
             RowLayout {
@@ -1714,8 +1770,9 @@ Rectangle {
                 objectName: "observationSearch"
                 Layout.fillWidth: true
                 label: qsTr("Name or catalogue number")
-                help: qsTr("Examples: Moon, Jupiter, M31, M42, NGC 7000. Typing filters the list. Select a result to use it.")
-                onTextChanged: root.controller.search(text)
+                help: qsTr("Examples: Moon, Jupiter, M31, M42, NGC 7000. Add a number after NGC or IC. Up to 25 results are shown after you pause typing. Select a result to use it.")
+                onTextChanged: if (objectChooser.visible && !objectChooser.favouritesOnly)
+                    objectSearchDelay.restart()
             }
             RowLayout {
                 Layout.fillWidth: true
@@ -1743,6 +1800,7 @@ Rectangle {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 clip: true
+                enabled: !objectSearchDelay.running
                 spacing: 4
                 model: objectChooser.favouritesOnly ? root.controller.favoriteTargets.filter(value => value.name.toLocaleLowerCase().indexOf(query.text.toLocaleLowerCase()) >= 0) : root.controller.searchResults
                 ScrollBar.vertical: ScrollBar {}
@@ -1759,7 +1817,7 @@ Rectangle {
                 Label {
                     anchors.centerIn: parent
                     visible: objectList.count === 0
-                    text: objectChooser.favouritesOnly ? qsTr("No favourite matches this search.") : qsTr("No local result. Try another name or search online.")
+                    text: objectChooser.favouritesOnly ? qsTr("No favourite matches this search.") : root.controller.searchStatus.length ? root.controller.searchStatus : qsTr("No local result. Try another name or search online.")
                     width: parent.width
                     color: Atelier.secondary
                     wrapMode: Text.Wrap
@@ -1767,8 +1825,8 @@ Rectangle {
                 }
             }
             Label {
-                visible: root.controller.searchStatus.length > 0
-                text: root.controller.searchStatus
+                visible: !objectChooser.favouritesOnly && (objectSearchDelay.running || objectList.count > 0 && root.controller.searchStatus.length > 0)
+                text: objectSearchDelay.running ? qsTr("Filtering…") : root.controller.searchStatus
                 color: Atelier.secondary
                 Layout.fillWidth: true
                 wrapMode: Text.Wrap
@@ -1779,8 +1837,11 @@ Rectangle {
                 text: root.controller.searching ? qsTr("Searching…") : qsTr("Search other names online")
                 Layout.fillWidth: true
                 busy: root.controller.searching
-                enabled: !root.controller.searching
-                onClicked: root.controller.searchOnline(query.text)
+                enabled: !root.controller.searching && query.text.trim().length >= 2 && !/^(ngc|ic|m|b|c)$/i.test(query.text.trim())
+                onClicked: {
+                    objectSearchDelay.stop();
+                    root.controller.searchOnline(query.text);
+                }
             }
         }
     }

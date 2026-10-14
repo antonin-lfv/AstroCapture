@@ -95,7 +95,10 @@ Vos images exportées se retrouvent dans **Historique**.
 Dans **Observation**, choisissez votre lieu, une date et un objet. Le premier
 lancement utilise Paris ; vous pouvez sélectionner une ville, saisir des
 coordonnées ou cliquer sur la carte. Enregistrez vos lieux et objets habituels
-en favoris pour les retrouver rapidement.
+en favoris pour les retrouver rapidement. L’étoile à côté du lieu permet de
+l’ajouter ou de le retirer des favoris ; la corbeille le supprime de la liste.
+Pour un objet du catalogue NGC ou IC, ajoutez son numéro (par exemple **NGC 5078**).
+La recherche affiche au maximum 25 résultats.
 
 ![Observation : préparer M42 depuis l’Utah, avec les heures sur place et chez soi](assets/screenshots/readme-observation.png)
 

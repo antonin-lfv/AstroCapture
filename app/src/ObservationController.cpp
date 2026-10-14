@@ -16,17 +16,20 @@
 #include <QTimeZone>
 #include <QUrlQuery>
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <stdexcept>
 namespace astro::app {
 namespace {
 QString normalized(QString s) {
+  static const QRegularExpression separators("[\\s\\p{M}_-]");
   s = s.toCaseFolded().normalized(QString::NormalizationForm_D);
-  s.remove(QRegularExpression("[\\s\\p{M}_-]"));
+  s.remove(separators);
   return s;
 }
 QString designation(QString s) {
-  auto m = QRegularExpression("^(NGC|IC|M|B|C)(0*)([0-9]+)(.*)$").match(s);
+  static const QRegularExpression pattern("^(NGC|IC|M|B|C)(0*)([0-9]+)(.*)$");
+  auto m = pattern.match(s);
   return m.hasMatch() ? m.captured(1) + m.captured(3) + m.captured(4) : s;
 }
 QStringList fields(const QString &line) {
@@ -101,8 +104,30 @@ ObservationController::ObservationController(QObject *parent)
   auto t68 = site(tr("T68 · Utah"), 37.7378, -113.6975, "America/Denver");
   t68["elevation"] = 1570;
   sites_.append(t68);
-  builtinSiteCount_ = sites_.size();
-  const auto stored = QSettings().value("observation/favorites").toList();
+  const QStringList presetIds = {"paris", "lyon", "marseille", "la-serena",
+                                "sydney", "tokyo", "new-york", "tromso",
+                                "cape-town", "t68-utah"};
+  const auto presetPreferences =
+      QSettings().value("observation/presetSites").toMap();
+  for (int i = sites_.size() - 1; i >= 0; --i) {
+    const auto preference = presetPreferences.value(presetIds[i]).toMap();
+    if (preference.value("hidden").toBool()) {
+      sites_.removeAt(i);
+      continue;
+    }
+    auto s = sites_[i].toMap();
+    s["presetId"] = presetIds[i];
+    s["favorite"] = preference.value("favorite", false);
+    sites_[i] = s;
+  }
+  // Existing versions stored saved places as favourites. Preserve all of them
+  // while allowing a saved place to remain in the menu without its star.
+  const bool legacySites = !QSettings().contains("observation/savedSites");
+  const auto stored = QSettings()
+                          .value(legacySites ? "observation/favorites"
+                                             : "observation/savedSites")
+                          .toList();
+  int savedCount = 0;
   for (const auto &value : stored) {
     auto s = value.toMap();
     if (!QTimeZone(s.value("zone").toString().toUtf8()).isValid() ||
@@ -113,10 +138,13 @@ ObservationController::ObservationController(QObject *parent)
         !std::isfinite(s.value("elevation").toDouble()) ||
         s.value("elevation").toDouble() < -500 ||
         s.value("elevation").toDouble() > 10000 ||
-        sites_.size() >= builtinSiteCount_ + 30)
+        savedCount >= 30)
       continue;
-    s["favorite"] = true;
+    s.remove("presetId");
+    s["saved"] = true;
+    s["favorite"] = legacySites || s.value("favorite").toBool();
     sites_.append(s);
+    ++savedCount;
   }
   for (const auto &value :
        QSettings().value("observation/targetFavorites").toList()) {
@@ -150,7 +178,7 @@ ObservationController::ObservationController(QObject *parent)
   }
   settings_ = QSettings().value("observation/settings").toMap();
   if (settings_.isEmpty())
-    settings_ = sites_[0].toMap();
+    settings_ = site(tr("Paris"), 48.8566, 2.3522, "Europe/Paris");
   auto initialPlanning = settings_;
   initialPlanning.remove("date");
   const auto planning = planningNight(initialPlanning);
@@ -262,40 +290,68 @@ void ObservationController::search(const QString &query) {
   ++searchGeneration_;
   searchResults_.clear();
   searchStatus_.clear();
+  if (query.size() > 100) {
+    searchStatus_ = tr("Use a name or catalogue number of up to 100 characters.");
+    emit searchChanged();
+    return;
+  }
   const auto q = normalized(query);
-  std::vector<ObservationTarget> matching;
+  if (q == "ngc" || q == "ic" || q == "m" || q == "b" || q == "c") {
+    searchStatus_ = tr("Add a catalogue number, for example NGC 5078 or M42.");
+    emit searchChanged();
+    return;
+  }
+  if (!q.isEmpty() && q.size() < 2) {
+    searchStatus_ = tr("Enter at least two characters or a catalogue number.");
+    emit searchChanged();
+    return;
+  }
+  constexpr int maximumResults = 25;
+  std::array<QVariantList, 3> ranked;
+  int matchCount = 0;
   const QStringList suggested = {"moon", "jupiter", "saturn",
                                  "mars", "NGC1976", "NGC0224",
                                  "M045", "NGC6205", "NGC3372"};
-  for (const auto &t : catalog_)
-    if ((q.isEmpty() && suggested.contains(t.id)) ||
-        (!q.isEmpty() &&
-         (normalized(t.name).contains(q) ||
-          normalized(designation(t.id)) == q || normalized(t.id) == q)))
-      matching.push_back(t);
-  std::stable_sort(matching.begin(), matching.end(),
-                   [&](const auto &a, const auto &b) {
-                     auto rank = [&](const auto &t) {
-                       if (normalized(designation(t.id)) == q)
-                         return 0;
-                       auto first = normalized(t.name.split(" · ")[0]);
-                       return first == q ? 0 : t.body >= 0 ? 1 : 2;
-                     };
-                     return rank(a) < rank(b);
-                   });
-  for (const auto &t : matching) {
-    if (searchResults_.size() == 80)
-      break;
-    searchResults_.append(QVariantMap{{"id", t.id},
-                                      {"name", t.name},
+  for (const auto &t : catalog_) {
+    auto keys = searchKeys_.constFind(t.id);
+    if (keys == searchKeys_.cend()) {
+      searchKeys_.insert(t.id, {normalized(t.name),
+                               normalized(designation(t.id)), normalized(t.id),
+                               normalized(t.name.section(" · ", 0, 0))});
+      keys = searchKeys_.constFind(t.id);
+    }
+    if (!(q.isEmpty() ? suggested.contains(t.id)
+                     : keys->name.contains(q) || keys->designation == q ||
+                           keys->id == q))
+      continue;
+    ++matchCount;
+    const int rank = !q.isEmpty() &&
+                             (keys->designation == q || keys->id == q ||
+                              keys->firstName == q)
+                         ? 0
+                         : t.body >= 0 ? 1 : 2;
+    if (ranked[rank].size() < maximumResults)
+      ranked[rank].append(QVariantMap{{"id", t.id}, {"name", t.name},
                                       {"source", t.source},
                                       {"moving", t.body >= 0}});
   }
-  if (matching.size() > 80)
-    searchStatus_ = tr("80 results shown. Refine the name.");
+  for (const auto &matches : ranked) {
+    for (const auto &value : matches) {
+      if (searchResults_.size() == maximumResults)
+        break;
+      searchResults_.append(value);
+    }
+  }
+  if (matchCount > maximumResults)
+    searchStatus_ = tr("25 results shown. Refine the name or catalogue number.");
   emit searchChanged();
 }
 void ObservationController::searchOnline(const QString &query) {
+  const auto q = normalized(query.left(101));
+  if (query.size() > 100 || q.size() < 2 || q == "ngc" || q == "ic") {
+    search(query);
+    return;
+  }
   if (searching_)
     return;
   if (offline_) {
@@ -330,6 +386,7 @@ void ObservationController::searchOnline(const QString &query) {
               searchStatus_ = networkFailure(networkCode, connectionLost_);
             } else if (error.isEmpty()) {
               const QString id = "cds:" + answer.value("query").toString();
+              searchKeys_.remove(id);
               catalog_.erase(
                   std::remove_if(catalog_.begin(), catalog_.end(),
                                  [&](const auto &t) { return t.id == id; }),
@@ -999,7 +1056,7 @@ void ObservationController::confirmMapSites() {
   bool updated = false;
   for (auto &value : sites_) {
     auto saved = value.toMap();
-    if (!saved.value("favorite").toBool() ||
+    if (!saved.value("saved").toBool() ||
         !saved.value("mapZoneUnresolved").toBool() ||
         saved.value("latitude").toDouble() != site_.latitude ||
         saved.value("longitude").toDouble() != site_.longitude)
@@ -1010,17 +1067,33 @@ void ObservationController::confirmMapSites() {
     updated = true;
   }
   if (updated) {
-    QVariantList favorites;
-    for (const auto &value : sites_)
-      if (value.toMap().value("favorite").toBool())
-        favorites.append(value);
-    QSettings().setValue("observation/favorites", favorites);
+    persistSites();
     emit sitesChanged();
   }
 }
+void ObservationController::persistSites() {
+  QVariantList saved, favorites;
+  auto presets = QSettings().value("observation/presetSites").toMap();
+  for (const auto &value : sites_) {
+    const auto s = value.toMap();
+    if (s.value("saved").toBool()) {
+      saved.append(value);
+      if (s.value("favorite").toBool())
+        favorites.append(value);
+    } else if (!s.value("presetId").toString().isEmpty()) {
+      presets[s.value("presetId").toString()] =
+          QVariantMap{{"favorite", s.value("favorite")}, {"hidden", false}};
+    }
+  }
+  QSettings prefs;
+  prefs.setValue("observation/savedSites", saved);
+  prefs.setValue("observation/presetSites", presets);
+  // Keep the original key readable by earlier application versions.
+  prefs.setValue("observation/favorites", favorites);
+}
 bool ObservationController::saveSite(const QString &name) {
   if (name.trimmed().isEmpty() || name.size() > 100) {
-    error_ = tr("Enter a favourite place name (maximum 100 characters).");
+    error_ = tr("Enter a place name (maximum 100 characters).");
     emit changed();
     return false;
   }
@@ -1030,23 +1103,31 @@ bool ObservationController::saveSite(const QString &name) {
   s["mapZoneUnresolved"] = settings_.value("mapZoneUnresolved", false);
   s["source"] = settings_.value("source");
   s["name"] = name.trimmed();
+  s["saved"] = true;
   s["favorite"] = true;
   s["label"] = "★ " + name.trimmed();
   int existing = -1;
   for (int i = 0; i < sites_.size(); ++i) {
     auto old = sites_[i].toMap();
-    if (old.value("favorite").toBool() &&
+    if (old.value("saved").toBool() &&
         old.value("latitude") == s.value("latitude") &&
         old.value("longitude") == s.value("longitude") &&
         old.value("elevation") == s.value("elevation") &&
         old.value("zone") == s.value("zone")) {
       existing = i;
+      s["favorite"] = old.value("favorite");
+      s["label"] = (s.value("favorite").toBool() ? QString("★ ") : QString()) +
+                   name.trimmed();
       break;
     }
   }
-  if (existing < 0 && sites_.size() >= builtinSiteCount_ + 30) {
+  const int savedCount = std::count_if(sites_.begin(), sites_.end(),
+                                     [](const auto &value) {
+    return value.toMap().value("saved").toBool();
+  });
+  if (existing < 0 && savedCount >= 30) {
     error_ = tr(
-        "30 favourite places already saved. Remove one before adding another.");
+        "30 places already saved. Remove one before adding another.");
     emit changed();
     return false;
   }
@@ -1058,24 +1139,32 @@ bool ObservationController::saveSite(const QString &name) {
   settings_["name"] = name.trimmed();
   persist();
   emit changed();
-  QVariantList favorites;
-  for (const auto &value : sites_)
-    if (value.toMap().value("favorite").toBool())
-      favorites.append(value);
-  QSettings().setValue("observation/favorites", favorites);
+  persistSites();
   emit sitesChanged();
   return true;
 }
-void ObservationController::removeSite(int index) {
-  if (index < 0 || index >= sites_.size() ||
-      !sites_[index].toMap().value("favorite").toBool())
+void ObservationController::toggleFavoriteSite(int index) {
+  if (index < 0 || index >= sites_.size())
     return;
+  auto s = sites_[index].toMap();
+  s["favorite"] = !s.value("favorite").toBool();
+  s["label"] = (s.value("favorite").toBool() ? QString("★ ") : QString()) +
+               s.value("name").toString();
+  sites_[index] = s;
+  persistSites();
+  emit sitesChanged();
+}
+void ObservationController::removeSite(int index) {
+  if (index < 0 || index >= sites_.size())
+    return;
+  const auto id = sites_[index].toMap().value("presetId").toString();
+  if (!id.isEmpty()) {
+    auto presets = QSettings().value("observation/presetSites").toMap();
+    presets[id] = QVariantMap{{"hidden", true}};
+    QSettings().setValue("observation/presetSites", presets);
+  }
   sites_.removeAt(index);
-  QVariantList favorites;
-  for (const auto &value : sites_)
-    if (value.toMap().value("favorite").toBool())
-      favorites.append(value);
-  QSettings().setValue("observation/favorites", favorites);
+  persistSites();
   emit sitesChanged();
 }
 void ObservationController::searchCity(const QString &name) {

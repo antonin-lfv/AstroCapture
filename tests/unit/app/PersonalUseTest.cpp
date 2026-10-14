@@ -162,6 +162,55 @@ static int workspace(const QString& directory,bool restore,bool faults=false) {
     QuitGuard guard(window);QCoreApplication::instance()->installEventFilter(&guard);
     auto* quit=window->findChild<QObject*>("quitConfirmation");ASTRO_TEST_CHECK(quit);
 
+    if (qEnvironmentVariableIsSet("ASTRO_OBSERVATION_MANAGEMENT_WINDOW")) {
+        const auto previewPath = qEnvironmentVariable("ASTRO_PERSONAL_PREVIEW_PATH");
+        ASTRO_TEST_CHECK(!previewPath.isEmpty());
+        processing->openPath(previewPath);
+        wait(processing);
+        ASTRO_TEST_CHECK(processing->hasResult());
+        auto* observation = window->findChild<ObservationController*>("observationController");
+        auto* workspace = window->findChild<QObject*>("observationWorkspace");
+        ASTRO_TEST_CHECK(observation && workspace);
+        workspace->setProperty("liveNow", false);
+        workspace->setProperty("autoLoadWeather", false);
+        workspace->setProperty("autoSelectVisible", false);
+        ASTRO_TEST_CHECK(observation->saveSite("Mon jardin d’observation"));
+        const auto selectedUtc = observation->instant()["utcSeconds"];
+        for (const auto size : {QSize(1440,960), QSize(1100,800), QSize(900,700)}) {
+            window->resize(size);
+            window->setProperty("currentTab", "processing");
+            capture(window, QString("real-image-%1").arg(size.width()));
+            window->setProperty("currentTab", "observation");
+            capture(window, QString("place-favourite-%1").arg(size.width()));
+            click(workspace, "observationFavoritePlace");
+            capture(window, QString("place-kept-without-star-%1").arg(size.width()));
+            ASTRO_TEST_CHECK(observation->sites().last().toMap()["saved"].toBool());
+            ASTRO_TEST_CHECK(!observation->sites().last().toMap()["favorite"].toBool());
+            click(workspace, "observationFavoritePlace");
+            ASTRO_TEST_CHECK(QMetaObject::invokeMethod(workspace, "openObjectChooser"));
+            auto* query = workspace->findChild<QObject*>("observationSearch");
+            auto* chooser = workspace->findChild<QObject*>("observationObjectChooser");
+            ASTRO_TEST_CHECK(query && chooser);
+            query->setProperty("text", "NGC");
+            until([&] { return observation->searchResults().isEmpty(); });
+            capture(window, QString("search-prefix-%1").arg(size.width()));
+            query->setProperty("text", "NGC 1");
+            until([&] { return observation->searchResults().size() == 25; });
+            capture(window, QString("search-bounded-%1").arg(size.width()));
+            query->setProperty("text", "NGC 5078");
+            until([&] { return observation->searchResults().size() == 1; });
+            capture(window, QString("search-exact-%1").arg(size.width()));
+            ASTRO_TEST_CHECK(QMetaObject::invokeMethod(chooser, "close"));
+        }
+        click(workspace, "observationDeletePlace");
+        ASTRO_TEST_CHECK(observation->sites().size() == 10);
+        ASTRO_TEST_CHECK(observation->instant()["utcSeconds"] == selectedUtc);
+        ASTRO_TEST_CHECK(workspace->property("selectedSiteIndex").toInt() == -1);
+        capture(window, "place-removed-900");
+        window->setProperty("quitApproved", true);
+        return 0;
+    }
+
     if(qEnvironmentVariableIsSet("ASTRO_OBSERVATION_LAYOUT_WINDOW")) {
         auto* observation=window->findChild<ObservationController*>("observationController");ASTRO_TEST_CHECK(observation);
         auto* workspace=window->findChild<QObject*>("observationWorkspace");ASTRO_TEST_CHECK(workspace);workspace->setProperty("liveNow",false);workspace->setProperty("autoLoadWeather",false);

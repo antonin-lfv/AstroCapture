@@ -9,6 +9,15 @@
 #include <QSet>
 
 namespace astro::app {
+void SessionController::updateMemoryPeers() {
+    if(!deepSky_)return;
+    deepSky_->setMemoryPeers([processing=processing_,mosaic=mosaic_] {
+        std::vector<WorkspaceSnapshot> snapshots;
+        if(processing)snapshots.push_back(processing->sessionSnapshot());
+        if(mosaic)snapshots.push_back(mosaic->sessionSnapshot());
+        return snapshots;
+    });
+}
 SessionController::SessionController(QObject* parent):QObject(parent) {
     timer_.setSingleShot(true);timer_.setInterval(2000);connect(&timer_,&QTimer::timeout,this,&SessionController::saveNow);
     setStorageDirectory(QDir(QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation)).filePath("session"));
@@ -19,15 +28,15 @@ void SessionController::setStorageDirectory(const QString& path) {
 }
 void SessionController::setProcessing(ProcessingController* c) {
     if(processing_==c)return;if(processing_)disconnect(processing_,nullptr,this,nullptr);processing_=c;
-    if(c){connect(c,&ProcessingController::changed,this,&SessionController::scheduleSave);connect(c,&ProcessingController::annotationChanged,this,&SessionController::scheduleSave);connect(c,&ProcessingController::imageChanged,this,&SessionController::scheduleSave);}emit controllersChanged();
+    if(c){connect(c,&ProcessingController::changed,this,[this]{scheduleSave();if(deepSky_)deepSky_->notifyMemoryUsageChanged();});connect(c,&ProcessingController::annotationChanged,this,&SessionController::scheduleSave);connect(c,&ProcessingController::imageChanged,this,&SessionController::scheduleSave);}updateMemoryPeers();emit controllersChanged();
 }
 void SessionController::setDeepSky(DeepSkyController* c) {
-    if(deepSky_==c)return;if(deepSky_)disconnect(deepSky_,nullptr,this,nullptr);deepSky_=c;
-    if(c){connect(c,&DeepSkyController::changed,this,&SessionController::scheduleSave);connect(c,&DeepSkyController::projectOptionsChanged,this,&SessionController::scheduleSave);connect(c,&DeepSkyController::imageChanged,this,&SessionController::scheduleSave);}emit controllersChanged();
+    if(deepSky_==c)return;if(deepSky_){disconnect(deepSky_,nullptr,this,nullptr);deepSky_->setMemoryPeers({});}deepSky_=c;
+    if(c){connect(c,&DeepSkyController::changed,this,&SessionController::scheduleSave);connect(c,&DeepSkyController::projectOptionsChanged,this,&SessionController::scheduleSave);connect(c,&DeepSkyController::imageChanged,this,&SessionController::scheduleSave);}updateMemoryPeers();emit controllersChanged();
 }
 void SessionController::setMosaic(MosaicController* c) {
     if(mosaic_==c)return;if(mosaic_)disconnect(mosaic_,nullptr,this,nullptr);mosaic_=c;
-    if(c){connect(c,&MosaicController::changed,this,&SessionController::scheduleSave);connect(c,&MosaicController::filesChanged,this,&SessionController::scheduleSave);connect(c,&MosaicController::annotationChanged,this,&SessionController::scheduleSave);}emit controllersChanged();
+    if(c){connect(c,&MosaicController::changed,this,[this]{scheduleSave();if(deepSky_)deepSky_->notifyMemoryUsageChanged();});connect(c,&MosaicController::filesChanged,this,&SessionController::scheduleSave);connect(c,&MosaicController::annotationChanged,this,&SessionController::scheduleSave);}updateMemoryPeers();emit controllersChanged();
 }
 void SessionController::setUiState(const QVariantMap& state){if(uiState_==state)return;uiState_=state;emit uiStateChanged();scheduleSave();}
 bool SessionController::workOpen() const{return (processing_&&(processing_->loaded()||processing_->stillImage()||processing_->hasResult()))||(deepSky_&&(!deepSky_->frames().isEmpty()||deepSky_->hasResult()))||(mosaic_&&(!mosaic_->files().isEmpty()||mosaic_->hasResult()));}

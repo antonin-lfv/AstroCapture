@@ -56,6 +56,7 @@ signals:
     void saveFinished(bool success);
     void sessionRestored(const QVariantMap& uiState);
 private:
+    void updateMemoryPeers();
     QSet<QString> protectedCachePaths() const;
     QVariantMap cacheInfo_;
     bool cacheCleaning_{};

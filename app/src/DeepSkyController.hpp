@@ -7,6 +7,7 @@
 #include <QVariantMap>
 #include <astro/processing/DeepSky.hpp>
 #include <thread>
+#include <functional>
 #include "ImageDocument.hpp"
 #include "WorkspaceSnapshot.hpp"
 namespace astro::app {
@@ -196,6 +197,8 @@ public:
     Q_INVOKABLE void loadProject(const QUrl&);
     Q_INVOKABLE QVariant processingDocument() const;
     WorkspaceSnapshot sessionSnapshot() const;
+    void setMemoryPeers(std::function<std::vector<WorkspaceSnapshot>()> provider);
+    void notifyMemoryUsageChanged() { emit changed(); }
     bool canRestoreSession(const WorkspaceSnapshot&) const;
     static bool validSession(const WorkspaceSnapshot&);
     void restoreSession(const WorkspaceSnapshot&);
@@ -222,6 +225,7 @@ private:
     bool restoringProject_{};
     void restoreProject(const WorkspaceSnapshot&, const QUrl&, const QString&);
     std::uint64_t retainedImageBytes() const;
+    std::function<std::vector<WorkspaceSnapshot>()> memoryPeers_;
     void run(const QString&,std::function<void(std::stop_token)>);
     void post(std::function<void()>);
     void show(std::shared_ptr<const processing::FloatImage>,bool result, QImage preview, std::shared_ptr<const processing::FloatImage> displayed, QVariantMap stretch, QImage before = {});

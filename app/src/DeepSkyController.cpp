@@ -353,6 +353,9 @@ void DeepSkyController::inspect(int index){
 QVariantList DeepSkyController::calibrationMasters() const {
     try{auto rows=calibrationMasterInventory();for(auto& v:rows){auto r=v.toMap();const auto compatibility=masterCompatibility(r,frames_);for(auto it=compatibility.begin();it!=compatibility.end();++it)r[it.key()]=it.value();v=r;}return rows;}catch(const std::exception&){return {};}
 }
+void DeepSkyController::setMemoryPeers(std::function<std::vector<WorkspaceSnapshot>()> provider) {
+    memoryPeers_=std::move(provider);emit changed();
+}
 std::uint64_t DeepSkyController::retainedImageBytes() const {
     std::set<const processing::FloatImage*> seen;std::uint64_t retained=256ULL*1024*1024;
     auto keep=[&](const auto& image){if(image&&seen.insert(image.get()).second)retained+=image->rgb.size()*sizeof(float);};
@@ -361,6 +364,16 @@ std::uint64_t DeepSkyController::retainedImageBytes() const {
     std::set<qint64> previews;
     for(const auto& image:{preview_,resultPreview_,rawPreview_,backgroundPreview_,linearPreview_,comparisonPreview_,geometryPreview_,maskSourcePreview_,maskImportPreview_,maskPreview_,starsLayerPreview_,starBackgroundLayerPreview_,diagnosticPreview_})
         if(!image.isNull()&&previews.insert(image.cacheKey()).second)retained+=image.sizeInBytes();
+    if(memoryPeers_) {
+        std::set<const std::vector<float>*> planes;
+        for(const auto& workspace:memoryPeers_()) {
+            for(const auto& image:workspace.images)keep(image);
+            for(const auto& image:workspace.previews)
+                if(!image.isNull()&&previews.insert(image.cacheKey()).second)retained+=image.sizeInBytes();
+            for(const auto& plane:workspace.planes)
+                if(plane&&planes.insert(plane.get()).second)retained+=plane->size()*sizeof(float);
+        }
+    }
     return retained;
 }
 QVariantMap DeepSkyController::calibrationBatchPlan() const {
@@ -520,10 +533,11 @@ QVariantMap DeepSkyController::integrationResources(const QVariantMap& options) 
             }
         }
         for(const auto& [key,bytes]:calibrations)calibrationBytes+=bytes;
-        if(groups.empty()){plan["message"]=tr("Select light frames to estimate resources.");return plan;}
         // Count shared native images and QImages once. Keep the previous result
         // while the new stack is computed, including pipeline caches.
         const auto retained=retainedImageBytes();
+        plan["retainedBytes"]=qulonglong(retained);
+        if(groups.empty()){plan["message"]=tr("Select light frames to estimate resources.");return plan;}
         std::uint64_t peak=retained+calibrationBytes*2+largestCalibration*6,results=0,disk=0,largestResult=0;
         QVariantList rows;
         for(const auto& [name,group]:groups) {
@@ -551,7 +565,7 @@ QVariantMap DeepSkyController::integrationResources(const QVariantMap& options) 
             if(storage.available<disk+256ULL*1024*1024)
                 plan["error"]=tr("Not enough temporary disk space. Choose another folder or fewer exposures.");
         }
-        if(peak>budget)plan["error"]=tr("The estimated memory exceeds the safety budget. Disable diagnostic maps, reduce drizzle scale or use fewer filter groups.");
+        if(peak>budget)plan["error"]=tr("The estimated memory exceeds the safety budget. Close results in other workspaces, disable diagnostic maps, reduce drizzle scale or use fewer filter groups.");
         if(results+largestResult>4ULL*1024*1024*1024 || groups.size()*(options.value("diagnosticMaps").toBool()?4:1)+2>64)
             plan["error"]=tr("The planned results exceed automatic recovery limits (4 GiB / 64 images). Disable maps or process fewer filter groups together.");
     }catch(const std::exception& e){plan["error"]=tr(e.what());}

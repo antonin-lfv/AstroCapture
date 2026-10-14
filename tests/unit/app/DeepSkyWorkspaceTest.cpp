@@ -368,6 +368,18 @@ int main(int argc,char** argv){
         const auto previous=controller.sessionSnapshot();
         const auto plan=controller.integrationResources({{"calibrated",true}});
         ASTRO_TEST_CHECK(!plan["blocked"].toBool() && plan["temporaryBytes"].toULongLong()==160ULL*128*2*12);
+        controller.setMemoryPeers([previous]{return std::vector<app::WorkspaceSnapshot>{previous,previous};});
+        ASTRO_TEST_CHECK(controller.integrationResources({{"calibrated",true}})["retainedBytes"]==plan["retainedBytes"]);
+        app::WorkspaceSnapshot peer;auto peerImage=std::make_shared<processing::FloatImage>();peerImage->width=16;peerImage->height=16;peerImage->rgb.resize(16*16*3);
+        peer.images["result"]=peerImage;peer.planes["edges"]=std::make_shared<const std::vector<float>>(16*16,1.f);peer.previews["display"]=QImage(16,16,QImage::Format_RGB32);
+        controller.setMemoryPeers([peer]{return std::vector<app::WorkspaceSnapshot>{peer,peer};});
+        const auto sharedPlan=controller.integrationResources({{"calibrated",true}});
+        constexpr auto extraBytes=16ULL*16*(3*4+4+4);
+        ASTRO_TEST_CHECK(sharedPlan["workingBytes"].toULongLong()==plan["workingBytes"].toULongLong()+extraBytes);
+        ASTRO_TEST_CHECK(sharedPlan["memoryBudget"]==plan["memoryBudget"]);
+        QCoreApplication::processEvents();
+        ASTRO_TEST_CHECK(root->property("resourcePlan").toMap()["retainedBytes"]==sharedPlan["retainedBytes"]);
+        controller.setMemoryPeers({});
         const auto work=directory.filePath("temporary space é # folder");ASTRO_TEST_CHECK(QDir().mkpath(work));
         controller.chooseIntegrationTemporaryDirectory(QUrl::fromLocalFile(work));
         ASTRO_TEST_CHECK(controller.integrationTemporaryDirectoryUrl().toLocalFile()==QFileInfo(work).canonicalFilePath());

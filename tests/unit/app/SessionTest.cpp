@@ -27,10 +27,23 @@ int main(int argc,char** argv) {
     QTemporaryDir temp;ASTRO_TEST_CHECK(temp.isValid());
     ProcessingController processing;DeepSkyController deep;MosaicController mosaic;
     SessionController session;session.setStorageDirectory(temp.filePath("recovery"));session.setProcessing(&processing);session.setDeepSky(&deep);session.setMosaic(&mosaic);
+    const auto emptyRetained=deep.integrationResources({})["retainedBytes"].toULongLong();
+    int memoryChanges=0;QObject::connect(&deep,&DeepSkyController::changed,[&]{++memoryChanges;});
     auto image=std::make_shared<astro::processing::FloatImage>();image->width=12;image->height=8;image->rgb.resize(12*8*3);
     for(std::size_t i=0;i<image->rgb.size();++i)image->rgb[i]=float(i)*.0091f-.13f; // Preserve negative and HDR float samples.
     ImageDocument doc;doc.pixels=image;doc.preview=QImage(12,8,QImage::Format_RGB32);doc.preview.fill(Qt::gray);doc.name="Missing source";doc.protectedPaths={temp.filePath("gone.tif")};doc.annotation={{"technicalText","Custom metadata"}};doc.edgeMask=std::make_shared<const std::vector<float>>(96,.75f);
     ASTRO_TEST_CHECK(processing.openDocument(QVariant::fromValue(doc)));
+    const auto processingRetained=deep.integrationResources({})["retainedBytes"].toULongLong();
+    ASTRO_TEST_CHECK(memoryChanges>0&&processingRetained>=emptyRetained+image->rgb.size()*sizeof(float)+doc.edgeMask->size()*sizeof(float)+doc.preview.sizeInBytes());
+    // Transferred results share their pixels, mask and preview between spaces.
+    WorkspaceSnapshot shared;shared.images["result"]=image;shared.planes["edges"]=doc.edgeMask;shared.previews["display"]=doc.preview;
+    ASTRO_TEST_CHECK(mosaic.canRestoreSession(shared));mosaic.restoreSession(shared);
+    ASTRO_TEST_CHECK(deep.integrationResources({})["retainedBytes"].toULongLong()==processingRetained);
+    auto independent=std::make_shared<astro::processing::FloatImage>(*image);shared.images["result"]=independent;mosaic.restoreSession(shared);
+    ASTRO_TEST_CHECK(deep.integrationResources({})["retainedBytes"].toULongLong()==processingRetained+independent->rgb.size()*sizeof(float));
+    session.setMosaic(nullptr);ASTRO_TEST_CHECK(deep.integrationResources({})["retainedBytes"].toULongLong()==processingRetained);
+    session.setProcessing(nullptr);ASTRO_TEST_CHECK(deep.integrationResources({})["retainedBytes"].toULongLong()==emptyRetained);
+    mosaic.restoreSession({});session.setProcessing(&processing);session.setMosaic(&mosaic);
     auto incomplete=processing.sessionSnapshot();incomplete.previews.remove("after");ASTRO_TEST_CHECK(!processing.canRestoreSession(incomplete));
     session.setUiState({{"tab","processing"},{"custom",.12345}});
     ASTRO_TEST_CHECK(session.saveNow());wait(session);ASTRO_TEST_CHECK(session.recoveryAvailable());

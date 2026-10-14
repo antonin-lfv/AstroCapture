@@ -5854,6 +5854,7 @@ Résultat obtenu :
     </context>
     <context>
         <name>astro::app::DeepSkyController</name>
+    <message><source>The estimated memory exceeds the safety budget. Close results in other workspaces, disable diagnostic maps, reduce drizzle scale or use fewer filter groups.</source><translation>La mémoire estimée dépasse le budget de sécurité. Fermez des résultats dans les autres espaces, désactivez les cartes de diagnostic, réduisez le facteur drizzle ou traitez moins de groupes de filtres.</translation></message>
         <message>
             <location filename="../src/DeepSkyController.cpp" line="172" />
             <source>Cancelled. Previous results are preserved.</source>

@@ -56,6 +56,7 @@ public:
     QVariant exportSizeInput() const { return QVariant::fromValue(ExportSizeInput{result_,annotationImage_}); }
     Q_INVOKABLE QVariant processingDocument() const;
     WorkspaceSnapshot sessionSnapshot() const;
+    WorkspaceSnapshot imageSnapshot() const;
     bool canRestoreSession(const WorkspaceSnapshot&) const;
     void restoreSession(const WorkspaceSnapshot&);
     Q_INVOKABLE void addImages(const QList<QUrl>& urls);

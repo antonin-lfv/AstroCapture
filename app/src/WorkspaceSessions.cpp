@@ -16,11 +16,15 @@ bool validImage(const std::shared_ptr<const processing::FloatImage>& p) {
 
 }
 WorkspaceSnapshot ProcessingController::sessionSnapshot() const {
-    WorkspaceSnapshot s;
+    auto s=imageSnapshot();
     s.state={{"annotation",annotation_},{"applied",appliedSettings_},{"index",index_},{"showingResult",showingResult_},{"summary",stackSummary_},{"label",imageLabel_},{"qualities",qualities_},{"still",stillImage()}};
     if(source_)s.state["source"]=QVariantMap{{"path",source_->path},{"width",source_->width},{"height",source_->height},{"count",source_->count},{"bits",source_->bits}};
     s.state["document"]=QVariantMap{{"name",document_.name},{"export",document_.exportSuggestion.toString()},{"protected",document_.protectedPaths},{"mosaicCount",document_.mosaicImageCount},{"processingSummary",document_.processingSummary}};
     QVariantList ranks;for(const auto& r:ranks_)ranks<<QVariantMap{{"index",r.index},{"quality",r.quality}};s.state["ranks"]=ranks;
+    return s;
+}
+WorkspaceSnapshot ProcessingController::imageSnapshot() const {
+    WorkspaceSnapshot s;
     if(stack_)s.images["stack"]=stack_;if(result_)s.images["result"]=result_;if(frameCache_)s.images["frame"]=frameCache_;
     if(document_.edgeMask)s.planes["edges"]=document_.edgeMask;
     if(!geometryPreview_.isNull())s.previews["geometry"]=geometryPreview_;if(!preview_.isNull())s.previews["display"]=preview_;if(!beforePreview_.isNull())s.previews["before"]=beforePreview_;if(!afterPreview_.isNull())s.previews["after"]=afterPreview_;
@@ -50,9 +54,13 @@ void ProcessingController::restoreSession(const WorkspaceSnapshot& s) {
     geometryPreview_=s.previews.value("geometry",s.previews.value("before"));preview_=s.previews.value("display");beforePreview_=s.previews.value("before");afterPreview_=s.previews.value("after");pendingAdjustments_.reset();pendingSeek_.reset();++adjustmentRevision_;progress_=100;updateAnnotation();status_=tr("Session restored. Cached results are ready.");emit changed();emit imageChanged();
 }
 WorkspaceSnapshot MosaicController::sessionSnapshot() const {
-    WorkspaceSnapshot s;s.state={{"annotation",annotation_},{"resultCount",resultCount_}};
+    auto s=imageSnapshot();s.state={{"annotation",annotation_},{"resultCount",resultCount_}};
     QVariantList inputs,excluded;auto row=[](const Input& i){return QVariantMap{{"path",i.path},{"width",i.width},{"height",i.height},{"selected",i.selected}};};
     for(const auto& i:inputs_)inputs<<row(i);for(const auto& i:excluded_)excluded<<row(i);s.state["inputs"]=inputs;s.state["excluded"]=excluded;
+    return s;
+}
+WorkspaceSnapshot MosaicController::imageSnapshot() const {
+    WorkspaceSnapshot s;
     if(result_)s.images["result"]=result_;if(edgeMask_)s.planes["edges"]=edgeMask_;if(!preview_.isNull())s.previews["display"]=preview_;
     return s;
 }

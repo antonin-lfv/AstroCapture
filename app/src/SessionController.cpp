@@ -13,8 +13,8 @@ void SessionController::updateMemoryPeers() {
     if(!deepSky_)return;
     deepSky_->setMemoryPeers([processing=processing_,mosaic=mosaic_] {
         std::vector<WorkspaceSnapshot> snapshots;
-        if(processing)snapshots.push_back(processing->sessionSnapshot());
-        if(mosaic)snapshots.push_back(mosaic->sessionSnapshot());
+        if(processing)snapshots.push_back(processing->imageSnapshot());
+        if(mosaic)snapshots.push_back(mosaic->imageSnapshot());
         return snapshots;
     });
 }

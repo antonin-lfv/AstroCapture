@@ -79,6 +79,7 @@ public:
   QImage beforeImage() const { return beforePreview_; }
   QVariantMap appliedSettings() const { return appliedSettings_; }
   WorkspaceSnapshot sessionSnapshot() const;
+  WorkspaceSnapshot imageSnapshot() const;
   bool canRestoreSession(const WorkspaceSnapshot&) const;
   void restoreSession(const WorkspaceSnapshot&);
   QUrl sourceUrl() const { return source_ ? QUrl::fromLocalFile(source_->path) : QUrl{}; }

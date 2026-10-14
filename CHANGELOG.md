@@ -11,6 +11,10 @@
 - Reject incomplete or invalid restored object coordinates without overwriting the saved settings or adding an invalid favourite; allow recovery by selecting a valid catalogue object.
 - Prevent saving a place with default coordinates when the initial observation calculation has failed.
 - Report an unavailable saved object at startup and wait for an explicit catalogue or manual-coordinate choice, preserving its saved settings instead of silently selecting the Moon. Keep automatic suggestions paused and provide a recovery action at the top of Observation.
+- Validate automatic-recovery workspace, asset and pixel-size limits before writing files; preserve the previous recovery across abrupt process exits during saving.
+- Include images, previews and masks retained by Processing and Mosaic in the existing Deep Sky memory budget, counting shared buffers once and updating the resource estimate immediately.
+- Reuse each topocentric solar position for altitude and day/night classification during Observation map updates, preserving the exact astronomical results while reducing cursor calculation time.
+- Bound city searches to 15 seconds even when a remote response continues arriving slowly; preserve previous results on failure.
 - Build the macOS DMG from a fresh deployment copy, verify it before replacement and retain previous installers. Generate and verify the Linux ZIP automatically, including launch instructions, camera access rules and an AppImage checksum.
 - Update French labels, the Observation Guide and README.
 

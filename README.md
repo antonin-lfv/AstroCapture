@@ -152,6 +152,11 @@ Les formats acceptés comprennent **FITS, RAW à matrice Bayer, PNG et TIFF**.
 Les outils avancés, comme la composition de plusieurs filtres, les masques et
 les réglages séparés des étoiles et du fond, restent disponibles dans Finition.
 
+L’estimation mémoire de **Ciel profond** tient aussi compte des images ouvertes
+dans **Traitement** et **Mosaïque**. Une même image partagée entre plusieurs
+espaces est comptée une seule fois. Si le budget est dépassé, sauvegardez puis
+fermez les résultats dont vous n’avez plus besoin avant de relancer le calcul.
+
 ### 🪐 Traiter la Lune ou une planète
 
 Dans **Traitement**, ouvrez votre vidéo **SER**, un format courant en

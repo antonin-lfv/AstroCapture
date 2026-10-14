@@ -1324,6 +1324,19 @@ int main(int argc, char **argv) {
     empty.removeSite(-1);
     empty.toggleFavoriteSite(20);
     ASTRO_TEST_CHECK(empty.sites().size() == 11);
+    // A malformed stored coordinate must not silently become zero. Invalid
+    // legacy website data is ignored without discarding a valid saved site.
+    auto valid = empty.sites().first().toMap();
+    auto corrupt = valid;
+    corrupt["latitude"] = "broken latitude";
+    auto missing = valid;
+    missing.remove("longitude");
+    valid["website"] = "file:///tmp/untrusted";
+    QSettings().setValue("observation/savedSites", QVariantList{corrupt, missing, valid});
+    ObservationController checked;
+    ASTRO_TEST_CHECK(checked.sites().size() == 11);
+    ASTRO_TEST_CHECK(checked.sites().last().toMap()["name"] == valid["name"]);
+    ASTRO_TEST_CHECK(checked.sites().last().toMap()["website"].toString().isEmpty());
   }
   app.setApplicationName(applicationName);
   return 0;

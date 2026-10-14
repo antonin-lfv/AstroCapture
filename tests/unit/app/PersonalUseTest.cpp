@@ -211,6 +211,19 @@ static int workspace(const QString& directory,bool restore,bool faults=false) {
         ASTRO_TEST_CHECK(observation->instant()["utcSeconds"] == selectedUtc);
         ASTRO_TEST_CHECK(workspace->property("selectedSiteIndex").toInt() == -1);
         capture(window, "place-removed-900");
+        observation->removeSite(1);
+        auto* options = workspace->findChild<QObject*>("observationOptionsDialog");
+        ASTRO_TEST_CHECK(options && QMetaObject::invokeMethod(options, "open"));
+        evaluate(workspace, "advanced.expanded = true");
+        for (const auto size : {QSize(1440,960), QSize(1100,800), QSize(900,700)}) {
+            window->resize(size);
+            capture(window, QString("restore-places-%1").arg(size.width()));
+        }
+        click(workspace, "observationRestorePresetSites");
+        ASTRO_TEST_CHECK(observation->sites().size() == 10);
+        ASTRO_TEST_CHECK(!observation->hasHiddenPresetSites());
+        ASTRO_TEST_CHECK(observation->instant()["utcSeconds"] == selectedUtc);
+        ASTRO_TEST_CHECK(QMetaObject::invokeMethod(options, "close"));
         window->setProperty("quitApproved", true);
         return 0;
     }

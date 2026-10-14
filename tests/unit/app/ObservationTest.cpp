@@ -1376,6 +1376,9 @@ int main(int argc, char **argv) {
         ASTRO_TEST_CHECK(!reopened.error().isEmpty());
         ASTRO_TEST_CHECK(reopened.samples().isEmpty());
         ASTRO_TEST_CHECK(reopened.result().isEmpty());
+        const auto placesBeforeRecovery = reopened.sites();
+        ASTRO_TEST_CHECK(!reopened.saveSite("Place before recovery"));
+        ASTRO_TEST_CHECK(reopened.sites() == placesBeforeRecovery);
         reopened.toggleFavoriteTarget();
         ASTRO_TEST_CHECK(!reopened.error().isEmpty());
         ASTRO_TEST_CHECK(reopened.favoriteTargets().isEmpty());

@@ -1126,6 +1126,10 @@ void ObservationController::persistSites() {
   prefs.setValue("observation/favorites", favorites);
 }
 bool ObservationController::saveSite(const QString &name, const QString &website) {
+  // A failed initial calculation leaves site_ uninitialized. Keep the original
+  // validation error instead of saving its default coordinates as a new place.
+  if (!start_)
+    return false;
   if (name.trimmed().isEmpty() || name.size() > 100) {
     error_ = tr("Enter a place name (maximum 100 characters).");
     emit changed();

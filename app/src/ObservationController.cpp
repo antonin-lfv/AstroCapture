@@ -121,6 +121,7 @@ ObservationController::ObservationController(QObject *parent)
   for (int i = 0; i < sites_.size(); ++i) {
     auto s = sites_[i].toMap();
     s["presetId"] = presetIds[i];
+    s["label"] = s.value("name");
     sites_[i] = s;
   }
   presetSites_ = sites_;

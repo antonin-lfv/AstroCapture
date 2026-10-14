@@ -1313,6 +1313,8 @@ int main(int argc, char **argv) {
     ASTRO_TEST_CHECK(empty.hasHiddenPresetSites());
     empty.restorePresetSites();
     ASTRO_TEST_CHECK(empty.sites().size() == 11);
+    for (const auto &entry : empty.sites())
+      ASTRO_TEST_CHECK(!entry.toMap()["label"].toString().isEmpty());
     ASTRO_TEST_CHECK(!empty.hasHiddenPresetSites());
     ASTRO_TEST_CHECK(empty.sites().first().toMap()["name"] == "Nouveau jardin");
     ASTRO_TEST_CHECK(empty.settings() == selected);

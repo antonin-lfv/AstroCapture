@@ -49,7 +49,7 @@ class DeepSkyController : public QObject {
     Q_PROPERTY(int progress READ progress NOTIFY changed)
     Q_PROPERTY(QString stage READ stage NOTIFY changed)
     Q_PROPERTY(QString status READ status NOTIFY changed)
-    Q_PROPERTY(QVariantList frames READ frames NOTIFY changed)
+    Q_PROPERTY(QVariantList frames READ frames NOTIFY framesChanged)
     Q_PROPERTY(QStringList groups READ groups NOTIFY changed)
     Q_PROPERTY(QVariantMap compositionState READ compositionState NOTIFY changed)
     Q_PROPERTY(QVariantList integrationReport READ integrationReport NOTIFY changed)
@@ -126,6 +126,7 @@ public:
     bool exporting() const{return busy_ && exporting_;}
     bool restoringProject() const{return restoringProject_;}
     QVariantList missingSources() const;
+    Q_INVOKABLE QVariantList missingSourceList() const { return missingSources(); }
     double portableProjectBytes() const;
     QString projectCacheDirectory() const;
     void setProjectCacheDirectory(const QString& path){if(!busy_){projectCacheDirectory_=path;emit changed();}}
@@ -169,6 +170,7 @@ public:
     Q_INVOKABLE void addFiles(const QList<QUrl>& urls,const QString& role="Light",const QString& group="Auto",double inputScale=0);
     Q_INVOKABLE void addFolder(const QUrl&,const QString& role="Auto",const QString& group="Auto",double inputScale=0);
     Q_INVOKABLE void setSelected(int index,bool selected);
+    Q_INVOKABLE void setSelectedRows(const QVariantList& indices,bool selected);
     Q_INVOKABLE void setRole(int index,const QString& role);
     Q_INVOKABLE void setGroup(int index,const QString& group);
     Q_INVOKABLE void remove(int index);
@@ -204,6 +206,7 @@ public:
     void restoreSession(const WorkspaceSnapshot&);
     Q_INVOKABLE void cancel(){pendingAdjustments_.reset();worker_.request_stop();}
 signals:
+    void framesChanged();
     void targetResolved(const QVariantMap& position);
     void maskFileChanged();
     void catalogCalibrationReady(const QVariantMap& settings);
@@ -226,6 +229,7 @@ private:
     void restoreProject(const WorkspaceSnapshot&, const QUrl&, const QString&);
     std::uint64_t retainedImageBytes() const;
     std::function<std::vector<WorkspaceSnapshot>()> memoryPeers_;
+    void importFiles(QList<QUrl>,const QUrl& folder,const QString& role,const QString& group,double scale);
     void run(const QString&,std::function<void(std::stop_token)>);
     void post(std::function<void()>);
     void show(std::shared_ptr<const processing::FloatImage>,bool result, QImage preview, std::shared_ptr<const processing::FloatImage> displayed, QVariantMap stretch, QImage before = {});

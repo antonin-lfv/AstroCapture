@@ -9,6 +9,7 @@
 #include <QTemporaryFile>
 #include <astro/recording/TiffWriter.hpp>
 #include <algorithm>
+#include <set>
 #include <cmath>
 #include <stdexcept>
 namespace astro::app {
@@ -113,23 +114,34 @@ QVariant MosaicController::processingDocument() const {
     return QVariant::fromValue(ImageDocument{result_,preview_,annotation_,tr("Mosaic"),QUrl::fromLocalFile(folder.filePath("mosaic-processed.tif")),originals,edgeMask_,resultCount_});
 }
 void MosaicController::addImages(const QList<QUrl>& urls) {
-    if(busy_) return;
-    int added=0,rejected=0;
-    for(const auto& url:urls) {
-        if(!url.isLocalFile()) {++rejected;continue;}
-        const QFileInfo info(url.toLocalFile()); const auto path=info.canonicalFilePath();
-        if(std::any_of(inputs_.begin(),inputs_.end(),[&](const auto& i){return i.path==path;})) continue;
-        const auto suffix=info.suffix().toLower();
-        if(path.isEmpty() || !QStringList{"tif","tiff","png","jpg","jpeg"}.contains(suffix) || inputs_.size()>=100) {++rejected;continue;}
-        QImageReader reader(path); reader.setAutoTransform(true); auto size=reader.size();
-        if(int(reader.transformation()) & int(QImageIOHandler::TransformationRotate90)) size.transpose();
-        if(!reader.canRead() || size.width()<64 || size.height()<64 || std::uint64_t(size.width())*size.height()>24000000) {++rejected;continue;}
-        inputs_.push_back({path,size.width(),size.height()}); ++added;
-    }
-    if(added) { invalidate(); emit filesChanged(); }
-    status_=tr("%1 images ready. Add overlapping views, then assemble.").arg(inputs_.size());
-    if(rejected) status_+=tr(" · %1 skipped (unsupported, too large or over the 100-image limit)").arg(rejected);
-    emit changed();
+    if(busy_ || urls.isEmpty()) return;
+    const auto existing=inputs_;
+    status_=tr("Reading images…");
+    run([this,urls,existing](std::stop_token stop) {
+        auto inputs=existing;int added=0,rejected=0;
+        std::set<QString> seen;for(const auto& input:inputs)seen.insert(input.path);
+        for(const auto& url:urls) {
+            check(stop);
+            if(!url.isLocalFile()) {++rejected;continue;}
+            const QFileInfo info(url.toLocalFile());const auto suffix=info.suffix().toLower();
+            if(!QStringList{"tif","tiff","png","jpg","jpeg"}.contains(suffix)) {++rejected;continue;}
+            const auto path=info.canonicalFilePath();
+            if(seen.contains(path))continue;
+            if(path.isEmpty() || inputs.size()>=100) {++rejected;continue;}
+            QImageReader reader(path);reader.setAutoTransform(true);auto size=reader.size();
+            if(int(reader.transformation()) & int(QImageIOHandler::TransformationRotate90))size.transpose();
+            if(!reader.canRead() || size.width()<64 || size.height()<64 || std::uint64_t(size.width())*size.height()>24000000) {++rejected;continue;}
+            inputs.push_back({path,size.width(),size.height()});seen.insert(path);++added;
+        }
+        check(stop);
+        post([this,inputs=std::move(inputs),added,rejected,stop]() mutable {
+            if(stop.stop_requested())return;
+            if(added){inputs_=std::move(inputs);invalidate();emit filesChanged();}
+            status_=tr("%1 images ready. Add overlapping views, then assemble.").arg(inputs_.size());
+            if(rejected)status_+=tr(" · %1 skipped (unsupported, too large or over the 100-image limit)").arg(rejected);
+            emit changed();
+        });
+    });
 }
 void MosaicController::removeImage(int index) {
     if(busy_ || index<0 || index>=int(inputs_.size())) return;

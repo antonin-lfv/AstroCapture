@@ -258,24 +258,35 @@ void DeepSkyController::estimatePsf(){
     const auto image=linear_;const auto settings=finishSettings_;auto test=settings;test["deconvolution"]=true;if(!checkedDeepSkySettings(test)){status_=tr("PSF estimation requires a linear, unrotated recipe input. Remove earlier stretches or use a new version.");emit changed();return;}
     run(tr("Measuring stellar PSF…"),[this,image,settings](std::stop_token stop){const auto checkpoint=[stop]{check(stop);};auto source=evaluateOperations(*image,settings["operations"].toList(),checkpoint);auto f=finishFromSettings(settings);if(f.background)source=processing::extractBackground(source,f.backgroundOptions,checkpoint).image;auto scientific=settings;scientific["deconvolution"]=false;source=scientificPreparation(source,scientific,checkpoint);const auto measured=processing::estimatePsf(source,checkpoint);post([this,stop,measured]{if(stop.stop_requested())return;advancedReport_["estimatedFwhm"]=measured.fwhm;advancedReport_["estimatedScatter"]=measured.scatter;advancedReport_["estimatedStars"]=measured.stars;status_=tr("PSF measured from %1 stars. Review the estimate before using it.").arg(measured.stars);emit changed();});});
 }
-void DeepSkyController::setRole(int index,const QString& role){if(busy_||index<0||index>=frames_.size()||!QStringList{"Light","Dark","Flat","Bias","DarkFlat","BadPixels"}.contains(role))return;auto row=frames_[index].toMap();if(row["master"].toBool())return;if(references_.contains(row["group"].toString())&&references_[row["group"].toString()]==row["path"].toString())references_.erase(row["group"].toString());row["role"]=role;row["reference"]=false;frames_[index]=row;emit changed();}
-void DeepSkyController::setGroup(int index,const QString& group){if(busy_||index<0||index>=frames_.size())return;auto row=frames_[index].toMap();const auto previous=row["group"].toString();if(references_.contains(previous)&&references_[previous]==row["path"].toString())references_.erase(previous);row["group"]=groupName(group);row["reference"]=false;frames_[index]=row;emit changed();}
+void DeepSkyController::setRole(int index,const QString& role){if(busy_||index<0||index>=frames_.size()||!QStringList{"Light","Dark","Flat","Bias","DarkFlat","BadPixels"}.contains(role))return;auto row=frames_[index].toMap();if(row["master"].toBool())return;if(references_.contains(row["group"].toString())&&references_[row["group"].toString()]==row["path"].toString())references_.erase(row["group"].toString());row["role"]=role;row["reference"]=false;frames_[index]=row;emit framesChanged();emit changed();}
+void DeepSkyController::setGroup(int index,const QString& group){if(busy_||index<0||index>=frames_.size())return;auto row=frames_[index].toMap();const auto previous=row["group"].toString();if(references_.contains(previous)&&references_[previous]==row["path"].toString())references_.erase(previous);row["group"]=groupName(group);row["reference"]=false;frames_[index]=row;emit framesChanged();emit changed();}
 void DeepSkyController::addFolder(const QUrl& url,const QString& role,const QString& group,double scale){
-    if(busy_||!url.isLocalFile())return;QList<QUrl> files;
-    QDirIterator iterator(url.toLocalFile(),QDir::Files|QDir::NoSymLinks,QDirIterator::Subdirectories);
-    const QStringList formats{"fit","fits","fts","fz","tif","tiff","png","cr2","cr3","nef","nrw","arw","dng","orf","raf","rw2","pef"};
-    while(iterator.hasNext()){const auto path=iterator.next();const auto name=QFileInfo(path).completeBaseName().toLower();if(role=="Auto"&&(name.startsWith("result")||name.startsWith("stack")||name.endsWith("-processed")||name=="rvb"||name=="hoo"))continue;if(formats.contains(QFileInfo(path).suffix().toLower()))files<<QUrl::fromLocalFile(path);if(files.size()>2000){status_=tr("Projects are limited to 2000 files.");emit changed();return;}}
-    std::sort(files.begin(),files.end(),[](const QUrl& a,const QUrl& b){return a.toString()<b.toString();});addFiles(files,role,group,scale);
+    if(!url.isLocalFile())return;
+    importFiles({},url,role,group,scale);
 }
 void DeepSkyController::addFiles(const QList<QUrl>& urls,const QString& role,const QString& group,double scale) {
+    importFiles(urls,{},role,group,scale);
+}
+void DeepSkyController::importFiles(QList<QUrl> urls,const QUrl& folder,const QString& role,const QString& group,double scale) {
     if(busy_)return;
     if(!QStringList{"Auto","Light","Dark","Flat","Bias","DarkFlat","BadPixels"}.contains(role)||!std::isfinite(scale)||scale<0){status_=tr("Invalid import settings.");emit changed();return;}
     if(frames_.size()+urls.size()>2000){status_=tr("Projects are limited to 2000 files.");emit changed();return;}
     const auto existing=frames_;
-    run(tr("Reading images and detecting stars…"),[this,urls,role,group,scale,existing](std::stop_token stop){
+    run(tr("Reading images and detecting stars…"),[this,urls=std::move(urls),folder,role,group,scale,existing](std::stop_token stop) mutable {
+        if(!folder.isEmpty()) {
+            QDirIterator iterator(folder.toLocalFile(),QDir::Files|QDir::NoSymLinks,QDirIterator::Subdirectories);
+            const QStringList formats{"fit","fits","fts","fz","tif","tiff","png","cr2","cr3","nef","nrw","arw","dng","orf","raf","rw2","pef"};
+            while(iterator.hasNext()) {
+                check(stop);const auto path=iterator.next();const QFileInfo info(path);const auto name=info.completeBaseName().toLower();
+                if(role=="Auto"&&(name.startsWith("result")||name.startsWith("stack")||name.endsWith("-processed")||name=="rvb"||name=="hoo"))continue;
+                if(formats.contains(info.suffix().toLower()))urls<<QUrl::fromLocalFile(path);
+                if(existing.size()+urls.size()>2000)throw std::runtime_error("Projects are limited to 2000 files.");
+            }
+            std::sort(urls.begin(),urls.end(),[](const QUrl& a,const QUrl& b){return a.toString()<b.toString();});
+        }
         QVariantList added;QStringList errors;std::set<QString> seen;
         for(const auto& value:existing)seen.insert(value.toMap()["path"].toString());
-        std::shared_ptr<processing::FloatImage> first;
+        std::shared_ptr<processing::FloatImage> first;int lastProgress=-1;
         for(int n=0;n<urls.size();++n) {
             check(stop);const auto& url=urls[n];
             if(!url.isLocalFile())continue;
@@ -311,23 +322,34 @@ void DeepSkyController::addFiles(const QList<QUrl>& urls,const QString& role,con
                 if(!first)first=rgb;
                 added<<row;
             }catch(const std::runtime_error& e){errors<<QFileInfo(path).fileName()+": "+QString::fromUtf8(e.what());}
-            post([this,n,total=int(urls.size())]{progress_=(n+1)*100/std::max(1,total);emit changed();});
+            const int progress=(n+1)*100/std::max(1,int(urls.size()));
+            if(progress!=lastProgress){lastProgress=progress;post([this,progress]{progress_=progress;emit changed();});}
         }
         const auto display=first?prepare(*first):Display{};
         check(stop);
-        post([this,added,errors,first,display,stop]{if(stop.stop_requested())return;frames_+=added;status_=tr("%1 images imported.").arg(added.size());if(!errors.isEmpty())status_+="\n"+errors.join("\n");if(first&&!hasResult()){sourceRow_=added.front().toMap();sourceDebayer_=sourceAutoStretch_=true;sourceInterpretation_=sourceRow_["channels"].toInt()==3?tr("RGB source · three channels"):sourceRow_["bayer"].toString()!="None"?tr("Bayer %1 source · color preview is debayered").arg(sourceRow_["bayer"].toString()):tr("Monochrome source · one channel");show(first,false,display.preview,display.pixels,display.stretch);}emit changed();});
+        post([this,added,errors,first,display,stop]{if(stop.stop_requested())return;frames_+=added;emit framesChanged();status_=tr("%1 images imported.").arg(added.size());if(!errors.isEmpty())status_+="\n"+errors.join("\n");if(first&&!hasResult()){sourceRow_=added.front().toMap();sourceDebayer_=sourceAutoStretch_=true;sourceInterpretation_=sourceRow_["channels"].toInt()==3?tr("RGB source · three channels"):sourceRow_["bayer"].toString()!="None"?tr("Bayer %1 source · color preview is debayered").arg(sourceRow_["bayer"].toString()):tr("Monochrome source · one channel");show(first,false,display.preview,display.pixels,display.stretch);}emit changed();});
     });
 }
-void DeepSkyController::setSelected(int index,bool selected){if(busy_||index<0||index>=frames_.size())return;auto row=frames_[index].toMap();row["selected"]=selected;frames_[index]=row;emit changed();}
+void DeepSkyController::setSelected(int index,bool selected){if(busy_||index<0||index>=frames_.size())return;auto row=frames_[index].toMap();row["selected"]=selected;frames_[index]=row;emit framesChanged();emit changed();}
+void DeepSkyController::setSelectedRows(const QVariantList& indices,bool selected) {
+    if(busy_)return;bool modified=false;
+    for(const auto& value:indices) {
+        bool ok=false;const int index=value.toInt(&ok);
+        if(!ok||index<0||index>=frames_.size())continue;
+        auto row=frames_[index].toMap();if(row["selected"].toBool()==selected)continue;
+        row["selected"]=selected;frames_[index]=row;modified=true;
+    }
+    if(modified){emit framesChanged();emit changed();}
+}
 void DeepSkyController::setReference(int index) {
     if(busy_||index<0||index>=frames_.size())return;
     const auto row=frames_[index].toMap();if(row["role"]!="Light"||!row["selected"].toBool())return;
     const auto group=row["group"].toString();references_[group]=row["path"].toString();
     for(int n=0;n<frames_.size();++n){auto item=frames_[n].toMap();if(item["group"].toString()==group)item["reference"]=n==index;frames_[n]=item;}
-    emit changed();
+    emit framesChanged();emit changed();
 }
-void DeepSkyController::remove(int index){if(busy_||index<0||index>=frames_.size())return;frames_.removeAt(index);emit changed();}
-void DeepSkyController::clear(){if(busy_)return;compositionState_.clear();calibrationBatchResults_.clear();diagnosticMaps_.clear();hdrReport_.clear();diagnosticPreview_={};diagnosticInfo_.clear();emit diagnosticChanged();integrationReport_.clear();starsLayer_.reset();starBackgroundLayer_.reset();starsLayerPreview_={};starBackgroundLayerPreview_={};starLayerView_=0;projectUrl_=QUrl();sourceFingerprints_.clear();maskImportPreview_={};maskImportPath_.clear();geometryPreview_={};maskSourcePreview_={};advancedReport_.clear();psfKernel_.clear();maskPreview_={};showingMask_=false;projectOptions_.clear();sourceRow_.clear();sourceInterpretation_.clear();sourceDebayer_=sourceAutoStretch_=true;finishSettings_.clear();rawPreview_={};backgroundPreview_={};showingBackgroundModel_=false;rawName_.clear();comparingRaw_=false;histogram_.clear();pendingAdjustments_.reset();displayingResult_=false;stage_.clear();frames_.clear();backgroundSamples_.clear();references_.clear();stacks_.clear();astrometry_.clear();stackAstrometry_.clear();groupExposure_.clear();groupCounts_.clear();exposureCount_=0;resultFilters_.clear();groups_.clear();linear_.reset();finished_.reset();pipelineCache_.reset();pipelineSource_.reset();pipelineCacheKey_.clear();preview_={};resultPreview_={};linearPreview_={};comparisonPreview_={};comparisonOrientationKey_.clear();status_.clear();emit projectOptionsChanged();emit changed();emit imageChanged();}
+void DeepSkyController::remove(int index){if(busy_||index<0||index>=frames_.size())return;frames_.removeAt(index);emit framesChanged();emit changed();}
+void DeepSkyController::clear(){if(busy_)return;compositionState_.clear();calibrationBatchResults_.clear();diagnosticMaps_.clear();hdrReport_.clear();diagnosticPreview_={};diagnosticInfo_.clear();emit diagnosticChanged();integrationReport_.clear();starsLayer_.reset();starBackgroundLayer_.reset();starsLayerPreview_={};starBackgroundLayerPreview_={};starLayerView_=0;projectUrl_=QUrl();sourceFingerprints_.clear();maskImportPreview_={};maskImportPath_.clear();geometryPreview_={};maskSourcePreview_={};advancedReport_.clear();psfKernel_.clear();maskPreview_={};showingMask_=false;projectOptions_.clear();sourceRow_.clear();sourceInterpretation_.clear();sourceDebayer_=sourceAutoStretch_=true;finishSettings_.clear();rawPreview_={};backgroundPreview_={};showingBackgroundModel_=false;rawName_.clear();comparingRaw_=false;histogram_.clear();pendingAdjustments_.reset();displayingResult_=false;stage_.clear();frames_.clear();backgroundSamples_.clear();references_.clear();stacks_.clear();astrometry_.clear();stackAstrometry_.clear();groupExposure_.clear();groupCounts_.clear();exposureCount_=0;resultFilters_.clear();groups_.clear();linear_.reset();finished_.reset();pipelineCache_.reset();pipelineSource_.reset();pipelineCacheKey_.clear();preview_={};resultPreview_={};linearPreview_={};comparisonPreview_={};comparisonOrientationKey_.clear();status_.clear();emit projectOptionsChanged();emit framesChanged();emit changed();emit imageChanged();}
 void DeepSkyController::chooseRawComparison(int index){
     if(busy_||index<0||index>=frames_.size()||frames_[index].toMap()["role"]!="Light")return;
     const auto row=frames_[index].toMap();
@@ -494,7 +516,7 @@ void DeepSkyController::importCalibrationMaster(const QUrl& url,const QString& r
     if(!url.isLocalFile())return;run(tr("Importing a calibration master…"),[this,url,role,name,correctedFlat](std::stop_token stop){auto a=recording::readAstroImage(url.toLocalFile().toStdString());if(role=="Flat"){if(!a.normalizedMasterFlat&&!correctedFlat)throw std::runtime_error("Confirm that the imported flat is already bias/dark-flat corrected.");if(!a.normalizedMasterFlat)a=processing::masterFrame(1,[&](int){return a;},true,[stop]{check(stop);});a.normalizedMasterFlat=true;}a.masterRole=role.toStdString();const auto r=storeCalibrationMaster(std::move(a),name,stop);post([this,r]{status_=tr("Master imported: %1. Original file preserved.").arg(r["name"].toString());emit changed();});});
 }
 void DeepSkyController::useCalibrationMaster(const QString& id,bool reviewed){
-    const auto frames=frames_;run(tr("Checking calibration master…"),[this,id,frames,reviewed](std::stop_token stop){auto r=calibrationMaster(id,stop);const auto c=masterCompatibility(r,frames);if(c["compatibility"].toInt()==2)throw std::runtime_error((tr("Master incompatible: %1").arg(c["mismatch"].toString())).toStdString());if(c["compatibility"].toInt()==1&&!reviewed)throw std::runtime_error((tr("Check missing metadata before using this master: %1").arg(c["missing"].toString())).toStdString());r["masterHash"]=r["hash"];r["sourceFingerprint"]=ProjectStorage::fingerprint(r["path"].toString(),[stop]{check(stop);});r["selected"]=true;r["scale"]=0;check(stop);post([this,r]{for(int n=0;n<frames_.size();++n){auto old=frames_[n].toMap();if(old["role"]==r["role"]&&(r["role"]!="Flat"||old["group"]==r["group"])){old["selected"]=false;frames_[n]=old;}}bool found=false;for(auto& v:frames_)if(v.toMap()["path"]==r["path"]){v=r;found=true;}if(!found)frames_<<r;status_=tr("Master selected: %1. Other files in this calibration role are deselected.").arg(r["name"].toString());emit changed();});});
+    const auto frames=frames_;run(tr("Checking calibration master…"),[this,id,frames,reviewed](std::stop_token stop){auto r=calibrationMaster(id,stop);const auto c=masterCompatibility(r,frames);if(c["compatibility"].toInt()==2)throw std::runtime_error((tr("Master incompatible: %1").arg(c["mismatch"].toString())).toStdString());if(c["compatibility"].toInt()==1&&!reviewed)throw std::runtime_error((tr("Check missing metadata before using this master: %1").arg(c["missing"].toString())).toStdString());r["masterHash"]=r["hash"];r["sourceFingerprint"]=ProjectStorage::fingerprint(r["path"].toString(),[stop]{check(stop);});r["selected"]=true;r["scale"]=0;check(stop);post([this,r]{for(int n=0;n<frames_.size();++n){auto old=frames_[n].toMap();if(old["role"]==r["role"]&&(r["role"]!="Flat"||old["group"]==r["group"])){old["selected"]=false;frames_[n]=old;}}bool found=false;for(auto& v:frames_)if(v.toMap()["path"]==r["path"]){v=r;found=true;}if(!found)frames_<<r;status_=tr("Master selected: %1. Other files in this calibration role are deselected.").arg(r["name"].toString());emit framesChanged();emit changed();});});
 }
 void DeepSkyController::removeCalibrationMasterEntry(const QString& id){if(busy_)return;try{removeCalibrationMaster(id);status_=tr("Master removed from the library. Its FITS file is retained for existing projects.");}catch(const std::exception& e){status_=tr(e.what());}emit changed();}
 QString DeepSkyController::integrationTemporaryDirectory() const {
@@ -950,7 +972,7 @@ void DeepSkyController::loadProject(const QUrl& url) {
         options["versions"]=*checked;
         options["finish"]=(*checked)[(*checked)["active"].toString()];
     }
-    clear();projectUrl_=url;sourceFingerprints_=object["sources"].toObject().toVariantMap();projectOptions_=std::move(options);emit projectOptionsChanged();frames_=std::move(frames);for(const auto& value:frames_){const auto row=value.toMap();if(row["reference"].toBool())references_[row["group"].toString()]=row["path"].toString();}status_=missingSources().isEmpty()?tr("Project loaded. Integrate to recreate the result."):tr("Project loaded. Find the moved sources before integrating.");emit projectOpened(url);emit changed();
+    clear();projectUrl_=url;sourceFingerprints_=object["sources"].toObject().toVariantMap();projectOptions_=std::move(options);emit projectOptionsChanged();frames_=std::move(frames);for(const auto& value:frames_){const auto row=value.toMap();if(row["reference"].toBool())references_[row["group"].toString()]=row["path"].toString();}status_=missingSources().isEmpty()?tr("Project loaded. Integrate to recreate the result."):tr("Project loaded. Find the moved sources before integrating.");emit projectOpened(url);emit framesChanged();emit changed();
 }
 QVariant DeepSkyController::processingDocument() const {
     if(!finished_)return {};
@@ -985,9 +1007,11 @@ double DeepSkyController::portableProjectBytes() const { return ProjectStorage::
 QVariantList DeepSkyController::missingSources() const {
     QVariantList missing;
     const auto snapshot=sessionSnapshot();
+    QHash<QString,QVariantMap> rows;
+    for(const auto& value:frames_){const auto row=value.toMap();const auto path=row["path"].toString();if(!rows.contains(path))rows.insert(path,row);}
     for(const auto& path:ProjectStorage::sourcePaths(snapshot))if(!QFileInfo(path).isFile()) {
         auto fingerprint=sourceFingerprints_[path].toMap();QString name=fingerprint["name"].toString();
-        for(const auto& value:frames_) {const auto row=value.toMap();if(row["path"].toString()==path){name=row["name"].toString();fingerprint=row.value("sourceFingerprint",fingerprint).toMap();break;}}
+        if(const auto row=rows.constFind(path);row!=rows.cend()){name=(*row)["name"].toString();fingerprint=row->value("sourceFingerprint",fingerprint).toMap();}
         missing<<QVariantMap{{"path",path},{"name",name.isEmpty()?QFileInfo(path).fileName():name},{"verified",!fingerprint["sha256"].toString().isEmpty()}};
     }
     return missing;

@@ -68,6 +68,7 @@ int main(int argc, char** argv) {
     const auto jpeg = QUrl::fromLocalFile(temp.filePath("planète 2.jpg"));
     ASTRO_TEST_CHECK(image.save(png.toLocalFile()));
     ASTRO_TEST_CHECK(image.save(jpeg.toLocalFile()));
+    auto waitImport=[&]{QElapsedTimer t;t.start();while(controller.busy()&&t.elapsed()<15000){QCoreApplication::processEvents();QThread::msleep(1);}ASTRO_TEST_CHECK(!controller.busy());};
     auto drop = [&](const QList<QUrl>& urls) {
         QMimeData mime;
         mime.setUrls(urls);
@@ -79,7 +80,7 @@ int main(int argc, char** argv) {
         QDropEvent event(QPointF(500, 350), Qt::CopyAction, &mime, Qt::LeftButton, Qt::NoModifier);
         QCoreApplication::sendEvent(&window, &event);
         QCoreApplication::processEvents();
-        return event.isAccepted();
+        waitImport();return event.isAccepted();
     };
     ASTRO_TEST_CHECK(!drop({QUrl("https://example.org/remote.png")}));
     ASTRO_TEST_CHECK(!drop({QUrl::fromLocalFile(temp.filePath("video.ser"))}));
@@ -107,7 +108,7 @@ int main(int argc, char** argv) {
     ASTRO_TEST_CHECK(viewport->mapToScene({viewport->width(),0}).x()<=1000);
     QList<QUrl> many;
     for(int i=0;i<30;++i) { const auto file=temp.filePath(QString("tile-%1.png").arg(i)); ASTRO_TEST_CHECK(image.save(file)); many.append(QUrl::fromLocalFile(file)); }
-    controller.addImages(many);
+    controller.addImages(many);ASTRO_TEST_CHECK(controller.busy());waitImport();
     timer.restart(); while(timer.elapsed()<150) { QCoreApplication::processEvents(); QThread::msleep(1); }
     auto* grid=workspace->findChild<QQuickItem*>("mosaicFiles"); ASTRO_TEST_CHECK(grid);
     std::function<int(QQuickItem*)> countActive=[&](QQuickItem* item) {
@@ -121,5 +122,12 @@ int main(int argc, char** argv) {
     ASTRO_TEST_CHECK(active<12);
     controller.removeImage(0);
     ASTRO_TEST_CHECK(controller.files().size()==31 && QFileInfo::exists(png.toLocalFile()));
+    QList<QUrl> bulk;
+    for(int i=0;i<100;++i){const auto file=temp.filePath(QString("bulk-%1.png").arg(i));ASTRO_TEST_CHECK(image.save(file));bulk<<QUrl::fromLocalFile(file);}
+    QElapsedTimer importTimer;importTimer.start();controller.addImages(bulk);const auto returned=importTimer.nsecsElapsed();
+    ASTRO_TEST_CHECK(controller.busy()&&controller.files().size()==31);waitImport();
+    ASTRO_TEST_CHECK(controller.files().size()==100);
+    qInfo()<<"100-image drop: call ms"<<returned/1e6<<"total ms"<<importTimer.elapsed();
+    QCoreApplication::processEvents();ASTRO_TEST_CHECK(countActive(grid)<12);
     workspace->setParentItem(nullptr);
 }

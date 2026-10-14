@@ -32,6 +32,10 @@ Control {
     readonly property bool drizzleInvalid: drizzle.checked && (bayerDrizzleInvalid || drizzlePlan.some(row=>row.width>Atelier.maximumImageDimension || row.height>Atelier.maximumImageDimension || row.width*row.height>Atelier.maximumImagePixels || row.count<2))
     readonly property bool wcsProjectionInvalid: wcsProjection.checked && drizzlePlan.some(row=>row.count<2)
     property int resourcesRevision: 0
+    readonly property var missingSources: {
+        const rows=controller.frames,revision=resourcesRevision;
+        return controller.missingSourceList();
+    }
     readonly property var resourcePlan: {
         const selectedRows=controller.frames,revision=resourcesRevision;
         return controller.integrationResources({calibrated:calibrated.checked,sequenceBackground:sequenceBackground.checked,drizzle:drizzle.checked,scale:[1,1.5,2][drizzleScale.currentIndex],nativeBayer:nativeBayer.checked,diagnosticMaps:diagnosticMaps.checked,wcsProjection:wcsProjection.checked});
@@ -240,7 +244,8 @@ Control {
         }
         function onChanged() {
             if(controller.restoringProject)return;
-            if(relinkDialog.visible&&!controller.busy&&controller.missingSources.length===0)relinkDialog.close();
+            if(!controller.busy)root.resourcesRevision++;
+            if(relinkDialog.visible&&!controller.busy&&root.missingSources.length===0)relinkDialog.close();
             if(controller.busy)completionToast.close();
             if(!controller.hasResult && root.workflowStep===6)root.workflowStep=0;
             if (!controller.busy && controller.hasResult && root.pendingProjectFinish) {
@@ -350,7 +355,7 @@ Control {
         AtelierMenuItem {text:qsTr("Save project");enabled:!controller.busy&&controller.frames.length>0;onTriggered:root.saveCurrentProject()}
         MenuSeparator {}
         AtelierMenuItem {objectName:"openMasterLibrary";text:qsTr("Master library");enabled:!controller.busy;onTriggered:masterLibrary.open()}
-        AtelierMenuItem {text:qsTr("Find moved sources");enabled:!controller.busy&&controller.missingSources.length>0;onTriggered:relinkDialog.open()}
+        AtelierMenuItem {text:qsTr("Find moved sources");enabled:!controller.busy&&root.missingSources.length>0;onTriggered:relinkDialog.open()}
         AtelierMenuItem {objectName:"deepSkyPresets";text:qsTr("Finishing presets");description:qsTr("All adjustment families");enabled:root.finishEditable;onTriggered:presetDialog.open()}
         AtelierMenuItem {objectName:"deepSkyImageFocus";text:root.imageFocus?qsTr("Show adjustment panel"):qsTr("Enlarge preview");onTriggered:root.imageFocus=!root.imageFocus}
         MenuSeparator {}
@@ -374,8 +379,8 @@ DropArea {
         ColumnLayout {
             Layout.fillWidth:true;Layout.fillHeight:true;Layout.minimumWidth:0;spacing:0
             RowLayout {
-                visible:controller.missingSources.length>0;Layout.fillWidth:true;Layout.margins:12;spacing:12
-                Label {text:(controller.missingSources.length===1?qsTr("1 source is missing"):qsTr("%1 sources are missing").arg(controller.missingSources.length));color:Atelier.secondary;Layout.fillWidth:true;wrapMode:Text.Wrap}
+                visible:root.missingSources.length>0;Layout.fillWidth:true;Layout.margins:12;spacing:12
+                Label {text:(root.missingSources.length===1?qsTr("1 source is missing"):qsTr("%1 sources are missing").arg(root.missingSources.length));color:Atelier.secondary;Layout.fillWidth:true;wrapMode:Text.Wrap}
                 IconButton {objectName:"findMovedSources";text:qsTr("Find sources");enabled:!controller.busy;onClicked:relinkDialog.open()}
             }
             GridLayout {
@@ -447,11 +452,11 @@ DropArea {
                 visible:!root.imageFocus && root.frameListOpen
                 DarkComboBox {id:frameFilterChoice;objectName:"deepSkyFrameFilter";model:[qsTr("All images")].concat(root.roleNames.slice(1));Layout.preferredWidth:155;onActivated:root.frameFilter=currentIndex===0?"All":root.roles[currentIndex]}
                 Label {text:qsTr("%1 / %2 images").arg(root.visibleFrames.length).arg(controller.frames.length);color:Atelier.secondary;Layout.fillWidth:true}
-                IconButton {text:qsTr("Select all");enabled:!controller.busy;onClicked:root.visibleFrames.forEach(row=>controller.setSelected(row.sourceIndex,true))}
-                IconButton {text:qsTr("Select none");enabled:!controller.busy;onClicked:root.visibleFrames.forEach(row=>controller.setSelected(row.sourceIndex,false))}
+                IconButton {text:qsTr("Select all");enabled:!controller.busy;onClicked:controller.setSelectedRows(root.visibleFrames.map(row=>row.sourceIndex),true)}
+                IconButton {text:qsTr("Select none");enabled:!controller.busy;onClicked:controller.setSelectedRows(root.visibleFrames.map(row=>row.sourceIndex),false)}
             }
             ListView {
-                id:frameList;objectName:"deepSkyFrameList";visible:!root.imageFocus && root.frameListOpen;Layout.fillWidth:true;Layout.preferredHeight:Math.min(160,Math.max(64,controller.frames.length*64));clip:true;model:root.visibleFrames
+                id:frameList;reuseItems:true;objectName:"deepSkyFrameList";visible:!root.imageFocus && root.frameListOpen;Layout.fillWidth:true;Layout.preferredHeight:Math.min(160,Math.max(64,controller.frames.length*64));clip:true;model:root.visibleFrames
                 ScrollBar.vertical:ScrollBar {}
                 delegate:Rectangle {
                     required property var modelData
@@ -945,7 +950,7 @@ ParameterControl {id:black;label:qsTr("Black level");textIsValue:true;text:"0";f
                 Layout.fillWidth:true
                 IconButton {text:qsTr("Cancel");onClicked:projectSaveChoice.close()}
                 Item {Layout.fillWidth:true}
-                IconButton {objectName:"chooseProjectDestination";text:qsTr("Choose location");enabled:!controller.busy&&(!root.portableSave||(!root.finishDirty&&controller.missingSources.length===0));onClicked:{projectSaveChoice.close();projectSave.open();}}
+                IconButton {objectName:"chooseProjectDestination";text:qsTr("Choose location");enabled:!controller.busy&&(!root.portableSave||(!root.finishDirty&&root.missingSources.length===0));onClicked:{projectSaveChoice.close();projectSave.open();}}
             }
         }
     }
@@ -956,29 +961,28 @@ ParameterControl {id:black;label:qsTr("Black level");textIsValue:true;text:"0";f
         ColumnLayout {
             width:parent.width;spacing:12
             Label {Layout.fillWidth:true;wrapMode:Text.Wrap;color:Atelier.secondary;text:qsTr("Choose the folder containing the moved images and masks. Subfolders are searched; matching content is verified before linking.")}
-            Label {Layout.fillWidth:true;color:Atelier.text;text:(controller.missingSources.length===1?qsTr("1 missing source"):qsTr("%1 missing sources").arg(controller.missingSources.length))}
-            ScrollView {
-                Layout.fillWidth:true;Layout.preferredHeight:Math.min(140,controller.missingSources.length*26);clip:true;contentWidth:availableWidth
-                ScrollBar.vertical.policy:ScrollBar.AlwaysOff;ScrollBar.horizontal.policy:ScrollBar.AlwaysOff
-                Column {width:parent.width;spacing:4
-                    Repeater {model:controller.missingSources
-                        Label {required property var modelData;width:parent.width;height:22;text:modelData.name;color:Atelier.secondary;elide:Text.ElideMiddle;HoverHandler {id:missingHover} DarkToolTip {visible:missingHover.hovered;text:modelData.path}}
-                    }
-                }
+            Label {Layout.fillWidth:true;color:Atelier.text;text:(root.missingSources.length===1?qsTr("1 missing source"):qsTr("%1 missing sources").arg(root.missingSources.length))}
+            ListView {
+                id:missingSourceList;objectName:"missingSourceList"
+                Layout.fillWidth:true;Layout.preferredHeight:Math.min(140,root.missingSources.length*26)
+                clip:true;spacing:4;reuseItems:true
+                model:relinkDialog.visible?root.missingSources:[]
+                ScrollBar.vertical:ScrollBar {}
+                delegate:Label {required property var modelData;width:missingSourceList.width;height:22;text:modelData.name;color:Atelier.secondary;elide:Text.ElideMiddle;HoverHandler {id:missingHover} DarkToolTip {visible:missingHover.hovered;text:modelData.path}}
             }
             RowLayout {
                 Layout.fillWidth:true
                 Label {Layout.fillWidth:true;text:root.relinkFolder.toString()||qsTr("No folder selected");color:Atelier.secondary;elide:Text.ElideMiddle}
                 IconButton {text:qsTr("Choose folder");enabled:!controller.busy;onClicked:relinkFolderDialog.open()}
             }
-            HelpCheckBox {id:allowMetadata;objectName:"allowMetadataMatch";visible:controller.missingSources.some(row=>!row.verified);Layout.fillWidth:true;text:qsTr("Older projects: allow metadata matching");enabled:!controller.busy;explanation:qsTr("Older projects have no content fingerprint. This explicitly accepts only one file with the same name, dimensions, channels, depth, exposure, filter and recorded camera metadata. Identical metadata cannot prove identical pixels. Ambiguous matches and old imported masks remain unlinked.")}
+            HelpCheckBox {id:allowMetadata;objectName:"allowMetadataMatch";visible:root.missingSources.some(row=>!row.verified);Layout.fillWidth:true;text:qsTr("Older projects: allow metadata matching");enabled:!controller.busy;explanation:qsTr("Older projects have no content fingerprint. This explicitly accepts only one file with the same name, dimensions, channels, depth, exposure, filter and recorded camera metadata. Identical metadata cannot prove identical pixels. Ambiguous matches and old imported masks remain unlinked.")}
             Label {Layout.fillWidth:true;wrapMode:Text.Wrap;color:Atelier.secondary;visible:controller.busy||controller.status.length>0;text:controller.status}
             ProgressBar {visible:controller.busy;Layout.fillWidth:true;from:0;to:100;value:controller.progress}
             RowLayout {
                 Layout.fillWidth:true
                 IconButton {text:controller.busy?qsTr("Cancel search"):qsTr("Close");onClicked:{if(controller.busy)controller.cancel();else relinkDialog.close();}}
                 Item {Layout.fillWidth:true}
-                IconButton {objectName:"searchMovedSources";text:qsTr("Find and link");enabled:!controller.busy&&root.relinkFolder.toString().length>0&&controller.missingSources.length>0;onClicked:controller.relinkSources(root.relinkFolder,allowMetadata.checked)}
+                IconButton {objectName:"searchMovedSources";text:qsTr("Find and link");enabled:!controller.busy&&root.relinkFolder.toString().length>0&&root.missingSources.length>0;onClicked:controller.relinkSources(root.relinkFolder,allowMetadata.checked)}
             }
         }
     }

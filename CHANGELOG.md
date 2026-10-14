@@ -15,6 +15,10 @@
 - Include images, previews and masks retained by Processing and Mosaic in the existing Deep Sky memory budget, counting shared buffers once and updating the resource estimate immediately.
 - Reuse each topocentric solar position for altitude and day/night classification during Observation map updates, preserving the exact astronomical results while reducing cursor calculation time.
 - Bound city searches to 15 seconds even when a remote response continues arriving slowly; preserve previous results on failure.
+- Defer Observation, Guide, History and Settings until first use, then retain their state across navigation; show a loading indicator during initial creation.
+- Read mosaic input headers and scan deep-sky folders in background workers, with cancellation preserving the previous workspace.
+- Keep deep-sky source lists stable during progress updates, batch selection changes and reuse visible delegates while scrolling.
+- Compute missing-source rows once per UI refresh, index their metadata and display long lists with virtualized delegates, avoiding repeated file checks and hidden row creation.
 - Build the macOS DMG from a fresh deployment copy, verify it before replacement and retain previous installers. Generate and verify the Linux ZIP automatically, including launch instructions, camera access rules and an AppImage checksum.
 - Update French labels, the Observation Guide and README.
 

@@ -25,7 +25,7 @@ int main(int argc,char** argv) {
             urls.append(QUrl::fromLocalFile(QDir(QString::fromLocal8Bit(argv[1])).filePath(name)));
         int last=-1;
         QObject::connect(&controller,&astro::app::MosaicController::changed,[&]{if(controller.progress()!=last){last=controller.progress();std::cout<<last<<"% "<<controller.status().toStdString()<<std::endl;}});
-        controller.addImages(urls);controller.assemble();wait(controller,1200000);
+        controller.addImages(urls);wait(controller);controller.assemble();wait(controller,1200000);
         std::cout<<controller.status().toStdString()<<std::endl;
         if(!controller.hasResult())return 1;
         controller.exportImage(QUrl::fromLocalFile(QString::fromLocal8Bit(argv[2])));wait(controller);
@@ -41,8 +41,11 @@ int main(int argc,char** argv) {
     const auto a=temp.filePath("A.png"),b=temp.filePath("B.png");
     ASTRO_TEST_CHECK(base.copy(0,0,420,320).save(a));ASTRO_TEST_CHECK(base.copy(220,0,420,320).save(b));
     int fileChanges=0; QObject::connect(&controller,&astro::app::MosaicController::filesChanged,[&]{++fileChanges;});
-    controller.addImages({QUrl::fromLocalFile(a),QUrl::fromLocalFile(b),QUrl::fromLocalFile(a)});
+    controller.addImages({QUrl::fromLocalFile(a),QUrl::fromLocalFile(b),QUrl::fromLocalFile(a)});wait(controller);
     ASTRO_TEST_CHECK(controller.files().size()==2);
+    const auto beforeCancelledImport=controller.files();
+    controller.addImages({QUrl::fromLocalFile(a)});ASTRO_TEST_CHECK(controller.busy());controller.cancel();wait(controller);
+    ASTRO_TEST_CHECK(controller.files()==beforeCancelledImport);
     controller.setImageSelected(0,false);ASTRO_TEST_CHECK(controller.selectedCount()==1 && controller.files().size()==2);
     controller.assemble();ASTRO_TEST_CHECK(!controller.busy() && !controller.hasResult());
     controller.setImageSelected(0,true);fileChanges=1;
@@ -52,6 +55,9 @@ int main(int argc,char** argv) {
     ASTRO_TEST_CHECK(fileChanges==1); // Progress must not recreate the thumbnail model.
     const auto plainDocument=controller.processingDocument().value<astro::app::ImageDocument>();
     ASTRO_TEST_CHECK(plainDocument.pixels && plainDocument.preview==controller.image());
+    const auto extra=temp.filePath("cancelled-input.png");ASTRO_TEST_CHECK(base.copy(0,0,420,320).save(extra));
+    controller.addImages({QUrl::fromLocalFile(extra)});controller.cancel();wait(controller);
+    ASTRO_TEST_CHECK(controller.files().size()==2&&controller.processingDocument().value<astro::app::ImageDocument>().pixels==plainDocument.pixels);
     ASTRO_TEST_CHECK(plainDocument.mosaicImageCount==2);
     ASTRO_TEST_CHECK(!controller.captionTechnicalText().isEmpty() && !controller.exportAnnotation().contains("technicalText"));
     controller.setExportAnnotation({{"enabled",true},{"technicalText","Mosaïque · filtre solaire Hα"}});
@@ -83,7 +89,7 @@ int main(int argc,char** argv) {
     controller.removeImage(0);ASTRO_TEST_CHECK(!controller.hasResult()&&controller.files().size()==1&&QFileInfo::exists(a));
     controller.clear();ASTRO_TEST_CHECK(controller.files().isEmpty());
     const auto blankPath=temp.filePath("blank.png");QImage blank(420,320,QImage::Format_RGB32);blank.fill(Qt::gray);ASTRO_TEST_CHECK(blank.save(blankPath));
-    controller.addImages({QUrl::fromLocalFile(blankPath),QUrl::fromLocalFile(a),QUrl::fromLocalFile(b)});
+    controller.addImages({QUrl::fromLocalFile(blankPath),QUrl::fromLocalFile(a),QUrl::fromLocalFile(b)});wait(controller);
     controller.assemble();wait(controller);
     ASTRO_TEST_CHECK(controller.hasResult() && controller.files().size()==3 && controller.selectedCount()==2 && controller.excludedFiles()==QStringList{"blank.png"});
     const auto cleaned=controller.processingDocument().value<astro::app::ImageDocument>();
@@ -94,6 +100,6 @@ int main(int argc,char** argv) {
     controller.restoreExcluded();ASTRO_TEST_CHECK(controller.files().size()==3 && controller.selectedCount()==3 && controller.excludedFiles().isEmpty() && !controller.hasResult());
     controller.clear();
     const auto blank2=temp.filePath("blank2.png");ASTRO_TEST_CHECK(blank.save(blank2));
-    controller.addImages({QUrl::fromLocalFile(blankPath),QUrl::fromLocalFile(blank2)});controller.assemble();wait(controller);
+    controller.addImages({QUrl::fromLocalFile(blankPath),QUrl::fromLocalFile(blank2)});wait(controller);controller.assemble();wait(controller);
     ASTRO_TEST_CHECK(!controller.hasResult() && controller.files().size()==2 && controller.status().contains("No pair"));
 }

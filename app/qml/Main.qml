@@ -255,30 +255,37 @@ ApplicationWindow {
         }
     }
     Connections { target: mosaicController; function onImageExported(url) { appLibrary.recordExport(url); } }
-    ObservationController { id: observationController; objectName: "observationController" }
-    ObservationWorkspace {
+    DeferredWorkspace {
         anchors.fill: parent
         visible: window.currentTab === "observation"
-        controller: observationController
+        sourceComponent: ObservationWorkspace {
+            controller: ObservationController { objectName: "observationController" }
+        }
     }
-    GuideWorkspace {
+    DeferredWorkspace {
         anchors.fill: parent
         visible: window.currentTab === "guide"
-        captureActive: previewController.recording
-        onNavigate: tab => { window.currentTab = tab; }
+        sourceComponent: GuideWorkspace {
+            captureActive: previewController.recording
+            onNavigate: tab => { window.currentTab = tab; }
+        }
     }
-    GlobalSettingsWorkspace {
-        session:sessionController
+    DeferredWorkspace {
         anchors.fill: parent
         visible: window.currentTab === "settings"
-        library: appLibrary
-        captureController: previewController
+        sourceComponent: GlobalSettingsWorkspace {
+            session: sessionController
+            library: appLibrary
+            captureController: previewController
+        }
     }
-    HistoryWorkspace {
-        enabled:!sessionController.cacheCleaning
+    DeferredWorkspace {
         anchors.fill: parent
         visible: window.currentTab === "history"
-        library: appLibrary
+        sourceComponent: HistoryWorkspace {
+            enabled: !sessionController.cacheCleaning
+            library: appLibrary
+        }
     }
     Connections {
         target: processingController

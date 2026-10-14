@@ -70,6 +70,7 @@ qt_add_qml_module(AstroCapture
         qml/AtelierMenu.qml
         qml/AtelierMenuItem.qml
         qml/StudioNavigation.qml
+        qml/DeferredWorkspace.qml
         qml/HomeWorkspace.qml
         qml/Main.qml
         qml/ProcessingWorkspace.qml

@@ -163,9 +163,15 @@ static int workspace(const QString& directory,bool restore,bool faults=false) {
         until([&]{return window->findChild<QObject*>("observationWorkspace")!=nullptr;});
         QCoreApplication::processEvents();
         qInfo()<<"First Observation ms"<<startupTimer.elapsed();
+        window->setProperty("currentTab","observation");until([&]{return window->findChild<QObject*>("observationWorkspace")!=nullptr;});
         auto* observation=window->findChild<ObservationController*>("observationController");ASTRO_TEST_CHECK(observation);
         window->setProperty("currentTab","home");QCoreApplication::processEvents();window->setProperty("currentTab","observation");QCoreApplication::processEvents();
         ASTRO_TEST_CHECK(window->findChild<ObservationController*>("observationController")==observation);
+        for(const auto& page:{std::pair{"guide","guideLessonScroll"},std::pair{"history","historyViewport"},std::pair{"settings","globalSettingsScroll"}}) {
+            window->setProperty("currentTab",page.first);until([&]{return window->findChild<QObject*>(page.second)!=nullptr;});
+            auto* item=window->findChild<QObject*>(page.second);window->setProperty("currentTab","home");QCoreApplication::processEvents();
+            window->setProperty("currentTab",page.first);QCoreApplication::processEvents();ASTRO_TEST_CHECK(window->findChild<QObject*>(page.second)==item);
+        }
         window->setProperty("quitApproved",true);return 0;
     }
     auto* deep=window->findChild<DeepSkyController*>("deepSkyController");
@@ -181,6 +187,7 @@ static int workspace(const QString& directory,bool restore,bool faults=false) {
     auto* quit=window->findChild<QObject*>("quitConfirmation");ASTRO_TEST_CHECK(quit);
 
     if (qEnvironmentVariableIsSet("ASTRO_OBSERVATION_MISSING_TARGET_WINDOW")) {
+        window->setProperty("currentTab","observation");until([&]{return window->findChild<QObject*>("observationWorkspace")!=nullptr;});
         auto* observation = window->findChild<ObservationController*>("observationController");
         auto* workspace = window->findChild<QObject*>("observationWorkspace");
         ASTRO_TEST_CHECK(observation && workspace);
@@ -226,6 +233,7 @@ static int workspace(const QString& directory,bool restore,bool faults=false) {
         processing->openPath(previewPath);
         wait(processing);
         ASTRO_TEST_CHECK(processing->hasResult());
+        window->setProperty("currentTab","observation");until([&]{return window->findChild<QObject*>("observationWorkspace")!=nullptr;});
         auto* observation = window->findChild<ObservationController*>("observationController");
         auto* workspace = window->findChild<QObject*>("observationWorkspace");
         ASTRO_TEST_CHECK(observation && workspace);
@@ -291,6 +299,7 @@ static int workspace(const QString& directory,bool restore,bool faults=false) {
     }
 
     if(qEnvironmentVariableIsSet("ASTRO_OBSERVATION_LAYOUT_WINDOW")) {
+        window->setProperty("currentTab","observation");until([&]{return window->findChild<QObject*>("observationWorkspace")!=nullptr;});
         auto* observation=window->findChild<ObservationController*>("observationController");ASTRO_TEST_CHECK(observation);
         auto* workspace=window->findChild<QObject*>("observationWorkspace");ASTRO_TEST_CHECK(workspace);workspace->setProperty("liveNow",false);workspace->setProperty("autoLoadWeather",false);
         auto options=observation->sites()[0].toMap();options["date"]="2026-12-12";options["minimum"]=30;options["sunLimit"]=-18;ASTRO_TEST_CHECK(observation->calculate(options));observation->setFraction(.5);
@@ -333,6 +342,7 @@ static int workspace(const QString& directory,bool restore,bool faults=false) {
     }
 
     if(qEnvironmentVariableIsSet("ASTRO_OBSERVATION_SITE_WINDOW")) {
+        window->setProperty("currentTab","observation");until([&]{return window->findChild<QObject*>("observationWorkspace")!=nullptr;});
         auto* observation=window->findChild<ObservationController*>("observationController");ASTRO_TEST_CHECK(observation);
         auto* workspace=window->findChild<QObject*>("observationWorkspace");ASTRO_TEST_CHECK(workspace);workspace->setProperty("liveNow",false);workspace->setProperty("autoLoadWeather",false);
         auto options=observation->sites()[9].toMap();options["date"]="2026-12-12";options["minimum"]=30;options["sunLimit"]=-18;ASTRO_TEST_CHECK(observation->calculate(options));ASTRO_TEST_CHECK(observation->selectTarget("NGC1976"));observation->toggleFavoriteTarget();
@@ -354,6 +364,7 @@ static int workspace(const QString& directory,bool restore,bool faults=false) {
     }
 
     if(qEnvironmentVariableIsSet("ASTRO_OBSERVATION_WEATHER_WINDOW")) {
+        window->setProperty("currentTab","observation");until([&]{return window->findChild<QObject*>("observationWorkspace")!=nullptr;});
         auto* observation=window->findChild<ObservationController*>("observationController");ASTRO_TEST_CHECK(observation);
         auto* workspace=window->findChild<QObject*>("observationWorkspace");ASTRO_TEST_CHECK(workspace);workspace->setProperty("liveNow",false);workspace->setProperty("autoLoadWeather",false);
         auto settings=observation->sites()[0].toMap();settings["date"]="2026-10-12";settings["minimum"]=30;settings["sunLimit"]=-18;ASTRO_TEST_CHECK(observation->calculate(settings));
@@ -372,6 +383,7 @@ static int workspace(const QString& directory,bool restore,bool faults=false) {
     }
 
     if(qEnvironmentVariableIsSet("ASTRO_OBSERVATION_WINDOW")) {
+        window->setProperty("currentTab","observation");until([&]{return window->findChild<QObject*>("observationWorkspace")!=nullptr;});
         auto* observation=window->findChild<ObservationController*>("observationController");ASTRO_TEST_CHECK(observation);
         auto* workspace=window->findChild<QObject*>("observationWorkspace");ASTRO_TEST_CHECK(workspace);workspace->setProperty("liveNow",false);workspace->setProperty("autoLoadWeather",false);
         auto settings=observation->sites()[0].toMap();settings["date"]="2026-12-12";settings["minimum"]=30;settings["sunLimit"]=-18;ASTRO_TEST_CHECK(observation->calculate(settings));

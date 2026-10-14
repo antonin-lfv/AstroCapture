@@ -354,13 +354,45 @@ int main(int argc,char** argv){
     controller.setSourceDebayer(false);wait(controller);ASTRO_TEST_CHECK(!controller.sourceDebayer());
     controller.setSourceAutoStretch(true);wait(controller);
     controller.addFiles(urls);wait(controller);ASTRO_TEST_CHECK(controller.frames().size()==3);
+    {
+        int notifications=0;const auto connection=QObject::connect(&controller,&app::DeepSkyController::framesChanged,[&]{++notifications;});
+        QMetaObject::invokeMethod(&controller,"changed");ASTRO_TEST_CHECK(notifications==0);
+        controller.setSelectedRows({0,2},false);ASTRO_TEST_CHECK(notifications==1);
+        ASTRO_TEST_CHECK(!controller.frames()[0].toMap()["selected"].toBool()&&controller.frames()[1].toMap()["selected"].toBool()&&!controller.frames()[2].toMap()["selected"].toBool());
+        controller.setSelectedRows({0,2},true);ASTRO_TEST_CHECK(notifications==2);
+        controller.setSelectedRows({0,2},true);ASTRO_TEST_CHECK(notifications==2);QObject::disconnect(connection);
+    }
     if(qEnvironmentVariableIsSet("ASTRO_UI_LIST_PERF")) {
         auto snapshot=controller.sessionSnapshot();QVariantList many;
+        QList<QUrl> batch;for(int n=0;n<250;++n){const auto path=directory.filePath(QString("batch-%1.fits").arg(n));ASTRO_TEST_CHECK(QFile::copy(urls.first().toLocalFile(),path));batch<<QUrl::fromLocalFile(path);}
+        int imports=0;const auto importConnection=QObject::connect(&controller,&app::DeepSkyController::framesChanged,[&]{++imports;});
+        QElapsedTimer importTimer;importTimer.start();controller.addFiles(batch);const auto returned=importTimer.elapsed();ASTRO_TEST_CHECK(controller.busy());wait(controller);
+        qInfo()<<"250 FITS import: call ms"<<returned<<"total ms"<<importTimer.elapsed()<<"list publications"<<imports;
+        ASTRO_TEST_CHECK(imports==1&&controller.frames().size()==253);QObject::disconnect(importConnection);
+
         for(int n=0;n<2000;++n){auto row=snapshot.state["frames"].toList().front().toMap();row["path"]=QString("/test/frame-%1.fits").arg(n);row["name"]=QString("frame-%1.fits").arg(n);many<<row;}
-        snapshot.state["frames"]=many;controller.restoreSession(snapshot);QCoreApplication::processEvents();
+        snapshot.state["frames"]=many;QElapsedTimer load;load.start();controller.restoreSession(snapshot);QCoreApplication::processEvents();
+        qInfo()<<"2000 missing files load ms"<<load.elapsed();
+        auto missingValue=root->property("missingSources");
+        if(missingValue.metaType()==QMetaType::fromType<QJSValue>())missingValue=missingValue.value<QJSValue>().toVariant();
+        ASTRO_TEST_CHECK(missingValue.toList().size()==2000);
+        auto* dialog=root->findChild<QObject*>("relinkSourcesDialog");ASTRO_TEST_CHECK(QMetaObject::invokeMethod(dialog,"open"));QCoreApplication::processEvents();
+        auto* missing=root->findChild<QQuickItem*>("missingSourceList");ASTRO_TEST_CHECK(missing&&missing->property("count").toInt()==2000);
+        const auto delegateCount=missing->property("contentItem").value<QQuickItem*>()->childItems().size();ASTRO_TEST_CHECK(delegateCount<50);
+        missing->setProperty("contentY",20000);QCoreApplication::processEvents();
+        ASTRO_TEST_CHECK(missing->property("contentItem").value<QQuickItem*>()->childItems().size()<50);
+        QMetaObject::invokeMethod(dialog,"close");
         QElapsedTimer elapsed;elapsed.start();
         for(int n=0;n<100;++n){QMetaObject::invokeMethod(&controller,"changed");QCoreApplication::processEvents();}
-        qInfo()<<"2000 files, 100 progress notifications ms"<<elapsed.elapsed();return 0;
+        qInfo()<<"2000 files, 100 progress notifications ms"<<elapsed.elapsed();
+        int frameChanges=0;QObject::connect(&controller,&app::DeepSkyController::framesChanged,[&]{++frameChanges;});
+        QMetaObject::invokeMethod(&controller,"changed");ASTRO_TEST_CHECK(frameChanges==0);
+        QVariantList indices;for(int n=0;n<2000;++n)indices<<n;
+        elapsed.restart();controller.setSelectedRows(indices,false);QCoreApplication::processEvents();
+        qInfo()<<"2000 files batch deselection ms"<<elapsed.elapsed();ASTRO_TEST_CHECK(frameChanges==1);
+        for(const auto& value:controller.frames())ASTRO_TEST_CHECK(!value.toMap()["selected"].toBool());
+        controller.setSelectedRows(indices,false);ASTRO_TEST_CHECK(frameChanges==1);
+        return 0;
     }
 
     root->setProperty("workflowStep",1);QCoreApplication::processEvents();

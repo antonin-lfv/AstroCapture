@@ -3,6 +3,7 @@
 ## 1.20.0 — 2026-10-14
 
 - Cache object search keys, replace the full catalogue sort with bounded ranked results, debounce typing and require a number for bare catalogue prefixes. Show at most 25 local results, retaining exact matches first and explicit online search.
+- Match equivalent catalogue numbers consistently, including spaces, letter case and leading zeroes (for example M42 and M 042).
 - Add direct place favourite and delete controls. Keep saved places when their star is removed, support preset favourites and deletion, migrate existing favourites and preserve the selected position and UTC instant.
 - Add optional website links to saved observing places, opened in the browser only on request; validate addresses and preserve links when renaming.
 - Restore deleted built-in places from Advanced without changing personal places, favourites, coordinates or the selected UTC instant.

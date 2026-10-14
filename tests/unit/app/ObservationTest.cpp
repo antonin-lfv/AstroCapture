@@ -258,6 +258,19 @@ int main(int argc, char **argv) {
   controller.search("M1");
   ASTRO_TEST_CHECK(controller.searchResults().first().toMap()["id"] ==
                    "NGC1952");
+  for (const auto &queries : {
+           QStringList{"M42", "M 042", "m00042"},
+           QStringList{"M45", "m 0045", "M00045"},
+           QStringList{"NGC 1", "ngc 00001", "NGC000001"},
+           QStringList{"IC 1396", "ic 01396", "IC001396"}}) {
+    controller.search(queries.first());
+    const auto expected = controller.searchResults();
+    ASTRO_TEST_CHECK(!expected.isEmpty());
+    for (const auto &query : queries) {
+      controller.search(query);
+      ASTRO_TEST_CHECK(controller.searchResults() == expected);
+    }
+  }
   QElapsedTimer searchTimer;
   searchTimer.start();
   for (int i = 0; i < 100; ++i)

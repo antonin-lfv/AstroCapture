@@ -28,9 +28,10 @@ QString normalized(QString s) {
   return s;
 }
 QString designation(QString s) {
-  static const QRegularExpression pattern("^(NGC|IC|M|B|C)(0*)([0-9]+)(.*)$");
+  static const QRegularExpression pattern("^(NGC|IC|M|B|C)(0*)([0-9]+)(.*)$",
+                                          QRegularExpression::CaseInsensitiveOption);
   auto m = pattern.match(s);
-  return m.hasMatch() ? m.captured(1) + m.captured(3) + m.captured(4) : s;
+  return m.hasMatch() ? m.captured(1).toUpper() + m.captured(3) + m.captured(4) : s;
 }
 bool validCoordinates(double ra, double dec) {
   return std::isfinite(ra) && std::isfinite(dec) && ra >= 0 && ra < 360 &&
@@ -325,7 +326,7 @@ void ObservationController::search(const QString &query) {
     emit searchChanged();
     return;
   }
-  const auto q = normalized(query);
+  const auto q = normalized(designation(normalized(query)));
   if (q == "ngc" || q == "ic" || q == "m" || q == "b" || q == "c") {
     searchStatus_ = tr("Add a catalogue number, for example NGC 5078 or M42.");
     emit searchChanged();

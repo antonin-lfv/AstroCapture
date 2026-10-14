@@ -1406,6 +1406,60 @@ int main(int argc, char **argv) {
       ASTRO_TEST_CHECK(reopened.settings()["dec"] == coordinates[1]);
     }
   }
+  // Unknown catalogue IDs require an explicit choice, even if saved numeric
+  // coordinates look valid. No timer, favourite action or failed choice may
+  // substitute a different object or overwrite the original settings.
+  for (const auto &id : {QString("removed-catalogue-object"), QString()}) {
+    auto stored = recoverySettings;
+    stored["target"] = id;
+    QSettings().setValue("observation/settings", stored);
+    ObservationController reopened;
+    ASTRO_TEST_CHECK(reopened.targetUnavailable());
+    ASTRO_TEST_CHECK(reopened.error().contains("introuvable"));
+    ASTRO_TEST_CHECK(reopened.result().isEmpty());
+    ASTRO_TEST_CHECK(!reopened.showNow());
+    reopened.toggleFavoriteTarget();
+    ASTRO_TEST_CHECK(reopened.targetUnavailable());
+    ASTRO_TEST_CHECK(reopened.error().contains("introuvable"));
+    ASTRO_TEST_CHECK(!reopened.selectTarget("also-unknown"));
+    ASTRO_TEST_CHECK(QSettings().value("observation/settings").toMap() == stored);
+    ASTRO_TEST_CHECK(reopened.selectTarget("NGC1976"));
+    ASTRO_TEST_CHECK(!reopened.targetUnavailable());
+    ASTRO_TEST_CHECK(reopened.error().isEmpty());
+    ObservationController recovered;
+    ASTRO_TEST_CHECK(!recovered.targetUnavailable());
+    ASTRO_TEST_CHECK(recovered.settings()["target"] == "NGC1976");
+    QSettings().setValue("observation/settings", stored);
+    ObservationController manualRecovery;
+    auto coordinates = manualRecovery.settings();
+    coordinates["manual"] = true;
+    coordinates["ra"] = "invalid";
+    ASTRO_TEST_CHECK(!manualRecovery.calculate(coordinates));
+    ASTRO_TEST_CHECK(manualRecovery.targetUnavailable());
+    ASTRO_TEST_CHECK(QSettings().value("observation/settings").toMap() == stored);
+    coordinates["ra"] = 42.125;
+    ASTRO_TEST_CHECK(manualRecovery.calculate(coordinates));
+    ASTRO_TEST_CHECK(!manualRecovery.targetUnavailable());
+    ASTRO_TEST_CHECK(manualRecovery.settings()["target"] == "manual");
+  }
+  // A missing object plus an invalid site must not trap recovery: choosing a
+  // known target leaves the independent site error available for correction.
+  auto invalidSite = recoverySettings;
+  invalidSite["target"] = "removed-catalogue-object";
+  invalidSite["latitude"] = "broken latitude";
+  QSettings().setValue("observation/settings", invalidSite);
+  {
+    ObservationController reopened;
+    ASTRO_TEST_CHECK(!reopened.selectTarget("NGC1976"));
+    ASTRO_TEST_CHECK(!reopened.targetUnavailable());
+    ASTRO_TEST_CHECK(!reopened.error().isEmpty());
+    ASTRO_TEST_CHECK(reopened.settings()["target"] == "NGC1976");
+    ASTRO_TEST_CHECK(reopened.settings()["latitude"] == "broken latitude");
+    auto corrected = reopened.settings();
+    corrected["latitude"] = 48.8566;
+    ASTRO_TEST_CHECK(reopened.changeSite(corrected));
+    ASTRO_TEST_CHECK(reopened.error().isEmpty());
+  }
   app.setApplicationName(applicationName);
   return 0;
 }

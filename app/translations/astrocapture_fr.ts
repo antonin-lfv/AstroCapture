@@ -10458,6 +10458,7 @@ RMS normalisée moyenne %5</translation>
 
 <context>
     <name>ObservationWorkspace</name>
+    <message><source>Choose an object…</source><translation>Choisir un objet…</translation></message>
     <message><source>Open the cloud forecast source, Open-Meteo</source><translation>Ouvrir la source des prévisions nuageuses, Open-Meteo</translation></message>
     <message><source>All</source><translation>Tout</translation></message>
     <message><source>Moon &amp; planets</source><translation>Lune et planètes</translation></message>
@@ -11025,6 +11026,7 @@ RMS normalisée moyenne %5</translation>
 </context>
 <context>
     <name>astro::app::ObservationController</name>
+    <message><source>The saved object is no longer available. Choose an object from the catalogue or enter coordinates.</source><translation>L’objet enregistré est introuvable. Choisissez un objet dans le catalogue ou saisissez ses coordonnées.</translation></message>
     <message><source>Searching cities…</source><translation>Recherche de villes…</translation></message>
     <message><source>City search unavailable. Choose a preset or enter coordinates in Advanced.</source><translation>Recherche de ville indisponible. Choisissez une ville proposée ou saisissez les coordonnées dans les options avancées.</translation></message>
     <message><source>No matching city. Try the city name followed by its country.</source><translation>Aucune ville trouvée. Essayez le nom de la ville suivi du pays.</translation></message>

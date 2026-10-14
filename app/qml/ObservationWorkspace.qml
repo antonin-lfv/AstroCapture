@@ -17,7 +17,7 @@ Rectangle {
             sensitivity: "base"
         }))
     function updateVisibleTarget() {
-        if (!ready || !autoSelectVisible || selectingVisible || !visible)
+        if (!ready || !autoSelectVisible || selectingVisible || !visible || controller.targetUnavailable)
             return;
         const targets = filteredSuggestions;
         if (targets.length && targets[0].id !== controller.settings.target) {
@@ -242,7 +242,7 @@ Rectangle {
         timezone.text = controller.settings.zone;
     }
     function sync() {
-        if (controller.error.length)
+        if (controller.error.length && !controller.targetUnavailable)
             return;
         syncing = true;
         const s = controller.settings;
@@ -399,8 +399,37 @@ Rectangle {
                 text: qsTr("Choose a place on the day/night map or in the list, then a time and a visible object. Both maps, the compass and the curves follow the displayed instant. Coordinates, favourites and advanced settings open in dialogs. Now follows the real clock.")
             }
         }
+        ColumnLayout {
+            objectName: "observationMissingTarget"
+            visible: root.controller.targetUnavailable
+            Layout.fillWidth: true
+            Layout.leftMargin: 20
+            Layout.rightMargin: 20
+            Layout.bottomMargin: 12
+            spacing: 8
+            Label {
+                Layout.fillWidth: true
+                text: root.controller.error
+                textFormat: Text.PlainText
+                color: Atelier.danger
+                wrapMode: Text.Wrap
+                Accessible.role: Accessible.AlertMessage
+            }
+            RowLayout {
+                IconButton {
+                    objectName: "observationRecoverTarget"
+                    text: qsTr("Choose an object…")
+                    onClicked: root.openObjectChooser()
+                }
+                IconButton {
+                    text: qsTr("Advanced")
+                    onClicked: optionsDialog.open()
+                }
+            }
+        }
         RowLayout {
             objectName: "observationSharedTime"
+            visible: !root.controller.targetUnavailable
             Layout.fillWidth: true
             Layout.leftMargin: 20
             Layout.rightMargin: 20
@@ -443,9 +472,15 @@ Rectangle {
             font.pixelSize: 12
             Accessible.role: Accessible.AlertMessage
         }
+        Item {
+            visible: root.controller.targetUnavailable
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+        }
         ScrollView {
             id: mainScroll
             objectName: "observationScroll"
+            visible: !root.controller.targetUnavailable
             Layout.fillWidth: true
             Layout.fillHeight: true
             clip: true
@@ -1204,7 +1239,7 @@ Rectangle {
                         }
                     }
                     Label {
-                        visible: root.controller.error.length > 0
+                        visible: root.controller.error.length > 0 && !root.controller.targetUnavailable
                         text: root.controller.error + "\n" + qsTr("The displayed results keep the previous valid choices.")
                         color: Atelier.danger
                         wrapMode: Text.Wrap
@@ -1249,7 +1284,7 @@ Rectangle {
                                 Layout.fillWidth: true
                             }
                             Label {
-                                visible: root.controller.reference.differentZones
+                                visible: root.controller.reference.differentZones === true
                                 objectName: "observationRecordingSite"
                                 text: (root.controller.settings.mapZoneUnresolved ? qsTr("At the telescope · UTC until confirmed: %1 → %2") : qsTr("At the telescope: %1 → %2")).arg(root.controller.reference.recording.siteStartLocal || "").arg(root.controller.reference.recording.siteEndLocal || "")
                                 color: Atelier.secondary
@@ -1794,6 +1829,7 @@ Rectangle {
                 }
             }
             Label {
+                visible: !root.controller.targetUnavailable
                 text: qsTr("Selected: %1").arg(root.controller.result.target || "")
                 color: Atelier.accent
                 wrapMode: Text.Wrap

@@ -126,6 +126,11 @@ static int workspace(const QString& directory,bool restore,bool faults=false) {
     if(qEnvironmentVariableIsSet("ASTRO_OBSERVATION_WEATHER_WINDOW") || qEnvironmentVariableIsSet("ASTRO_OBSERVATION_LAYOUT_WINDOW")) {
         QSettings().setValue("observation/weatherCache",QVariantMap{{"data",bytes(ASTRO_SOURCE_DIR "/tests/unit/app/observation-weather.json")},{"latitude",48.8566},{"longitude",2.3522},{"receivedUtc",QDateTime::currentSecsSinceEpoch()}});
     }
+    const QVariantMap missingTargetSettings{{"name", "Paris"}, {"latitude", 48.8566},
+        {"longitude", 2.3522}, {"elevation", 0}, {"zone", "Europe/Paris"},
+        {"target", "removed-catalogue-object"}, {"targetName", "Objet mémorisé"}};
+    if(qEnvironmentVariableIsSet("ASTRO_OBSERVATION_MISSING_TARGET_WINDOW"))
+        QSettings().setValue("observation/settings", missingTargetSettings);
     registerTypes();QQmlEngine engine;
     engine.rootContext()->setContextProperty("validationDirectory",directory);
     const QDir sourceDirectory(QStringLiteral(ASTRO_SOURCE_DIR "/app/qml"));
@@ -161,6 +166,46 @@ static int workspace(const QString& directory,bool restore,bool faults=false) {
     applyWindowAppearance(window, window->property("color").value<QColor>());
     QuitGuard guard(window);QCoreApplication::instance()->installEventFilter(&guard);
     auto* quit=window->findChild<QObject*>("quitConfirmation");ASTRO_TEST_CHECK(quit);
+
+    if (qEnvironmentVariableIsSet("ASTRO_OBSERVATION_MISSING_TARGET_WINDOW")) {
+        auto* observation = window->findChild<ObservationController*>("observationController");
+        auto* workspace = window->findChild<QObject*>("observationWorkspace");
+        ASTRO_TEST_CHECK(observation && workspace);
+        workspace->setProperty("autoLoadWeather", false);
+        const auto previewPath = qEnvironmentVariable("ASTRO_PERSONAL_PREVIEW_PATH");
+        ASTRO_TEST_CHECK(!previewPath.isEmpty());
+        processing->openPath(previewPath);
+        wait(processing);
+        ASTRO_TEST_CHECK(processing->hasResult());
+        for (const auto size : {QSize(1440,960), QSize(1100,800), QSize(900,700)}) {
+            window->resize(size);
+            window->setProperty("currentTab", "processing");
+            capture(window, QString("real-image-%1").arg(size.width()));
+            window->setProperty("currentTab", "observation");
+            QCoreApplication::processEvents();
+            ASTRO_TEST_CHECK(QMetaObject::invokeMethod(workspace, "updateVisibleTarget"));
+            ASTRO_TEST_CHECK(observation->targetUnavailable());
+            ASTRO_TEST_CHECK(observation->error().contains("introuvable"));
+            ASTRO_TEST_CHECK(observation->result().isEmpty());
+            ASTRO_TEST_CHECK(QSettings().value("observation/settings").toMap() == missingTargetSettings);
+            capture(window, QString("missing-target-%1").arg(size.width()));
+            auto* banner = workspace->findChild<QQuickItem*>("observationMissingTarget");
+            ASTRO_TEST_CHECK(banner && banner->isVisible());
+            ASTRO_TEST_CHECK(banner->mapToItem(window->contentItem(), QPointF()).y() < 180);
+        }
+        click(workspace, "observationRecoverTarget");
+        auto* chooser = workspace->findChild<QObject*>("observationObjectChooser");
+        ASTRO_TEST_CHECK(chooser && chooser->property("visible").toBool());
+        capture(window, "missing-target-chooser-900");
+        ASTRO_TEST_CHECK(QMetaObject::invokeMethod(workspace, "chooseTarget", Q_ARG(QVariant, "NGC1976")));
+        ASTRO_TEST_CHECK(!observation->targetUnavailable());
+        ASTRO_TEST_CHECK(observation->settings()["target"] == "NGC1976");
+        ASTRO_TEST_CHECK(observation->error().isEmpty());
+        ASTRO_TEST_CHECK(!chooser->property("visible").toBool());
+        capture(window, "recovered-target-900");
+        window->setProperty("quitApproved", true);
+        return 0;
+    }
 
     if (qEnvironmentVariableIsSet("ASTRO_OBSERVATION_MANAGEMENT_WINDOW")) {
         const auto previewPath = qEnvironmentVariable("ASTRO_PERSONAL_PREVIEW_PATH");

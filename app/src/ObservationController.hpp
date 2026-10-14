@@ -24,6 +24,7 @@ class ObservationController : public QObject {
   Q_PROPERTY(QVariantMap instant READ instant NOTIFY instantChanged)
   Q_PROPERTY(QVariantMap reference READ reference NOTIFY referenceChanged)
   Q_PROPERTY(QString error READ error NOTIFY changed)
+  Q_PROPERTY(bool targetUnavailable READ targetUnavailable NOTIFY changed)
   Q_PROPERTY(QString searchStatus READ searchStatus NOTIFY searchChanged)
   Q_PROPERTY(bool searching READ searching NOTIFY searchChanged)
   Q_PROPERTY(int catalogCount READ catalogCount CONSTANT)
@@ -58,6 +59,7 @@ public:
   QVariantMap instant() const { return instant_; }
   QVariantMap reference() const { return reference_; }
   QString error() const { return error_; }
+  bool targetUnavailable() const { return targetUnavailable_; }
   QString searchStatus() const { return searchStatus_; }
   bool searching() const { return searching_; }
   int catalogCount() const { return catalogCount_; }
@@ -134,6 +136,7 @@ private:
   void updateWeatherContext();
   bool weatherPeriodSupported() const;
   ObservationTarget target_;
+  bool targetUnavailable_{};
   ObservationSite site_;
   std::vector<ObservationTarget> catalog_;
   struct SearchKeys {

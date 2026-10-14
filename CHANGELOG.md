@@ -10,6 +10,7 @@
 - Select the saved copy correctly when it shares a preset’s name and coordinates; reject malformed saved coordinates instead of silently moving them to zero.
 - Reject incomplete or invalid restored object coordinates without overwriting the saved settings or adding an invalid favourite; allow recovery by selecting a valid catalogue object.
 - Prevent saving a place with default coordinates when the initial observation calculation has failed.
+- Report an unavailable saved object at startup and wait for an explicit catalogue or manual-coordinate choice, preserving its saved settings instead of silently selecting the Moon. Keep automatic suggestions paused and provide a recovery action at the top of Observation.
 - Build the macOS DMG from a fresh deployment copy, verify it before replacement and retain previous installers. Generate and verify the Linux ZIP automatically, including launch instructions, camera access rules and an AppImage checksum.
 - Update French labels, the Observation Guide and README.
 

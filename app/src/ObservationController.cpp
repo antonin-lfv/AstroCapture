@@ -216,15 +216,18 @@ ObservationController::ObservationController(QObject *parent)
   settings_["sunLimit"] = settings_.value("sunLimit", -18);
   if (settings_.value("referenceZone").toString() != "site")
     settings_["referenceZone"] = "system";
-  target_ = catalog_[0];
   const QString targetId = settings_.value("target", "NGC1976").toString();
+  target_ = {targetId, settings_.value("targetName").toString(), {}, -1, NAN, NAN};
+  targetUnavailable_ = true;
   for (const auto &t : catalog_)
     if (t.id == targetId) {
       target_ = t;
+      targetUnavailable_ = false;
       break;
     }
   if (targetId == "manual" || targetId.startsWith("manual:") ||
       targetId.startsWith("cds:")) {
+    targetUnavailable_ = false;
     bool raOk, decOk;
     const double ra = settings_.value("ra").toDouble(&raOk),
                  dec = settings_.value("dec").toDouble(&decOk);
@@ -445,12 +448,26 @@ bool ObservationController::selectTarget(const QString &id) {
   for (const auto &t : catalog_)
     if (t.id == id) {
       auto previous = target_;
+      const bool previousUnavailable = targetUnavailable_;
       target_ = t;
+      targetUnavailable_ = false;
       auto options = settings_;
       options["sunLimit"] = t.body >= 0 ? -6 : -18;
       if (calculate(options))
         return true;
-      target_ = previous;
+      if (previousUnavailable) {
+        // The explicit choice resolves the missing object even if another
+        // setting is invalid. Let the user correct that setting next.
+        settings_["target"] = t.id;
+        settings_["targetName"] = t.name;
+        settings_["ra"] = t.ra;
+        settings_["dec"] = t.dec;
+        persist();
+      } else {
+        target_ = previous;
+        targetUnavailable_ = previousUnavailable;
+      }
+      emit changed();
       return false;
     }
   return false;
@@ -500,6 +517,8 @@ ObservationController::planningNight(const QVariantMap &options) const {
 }
 bool ObservationController::calculate(const QVariantMap &options) {
   try {
+    if (targetUnavailable_ && !options.value("manual").toBool())
+      throw std::runtime_error("The saved object is no longer available. Choose an object from the catalogue or enter coordinates.");
     const auto start = observationNoon(options.value("date").toString(),
                                        options.value("zone").toString());
     const auto end =
@@ -548,6 +567,7 @@ bool ObservationController::calculate(const QVariantMap &options) {
       siteSolar.insert(siteSolar.end(), following.begin(), following.end());
     }
     target_ = t;
+    targetUnavailable_ = false;
     site_ = s;
     settings_ = options;
     settings_["latitude"] = s.latitude;
@@ -1375,6 +1395,11 @@ void ObservationController::saveFavoriteTargets() {
   emit weatherChanged();
 }
 void ObservationController::toggleFavoriteTarget() {
+  if (targetUnavailable_) {
+    error_ = tr("The saved object is no longer available. Choose an object from the catalogue or enter coordinates.");
+    emit changed();
+    return;
+  }
   if (target_.body < 0 && !validCoordinates(target_.ra, target_.dec)) {
     error_ = tr("Invalid J2000 coordinates.");
     emit changed();

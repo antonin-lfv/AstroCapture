@@ -204,6 +204,7 @@ int main(int argc, char **argv) {
                   {"receivedUtc", QDateTime::currentSecsSinceEpoch() - 7200}};
   QSettings().setValue("observation/weatherCache", weatherCache);
   ObservationController controller;
+  if(qEnvironmentVariableIsSet("ASTRO_OBSERVATION_PERF")){QElapsedTimer first;first.start();controller.search("M 042");qInfo()<<"First local search ms"<<first.nsecsElapsed()/1e6;}
   ASTRO_TEST_CHECK(controller.catalogCount() > 13000);
   ASTRO_TEST_CHECK(controller.error().isEmpty());
   auto cloudyNight = controller.settings();

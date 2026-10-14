@@ -354,6 +354,15 @@ int main(int argc,char** argv){
     controller.setSourceDebayer(false);wait(controller);ASTRO_TEST_CHECK(!controller.sourceDebayer());
     controller.setSourceAutoStretch(true);wait(controller);
     controller.addFiles(urls);wait(controller);ASTRO_TEST_CHECK(controller.frames().size()==3);
+    if(qEnvironmentVariableIsSet("ASTRO_UI_LIST_PERF")) {
+        auto snapshot=controller.sessionSnapshot();QVariantList many;
+        for(int n=0;n<2000;++n){auto row=snapshot.state["frames"].toList().front().toMap();row["path"]=QString("/test/frame-%1.fits").arg(n);row["name"]=QString("frame-%1.fits").arg(n);many<<row;}
+        snapshot.state["frames"]=many;controller.restoreSession(snapshot);QCoreApplication::processEvents();
+        QElapsedTimer elapsed;elapsed.start();
+        for(int n=0;n<100;++n){QMetaObject::invokeMethod(&controller,"changed");QCoreApplication::processEvents();}
+        qInfo()<<"2000 files, 100 progress notifications ms"<<elapsed.elapsed();return 0;
+    }
+
     root->setProperty("workflowStep",1);QCoreApplication::processEvents();
     ASTRO_TEST_CHECK(object->findChild<QObject*>("deepSkyIntegrate")->property("visible").toBool());
     ASTRO_TEST_CHECK(object->findChild<QObject*>("deepSkyStackDivider")->property("visible").toBool());

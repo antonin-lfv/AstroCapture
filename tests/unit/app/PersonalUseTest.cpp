@@ -150,11 +150,24 @@ static int workspace(const QString& directory,bool restore,bool faults=false) {
         "storageDirectory:validationDirectory+'/recovery';id:sessionController;objectName:");
     qml.replace("id: deepSkyController;objectName:",
         "projectCacheDirectory:validationDirectory+'/projects';id: deepSkyController;objectName:");
+    QElapsedTimer startupTimer;startupTimer.start();
     QQmlComponent component(&engine);component.setData(qml,QUrl::fromLocalFile(qmlDirectory+"/Main.qml"));
     if(component.isError())qWarning()<<component.errors();ASTRO_TEST_CHECK(component.isReady());
     std::unique_ptr<QObject> object(component.create());
     if(!object)qWarning()<<component.errors();ASTRO_TEST_CHECK(object);
     auto* window=qobject_cast<QQuickWindow*>(object.get());ASTRO_TEST_CHECK(window);
+    if(qEnvironmentVariableIsSet("ASTRO_UI_STARTUP_PERF")) {
+        QCoreApplication::processEvents();
+        qInfo()<<"Startup QML ms"<<startupTimer.elapsed()<<"objects"<<window->findChildren<QObject*>().size();
+        startupTimer.restart();window->setProperty("currentTab","observation");
+        until([&]{return window->findChild<QObject*>("observationWorkspace")!=nullptr;});
+        QCoreApplication::processEvents();
+        qInfo()<<"First Observation ms"<<startupTimer.elapsed();
+        auto* observation=window->findChild<ObservationController*>("observationController");ASTRO_TEST_CHECK(observation);
+        window->setProperty("currentTab","home");QCoreApplication::processEvents();window->setProperty("currentTab","observation");QCoreApplication::processEvents();
+        ASTRO_TEST_CHECK(window->findChild<ObservationController*>("observationController")==observation);
+        window->setProperty("quitApproved",true);return 0;
+    }
     auto* deep=window->findChild<DeepSkyController*>("deepSkyController");
     auto* processing=window->findChild<ProcessingController*>("processingController");
     auto* caption=window->findChild<ProcessingController*>("captionController");

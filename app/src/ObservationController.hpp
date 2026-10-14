@@ -18,6 +18,7 @@ class ObservationController : public QObject {
   Q_PROPERTY(QVariantMap settings READ settings NOTIFY changed)
   Q_PROPERTY(QVariantList samples READ samples NOTIFY changed)
   Q_PROPERTY(QVariantList sites READ sites NOTIFY sitesChanged)
+  Q_PROPERTY(bool hasHiddenPresetSites READ hasHiddenPresetSites NOTIFY sitesChanged)
   Q_PROPERTY(QVariantList searchResults READ searchResults NOTIFY searchChanged)
   Q_PROPERTY(QVariantList world READ world NOTIFY instantChanged)
   Q_PROPERTY(QVariantMap instant READ instant NOTIFY instantChanged)
@@ -51,6 +52,7 @@ public:
   QVariantMap settings() const { return settings_; }
   QVariantList samples() const { return samples_; }
   QVariantList sites() const { return sites_; }
+  bool hasHiddenPresetSites() const;
   QVariantList searchResults() const { return searchResults_; }
   QVariantList world() const { return world_; }
   QVariantMap instant() const { return instant_; }
@@ -100,7 +102,8 @@ public:
   Q_INVOKABLE QVariantMap recordingWindow(qint64 notBefore = 0) const;
   Q_INVOKABLE void chooseMapLocation(double latitude, double longitude);
   Q_INVOKABLE void resolveMapTimeZone();
-  Q_INVOKABLE bool saveSite(const QString &name);
+  Q_INVOKABLE bool saveSite(const QString &name, const QString &website = QString());
+  Q_INVOKABLE void restorePresetSites();
   Q_INVOKABLE void toggleFavoriteSite(int index);
   Q_INVOKABLE void removeSite(int index);
 signals:
@@ -141,7 +144,7 @@ private:
   QVariantMap reference_{{"recording", QVariantMap{{"available", false}}},
                          {"days", QVariantList{}},
                          {"slots", QVariantList{}}};
-  QVariantList samples_, sites_, searchResults_, world_;
+  QVariantList samples_, sites_, presetSites_, searchResults_, world_;
   QString error_, searchStatus_;
   bool searching_{};
   qint64 start_{}, end_{};

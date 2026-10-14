@@ -828,6 +828,41 @@ int main(int argc, char **argv) {
   ASTRO_TEST_CHECK(controller.instant()["utcSeconds"] == beforeSiteActions);
   ASTRO_TEST_CHECK(root->property("selectedSiteIndex").toInt() == -1);
   ASTRO_TEST_CHECK(!item(root, "observationDeletePlace")->isVisible());
+  // A personal copy of a preset can retain its original name. Its controls
+  // must affect the saved copy, including after it loses its favourite star.
+  pickSite(0);
+  const auto presetName = controller.settings()["name"].toString();
+  const auto websiteUtc = controller.instant()["utcSeconds"];
+  ASTRO_TEST_CHECK(controller.saveSite(presetName, "https://example.org/telescope?site=paris"));
+  const int copyIndex = controller.sites().size() - 1;
+  ASTRO_TEST_CHECK(root->property("selectedSiteIndex").toInt() == copyIndex);
+  controller.toggleFavoriteSite(copyIndex);
+  ASTRO_TEST_CHECK(root->property("selectedSiteIndex").toInt() == copyIndex);
+  ASTRO_TEST_CHECK(root->property("selectedSite").toMap()["website"] ==
+                   "https://example.org/telescope?site=paris");
+  const auto savedCopy = controller.sites();
+  for (const auto *invalid : {"file:///tmp/test", "javascript:alert(1)",
+                             "https://user:password@example.org", "https://", "not a URL"}) {
+    ASTRO_TEST_CHECK(!controller.saveSite("Invalid", invalid));
+    ASTRO_TEST_CHECK(controller.sites() == savedCopy);
+    ASTRO_TEST_CHECK(controller.settings()["name"] == presetName);
+  }
+  ASTRO_TEST_CHECK(controller.saveSite(presetName));
+  {
+    ObservationController reopened;
+    ASTRO_TEST_CHECK(reopened.sites().last().toMap()["website"] ==
+                     "https://example.org/telescope?site=paris");
+    ASTRO_TEST_CHECK(!reopened.sites().last().toMap()["favorite"].toBool());
+  }
+  ASTRO_TEST_CHECK(QMetaObject::invokeMethod(item(root, "observationNamePlace"), "clicked"));
+  ASTRO_TEST_CHECK(item(root, "observationPlaceWebsite")->property("text") ==
+                   "https://example.org/telescope?site=paris");
+  item(root, "observationPlaceWebsite")->setProperty("text", QStringLiteral(""));
+  ASTRO_TEST_CHECK(QMetaObject::invokeMethod(item(root, "observationSavePlace"), "clicked"));
+  ASTRO_TEST_CHECK(controller.sites().last().toMap()["website"].toString().isEmpty());
+  ASTRO_TEST_CHECK(controller.instant()["utcSeconds"] == websiteUtc);
+  controller.removeSite(copyIndex);
+  ASTRO_TEST_CHECK(root->property("selectedSiteIndex").toInt() == 0);
   for (const char *kind : {"sunset", "sunrise"}) {
     for (const auto &value : controller.result()["siteSolarEvents"].toList()) {
       const auto event = value.toMap();
@@ -1273,9 +1308,22 @@ int main(int argc, char **argv) {
     ASTRO_TEST_CHECK(empty.error().isEmpty());
     ASTRO_TEST_CHECK(empty.saveSite("Nouveau jardin"));
     ASTRO_TEST_CHECK(empty.sites().size() == 1);
+    const auto selected = empty.settings();
+    const auto instant = empty.instant()["utcSeconds"];
+    ASTRO_TEST_CHECK(empty.hasHiddenPresetSites());
+    empty.restorePresetSites();
+    ASTRO_TEST_CHECK(empty.sites().size() == 11);
+    ASTRO_TEST_CHECK(!empty.hasHiddenPresetSites());
+    ASTRO_TEST_CHECK(empty.sites().first().toMap()["name"] == "Nouveau jardin");
+    ASTRO_TEST_CHECK(empty.settings() == selected);
+    ASTRO_TEST_CHECK(empty.instant()["utcSeconds"] == instant);
+    empty.restorePresetSites();
+    ObservationController restored;
+    ASTRO_TEST_CHECK(restored.sites().size() == 11);
+    ASTRO_TEST_CHECK(!restored.hasHiddenPresetSites());
     empty.removeSite(-1);
     empty.toggleFavoriteSite(20);
-    ASTRO_TEST_CHECK(empty.sites().size() == 1);
+    ASTRO_TEST_CHECK(empty.sites().size() == 11);
   }
   app.setApplicationName(applicationName);
   return 0;

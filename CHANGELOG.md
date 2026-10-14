@@ -1,9 +1,12 @@
 # Changelog
 
-## Unreleased
+## 1.20.0 — 2026-10-14
 
 - Cache object search keys, replace the full catalogue sort with bounded ranked results, debounce typing and require a number for bare catalogue prefixes. Show at most 25 local results, retaining exact matches first and explicit online search.
 - Add direct place favourite and delete controls. Keep saved places when their star is removed, support preset favourites and deletion, migrate existing favourites and preserve the selected position and UTC instant.
+- Add optional website links to saved observing places, opened in the browser only on request; validate addresses and preserve links when renaming.
+- Restore deleted built-in places from Advanced without changing personal places, favourites, coordinates or the selected UTC instant.
+- Select the saved copy correctly when it shares a preset’s name and coordinates; reject malformed saved coordinates instead of silently moving them to zero.
 - Update French labels, the Observation Guide and README.
 
 ## 1.19.0 — 2026-10-13

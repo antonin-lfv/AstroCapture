@@ -71,6 +71,15 @@ QVariantMap site(QString name, double lat, double lon, QString zone) {
   return {{"name", name},   {"latitude", lat}, {"longitude", lon},
           {"elevation", 0}, {"zone", zone},    {"favorite", false}};
 }
+QString validatedWebsite(const QString &text) {
+  const auto trimmed = text.trimmed();
+  const QUrl url(trimmed, QUrl::StrictMode);
+  if (trimmed.size() > 2048 || !url.isValid() || url.host().isEmpty() ||
+      (url.scheme() != "https" && url.scheme() != "http") ||
+      !url.userInfo().isEmpty())
+    return {};
+  return url.toString(QUrl::FullyEncoded);
+}
 bool recommendationTarget(const ObservationTarget &target, bool favorite) {
   static const QStringList extra = {"NGC3372", "NGC5139", "NGC5128",
                                     "NGC0104", "NGC2070", "NGC0253",
@@ -109,6 +118,12 @@ ObservationController::ObservationController(QObject *parent)
                                 "cape-town", "t68-utah"};
   const auto presetPreferences =
       QSettings().value("observation/presetSites").toMap();
+  for (int i = 0; i < sites_.size(); ++i) {
+    auto s = sites_[i].toMap();
+    s["presetId"] = presetIds[i];
+    sites_[i] = s;
+  }
+  presetSites_ = sites_;
   for (int i = sites_.size() - 1; i >= 0; --i) {
     const auto preference = presetPreferences.value(presetIds[i]).toMap();
     if (preference.value("hidden").toBool()) {
@@ -130,7 +145,13 @@ ObservationController::ObservationController(QObject *parent)
   int savedCount = 0;
   for (const auto &value : stored) {
     auto s = value.toMap();
-    if (!QTimeZone(s.value("zone").toString().toUtf8()).isValid() ||
+    bool latitudeOk, longitudeOk, elevationOk;
+    s.value("latitude").toDouble(&latitudeOk);
+    s.value("longitude").toDouble(&longitudeOk);
+    s.value("elevation").toDouble(&elevationOk);
+    if (!latitudeOk || !longitudeOk || !elevationOk ||
+        s.value("name").toString().trimmed().isEmpty() ||
+        !QTimeZone(s.value("zone").toString().toUtf8()).isValid() ||
         !std::isfinite(s.value("latitude").toDouble()) ||
         std::abs(s.value("latitude").toDouble()) > 90 ||
         !std::isfinite(s.value("longitude").toDouble()) ||
@@ -143,6 +164,7 @@ ObservationController::ObservationController(QObject *parent)
     s.remove("presetId");
     s["saved"] = true;
     s["favorite"] = legacySites || s.value("favorite").toBool();
+    s["website"] = validatedWebsite(s.value("website").toString());
     sites_.append(s);
     ++savedCount;
   }
@@ -1091,9 +1113,15 @@ void ObservationController::persistSites() {
   // Keep the original key readable by earlier application versions.
   prefs.setValue("observation/favorites", favorites);
 }
-bool ObservationController::saveSite(const QString &name) {
+bool ObservationController::saveSite(const QString &name, const QString &website) {
   if (name.trimmed().isEmpty() || name.size() > 100) {
     error_ = tr("Enter a place name (maximum 100 characters).");
+    emit changed();
+    return false;
+  }
+  const auto link = validatedWebsite(website);
+  if (!website.trimmed().isEmpty() && link.isEmpty()) {
+    error_ = tr("Enter an http:// or https:// address without login details (maximum 2048 characters), or leave it empty.");
     emit changed();
     return false;
   }
@@ -1115,6 +1143,7 @@ bool ObservationController::saveSite(const QString &name) {
         old.value("elevation") == s.value("elevation") &&
         old.value("zone") == s.value("zone")) {
       existing = i;
+      s["website"] = old.value("website");
       s["favorite"] = old.value("favorite");
       s["label"] = (s.value("favorite").toBool() ? QString("★ ") : QString()) +
                    name.trimmed();
@@ -1131,6 +1160,8 @@ bool ObservationController::saveSite(const QString &name) {
     emit changed();
     return false;
   }
+  if (!website.isNull())
+    s["website"] = link;
   error_.clear();
   if (existing >= 0)
     sites_[existing] = s;
@@ -1142,6 +1173,27 @@ bool ObservationController::saveSite(const QString &name) {
   persistSites();
   emit sitesChanged();
   return true;
+}
+bool ObservationController::hasHiddenPresetSites() const {
+  for (const auto &preset : presetSites_)
+    if (std::none_of(sites_.cbegin(), sites_.cend(), [&](const auto &value) {
+          return value.toMap().value("presetId") ==
+                 preset.toMap().value("presetId");
+        }))
+      return true;
+  return false;
+}
+void ObservationController::restorePresetSites() {
+  if (!hasHiddenPresetSites())
+    return;
+  for (const auto &preset : presetSites_)
+    if (std::none_of(sites_.cbegin(), sites_.cend(), [&](const auto &value) {
+          return value.toMap().value("presetId") ==
+                 preset.toMap().value("presetId");
+        }))
+      sites_.append(preset);
+  persistSites();
+  emit sitesChanged();
 }
 void ObservationController::toggleFavoriteSite(int index) {
   if (index < 0 || index >= sites_.size())

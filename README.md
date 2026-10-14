@@ -11,7 +11,7 @@
 </p>
 
 <p align="center">
-  <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/version-1.19.0-d4af37" alt="Version 1.19.0"></a>
+  <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/version-1.20.0-d4af37" alt="Version 1.20.0"></a>
   <a href="#installer-sur-mac"><img src="https://img.shields.io/badge/macOS-Apple_Silicon-7897c5" alt="macOS : Apple Silicon"></a>
   <a href="#installer-sur-linux"><img src="https://img.shields.io/badge/Linux-Ubuntu_%C2%B7_Mint-87b07c" alt="Linux : Ubuntu et Mint"></a>
   <img src="https://img.shields.io/badge/langues-FR_%C2%B7_EN-b69ad4" alt="Langues : français et anglais">
@@ -99,6 +99,12 @@ en favoris pour les retrouver rapidement. L’étoile à côté du lieu permet d
 l’ajouter ou de le retirer des favoris ; la corbeille le supprime de la liste.
 Pour un objet du catalogue NGC ou IC, ajoutez son numéro (par exemple **NGC 5078**).
 La recherche affiche au maximum 25 résultats.
+
+Dans **Enregistrer le lieu** ou **Renommer**, vous pouvez ajouter un lien vers
+la page de votre télescope, une réservation ou votre site d’observation.
+**Ouvrir le site du lieu** l’ouvre dans votre navigateur. Dans les options avancées,
+**Rétablir les lieux prédéfinis** récupère les lieux intégrés que vous avez supprimés,
+en conservant vos lieux personnels et vos favoris.
 
 ![Observation : préparer M42 depuis l’Utah, avec les heures sur place et chez soi](assets/screenshots/readme-observation.png)
 

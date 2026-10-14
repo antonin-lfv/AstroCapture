@@ -174,7 +174,7 @@ static int workspace(const QString& directory,bool restore,bool faults=false) {
         workspace->setProperty("liveNow", false);
         workspace->setProperty("autoLoadWeather", false);
         workspace->setProperty("autoSelectVisible", false);
-        ASTRO_TEST_CHECK(observation->saveSite("Mon jardin d’observation"));
+        ASTRO_TEST_CHECK(observation->saveSite("Mon jardin d’observation", "https://example.org/observatoire"));
         const auto selectedUtc = observation->instant()["utcSeconds"];
         for (const auto size : {QSize(1440,960), QSize(1100,800), QSize(900,700)}) {
             window->resize(size);
@@ -182,6 +182,10 @@ static int workspace(const QString& directory,bool restore,bool faults=false) {
             capture(window, QString("real-image-%1").arg(size.width()));
             window->setProperty("currentTab", "observation");
             capture(window, QString("place-favourite-%1").arg(size.width()));
+            click(workspace, "observationNamePlace");
+            capture(window, QString("place-website-dialog-%1").arg(size.width()));
+            auto* nameDialog = workspace->findChild<QObject*>("observationNameDialog");
+            ASTRO_TEST_CHECK(nameDialog && QMetaObject::invokeMethod(nameDialog, "close"));
             click(workspace, "observationFavoritePlace");
             capture(window, QString("place-kept-without-star-%1").arg(size.width()));
             ASTRO_TEST_CHECK(observation->sites().last().toMap()["saved"].toBool());

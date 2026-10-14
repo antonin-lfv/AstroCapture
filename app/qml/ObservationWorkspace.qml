@@ -160,12 +160,16 @@ Rectangle {
     readonly property var selectedSite: selectedSiteIndex >= 0 ? controller.sites[selectedSiteIndex] || ({}) : ({})
     function currentSiteIndex() {
         const current = controller.settings;
+        let presetIndex = -1;
         for (let i = 0; i < sortedSites.length; i++) {
             const site = sortedSites[i];
-            if (site.name === current.name && Number(site.latitude) === Number(current.latitude) && Number(site.longitude) === Number(current.longitude) && Number(site.elevation) === Number(current.elevation) && site.zone === current.zone)
-                return site.sourceIndex;
+            if (site.name === current.name && Number(site.latitude) === Number(current.latitude) && Number(site.longitude) === Number(current.longitude) && Number(site.elevation) === Number(current.elevation) && site.zone === current.zone) {
+                if (site.saved)
+                    return site.sourceIndex;
+                presetIndex = site.sourceIndex;
+            }
         }
-        return -1;
+        return presetIndex;
     }
     function favoriteSiteIndex() {
         return selectedSite.favorite ? selectedSiteIndex : -1;
@@ -175,6 +179,7 @@ Rectangle {
         nameDialog.addToFavourites = addToFavourites;
         nameDialog.open();
         favoriteName.text = controller.settings.name || "";
+        placeWebsite.text = selectedSite.website || "";
     }
     function compassDirection(degrees) {
         const directions = [qsTr("North"), qsTr("North-east"), qsTr("East"), qsTr("South-east"), qsTr("South"), qsTr("South-west"), qsTr("West"), qsTr("North-west")];
@@ -610,6 +615,17 @@ Rectangle {
                                         ToolTip.delay: 450
                                         onClicked: root.controller.removeSite(root.selectedSiteIndex)
                                     }
+                                }
+                                IconButton {
+                                    objectName: "observationOpenPlaceWebsite"
+                                    Layout.fillWidth: true
+                                    visible: !!root.selectedSite.website
+                                    text: qsTr("Open place website")
+                                    Accessible.description: root.selectedSite.website || ""
+                                    ToolTip.text: root.selectedSite.website || ""
+                                    ToolTip.visible: hovered
+                                    ToolTip.delay: 450
+                                    onClicked: Qt.openUrlExternally(root.selectedSite.website)
                                 }
                                 GridLayout {
                                     Layout.fillWidth: true
@@ -1462,7 +1478,7 @@ Rectangle {
         parent: Overlay.overlay
         closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
         width: Math.min(560, root.width - 48)
-        height: Math.min(330, root.height - 48)
+        height: Math.min(420, root.height - 48)
         x: parent ? (parent.width - width) / 2 : 0
         y: parent ? (parent.height - height) / 2 : 0
         onOpened: favoriteName.focusInput(true)
@@ -1482,6 +1498,13 @@ Rectangle {
                     label: qsTr("Place name")
                     help: qsTr("For example Garden, Balcony or Mountain site. The name, coordinates and time zone are saved on this computer. New places are added to favourites; the star can be turned off without deleting the place. Renaming keeps the same position.")
                 }
+                ObservationField {
+                    id: placeWebsite
+                    objectName: "observationPlaceWebsite"
+                    Layout.fillWidth: true
+                    label: qsTr("Website · optional")
+                    help: qsTr("Save an http:// or https:// link to your telescope, booking page or observing site. Open place website opens it in your browser only when requested. Leave it empty to remove the link.")
+                }
                 Label {
                     text: qsTr("%1°, %2° · %3").arg(root.controller.settings.latitude).arg(root.controller.settings.longitude).arg(root.controller.settings.zone)
                     color: Atelier.secondary
@@ -1489,11 +1512,12 @@ Rectangle {
                     wrapMode: Text.Wrap
                 }
                 IconButton {
+                    objectName: "observationSavePlace"
                     text: qsTr("Save this site")
                     enabled: favoriteName.text.trim().length > 0
                     Layout.fillWidth: true
                     onClicked: {
-                        if (root.controller.saveSite(favoriteName.text)) {
+                        if (root.controller.saveSite(favoriteName.text, placeWebsite.text)) {
                             if (nameDialog.addToFavourites && !root.selectedSite.favorite)
                                 root.controller.toggleFavoriteSite(root.selectedSiteIndex);
                             nameDialog.close();
@@ -1642,6 +1666,17 @@ Rectangle {
                     ColumnLayout {
                         Layout.fillWidth: true
                         spacing: 12
+                        IconButton {
+                            objectName: "observationRestorePresetSites"
+                            Layout.fillWidth: true
+                            text: qsTr("Restore built-in places")
+                            enabled: root.controller.hasHiddenPresetSites
+                            Accessible.description: qsTr("Restore deleted built-in places while keeping your saved places, favourites and selected instant.")
+                            ToolTip.text: Accessible.description
+                            ToolTip.visible: hovered
+                            ToolTip.delay: 450
+                            onClicked: root.controller.restorePresetSites()
+                        }
                         CheckBox {
                             id: history
                             objectName: "observationHistory"

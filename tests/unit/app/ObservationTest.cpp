@@ -1243,46 +1243,60 @@ int main(int argc, char **argv) {
         qEnvironmentVariable("ASTRO_OBSERVATION_SCREENSHOTS") +
         "/moon-horizon-900.png");
   if (qEnvironmentVariableIsSet("ASTRO_OBSERVATION_ONLINE")) {
-    reachability(Reachability::Online);
-    auto today = controller.settings();
+    // Isolate network checks from the map lookup and live-clock events left
+    // pending by the preceding UI interactions.
+    ObservationController online;
+    ASTRO_TEST_CHECK(QMetaObject::invokeMethod(&online,"updateReachability",Qt::DirectConnection,Q_ARG(int,int(Reachability::Online))));
+    auto today = online.settings();
+    today["latitude"]=48.8566;today["longitude"]=2.3522;today["elevation"]=35;
+    today["zone"]="Europe/Paris";today["mapZoneUnresolved"]=false;
     today["date"] =
         QDateTime::currentDateTimeUtc().date().toString(Qt::ISODate);
-    ASTRO_TEST_CHECK(controller.calculate(today));
-    controller.refreshWeather();
+    ASTRO_TEST_CHECK(online.calculate(today));
+    online.refreshWeather();
     QElapsedTimer weatherTimeout;
     weatherTimeout.start();
-    while (controller.weather()["busy"].toBool() &&
+    while (online.weather()["busy"].toBool() &&
            weatherTimeout.elapsed() < 25000) {
       QCoreApplication::processEvents();
       QThread::msleep(10);
     }
-    ASTRO_TEST_CHECK(!controller.weather()["busy"].toBool());
-    ASTRO_TEST_CHECK(controller.weather()["hasForecast"].toBool());
-    ASTRO_TEST_CHECK(controller.weather()["available"].toBool());
-    controller.searchCity("Toulouse, France");
+    ASTRO_TEST_CHECK(!online.weather()["busy"].toBool());
+    qInfo()<<"Online weather"<<online.weather();
+    ASTRO_TEST_CHECK(online.weather()["hasForecast"].toBool());
+    ASTRO_TEST_CHECK(online.weather()["available"].toBool());
+    online.searchCity("Toulouse, France");
     QElapsedTimer timeout;
     timeout.start();
-    while (controller.locating() && timeout.elapsed() < 20000) {
+    while (online.locating() && timeout.elapsed() < 20000) {
       QCoreApplication::processEvents();
       QThread::msleep(10);
     }
-    ASTRO_TEST_CHECK(!controller.locating());
-    ASTRO_TEST_CHECK(!controller.cityResults().isEmpty());
-    ASTRO_TEST_CHECK(controller.selectCity(0));
-    ASTRO_TEST_CHECK(controller.settings()["zone"].toString() ==
+    ASTRO_TEST_CHECK(!online.locating());
+    ASTRO_TEST_CHECK(!online.cityResults().isEmpty());
+    ASTRO_TEST_CHECK(online.selectCity(0));
+    ASTRO_TEST_CHECK(online.settings()["zone"].toString() ==
                      "Europe/Paris");
-    controller.searchOnline("Vega");
+    const auto citiesBeforeFailure=online.cityResults();
+    const auto settingsBeforeFailure=online.settings();
+    online.searchCity("Bordeaux");bool abortedCity=false;
+    for(auto* reply:online.findChildren<QNetworkReply*>())
+      if(reply->url().host()=="geocoding-api.open-meteo.com"&&!reply->isFinished()){reply->abort();abortedCity=true;}
+    ASTRO_TEST_CHECK(abortedCity&&!online.locating());
+    ASTRO_TEST_CHECK(online.cityResults()==citiesBeforeFailure&&online.settings()==settingsBeforeFailure);
+    ASTRO_TEST_CHECK(!online.locationStatus().isEmpty());
+    online.searchOnline("Vega");
     timeout.restart();
-    while (controller.searching() && timeout.elapsed() < 35000) {
+    while (online.searching() && timeout.elapsed() < 35000) {
       QCoreApplication::processEvents();
       QThread::msleep(10);
     }
-    ASTRO_TEST_CHECK(!controller.searching());
-    ASTRO_TEST_CHECK(!controller.searchResults().isEmpty());
+    ASTRO_TEST_CHECK(!online.searching());
+    ASTRO_TEST_CHECK(!online.searchResults().isEmpty());
     const auto onlineId =
-        controller.searchResults().first().toMap()["id"].toString();
-    ASTRO_TEST_CHECK(controller.selectTarget(onlineId));
-    controller.toggleFavoriteTarget();
+        online.searchResults().first().toMap()["id"].toString();
+    ASTRO_TEST_CHECK(online.selectTarget(onlineId));
+    online.toggleFavoriteTarget();
     ObservationController reopened;
     ASTRO_TEST_CHECK(reopened.selectTarget(onlineId));
     ASTRO_TEST_CHECK(reopened.targetFavorite());

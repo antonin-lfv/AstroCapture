@@ -214,7 +214,11 @@ static int workspace(const QString& directory,bool restore,bool faults=false) {
         observation->removeSite(1);
         auto* options = workspace->findChild<QObject*>("observationOptionsDialog");
         ASTRO_TEST_CHECK(options && QMetaObject::invokeMethod(options, "open"));
-        evaluate(workspace, "advanced.expanded = true");
+        auto* advancedSection = workspace->findChild<QObject*>("observationRestorePresetSites");
+        while (advancedSection && !advancedSection->property("expanded").isValid())
+            advancedSection = advancedSection->parent();
+        ASTRO_TEST_CHECK(advancedSection);
+        advancedSection->setProperty("expanded", true);
         for (const auto size : {QSize(1440,960), QSize(1100,800), QSize(900,700)}) {
             window->resize(size);
             capture(window, QString("restore-places-%1").arg(size.width()));

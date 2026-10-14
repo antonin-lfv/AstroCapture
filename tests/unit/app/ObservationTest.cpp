@@ -1340,6 +1340,56 @@ int main(int argc, char **argv) {
     ASTRO_TEST_CHECK(checked.sites().last().toMap()["name"] == valid["name"]);
     ASTRO_TEST_CHECK(checked.sites().last().toMap()["website"].toString().isEmpty());
   }
+  // Invalid persisted coordinates must not produce a plausible zero-degree
+  // target or overwrite the original settings. A catalogue choice recovers.
+  app.setApplicationName("ObservationTargetRecovery");
+  const QVariantMap recoverySettings{
+      {"latitude", 48.8566}, {"longitude", 2.3522}, {"elevation", 0},
+      {"zone", "Europe/Paris"}, {"targetName", "Saved target"},
+      {"ra", 42.125}, {"dec", -12.25}};
+  for (const auto &id : {QString("manual"), QString("manual:test"),
+                         QString("cds:test")}) {
+    for (const auto &coordinate : {QString("ra"), QString("dec")}) {
+      for (const auto &invalid : {QVariant(), QVariant("broken coordinate"),
+                                  QVariant(400.0)}) {
+        auto stored = recoverySettings;
+        stored["target"] = id;
+        if (invalid.isValid())
+          stored[coordinate] = invalid;
+        else
+          stored.remove(coordinate);
+        QSettings().setValue("observation/settings", stored);
+        ObservationController reopened;
+        ASTRO_TEST_CHECK(!reopened.error().isEmpty());
+        ASTRO_TEST_CHECK(reopened.samples().isEmpty());
+        ASTRO_TEST_CHECK(reopened.result().isEmpty());
+        reopened.toggleFavoriteTarget();
+        ASTRO_TEST_CHECK(!reopened.error().isEmpty());
+        ASTRO_TEST_CHECK(reopened.favoriteTargets().isEmpty());
+        ASTRO_TEST_CHECK(reopened.setReferenceZone("site"));
+        ASTRO_TEST_CHECK(QSettings().value("observation/settings").toMap() == stored);
+        ASTRO_TEST_CHECK(!reopened.selectTarget(id));
+        ASTRO_TEST_CHECK(reopened.selectTarget("NGC1976"));
+        ASTRO_TEST_CHECK(reopened.error().isEmpty());
+        ASTRO_TEST_CHECK(!reopened.samples().isEmpty());
+      }
+    }
+    // Zero is a valid coordinate when explicitly saved, and exact coordinates
+    // survive a restart without rounding.
+    for (const auto &coordinates : {QVariantList{0.0, 0.0},
+                                    QVariantList{42.125, -12.25}}) {
+      auto stored = recoverySettings;
+      stored["target"] = id;
+      stored["ra"] = coordinates[0];
+      stored["dec"] = coordinates[1];
+      QSettings().setValue("observation/settings", stored);
+      ObservationController reopened;
+      ASTRO_TEST_CHECK(reopened.error().isEmpty());
+      ASTRO_TEST_CHECK(reopened.settings()["target"] == id);
+      ASTRO_TEST_CHECK(reopened.settings()["ra"] == coordinates[0]);
+      ASTRO_TEST_CHECK(reopened.settings()["dec"] == coordinates[1]);
+    }
+  }
   app.setApplicationName(applicationName);
   return 0;
 }

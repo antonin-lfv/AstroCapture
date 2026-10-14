@@ -32,6 +32,10 @@ QString designation(QString s) {
   auto m = pattern.match(s);
   return m.hasMatch() ? m.captured(1) + m.captured(3) + m.captured(4) : s;
 }
+bool validCoordinates(double ra, double dec) {
+  return std::isfinite(ra) && std::isfinite(dec) && ra >= 0 && ra < 360 &&
+         std::abs(dec) <= 90;
+}
 QStringList fields(const QString &line) {
   QStringList out;
   QString field;
@@ -220,15 +224,18 @@ ObservationController::ObservationController(QObject *parent)
     }
   if (targetId == "manual" || targetId.startsWith("manual:") ||
       targetId.startsWith("cds:")) {
+    bool raOk, decOk;
+    const double ra = settings_.value("ra").toDouble(&raOk),
+                 dec = settings_.value("dec").toDouble(&decOk);
     target_ = {
         targetId,
         settings_.value("targetName", tr("Manual coordinates")).toString(),
         settings_.value("targetSource", tr("Manual J2000 coordinates"))
             .toString(),
         -1,
-        settings_.value("ra").toDouble(),
-        settings_.value("dec").toDouble()};
-    if (targetId != "manual" &&
+        raOk ? ra : NAN,
+        decOk ? dec : NAN};
+    if (targetId != "manual" && validCoordinates(target_.ra, target_.dec) &&
         std::none_of(catalog_.begin(), catalog_.end(),
                      [&](const auto &t) { return t.id == targetId; }))
       catalog_.push_back(target_);
@@ -453,6 +460,9 @@ QString ObservationController::localTime(qint64 utc) const {
       .toString("dd/MM HH:mm t");
 }
 void ObservationController::persist() {
+  // Keep the recoverable input intact until a valid target is selected.
+  if (target_.body < 0 && !validCoordinates(target_.ra, target_.dec))
+    return;
   QSettings prefs;
   auto s = settings_;
   s["target"] = target_.id;
@@ -1360,6 +1370,11 @@ void ObservationController::saveFavoriteTargets() {
   emit weatherChanged();
 }
 void ObservationController::toggleFavoriteTarget() {
+  if (target_.body < 0 && !validCoordinates(target_.ra, target_.dec)) {
+    error_ = tr("Invalid J2000 coordinates.");
+    emit changed();
+    return;
+  }
   error_.clear();
   for (int i = 0; i < favoriteTargets_.size(); ++i) {
     if (favoriteTargets_[i].toMap().value("id").toString() == target_.id) {

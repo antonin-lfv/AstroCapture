@@ -7,6 +7,7 @@
 - Add optional website links to saved observing places, opened in the browser only on request; validate addresses and preserve links when renaming.
 - Restore deleted built-in places from Advanced without changing personal places, favourites, coordinates or the selected UTC instant.
 - Select the saved copy correctly when it shares a preset’s name and coordinates; reject malformed saved coordinates instead of silently moving them to zero.
+- Reject incomplete or invalid restored object coordinates without overwriting the saved settings or adding an invalid favourite; allow recovery by selecting a valid catalogue object.
 - Build the macOS DMG from a fresh deployment copy, verify it before replacement and retain previous installers. Generate and verify the Linux ZIP automatically, including launch instructions, camera access rules and an AppImage checksum.
 - Update French labels, the Observation Guide and README.
 

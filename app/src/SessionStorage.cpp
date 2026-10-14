@@ -67,6 +67,27 @@ QString newName(const char* suffix){return QUuid::createUuid().toString(QUuid::W
 bool SessionStorage::available() const{return QFileInfo::exists(QDir(directory_).filePath("session.json"));}
 QString SessionStorage::savedAt() const{try{return readManifest(directory_)["savedAt"].toString();}catch(...){return {};}}
 void SessionStorage::save(const SavedSession& session,const std::function<void()>& check) {
+    // Reject snapshots the reader cannot restore before creating any assets.
+    require(session.workspaces.size()<=3,"Invalid session workspaces.");
+    std::uint64_t pixelBytes=0;
+    QSet<const void*> images,planes;
+    for(auto it=session.workspaces.cbegin();it!=session.workspaces.cend();++it) {
+        require(QStringList{"processing","deepSky","mosaic"}.contains(it.key()),"Invalid session workspace.");
+        const auto& s=it.value();
+        require(s.images.size()<=64,"Too many saved session images.");
+        require(s.planes.size()<=8,"Too many saved session masks.");
+        require(s.previews.size()<=16,"Too many session previews.");
+        for(const auto& image:s.images) {
+            require(image&&domain::supportedImageSize(image->width,image->height)&&image->rgb.size()==std::size_t(image->width)*image->height*3,"Invalid saved session image.");
+            if(!images.contains(image.get())){images.insert(image.get());pixelBytes+=20+image->rgb.size()*4ULL;}
+        }
+        for(const auto& plane:s.planes) {
+            const auto base=s.images.value("stack",s.images.value("result"));
+            require(plane&&base&&plane->size()==std::size_t(base->width)*base->height,"Invalid saved mask size.");
+            if(!planes.contains(plane.get())){planes.insert(plane.get());pixelBytes+=20+plane->size()*4ULL;}
+        }
+    }
+    require(pixelBytes<=4ULL*1024*1024*1024,"The saved session exceeds the 4 GiB recovery limit.");
     require(QDir().mkpath(directory_),"Cannot create the session folder.");QJsonObject spaces;QSet<QString> retained;
     for(auto it=session.workspaces.cbegin();it!=session.workspaces.cend();++it){const auto& s=it.value();QJsonObject imageRefs,planeRefs,previewRefs;
         for(auto p=s.images.cbegin();p!=s.images.cend();++p){require(bool(p.value()),"Invalid saved session image.");auto& cached=images_[p.value().get()];

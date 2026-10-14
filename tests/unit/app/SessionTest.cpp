@@ -8,12 +8,22 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QDir>
+#include <QProcess>
+#include <cstdlib>
 #include <iostream>
 using namespace astro::app;
 void wait(SessionController& c) { QElapsedTimer t;t.start();while(c.busy()&&t.elapsed()<15000){QCoreApplication::processEvents();QThread::msleep(2);}ASTRO_TEST_CHECK(!c.busy()); }
 QByteArray read(const QString& p){QFile f(p);ASTRO_TEST_CHECK(f.open(QIODevice::ReadOnly));return f.readAll();}
 int main(int argc,char** argv) {
     QGuiApplication app(argc,argv);app.setOrganizationName("AstroCaptureTests");app.setApplicationName("SessionTests");
+    if(app.arguments().size()==4 && app.arguments()[1]=="--interrupt-save") {
+        SessionStorage storage(app.arguments()[2]);auto saved=storage.load();
+        auto changed=std::make_shared<astro::processing::FloatImage>(*saved.workspaces["processing"].images["result"]);
+        changed->rgb[0]=33.f;saved.workspaces["processing"].images["result"]=changed;
+        const int stopAt=app.arguments()[3].toInt();int checkpoints=0;
+        storage.save(saved,[&]{if(++checkpoints==stopAt)std::_Exit(86);});
+        return 0;
+    }
     QTemporaryDir temp;ASTRO_TEST_CHECK(temp.isValid());
     ProcessingController processing;DeepSkyController deep;MosaicController mosaic;
     SessionController session;session.setStorageDirectory(temp.filePath("recovery"));session.setProcessing(&processing);session.setDeepSky(&deep);session.setMosaic(&mosaic);
@@ -32,6 +42,33 @@ int main(int argc,char** argv) {
     saved.ui["custom"]=9;storage.save(saved);
     ASTRO_TEST_CHECK(QDir(temp.filePath("recovery")).entryList({"*.pixels","*.plane","*.png"},QDir::Files)==assetNames);
     const auto originalManifest=read(temp.filePath("recovery/session.json"));
+    const auto originalFiles=QDir(temp.filePath("recovery")).entryList(QDir::Files|QDir::Hidden);
+    for(int kind=0;kind<4;++kind) {
+        auto invalid=saved;auto& space=invalid.workspaces["processing"];
+        if(kind==0)for(int i=0;i<65;++i)space.images[QString::number(i)]=image;
+        if(kind==1)for(int i=0;i<9;++i)space.planes[QString::number(i)]=doc.edgeMask;
+        if(kind==2)for(int i=0;i<17;++i)space.previews[QString::number(i)]=doc.preview;
+        if(kind==3)invalid.workspaces["unknown"]=space;
+        bool rejected=false;try{storage.save(invalid);}catch(const std::exception&){rejected=true;}
+        ASTRO_TEST_CHECK(rejected&&read(temp.filePath("recovery/session.json"))==originalManifest);
+        ASTRO_TEST_CHECK(QDir(temp.filePath("recovery")).entryList(QDir::Files|QDir::Hidden)==originalFiles);
+    }
+    // Exit a separate process at every save checkpoint, without destructors.
+    // Until publication, the previous manifest and all float pixels survive.
+    const auto crashFolder=temp.filePath("interrupted");SessionStorage crashStorage(crashFolder);crashStorage.save(saved);
+    const auto crashManifest=read(crashFolder+"/session.json");bool published=false;int interruptions=0;
+    for(int checkpoint=1;checkpoint<=40;++checkpoint) {
+        QProcess child;child.start(app.applicationFilePath(),{"--interrupt-save",crashFolder,QString::number(checkpoint)});
+        ASTRO_TEST_CHECK(child.waitForStarted(5000)&&child.waitForFinished(15000));
+        ASTRO_TEST_CHECK(child.exitStatus()==QProcess::NormalExit);
+        if(child.exitCode()==0){published=true;break;}
+        ASTRO_TEST_CHECK(child.exitCode()==86);++interruptions;
+        ASTRO_TEST_CHECK(read(crashFolder+"/session.json")==crashManifest);
+        ASTRO_TEST_CHECK(SessionStorage(crashFolder).load().workspaces["processing"].images["result"]->rgb==image->rgb);
+    }
+    ASTRO_TEST_CHECK(published&&interruptions>=2);
+    ASTRO_TEST_CHECK(SessionStorage(crashFolder).load().workspaces["processing"].images["result"]->rgb[0]==33.f);
+    std::cout<<"Abrupt process exit: "<<interruptions<<" save checkpoints preserve the previous recovery\n";
     auto changed=std::make_shared<astro::processing::FloatImage>(*image);changed->rgb[0]=33.f;saved.workspaces["processing"].images["result"]=changed;
     bool cancelled=false;try{storage.save(saved,[]{throw std::runtime_error("cancel");});}catch(...){cancelled=true;}
     ASTRO_TEST_CHECK(cancelled && read(temp.filePath("recovery/session.json"))==originalManifest);

@@ -27,6 +27,11 @@ struct ObservationSolarEvent {
 };
 std::vector<ObservationSolarEvent>
 observationSolarEvents(const ObservationSite &, qint64 start, qint64 end);
+struct ObservationSunPosition {
+  double altitude{};
+  bool isUp{};
+};
+ObservationSunPosition observationSunPosition(const ObservationSite &, qint64 utc);
 bool observationSunIsUp(const ObservationSite &, qint64 utc);
 ObservationPosition observationPosition(const ObservationTarget &,
                                         const ObservationSite &, qint64 utc);

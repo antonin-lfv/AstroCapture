@@ -4,6 +4,7 @@
 #include "ObservationPlot.hpp"
 #include "astronomy.h"
 #include <QElapsedTimer>
+#include <QCryptographicHash>
 #include <QFile>
 #include <QGuiApplication>
 #include <QJSValue>
@@ -104,6 +105,23 @@ int main(int argc, char **argv) {
           }));
     }
   }
+  // Preserve the unrefracted solar altitude and apparent upper-limb test
+  // when both values are obtained from the same topocentric ephemeris.
+  for(const auto date:{"1900-01-01","2026-03-20","2026-06-21","2026-12-21","2100-12-31"})
+    for(double latitude:{-89.0,-48.0,0.0,48.0,89.0})
+      for(double elevation:{-400.0,0.0,4000.0})
+        for(int hour=0;hour<24;++hour) {
+          const auto utc=QDateTime(QDate::fromString(date,Qt::ISODate),QTime(hour,0),QTimeZone::UTC).toSecsSinceEpoch();
+          const ObservationSite site{latitude,2.35,elevation};
+          const auto combined=observationSunPosition(site,utc);
+          ASTRO_TEST_CHECK(combined.altitude==observationSunAltitude(site,utc));
+          auto time=Astronomy_TimeFromDays((utc-946728000)/86400.0);
+          const auto observer=Astronomy_MakeObserver(latitude,2.35,elevation);
+          const auto eq=Astronomy_Equator(BODY_SUN,&time,observer,EQUATOR_OF_DATE,ABERRATION);
+          const bool expected=Astronomy_Horizon(&time,observer,eq.ra,eq.dec,REFRACTION_NONE).altitude+
+              (34.0/60)*Astronomy_Atmosphere(elevation).density+std::asin(0.004650467260962157/eq.dist)*RAD2DEG>=0;
+          ASTRO_TEST_CHECK(combined.isUp==expected);
+        }
   auto spring = observationNoon("2026-03-28", "Europe/Paris"),
        fall = observationNoon("2026-10-24", "Europe/Paris");
   ASTRO_TEST_CHECK(spring.secsTo(QDateTime(spring.date().addDays(1),
@@ -191,6 +209,18 @@ int main(int argc, char **argv) {
   auto cloudyNight = controller.settings();
   cloudyNight["date"] = "2026-10-12";
   ASTRO_TEST_CHECK(controller.calculate(cloudyNight));
+  if(qEnvironmentVariableIsSet("ASTRO_OBSERVATION_PERF")) {
+    QElapsedTimer elapsed;elapsed.start();
+    for(int n=0;n<40;++n)controller.setFraction(double(n)/40);
+    const auto cursorNs=elapsed.nsecsElapsed();elapsed.restart();
+    for(int n=0;n<40;++n)controller.visibleTargets();
+    std::cout<<"Observation benchmark: cursor ms/update "<<cursorNs/40.0/1e6
+             <<", suggestions ms/read "<<elapsed.nsecsElapsed()/40.0/1e6<<std::endl;
+    QCryptographicHash grids(QCryptographicHash::Sha256);
+    for(int n=0;n<40;++n){controller.setFraction(double(n)/40);grids.addData(QJsonDocument::fromVariant(controller.world()).toJson(QJsonDocument::Compact));}
+    std::cout<<"World grids SHA256 "<<grids.result().toHex().constData()<<std::endl;
+    return 0;
+  }
   controller.setFraction(.5);
   ASTRO_TEST_CHECK(controller.weather()["available"].toBool());
   ASTRO_TEST_CHECK(controller.weather()["cloud_cover"].toInt() == 100);

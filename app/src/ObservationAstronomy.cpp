@@ -48,7 +48,7 @@ ObservationPosition observationPosition(const ObservationTarget &target,
 double observationSunAltitude(const ObservationSite &site, qint64 utc) {
   return observationPosition({{}, {}, {}, BODY_SUN}, site, utc).altitude;
 }
-bool observationSunIsUp(const ObservationSite &site, qint64 utc) {
+ObservationSunPosition observationSunPosition(const ObservationSite &site, qint64 utc) {
   valid(site, utc);
   auto time = timeAt(utc);
   auto observer =
@@ -58,11 +58,15 @@ bool observationSunIsUp(const ObservationSite &site, qint64 utc) {
   if (eq.status != ASTRO_SUCCESS)
     throw std::runtime_error("Cannot calculate solar events.");
   auto atmosphere = Astronomy_Atmosphere(site.elevation);
-  return Astronomy_Horizon(&time, observer, eq.ra, eq.dec, REFRACTION_NONE)
-                 .altitude +
+  const double altitude =
+      Astronomy_Horizon(&time, observer, eq.ra, eq.dec, REFRACTION_NONE).altitude;
+  return {altitude, altitude +
              (34.0 / 60) * atmosphere.density +
              std::asin(0.004650467260962157 / eq.dist) * RAD2DEG >=
-         0;
+         0};
+}
+bool observationSunIsUp(const ObservationSite &site, qint64 utc) {
+  return observationSunPosition(site, utc).isUp;
 }
 std::vector<ObservationSolarEvent>
 observationSolarEvents(const ObservationSite &site, qint64 start, qint64 end) {

@@ -959,7 +959,8 @@ void ObservationController::updateInstant() {
   const qint64 utc = start_ + qRound64(fraction_ * (end_ - start_));
   const auto p = observationPosition(target_, site_, utc),
              moon = observationPosition({{}, {}, {}, BODY_MOON}, site_, utc);
-  const double sun = observationSunAltitude(site_, utc),
+  const auto sunPosition = observationSunPosition(site_, utc);
+  const double sun = sunPosition.altitude,
                minimum = settings_["minimum"].toDouble(),
                limit = settings_["sunLimit"].toDouble();
   QString status = p.altitude < 0         ? tr("Below the horizon")
@@ -975,7 +976,7 @@ void ObservationController::updateInstant() {
               {"altitude", p.altitude},
               {"azimuth", p.azimuth},
               {"sun", sun},
-              {"solarPhase", observationSunIsUp(site_, utc) ? tr("Day")
+              {"solarPhase", sunPosition.isUp ? tr("Day")
                              : sun > -6  ? tr("Civil twilight")
                              : sun > -12 ? tr("Nautical twilight")
                              : sun > -18 ? tr("Astronomical twilight")
@@ -990,10 +991,11 @@ void ObservationController::updateInstant() {
   for (int lat = -87; lat < 90; lat += 6)
     for (int lon = -177; lon < 180; lon += 6) {
       ObservationSite s{double(lat), double(lon), 0};
+      const auto solarPosition = observationSunPosition(s, utc);
       const double alt = observationPosition(target_, s, utc).altitude,
-                   solar = observationSunAltitude(s, utc);
+                   solar = solarPosition.altitude;
       int state = alt < 0 ? 0 : alt < minimum ? 1 : solar > limit ? 2 : 3;
-      const int solarState = observationSunIsUp(s, utc) ? 0
+      const int solarState = solarPosition.isUp ? 0
                              : solar > -18              ? 1
                                                         : 2;
       world_.append(QVariantMap{{"lat", lat},
@@ -1282,6 +1284,11 @@ void ObservationController::searchCity(const QString &name) {
   auto *reply = network->get(request);
   connect(reply, &QNetworkReply::readyRead, reply, [reply] {
     if (reply->bytesAvailable() > 65536)
+      reply->abort();
+  });
+  // A transfer timeout alone can be prolonged by a trickling response.
+  QTimer::singleShot(15000, reply, [reply] {
+    if (!reply->isFinished())
       reply->abort();
   });
   connect(reply, &QNetworkReply::finished, this, [this, network, reply] {

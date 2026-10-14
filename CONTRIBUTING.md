@@ -33,7 +33,7 @@ The AppImage distribution was validated with Qt 6.9.3 on Ubuntu 22.04.
 On Mint/Ubuntu, install the build dependencies:
 
 ```sh
-sudo apt-get install build-essential cmake ninja-build pkg-config libcfitsio-dev libraw-dev libusb-1.0-0-dev libuvc-dev libgl1-mesa-dev desktop-file-utils
+sudo apt-get install build-essential cmake ninja-build pkg-config libcfitsio-dev libraw-dev libusb-1.0-0-dev libuvc-dev libgl1-mesa-dev libfontconfig1 libdbus-1-3 desktop-file-utils python3 file
 ```
 
 Install a suitable Qt SDK and put its `bin` directory on `PATH`, then run:

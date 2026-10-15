@@ -14,6 +14,7 @@
 #include <QMouseEvent>
 #include <QNetworkInformation>
 #include <QNetworkReply>
+#include <QProcess>
 #include <QQmlComponent>
 #include <QQmlEngine>
 #include <QQuickWindow>
@@ -22,6 +23,7 @@
 #include <QThread>
 #include <QTimeZone>
 #include <QTranslator>
+#include <QUuid>
 #include <cmath>
 #include <iostream>
 using namespace astro::app;
@@ -35,6 +37,71 @@ static QQuickItem *item(QQuickItem *root, const QString &name) {
 }
 int main(int argc, char **argv) {
   QGuiApplication app(argc, argv);
+  // Exercise the real platform preferences across process exits, not just
+  // QSettings' shared in-process cache. Never use the user's app identity.
+  const auto args = app.arguments();
+  if (args.size() == 4 && args[1] == "--native-sites") {
+    QCoreApplication::setOrganizationName("AstroCaptureTest");
+    QCoreApplication::setApplicationName(args[2]);
+    const auto stage = args[3];
+    if (stage == "cleanup") {
+      QSettings prefs;
+      prefs.clear();
+      prefs.sync();
+      return 0;
+    }
+    if (stage == "legacy") {
+      QSettings prefs;
+      const auto saved = prefs.value("observation/savedSites").toList();
+      ASTRO_TEST_CHECK(saved.size() == 1);
+      auto place = saved.first().toMap();
+      place.remove("saved");
+      prefs.setValue("observation/favorites", QVariantList{place});
+      prefs.remove("observation/savedSites");
+      prefs.sync();
+      ASTRO_TEST_CHECK(prefs.status() == QSettings::NoError);
+      return 0;
+    }
+    ObservationController controller;
+    if (stage == "save") {
+      auto options = controller.settings();
+      options["latitude"] = -31.273333333333333;
+      options["longitude"] = 149.06444444444443;
+      options["elevation"] = 1122;
+      options["zone"] = "Australia/Sydney";
+      ASTRO_TEST_CHECK(controller.changeSite(options));
+      ASTRO_TEST_CHECK(controller.saveSite("T33", "https://www.itelescope.net/"));
+      std::_Exit(0); // Saving must not depend on later event-loop/quit flushing.
+    } else {
+      ASTRO_TEST_CHECK(controller.sites().size() == 11);
+      const auto saved = controller.sites().last().toMap();
+      ASTRO_TEST_CHECK(saved["name"] == "T33");
+      ASTRO_TEST_CHECK(saved["saved"].toBool());
+      ASTRO_TEST_CHECK(saved["favorite"].toBool() == (stage != "verify-unstarred"));
+      ASTRO_TEST_CHECK(saved["zone"] == "Australia/Sydney");
+      ASTRO_TEST_CHECK(saved["elevation"].toDouble() == 1122);
+      ASTRO_TEST_CHECK(std::abs(saved["latitude"].toDouble() + 31.273333333333333) < 1e-12);
+      ASTRO_TEST_CHECK(std::abs(saved["longitude"].toDouble() - 149.06444444444443) < 1e-12);
+      ASTRO_TEST_CHECK(saved["website"] == "https://www.itelescope.net/");
+      if (stage == "unstar") {
+        controller.toggleFavoriteSite(10);
+        std::_Exit(0);
+      }
+    }
+    return 0;
+  }
+  const auto nativeIdentity = "ObservationPlaces-" + QUuid::createUuid().toString(QUuid::Id128);
+  bool nativePassed = true;
+  for (const auto *stage : {"save", "verify", "legacy", "verify", "unstar", "verify-unstarred", "cleanup"}) {
+    QProcess child;
+    child.setProcessChannelMode(QProcess::MergedChannels);
+    child.start(QCoreApplication::applicationFilePath(), {"--native-sites", nativeIdentity, stage});
+    const bool finished = child.waitForFinished(20000);
+    if (!finished) { child.kill(); child.waitForFinished(5000); }
+    std::cerr << child.readAll().constData();
+    nativePassed = finished && child.exitStatus() == QProcess::NormalExit && child.exitCode() == 0 && nativePassed;
+  }
+  ASTRO_TEST_CHECK(nativePassed);
   QTemporaryDir directory;
   ASTRO_TEST_CHECK(directory.isValid());
   QCoreApplication::setOrganizationName("AstroCaptureTest");

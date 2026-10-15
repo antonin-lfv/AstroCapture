@@ -33,11 +33,13 @@ The AppImage distribution was validated with Qt 6.9.3 on Ubuntu 22.04.
 On Mint/Ubuntu, install the build dependencies:
 
 ```sh
-sudo apt-get install build-essential cmake ninja-build pkg-config libcfitsio-dev libraw-dev libusb-1.0-0-dev libuvc-dev libgl1-mesa-dev libfontconfig1 libdbus-1-3 desktop-file-utils python3 file tzdata
+sudo apt-get install build-essential cmake ninja-build pkg-config libcfitsio-dev libraw-dev libusb-1.0-0-dev libuvc-dev libgl1-mesa-dev libfontconfig1 libdbus-1-3 libwayland-cursor0 libwayland-egl1 desktop-file-utils python3 file tzdata
 ```
 
 The `tzdata` database is required for observing-site time zones, including in
 minimal containers used for tests.
+The Wayland runtime libraries are also required when packaging Qt's Wayland
+platform plugins in a minimal build container.
 
 Install a suitable Qt SDK and put its `bin` directory on `PATH`, then run:
 

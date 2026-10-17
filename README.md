@@ -61,6 +61,48 @@ Consultez le [guide du mode agent](AGENT_MODE.md) pour les commandes, un exemple
 de recette et les limites de cette première version. Ce mode nécessite une version
 construite après son ajout ; il n'est pas présent dans les anciennes installations.
 
+### Installer le skill AstroCapture dans Codex
+
+Le [skill partageable](.agents/skills/astrocapture/SKILL.md) est versionné avec le
+logiciel. Il aide l’agent à trouver AstroCapture, inspecter les sources, préparer
+la recette et vérifier les résultats. Il ne contient aucun chemin personnel.
+Il nécessite une installation d’AstroCapture compatible avec `--agent` ; installer
+le skill n’installe pas le logiciel.
+
+**Depuis le projet :** Codex peut découvrir le skill dans `.agents/skills/` lorsque
+vous travaillez dans ce dépôt. Le guide `AGENT_MODE.md` est alors lu à sa racine.
+
+**Pour l’utiliser depuis vos autres projets :** récupérez le dépôt (clone ou archive
+du code source) de la version souhaitée, puis exécutez les commandes suivantes
+à sa racine, sur macOS ou Linux :
+
+```sh
+mkdir -p "$HOME/.agents/skills"
+if [ -e "$HOME/.agents/skills/astrocapture" ] || [ -L "$HOME/.agents/skills/astrocapture" ]; then
+  echo "Un skill AstroCapture existe déjà à cet emplacement : conservez-le avant de le remplacer."
+else
+  cp -R .agents/skills/astrocapture "$HOME/.agents/skills/astrocapture" &&
+  mkdir -p "$HOME/.agents/skills/astrocapture/references" &&
+  cp AGENT_MODE.md "$HOME/.agents/skills/astrocapture/references/AGENT_MODE.md"
+fi
+```
+
+Copiez bien **le dossier du skill et son guide**, y compris si vous avez installé
+l’application depuis un DMG ou une AppImage. La copie personnelle peut ensuite
+fonctionner sans conserver le dépôt. Pour une mise à jour, remplacer le skill et
+le guide ensemble après avoir sauvegardé toute personnalisation.
+
+Évitez de conserver plusieurs installations personnelles portant le même nom
+(par exemple dans `~/.codex/skills` et `~/.agents/skills`). Si le skill n’apparaît
+pas, redémarrez Codex. Vous pouvez ensuite demander :
+
+> Utilise le skill AstroCapture pour traiter ce dossier de M42 avec un rendu naturel.
+
+Indiquez le dossier d’images et, si nécessaire, le chemin de l’application.
+Le skill peut aussi être sélectionné automatiquement lorsque la demande correspond
+à sa description. Consultez la [documentation des skills de Codex](https://learn.chatgpt.com/docs/build-skills)
+pour leur découverte et leur installation personnelle.
+
 ## Installation
 
 ### Installer sur Mac

@@ -1,0 +1,3 @@
+interface:
+  display_name: "AstroCapture"
+  short_description: "Traiter le ciel profond avec AstroCapture"

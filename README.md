@@ -11,7 +11,7 @@
 </p>
 
 <p align="center">
-  <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/version-1.20.0-d4af37" alt="Version 1.20.0"></a>
+  <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/version-1.21.0-d4af37" alt="Version 1.21.0"></a>
   <a href="#installer-sur-mac"><img src="https://img.shields.io/badge/macOS-Apple_Silicon-7897c5" alt="macOS : Apple Silicon"></a>
   <a href="#installer-sur-linux"><img src="https://img.shields.io/badge/Linux-Ubuntu_%C2%B7_Mint-87b07c" alt="Linux : Ubuntu et Mint"></a>
   <img src="https://img.shields.io/badge/langues-FR_%C2%B7_EN-b69ad4" alt="Langues : français et anglais">
@@ -58,8 +58,9 @@ inchangée. L'agent fournit une recette explicite et un nouveau dossier de sorti
 les images originales sont conservées.
 
 Consultez le [guide du mode agent](AGENT_MODE.md) pour les commandes, un exemple
-de recette et les limites de cette première version. Ce mode nécessite une version
-construite après son ajout ; il n'est pas présent dans les anciennes installations.
+de recette et les limites de cette première version. Ce mode est disponible à
+partir de la version **1.21.0**. La reprise de finition d’un projet, la légende et le redimensionnement du JPEG restent à effectuer dans
+l’application ou via une étape complémentaire utilisant son moteur.
 
 ### Installer le skill AstroCapture dans Codex
 

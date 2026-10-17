@@ -1,7 +1,7 @@
 # Traitement local par un agent
 
-AstroCapture propose une entrée `--agent` pour traiter des images de ciel profond
-sans ouvrir de fenêtre. Elle réutilise les commandes et le moteur de l'application :
+Depuis la version 1.21.0, AstroCapture propose une entrée `--agent` pour traiter
+des images de ciel profond sans ouvrir de fenêtre. Elle réutilise les commandes et le moteur de l'application :
 aucun serveur permanent, aucune modification de l'interface, aucun envoi d'images.
 Lancer normalement AstroCapture ne démarre pas ce mode.
 
@@ -113,6 +113,9 @@ Chaque projet portable inclut les sources et les empilements des groupes, avec
 la finition active du groupe concerné : plusieurs groupes peuvent donc produire
 un volume important. Les calculs conservent leur précision flottante ; le JPEG
 est un aperçu. Les TIFF sont les exports de finition, pas les données linéaires.
+Le JPEG est exporté à pleine résolution, sans légende ; la recette ne propose
+pas encore de redimensionnement ni de légende. Ces étapes nécessitent les
+fonctions de l’application ou un auxiliaire utilisant son moteur.
 
 Le rapport est écrit atomiquement aux étapes principales. En cas d'échec ou
 d'annulation, les fichiers déjà terminés sont conservés. Le checkpoint permet

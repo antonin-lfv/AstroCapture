@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.21.0 — 2026-10-17
+
+- Add a local, headless `--agent` entry point for deep-sky inspection, calibration, alignment, integration, basic finishing and exports through the existing processing engine. Normal application startup and the interface remain unchanged.
+- Validate versioned recipes, explicit calibration state and input roles; preserve source images and require a new output directory. Report progress, failures and cancellation as JSON Lines.
+- Save portable checkpoints and finished projects, Float32 linear FITS, 16-bit TIFF and JPEG previews, with a processing report and source fingerprints.
+- Include the offscreen Qt platform plugin in macOS and Linux packages and verify the agent workflow with real FITS processing, project reopening, invalid inputs and cancellation tests.
+- Share an installable AstroCapture agent skill and document its installation, visual evaluation, compact delivery and reconstruction notes. Project refinish, captions and JPEG resizing are not yet exposed by the agent commands.
+
 ## 1.20.0 — 2026-10-14
 
 - Cache object search keys, replace the full catalogue sort with bounded ranked results, debounce typing and require a number for bare catalogue prefixes. Show at most 25 local results, retaining exact matches first and explicit online search.

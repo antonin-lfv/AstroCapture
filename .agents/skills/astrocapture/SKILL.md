@@ -87,8 +87,8 @@ et attendre sa fin. En cas d’échec, lire le bilan et garder les fichiers term
 Le checkpoint `stacked.astroproject` permet de reprendre dans l’application ; ne
 pas annoncer une reprise automatique en ligne de commande.
 
-Livrer les liens vers le projet réouvrable, le FITS linéaire, le TIFF de finition,
-l’aperçu et le rapport. Présenter brièvement les choix et les réserves fondées sur
+Adapter les livrables à la demande : projet réouvrable, TIFF de finition, aperçu
+et paramètres de reprise ; proposer le FITS linéaire séparé si utile. Présenter brièvement les choix et les réserves fondées sur
 le bilan ou l’image. Préciser les limites si l’aperçu n’a pas pu être examiné.
 
 ## Dossiers, variantes et livrables
@@ -102,8 +102,8 @@ le bilan ou l’image. Préciser les limites si l’aperçu n’a pas pu être e
 - Si l’utilisateur demande un dossier `results` dans le dossier des sources,
   respecter cet emplacement. Le dossier racine peut contenir `workflow/` pour
   les recettes et journaux et un sous-dossier de traitement encore inexistant
-  destiné à `run`. Si des résultats existent déjà, créer une nouvelle sous-sortie
-  sans les effacer. Ne pas inclure `results` dans une inspection récursive des sources.
+  destiné à `run`. Pendant les essais, préserver les résultats existants dans une nouvelle sortie.
+  Après validation, respecter la demande de rangement de l’utilisateur. Ne pas inclure `results` dans une inspection récursive des sources.
 - Le JPEG de `run` est un aperçu à pleine résolution, sans légende : ce n’est pas
   nécessairement un fichier léger. La recette actuelle n’accepte ni légende ni
   taille d’export. Utiliser les fonctions d’export de l’application ou une étape
@@ -120,3 +120,18 @@ le bilan ou l’image. Préciser les limites si l’aperçu n’a pas pu être e
   celui d’une première passe. Si une étape complémentaire a été nécessaire,
   conserver ses paramètres à côté du rapport initial sans présenter ce rapport
   initial comme celui de la finition finale.
+
+## Livraison compacte et suppression du projet
+
+Quand l’utilisateur souhaite une livraison compacte, réunir dans un seul Markdown
+la sélection ordonnée des sources, leur état de calibration, la version du moteur,
+les paramètres d’empilement, les réglages finaux complets (y compris points du fond,
+masques ou références nécessaires), la légende et les paramètres d’export.
+Distinguer la recette d’empilement de toute finition complémentaire ; ne pas
+présenter ce Markdown comme un projet importable si ce n’est pas pris en charge.
+Avant de supprimer les intermédiaires à sa demande, vérifier que les livrables
+retenus et les informations de reprise sont conservés. Ne pas supprimer les sources.
+Expliquer que supprimer le projet et le FITS linéaire impose de refaire l’empilement
+à partir des sources pour reprendre la finition ; un TIFF déjà étiré ne remplace
+pas cet empilement. Les réglages seuls ne garantissent pas un résultat identique
+avec une autre version du moteur.

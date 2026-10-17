@@ -15,6 +15,7 @@ endif()
 qt_add_executable(AstroCapture
     MACOSX_BUNDLE
     main.cpp
+    src/AgentRunner.cpp src/AgentRunner.hpp
 )
 
 target_compile_definitions(AstroCapture PRIVATE ASTRO_APP_VERSION="${PROJECT_VERSION}")

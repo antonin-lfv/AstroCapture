@@ -1,3 +1,5 @@
+#include "src/AgentRunner.hpp"
+#include <cstring>
 #include <QGuiApplication>
 #include <QIcon>
 #include <QQmlApplicationEngine>
@@ -10,6 +12,8 @@
 #include <QColor>
 
 int main(int argc, char* argv[]) {
+    if (argc > 1 && std::strcmp(argv[1], "--agent") == 0)
+        return astro::app::runAgent(argc, argv);
     QGuiApplication app(argc, argv);
     QCoreApplication::setApplicationVersion(QStringLiteral(ASTRO_APP_VERSION));
     // QSettings needs these to resolve a native storage location

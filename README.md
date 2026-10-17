@@ -46,6 +46,21 @@ Vous pouvez aussi partir de vidéos ou de photos déjà prises avec votre matér
 ou un télescope distant. **Pas besoin de caméra connectée pour préparer une
 observation ou traiter vos images.**
 
+## Utilisation avec un agent
+
+AstroCapture peut aussi être piloté par un agent local, **sans ouvrir de fenêtre** :
+inspection d'un dossier, calibration et empilement de ciel profond, finition,
+exports et sauvegarde de projets réouvrables dans l'application.
+
+Le mode `--agent` utilise les mêmes traitements et la même précision, fournit un
+suivi JSON et ne lance aucun service permanent. L'interface habituelle reste
+inchangée. L'agent fournit une recette explicite et un nouveau dossier de sortie ;
+les images originales sont conservées.
+
+Consultez le [guide du mode agent](AGENT_MODE.md) pour les commandes, un exemple
+de recette et les limites de cette première version. Ce mode nécessite une version
+construite après son ajout ; il n'est pas présent dans les anciennes installations.
+
 ## Installation
 
 ### Installer sur Mac

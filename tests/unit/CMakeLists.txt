@@ -410,3 +410,11 @@ foreach(unit_target IN LISTS astro_unit_targets)
         target_link_libraries(${unit_target} PRIVATE astro::domain)
     endif()
 endforeach()
+
+# Exercise the shipped entry point, including its JSON protocol and project files.
+find_package(Python3 QUIET COMPONENTS Interpreter)
+if(Python3_Interpreter_FOUND)
+    add_test(NAME agent_mode COMMAND "${Python3_EXECUTABLE}"
+        "${PROJECT_SOURCE_DIR}/tests/integration/agent_mode.py" "$<TARGET_FILE:AstroCapture>")
+    set_tests_properties(agent_mode PROPERTIES TIMEOUT 180)
+endif()

@@ -48,6 +48,12 @@ echo "==> Running macdeployqt (bundles Qt frameworks/plugins)"
 # fine.
 macdeployqt "${APP_BUNDLE}" -qmldir="${REPO_ROOT}/app/qml"
 
+# The agent entry point uses Qt image services without a display server.
+# Copy before the dependency walk so its libraries are bundled as well.
+QT_PLUGIN_DIR="$(qtpaths --query QT_INSTALL_PLUGINS)"
+mkdir -p "${APP_BUNDLE}/Contents/PlugIns/platforms"
+cp "${QT_PLUGIN_DIR}/platforms/libqoffscreen.dylib" "${APP_BUNDLE}/Contents/PlugIns/platforms/"
+
 echo "==> Bundling native dependencies (Qt frameworks macdeployqt missed, libusb, libuvc, ASICamera2, ...)"
 # macdeployqt walks the main executable's own dependencies but doesn't
 # reliably follow *transitive* ones, and Homebrew's own Qt frameworks

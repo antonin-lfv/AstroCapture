@@ -83,3 +83,33 @@ pas annoncer une reprise automatique en ligne de commande.
 Livrer les liens vers le projet réouvrable, le FITS linéaire, le TIFF de finition,
 l’aperçu et le rapport. Présenter brièvement les choix et les réserves fondées sur
 le bilan ou l’image. Préciser les limites si l’aperçu n’a pas pu être examiné.
+
+## Dossiers, variantes et livrables
+
+- Un dossier peut contenir les mêmes poses en version brute et calibrée. Lire les
+  métadonnées et l’historique de calibration, puis sélectionner une seule version
+  par pose ; ne pas additionner ces variantes comme des expositions indépendantes.
+  Préférer une liste explicite de fichiers dans la recette lorsque le dossier
+  contient aussi d’anciens exports ou un sous-dossier de résultats. Vérifier les
+  dates d’acquisition dans les en-têtes si elles divergent des noms de fichiers.
+- Si l’utilisateur demande un dossier `results` dans le dossier des sources,
+  respecter cet emplacement. Le dossier racine peut contenir `workflow/` pour
+  les recettes et journaux et un sous-dossier de traitement encore inexistant
+  destiné à `run`. Si des résultats existent déjà, créer une nouvelle sous-sortie
+  sans les effacer. Ne pas inclure `results` dans une inspection récursive des sources.
+- Le JPEG de `run` est un aperçu à pleine résolution, sans légende : ce n’est pas
+  nécessairement un fichier léger. La recette actuelle n’accepte ni légende ni
+  taille d’export. Utiliser les fonctions d’export de l’application ou une étape
+  complémentaire disponible utilisant son moteur pour les produire ; ne pas
+  inventer de champs JSON. Expliquer toute limite qui empêche de livrer la demande.
+- Une légende n’appartient qu’à l’export demandé. Conserver un master pleine
+  résolution sans texte, et enregistrer séparément les réglages de légende.
+  N’annoncer une légende éditable dans le projet que si elle y a effectivement
+  été sauvegardée. Calculer le temps total à partir des poses conservées.
+- Pour la reprise, distinguer la finition, qui repart de l’empilement sauvegardé,
+  de la calibration ou de la sélection des poses, qui nécessite un nouvel
+  empilement. Une modification de légende seule ne nécessite pas de retraitement
+  astronomique. Livrer le projet correspondant à la finition finale, pas seulement
+  celui d’une première passe. Si une étape complémentaire a été nécessaire,
+  conserver ses paramètres à côté du rapport initial sans présenter ce rapport
+  initial comme celui de la finition finale.

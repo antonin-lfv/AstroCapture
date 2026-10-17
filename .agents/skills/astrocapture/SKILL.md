@@ -70,7 +70,14 @@ l’événement final pour déterminer la réussite, pas un message traduit ni u
 Lire `report.json`, notamment les sources retenues/rejetées, leurs motifs, les
 groupes et les réglages effectivement appliqués. Ouvrir réellement les aperçus
 produits avant de juger la finition : surveiller le fond de ciel, l’écrêtage,
-les dominantes, les halos et les artefacts. Ne pas ajouter ou inventer de détails
+les dominantes, les halos et les artefacts. Vérifier aussi que la cible est
+lisible à la taille de livraison : un fond non écrêté ne suffit pas à valider
+une finition trop plate. Si la cible se distingue mal, comparer des variantes
+du point noir et de l’étirement depuis le même empilement ; éclaircir tout le
+fond peut réduire le contraste apparent. Ajuster le bruit et les dominantes
+sur la variante retenue, puis la vérifier à pleine résolution avant l’export.
+Ne pas recopier les niveaux numériques d’une autre acquisition.
+Ne pas ajouter ou inventer de détails
 astronomiques avec un générateur d’images. Si une variante est utile, garder les
 résultats existants et utiliser une nouvelle sortie ; tenir compte du coût d’un
 nouvel empilement, car la reprise automatique n’est pas encore disponible.
